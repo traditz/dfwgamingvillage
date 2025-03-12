@@ -121,7 +121,7 @@
             games.forEach(game => {
                 let row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${game["Game Name:"] || "Unknown"}</td>
+                    <td>${game["Game Name:"] ? String(game["Game Name:"]).toLowerCase() : "Unknown"}</td>
                     <td>${game["Minimum Player Count"] || "N/A"}</td>
                     <td>${game["Maximum Player Count"] || "N/A"}</td>
                     <td>${game["Time Needed to Play in Minutes"] || "N/A"}</td>
@@ -136,7 +136,7 @@
             let maxPlayersInput = document.getElementById("searchMaxPlayers").value;
             
             let filteredGames = allGames.filter(game => {
-                let gameName = game["Game Name:"] ? game["Game Name:"].toLowerCase() : "";
+                let gameName = game["Game Name:"] ? String(game["Game Name:"]).toLowerCase() : "";
                 let maxPlayers = game["Maximum Player Count"] ? parseInt(game["Maximum Player Count"]) : 0;
                 
                 let matchesName = nameInput ? gameName.includes(nameInput) : true;
