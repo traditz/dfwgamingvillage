@@ -37,10 +37,26 @@
         .content {
             padding: 50px 20px;
         }
-        iframe {
+        input {
+            padding: 10px;
+            width: 80%;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        table {
             width: 90%;
-            height: 600px;
-            border: none;
+            margin: auto;
+            border-collapse: collapse;
+            background: white;
+            color: black;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid black;
+        }
+        th {
+            background: #333;
+            color: white;
         }
         .footer {
             background-color: #222;
@@ -58,15 +74,54 @@
         <a href="contact.html">Contact</a>
     </div>
     <div class="banner">
-        <img src="banner.png" alt="DFW Gaming Village Banner">
+        <img src="banner.jpg" alt="DFW Gaming Village Banner">
     </div>
     <div class="content">
         <h1>Board Game Library</h1>
         <p>Explore our collection of 1000+ board games!</p>
-        <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQj1hv4lh-U7Kl7tV4HCKB-DS2tJYS8-mpk-eHfWy2bK9DNNK8HuDutOMOofRLi2itJ5nipRdK0i-Jb/pubhtml"></iframe>
+        <input type="text" id="search" placeholder="Search for a game..." onkeyup="searchGames()">
+        <table>
+            <thead>
+                <tr>
+                    <th>Game Name</th>
+                    <th>Publisher</th>
+                    <th>Year</th>
+                </tr>
+            </thead>
+            <tbody id="gameTable">
+                <!-- Data will be inserted here -->
+            </tbody>
+        </table>
     </div>
     <div class="footer">
         <p>&copy; 2025 DFW Gaming Village. All Rights Reserved.</p>
     </div>
+
+    <script>
+        async function loadGames() {
+            const response = await fetch('games.json'); // Make sure to upload this JSON file
+            const games = await response.json();
+            const table = document.getElementById('gameTable');
+
+            games.forEach(game => {
+                let row = `<tr>
+                    <td>${game.name}</td>
+                    <td>${game.publisher}</td>
+                    <td>${game.year}</td>
+                </tr>`;
+                table.innerHTML += row;
+            });
+        }
+
+        function searchGames() {
+            let input = document.getElementById("search").value.toLowerCase();
+            let rows = document.querySelectorAll("#gameTable tr");
+            rows.forEach(row => {
+                row.style.display = row.innerText.toLowerCase().includes(input) ? "" : "none";
+            });
+        }
+
+        loadGames(); // Load games on page load
+    </script>
 </body>
 </html>
