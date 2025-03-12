@@ -79,8 +79,8 @@
     <div class="content">
         <h1>Board Game Library</h1>
         <p>Explore our collection of 1000+ board games!</p>
-        <input type="text" id="search" placeholder="Search for a game..." oninput="searchGames()">
-        <input type="number" id="searchMaxPlayers" placeholder="Filter by max player count..." oninput="searchGames()">
+        <input type="text" id="search" placeholder="Search for a game...">
+        <input type="number" id="searchMaxPlayers" placeholder="Filter by max player count...">
         <table>
             <thead>
                 <tr>
@@ -135,12 +135,19 @@
             let maxPlayersInput = document.getElementById("searchMaxPlayers").value;
             
             let filteredGames = allGames.filter(game => {
-                let matchesName = game["Game Name:"] && game["Game Name:"].toLowerCase().includes(nameInput);
-                let matchesMaxPlayers = maxPlayersInput ? game["Maximum Player Count"] >= parseInt(maxPlayersInput) : true;
+                let gameName = game["Game Name:"] ? game["Game Name:"].toLowerCase() : "";
+                let maxPlayers = game["Maximum Player Count"] ? parseInt(game["Maximum Player Count"]) : 0;
+                
+                let matchesName = gameName.includes(nameInput);
+                let matchesMaxPlayers = maxPlayersInput ? maxPlayers >= parseInt(maxPlayersInput) : true;
+                
                 return matchesName && matchesMaxPlayers;
             });
             renderGames(filteredGames);
         }
+
+        document.getElementById("search").addEventListener("input", searchGames);
+        document.getElementById("searchMaxPlayers").addEventListener("input", searchGames);
 
         loadGames(); // Load games on page load
     </script>
