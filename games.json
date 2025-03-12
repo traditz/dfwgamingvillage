@@ -800,7 +800,7 @@
   {
     "Game Name:": "Battlestar Galactica: The Board Game",
     "Minimum Player Count": 3,
-    "Maximum Player Count": 6,
+    "Maximum Player Count": 7,
     "Time Needed to Play in Minutes": 180,
     "Year Published": 2008
   },
@@ -1612,7 +1612,7 @@
   {
     "Game Name:": "Cthulhu Wars",
     "Minimum Player Count": 2,
-    "Maximum Player Count": 4,
+    "Maximum Player Count": 8,
     "Time Needed to Play in Minutes": 120,
     "Year Published": 2015
   },
@@ -6694,7 +6694,7 @@
   {
     "Game Name:": "Twilight Imperium: Fourth Edition",
     "Minimum Player Count": 3,
-    "Maximum Player Count": 6,
+    "Maximum Player Count": 8,
     "Time Needed to Play in Minutes": 480,
     "Year Published": 2017
   },
