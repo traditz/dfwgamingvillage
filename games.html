@@ -79,7 +79,7 @@
     <div class="content">
         <h1>Board Game Library</h1>
         <p>Explore our collection of 1000+ board games!</p>
-        <input type="text" id="search" placeholder="Search for a game..." onkeyup="searchGames()">
+        <input type="text" id="search" placeholder="Search for a game...">
         <table>
             <thead>
                 <tr>
@@ -100,47 +100,54 @@
     </div>
 
     <script>
+        let allGames = [];
+
         async function loadGames() {
             try {
                 const response = await fetch('games.json'); // Ensure the file exists in your GitHub repository
-                const games = await response.json();
-                const table = document.getElementById('gameTable');
-                const fragment = document.createDocumentFragment();
-
-                // Clear existing content
-                table.innerHTML = '';
-
-                // Check if the data is an array
-                if (!Array.isArray(games)) {
-                    console.error("Expected an array but got:", games);
-                    return;
-                }
-
-                games.forEach(game => {
-                    let row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${game["Game Name:"] || "Unknown"}</td>
-                        <td>${game["Minimum Player Count"] || "N/A"}</td>
-                        <td>${game["Maximum Player Count"] || "N/A"}</td>
-                        <td>${game["Time Needed to Play in Minutes"] || "N/A"}</td>
-                        <td>${game["Year Published"] || "N/A"}</td>
-                    `;
-                    fragment.appendChild(row);
-                });
-
-                table.appendChild(fragment);
+                allGames = await response.json();
+                renderGames(allGames);
             } catch (error) {
                 console.error("Error loading games:", error);
             }
         }
 
+        function renderGames(games) {
+            const table = document.getElementById('gameTable');
+            const fragment = document.createDocumentFragment();
+            table.innerHTML = ''; // Clear existing content
+
+            games.forEach(game => {
+                let row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${game["Game Name:"] || "Unknown"}</td>
+                    <td>${game["Minimum Player Count"] || "N/A"}</td>
+                    <td>${game["Maximum Player Count"] || "N/A"}</td>
+                    <td>${game["Time Needed to Play in Minutes"] || "N/A"}</td>
+                    <td>${game["Year Published"] || "N/A"}</td>
+                `;
+                fragment.appendChild(row);
+            });
+            table.appendChild(fragment);
+        }
+
+        function debounce(func, delay) {
+            let timeout;
+            return function (...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), delay);
+            };
+        }
+
         function searchGames() {
             let input = document.getElementById("search").value.toLowerCase();
-            let rows = document.querySelectorAll("#gameTable tr");
-            rows.forEach(row => {
-                row.style.display = row.innerText.toLowerCase().includes(input) ? "" : "none";
-            });
+            let filteredGames = allGames.filter(game =>
+                game["Game Name:"].toLowerCase().includes(input)
+            );
+            renderGames(filteredGames);
         }
+
+        document.getElementById("search").addEventListener("input", debounce(searchGames, 200));
 
         loadGames(); // Load games on page load
     </script>
