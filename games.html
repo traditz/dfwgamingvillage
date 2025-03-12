@@ -105,6 +105,7 @@
                 const response = await fetch('games.json'); // Ensure the file exists in your GitHub repository
                 const games = await response.json();
                 const table = document.getElementById('gameTable');
+                const fragment = document.createDocumentFragment();
 
                 // Clear existing content
                 table.innerHTML = '';
@@ -116,21 +117,18 @@
                 }
 
                 games.forEach(game => {
-                    let gameName = game["Game Name:"] || "Unknown";
-                    let minPlayers = game["Minimum Player Count"] || "N/A";
-                    let maxPlayers = game["Maximum Player Count"] || "N/A";
-                    let playTime = game["Time Needed to Play in Minutes"] || "N/A";
-                    let yearPublished = game["Year Published"] || "N/A";
-
-                    let row = `<tr>
-                        <td>${gameName}</td>
-                        <td>${minPlayers}</td>
-                        <td>${maxPlayers}</td>
-                        <td>${playTime}</td>
-                        <td>${yearPublished}</td>
-                    </tr>`;
-                    table.innerHTML += row;
+                    let row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${game["Game Name:"] || "Unknown"}</td>
+                        <td>${game["Minimum Player Count"] || "N/A"}</td>
+                        <td>${game["Maximum Player Count"] || "N/A"}</td>
+                        <td>${game["Time Needed to Play in Minutes"] || "N/A"}</td>
+                        <td>${game["Year Published"] || "N/A"}</td>
+                    `;
+                    fragment.appendChild(row);
                 });
+
+                table.appendChild(fragment);
             } catch (error) {
                 console.error("Error loading games:", error);
             }
