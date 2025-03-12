@@ -116,11 +116,11 @@
                 }
 
                 games.forEach(game => {
-                    let gameName = game.name || "Unknown";
-                    let minPlayers = game.min_players || "N/A";
-                    let maxPlayers = game.max_players || "N/A";
-                    let playTime = game.play_time || "N/A";
-                    let yearPublished = game.year_published || "N/A";
+                    let gameName = game["Game Name:"] || "Unknown";
+                    let minPlayers = game["Minimum Player Count"] || "N/A";
+                    let maxPlayers = game["Maximum Player Count"] || "N/A";
+                    let playTime = game["Time Needed to Play in Minutes"] || "N/A";
+                    let yearPublished = game["Year Published"] || "N/A";
 
                     let row = `<tr>
                         <td>${gameName}</td>
