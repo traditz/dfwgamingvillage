@@ -115,7 +115,6 @@
 
         function renderGames(games) {
             const table = document.getElementById('gameTable');
-            const fragment = document.createDocumentFragment();
             table.innerHTML = ''; // Clear existing content
 
             games.forEach(game => {
@@ -127,9 +126,8 @@
                     <td>${game["Time Needed to Play in Minutes"] || "N/A"}</td>
                     <td>${game["Year Published"] || "N/A"}</td>
                 `;
-                fragment.appendChild(row);
+                table.appendChild(row);
             });
-            table.appendChild(fragment);
         }
 
         function searchGames() {
@@ -138,7 +136,7 @@
             
             let filteredGames = allGames.filter(game => {
                 let matchesName = game["Game Name:"] && game["Game Name:"].toLowerCase().includes(nameInput);
-                let matchesMaxPlayers = maxPlayersInput ? game["Maximum Player Count"] == maxPlayersInput : true;
+                let matchesMaxPlayers = maxPlayersInput ? game["Maximum Player Count"] >= parseInt(maxPlayersInput) : true;
                 return matchesName && matchesMaxPlayers;
             });
             renderGames(filteredGames);
