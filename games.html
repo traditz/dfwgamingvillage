@@ -84,8 +84,10 @@
             <thead>
                 <tr>
                     <th>Game Name</th>
-                    <th>Publisher</th>
-                    <th>Year</th>
+                    <th>Minimum Player Count</th>
+                    <th>Maximum Player Count</th>
+                    <th>Time Needed to Play (Minutes)</th>
+                    <th>Year Published</th>
                 </tr>
             </thead>
             <tbody id="gameTable">
@@ -99,18 +101,39 @@
 
     <script>
         async function loadGames() {
-            const response = await fetch('games.json'); // Make sure to upload this JSON file
-            const games = await response.json();
-            const table = document.getElementById('gameTable');
+            try {
+                const response = await fetch('games.json'); // Ensure the file exists in your GitHub repository
+                const games = await response.json();
+                const table = document.getElementById('gameTable');
 
-            games.forEach(game => {
-                let row = `<tr>
-                    <td>${game.name}</td>
-                    <td>${game.publisher}</td>
-                    <td>${game.year}</td>
-                </tr>`;
-                table.innerHTML += row;
-            });
+                // Clear existing content
+                table.innerHTML = '';
+
+                // Check if the data is an array
+                if (!Array.isArray(games)) {
+                    console.error("Expected an array but got:", games);
+                    return;
+                }
+
+                games.forEach(game => {
+                    let gameName = game.name || "Unknown";
+                    let minPlayers = game.min_players || "N/A";
+                    let maxPlayers = game.max_players || "N/A";
+                    let playTime = game.play_time || "N/A";
+                    let yearPublished = game.year_published || "N/A";
+
+                    let row = `<tr>
+                        <td>${gameName}</td>
+                        <td>${minPlayers}</td>
+                        <td>${maxPlayers}</td>
+                        <td>${playTime}</td>
+                        <td>${yearPublished}</td>
+                    </tr>`;
+                    table.innerHTML += row;
+                });
+            } catch (error) {
+                console.error("Error loading games:", error);
+            }
         }
 
         function searchGames() {
