@@ -13,13 +13,15 @@ async function fetchBGGCollection(username = "traditz") {
         allGames = []; // Reset the global array
 
         games.forEach(game => {
-            let name = game.querySelector("name").textContent; // Keep original case
+            let id = game.getAttribute("objectid"); // Get the BGG ID
+            let name = game.querySelector("name").textContent;
             let year = game.querySelector("yearpublished")?.textContent || "Unknown";
             let image = game.querySelector("image")?.textContent || "";
             let minPlayers = game.querySelector("stats")?.getAttribute("minplayers") || "N/A";
             let maxPlayers = game.querySelector("stats")?.getAttribute("maxplayers") || "N/A";
+            let bggLink = `https://boardgamegeek.com/boardgame/${id}`; // Construct BGG URL
 
-            allGames.push({ name, year, image, minPlayers, maxPlayers });
+            allGames.push({ id, name, year, image, minPlayers, maxPlayers, bggLink });
         });
 
         displayGames(allGames);
@@ -38,8 +40,10 @@ function displayGames(gameList) {
 
     container.innerHTML = gameList.map(game => `
         <div class="game-card">
-            <img src="${game.image}" alt="${game.name}" />
-            <h3>${game.name} (${game.year})</h3>
+            <a href="${game.bggLink}" target="_blank">
+                <img src="${game.image}" alt="${game.name}" />
+                <h3>${game.name} (${game.year})</h3>
+            </a>
             <p>Players: ${game.minPlayers} - ${game.maxPlayers}</p>
         </div>
     `).join("");
