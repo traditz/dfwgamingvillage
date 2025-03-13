@@ -28,6 +28,9 @@
     <div class="search-container">
         <input type="text" id="search-input" placeholder="Search by game name..." oninput="searchGames()">
         <input type="number" id="max-players" placeholder="Min Max Players" oninput="searchGames()">
+        <select id="mechanism-filter" onchange="searchGames()">
+            <option value="">All Mechanisms</option>
+        </select>
     </div>
 
     <div id="game-container">Loading games...</div>
