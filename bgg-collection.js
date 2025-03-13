@@ -19,9 +19,10 @@ async function fetchBGGCollection(username = "traditz") {
             let image = game.querySelector("image")?.textContent || "";
             let minPlayers = game.querySelector("stats")?.getAttribute("minplayers") || "N/A";
             let maxPlayers = game.querySelector("stats")?.getAttribute("maxplayers") || "N/A";
+            let playTime = game.querySelector("stats")?.getAttribute("playingtime") || "N/A";
             let bggLink = `https://boardgamegeek.com/boardgame/${id}`;
 
-            allGames.push({ id, name, year, image, minPlayers, maxPlayers, bggLink });
+            allGames.push({ id, name, year, image, minPlayers, maxPlayers, playTime, bggLink });
         });
 
         displayGames(allGames);
@@ -45,6 +46,7 @@ function displayGames(gameList) {
                 <h3>${game.name} (${game.year})</h3>
             </a>
             <p>Players: ${game.minPlayers} - ${game.maxPlayers}</p>
+            <p>Play Time: ${game.playTime} min</p>
         </div>
     `).join("");
 }
