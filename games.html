@@ -37,6 +37,18 @@
         .content {
             padding: 50px 20px;
         }
+        .search-container {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .search-container input {
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+        }
         .games-container {
             display: flex;
             flex-wrap: wrap;
@@ -78,6 +90,13 @@
     <div class="content">
         <h1>Our Board Game Library</h1>
         <p>Browse our collection of board games available at our events.</p>
+
+        <!-- Search and Filter Section -->
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Search by game name..." oninput="searchGames()">
+            <input type="number" id="max-players" placeholder="Min Max Players" oninput="searchGames()">
+        </div>
+
         <div id="game-container" class="games-container">Loading games...</div>
     </div>
     <div class="footer">
