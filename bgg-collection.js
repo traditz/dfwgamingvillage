@@ -46,7 +46,7 @@ function displayGames(gameList) {
                 <h3>${game.name} (${game.year})</h3>
             </a>
             <p>Players: ${game.minPlayers} - ${game.maxPlayers}</p>
-            <p>Play Time: ${game.playTime} min</p>
+            <p>${game.playTime} min</p>
         </div>
     `).join("");
 }
