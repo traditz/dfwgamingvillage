@@ -4942,6 +4942,13 @@
     "Year Published": 2016
   },
   {
+    "Game Name:": "Reign of Dragoness",
+    "Minimum Player Count": 2,
+    "Maximum Player Count": 8,
+    "Time Needed to Play in Minutes": 60,
+    "Year Published": 2022
+  },
+  {
     "Game Name:": "Relic",
     "Minimum Player Count": 2,
     "Maximum Player Count": 4,
@@ -5465,6 +5472,13 @@
     "Maximum Player Count": 4,
     "Time Needed to Play in Minutes": 60,
     "Year Published": 2020
+  },
+  {
+    "Game Name:": "Skull King",
+    "Minimum Player Count": 2,
+    "Maximum Player Count": 8,
+    "Time Needed to Play in Minutes": 30,
+    "Year Published": 2013
   },
   {
     "Game Name:": "Skull Tales: Full Sail!",
