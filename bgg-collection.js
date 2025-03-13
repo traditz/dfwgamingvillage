@@ -11,7 +11,7 @@ async function fetchBGGCollection(username = "traditz") {
         let xml = parser.parseFromString(text, "text/xml");
 
         let games = xml.querySelectorAll("item");
-        allGames = []; // Reset the global array
+        allGames = [];
         let gameIds = [];
 
         games.forEach(game => {
@@ -27,8 +27,11 @@ async function fetchBGGCollection(username = "traditz") {
             gameIds.push(id);
         });
 
-        // Fetch detailed game data including mechanisms
-        await fetchGameMechanisms(gameIds);
+        if (gameIds.length > 0) {
+            await fetchGameMechanisms(gameIds); // Fetch mechanisms for all games at once
+        } else {
+            displayGames(allGames);
+        }
 
     } catch (error) {
         console.error("Error fetching collection:", error);
@@ -36,32 +39,37 @@ async function fetchBGGCollection(username = "traditz") {
 }
 
 async function fetchGameMechanisms(gameIds) {
-    if (gameIds.length === 0) return;
+    const batchSize = 50; // Maximize API efficiency by batching requests
+    let batches = [];
 
-    const url = `https://boardgamegeek.com/xmlapi2/thing?id=${gameIds.join(",")}&stats=1`;
+    for (let i = 0; i < gameIds.length; i += batchSize) {
+        batches.push(gameIds.slice(i, i + batchSize).join(",")); // Create batched requests
+    }
 
     try {
-        let response = await fetch(url);
-        let text = await response.text();
-        let parser = new DOMParser();
-        let xml = parser.parseFromString(text, "text/xml");
+        await Promise.all(batches.map(async (batch) => {
+            const url = `https://boardgamegeek.com/xmlapi2/thing?id=${batch}&stats=1`;
+            let response = await fetch(url);
+            let text = await response.text();
+            let parser = new DOMParser();
+            let xml = parser.parseFromString(text, "text/xml");
 
-        let games = xml.querySelectorAll("item");
+            let games = xml.querySelectorAll("item");
 
-        games.forEach(game => {
-            let id = game.getAttribute("id");
-            let mechanisms = [...game.querySelectorAll("link[type='boardgamemechanic']")]
-                .map(mech => mech.getAttribute("value"));
+            games.forEach(game => {
+                let id = game.getAttribute("id");
+                let mechanisms = [...game.querySelectorAll("link[type='boardgamemechanic']")]
+                    .map(mech => mech.getAttribute("value"));
 
-            // Find the game in allGames and update it with mechanisms
-            let gameEntry = allGames.find(g => g.id === id);
-            if (gameEntry) {
-                gameEntry.mechanisms = mechanisms;
-                mechanisms.forEach(mech => allMechanisms.add(mech)); // Store unique mechanisms
-            }
-        });
+                let gameEntry = allGames.find(g => g.id === id);
+                if (gameEntry) {
+                    gameEntry.mechanisms = mechanisms;
+                    mechanisms.forEach(mech => allMechanisms.add(mech)); // Store unique mechanisms
+                }
+            });
+        }));
 
-        populateMechanismFilter(); // Populate filter dropdown
+        populateMechanismFilter(); // Populate mechanism dropdown after fetching data
         displayGames(allGames);
     } catch (error) {
         console.error("Error fetching game mechanisms:", error);
