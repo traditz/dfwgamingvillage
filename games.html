@@ -3,35 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Board Game Library</title>
+    <title>DFW Gaming Village - Games</title>
     <style>
-        .game-card { 
-            display: inline-block; 
-            width: 200px; 
-            padding: 10px; 
-            border: 1px solid #ccc; 
-            margin: 10px; 
-            text-align: center; 
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #000;
+            color: white;
+            text-align: center;
         }
-        .game-card img { 
-            width: 100px; 
-            height: auto; 
+        .banner {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #111;
+            padding: 20px 0;
         }
-        .search-container {
-            margin-bottom: 20px;
+        .banner img {
+            max-width: 100%;
+            height: auto;
+        }
+        .nav {
+            background-color: #222;
+            padding: 15px;
+        }
+        .nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 18px;
+        }
+        .content {
+            padding: 50px 20px;
+        }
+        .games-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+        }
+        .game-card {
+            background-color: #111;
+            padding: 15px;
+            border-radius: 10px;
+            width: 200px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(255, 255, 255, 0.2);
+        }
+        .game-card img {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+        .footer {
+            background-color: #222;
+            padding: 20px;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <h1>My Board Game Collection</h1>
-
-    <div class="search-container">
-        <input type="text" id="search-input" placeholder="Search by game name..." oninput="searchGames()">
-        <input type="number" id="max-players" placeholder="Min Max Players" oninput="searchGames()">
+    <div class="nav">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="events.html">Events</a>
+        <a href="games.html">Games</a>
+        <a href="contact.html">Contact</a>
+    </div>
+    <div class="banner">
+        <img src="banner.png" alt="DFW Gaming Village Banner">
+    </div>
+    <div class="content">
+        <h1>Our Board Game Library</h1>
+        <p>Browse our collection of board games available at our events.</p>
+        <div id="game-container" class="games-container">Loading games...</div>
+    </div>
+    <div class="footer">
+        <p>&copy; 2025 DFW Gaming Village. All Rights Reserved.</p>
     </div>
 
-    <div id="game-container">Loading games...</div>
-
-    <script src="bgg-collection.js"></script>
+    <script src="bgg-collection.js"></script> 
 </body>
 </html>
