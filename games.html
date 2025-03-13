@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DFW Gaming Village Board Game Library</title>
+    <title>My Board Game Library</title>
     <style>
         .game-card { 
             display: inline-block; 
@@ -17,13 +17,21 @@
             width: 100px; 
             height: auto; 
         }
+        .search-container {
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
-    <h1>DFW Gaming Village Board Game Library</h1>
+    <h1>My Board Game Collection</h1>
+
+    <div class="search-container">
+        <input type="text" id="search-input" placeholder="Search by game name..." oninput="searchGames()">
+        <input type="number" id="max-players" placeholder="Min Max Players" oninput="searchGames()">
+    </div>
+
     <div id="game-container">Loading games...</div>
 
-    <!-- Link to your JavaScript file -->
     <script src="bgg-collection.js"></script>
 </body>
 </html>
