@@ -13,7 +13,7 @@ async function fetchBGGCollection(username = "traditz") {
         allGames = []; // Reset the global array
 
         games.forEach(game => {
-            let name = game.querySelector("name").textContent.toLowerCase();
+            let name = game.querySelector("name").textContent; // Keep original case
             let year = game.querySelector("yearpublished")?.textContent || "Unknown";
             let image = game.querySelector("image")?.textContent || "";
             let minPlayers = game.querySelector("stats")?.getAttribute("minplayers") || "N/A";
@@ -45,13 +45,13 @@ function displayGames(gameList) {
     `).join("");
 }
 
-// Search Function
+// Search Function (Case-Insensitive)
 function searchGames() {
     let searchQuery = document.getElementById("search-input").value.toLowerCase();
     let maxPlayersFilter = document.getElementById("max-players").value;
 
     let filteredGames = allGames.filter(game => 
-        game.name.includes(searchQuery) &&
+        game.name.toLowerCase().includes(searchQuery) && // Convert only the search query
         (maxPlayersFilter === "" || parseInt(game.maxPlayers) >= parseInt(maxPlayersFilter))
     );
 
