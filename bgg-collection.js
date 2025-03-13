@@ -1,4 +1,5 @@
 let allGames = []; // Store all games globally
+let allMechanisms = new Set(); // Store unique mechanisms
 
 async function fetchBGGCollection(username = "traditz") {
     const url = `https://boardgamegeek.com/xmlapi2/collection?username=${username}&own=1&stats=1&excludesubtype=boardgameexpansion`;
@@ -11,23 +12,72 @@ async function fetchBGGCollection(username = "traditz") {
 
         let games = xml.querySelectorAll("item");
         allGames = []; // Reset the global array
+        let gameIds = [];
 
         games.forEach(game => {
-            let id = game.getAttribute("objectid"); // Get the BGG ID
+            let id = game.getAttribute("objectid");
             let name = game.querySelector("name").textContent;
             let year = game.querySelector("yearpublished")?.textContent || "Unknown";
             let image = game.querySelector("image")?.textContent || "";
             let minPlayers = game.querySelector("stats")?.getAttribute("minplayers") || "N/A";
             let maxPlayers = game.querySelector("stats")?.getAttribute("maxplayers") || "N/A";
-            let bggLink = `https://boardgamegeek.com/boardgame/${id}`; // Construct BGG URL
+            let bggLink = `https://boardgamegeek.com/boardgame/${id}`;
 
-            allGames.push({ id, name, year, image, minPlayers, maxPlayers, bggLink });
+            allGames.push({ id, name, year, image, minPlayers, maxPlayers, bggLink, mechanisms: [] });
+            gameIds.push(id);
         });
 
-        displayGames(allGames);
+        // Fetch detailed game data including mechanisms
+        await fetchGameMechanisms(gameIds);
+
     } catch (error) {
         console.error("Error fetching collection:", error);
     }
+}
+
+async function fetchGameMechanisms(gameIds) {
+    if (gameIds.length === 0) return;
+
+    const url = `https://boardgamegeek.com/xmlapi2/thing?id=${gameIds.join(",")}&stats=1`;
+
+    try {
+        let response = await fetch(url);
+        let text = await response.text();
+        let parser = new DOMParser();
+        let xml = parser.parseFromString(text, "text/xml");
+
+        let games = xml.querySelectorAll("item");
+
+        games.forEach(game => {
+            let id = game.getAttribute("id");
+            let mechanisms = [...game.querySelectorAll("link[type='boardgamemechanic']")]
+                .map(mech => mech.getAttribute("value"));
+
+            // Find the game in allGames and update it with mechanisms
+            let gameEntry = allGames.find(g => g.id === id);
+            if (gameEntry) {
+                gameEntry.mechanisms = mechanisms;
+                mechanisms.forEach(mech => allMechanisms.add(mech)); // Store unique mechanisms
+            }
+        });
+
+        populateMechanismFilter(); // Populate filter dropdown
+        displayGames(allGames);
+    } catch (error) {
+        console.error("Error fetching game mechanisms:", error);
+    }
+}
+
+function populateMechanismFilter() {
+    let filter = document.getElementById("mechanism-filter");
+    filter.innerHTML = `<option value="">All Mechanisms</option>`; // Default option
+
+    Array.from(allMechanisms).sort().forEach(mech => {
+        let option = document.createElement("option");
+        option.value = mech;
+        option.textContent = mech;
+        filter.appendChild(option);
+    });
 }
 
 function displayGames(gameList) {
@@ -45,18 +95,21 @@ function displayGames(gameList) {
                 <h3>${game.name} (${game.year})</h3>
             </a>
             <p>Players: ${game.minPlayers} - ${game.maxPlayers}</p>
+            <p><strong>Mechanisms:</strong> ${game.mechanisms.length > 0 ? game.mechanisms.join(", ") : "N/A"}</p>
         </div>
     `).join("");
 }
 
-// Search Function (Case-Insensitive)
+// Search & Filter Function
 function searchGames() {
     let searchQuery = document.getElementById("search-input").value.toLowerCase();
     let maxPlayersFilter = document.getElementById("max-players").value;
+    let mechanismFilter = document.getElementById("mechanism-filter").value;
 
     let filteredGames = allGames.filter(game => 
-        game.name.toLowerCase().includes(searchQuery) && // Convert only the search query
-        (maxPlayersFilter === "" || parseInt(game.maxPlayers) >= parseInt(maxPlayersFilter))
+        game.name.toLowerCase().includes(searchQuery) &&
+        (maxPlayersFilter === "" || parseInt(game.maxPlayers) >= parseInt(maxPlayersFilter)) &&
+        (mechanismFilter === "" || game.mechanisms.includes(mechanismFilter))
     );
 
     displayGames(filteredGames);
