@@ -1,3 +1,5 @@
+let allGames = []; // Store all games globally
+
 async function fetchBGGCollection(username = "traditz") {
     const url = `https://boardgamegeek.com/xmlapi2/collection?username=${username}&own=1&stats=1&excludesubtype=boardgameexpansion`;
 
@@ -8,22 +10,19 @@ async function fetchBGGCollection(username = "traditz") {
         let xml = parser.parseFromString(text, "text/xml");
 
         let games = xml.querySelectorAll("item");
-        let gameList = [];
+        allGames = []; // Reset the global array
 
         games.forEach(game => {
-            let subtype = game.getAttribute("subtype");
-            if (subtype === "boardgameexpansion") return; // Skip expansions
-
-            let name = game.querySelector("name").textContent;
+            let name = game.querySelector("name").textContent.toLowerCase();
             let year = game.querySelector("yearpublished")?.textContent || "Unknown";
             let image = game.querySelector("image")?.textContent || "";
             let minPlayers = game.querySelector("stats")?.getAttribute("minplayers") || "N/A";
             let maxPlayers = game.querySelector("stats")?.getAttribute("maxplayers") || "N/A";
 
-            gameList.push({ name, year, image, minPlayers, maxPlayers });
+            allGames.push({ name, year, image, minPlayers, maxPlayers });
         });
 
-        displayGames(gameList);
+        displayGames(allGames);
     } catch (error) {
         console.error("Error fetching collection:", error);
     }
@@ -33,7 +32,7 @@ function displayGames(gameList) {
     let container = document.getElementById("game-container");
 
     if (gameList.length === 0) {
-        container.innerHTML = "<p>No games found or BGG API is taking too long. Try again later.</p>";
+        container.innerHTML = "<p>No games found.</p>";
         return;
     }
 
@@ -46,5 +45,18 @@ function displayGames(gameList) {
     `).join("");
 }
 
-// Fetch and display the collection for traditz
+// Search Function
+function searchGames() {
+    let searchQuery = document.getElementById("search-input").value.toLowerCase();
+    let maxPlayersFilter = document.getElementById("max-players").value;
+
+    let filteredGames = allGames.filter(game => 
+        game.name.includes(searchQuery) &&
+        (maxPlayersFilter === "" || parseInt(game.maxPlayers) >= parseInt(maxPlayersFilter))
+    );
+
+    displayGames(filteredGames);
+}
+
+// Fetch and display the collection for traditz on page load
 fetchBGGCollection();
