@@ -3,156 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Board Game Library - DFW Gaming Village</title>
+    <title>DFW Gaming Village Board Game Library</title>
     <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #000;
-            color: white;
-            text-align: center;
+        .game-card { 
+            display: inline-block; 
+            width: 200px; 
+            padding: 10px; 
+            border: 1px solid #ccc; 
+            margin: 10px; 
+            text-align: center; 
         }
-        .banner {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #111;
-            padding: 20px 0;
-        }
-        .banner img {
-            max-width: 100%;
-            height: auto;
-        }
-        .nav {
-            background-color: #222;
-            padding: 15px;
-        }
-        .nav a {
-            color: white;
-            text-decoration: none;
-            margin: 0 15px;
-            font-size: 18px;
-        }
-        .content {
-            padding: 50px 20px;
-        }
-        input {
-            padding: 10px;
-            width: 80%;
-            font-size: 16px;
-            margin-bottom: 20px;
-        }
-        table {
-            width: 90%;
-            margin: auto;
-            border-collapse: collapse;
-            background: #adadad;
-            color: black;
-        }
-        th, td {
-            padding: 10px;
-            border: 1px solid black;
-        }
-        th {
-            background: #333;
-            color: white;
-        }
-        .footer {
-            background-color: #222;
-            padding: 20px;
-            margin-top: 20px;
+        .game-card img { 
+            width: 100px; 
+            height: auto; 
         }
     </style>
 </head>
 <body>
-    <div class="nav">
-        <a href="index.html">Home</a>
-        <a href="about.html">About</a>
-        <a href="events.html">Events</a>
-        <a href="games.html">Games</a>
-        <a href="contact.html">Contact</a>
-    </div>
-    <div class="banner">
-        <img src="banner.png" alt="DFW Gaming Village Banner">
-    </div>
-    
-    <div class="content">
-        <h1>Board Game Library</h1>
-        <p>Explore our collection of 1000+ board games!</p>
-        <input type="text" id="search" placeholder="Search for a game...">
-        <input type="number" id="searchMaxPlayers" placeholder="Filter by max player count...">
-        <table>
-            <thead>
-                <tr>
-                    <th>Game Name</th>
-                    <th>Minimum Player Count</th>
-                    <th>Maximum Player Count</th>
-                    <th>Time Needed to Play (Minutes)</th>
-                    <th>Year Published</th>
-                </tr>
-            </thead>
-            <tbody id="gameTable">
-                <!-- Data will be inserted here -->
-            </tbody>
-        </table>
-    </div>
-    <div class="footer">
-        <p>&copy; 2025 DFW Gaming Village. All Rights Reserved.</p>
-    </div>
+    <h1>DFW Gaming Village Board Game Library</h1>
+    <div id="game-container">Loading games...</div>
 
-    <script>
-        let allGames = [];
-
-        async function loadGames() {
-            try {
-                const response = await fetch('games.json'); // Ensure the file exists in your GitHub repository
-                allGames = await response.json();
-                console.log("Loaded games:", allGames); // Debugging log
-                renderGames(allGames);
-            } catch (error) {
-                console.error("Error loading games:", error);
-            }
-        }
-
-        function renderGames(games) {
-            const table = document.getElementById('gameTable');
-            table.innerHTML = ''; // Clear existing content
-
-            games.forEach(game => {
-                let row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${game["Game Name:"] || "Unknown"}</td>
-                    <td>${game["Minimum Player Count"] || "N/A"}</td>
-                    <td>${game["Maximum Player Count"] || "N/A"}</td>
-                    <td>${game["Time Needed to Play in Minutes"] || "N/A"}</td>
-                    <td>${game["Year Published"] || "N/A"}</td>
-                `;
-                table.appendChild(row);
-            });
-        }
-
-        function searchGames() {
-            let nameInput = document.getElementById("search").value.toLowerCase();
-            let maxPlayersInput = document.getElementById("searchMaxPlayers").value;
-            
-            let filteredGames = allGames.filter(game => {
-                let gameName = game["Game Name:"] ? String(game["Game Name:"]).toLowerCase() : "";
-                let maxPlayers = game["Maximum Player Count"] ? parseInt(game["Maximum Player Count"]) : 0;
-                
-                let matchesName = nameInput ? gameName.includes(nameInput) : true;
-                let matchesMaxPlayers = maxPlayersInput ? maxPlayers >= parseInt(maxPlayersInput) : true;
-                
-                return matchesName && matchesMaxPlayers;
-            });
-            console.log("Filtered games:", filteredGames); // Debugging log
-            renderGames(filteredGames);
-        }
-
-        document.getElementById("search").addEventListener("input", searchGames);
-        document.getElementById("searchMaxPlayers").addEventListener("input", searchGames);
-
-        loadGames(); // Load games on page load
-    </script>
+    <!-- Link to your JavaScript file -->
+    <script src="bgg-collection.js"></script>
 </body>
 </html>
