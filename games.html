@@ -63,7 +63,7 @@
             padding: 20px;
         }
         .game-card {
-            background-color: #424242;
+            background-color: #111;
             padding: 15px;
             border-radius: 10px;
             text-align: center;
@@ -73,6 +73,13 @@
             width: 100%;
             height: auto;
             border-radius: 5px;
+        }
+        .game-card a {
+            color: white; /* Makes the game name white */
+            text-decoration: none; /* Removes the underline */
+        }
+        .game-card a:hover {
+            color: #ddd; /* Slightly lighter color on hover */
         }
         .footer {
             background-color: #222;
@@ -112,8 +119,8 @@
 
         <!-- Search and Filter Section -->
         <div class="search-container">
-            <input type="text" id="search-input" placeholder="Search by Game Name..." oninput="searchGames()">
-            <input type="number" id="max-players" placeholder="Player Count" oninput="searchGames()">
+            <input type="text" id="search-input" placeholder="Search by game name..." oninput="searchGames()">
+            <input type="number" id="max-players" placeholder="Min Max Players" oninput="searchGames()">
         </div>
 
         <div id="game-container" class="games-container">Loading games...</div>
