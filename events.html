@@ -50,7 +50,16 @@
             margin: 0 auto;
             line-height: 1.6;
         }
-        .calendar-section iframe {
+        .calendar-section {
+            padding: 20px;
+        }
+        .calendar-container {
+            filter: invert(1) hue-rotate(180deg);
+            display: inline-block;
+            overflow: hidden;
+            border-radius: 10px;
+        }
+        .calendar-container iframe {
             width: 100%;
             height: 600px;
             border: none;
@@ -80,7 +89,9 @@
     </div>
     <div class="calendar-section">
         <h2>Event Calendar</h2>
-        <iframe src="https://calendar.google.com/calendar/embed?src=your-calendar-id&ctz=America%2FChicago"></iframe>
+        <div class="calendar-container">
+            <iframe src="https://calendar.google.com/calendar/embed?src=your-calendar-id&ctz=America%2FChicago"></iframe>
+        </div>
     </div>
     <div class="footer">
         <p>&copy; 2025 DFW Gaming Village. All Rights Reserved.</p>
