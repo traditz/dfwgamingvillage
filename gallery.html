@@ -14,7 +14,7 @@
         }
         .banner {
             width: 100%;
-            display: none;
+            display: flex;
             justify-content: center;
             align-items: center;
             background-color: #111;
@@ -27,7 +27,7 @@
         .nav {
             background-color: #222;
             padding: 15px;
-            display: block;
+            display: flex;
             justify-content: center;
             flex-wrap: wrap;
         }
@@ -41,7 +41,7 @@
             padding: 50px 20px;
         }
         .gallery {
-            display: block;
+            display: flex;
             flex-wrap: wrap;
             justify-content: center;
             gap: 15px;
@@ -65,7 +65,7 @@
             margin-top: 20px;
         }
         .modal {
-            display: block;
+            display: none;
             position: fixed;
             z-index: 1000;
             left: 0;
@@ -73,7 +73,7 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.8);
-            display: block;
+            display: flex;
             justify-content: center;
             align-items: center;
         }
@@ -100,7 +100,7 @@
         <p>Check out some photos from past events!</p>
         <div class="gallery" id="gallery"></div>
     </div>
-    <div class="modal" id="imageModal" onclick="closeModal()" style="display: block;">
+    <div class="modal" id="imageModal" onclick="closeModal()">
         <img id="modalImg" src="" alt="">
     </div>
     <div class="footer">
@@ -236,14 +236,6 @@
         }
 
         function displayImages() {
-            function getImageSize(url) {
-                return new Promise(resolve => {
-                    const img = new Image();
-                    img.onload = () => resolve({ url, ratio: img.width / img.height });
-                    img.src = url;
-                });
-            }
-
             const gallery = document.getElementById("gallery");
             gallery.innerHTML = "";
             let selectedImages = getRandomImages(10);
@@ -251,35 +243,12 @@
                 let img = document.createElement("img");
                 img.src = imgSrc;
                 img.alt = "Gallery Image";
-                img.onclick = () => openModal(imgSrc);
-                gallery.appendChild(img);
-            });
-                let selectedImages = imageData.slice(0, 10);
-                selectedImages.forEach(data => {
-                    let img = document.createElement("img");
-                    img.src = data.url;
-                    img.alt = "Gallery Image";
-                    img.onclick = () => openModal(data.url);
-                    gallery.appendChild(img);
-                });
-            });
-            const gallery = document.getElementById("gallery");
-            gallery.innerHTML = "";
-            let selectedImages = getRandomImages(10);
-            selectedImages.forEach(imgSrc => {
-                let img = document.createElement("img");
-                img.src = imgSrc;
-                img.alt = "Gallery Image";
-                
                 img.onclick = () => openModal(imgSrc);
                 gallery.appendChild(img);
             });
         }
 
-        
-
-        window.onload = displayImages;
-    function openModal(imgSrc) {
+        function openModal(imgSrc) {
             document.getElementById("modalImg").src = imgSrc;
             document.getElementById("imageModal").style.display = "flex";
         }
@@ -287,6 +256,8 @@
         function closeModal() {
             document.getElementById("imageModal").style.display = "none";
         }
+
+        window.onload = displayImages;
     </script>
 </body>
 </html>
