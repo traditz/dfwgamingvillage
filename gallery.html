@@ -48,15 +48,37 @@
             padding: 20px;
         }
         .gallery img {
-            width: 250px;
+            width: 300px;
             height: auto;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+        .gallery img:hover {
+            transform: scale(1.1);
         }
         .footer {
             background-color: #222;
             padding: 20px;
             margin-top: 20px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal img {
+            max-width: 90%;
+            max-height: 90%;
         }
     </style>
 </head>
@@ -76,14 +98,16 @@
         <p>Check out some photos from past events!</p>
         <div class="gallery" id="gallery"></div>
     </div>
+    <div class="modal" id="imageModal" onclick="closeModal()">
+        <img id="modalImg" src="" alt="Expanded Image">
+    </div>
     <div class="footer">
         <p>&copy; 2025 DFW Gaming Village. All Rights Reserved.</p>
     </div>
 
     <script>
-        // List of Google Drive image links
         const images = [
-    "https://lh3.googleusercontent.com/d/1K4Bj2Rgp0yJGh12vqoMs1fndGKV7-t5A",
+            "https://lh3.googleusercontent.com/d/1K4Bj2Rgp0yJGh12vqoMs1fndGKV7-t5A",
 "https://lh3.googleusercontent.com/d/1tv836-Ef4Jiubj1G6imZrkR-06LL9dt6",
 "https://lh3.googleusercontent.com/d/1WBY9eAVZAg3SvgqgNSWFDqFd5-f3l_BK",
 "https://lh3.googleusercontent.com/d/1b7LWS3W5TdMUJg5YKNsIxmtDGrU2EW9L",
@@ -202,15 +226,13 @@
 "https://lh3.googleusercontent.com/d/1FgueaPkdKQK4Ei6Ahq6QxWCnf1BHx42e",
 "https://lh3.googleusercontent.com/d/1RxG9ZobMAuXpKIt-HPmtC98liMRyZYQ-",
 "https://lh3.googleusercontent.com/d/1UjOV7yN1Fm1HuAMMfmJW6Dq0utGPLrpk"
-];
+        ];
 
-        // Shuffle and select 10 random images
         function getRandomImages(count) {
             let shuffled = images.sort(() => 0.5 - Math.random());
             return shuffled.slice(0, count);
         }
 
-        // Display images in the gallery
         function displayImages() {
             const gallery = document.getElementById("gallery");
             gallery.innerHTML = "";
@@ -219,11 +241,20 @@
                 let img = document.createElement("img");
                 img.src = imgSrc;
                 img.alt = "Gallery Image";
+                img.onclick = () => openModal(imgSrc);
                 gallery.appendChild(img);
             });
         }
 
-        // Load images when page loads
+        function openModal(imgSrc) {
+            document.getElementById("modalImg").src = imgSrc;
+            document.getElementById("imageModal").style.display = "flex";
+        }
+
+        function closeModal() {
+            document.getElementById("imageModal").style.display = "none";
+        }
+
         window.onload = displayImages;
     </script>
 </body>
