@@ -81,46 +81,150 @@
     </div>
 
     <script>
-        // Your public Google Drive folder ID
-        const folderId = "1ClIRRga46wACqe0yB5lA14ToIneXXBrB";
+        // List of Google Drive image links
+        const images = [
+    "https://drive.google.com/uc?export=view&id=1K4Bj2Rgp0yJGh12vqoMs1fndGKV7-t5A",
+"https://drive.google.com/uc?export=view&id=1tv836-Ef4Jiubj1G6imZrkR-06LL9dt6",
+"https://drive.google.com/uc?export=view&id=1WBY9eAVZAg3SvgqgNSWFDqFd5-f3l_BK",
+"https://drive.google.com/uc?export=view&id=1b7LWS3W5TdMUJg5YKNsIxmtDGrU2EW9L",
+"https://drive.google.com/uc?export=view&id=1qE4M8nRQyLq1pIf7XPv3QEFpfsu8C9TC",
+"https://drive.google.com/uc?export=view&id=1YZAPBZ63re0nfbrlHmaObSIT71YdZTQe",
+"https://drive.google.com/uc?export=view&id=12ReneMusHZLW6Ww5rW8m-XSr_QRPInfd",
+"https://drive.google.com/uc?export=view&id=1U_ZBdx07l0I4xUshhNo5LG1aTt3eFbW_",
+"https://drive.google.com/uc?export=view&id=13VCL6tiAFYsNRSOHK86kwpj4bK87uFag",
+"https://drive.google.com/uc?export=view&id=1Xl9P8FVaku3gGQGbcn2zeCHqQweUwR1q",
+"https://drive.google.com/uc?export=view&id=1hTukdL1qdilXlQa9DqjT9930_ynS5Vp3",
+"https://drive.google.com/uc?export=view&id=1N2kJz-pvgee8OcKq-eoZtLQ_p9OHcJQZ",
+"https://drive.google.com/uc?export=view&id=1_c5ShLhJwM8lpVrN9jwAQIFyJt-ccQHj",
+"https://drive.google.com/uc?export=view&id=1zDmku7b2pIEXVV23rDN-vmiPdxcoZ15V",
+"https://drive.google.com/uc?export=view&id=1yu8iH0qbVK6Powuu9XLnILOZKbUuCWHj",
+"https://drive.google.com/uc?export=view&id=1QR0krz0vRtkNYkYNh-mbhzcozrCwKNVM",
+"https://drive.google.com/uc?export=view&id=1USWgbogNisYclERtJtAcuUg_u-465rfv",
+"https://drive.google.com/uc?export=view&id=1HFfAjIevj6shH7Qaptpwy9RpI84zkM5A",
+"https://drive.google.com/uc?export=view&id=1NF98jqa98i88lEpQDQOKobuXWSZq2sw3",
+"https://drive.google.com/uc?export=view&id=1toaRA7yrrEg2QbZZNF5APm_8gdVk1RU-",
+"https://drive.google.com/uc?export=view&id=1xM7c0L-FpNJ0Wq5OCVfcdp0Z5iT1CYkI",
+"https://drive.google.com/uc?export=view&id=1WIBNcZdGpScPb0jQYxHp2PJrvRfXC09i",
+"https://drive.google.com/uc?export=view&id=1TORCP_C9RW_VcSnqrewEUJBk6_Hc0TJb",
+"https://drive.google.com/uc?export=view&id=1jaVcD-hze7LTdI8hp5MogydM4JVHMp6v",
+"https://drive.google.com/uc?export=view&id=17TLAR4KTY0bUOikn5ktjrxY9I_MRgAfP",
+"https://drive.google.com/uc?export=view&id=1dk6QIu2cL9FcNrKhK10T_JXx59aI-M1O",
+"https://drive.google.com/uc?export=view&id=17Cazt2pjGFyl4sgJbAHTRvdwalRf9Hr2",
+"https://drive.google.com/uc?export=view&id=1aSTKB1C2-ideu_Px8gle1zRhyR5kQDJc",
+"https://drive.google.com/uc?export=view&id=1ZIAbSypXmlZi5zmGm4pkhwMUAurbJ-9p",
+"https://drive.google.com/uc?export=view&id=1H0yZ9Zv2ZgQWiQvlNLNa2nV6B71xVdBi",
+"https://drive.google.com/uc?export=view&id=1EuWt_Am58UVFAj6E2Y-kP4ydBD_aJYXR",
+"https://drive.google.com/uc?export=view&id=1QCYH99W5hoOggeq1hwTa2KEOweTHhtcZ",
+"https://drive.google.com/uc?export=view&id=1hi4KeK0VFqzJAthM8jAOt6EvJ3m4ujtT",
+"https://drive.google.com/uc?export=view&id=1n3jB4c5OJYRLjezqc32c3fl_jak2rluw",
+"https://drive.google.com/uc?export=view&id=1WcoCaxQ0zu-Pg3_cDoRaUCpeaPLUNCgY",
+"https://drive.google.com/uc?export=view&id=1ASpGOfOZ496QUify6ngQV4GgsMCO1jss",
+"https://drive.google.com/uc?export=view&id=1P9zpU-bLUHp-PjbStq7Fy_iqBHYodEft",
+"https://drive.google.com/uc?export=view&id=1sivHSlFMsBLESFL8RcRqDIUPEMXRtw0y",
+"https://drive.google.com/uc?export=view&id=1N4FEAKhwpsjH6hEDwzLlkyUvPSPrFgXn",
+"https://drive.google.com/uc?export=view&id=1BZWO2ORSwuyPRN48wA0AQNMh6cZGky9V",
+"https://drive.google.com/uc?export=view&id=1tDSk8-F__M72x98LViGpo6dBZDWSfZrP",
+"https://drive.google.com/uc?export=view&id=19okLZ95LUQq9AULprhXQCKTqPPwElHk_",
+"https://drive.google.com/uc?export=view&id=1Ryt6tMqgAPqNOmS_3QM0PMNuL919API7",
+"https://drive.google.com/uc?export=view&id=1ph7yJ4M3SWWMdeh_7sNnyAAyl2WU7TJ2",
+"https://drive.google.com/uc?export=view&id=1tbyqYgLIgWmakMuats29IwMRyH4isU-s",
+"https://drive.google.com/uc?export=view&id=1e2IN3sC-IUhxJLx-WZ6JZ48t9bFpi6n5",
+"https://drive.google.com/uc?export=view&id=1wjIYIh2EYooQlGg1dnd9ctBxArkhnIJB",
+"https://drive.google.com/uc?export=view&id=10AXN92TTkD0JJjWCh1kQhalopVZMYWHN",
+"https://drive.google.com/uc?export=view&id=1RzTiHvPMe8lLsB0Jpmn4jXQEJS7TDpPc",
+"https://drive.google.com/uc?export=view&id=1FCettvorQDWdwYboY89CM2SULn164RYS",
+"https://drive.google.com/uc?export=view&id=1fuwVbUvvBPPGj0hxF7unLWmCM4zh40hu",
+"https://drive.google.com/uc?export=view&id=1PvPU9zuV6fwXZRpRbjGeJMM0lqcIjiSt",
+"https://drive.google.com/uc?export=view&id=1bb5lkFwILjlwzuGDEkqK_R7i6fqbDjEH",
+"https://drive.google.com/uc?export=view&id=1bCkcWTu-lQXrZP3KXmY_OHUboCmNioVR",
+"https://drive.google.com/uc?export=view&id=1SCgolBHKDJ0CcHBxFdS4B0OaYbRtIcLd",
+"https://drive.google.com/uc?export=view&id=1S13lnzzcQo8g87dw8nL8q5_qNn-9PtAO",
+"https://drive.google.com/uc?export=view&id=1jmIFt9_6OJdpPdYnaKJpkRjgttiC2BCj",
+"https://drive.google.com/uc?export=view&id=1l1cLMjEXpZfpfNYZG4W2epPs5FaGojsM",
+"https://drive.google.com/uc?export=view&id=1RGW6woEuHOmfEpAQ0h-Ldsb48-OfbSD9",
+"https://drive.google.com/uc?export=view&id=1pXfCTyx07Lflvt8Nl75_k2CWrSrWYoED",
+"https://drive.google.com/uc?export=view&id=1jPD3jtmvhpwJngOMBGfdHotos1sx9osm",
+"https://drive.google.com/uc?export=view&id=1xeIPa7rqyI-yMuPzaT5Rv2cIyvkyuD44",
+"https://drive.google.com/uc?export=view&id=13AOzaMk-nhTpAllJ6KtSwXhFVhTGvTyt",
+"https://drive.google.com/uc?export=view&id=1VGYJRXqaUwx9G7QvpsoEm_nOiMZmytrQ",
+"https://drive.google.com/uc?export=view&id=1ns3tcOAzYJgp0PozD84Dkmk5Yika4fXG",
+"https://drive.google.com/uc?export=view&id=1ZX7bGcJSK9tH7b3L_mILAHeVjG1u6Fk4",
+"https://drive.google.com/uc?export=view&id=1Dox7OP72E9AnJp-XVXAQvT3r2lf6JCZT",
+"https://drive.google.com/uc?export=view&id=1TD_bRlL3B3KWjsD9AXrubZrGaFxtAGQN",
+"https://drive.google.com/uc?export=view&id=1dF4Pgaay0wROfVRj0SKXpslZrwibBzCz",
+"https://drive.google.com/uc?export=view&id=1vzbp0x62VG_8XuHzAtO9UdPnCHnPQZdO",
+"https://drive.google.com/uc?export=view&id=1xpFa73iUWLXS-hWWIibRygD0JYyguFgr",
+"https://drive.google.com/uc?export=view&id=1KaQ9vkAURnORBDxM03CfD9I2uqj7i_-m",
+"https://drive.google.com/uc?export=view&id=1rxzenAbgFaZpUGZK0LsQv2wmngUWfbHR",
+"https://drive.google.com/uc?export=view&id=1szCwhSRkwHS1JWozMpLIXL4MzxaWtnEX",
+"https://drive.google.com/uc?export=view&id=1DGPzHsf7aMcI80FvIaFHNLovxxrw_DNI",
+"https://drive.google.com/uc?export=view&id=1yW14cU73-3ohBhdxP6uCL5eQrbpHtqC3",
+"https://drive.google.com/uc?export=view&id=1v5SOuPmuIwMcLC6cwVJB-n3_4S7ysBCz",
+"https://drive.google.com/uc?export=view&id=1TvHxlKm-p9zCN_bgP7gTtyWVleGuehL_",
+"https://drive.google.com/uc?export=view&id=1R4gCZoNvgubRe7Ja4Cdyw8zW708v27lE",
+"https://drive.google.com/uc?export=view&id=1W7aCG1W-9u8IiHVB1A9xz8GRPvHIrJCh",
+"https://drive.google.com/uc?export=view&id=1LK_Tv4TBSe2ATHJKQM5fFmOTNh9ltK9h",
+"https://drive.google.com/uc?export=view&id=1AKtHlbPXUlWM7VtBDrQzVXSS3sKzfafW",
+"https://drive.google.com/uc?export=view&id=1Sbngv3Ux5Iwn1MIdBi7kJcmVA2Y0RFCs",
+"https://drive.google.com/uc?export=view&id=1iJ9aEtAyaHRMHuucetKOlZ2I0PR_KMqc",
+"https://drive.google.com/uc?export=view&id=145WFL8AHgZortDWy0R6YGP85fVxAvkXL",
+"https://drive.google.com/uc?export=view&id=1CI5_nRPSR7M28upABx42cWHCMqpxxnGX",
+"https://drive.google.com/uc?export=view&id=1pnyCN2tZforcYUzDONzWvfG5iGLE4L5v",
+"https://drive.google.com/uc?export=view&id=1agH1O3VF9rSMDNXvWeqGbN1dFifZ3hWy",
+"https://drive.google.com/uc?export=view&id=1ejhgsvk2jD9VCmgAJnLfxvfw-xcpj_cv",
+"https://drive.google.com/uc?export=view&id=1oHNGkpaTAUrLdl6eFAoYua0KFAAf-2Yb",
+"https://drive.google.com/uc?export=view&id=1A6_NUeO7LZErSCmVFlQ_u8Uh0lbbdizt",
+"https://drive.google.com/uc?export=view&id=1tunW2cFo-Zev0nwXVEiIlbtrZKL12mgr",
+"https://drive.google.com/uc?export=view&id=1AEwdYfoxdepmL688RKdhAyUgl6X7W2hJ",
+"https://drive.google.com/uc?export=view&id=1h7tRuQADb6xkXaQY-GMs4hxinGZIbFgk",
+"https://drive.google.com/uc?export=view&id=1AwGt9AlkyM-VgEYakjW6ISadpMvH2Ik4",
+"https://drive.google.com/uc?export=view&id=1iesK3z9LYEXiEe-kfysPOmk_-I3WTqhS",
+"https://drive.google.com/uc?export=view&id=12uQaT2WrWbP3dZlOF-nTfhQSFMvuuFQb",
+"https://drive.google.com/uc?export=view&id=1I45W6X2flBEGslirXpKXyJMj3_Hag2TB",
+"https://drive.google.com/uc?export=view&id=18ah35YZnjS8MrSQ8AamR5jBGViqFbeeR",
+"https://drive.google.com/uc?export=view&id=1O2qEkpwrz0Qh5uocC97WGUkWM1XZG1SG",
+"https://drive.google.com/uc?export=view&id=1l73_3yXzdQ-v5D0kgQrSB5dFba35EkXB",
+"https://drive.google.com/uc?export=view&id=1Ju0ptWpBtTqImhxH11567kyiRCjDSaeU",
+"https://drive.google.com/uc?export=view&id=19aUcfip-lnsN-78GD1HbcXyfzD1sQynm",
+"https://drive.google.com/uc?export=view&id=1F24ali7qK5yTYGm_PizVZyqDvOzDHKXQ",
+"https://drive.google.com/uc?export=view&id=1ZXybcqVRgtSzHc2eB93oRAMBpZQEvppc",
+"https://drive.google.com/uc?export=view&id=19Cg21PsWqIVQYIWaXihTC82iAHvX5ybu",
+"https://drive.google.com/uc?export=view&id=1S96MhJ2fj2Intdnu24hXbf32K9ARDGZC",
+"https://drive.google.com/uc?export=view&id=1C1ZlfnCNM3399s2MxVL3jwTCEAGsD93-",
+"https://drive.google.com/uc?export=view&id=1KX_Jih7b2UGF22yy2ncD4JLgSxwoF1l3",
+"https://drive.google.com/uc?export=view&id=1Mdl49Wq3Yhv62sg8ZsRUefVGx_WBljgY",
+"https://drive.google.com/uc?export=view&id=1xZxEcdbvRjM12Q760u7LRBCsCnxzUCWE",
+"https://drive.google.com/uc?export=view&id=1A41eq2OLZgFyZ8qlCGZKwQ-bk2_fZ5SC",
+"https://drive.google.com/uc?export=view&id=1AmfO6XHQZC7KtYu2EXEXNQZdzi3K-Bpf",
+"https://drive.google.com/uc?export=view&id=1ZBqAzeE53jLq1l9yLoW7LIYrK9MmogoH",
+"https://drive.google.com/uc?export=view&id=10pp72Z0V9NijGr-JEj0nLHqGT82cDt7l",
+"https://drive.google.com/uc?export=view&id=1592nyc35LX81o4UEszhMbrbvGzeaIDaU",
+"https://drive.google.com/uc?export=view&id=1FgueaPkdKQK4Ei6Ahq6QxWCnf1BHx42e",
+"https://drive.google.com/uc?export=view&id=1RxG9ZobMAuXpKIt-HPmtC98liMRyZYQ-",
+"https://drive.google.com/uc?export=view&id=1UjOV7yN1Fm1HuAMMfmJW6Dq0utGPLrpk"
+];
 
-        // Fetch images from Google Drive folder
-        async function fetchImages() {
-            const url = `https://drive.google.com/drive/folders/${folderId}`;
-            try {
-                let response = await fetch(url);
-                let text = await response.text();
-                
-                // Extract image IDs from the Google Drive folder page
-                let imageIds = [...text.matchAll(/data-id="(.*?)"/g)].map(match => match[1]);
-
-                if (imageIds.length === 0) {
-                    console.error("No images found. Make sure the folder is public.");
-                    return;
-                }
-
-                displayRandomImages(imageIds);
-            } catch (error) {
-                console.error("Error fetching images:", error);
-            }
+        // Shuffle and select 10 random images
+        function getRandomImages(count) {
+            let shuffled = images.sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, count);
         }
 
-        // Shuffle and display 10 random images
-        function displayRandomImages(imageIds) {
+        // Display images in the gallery
+        function displayImages() {
             const gallery = document.getElementById("gallery");
             gallery.innerHTML = "";
-
-            let selectedImages = imageIds.sort(() => 0.5 - Math.random()).slice(0, 10);
-            selectedImages.forEach(imageId => {
+            let selectedImages = getRandomImages(10);
+            selectedImages.forEach(imgSrc => {
                 let img = document.createElement("img");
-                img.src = `https://drive.google.com/uc?export=view&id=${imageId}`;
+                img.src = imgSrc;
                 img.alt = "Gallery Image";
                 gallery.appendChild(img);
             });
         }
 
         // Load images when page loads
-        window.onload = fetchImages;
+        window.onload = displayImages;
     </script>
 </body>
 </html>
