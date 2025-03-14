@@ -55,12 +55,16 @@
         }
         .calendar-container {
             filter: invert(1) hue-rotate(180deg);
-            display: inline-block;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             overflow: hidden;
             border-radius: 10px;
+            max-width: 100%;
         }
         .calendar-container iframe {
-            width: 100%;
+            width: 90%;
+            max-width: 900px;
             height: 600px;
             border: none;
         }
