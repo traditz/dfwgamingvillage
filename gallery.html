@@ -99,7 +99,9 @@
         <p>Check out some photos from past events!</p>
         <div class="gallery" id="gallery"></div>
     </div>
-    
+    <div class="modal" id="imageModal" onclick="closeModal()" style="display: none;">
+        <img id="modalImg" src="" alt="">
+    </div>
     <div class="footer">
         <p>&copy; 2025 DFW Gaming Village. All Rights Reserved.</p>
     </div>
@@ -241,6 +243,7 @@
                 img.src = imgSrc;
                 img.alt = "Gallery Image";
                 
+                img.onclick = () => openModal(imgSrc);
                 gallery.appendChild(img);
             });
         }
@@ -248,6 +251,14 @@
         
 
         window.onload = displayImages;
+    function openModal(imgSrc) {
+            document.getElementById("modalImg").src = imgSrc;
+            document.getElementById("imageModal").style.display = "flex";
+        }
+
+        function closeModal() {
+            document.getElementById("imageModal").style.display = "none";
+        }
     </script>
 </body>
 </html>
