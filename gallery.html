@@ -14,7 +14,7 @@
         }
         .banner {
             width: 100%;
-            display: block;
+            display: none;
             justify-content: center;
             align-items: center;
             background-color: #111;
@@ -244,10 +244,16 @@
                 });
             }
 
-            Promise.all(images.map(getImageSize)).then(imageData => {
-                imageData.sort((a, b) => a.ratio - b.ratio);
-                const gallery = document.getElementById("gallery");
-                gallery.innerHTML = "";
+            const gallery = document.getElementById("gallery");
+            gallery.innerHTML = "";
+            let selectedImages = getRandomImages(10);
+            selectedImages.forEach(imgSrc => {
+                let img = document.createElement("img");
+                img.src = imgSrc;
+                img.alt = "Gallery Image";
+                img.onclick = () => openModal(imgSrc);
+                gallery.appendChild(img);
+            });
                 let selectedImages = imageData.slice(0, 10);
                 selectedImages.forEach(data => {
                     let img = document.createElement("img");
