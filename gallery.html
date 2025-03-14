@@ -14,7 +14,7 @@
         }
         .banner {
             width: 100%;
-            display: flex;
+            display: block;
             justify-content: center;
             align-items: center;
             background-color: #111;
@@ -27,7 +27,7 @@
         .nav {
             background-color: #222;
             padding: 15px;
-            display: flex;
+            display: block;
             justify-content: center;
             flex-wrap: wrap;
         }
@@ -41,7 +41,7 @@
             padding: 50px 20px;
         }
         .gallery {
-            display: flex;
+            display: block;
             flex-wrap: wrap;
             justify-content: center;
             gap: 15px;
@@ -54,6 +54,7 @@
             box-shadow: 0 4px 8px rgba(255, 255, 255, 0.2);
             transition: transform 0.3s ease;
             cursor: pointer;
+            object-fit: contain;
         }
         .gallery img:hover {
             transform: scale(1.1);
@@ -64,7 +65,7 @@
             margin-top: 20px;
         }
         .modal {
-            display: flex;
+            display: block;
             position: fixed;
             z-index: 1000;
             left: 0;
@@ -72,7 +73,7 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.8);
-            display: flex;
+            display: block;
             justify-content: center;
             align-items: center;
         }
@@ -99,7 +100,7 @@
         <p>Check out some photos from past events!</p>
         <div class="gallery" id="gallery"></div>
     </div>
-    <div class="modal" id="imageModal" onclick="closeModal()" style="display: flex;">
+    <div class="modal" id="imageModal" onclick="closeModal()" style="display: block;">
         <img id="modalImg" src="" alt="">
     </div>
     <div class="footer">
