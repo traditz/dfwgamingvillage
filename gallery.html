@@ -242,16 +242,12 @@
                 let img = document.createElement("img");
                 img.src = imgSrc;
                 img.alt = "Gallery Image";
-                
                 img.onclick = () => openModal(imgSrc);
                 gallery.appendChild(img);
             });
         }
 
-        
-
-        window.onload = displayImages;
-    function openModal(imgSrc) {
+        function openModal(imgSrc) {
             document.getElementById("modalImg").src = imgSrc;
             document.getElementById("imageModal").style.display = "flex";
         }
@@ -259,6 +255,8 @@
         function closeModal() {
             document.getElementById("imageModal").style.display = "none";
         }
+
+        window.onload = displayImages;
     </script>
 </body>
 </html>
