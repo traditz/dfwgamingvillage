@@ -24,6 +24,7 @@
             display: block;
             margin: 10px auto;
             border-radius: 10px;
+            width: 100px; /* Reduced by 50% */
         }
         .info-section {
             margin-top: 10px;
@@ -59,7 +60,6 @@
                 let icon = document.createElement("img");
                 icon.src = factionData[selectedFaction].Icon;
                 icon.alt = `${selectedFaction} Icon`;
-                icon.style.width = "200px";
                 infoDiv.appendChild(icon);
                 
                 for (let key in factionData[selectedFaction]) {
