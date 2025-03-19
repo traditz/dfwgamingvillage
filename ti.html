@@ -40,12 +40,20 @@
         
         function populateDropdown() {
             const dropdown = document.getElementById("factionDropdown");
+            dropdown.innerHTML = '<option value="">--Choose a faction--</option>';
+            
+            if (Object.keys(factionData).length === 0) {
+                console.error("No faction data loaded.");
+                return;
+            }
+            
             for (let faction in factionData) {
                 let option = document.createElement("option");
                 option.value = faction;
                 option.textContent = faction;
                 dropdown.appendChild(option);
             }
+            console.log("Dropdown populated successfully.");
         }
         
         function displayFactionInfo() {
@@ -77,12 +85,20 @@
         }
         
         document.addEventListener("DOMContentLoaded", function() {
+            console.log("Fetching faction data...");
             fetch("factionData_with_icons.json")
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     factionData = data;
+                    console.log("Faction data loaded:", factionData);
                     populateDropdown();
-                });
+                })
+                .catch(error => console.error("Error loading faction data:", error));
         });
     </script>
 </head>
