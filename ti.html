@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TI4 Faction Database</title>
+    <script>
+        let factionData = {};
+        
+        function populateDropdown() {
+            const dropdown = document.getElementById("factionDropdown");
+            for (let faction in factionData) {
+                let option = document.createElement("option");
+                option.value = faction;
+                option.textContent = faction;
+                dropdown.appendChild(option);
+            }
+        }
+        
+        function displayFactionInfo() {
+            const selectedFaction = document.getElementById("factionDropdown").value;
+            const infoDiv = document.getElementById("factionInfo");
+            infoDiv.innerHTML = "";
+            
+            if (selectedFaction in factionData) {
+                for (let key in factionData[selectedFaction]) {
+                    let p = document.createElement("p");
+                    p.innerHTML = `<strong>${key}:</strong> ${factionData[selectedFaction][key]}`;
+                    infoDiv.appendChild(p);
+                }
+            }
+        }
+        
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch("factionData.json")
+                .then(response => response.json())
+                .then(data => {
+                    factionData = data;
+                    populateDropdown();
+                });
+        });
+    </script>
+</head>
+<body>
+    <h1>TI4 Faction Database</h1>
+    <label for="factionDropdown">Select a Faction:</label>
+    <select id="factionDropdown" onchange="displayFactionInfo()">
+        <option value="">--Choose a faction--</option>
+    </select>
+    <div id="factionInfo"></div>
+</body>
+</html>
