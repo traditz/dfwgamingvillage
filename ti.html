@@ -42,18 +42,12 @@
             const dropdown = document.getElementById("factionDropdown");
             dropdown.innerHTML = '<option value="">--Choose a faction--</option>';
             
-            if (Object.keys(factionData).length === 0) {
-                console.error("No faction data loaded.");
-                return;
-            }
-            
-            for (let faction in factionData) {
+            for (let faction of Object.keys(factionData)) {
                 let option = document.createElement("option");
                 option.value = faction;
                 option.textContent = faction;
                 dropdown.appendChild(option);
             }
-            console.log("Dropdown populated successfully.");
         }
         
         function displayFactionInfo() {
@@ -61,7 +55,7 @@
             const infoDiv = document.getElementById("factionInfo");
             infoDiv.innerHTML = "";
             
-            if (selectedFaction in factionData) {
+            if (factionData[selectedFaction]) {
                 let icon = document.createElement("img");
                 icon.src = factionData[selectedFaction].Icon;
                 icon.alt = `${selectedFaction} Icon`;
@@ -69,7 +63,7 @@
                 infoDiv.appendChild(icon);
                 
                 for (let key in factionData[selectedFaction]) {
-                    if (key !== "Icon") {
+                    if (key !== "Icon" && factionData[selectedFaction][key]) {
                         let section = document.createElement("div");
                         section.className = "info-section";
                         let h2 = document.createElement("h2");
@@ -85,17 +79,10 @@
         }
         
         document.addEventListener("DOMContentLoaded", function() {
-            console.log("Fetching faction data...");
             fetch("factionData_with_icons.json")
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
                     factionData = data;
-                    console.log("Faction data loaded:", factionData);
                     populateDropdown();
                 })
                 .catch(error => console.error("Error loading faction data:", error));
