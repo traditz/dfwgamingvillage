@@ -20,20 +20,28 @@
             text-align: left;
             width: 50%;
         }
-        img {
-            display: block;
-            margin: 10px auto;
+        .faction-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .faction-header img {
+            width: 75px;
+            height: auto;
             border-radius: 10px;
-            width: 100px; /* Reduced by 50% */
+        }
+        .faction-header h2 {
+            margin: 0;
+            font-size: 1.5em;
+            color: #333;
         }
         .info-section {
             margin-top: 10px;
             padding: 10px;
             border-radius: 5px;
             background: #e8e8e8;
-        }
-        h2 {
-            color: #333;
         }
     </style>
     <script>
@@ -57,10 +65,19 @@
             infoDiv.innerHTML = "";
             
             if (factionData[selectedFaction]) {
+                let headerDiv = document.createElement("div");
+                headerDiv.className = "faction-header";
+                
                 let icon = document.createElement("img");
                 icon.src = factionData[selectedFaction].Icon;
                 icon.alt = `${selectedFaction} Icon`;
-                infoDiv.appendChild(icon);
+                
+                let title = document.createElement("h2");
+                title.textContent = selectedFaction;
+                
+                headerDiv.appendChild(icon);
+                headerDiv.appendChild(title);
+                infoDiv.appendChild(headerDiv);
                 
                 for (let key in factionData[selectedFaction]) {
                     if (key !== "Icon" && factionData[selectedFaction][key]) {
