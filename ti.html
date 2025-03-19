@@ -4,6 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TI4 Faction Database</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        #container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+            text-align: left;
+            width: 50%;
+        }
+        img {
+            display: block;
+            margin: 10px auto;
+            border-radius: 10px;
+        }
+        .info-section {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            background: #e8e8e8;
+        }
+        h2 {
+            color: #333;
+        }
+    </style>
     <script>
         let factionData = {};
         
@@ -23,16 +54,30 @@
             infoDiv.innerHTML = "";
             
             if (selectedFaction in factionData) {
+                let icon = document.createElement("img");
+                icon.src = factionData[selectedFaction].Icon;
+                icon.alt = `${selectedFaction} Icon`;
+                icon.style.width = "200px";
+                infoDiv.appendChild(icon);
+                
                 for (let key in factionData[selectedFaction]) {
-                    let p = document.createElement("p");
-                    p.innerHTML = `<strong>${key}:</strong> ${factionData[selectedFaction][key]}`;
-                    infoDiv.appendChild(p);
+                    if (key !== "Icon") {
+                        let section = document.createElement("div");
+                        section.className = "info-section";
+                        let h2 = document.createElement("h2");
+                        h2.textContent = key.replace(/_/g, " ");
+                        let p = document.createElement("p");
+                        p.textContent = factionData[selectedFaction][key];
+                        section.appendChild(h2);
+                        section.appendChild(p);
+                        infoDiv.appendChild(section);
+                    }
                 }
             }
         }
         
         document.addEventListener("DOMContentLoaded", function() {
-            fetch("factionData.json")
+            fetch("factionData_with_icons.json")
                 .then(response => response.json())
                 .then(data => {
                     factionData = data;
@@ -43,10 +88,12 @@
 </head>
 <body>
     <h1>TI4 Faction Database</h1>
-    <label for="factionDropdown">Select a Faction:</label>
-    <select id="factionDropdown" onchange="displayFactionInfo()">
-        <option value="">--Choose a faction--</option>
-    </select>
-    <div id="factionInfo"></div>
+    <div id="container">
+        <label for="factionDropdown"><strong>Select a Faction:</strong></label>
+        <select id="factionDropdown" onchange="displayFactionInfo()">
+            <option value="">--Choose a faction--</option>
+        </select>
+        <div id="factionInfo"></div>
+    </div>
 </body>
 </html>
