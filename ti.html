@@ -55,7 +55,7 @@
         label {
             color: #e0e0e0;
         }
-        .tech-icon {
+        .tech-icon, .monument-icon {
             width: 20px;
             height: 20px;
             vertical-align: middle;
@@ -83,6 +83,15 @@
                        .replace(/RED/g, '<img src="images/warfare.png" class="tech-icon">')
                        .replace(/GREEN/g, '<img src="images/biotic.png" class="tech-icon">')
                        .replace(/BLUE/g, '<img src="images/propulsion.png" class="tech-icon">');
+        }
+        
+        function replaceMonumentWords(text) {
+            if (!text) return "";
+            return text.replace(/GREEN/g, '<img src="images/industrial.png" class="monument-icon">')
+                       .replace(/BLUE/g, '<img src="images/cultural.png" class="monument-icon">')
+                       .replace(/RED/g, '<img src="images/hazardous.png" class="monument-icon">')
+                       .replace(/LEGENDARY/g, '<img src="images/legendary.png" class="monument-icon">')
+                       .replace(/MECATOL REX/g, '<img src="images/rex.png" class="monument-icon">');
         }
         
         function displayFactionInfo() {
@@ -114,7 +123,13 @@
                         let h2 = document.createElement("h2");
                         h2.textContent = key.replace(/_/g, " ");
                         let p = document.createElement("p");
-                        p.innerHTML = replaceTechWords(String(value));
+                        
+                        if (key === "Monument:") {
+                            p.innerHTML = replaceMonumentWords(String(value));
+                        } else {
+                            p.innerHTML = replaceTechWords(String(value));
+                        }
+                        
                         section.appendChild(h2);
                         section.appendChild(p);
                         infoDiv.appendChild(section);
