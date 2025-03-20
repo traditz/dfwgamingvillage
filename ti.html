@@ -108,6 +108,7 @@
                 infoDiv.appendChild(headerDiv);
                 
                 Object.entries(faction).forEach(([key, value]) => {
+                    if (key === "Faction Name:") return; // Skip displaying the faction name
                     if (value !== "") {  // Ensure every column is displayed
                         let section = document.createElement("div");
                         section.className = "info-section";
