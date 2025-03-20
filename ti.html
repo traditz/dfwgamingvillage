@@ -120,7 +120,7 @@
         }
         
         function displayFactionInfo() {
-            const selectedFaction = document.getElementById("factionDropdown").value;
+            const selectedFaction = document.getElementById("factionDropdown");
             const infoDiv = document.getElementById("factionInfo");
             infoDiv.innerHTML = "";
             
@@ -149,10 +149,12 @@
                         h2.textContent = key.replace(/_/g, " ");
                         let p = document.createElement("p");
                         
-                        if (key === "Monument:") {
+                        if (["Faction Specific Unit 1:", "Faction Specific Unit 2:", "Faction Specific Unit 3:", "Faction Specific Unit 4:", "Flagship:", "Mech:"].includes(key)) {
+                            p.innerHTML = formatStatBlock(value);
+                        } else if (key === "Monument:") {
                             p.innerHTML = replaceMonumentWords(value);
                         } else {
-                            p.innerHTML = formatStatBlock(value);
+                            p.innerHTML = replaceTechWords(value);
                         }
                         
                         section.appendChild(h2);
