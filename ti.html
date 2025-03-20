@@ -69,12 +69,12 @@
             const dropdown = document.getElementById("factionDropdown");
             dropdown.innerHTML = '<option value="">--Choose a faction--</option>';
             
-            for (let faction of Object.keys(factionData)) {
+            factionData.forEach(faction => {
                 let option = document.createElement("option");
-                option.value = faction;
-                option.textContent = faction;
+                option.value = faction["Faction Name:"];
+                option.textContent = faction["Faction Name:"];
                 dropdown.appendChild(option);
-            }
+            });
         }
         
         function replaceTechWords(text) {
@@ -90,12 +90,14 @@
             const infoDiv = document.getElementById("factionInfo");
             infoDiv.innerHTML = "";
             
-            if (factionData[selectedFaction]) {
+            let faction = factionData.find(f => f["Faction Name:"] === selectedFaction);
+            
+            if (faction) {
                 let headerDiv = document.createElement("div");
                 headerDiv.className = "faction-header";
                 
                 let icon = document.createElement("img");
-                icon.src = factionData[selectedFaction].Icon;
+                icon.src = `images/${selectedFaction.replace(/ /g, "_").toLowerCase()}.png`;
                 icon.alt = `${selectedFaction} Icon`;
                 
                 let title = document.createElement("h2");
@@ -105,19 +107,19 @@
                 headerDiv.appendChild(title);
                 infoDiv.appendChild(headerDiv);
                 
-                for (let key in factionData[selectedFaction]) {
-                    if (key !== "Icon" && factionData[selectedFaction][key]) {
+                Object.entries(faction).forEach(([key, value]) => {
+                    if (key !== "Faction Name:" && value) {
                         let section = document.createElement("div");
                         section.className = "info-section";
                         let h2 = document.createElement("h2");
                         h2.textContent = key.replace(/_/g, " ");
                         let p = document.createElement("p");
-                        p.innerHTML = replaceTechWords(factionData[selectedFaction][key]);
+                        p.innerHTML = replaceTechWords(String(value));
                         section.appendChild(h2);
                         section.appendChild(p);
                         infoDiv.appendChild(section);
                     }
-                }
+                });
             }
         }
         
