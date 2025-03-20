@@ -108,17 +108,19 @@
                 infoDiv.appendChild(headerDiv);
                 
                 Object.entries(faction).forEach(([key, value]) => {
-                    if (value) {  // Ensure every column is displayed
+                    if (value !== "") {  // Ensure every column is displayed
                         let section = document.createElement("div");
                         section.className = "info-section";
                         let h2 = document.createElement("h2");
                         h2.textContent = key.replace(/_/g, " ");
                         let p = document.createElement("p");
                         
-                        if (key === "Monument:") {
+                        if (key.includes("Technology") || key.includes("Unit")) {
+                            p.innerHTML = replaceTechWords(value);
+                        } else if (key === "Monument:") {
                             p.innerHTML = replaceMonumentWords(value);
                         } else {
-                            p.innerHTML = replaceTechWords(value);
+                            p.innerHTML = value;
                         }
                         
                         section.appendChild(h2);
