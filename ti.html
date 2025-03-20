@@ -79,10 +79,10 @@
         
         function replaceTechWords(text) {
             if (!text) return "";
-            return text.replace(/YELLOW/g, '<img src="images/cybernetic.png" class="tech-icon"> Cybernetic')
-                       .replace(/RED/g, '<img src="images/warfare.png" class="tech-icon"> Warfare')
-                       .replace(/GREEN/g, '<img src="images/biotic.png" class="tech-icon"> Biotic')
-                       .replace(/BLUE/g, '<img src="images/propulsion.png" class="tech-icon"> Propulsion');
+            return text.replace(/YELLOW/g, '<img src="images/cybernetic.png" class="tech-icon">')
+                       .replace(/RED/g, '<img src="images/warfare.png" class="tech-icon">')
+                       .replace(/GREEN/g, '<img src="images/biotic.png" class="tech-icon">')
+                       .replace(/BLUE/g, '<img src="images/propulsion.png" class="tech-icon">');
         }
         
         function displayFactionInfo() {
