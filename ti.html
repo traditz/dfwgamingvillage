@@ -46,14 +46,20 @@
             background: #2a2a2a;
             color: #e0e0e0;
         }
-        select, option {
-            background: #2a2a2a;
-            color: #ffffff;
-            border: 1px solid #444;
-            padding: 5px;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            background: #333;
+            color: #fff;
         }
-        label {
-            color: #e0e0e0;
+        th, td {
+            border: 1px solid #555;
+            padding: 5px;
+            text-align: left;
+        }
+        th {
+            background: #444;
         }
         .tech-icon, .monument-icon {
             width: 20px;
@@ -94,6 +100,25 @@
                        .replace(/MECATOL REX/g, '<img src="images/rex.png" class="monument-icon">');
         }
         
+        function formatStatBlock(text) {
+            if (!text) return "";
+            let stats = {};
+            text.split(/(?=COST:|COMBAT:|MOVE:|CAPACITY:|ABILITY:)/).forEach(part => {
+                let [key, value] = part.split(":");
+                if (key && value) stats[key.trim()] = value.trim();
+            });
+            
+            if (Object.keys(stats).length === 0) return replaceTechWords(text);
+            
+            let table = '<table><tr>';
+            Object.keys(stats).forEach(stat => table += `<th>${stat}</th>`);
+            table += '</tr><tr>';
+            Object.values(stats).forEach(value => table += `<td>${value}</td>`);
+            table += '</tr></table>';
+            
+            return table;
+        }
+        
         function displayFactionInfo() {
             const selectedFaction = document.getElementById("factionDropdown").value;
             const infoDiv = document.getElementById("factionInfo");
@@ -125,9 +150,9 @@
                         let p = document.createElement("p");
                         
                         if (key === "Monument:") {
-                            p.innerHTML = replaceMonumentWords(String(value));
+                            p.innerHTML = replaceMonumentWords(value);
                         } else {
-                            p.innerHTML = replaceTechWords(String(value));
+                            p.innerHTML = formatStatBlock(value);
                         }
                         
                         section.appendChild(h2);
