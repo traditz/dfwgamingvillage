@@ -183,6 +183,8 @@ function displayFactionInfo(selectedFaction) {
             p.innerHTML = replaceTechWords(value);
         } else if (key === "Monument:") {
             p.innerHTML = replaceMonumentWords(value);
+        } else {
+            p.innerHTML = value;
         } 
         section.appendChild(h2);
         section.appendChild(p);
