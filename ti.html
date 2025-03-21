@@ -180,9 +180,7 @@ function displayFactionInfo(selectedFaction) {
 
         if (key.includes("Technology") || key.includes("Unit")) {
             p.innerHTML = replaceTechWords(value);
-        } else if (key === "Monument:") {
-            p.innerHTML = replaceMonumentWords(value);
-        } else {
+        }  else {
             p.innerHTML = value;
         }
 
