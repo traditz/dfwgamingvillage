@@ -65,7 +65,8 @@ body {
     padding: 10px;
     cursor: pointer;
     text-align: center;
-    width: 120px;
+    flex: 1 1 calc(33.33% - 20px);
+    max-width: 120px;
     transition: background 0.3s;
 }
 .faction-tile:hover {
@@ -94,7 +95,7 @@ let factionData = {};
 function populateDropdown() {
     const dropdown = document.getElementById("factionDropdown");
     dropdown.innerHTML = '<option value="">--Choose a faction--</option>';
-    
+
     factionData.forEach(faction => {
         let option = document.createElement("option");
         option.value = faction["Faction Name:"];
@@ -109,7 +110,10 @@ function populateFactionMenu() {
     factionData.forEach(faction => {
         let tile = document.createElement("div");
         tile.className = "faction-tile";
-        tile.onclick = () => displayFactionInfo(faction["Faction Name:"]);
+        tile.onclick = () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            displayFactionInfo(faction["Faction Name:"]);
+        };
 
         let icon = document.createElement("img");
         icon.src = `images/${faction["Faction Name:"].replace(/ /g, "_").toLowerCase()}.png`;
