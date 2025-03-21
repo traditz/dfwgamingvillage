@@ -180,16 +180,16 @@ function displayFactionInfo(selectedFaction) {
 
         if (key.includes("Technology") || key.includes("Unit")) {
             p.innerHTML = replaceTechWords(value);
-        }  else {
+        } else if (key === "Monument:") {
+            p.innerHTML = replaceMonumentWords(value);
+        } else {
             p.innerHTML = value;
         }
 
         section.appendChild(h2);
         section.appendChild(p);
         infoDiv.appendChild(section);
-    }); else if (key === "Monument:") {
-            p.innerHTML = replaceMonumentWords(value);
-        } else {
+    }); else {
             p.innerHTML = value;
         }
 
