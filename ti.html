@@ -52,10 +52,35 @@
             vertical-align: middle;
             margin-right: 5px;
         }
+        #factionMenu {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px auto;
+            gap: 10px;
+        }
+        .faction-tile {
+            background: #2a2a2a;
+            border-radius: 8px;
+            padding: 10px;
+            cursor: pointer;
+            text-align: center;
+            width: 120px;
+            transition: background 0.3s;
+        }
+        .faction-tile:hover {
+            background: #3a3a3a;
+        }
+        .faction-tile img {
+            width: 60px;
+            height: auto;
+            border-radius: 6px;
+            margin-bottom: 5px;
+        }
     </style>
     <script>
         let factionData = {};
-        
+
         function populateDropdown() {
             const dropdown = document.getElementById("factionDropdown");
             dropdown.innerHTML = '<option value="">--Choose a faction--</option>';
@@ -67,7 +92,28 @@
                 dropdown.appendChild(option);
             });
         }
-        
+
+        function populateFactionMenu() {
+            const menu = document.getElementById("factionMenu");
+            menu.innerHTML = "";
+            factionData.forEach(faction => {
+                let tile = document.createElement("div");
+                tile.className = "faction-tile";
+                tile.onclick = () => displayFactionInfo(faction["Faction Name:"]);
+
+                let icon = document.createElement("img");
+                icon.src = `images/${faction["Faction Name:"].replace(/ /g, "_").toLowerCase()}.png`;
+                icon.alt = `${faction["Faction Name:"]} Icon`;
+
+                let label = document.createElement("div");
+                label.textContent = faction["Faction Name:"];
+
+                tile.appendChild(icon);
+                tile.appendChild(label);
+                menu.appendChild(tile);
+            });
+        }
+
         function replaceTechWords(text) {
             if (!text) return "";
             return text.replace(/YELLOW/g, '<img src="images/cybernetic.png" class="tech-icon">')
@@ -75,7 +121,7 @@
                        .replace(/GREEN/g, '<img src="images/biotic.png" class="tech-icon">')
                        .replace(/BLUE/g, '<img src="images/propulsion.png" class="tech-icon">');
         }
-        
+
         function replaceMonumentWords(text) {
             if (!text) return "";
             return text.replace(/GREEN/g, '<img src="images/industrial.png" class="monument-icon">')
@@ -84,60 +130,58 @@
                        .replace(/LEGENDARY/g, '<img src="images/legendary.png" class="monument-icon">')
                        .replace(/MECATOL REX/g, '<img src="images/rex.png" class="monument-icon">');
         }
-        
-        function displayFactionInfo() {
-            const selectedFaction = document.getElementById("factionDropdown").value;
+
+        function displayFactionInfo(selectedFaction) {
             const infoDiv = document.getElementById("factionInfo");
             infoDiv.innerHTML = "";
             
             let faction = factionData.find(f => f["Faction Name:"] === selectedFaction);
-            
+
             if (faction) {
                 let headerDiv = document.createElement("div");
                 headerDiv.className = "faction-header";
-                
+
                 let icon = document.createElement("img");
                 icon.src = `images/${selectedFaction.replace(/ /g, "_").toLowerCase()}.png`;
                 icon.alt = `${selectedFaction} Icon`;
-                
+
                 let title = document.createElement("h2");
                 title.textContent = selectedFaction;
-                
+
                 headerDiv.appendChild(icon);
                 headerDiv.appendChild(title);
                 infoDiv.appendChild(headerDiv);
-                
+
                 Object.entries(faction).forEach(([key, value]) => {
-                    if (key === "Faction Name:") return; // Skip displaying the faction name
-                    if (value !== "") {  // Ensure every column is displayed
-                        let section = document.createElement("div");
-                        section.className = "info-section";
-                        let h2 = document.createElement("h2");
-                        h2.textContent = key.replace(/_/g, " ");
-                        let p = document.createElement("p");
-                        
-                        if (key.includes("Technology") || key.includes("Unit")) {
-                            p.innerHTML = replaceTechWords(value);
-                        } else if (key === "Monument:") {
-                            p.innerHTML = replaceMonumentWords(value);
-                        } else {
-                            p.innerHTML = value;
-                        }
-                        
-                        section.appendChild(h2);
-                        section.appendChild(p);
-                        infoDiv.appendChild(section);
+                    if (key === "Faction Name:" || value === "") return;
+                    let section = document.createElement("div");
+                    section.className = "info-section";
+                    let h2 = document.createElement("h2");
+                    h2.textContent = key.replace(/_/g, " ");
+                    let p = document.createElement("p");
+
+                    if (key.includes("Technology") || key.includes("Unit")) {
+                        p.innerHTML = replaceTechWords(value);
+                    } else if (key === "Monument:") {
+                        p.innerHTML = replaceMonumentWords(value);
+                    } else {
+                        p.innerHTML = value;
                     }
+
+                    section.appendChild(h2);
+                    section.appendChild(p);
+                    infoDiv.appendChild(section);
                 });
             }
         }
-        
+
         document.addEventListener("DOMContentLoaded", function() {
             fetch("factionData_with_icons.json")
                 .then(response => response.json())
                 .then(data => {
                     factionData = data;
                     populateDropdown();
+                    populateFactionMenu();
                 })
                 .catch(error => console.error("Error loading faction data:", error));
         });
@@ -147,9 +191,10 @@
     <h1>TI4 Faction Database</h1>
     <div id="container">
         <label for="factionDropdown"><strong>Select a Faction:</strong></label>
-        <select id="factionDropdown" onchange="displayFactionInfo()">
+        <select id="factionDropdown" onchange="displayFactionInfo(this.value)">
             <option value="">--Choose a faction--</option>
         </select>
+        <div id="factionMenu"></div>
         <div id="factionInfo"></div>
     </div>
 </body>
