@@ -171,7 +171,7 @@ function displayFactionInfo(selectedFaction) {
     infoDiv.appendChild(headerDiv);
 
     Object.entries(faction).forEach(([key, value]) => {
-        if (key === "Faction Name:" || value === "" || key.trim().toLowerCase() === "ds:") return;
+        if (key === "Faction Name:" || value === "") return;
         let section = document.createElement("div");
         section.className = "info-section";
         let h2 = document.createElement("h2");
