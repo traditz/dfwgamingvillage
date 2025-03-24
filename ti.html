@@ -103,7 +103,7 @@ function populateDropdown() {
         option.value = faction["Faction Name:"];
         option.textContent = faction["Faction Name:"];
         dropdown.appendChild(option);
-            });
+    });
 }
 }
 
@@ -130,6 +130,7 @@ function populateFactionMenu() {
         tile.appendChild(label);
         menu.appendChild(tile);
     });
+}
 });
             displayFactionInfo(faction["Faction Name:"]);
         };
