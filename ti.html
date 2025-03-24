@@ -104,6 +104,7 @@ function populateDropdown() {
         option.textContent = faction["Faction Name:"];
         dropdown.appendChild(option);
     });
+});
 }
 }
 
@@ -116,6 +117,21 @@ function populateFactionMenu() {
         tile.className = "faction-tile";
         tile.onclick = () => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
+            displayFactionInfo(faction["Faction Name:"]);
+        };
+
+        let icon = document.createElement("img");
+        icon.src = `images/${faction["Faction Name:"].replace(/ /g, "_").toLowerCase()}.png`;
+        icon.alt = `${faction["Faction Name:"]} Icon`;
+
+        let label = document.createElement("div");
+        label.textContent = faction["Faction Name:"];
+
+        tile.appendChild(icon);
+        tile.appendChild(label);
+        menu.appendChild(tile);
+    });
+});
             displayFactionInfo(faction["Faction Name:"]);
         };
 
@@ -233,10 +249,7 @@ document.addEventListener("DOMContentLoaded", function() {
         })
         .catch(error => console.error("Error loading faction data:", error));
 });
-document.addEventListener("DOMContentLoaded", () => {
-    const dsCheckbox = document.getElementById("dsToggle");
-    dsCheckbox.checked = showDS;
-});
+
 </script>
 </head>
 <body>
