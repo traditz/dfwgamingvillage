@@ -202,16 +202,13 @@ function showFactionMenu() {
 
 document.addEventListener("DOMContentLoaded", function() {
     const dsCheckbox = document.getElementById("dsToggle");
-    dsCheckbox.checked = localStorage.getItem("showDS") === "true";
     showDS = dsCheckbox.checked;
-
     dsCheckbox.addEventListener("change", () => {
-        localStorage.setItem("showDS", dsCheckbox.checked);
-        showDS = dsCheckbox.checked;
-        populateDropdown();
-        populateFactionMenu();
-    });
-
+    localStorage.setItem("showDS", dsCheckbox.checked);
+    showDS = dsCheckbox.checked;
+    populateDropdown();
+    populateFactionMenu();
+});
     fetch("factionData_with_icons.json")
         .then(response => response.json())
         .then(data => {
@@ -222,15 +219,13 @@ document.addEventListener("DOMContentLoaded", function() {
         .catch(error => console.error("Error loading faction data:", error));
 });
 
-});
-
 </script>
 </head>
 <body>
 <h1>TI4 Faction Database</h1>
 <div id="container">
     <label for="factionDropdown"><strong>Select a Faction:</strong></label>
-    <label><input type="checkbox" id="dsToggle"> Discordant Stars?</label>
+    <label><input type="checkbox" id="dsToggle" onchange="localStorage.setItem('showDS', this.checked);"> Discordant Stars?</label>
     <select id="factionDropdown" onchange="displayFactionInfo(this.value)">
         <option value="">--Choose a faction--</option>
     </select>
