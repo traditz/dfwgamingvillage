@@ -104,8 +104,6 @@ function populateDropdown() {
         option.textContent = faction["Faction Name:"];
         dropdown.appendChild(option);
     });
-});
-}
 }
 
 function populateFactionMenu() {
@@ -131,38 +129,7 @@ function populateFactionMenu() {
         tile.appendChild(label);
         menu.appendChild(tile);
     });
-});
-            displayFactionInfo(faction["Faction Name:"]);
-        };
-
-        let icon = document.createElement("img");
-        icon.src = `images/${faction["Faction Name:"].replace(/ /g, "_").toLowerCase()}.png`;
-        icon.alt = `${faction["Faction Name:"]} Icon`;
-
-        let label = document.createElement("div");
-        label.textContent = faction["Faction Name:"];
-
-        tile.appendChild(icon);
-        tile.appendChild(label);
-        menu.appendChild(tile);
-    });
-}
-});
-            displayFactionInfo(faction["Faction Name:"]);
-        };
-
-        let icon = document.createElement("img");
-        icon.src = `images/${faction["Faction Name:"].replace(/ /g, "_").toLowerCase()}.png`;
-        icon.alt = `${faction["Faction Name:"]} Icon`;
-
-        let label = document.createElement("div");
-        label.textContent = faction["Faction Name:"];
-
-        tile.appendChild(icon);
-        tile.appendChild(label);
-        menu.appendChild(tile);
-    });
-}
+  }
 
 function replaceTechWords(text) {
     if (!text) return "";
@@ -237,9 +204,11 @@ document.addEventListener("DOMContentLoaded", function() {
     const dsCheckbox = document.getElementById("dsToggle");
     showDS = dsCheckbox.checked;
     dsCheckbox.addEventListener("change", () => {
-        localStorage.setItem("showDS", dsCheckbox.checked);
-        location.reload();
-    });
+    localStorage.setItem("showDS", dsCheckbox.checked);
+    showDS = dsCheckbox.checked;
+    populateDropdown();
+    populateFactionMenu();
+});
     fetch("factionData_with_icons.json")
         .then(response => response.json())
         .then(data => {
