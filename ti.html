@@ -91,27 +91,46 @@ body {
 </style>
 <script>
 let factionData = {};
+let showDS = false;
 
 function populateDropdown() {
     const dropdown = document.getElementById("factionDropdown");
     dropdown.innerHTML = '<option value="">--Choose a faction--</option>';
 
     factionData.forEach(faction => {
+        if (!showDS && faction["ds:"] && faction["ds:"].toLowerCase() === "yes") return;
         let option = document.createElement("option");
         option.value = faction["Faction Name:"];
         option.textContent = faction["Faction Name:"];
         dropdown.appendChild(option);
     });
+});
 }
 
 function populateFactionMenu() {
     const menu = document.getElementById("factionMenu");
     menu.innerHTML = "";
     factionData.forEach(faction => {
+        if (!showDS && faction["ds:"] && faction["ds:"].toLowerCase() === "yes") return;
         let tile = document.createElement("div");
         tile.className = "faction-tile";
         tile.onclick = () => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
+            displayFactionInfo(faction["Faction Name:"]);
+        };
+
+        let icon = document.createElement("img");
+        icon.src = `images/${faction["Faction Name:"].replace(/ /g, "_").toLowerCase()}.png`;
+        icon.alt = `${faction["Faction Name:"]} Icon`;
+
+        let label = document.createElement("div");
+        label.textContent = faction["Faction Name:"];
+
+        tile.appendChild(icon);
+        tile.appendChild(label);
+        menu.appendChild(tile);
+    });
+});
             displayFactionInfo(faction["Faction Name:"]);
         };
 
@@ -198,6 +217,9 @@ function showFactionMenu() {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
+    const dsCheckbox = document.getElementById("dsToggle");
+    showDS = dsCheckbox.checked;
+    dsCheckbox.addEventListener("change", () => location.reload());
     fetch("factionData_with_icons.json")
         .then(response => response.json())
         .then(data => {
@@ -213,6 +235,7 @@ document.addEventListener("DOMContentLoaded", function() {
 <h1>TI4 Faction Database</h1>
 <div id="container">
     <label for="factionDropdown"><strong>Select a Faction:</strong></label>
+    <label><input type="checkbox" id="dsToggle"> Discordant Stars?</label>
     <select id="factionDropdown" onchange="displayFactionInfo(this.value)">
         <option value="">--Choose a faction--</option>
     </select>
