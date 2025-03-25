@@ -1384,7 +1384,7 @@
     "Faction Promissory Note:": "Read the Fates: ACTION: Place this face up in your play area. While this card is in your play area, you may look at the public objective card on the Ilyxum player s faction sheet. If you activate a system that contains 1 or more of the Ilyxum player's units, return this card to the Ilyxum player.",
     "Faction Promissory Note 2:": "",
     "Faction Technology 1:": "GREEN: Psychographics: During the status phase, you may score 1 additional public objective instead of a secret objective. PREREQ: GREEN GREEN GREEN",
-    "Faction Technology 2:": "YELLOW: Sentient Datapool: At the start of the status phase, you may spend 3 trade goods to research 1 technology.",
+    "Faction Technology 2:": "YELLOW: Sentient Datapool: At the start of the status phase, you may spend 3 trade goods to research 1 technology. PREREQ: YELLOW YELLOW",
     "Faction Technology 3:": "",
     "Faction Specific Unit 1:": "",
     "Faction Specific Unit 2:": "",
