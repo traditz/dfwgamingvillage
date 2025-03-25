@@ -128,12 +128,17 @@ function populateFactionMenu() {
     factionData.forEach(faction => {
      if (!showDS) {
   const dsKey = Object.keys(faction).find(k => k.trim().toLowerCase() === "ds:");
-  if (dsKey && String(faction[dsKey]).toLowerCase() === "yes") return;
-}
+const isDSFaction = dsKey && String(faction[dsKey]).toLowerCase() === "yes";
+if (!showDS && isDSFaction) return;
+
 
 
         let tile = document.createElement("div");
 tile.className = "faction-tile";
+       if (isDSFaction) {
+    tile.classList.add("ds-faction");
+}
+
 
 // Highlight DS factions
 const dsKey = Object.keys(faction).find(k => k.trim().toLowerCase() === "ds:");
