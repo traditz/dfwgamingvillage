@@ -98,7 +98,12 @@ function populateDropdown() {
     dropdown.innerHTML = '<option value="">--Choose a faction--</option>';
 
     factionData.forEach(faction => {
-        if (!showDS && faction["ds:"] && faction["ds:"].toLowerCase() === "yes") return;
+      if (!showDS) {
+  const dsKey = Object.keys(faction).find(k => k.trim().toLowerCase() === "ds:");
+  if (dsKey && String(faction[dsKey]).toLowerCase() === "yes") return;
+}
+
+
         let option = document.createElement("option");
         option.value = faction["Faction Name:"];
         option.textContent = faction["Faction Name:"];
@@ -110,7 +115,12 @@ function populateFactionMenu() {
     const menu = document.getElementById("factionMenu");
     menu.innerHTML = "";
     factionData.forEach(faction => {
-        if (!showDS && faction["ds:"] && faction["ds:"].toLowerCase() === "yes") return;
+     if (!showDS) {
+  const dsKey = Object.keys(faction).find(k => k.trim().toLowerCase() === "ds:");
+  if (dsKey && String(faction[dsKey]).toLowerCase() === "yes") return;
+}
+
+
         let tile = document.createElement("div");
         tile.className = "faction-tile";
         tile.onclick = () => {
@@ -202,22 +212,27 @@ function showFactionMenu() {
 
 document.addEventListener("DOMContentLoaded", function() {
     const dsCheckbox = document.getElementById("dsToggle");
+
+    // Restore from localStorage
+    dsCheckbox.checked = localStorage.getItem("showDS") === "true";
     showDS = dsCheckbox.checked;
+
     dsCheckbox.addEventListener("change", () => {
-    localStorage.setItem("showDS", dsCheckbox.checked);
-    showDS = dsCheckbox.checked;
-    populateDropdown();
-    populateFactionMenu();
-});
+        showDS = dsCheckbox.checked;
+        localStorage.setItem("showDS", showDS);
+        populateDropdown();
+        populateFactionMenu();
+    });
+
     fetch("factionData_with_icons.json")
         .then(response => response.json())
         .then(data => {
             factionData = data;
             populateDropdown();
             populateFactionMenu();
-        })
-        .catch(error => console.error("Error loading faction data:", error));
+        });
 });
+
 
 </script>
 </head>
@@ -225,7 +240,7 @@ document.addEventListener("DOMContentLoaded", function() {
 <h1>TI4 Faction Database</h1>
 <div id="container">
     <label for="factionDropdown"><strong>Select a Faction:</strong></label>
-    <label><input type="checkbox" id="dsToggle" onchange="localStorage.setItem('showDS', this.checked);"> Discordant Stars?</label>
+    <label><input type="checkbox" id="dsToggle"> Discordant Stars?</label>
     <select id="factionDropdown" onchange="displayFactionInfo(this.value)">
         <option value="">--Choose a faction--</option>
     </select>
