@@ -125,25 +125,24 @@ function populateDropdown() {
 function populateFactionMenu() {
     const menu = document.getElementById("factionMenu");
     menu.innerHTML = "";
+
     factionData.forEach(faction => {
-     if (!showDS) {
-  const dsKey = Object.keys(faction).find(k => k.trim().toLowerCase() === "ds:");
-const isDSFaction = dsKey && String(faction[dsKey]).toLowerCase() === "yes";
-if (!showDS && isDSFaction) return;
+        // Try to find a DS-related key (case-insensitive, spacing tolerant)
+        const dsKey = Object.keys(faction).find(k => k.trim().toLowerCase() === "ds:");
+        const isDSFaction = dsKey && String(faction[dsKey]).toLowerCase() === "yes";
 
+        // Skip DS factions if checkbox is not checked
+        if (!showDS && isDSFaction) return;
 
-
+        // Create faction tile
         let tile = document.createElement("div");
-tile.className = "faction-tile";
-       if (isDSFaction) {
-    tile.classList.add("ds-faction");
-}
+        tile.className = "faction-tile";
 
+        // Visually highlight DS factions
+        if (isDSFaction) {
+            tile.classList.add("ds-faction");
+        }
 
-// Highlight DS factions
-const dsKey = Object.keys(faction).find(k => k.trim().toLowerCase() === "ds:");
-if (dsKey && String(faction[dsKey]).toLowerCase() === "yes") {
-    tile.classList.add("ds-faction");
         tile.onclick = () => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
             displayFactionInfo(faction["Faction Name:"]);
@@ -160,7 +159,8 @@ if (dsKey && String(faction[dsKey]).toLowerCase() === "yes") {
         tile.appendChild(label);
         menu.appendChild(tile);
     });
-  }
+}
+
 
 function replaceTechWords(text) {
     if (!text) return "";
