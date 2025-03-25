@@ -69,6 +69,10 @@ body {
     max-width: 120px;
     transition: background 0.3s;
 }
+  .ds-faction {
+    border: 2px solid #ff9800;
+    box-shadow: 0 0 8px rgba(255, 152, 0, 0.5);
+}
 .faction-tile:hover {
     background: #3a3a3a;
 }
@@ -78,6 +82,11 @@ body {
     border-radius: 6px;
     margin-bottom: 5px;
 }
+  .ds-faction {
+    border: 2px solid #ff9800;
+    box-shadow: 0 0 8px rgba(255, 152, 0, 0.5);
+}
+
 #menuToggle {
     display: none;
     margin-left: 10px;
@@ -87,6 +96,8 @@ body {
     border: none;
     border-radius: 5px;
     cursor: pointer;
+  
+  
 }
 </style>
 <script>
@@ -122,7 +133,12 @@ function populateFactionMenu() {
 
 
         let tile = document.createElement("div");
-        tile.className = "faction-tile";
+tile.className = "faction-tile";
+
+// Highlight DS factions
+const dsKey = Object.keys(faction).find(k => k.trim().toLowerCase() === "ds:");
+if (dsKey && String(faction[dsKey]).toLowerCase() === "yes") {
+    tile.classList.add("ds-faction");
         tile.onclick = () => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
             displayFactionInfo(faction["Faction Name:"]);
