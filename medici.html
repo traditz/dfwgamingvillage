@@ -32,9 +32,11 @@
         const ReactDOM = window.ReactDOM;
 
         // --- Supabase Client Initialization ---
+        // IMPORTANT: Replace 'YOUR_SUPABASE_URL' and 'YOUR_SUPABASE_ANON_KEY' with your actual Supabase project URL and Anon Key.
+        // You can find these in your Supabase project settings under 'API'.
+        // Ensure Realtime is enabled for the 'games' table in your Supabase project settings.
         const supabaseUrl = 'https://krfrccsetibzmzutfzll.supabase.co';
-        // IMPORTANT: Replace 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtyZnJjY3NldGliem16dXRmemxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg1NjgzNjAsImV4cCI6MjA2NDE0NDM2MH0.wLEUxijlo4PR35aLX2BdJ-99g0cd_JAQPRz9VXM3ihQ' with your actual Supabase 'anon public' key from your Supabase project settings -> API.
-        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtyZnJjY3NldGliem16dXRmemxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg1NjgzNjAsImV4cCI6MjA2NDE0NDM2MH0.wLEUxijlo4PR35aLX2BdJ-99g0cd_JAQPRz9VXM3ihQ'; 
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtyZnJjY3NldGliem16dXRmemxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg1NjgzNjAsImV4cCI6MjA2NDE0NDM2MH0.wLEUxijlo4PR35aLX2BdJ-99g0cd_JAQPRz9VXM3ihQ';
 
         // Create the Supabase client instance using the globally loaded Supabase object
         const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
@@ -50,7 +52,7 @@
             useEffect(() => {
                 const initializeAuth = async () => {
                     try {
-                        const { data: { session } } = await supabase.auth.getSession();
+                        const { data: { session } = {} } = await supabase.auth.getSession(); // Destructure with default empty object
                         let currentUserId = session?.user?.id;
 
                         if (!currentUserId) {
@@ -252,7 +254,7 @@
             for (let i = 1; i <= totalPlayers; i++) {
                 const potentialNextPlayerIndex = (startIndex + i) % totalPlayers;
                 const potentialNextPlayerId = playerOrder[potentialNextPlayerIndex];
-                const potentialNextPlayer = gameData.players.find(p => p.id === potentialNextPlayerId);
+                const potentialNextPlayer = (gameData.players || []).find(p => p.id === potentialNextPlayerId); // Defensive check
 
                 if (potentialNextPlayer && potentialNextPlayer.ship.length < gameData.ship_capacity) {
                     nextPlayerId = potentialNextPlayerId;
@@ -328,7 +330,55 @@
             { type: 'Diversifier_Cautious', bidModifier: 0.6, drawModifier: 0.6, commodityPreference: 0.4, goldPreference: 0.1, trackPreference: 0.3, shipFillPreference: 0.5 }
         ];
 
-        // --- AI Decision Helper Functions ---
+        // --- Helper function to calculate lot value considering AI personality, ship, and track positions ---
+        const calculateLotValue = (cards, playerPersonality, currentTrackPositions, currentPlayerId, playerShip) => {
+            let value = cards.reduce((sum, card) => sum + card.value, 0);
+            const goldCount = cards.filter(card => card.type === 'gold').length;
+            let focusedCommodityCount = 0;
+            if (playerPersonality.commodityFocus) {
+                focusedCommodityCount = cards.filter(card => card.type === playerPersonality.commodityFocus).length;
+            }
+
+            value += goldCount * (playerPersonality.goldPreference * 10);
+            value += focusedCommodityCount * (playerPersonality.commodityPreference * 5);
+
+            // Calculate current commodity counts in the player's ship
+            const playerShipCommodityCounts = {};
+            (playerShip || []).forEach(card => {
+                if (card.type !== 'gold') {
+                    playerShipCommodityCounts[card.type] = (playerShipCommodityCounts[card.type] || 0) + 1;
+                }
+            });
+
+            cards.forEach(card => {
+                if (card.type !== 'gold') {
+                    // 1. Value for progressing higher in commodity tracks they've already advanced in
+                    const currentTrackLevel = currentTrackPositions[card.type]?.[currentPlayerId] || 1;
+                    // Add a bonus based on current track level, making cards of types they are good at more valuable
+                    value += (currentTrackLevel - 1) * (playerPersonality.trackPreference * 0.5); // Small bonus per level already achieved
+
+                    // Existing logic for potential track points (reaching 6, 7, 8)
+                    // This needs to consider the *total* cards of that type (ship + current lot)
+                    const cardsOfThisTypeInLot = cards.filter(c => c.type === card.type).length;
+                    const totalCardsOfThisType = (playerShipCommodityCounts[card.type] || 0) + cardsOfThisTypeInLot;
+                    const potentialNewLevel = Math.min(8, currentTrackLevel + totalCardsOfThisType);
+
+                    if (potentialNewLevel >= 6 && currentTrackLevel < 6) value += 5 * playerPersonality.trackPreference;
+                    if (potentialNewLevel >= 7 && currentTrackLevel < 7) value += 10 * playerPersonality.trackPreference;
+                    if (potentialNewLevel >= 8 && currentTrackLevel < 8) value += 20 * playerPersonality.trackPreference;
+
+
+                    // 2. Value cards higher for types they already have in their ship (synergy)
+                    const existingCount = playerShipCommodityCounts[card.type] || 0;
+                    if (existingCount > 0) {
+                        value += existingCount * (playerPersonality.commodityPreference * 1); // Bonus scales with existing cards
+                    }
+                }
+            });
+            console.log(`[calculateLotValue] Cards: ${cards.map(c => `${c.type}:${c.value}`).join(', ')}, Calculated Value: ${value}`);
+            return value;
+        };
+
         const calculateAIBid = (player, auctionCards, highestBid, shipCapacity, gameData) => {
             const personality = player.personality;
             const minBid = highestBid + 1;
@@ -345,31 +395,9 @@
                 return 0;
             }
 
-            let lotValue = auctionCards.reduce((sum, card) => sum + card.value, 0);
-            let goldCount = auctionCards.filter(card => card.type === 'gold').length;
-            let focusedCommodityCount = 0;
-            if (personality.commodityFocus) {
-                focusedCommodityCount = auctionCards.filter(card => card.type === personality.commodityFocus).length;
-            }
-            console.log(`[calculateAIBid] Base lot value: ${lotValue}, Gold count: ${goldCount}, Focused commodity count: ${focusedCommodityCount}`);
-
-
-            lotValue += goldCount * (personality.goldPreference * 10);
-            lotValue += focusedCommodityCount * (personality.commodityPreference * 5);
-
-            const currentTrackPositions = gameData.commodity_track_positions;
-            let potentialTrackPoints = 0;
-            auctionCards.forEach(card => {
-                if (card.type !== 'gold') {
-                    const currentLevel = currentTrackPositions[card.type]?.[player.id] || 1;
-                    if (currentLevel + 1 === 6) potentialTrackPoints += 5 * personality.trackPreference;
-                    if (currentLevel + 1 === 7) potentialTrackPoints += 10 * personality.trackPreference;
-                    if (currentLevel + 1 === 8) potentialTrackPoints += 20 * personality.trackPreference;
-                }
-            });
-            lotValue += potentialTrackPoints;
-            console.log(`[calculateAIBid] Lot value after gold/commodity/track bonuses: ${lotValue}`);
-
+            // Use the centralized calculateLotValue
+            let lotValue = calculateLotValue(auctionCards, personality, gameData.commodity_track_positions, player.id, player.ship);
+            console.log(`[calculateAIBid] Lot value after all bonuses: ${lotValue}`);
 
             const emptySlots = shipCapacity - player.ship.length;
             if (auctionCards.length <= emptySlots) {
@@ -380,14 +408,13 @@
             let fairPrice = Math.round(lotValue * personality.bidModifier);
             console.log(`[calculateAIBid] Fair price (modified): ${fairPrice}`);
 
-
             if (fairPrice < 1 || fairPrice < minBid * 0.75) {
                 console.log(`[calculateAIBid] AI ${player.name} considering passing: Fair price (${fairPrice}) too low compared to min bid (${minBid}). Returning 0.`);
                 return 0;
             }
 
             const hasFocusedCommodity = auctionCards.some(card => card.type === personality.commodityFocus);
-            const hasGold = goldCount > 0;
+            const hasGold = auctionCards.some(card => card.type === 'gold');
             if (personality.commodityFocus && !hasFocusedCommodity && !hasGold && Math.random() < (1 - personality.commodityPreference)) {
                 console.log(`[calculateAIBid] AI ${player.name} passing: Not focused commodity or gold, and AI is a specialist. Returning 0.`);
                 return 0;
@@ -397,7 +424,6 @@
             bid = Math.max(minBid, bid + Math.floor(Math.random() * 3) - 1);
             bid = Math.min(bid, currentMoney);
             console.log(`[calculateAIBid] Calculated bid (before final check): ${bid}`);
-
 
             if (bid < minBid) {
                 console.log(`[calculateAIBid] Final bid (${bid}) is less than min bid (${minBid}). Returning 0.`);
@@ -427,33 +453,11 @@
                 return true;
             }
 
-            const calculateLotValue = (cards, playerPersonality, currentTrackPositions, currentPlayerId) => {
-                let value = cards.reduce((sum, card) => sum + card.value, 0);
-                const goldCount = cards.filter(card => card.type === 'gold').length;
-                let focusedCommodityCount = 0;
-                if (playerPersonality.commodityFocus) {
-                    focusedCommodityCount = cards.filter(card => card.type === playerPersonality.commodityFocus).length;
-                }
-
-                value += goldCount * (playerPersonality.goldPreference * 10);
-                value += focusedCommodityCount * (playerPersonality.commodityPreference * 5);
-
-                cards.forEach(card => {
-                    if (card.type !== 'gold') {
-                        const currentLevel = currentTrackPositions[card.type]?.[currentPlayerId] || 1;
-                        if (currentLevel + 1 === 6) value += 5 * playerPersonality.trackPreference;
-                        if (currentLevel + 1 === 7) value += 10 * playerPersonality.trackPreference;
-                        if (currentLevel + 1 === 8) value += 20 * playerPersonality.trackPreference;
-                    }
-                });
-                console.log(`[calculateLotValue] Cards: ${cards.map(c => `${c.type}:${c.value}`).join(', ')}, Calculated Value: ${value}`);
-                return value;
-            };
-
-            const currentLotValue = calculateLotValue(currentDrawnCards, personality, gameData.commodity_track_positions, player.id);
+            // Use the centralized calculateLotValue
+            const currentLotValue = calculateLotValue(currentDrawnCards, personality, gameData.commodity_track_positions, player.id, player.ship);
 
             const potentialCardsAfterDraw = currentDrawnCount + 1;
-            const canAnyPlayerAccommodateNextDraw = gameData.players.some(p => p.ship.length + potentialCardsAfterDraw <= shipCapacity);
+            const canAnyPlayerAccommodateNextDraw = (gameData.players || []).some(p => p.ship.length + potentialCardsAfterDraw <= shipCapacity); // Defensive check
             console.log(`[shouldAIDrawMore] Can any player accommodate next draw: ${canAnyPlayerAccommodateNextDraw}`);
 
             if (!canAnyPlayerAccommodateNextDraw) {
@@ -464,7 +468,7 @@
             const nextCard = deckSize > 0 ? gameData.deck[0] : null;
             let potentialNextLotValue = 0;
             if (nextCard) {
-                potentialNextLotValue = calculateLotValue([...currentDrawnCards, nextCard], personality, gameData.commodity_track_positions, player.id);
+                potentialNextLotValue = calculateLotValue([...currentDrawnCards, nextCard], personality, gameData.commodity_track_positions, player.id, player.ship);
             }
             console.log(`[shouldAIDrawMore] Next card: ${nextCard ? `${nextCard.type}:${nextCard.value}` : 'None'}, Potential next lot value: ${potentialNextLotValue}`);
 
@@ -472,60 +476,36 @@
             let desireToDraw = personality.drawModifier;
             console.log(`[shouldAIDrawMore] Initial desireToDraw: ${desireToDraw}`);
 
-            if (currentDrawnCount === 1) {
-                const firstCard = currentDrawnCards[0];
-                if (firstCard.value >= 5 || firstCard.type === 'gold' || (personality.commodityFocus && firstCard.type === personality.commodityFocus && firstCard.value >= 3)) {
-                    if (personality.bidModifier < 0.8 || personality.drawModifier < 0.6) {
-                        desireToDraw -= 0.3;
-                        console.log(`[shouldAIDrawMore] (1 card) Decreased desire due to high value/gold/focus card and low bid/draw modifier.`);
-                    }
-                    if (firstCard.type === 'gold' && personality.goldPreference > 0.7) {
-                        desireToDraw -= 0.4;
-                        console.log(`[shouldAIDrawMore] (1 card) Decreased desire due to gold card and high gold preference.`);
-                    }
-                }
-                if (nextCard && (nextCard.value >= 5 || nextCard.type === 'gold' || (personality.commodityFocus && nextCard.type === personality.commodityFocus && nextCard.value >= 3))) {
-                     desireToDraw += 0.2;
-                     console.log(`[shouldAIDrawMore] (1 card) Increased desire due to good next card.`);
-                }
-
-            } else if (currentDrawnCount === 2) {
-                const [card1, card2] = currentDrawnCards;
-                if (card1.type === card2.type && card1.type !== 'gold' && card1.value >= 3 && card2.value >= 3) {
-                    if (personality.commodityFocus === card1.type || personality.trackPreference > 0.5) {
-                        desireToDraw -= 0.4;
-                        console.log(`[shouldAIDrawMore] (2 cards) Decreased desire due to good commodity pair and focus/track pref.`);
-                    }
-                }
-                if ((card1.type === 'gold' && card2.value >= 4) || (card2.type === 'gold' && card1.value >= 4)) {
-                    if (personality.goldPreference > 0.5) {
-                        desireToDraw -= 0.3;
-                        console.log(`[shouldAIDrawMore] (2 cards) Decreased desire due to gold combo and high gold preference.`);
-                    }
-                }
-                if (nextCard && (nextCard.value >= 5 || nextCard.type === 'gold' || (personality.commodityFocus && nextCard.type === personality.commodityFocus && nextCard.value >= 3))) {
-                    desireToDraw += 0.1;
-                    console.log(`[shouldAIDrawMore] (2 cards) Increased desire due to good next card.`);
+            // Consider the marginal gain from the next card
+            if (nextCard) {
+                const marginalValue = potentialNextLotValue - currentLotValue;
+                if (marginalValue > 0) {
+                    desireToDraw += (marginalValue / 10) * personality.drawModifier; // Scale desire by marginal value
+                    console.log(`[shouldAIDrawMore] (Marginal Value) Increased desire due to positive marginal value: ${marginalValue}`);
+                } else {
+                    desireToDraw -= 0.1; // Slight deterrent if next card doesn't add much value
+                    console.log(`[shouldAIDrawMore] (Marginal Value) Decreased desire due to low marginal value.`);
                 }
             }
 
-            const avgCardValue = currentDrawnCards.reduce((sum, card) => sum + card.value, 0) / currentDrawnCount;
-            if (currentLotValue > player.money * 0.3 && personality.bidModifier < 1.0) {
-                desireToDraw -= 0.1;
-                console.log(`[shouldAIDrawMore] Decreased desire due to high lot value relative to money for conservative AI.`);
-            }
-            if (avgCardValue > 3 && personality.drawModifier < 0.7) {
-                desireToDraw -= 0.1;
-                console.log(`[shouldAIDrawMore] Decreased desire due to good average card value for low draw modifier AI.`);
+            // Risk assessment based on current lot value vs. money
+            if (currentLotValue > player.money * 0.4 && personality.bidModifier < 0.7) {
+                desireToDraw -= 0.2; // Conservative AIs are less likely to draw more if lot is already expensive
+                console.log(`[shouldAIDrawMore] (Risk) Current lot very valuable, AI is risk-averse. Decreasing desire.`);
             }
 
+            // Ship capacity considerations
             const emptySlots = shipCapacity - player.ship.length;
-            if (emptySlots < potentialCardsAfterDraw && personality.shipFillPreference < 0.7) {
-                desireToDraw -= 0.2;
-                console.log(`[shouldAIDrawMore] Decreased desire due to few empty slots and low ship fill preference.`);
+            if (currentDrawnCount + 1 > emptySlots) {
+                desireToDraw -= 0.5; // Strong deterrent if drawing more would overfill own ship
+                console.log(`[shouldAIDrawMore] (Capacity) Drawing more would overfill own ship. Strongly decreasing desire.`);
+            } else if (currentDrawnCount + 1 === emptySlots) {
+                desireToDraw += 0.1 * personality.shipFillPreference; // Bonus if perfectly filling ship
+                console.log(`[shouldAIDrawMore] (Capacity) Drawing more would perfectly fill ship. Increasing desire.`);
             }
 
-            desireToDraw += (Math.random() * 0.2) - 0.1;
+            // Final random adjustment
+            desireToDraw += (Math.random() * 0.2) - 0.1; // +/- 0.1 randomness
             console.log(`[shouldAIDrawMore] Final desireToDraw (with random): ${desireToDraw}`);
 
             const result = desireToDraw > 0.5;
@@ -542,10 +522,23 @@
             const [joiningGame, setJoiningGame] = useState(false);
             const [message, setMessage] = useState('');
             const [numAIPlayers, setNumAIPlayers] = useState(0);
+            const [playerName, setPlayerName] = useState(''); // New state for player name
+
+            useEffect(() => {
+                // Set default player name if userId is available and playerName is empty
+                if (userId && !playerName) {
+                    setPlayerName(`Player ${userId.substring(0, 4)}`);
+                }
+            }, [userId, playerName]);
+
 
             const handleCreateGame = async () => {
                 if (!supabase || !isAuthReady || !userId) {
                     setMessage("Supabase not ready or user ID not available. Please wait.");
+                    return;
+                }
+                if (!playerName.trim()) {
+                    setMessage("Please enter your player name.");
                     return;
                 }
 
@@ -553,7 +546,7 @@
                 const newJoinCode = generateGameId();
 
                 const initialPlayersMap = new Map();
-                initialPlayersMap.set(userId, { id: userId, name: `Player ${userId.substring(0, 4)}`, ship: [], commodityCounts: {}, isAI: false });
+                initialPlayersMap.set(userId, { id: userId, name: playerName.trim(), ship: [], commodityCounts: {}, isAI: false }); // Use playerName
 
                 for (let i = 0; i < numAIPlayers; i++) {
                     const aiId = `AI_${Math.random().toString(36).substring(2, 10)}`;
@@ -683,6 +676,10 @@
                     setMessage("Please enter a Game ID to join.");
                     return;
                 }
+                if (!playerName.trim()) {
+                    setMessage("Please enter your player name.");
+                    return;
+                }
 
                 setJoiningGame(true);
 
@@ -711,28 +708,28 @@
                         return;
                     }
 
-                    if (gameData.players.some(p => p.id === userId)) {
+                    if ((gameData.players || []).some(p => p.id === userId)) { // Defensive check
                         setMessage("You are already in this game!");
                         onGameJoined(gameId);
                         return;
                     }
 
-                    if (gameData.players.length >= 6) {
+                    if ((gameData.players || []).length >= 6) { // Defensive check
                         setMessage("This game is full. Maximum 6 players allowed.");
                         return;
                     }
 
                     const newPlayer = {
                         id: userId,
-                        name: `Player ${userId.substring(0, 4)}`,
+                        name: playerName.trim(), // Use playerName
                         ship: [],
                         commodityCounts: {},
                         isAI: false,
-                        money: gameData.players[0]?.money || 40
+                        money: (gameData.players && gameData.players[0]?.money) || 40 // Defensive check
                     };
 
-                    const updatedPlayers = [...gameData.players, newPlayer];
-                    const updatedPlayerOrder = [...gameData.player_order, userId];
+                    const updatedPlayers = [...(gameData.players || []), newPlayer]; // Defensive check
+                    const updatedPlayerOrder = [...(gameData.player_order || []), userId]; // Defensive check
                     const updatedCommodityTrackPositions = { ...gameData.commodity_track_positions };
                     Object.keys(updatedCommodityTrackPositions).forEach(type => {
                         updatedCommodityTrackPositions[type][userId] = 1;
@@ -776,6 +773,19 @@
                         <p className="text-gray-300 mb-8">Play with AI or friends!</p>
 
                         <div className="mb-6">
+                            <div className="mb-4">
+                                <label htmlFor="player-name" className="block text-gray-300 font-medium mb-2">Your Player Name:</label>
+                                <input
+                                    id="player-name"
+                                    type="text"
+                                    placeholder="Enter your name"
+                                    value={playerName}
+                                    onChange={(e) => setPlayerName(e.target.value)}
+                                    className="w-full p-3 border border-gray-600 bg-gray-700 text-gray-100 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-center tracking-wider"
+                                    maxLength="15" // Limit name length
+                                />
+                            </div>
+
                             <div className="flex items-center justify-center mb-4">
                                 <label htmlFor="num-ai" className="mr-3 text-gray-300 font-medium">Number of AI Players:</label>
                                 <select
@@ -794,7 +804,7 @@
                             </div>
                             <button
                                 onClick={handleCreateGame}
-                                disabled={creatingGame || !isAuthReady}
+                                disabled={creatingGame || !isAuthReady || !playerName.trim()}
                                 className="w-full py-3 px-6 bg-green-600 text-white font-bold rounded-lg shadow-md hover:bg-green-700 transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
                             >
                                 {creatingGame ? 'Creating Game...' : `Create New Game`}
@@ -818,7 +828,7 @@
                         </div>
                         <button
                             onClick={() => handleJoinGame(gameIdInput)}
-                            disabled={joiningGame || !isAuthReady || gameIdInput.trim() === ''}
+                            disabled={joiningGame || !isAuthReady || gameIdInput.trim() === '' || !playerName.trim()}
                             className="w-full py-3 px-6 bg-blue-600 text-white font-bold rounded-lg shadow-md hover:bg-blue-700 transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
                         >
                             {joiningGame ? 'Joining Game...' : 'Join Game'}
@@ -846,7 +856,7 @@
                     setMessage("It's not your turn to pass, or no auction is active.");
                     return;
                 }
-                const currentPlayer = gameData.players.find(p => p.id === userId);
+                const currentPlayer = (gameData.players || []).find(p => p.id === userId); // Defensive check
                 const currentBidderId = gameData.auction.status === 'bidding' && gameData.auction.current_bidder_index !== -1
                     ? gameData.auction.bidding_order[gameData.auction.current_bidder_index]
                     : null;
@@ -878,11 +888,11 @@
                         let auctionWinnerId = gameData.auction.highest_bidder_id;
                         let winningBid = gameData.auction.highest_bid;
                         let auctionMessage = "";
-                        let updatedPlayers = [...gameData.players];
+                        let updatedPlayers = [...(gameData.players || [])]; // Defensive check
                         let updatedDiscardPile = [...gameData.discard_pile];
 
                         if (winningBid > 0 && auctionWinnerId) {
-                            const winnerName = gameData.players.find(p => p.id === auctionWinnerId)?.name;
+                            const winnerName = (gameData.players || []).find(p => p.id === auctionWinnerId)?.name; // Defensive check
                             auctionMessage = `Auction ended. ${winnerName} won with a bid of ${winningBid}!`;
                             updatedPlayers = updatedPlayers.map(p =>
                                 p.id === auctionWinnerId ? { ...p, money: p.money - winningBid, ship: [...p.ship, ...gameData.auction.cards] } : p
@@ -892,9 +902,23 @@
                             updatedDiscardPile = [...gameData.discard_pile, ...gameData.auction.cards];
                         }
 
+                        // Determine the next player or if day scoring should begin
                         const { nextPlayerId, allShipsFull } = findNextEligiblePlayer(gameData, gameData.current_player_id);
 
-                        if (allShipsFull || (gameData.deck.length === 0 && gameData.auction.cards.length === 0)) {
+                        console.log("[DEBUG handleAuctionWin] gameData.auction AFTER reset:", {
+                            cards: [],
+                            highest_bid: 0,
+                            highest_bidder_id: null,
+                            bids: {},
+                            auctioneer_id: null,
+                            status: 'inactive',
+                            bidding_order: [],
+                            current_bidder_index: -1
+                        });
+                        console.log("[DEBUG handleAuctionWin] next current_player_id:", nextPlayerId);
+
+
+                        if (allShipsFull || gameData.deck.length === 0) { // If all ships are full OR deck is empty, trigger day scoring
                             const { error } = await supabase
                                 .from('games')
                                 .update({
@@ -918,11 +942,11 @@
                                         highest_bidder_id: null,
                                         bids: {},
                                         auctioneer_id: null,
-                                        status: 'inactive',
+                                        status: 'inactive', // Explicitly set status to inactive
                                         bidding_order: [],
                                         current_bidder_index: -1
                                     },
-                                    message: `${auctionMessage} Next turn: ${gameData.players.find(p => p.id === nextPlayerId)?.name}.`
+                                    message: `${auctionMessage} Next turn: ${(gameData.players || []).find(p => p.id === nextPlayerId)?.name}.` // Defensive check
                                 })
                                 .eq('id', gameId);
                             if (error) throw error;
@@ -941,7 +965,7 @@
                     return;
                 }
 
-                const currentPlayer = gameData.players.find(p => p.id === userId);
+                const currentPlayer = (gameData.players || []).find(p => p.id === userId); // Defensive check
 
                 if (gameData.current_player_id !== userId || (gameData.auction.status !== 'inactive' && gameData.auction.status !== 'drawing')) {
                     setMessage("It's not your turn to draw cards.");
@@ -951,27 +975,18 @@
                 if (gameData.deck.length === 0) {
                     setMessage(`No cards left in the deck.`);
                     if (gameData.auction.cards.length === 0) {
-                         const { nextPlayerId, allShipsFull } = findNextEligiblePlayer(gameData, gameData.current_player_id);
-                         if (allShipsFull) {
-                             const { error } = await supabase
-                                 .from('games')
-                                 .update({
-                                     status: 'day_scoring',
-                                     message: `Day ${gameData.current_day} ended. All ships are full or deck is empty!`
-                                 })
-                                 .eq('id', gameId);
-                             if (error) throw error;
-                         } else {
-                             const { error } = await supabase
-                                 .from('games')
-                                 .update({
-                                     current_player_id: nextPlayerId,
-                                     message: `Deck is empty. ${currentPlayer.name} passed turn.`
-                                 })
-                                 .eq('id', gameId);
-                             if (error) throw error;
-                         }
+                         // If deck is empty and no cards were drawn for auction, end the day
+                         const { error } = await supabase
+                             .from('games')
+                             .update({
+                                 status: 'day_scoring',
+                                 message: `Day ${gameData.current_day} ended. Deck is empty and no auction in progress!`
+                             })
+                             .eq('id', gameId);
+                         if (error) throw error;
+
                     } else {
+                        // If deck is empty but cards were drawn, start the auction for those cards
                         const biddingOrder = getBiddingOrder(gameData.player_order, userId);
                         const { error } = await supabase
                             .from('games')
@@ -999,7 +1014,7 @@
                 const shipCapacity = gameData.ship_capacity || 5;
                 const potentialCardsAfterDraw = gameData.auction.cards.length + 1;
 
-                const canAnyPlayerAccommodateNextDraw = gameData.players.some(p => p.ship.length + potentialCardsAfterDraw <= shipCapacity);
+                const canAnyPlayerAccommodateNextDraw = (gameData.players || []).some(p => p.ship.length + potentialCardsAfterDraw <= shipCapacity); // Defensive check
 
                 if (!canAnyPlayerAccommodateNextDraw) {
                     setMessage(`Drawing another card would make the lot too large for anyone's ship. Auction for ${gameData.auction.cards.length} card(s) begins!`);
@@ -1103,7 +1118,7 @@
                     setMessage("It's not your turn to bid, or no auction is active.");
                     return;
                 }
-                const currentPlayer = gameData.players.find(p => p.id === userId);
+                const currentPlayer = (gameData.players || []).find(p => p.id === userId); // Defensive check
                 const currentBidderId = gameData.auction.status === 'bidding' && gameData.auction.current_bidder_index !== -1
                     ? gameData.auction.bidding_order[gameData.auction.current_bidder_index]
                     : null;
@@ -1158,14 +1173,28 @@
                         let winningBid = bidAmount;
                         let auctionMessage = "";
 
-                        const updatedPlayers = gameData.players.map(p =>
+                        const updatedPlayers = (gameData.players || []).map(p => // Defensive check
                             p.id === auctionWinnerId ? { ...p, money: p.money - winningBid, ship: [...p.ship, ...gameData.auction.cards] } : p
                         );
                         auctionMessage = `Auction ended. ${currentPlayer.name} won with a bid of ${winningBid}!`;
 
+                        // Determine the next player or if day scoring should begin
                         const { nextPlayerId, allShipsFull } = findNextEligiblePlayer({ ...gameData, players: updatedPlayers }, gameData.current_player_id);
 
-                        if (allShipsFull || (gameData.deck.length === 0 && gameData.auction.cards.length === 0)) {
+                        console.log("[DEBUG handleAuctionWin] gameData.auction AFTER reset:", {
+                            cards: [],
+                            highest_bid: 0,
+                            highest_bidder_id: null,
+                            bids: {},
+                            auctioneer_id: null,
+                            status: 'inactive',
+                            bidding_order: [],
+                            current_bidder_index: -1
+                        });
+                        console.log("[DEBUG handleAuctionWin] next current_player_id:", nextPlayerId);
+
+
+                        if (allShipsFull || gameData.deck.length === 0) { // If all ships are full OR deck is empty, trigger day scoring
                             const { error } = await supabase
                                 .from('games')
                                 .update({
@@ -1187,11 +1216,11 @@
                                         highest_bidder_id: null,
                                         bids: {},
                                         auctioneer_id: null,
-                                        status: 'inactive',
+                                        status: 'inactive', // Explicitly set status to inactive
                                         bidding_order: [],
                                         current_bidder_index: -1
                                     },
-                                    message: `${auctionMessage} Next turn: ${gameData.players.find(p => p.id === nextPlayerId)?.name}.`
+                                    message: `${auctionMessage} Next turn: ${(gameData.players || []).find(p => p.id === nextPlayerId)?.name}.` // Defensive check
                                 })
                                 .eq('id', gameId);
                             if (error) throw error;
@@ -1208,7 +1237,7 @@
             const handleDayScoring = useCallback(async () => {
                 if (!supabase || !gameData) return;
 
-                let updatedPlayers = [...gameData.players];
+                let updatedPlayers = [...(gameData.players || [])]; // Defensive check
                 let newCommodityTrackPositions = { ...gameData.commodity_track_positions };
                 const scoringSummary = [];
 
@@ -1248,12 +1277,12 @@
                     const paymentPerTiedPlayer = Math.floor(totalPaymentForTiedRank / tiedPlayers.length);
 
                     tiedPlayers.forEach(tiedPlayer => {
-                        updatedPlayers = updatedPlayers.map(p =>
-                            p.id === tiedPlayer.id ? { ...p, money: p.money + paymentPerTiedPlayer } : p
+                        updatedPlayers = updatedPlayers.map(player =>
+                            player.id === tiedPlayer.id ? { ...player, money: player.money + paymentPerTiedPlayer } : player
                         );
                         let playerSummary = scoringSummary.find(s => s.playerId === tiedPlayer.id);
                         if (!playerSummary) {
-                            const playerObj = gameData.players.find(p => p.id === tiedPlayer.id);
+                            const playerObj = (gameData.players || []).find(p => p.id === tiedPlayer.id); // Defensive check
                             playerSummary = { playerId: tiedPlayer.id, playerName: playerObj?.name, shipValuePoints: 0, commodityBonuses: {}, totalDayPoints: 0 };
                             scoringSummary.push(playerSummary);
                         }
@@ -1311,11 +1340,11 @@
 
                         rankGroup.players.forEach(playerId => {
                             updatedPlayers = updatedPlayers.map(player =>
-                                player.id === playerId ? { ...player, money: player.money + pointsPerPlayer } : p
+                                player.id === playerId ? { ...player, money: player.money + pointsPerPlayer } : player
                             );
                             let playerSummary = scoringSummary.find(s => s.playerId === playerId);
                             if (!playerSummary) {
-                                const playerObj = gameData.players.find(p => p.id === playerId);
+                                const playerObj = (gameData.players || []).find(p => p.id === playerId); // Defensive check
                                 playerSummary = { playerId: playerId, playerName: playerObj?.name, shipValuePoints: 0, commodityBonuses: {}, totalDayPoints: 0 };
                                 scoringSummary.push(playerSummary);
                             }
@@ -1377,10 +1406,10 @@
                 console.log("[handleScoringAcknowledged] === START ===");
                 console.log("[handleScoringAcknowledged] Current gameData.deck (before collecting from ships):", gameData.deck);
                 console.log("[handleScoringAcknowledged] Current gameData.discard_pile (before collecting from ships):", gameData.discard_pile);
-                gameData.players.forEach(p => console.log(`[handleScoringAcknowledged] Player ${p.name}'s ship (before reset):`, p.ship));
+                (gameData.players || []).forEach(p => console.log(`[handleScoringAcknowledged] Player ${p.name}'s ship (before reset):`, p.ship)); // Defensive check
 
 
-                let playersForNextDay = [...gameData.players];
+                let playersForNextDay = [...(gameData.players || [])]; // Defensive check
                 console.log("[handleScoringAcknowledged] Players before day transition (should have updated money):", playersForNextDay);
 
                 let newDeck = [];
@@ -1399,7 +1428,7 @@
                     shouldShowFinalScore = true;
                 } else {
                     let allCardsInPlay = [...gameData.deck, ...gameData.discard_pile];
-                    gameData.players.forEach(player => {
+                    (gameData.players || []).forEach(player => { // Defensive check
                         if (player.ship && player.ship.length > 0) {
                             allCardsInPlay = [...allCardsInPlay, ...player.ship];
                         }
@@ -1443,7 +1472,7 @@
                                 highest_bidder_id: null,
                                 bids: {},
                                 auctioneer_id: null,
-                                status: 'inactive',
+                                status: 'inactive', // Explicitly set status to inactive
                                 bidding_order: [],
                                 current_bidder_index: -1
                             }
@@ -1474,7 +1503,14 @@
 
 
             useEffect(() => {
-                if (!supabase || !gameId || !isAuthReady) return;
+                console.log(`[GameBoard useEffect] Initializing... supabase: ${!!supabase}, gameId: ${gameId}, isAuthReady: ${isAuthReady}`);
+
+                if (!supabase || !gameId || !isAuthReady) {
+                    console.log("[GameBoard useEffect] Skipping subscription setup: Missing dependencies.");
+                    return;
+                }
+
+                console.log(`[GameBoard useEffect] Setting up Supabase subscription for game ID: ${gameId}`);
 
                 const gameChannel = supabase
                     .channel(`game_${gameId}`)
@@ -1500,28 +1536,33 @@
                             }
                         }
                     )
-                    .subscribe((status) => {
+                    .subscribe((status, error) => { // Added error parameter to subscribe callback
+                        console.log(`[GameBoard useEffect] Supabase subscription status: ${status}`);
                         if (status === 'SUBSCRIBED') {
-                            console.log(`Subscribed to game ${gameId} changes.`);
+                            console.log(`Subscribed to game ${gameId} changes. Fetching initial state.`);
                             supabase
                                 .from('games')
                                 .select('*')
                                 .eq('id', gameId)
                                 .single()
-                                .then(({ data, error }) => {
-                                    if (error) console.error('Error fetching initial game state:', error);
+                                .then(({ data, error: fetchError }) => { // Renamed error to fetchError to avoid conflict
+                                    if (fetchError) {
+                                        console.error(`[CONSOLE_ERROR] Error fetching initial game state for game ID ${gameId}:`, fetchError);
+                                        setMessage(`Error loading game: ${fetchError.message}`);
+                                    }
                                     else if (data) {
                                         setGameData(data);
                                         setLoadingGame(false);
                                         console.log("Initial Game Data Fetched:", data);
                                     } else {
                                         setMessage("Game not found or deleted.");
-                                        setLoadingGame(false);
                                     }
+                                    setLoadingGame(false); // Ensure loading is false even if no data or error
                                 });
                         } else if (status === 'CHANNEL_ERROR') {
-                            console.error(`Error subscribing to channel ${gameId}`);
-                            setMessage("Error connecting to game updates.");
+                            // Improved error logging: log the error object if it exists, otherwise a generic message
+                            console.error(`[CONSOLE_ERROR] Error subscribing to channel ${gameId}:`, error || 'Unknown error during subscription.');
+                            setMessage("Error connecting to game updates. Please check your Supabase configuration and network connection.");
                             setLoadingGame(false);
                         }
                     });
@@ -1542,9 +1583,13 @@
 
             // --- AI and Human Auto-Skip Turn Logic ---
             useEffect(() => {
-                console.log("[DEBUG useEffect] GameData changed. Current status:", gameData?.status, "Current Player ID:", gameData?.current_player_id, "User ID:", userId);
-                if (!gameData || !supabase || !isAuthReady) {
-                    console.log("[DEBUG useEffect] Skipping AI/Human turn logic: gameData, supabase, or auth not ready.");
+                console.log(`[DEBUG useEffect START] GameData status: ${gameData?.status}, Current Player ID: ${gameData?.current_player_id}, User ID: ${userId}, Is Processing AI: ${isProcessingAITurn}`);
+                // Added defensive checks for gameData.auction and gameData.auction.status
+                if (!gameData || !supabase || !isAuthReady || !gameData.auction || typeof gameData.auction.status === 'undefined') {
+                    console.log("[DEBUG useEffect] Skipping AI/Human turn logic: gameData, supabase, auth, or auction data not ready/complete.");
+                    if (isProcessingAITurn) {
+                        setIsProcessingAITurn(false);
+                    }
                     return;
                 }
 
@@ -1552,127 +1597,94 @@
                     ? gameData.auction.bidding_order[gameData.auction.current_bidder_index]
                     : null;
 
-                const currentActivePlayerId = gameData.auction.status === 'inactive' || gameData.auction.status === 'drawing'
+                const currentActivePlayerId = (gameData.auction.status === 'inactive' || gameData.auction.status === 'drawing')
                     ? gameData.current_player_id
-                    : currentBidderId; // Use currentBidderId if auction is bidding
+                    : currentBidderId;
 
-                const currentActivePlayer = gameData.players.find(p => p.id === currentActivePlayerId);
+                const currentActivePlayer = (gameData.players || []).find(p => p.id === currentActivePlayerId); // Defensive check
 
                 // Only proceed if there's an active player and the game is in 'playing' state
                 if (gameData.status === "playing" && currentActivePlayer) {
                     console.log(`[DEBUG AutoSkip] Current Active Player: ${currentActivePlayer.name} (ID: ${currentActivePlayer.id}). Is AI: ${currentActivePlayer.isAI}. Auction Status: ${gameData.auction.status}`);
 
-                    // If it's a human player's turn, just log and return. No AI logic for them.
+                    // If it's a human player's turn
                     if (currentActivePlayer.id === userId) {
-                        console.log(`[Human Turn] It's your turn, ${currentActivePlayer.name}. Auction Status: ${gameData.auction.status}, Current Bidder: ${currentBidderId === userId ? 'You' : (currentBidderId ? 'Other' : 'None')}.`);
-                        setIsProcessingAITurn(false); // Ensure AI indicator is off for human turn
+                        console.log(`[Human Turn] It's your turn, ${currentActivePlayer.name}.`);
+                        if (isProcessingAITurn) {
+                            console.log("[DEBUG] Setting isProcessingAITurn to FALSE for Human Turn.");
+                            setIsProcessingAITurn(false); // Ensure AI indicator is off for human turn
+                        }
 
                         // Specific message for human player if their ship is full and it's their turn to draw
-                        if (gameData.current_player_id === userId && (gameData.auction.status === 'inactive' || gameData.auction.status === 'drawing') && currentActivePlayer.ship.length === shipCapacity && gameData.auction.cards.length === 0) {
-                            setMessage("Your ship is full. Your turn will be skipped. Waiting for other players to fill their ships or for the day to end.");
+                        if (gameData.current_player_id === userId && (gameData.auction.status === 'inactive' || gameData.auction.status === 'drawing') && currentActivePlayer.ship.length === gameData.ship_capacity && gameData.auction.cards.length === 0) {
+                            setMessage("Your ship is full. Your turn will be skipped.");
+                            console.log(`[Human Skip Turn] Ship full. Attempting to skip human turn.`);
+                            const timeoutIdForHumanSkip = setTimeout(async () => {
+                                 // If human player's ship is full and it's their turn to draw (and no auction cards), trigger day scoring
+                                 const { error } = await supabase
+                                     .from('games')
+                                     .update({
+                                         status: 'day_scoring',
+                                         message: `Day ${gameData.current_day} ended. All ships are full!`
+                                     })
+                                     .eq('id', gameId);
+                                 if (error) console.error("Error updating game to day_scoring (human skip):", error);
+                                 else console.log("[Human Skip Turn] Supabase update to day_scoring SUCCESS.");
+                            }, 500); // Small delay to show the message
+                            return () => clearTimeout(timeoutIdForHumanSkip);
                         }
                         return; // IMPORTANT: Exit here for human player turns.
                     }
 
                     // If it's an AI player's turn
-                    setIsProcessingAITurn(true); // AI starts thinking
+                    if (!isProcessingAITurn) { // Prevent setting true if already processing
+                        console.log("[DEBUG] Setting isProcessingAITurn to TRUE for AI Turn.");
+                        setIsProcessingAITurn(true); // AI starts thinking
+                    }
+
 
                     const handleAutoSkipTurn = async () => {
-                        try { // Added try-catch here
-                            console.log(`[AutoSkip AI Logic] Running for ${currentActivePlayer.name}. Status: ${gameData.status}, Deck size: ${gameData.deck.length}, Auction Cards: ${gameData.auction.cards.length}, Ships full: ${gameData.players.every(p => p.ship.length === shipCapacity)}`);
+                        try {
+                            console.log(`[AutoSkip AI Logic] Running for ${currentActivePlayer.name}. Status: ${gameData.status}, Deck size: ${gameData.deck.length}, Auction Cards: ${gameData.auction.cards.length}`);
 
                             const shipCapacity = gameData.ship_capacity || 5;
 
                             // Scenario 1: Only one player left with open slots and it's their turn (AI or human)
-                            const playersWithOpenSlots = gameData.players.filter(p => p.ship.length < shipCapacity);
-                            const numPlayersWithOpenSlots = playersWithOpenSlots.length;
+                            // This scenario is now handled by the general "deck empty" or "all ships full" logic
+                            // and the "current player's ship is full" auto-skip.
+                            // Removing this specific block to simplify and avoid redundant checks.
 
-                            if (numPlayersWithOpenSlots === 1 && gameData.current_player_id === playersWithOpenSlots[0].id && gameData.auction.cards.length === 0) {
-                                const soleEligiblePlayer = playersWithOpenSlots[0];
-                                const cardsToFillShip = shipCapacity - soleEligiblePlayer.ship.length;
-                                const numCardsToDraw = Math.min(cardsToFillShip, gameData.deck.length);
-
-                                if (numCardsToDraw > 0) {
-                                    console.log(`${soleEligiblePlayer.name} is the last player with open slots and it's their turn. Drawing ${numCardsToDraw} cards for free.`);
-
-                                    const drawnCards = gameData.deck.slice(0, numCardsToDraw);
-                                    const remainingDeck = gameData.deck.slice(numCardsToDraw);
-
-                                    const updatedPlayers = gameData.players.map(p =>
-                                        p.id === soleEligiblePlayer.id ? { ...p, ship: [...p.ship, ...drawnCards] } : p
-                                    );
-
-                                    let updatedDiscardPile = [...gameData.discard_pile];
-                                    if (gameData.auction.cards.length > 0) {
-                                        updatedDiscardPile = [...updatedDiscardPile, ...gameData.auction.cards];
-                                    }
-
+                            // Scenario 2: Current player's ship is full at the start of their draw turn (AI)
+                            if (gameData.current_player_id === currentActivePlayerId && (gameData.auction.status === 'inactive' || gameData.auction.status === 'drawing')) {
+                                 console.log(`[AI Draw Turn Check] AI: ${currentActivePlayer.name}, Ship Length: ${currentActivePlayer.ship.length}, Ship Capacity: ${shipCapacity}, Auction Cards: ${gameData.auction.cards.length}`);
+                                if (currentActivePlayer.ship.length === shipCapacity && gameData.auction.cards.length === 0) {
+                                    console.log(`${currentActivePlayer.name}'s ship is full at the start of their draw turn. Skipping turn.`);
+                                    // If AI player's ship is full and it's their turn to draw (and no auction cards), trigger day scoring
                                     const { error } = await supabase
                                         .from('games')
                                         .update({
-                                            players: updatedPlayers,
-                                            deck: remainingDeck,
-                                            discard_pile: updatedDiscardPile,
                                             status: 'day_scoring',
-                                            message: `${soleEligiblePlayer.name} filled their ship with ${numCardsToDraw} cards for free! Day ${gameData.current_day} ended.`,
-                                            auction: {
-                                                cards: [],
-                                                highest_bid: 0,
-                                                highest_bidder_id: null,
-                                                auctioneer_id: null,
-                                                bids: {},
-                                                bidding_order: [],
-                                                current_bidder_index: -1,
-                                            }
+                                            message: `Day ${gameData.current_day} ended. All ships are full!`
                                         })
                                         .eq('id', gameId);
-                                    if (error) throw error;
+                                    if (error) console.error("Error updating game to day_scoring (AI ship full):", error);
+                                    else console.log("[AI Ship Full Skip] Supabase update to day_scoring SUCCESS.");
+                                    console.log("[DEBUG] Setting isProcessingAITurn to FALSE after AI ship full skip.");
                                     setIsProcessingAITurn(false);
                                     return;
                                 }
                             }
 
-                            // Scenario 2: Current player's ship is full at the start of their draw turn (AI or human)
-                            if (gameData.current_player_id === currentActivePlayerId && (gameData.auction.status === 'inactive' || gameData.auction.status === 'drawing')) {
-                                if (currentActivePlayer.ship.length === shipCapacity && gameData.auction.cards.length === 0) {
-                                    console.log(`${currentActivePlayer.name}'s ship is full at the start of their draw turn. Skipping turn.`);
-                                    const { nextPlayerId, allShipsFull } = findNextEligiblePlayer(gameData, currentActivePlayer.id);
-                                    console.log(`[findNextEligiblePlayer result] nextPlayerId: ${nextPlayerId}, allShipsFull: ${allShipsFull}`);
-
-                                    if (allShipsFull) {
-                                        const { error } = await supabase
-                                            .from('games')
-                                            .update({
-                                                status: 'day_scoring',
-                                                message: `Day ${gameData.current_day} ended. All ships are full!`
-                                            })
-                                            .eq('id', gameId);
-                                        if (error) throw error;
-                                    } else {
-                                        const { error } = await supabase
-                                            .from('games')
-                                            .update({
-                                                current_player_id: nextPlayerId,
-                                                message: `${currentActivePlayer.name}'s ship is full. Skipping turn.`
-                                            })
-                                            .eq('id', gameId);
-                                        if (error) throw error;
-                                    }
-                                    setIsProcessingAITurn(false);
-                                    return;
-                                }
-                            }
-
-                            // Scenario 3: Current bidder's ship would be overfilled (AI or human)
+                            // Scenario 3: Current bidder's ship would be overfilled (AI)
                             if (gameData.auction.status === 'bidding' && currentBidderId === currentActivePlayerId) {
                                 if (currentActivePlayer.ship.length + gameData.auction.cards.length > shipCapacity) {
                                     console.log(`${currentActivePlayer.name}'s ship is full or would be overfilled. Automatically passing bid.`);
 
-                                    // This block is only for AI now, as human case is handled by `return;` above
                                     const nextBidderIndex = (gameData.auction.current_bidder_index + 1);
                                     const isLastBidderInRound = nextBidderIndex === gameData.auction.bidding_order.length;
 
                                     if (!isLastBidderInRound) {
+                                        console.log("[AI Bidding Overfill Pass] Preparing Supabase update to next bidder.");
                                         const { error } = await supabase
                                             .from('games')
                                             .update({
@@ -1688,11 +1700,11 @@
                                         let auctionWinnerId = gameData.auction.highest_bidder_id;
                                         let winningBid = gameData.auction.highest_bid;
                                         let auctionMessage = "";
-                                        let updatedPlayers = [...gameData.players];
+                                        let updatedPlayers = [...(gameData.players || [])]; // Defensive check
                                         let updatedDiscardPile = [...gameData.discard_pile];
 
                                         if (winningBid > 0 && auctionWinnerId) {
-                                            const winnerName = gameData.players.find(p => p.id === auctionWinnerId)?.name;
+                                            const winnerName = (gameData.players || []).find(p => p.id === auctionWinnerId)?.name; // Defensive check
                                             auctionMessage = `Auction ended. ${winnerName} won with a bid of ${winningBid}!`;
                                             updatedPlayers = updatedPlayers.map(p =>
                                                 p.id === auctionWinnerId ? { ...p, money: p.money - winningBid, ship: [...p.ship, ...gameData.auction.cards] } : p
@@ -1702,19 +1714,22 @@
                                             updatedDiscardPile = [...updatedDiscardPile, ...gameData.auction.cards];
                                         }
 
-                                        const { nextPlayerId, allShipsFull } = findNextEligiblePlayer(gameData, gameData.current_player_id);
+                                        // Determine the next player or if day scoring should begin
+                                        const { nextPlayerId, allShipsFull } = findNextEligiblePlayer({ ...gameData, players: updatedPlayers }, gameData.current_player_id);
                                         console.log(`[findNextEligiblePlayer result for auction end] nextPlayerId: ${nextPlayerId}, allShipsFull: ${allShipsFull}`);
-
-                                        if (allShipsFull) {
+                                        if (allShipsFull || gameData.deck.length === 0) { // If all ships are full OR deck is empty, trigger day scoring
+                                            console.log("[AI Bidding Overfill End Auction] Preparing Supabase update to day_scoring.");
                                             const { error } = await supabase
                                                 .from('games')
                                                 .update({
                                                     status: 'day_scoring',
-                                                    message: `Day ${gameData.current_day} ended. All ships are full!`
+                                                    message: `Day ${gameData.current_day} ended. All ships are full or deck is empty!`
                                                 })
                                                 .eq('id', gameId);
-                                            if (error) throw error;
+                                            if (error) console.error("Error updating game to day_scoring (AI bidding overfill end auction):", error);
+                                            else console.log("[AI Bidding Overfill End Auction] Supabase update to day_scoring SUCCESS.");
                                         } else {
+                                            console.log("[AI Bidding Overfill End Auction] Preparing Supabase update to next player.");
                                             const { error } = await supabase
                                                 .from('games')
                                                 .update({
@@ -1729,12 +1744,15 @@
                                                         bids: {},
                                                         bidding_order: [],
                                                         current_bidder_index: -1,
+                                                        status: 'inactive' // Explicitly set status to inactive
                                                     },
                                                 })
                                                 .eq('id', gameId);
-                                            if (error) throw error;
+                                            if (error) console.error("Error updating game to next player (AI bidding overfill end auction):", error);
+                                            else console.log("[AI Bidding Overfill End Auction] Supabase update to next player SUCCESS.");
                                         }
                                     }
+                                    console.log("[DEBUG] Setting isProcessingAITurn to FALSE after AI bidding overfill.");
                                     setIsProcessingAITurn(false);
                                     return;
                                 }
@@ -1744,12 +1762,93 @@
                             if (currentActivePlayer.isAI) {
                                 if (gameData.auction.status === 'inactive' || gameData.auction.status === 'drawing') {
                                     console.log(`AI ${currentActivePlayer.name} is deciding to draw or start auction.`);
-                                    await new Promise(resolve => setTimeout(resolve, 2000));
+                                    await new Promise(resolve => setTimeout(resolve, 2000)); // Small delay for AI "thinking"
 
                                     const shouldDraw = shouldAIDrawMore(currentActivePlayer, gameData.auction.cards, gameData.deck.length, shipCapacity, gameData);
                                     console.log(`[shouldAIDrawMore result] shouldDraw: ${shouldDraw}`);
 
+                                    // If deck is empty and no cards were drawn for auction, end the day
+                                    if (gameData.deck.length === 0 && gameData.auction.cards.length === 0) {
+                                        console.log(`AI ${currentActivePlayer.name} found deck empty after draw decision. No cards to draw/auction. Triggering day scoring.`);
+                                        await supabase.from('games').update({
+                                            status: 'day_scoring',
+                                            message: `Day ${gameData.current_day} ended. Deck is empty and no auction in progress!`
+                                        }).eq('id', gameId);
+                                        console.log("[AI Draw Decision Empty Deck] Supabase update to day_scoring SUCCESS.");
+
+                                        console.log("[DEBUG] Setting isProcessingAITurn to FALSE after AI draw decision empty deck.");
+                                        setIsProcessingAITurn(false);
+                                        return; // Important: Exit after handling empty deck
+                                    }
+
+
                                     if (shouldDraw) {
+                                        // Before drawing, double-check if drawing would overfill ALL players' ships.
+                                        const potentialCardsAfterDraw = gameData.auction.cards.length + 1;
+                                        const canAnyPlayerAccommodateNextDraw = (gameData.players || []).some(p => p.ship.length + potentialCardsAfterDraw <= shipCapacity); // Defensive check
+
+                                        if (!canAnyPlayerAccommodateNextDraw) {
+                                            console.log(`AI ${currentActivePlayer.name}: Drawing another card would make the lot too large for anyone's ship. Triggering auction. Current auction cards: ${gameData.auction.cards.length}.`);
+                                            const biddingOrder = getBiddingOrder(gameData.player_order, currentActivePlayer.id);
+                                            console.log("[AI Draw Decision No Space] Preparing Supabase update to bidding.");
+                                            const { error } = await supabase
+                                                .from('games')
+                                                .update({
+                                                    auction: {
+                                                        ...gameData.auction,
+                                                        status: 'bidding',
+                                                        bidding_order: biddingOrder,
+                                                        current_bidder_index: 0,
+                                                        auctioneer_id: currentActivePlayer.id // Set auctioneer when auction starts
+                                                    },
+                                                    message: `AI ${currentActivePlayer.name} couldn't draw more. Auction for ${gameData.auction.cards.length} card(s) begins!`
+                                                })
+                                                .eq('id', gameId);
+                                            if (error) console.error("Error updating game to bidding (AI draw decision no space):", error);
+                                            else console.log("[AI Draw Decision No Space] Supabase update to bidding SUCCESS.");
+                                            console.log("[DEBUG] Setting isProcessingAITurn to FALSE after AI draw decision no space.");
+                                            setIsProcessingAITurn(false);
+                                            return;
+                                        }
+
+                                        // If deck is empty but cards were drawn, start the auction for those cards
+                                        if (gameData.deck.length === 0) { // Double check for empty deck *before* slicing
+                                            console.log(`AI ${currentActivePlayer.name} tried to draw but deck is now empty. Starting auction or passing.`);
+                                            // If cards were already drawn, start auction. If not, end day.
+                                            if (gameData.auction.cards.length > 0) {
+                                                const biddingOrder = getBiddingOrder(gameData.player_order, currentActivePlayer.id);
+                                                console.log("[AI Draw Tried Empty Deck] Preparing Supabase update to bidding.");
+                                                const { error } = await supabase
+                                                    .from('games')
+                                                    .update({
+                                                        auction: {
+                                                            ...gameData.auction,
+                                                            status: 'bidding',
+                                                            bidding_order: biddingOrder,
+                                                            current_bidder_index: 0,
+                                                            auctioneer_id: currentActivePlayer.id
+                                                        },
+                                                        message: `Deck is empty. AI ${currentActivePlayer.name} starts auction for ${gameData.auction.cards.length} card(s)!`
+                                                    })
+                                                    .eq('id', gameId);
+                                                if (error) console.error("Error updating game to bidding (AI tried empty deck):", error);
+                                                else console.log("[AI Draw Tried Empty Deck] Supabase update to bidding SUCCESS.");
+                                            } else {
+                                                // No cards drawn, deck empty, AI triggers day scoring
+                                                console.log("[AI Draw Tried Empty Deck] Preparing Supabase update to day_scoring.");
+                                                await supabase.from('games').update({
+                                                    status: 'day_scoring',
+                                                    message: `Day ${gameData.current_day} ended. Deck is empty and no auction in progress!`
+                                                }).eq('id', gameId);
+                                                console.log("[AI Draw Tried Empty Deck] Supabase update to day_scoring SUCCESS.");
+                                            }
+                                            console.log("[DEBUG] Setting isProcessingAITurn to FALSE after AI draw tried empty deck.");
+                                            setIsProcessingAITurn(false);
+                                            return; // Exit after handling empty deck
+                                        }
+
+
+                                        // Actual draw logic
                                         const drawnCard = gameData.deck[0];
                                         const updatedAuctionCards = [...gameData.auction.cards, drawnCard];
                                         const remainingDeck = gameData.deck.slice(1);
@@ -1757,9 +1856,10 @@
                                         let newAuctionStatus = 'drawing';
                                         let messageText = `AI ${currentActivePlayer.name} drew a ${drawnCard.type} card (Value: ${drawnCard.value}).`;
 
-                                        if (updatedAuctionCards.length === 3 || remainingDeck.length === 0) {
+                                        if (updatedAuctionCards.length >= 3 || remainingDeck.length === 0) { // Changed to >=3 for safety
                                             newAuctionStatus = 'bidding';
                                             const biddingOrder = getBiddingOrder(gameData.player_order, currentActivePlayer.id);
+                                            console.log("[AI Draw Success] Preparing Supabase update to bidding.");
                                             const { error } = await supabase
                                                 .from('games')
                                                 .update({
@@ -1771,13 +1871,14 @@
                                                         bidding_order: biddingOrder,
                                                         current_bidder_index: 0,
                                                         auctioneer_id: currentActivePlayer.id
-                                                    },
+                                                        },
                                                     message: messageText
                                                 })
                                                 .eq('id', gameId);
-                                            if (error) throw error;
-                                            console.log(`AI ${currentActivePlayer.name} finished drawing, auction status: bidding.`);
+                                            if (error) console.error("Error updating game to bidding (AI draw success):", error);
+                                            else console.log("[AI Draw Success] Supabase update to bidding SUCCESS.");
                                         } else {
+                                            console.log("[AI Draw Success] Preparing Supabase update to drawing.");
                                             const { error } = await supabase
                                                 .from('games')
                                                 .update({
@@ -1790,13 +1891,16 @@
                                                     message: messageText
                                                 })
                                                 .eq('id', gameId);
-                                            if (error) throw error;
-                                            console.log(`AI ${currentActivePlayer.name} drew another card. Current auction cards: ${updatedAuctionCards.length}.`);
+                                            if (error) console.error("Error updating game to drawing (AI draw success):", error);
+                                            else console.log("[AI Draw Success] Supabase update to drawing SUCCESS.");
                                         }
+                                        console.log("[DEBUG] Setting isProcessingAITurn to FALSE after AI draw success.");
+                                        setIsProcessingAITurn(false); // Make sure it releases after draw, even if it continues drawing on next tick
                                     } else { // AI decided not to draw more
                                         if (gameData.auction.cards.length > 0) {
                                             console.log(`AI ${currentActivePlayer.name} decided to start auction with ${gameData.auction.cards.length} cards.`);
                                             const biddingOrder = getBiddingOrder(gameData.player_order, currentActivePlayer.id);
+                                            console.log("[AI Decide Not Draw] Preparing Supabase update to bidding.");
                                             const { error } = await supabase
                                                 .from('games')
                                                 .update({
@@ -1810,139 +1914,217 @@
                                                     message: `AI ${currentActivePlayer.name} decided to start auction for ${gameData.auction.cards.length} card(s)!`
                                                 })
                                                 .eq('id', gameId);
-                                            if (error) throw error;
-                                            console.log(`AI ${currentActivePlayer.name} decided to start auction.`);
+                                            if (error) console.error("Error updating game to bidding (AI decide not draw):", error);
+                                            else console.log("[AI Decide Not Draw] Supabase update to bidding SUCCESS.");
                                         } else {
                                             // AI passes turn (no cards drawn, decided not to draw, deck might be empty)
-                                            console.log(`AI ${currentActivePlayer.name} decided not to draw and no cards in auction. Passing turn.`);
-                                            const { nextPlayerId, allShipsFull } = findNextEligiblePlayer(gameData, currentActivePlayer.id);
-                                            console.log(`[findNextEligiblePlayer result for passing] nextPlayerId: ${nextPlayerId}, allShipsFull: ${allShipsFull}`);
-                                            if (allShipsFull) {
-                                                const { error } = await supabase
-                                                    .from('games')
-                                                    .update({
-                                                        status: 'day_scoring',
-                                                        message: `Day ${gameData.current_day} ended. All ships are full!`
-                                                    })
-                                                    .eq('id', gameId);
-                                                if (error) throw error;
-                                                console.log(`Day ${gameData.current_day} ended due to all ships full.`);
-                                            } else {
-                                                const { error } = await supabase
-                                                    .from('games')
-                                                    .update({
-                                                        current_player_id: nextPlayerId,
-                                                        message: `AI ${currentActivePlayer.name} passed turn (couldn't draw or chose not to).`
-                                                    })
-                                                    .eq('id', gameId);
-                                                if (error) throw error;
-                                                console.log(`AI ${currentActivePlayer.name} passed turn.`);
-                                            }
+                                            console.log(`AI ${currentActivePlayer.name} decided not to draw and no cards in auction. Triggering day scoring.`);
+                                            await supabase.from('games').update({
+                                                status: 'day_scoring',
+                                                message: `Day ${gameData.current_day} ended. Deck is empty and no auction in progress!`
+                                            }).eq('id', gameId);
+                                            console.log("[AI Passed No Cards] Supabase update to day_scoring SUCCESS.");
                                         }
+                                        console.log("[DEBUG] Setting isProcessingAITurn to FALSE after AI decided not to draw/passed.");
+                                        setIsProcessingAITurn(false);
                                     }
                                 }
                                 else if (gameData.auction.status === 'bidding') {
                                     console.log(`AI ${currentActivePlayer.name} is deciding to bid or pass. Current highest bid: ${gameData.auction.highest_bid}`);
-                                    await new Promise(resolve => setTimeout(resolve, 1500));
+                                    await new Promise(resolve => setTimeout(resolve, 1500)); // Delay for AI thinking
 
-                                    const aiBid = calculateAIBid(currentActivePlayer, gameData.auction.cards, gameData.auction.highest_bid, shipCapacity, gameData);
+                                    let aiBid;
+                                    // Check if this AI is the last bidder in the current round
+                                    const isLastBidderInRoundForAI = (gameData.auction.current_bidder_index + 1) === gameData.auction.bidding_order.length;
+
+                                    if (isLastBidderInRoundForAI) {
+                                        // If it's the last bidder, bid only 1 more than the highest bid
+                                        aiBid = gameData.auction.highest_bid + 1;
+                                        console.log(`[calculateAIBid] AI ${currentActivePlayer.name} is the last bidder. Bidding highest_bid + 1: ${aiBid}`);
+                                    } else {
+                                        // Otherwise, use the regular AI bidding logic
+                                        aiBid = calculateAIBid(currentActivePlayer, gameData.auction.cards, gameData.auction.highest_bid, shipCapacity, gameData);
+                                    }
+
                                     console.log(`[calculateAIBid result] aiBid: ${aiBid}`);
 
                                     const nextBidderIndex = (gameData.auction.current_bidder_index + 1);
                                     const isLastBidderInRound = nextBidderIndex === gameData.auction.bidding_order.length;
 
-                                    if (!isLastBidderInRound) {
-                                        const updateData = {
-                                            auction: {
-                                                ...gameData.auction,
-                                                current_bidder_index: nextBidderIndex,
-                                            },
-                                            message: `${currentActivePlayer.name} ${aiBid > 0 ? `bid ${aiBid}` : 'passed'}.`
-                                        };
-                                        if (aiBid > gameData.auction.highest_bid) {
-                                            updateData.auction.highest_bid = aiBid;
-                                            updateData.auction.highest_bidder_id = currentActivePlayer.id;
-                                            updateData.auction.bids = { ...gameData.auction.bids, [currentActivePlayer.id]: aiBid };
+                                    if (aiBid === 0 || aiBid <= gameData.auction.highest_bid || aiBid > currentActivePlayer.money || currentActivePlayer.ship.length + gameData.auction.cards.length > shipCapacity) {
+                                        // AI chooses to pass or cannot bid
+                                        console.log(`AI ${currentActivePlayer.name} decided to pass or cannot bid. AI Bid: ${aiBid}. Highest Bid: ${gameData.auction.highest_bid}. Player Money: ${currentActivePlayer.money}. Ship Space: ${currentActivePlayer.ship.length}/${shipCapacity}. Auction Cards: ${gameData.auction.cards.length}.`);
+
+                                        if (!isLastBidderInRound) {
+                                            console.log("[AI Bid Pass] Preparing Supabase update to next bidder.");
+                                            const { error } = await supabase
+                                                .from('games')
+                                                .update({
+                                                    auction: {
+                                                        ...gameData.auction,
+                                                        current_bidder_index: nextBidderIndex
+                                                    },
+                                                    message: `${currentActivePlayer.name} passed.`
+                                                })
+                                                .eq('id', gameId);
+                                            if (error) throw error;
+                                        } else {
+                                            console.log(`Auction cycle complete for AI ${currentActivePlayer.name}. Resolving auction (AI passed as last bidder).`);
+                                            // The highest bidder is the winner (or no one if highest bid is 0)
+                                            let auctionWinnerId = gameData.auction.highest_bidder_id;
+                                            let winningBid = gameData.auction.highest_bid;
+                                            let auctionMessage = "";
+                                            let updatedPlayers = [...(gameData.players || [])]; // Defensive check
+                                            let updatedDiscardPile = [...gameData.discard_pile];
+
+                                            if (winningBid > 0 && auctionWinnerId) {
+                                                const winnerName = (gameData.players || []).find(p => p.id === auctionWinnerId)?.name; // Defensive check
+                                                auctionMessage = `Auction ended. ${winnerName} won with a bid of ${winningBid}!`;
+                                                updatedPlayers = updatedPlayers.map(p =>
+                                                    p.id === auctionWinnerId ? { ...p, money: p.money - winningBid, ship: [...p.ship, ...gameData.auction.cards] } : p
+                                                );
+                                            } else {
+                                                auctionMessage = `Auction ended. No one won. Cards discarded.`;
+                                                updatedDiscardPile = [...updatedDiscardPile, ...gameData.auction.cards];
+                                            }
+
+                                            // Determine the next player or if day scoring should begin
+                                            const { nextPlayerId, allShipsFull } = findNextEligiblePlayer({ ...gameData, players: updatedPlayers }, gameData.current_player_id);
+                                            console.log(`[findNextEligiblePlayer result for auction end] nextPlayerId: ${nextPlayerId}, allShipsFull: ${allShipsFull}`);
+                                            if (allShipsFull || gameData.deck.length === 0) { // If all ships are full OR deck is empty, trigger day scoring
+                                                console.log("[AI Bid Pass End Auction] Preparing Supabase update to day_scoring.");
+                                                const { error } = await supabase
+                                                    .from('games')
+                                                    .update({
+                                                        status: 'day_scoring',
+                                                        message: `Day ${gameData.current_day} ended. All ships are full or deck is empty!`
+                                                    })
+                                                    .eq('id', gameId);
+                                                if (error) console.error("Error updating game to day_scoring (AI bid pass end auction):", error);
+                                                else console.log("[AI Bid Pass End Auction] Supabase update to day_scoring SUCCESS.");
+                                            } else {
+                                                console.log("[AI Bid Pass End Auction] Preparing Supabase update to next player.");
+                                                const { error } = await supabase
+                                                    .from('games')
+                                                    .update({
+                                                        players: updatedPlayers,
+                                                        discard_pile: updatedDiscardPile,
+                                                        current_player_id: nextPlayerId,
+                                                        auction: {
+                                                            cards: [],
+                                                            highest_bid: 0,
+                                                            highest_bidder_id: null,
+                                                            auctioneer_id: null,
+                                                            bids: {},
+                                                            bidding_order: [],
+                                                            current_bidder_index: -1,
+                                                            status: 'inactive' // Explicitly set status to inactive
+                                                        },
+                                                    })
+                                                    .eq('id', gameId);
+                                                if (error) console.error("Error updating game to next player (AI bid pass end auction):", error);
+                                                else console.log("[AI Bid Pass End Auction] Supabase update to next player SUCCESS.");
+                                            }
                                         }
-                                        const { error } = await supabase.from('games').update(updateData).eq('id', gameId);
-                                        if (error) throw error;
-                                        console.log(`AI ${currentActivePlayer.name} moved to next bidder.`);
                                     } else {
-                                        console.log(`Auction cycle complete for AI ${currentActivePlayer.name}. Resolving auction.`);
-                                        let auctionWinnerId = gameData.auction.highest_bidder_id;
-                                        let winningBid = gameData.auction.highest_bid;
-                                        let auctionMessage = "";
-                                        let updatedPlayers = [...gameData.players];
-                                        let updatedDiscardPile = [...gameData.discard_pile];
+                                        // AI places a valid bid
+                                        console.log(`AI ${currentActivePlayer.name} placed a bid of ${aiBid}.`);
+                                        if (!isLastBidderInRound) {
+                                            console.log("[AI Bid Place] Preparing Supabase update to next bidder with new bid.");
+                                            const { error } = await supabase
+                                                .from('games')
+                                                .update({
+                                                    auction: {
+                                                        ...gameData.auction,
+                                                        highest_bid: aiBid,
+                                                        highest_bidder_id: currentActivePlayer.id,
+                                                        bids: { ...gameData.auction.bids, [currentActivePlayer.id]: aiBid },
+                                                        current_bidder_index: nextBidderIndex
+                                                    },
+                                                    message: `${currentActivePlayer.name} bid ${aiBid}.`
+                                                })
+                                                .eq('id', gameId);
+                                            if (error) console.error("Error updating game (AI bid place):", error);
+                                            else console.log("[AI Bid Place] Supabase update to next bidder with new bid SUCCESS.");
+                                        } else {
+                                            console.log(`Auction cycle complete for AI ${currentActivePlayer.name}. Resolving auction (AI won).`);
+                                            let auctionWinnerId = currentActivePlayer.id;
+                                            let winningBid = aiBid;
 
-                                        if (aiBid > winningBid && currentActivePlayer.id === gameData.auction.auctioneer_id) {
-                                            auctionWinnerId = currentActivePlayer.id;
-                                            winningBid = aiBid;
-                                        }
-
-                                        if (winningBid > 0 && auctionWinnerId) {
-                                            const winnerName = gameData.players.find(p => p.id === auctionWinnerId)?.name;
-                                            auctionMessage = `Auction ended. ${winnerName} won with a bid of ${winningBid}!`;
-                                            updatedPlayers = updatedPlayers.map(p =>
+                                            const updatedPlayers = (gameData.players || []).map(p => // Defensive check
                                                 p.id === auctionWinnerId ? { ...p, money: p.money - winningBid, ship: [...p.ship, ...gameData.auction.cards] } : p
                                             );
-                                            console.log(`${winnerName} won the auction for ${winningBid}. Cards:`, gameData.auction.cards);
-                                        } else {
-                                            auctionMessage = `Auction ended. No one won. Cards discarded.`;
-                                            updatedDiscardPile = [...updatedDiscardPile, ...gameData.auction.cards];
-                                            console.log(`Auction ended with no winner. Cards discarded:`, gameData.auction.cards);
-                                        }
 
-                                        const { nextPlayerId, allShipsFull } = findNextEligiblePlayer({ ...gameData, players: updatedPlayers }, gameData.current_player_id);
-                                        console.log(`[findNextEligiblePlayer result for auction end] nextPlayerId: ${nextPlayerId}, allShipsFull: ${allShipsFull}`);
-
-                                        if (allShipsFull) {
-                                            const { error } = await supabase
-                                                .from('games')
-                                                .update({
-                                                    status: 'day_scoring',
-                                                    message: `Day ${gameData.current_day} ended. All ships are full!`
-                                                })
-                                                .eq('id', gameId);
-                                            if (error) throw error;
-                                        } else {
-                                            const { error } = await supabase
-                                                .from('games')
-                                                .update({
-                                                    players: updatedPlayers,
-                                                    discard_pile: updatedDiscardPile,
-                                                    current_player_id: nextPlayerId,
-                                                    auction: {
-                                                        cards: [],
-                                                        highest_bid: 0,
-                                                        highest_bidder_id: null,
-                                                        auctioneer_id: null,
-                                                        bids: {},
-                                                        bidding_order: [],
-                                                        current_bidder_index: -1,
-                                                    },
-                                                })
-                                                .eq('id', gameId);
-                                            if (error) throw error;
+                                            // Determine the next player or if day scoring should begin
+                                            const { nextPlayerId, allShipsFull } = findNextEligiblePlayer({ ...gameData, players: updatedPlayers }, gameData.current_player_id);
+                                            console.log(`[findNextEligiblePlayer result for auction end] nextPlayerId: ${nextPlayerId}, allShipsFull: ${allShipsFull}`);
+                                            if (allShipsFull || gameData.deck.length === 0) { // If all ships are full OR deck is empty, trigger day scoring
+                                                console.log("[AI Bid Win End Auction] Preparing Supabase update to day_scoring.");
+                                                const { error } = await supabase
+                                                    .from('games')
+                                                    .update({
+                                                        status: 'day_scoring',
+                                                        message: `Day ${gameData.current_day} ended. All ships are full or deck is empty!`
+                                                    })
+                                                    .eq('id', gameId);
+                                                if (error) console.error("Error updating game to day_scoring (AI bid win end auction):", error);
+                                                else console.log("[AI Bid Win End Auction] Supabase update to day_scoring SUCCESS.");
+                                            } else {
+                                                console.log("[AI Bid Win End Auction] Preparing Supabase update to next player.");
+                                                const { error } = await supabase
+                                                    .from('games')
+                                                    .update({
+                                                        players: updatedPlayers,
+                                                        current_player_id: nextPlayerId,
+                                                        auction: {
+                                                            cards: [],
+                                                            highest_bid: 0,
+                                                            highest_bidder_id: null,
+                                                            bids: {},
+                                                            auctioneer_id: null,
+                                                            bidding_order: [],
+                                                            current_bidder_index: -1,
+                                                            status: 'inactive' // Explicitly set status to inactive
+                                                        },
+                                                    })
+                                                    .eq('id', gameId);
+                                                if (error) console.error("Error updating game to next player (AI bid win end auction):", error);
+                                                else console.log("[AI Bid Win End Auction] Supabase update to next player SUCCESS.");
+                                            }
                                         }
                                     }
                                 }
                             }
-                            setIsProcessingAITurn(false); // AI finished thinking
                         } catch (error) {
-                            console.error(`[handleAutoSkipTurn Error for AI ${currentActivePlayer.name}]`, error);
-                            setMessage(`AI ${currentActivePlayer.name} encountered an error. Check console for details.`);
-                            setIsProcessingAITurn(false); // Ensure AI indicator is off
+                            console.error(`[handleAutoSkipTurn Error for AI ${currentActivePlayer?.name || 'Unknown'}]`, error);
+                            setMessage(`AI ${currentActivePlayer?.name || 'Unknown'} encountered an error. Check console for details.`);
+                            if (isProcessingAITurn) {
+                                 console.log("[DEBUG] Setting isProcessingAITurn to FALSE in catch block.");
+                                 setIsProcessingAITurn(false); // Ensure AI indicator is off in case of error
+                            }
+                        } finally {
+                            // This block runs regardless of try/catch outcome
+                            if (isProcessingAITurn) {
+                                // Only set to false if it's currently true, to avoid unnecessary renders
+                                console.log("[DEBUG] Setting isProcessingAITurn to FALSE in finally block.");
+                                setIsProcessingAITurn(false);
+                            }
                         }
                     };
 
                     const timeoutId = setTimeout(() => {
                         handleAutoSkipTurn();
-                    }, currentActivePlayer.isAI ? 1500 : 500);
+                    }, currentActivePlayer.isAI ? 1500 : 500); // AI wait time, shorter for human auto-skips
 
                     return () => clearTimeout(timeoutId);
+                } else {
+                    // If game is not playing or no active player, ensure AI indicator is off
+                    if (isProcessingAITurn) {
+                        console.log("[DEBUG useEffect END] Game not playing or no active player. Setting isProcessingAITurn to FALSE.");
+                        setIsProcessingAITurn(false);
+                    }
                 }
-            }, [gameData, supabase, isAuthReady, userId, gameId, handlePass]); // Added handlePass to dependencies as it's called.
+            }, [gameData, supabase, isAuthReady, userId, gameId, isProcessingAITurn]); // Added isProcessingAITurn to dependencies to correctly observe its state for conditional setting
 
 
             if (loadingGame) {
@@ -1965,7 +2147,7 @@
             const isCreator = gameData.host_user_id === userId;
 
             // Simplified for clarity: isHumanPlayerTurn is true if the current_player_id is the human user
-            const isHumanCurrentPlayer = gameData.current_player_id === userId && gameData.players.some(p => p.id === userId && !p.isAI);
+            const isHumanCurrentPlayer = gameData.current_player_id === userId && (gameData.players || []).some(p => p.id === userId && !p.isAI); // Defensive check
 
             const shipCapacity = gameData.ship_capacity || 5;
             const commodityTypes = ['cloth', 'fur', 'grain', 'dye', 'spice'];
@@ -1981,35 +2163,35 @@
             ];
 
 
-            const currentBidderId = gameData.auction.status === 'bidding' && gameData.auction.current_bidder_index !== -1
+            const currentBidderId = gameData.auction?.status === 'bidding' && gameData.auction.current_bidder_index !== -1
                 ? gameData.auction.bidding_order[gameData.auction.current_bidder_index]
                 : null;
 
-            const uniquePlayers = Array.from(new Map(gameData.players.map(player => [player.id, player])).values());
+            const uniquePlayers = Array.from(new Map((gameData.players || []).map(player => [player.id, player])).values()); // Defensive check
 
 
-            const currentPlayerObject = gameData.players.find(p => p.id === gameData.current_player_id);
+            const currentPlayerObject = (gameData.players || []).find(p => p.id === gameData.current_player_id); // Defensive check
             const currentPlayerDisplay = currentPlayerObject
                 ? (currentPlayerObject.isAI
                     ? `${currentPlayerObject.name} (AI)`
                     : `${currentPlayerObject.name}`)
                 : 'Unknown Player';
 
-            const currentBidderObject = gameData.players.find(p => p.id === currentBidderId);
+            const currentBidderObject = (gameData.players || []).find(p => p.id === currentBidderId); // Defensive check
             const currentBidderDisplay = currentBidderObject
                 ? (currentBidderObject.isAI
                     ? `${currentBidderObject.name} (AI)`
                     : `${currentBidderObject.name}`)
                 : 'Unknown Bidder';
 
-            const highestBidderName = gameData.auction.highest_bidder_id
+            const highestBidderName = gameData.auction?.highest_bidder_id
                 ? (gameData.auction.highest_bidder_id === userId
                     ? "You"
-                    : gameData.players.find(p => p.id === gameData.auction.highest_bidder_id)?.name || 'Unknown')
+                    : (gameData.players || []).find(p => p.id === gameData.auction.highest_bidder_id)?.name || 'Unknown') // Defensive check
                 : "N/A";
 
-            const auctioneerName = gameData.auction.auctioneer_id
-                ? gameData.players.find(p => p.id === gameData.auction.auctioneer_id)?.name || 'Unknown'
+            const auctioneerName = gameData.auction?.auctioneer_id
+                ? (gameData.players || []).find(p => p.id === gameData.auction.auctioneer_id)?.name || 'Unknown' // Defensive check
                 : 'N/A';
 
 
@@ -2039,7 +2221,7 @@
                                 console.log("Start Game button clicked.");
                                 console.log("Current gameData.player_order:", gameData.player_order);
                                 try {
-                                    const shuffledPlayerOrder = [...gameData.player_order];
+                                    const shuffledPlayerOrder = [...(gameData.player_order || [])]; // Defensive check
                                     if (shuffledPlayerOrder.length === 0) {
                                         setMessage("Cannot start game: No players in game.");
                                         console.error("Attempted to start game with empty player_order.");
@@ -2059,7 +2241,7 @@
                                             message: "Game has started!",
                                             current_player_id: shuffledPlayerOrder[0],
                                             player_order: shuffledPlayerOrder,
-                                            auction: { 
+                                            auction: {
                                                 cards: [],
                                                 highest_bid: 0,
                                                 highest_bidder_id: null,
@@ -2068,7 +2250,7 @@
                                                 status: 'inactive',
                                                 bidding_order: [],
                                                 current_bidder_index: -1
-                                            } 
+                                            }
                                         })
                                         .eq('id', gameId);
                                     if (error) {
@@ -2095,44 +2277,95 @@
                             <div className="bg-gray-700 p-6 rounded-lg shadow-md flex flex-wrap gap-4 justify-center border border-gray-600">
                                 {gameData.status === "playing" ? (
                                     <>
-                                        {/* Buttons for Drawing/Starting Auction (only for the current player/auctioneer) */}
-                                        {isHumanCurrentPlayer && (gameData.auction.status === 'inactive' || gameData.auction.status === 'drawing') && gameData.auction.cards.length < 3 && gameData.deck.length > 0 && (
-                                            <button onClick={handleDrawCard} className="px-6 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition duration-300 ease-in-out">Draw Card ({gameData.auction.cards.length}/3)</button>
-                                        )}
-                                        {isHumanCurrentPlayer && gameData.auction.status === 'drawing' && gameData.auction.cards.length > 0 && (
-                                            <button onClick={handleStartAuction} className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300 ease-in-out">Start Auction</button>
-                                        )}
+                                        {/* Player Actions Section */}
+                                        {userId && uniquePlayers.find(p => p.id === userId) && (
+                                            <>
+                                                {(() => {
+                                                    const humanPlayer = uniquePlayers.find(p => p.id === userId);
+                                                    const isMyTurn = gameData.current_player_id === userId;
+                                                    const isMyAuctionTurn = gameData.auction?.status === 'bidding' && gameData.auction.bidding_order[gameData.auction.current_bidder_index] === userId;
 
-                                        {/* Buttons for Bidding (only for the current bidder) */}
-                                        {gameData.auction.status === 'bidding' && currentBidderId === userId && (
-                                            <div className="flex flex-col items-center w-full">
-                                                <input
-                                                    type="number"
-                                                    value={bidAmount}
-                                                    onChange={(e) => setBidAmount(parseInt(e.target.value) || 0)}
-                                                    min={gameData.auction.highest_bid + 1}
-                                                    className="w-32 p-2 border border-gray-600 bg-gray-700 text-gray-100 rounded-md text-center mb-3"
-                                                    placeholder="Your Bid"
-                                                />
-                                                <div className="flex gap-4">
-                                                    <button
-                                                        onClick={handlePlaceBid}
-                                                        className="px-6 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition duration-300 ease-in-out"
-                                                    >
-                                                        Place Bid
-                                                    </button>
-                                                    <button
-                                                        onClick={handlePass}
-                                                        className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300 ease-in-out"
-                                                    >
-                                                        Pass
-                                                    </button>
-                                                </div>
-                                            </div>
+                                                    console.log(`[PlayerActions Render Debug] Player: ${humanPlayer?.name}, IsMyTurn: ${isMyTurn}, IsMyAuctionTurn: ${isMyAuctionTurn}, Auction Status: ${gameData.auction?.status}, Auction Cards: ${gameData.auction?.cards?.length}, Deck Size: ${gameData.deck?.length}, My Ship Length: ${humanPlayer?.ship?.length}, Ship Capacity: ${gameData.ship_capacity}, IsProcessingAITurn: ${isProcessingAITurn}`);
+
+                                                    // Modified condition: Check if it's my turn for drawing OR my turn for bidding
+                                                    if ((isMyTurn || isMyAuctionTurn) && !isProcessingAITurn) {
+                                                        // Draw Phase Buttons
+                                                        if (gameData.auction?.status === 'inactive' || gameData.auction?.status === 'drawing') {
+                                                            const canDraw = (humanPlayer?.ship?.length || 0) < gameData.ship_capacity && gameData.deck.length > 0 && gameData.auction.cards.length < 3;
+                                                            const canStartAuction = gameData.auction.cards.length > 0;
+                                                            const canPass = gameData.auction.cards.length === 0; // Only pass if no cards drawn
+
+                                                            console.log(`[PlayerActions Draw Phase Debug] CanDraw: ${canDraw}, CanStartAuction: ${canStartAuction}, CanPass: ${canPass}`);
+
+                                                            return (
+                                                                <>
+                                                                    {canDraw && (
+                                                                        <button
+                                                                            onClick={handleDrawCard}
+                                                                            className="px-6 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition duration-300 ease-in-out"
+                                                                        >
+                                                                            Draw Card ({gameData.auction.cards.length}/3)
+                                                                        </button>
+                                                                    )}
+                                                                    {canStartAuction && (
+                                                                        <button
+                                                                            onClick={handleStartAuction}
+                                                                            className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300 ease-in-out"
+                                                                        >
+                                                                            Start Auction
+                                                                        </button>
+                                                                    )}
+                                                                    {canPass && (
+                                                                        <button
+                                                                            onClick={handlePass}
+                                                                            className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300 ease-in-out"
+                                                                        >
+                                                                            Pass Turn
+                                                                        </button>
+                                                                    )}
+                                                                </>
+                                                            );
+                                                        }
+                                                        // Bidding Phase Buttons
+                                                        else if (gameData.auction?.status === 'bidding' && isMyAuctionTurn) {
+                                                            console.log("[PlayerActions Bidding Phase Debug] It's my bidding turn.");
+                                                            return (
+                                                                <div className="flex flex-col items-center w-full">
+                                                                    <input
+                                                                        type="number"
+                                                                        value={bidAmount}
+                                                                        onChange={(e) => setBidAmount(Math.max(gameData.auction.highest_bid + 1, parseInt(e.target.value) || 0))}
+                                                                        min={gameData.auction.highest_bid + 1}
+                                                                        max={humanPlayer.money}
+                                                                        className="w-32 p-2 border border-gray-600 bg-gray-700 text-gray-100 rounded-md text-center mb-3"
+                                                                        placeholder="Your Bid"
+                                                                    />
+                                                                    <div className="flex gap-4">
+                                                                        <button
+                                                                            onClick={handlePlaceBid}
+                                                                            disabled={bidAmount <= gameData.auction.highest_bid || bidAmount > humanPlayer.money || bidAmount < 1 || (humanPlayer.ship.length + gameData.auction.cards.length > shipCapacity)}
+                                                                            className="px-6 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                        >
+                                                                            Place Bid
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={handlePass}
+                                                                            className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300 ease-in-out"
+                                                                        >
+                                                                            Pass
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        }
+                                                    }
+                                                    return null; // No actions for current player if not their turn or AI is processing
+                                                })()}
+                                            </>
                                         )}
 
                                         {/* Messages when it's not your turn */}
-                                        {!(isHumanCurrentPlayer || (gameData.auction.status === 'bidding' && currentBidderId === userId)) && (
+                                        {!(isHumanCurrentPlayer || (gameData.auction?.status === 'bidding' && currentBidderId === userId)) && (
                                             <p className="text-gray-400 flex items-center justify-center">
                                                 {isProcessingAITurn && (
                                                     <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -2140,7 +2373,7 @@
                                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                                     </svg>
                                                 )}
-                                                {gameData.auction.status === 'bidding' ?
+                                                {gameData.auction?.status === 'bidding' ?
                                                     `Waiting for ${currentBidderDisplay} to bid...` :
                                                     `Waiting for ${currentPlayerDisplay} to draw cards...`}
                                             </p>
@@ -2158,7 +2391,7 @@
                         <div className="col-span-full flex flex-col items-center justify-center">
                             <h2 className="text-2xl font-bold text-gray-100 mb-4">Current Auction</h2>
                             <div className="bg-gray-700 p-4 rounded-lg shadow-md min-h-[100px] flex flex-col items-center justify-center w-full max-w-md mx-auto border border-gray-600">
-                                {gameData.auction.cards && gameData.auction.cards.length > 0 ? (
+                                {gameData.auction?.cards && gameData.auction.cards.length > 0 ? (
                                     <>
                                         <div className="flex flex-wrap gap-2 justify-center mb-2">
                                             {gameData.auction.cards.map((card) => (
@@ -2170,7 +2403,7 @@
                                                 </div>
                                             ))}
                                         </div>
-                                        {gameData.auction.status === 'bidding' && (
+                                        {gameData.auction?.status === 'bidding' && (
                                             <>
                                                 <p className="w-full text-center mt-2 text-lg font-bold text-blue-400">
                                                     Highest Bid: {gameData.auction.highest_bid} by {highestBidderName}
@@ -2183,7 +2416,7 @@
                                                 </p>
                                             </>
                                         )}
-                                        {gameData.auction.status === 'drawing' && (
+                                        {gameData.auction?.status === 'drawing' && (
                                             <p className="w-full text-center mt-2 text-lg font-bold text-gray-300">
                                                 Drawing cards for auction...
                                             </p>
@@ -2262,9 +2495,14 @@
                                         <div className="flex flex-col-reverse w-full items-center">
                                             {Array.from({ length: 8 }).map((_, levelIndex) => {
                                                 const displayLevel = levelIndex + 1;
+                                                let levelLabel = displayLevel;
+                                                if (displayLevel === 6) levelLabel = "6(5)";
+                                                if (displayLevel === 7) levelLabel = "7(10)";
+                                                if (displayLevel === 8) levelLabel = "8(20)";
+
                                                 return (
                                                     <div key={`${type}-${displayLevel}`} className={`relative w-full h-8 border-b border-gray-600 flex items-center justify-center ${displayLevel === 1 ? 'bg-yellow-600' : 'bg-gray-800'}`}>
-                                                        <span className="absolute left-1 text-xs text-gray-400">{displayLevel}</span>
+                                                        <span className="absolute left-1 text-xs text-gray-400">{levelLabel}</span>
                                                         {uniquePlayers.map(player => {
                                                             if (gameData.commodity_track_positions[type] && gameData.commodity_track_positions[type][player.id] === displayLevel) {
                                                                 return (
