@@ -1,0 +1,2323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medici Web App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            background-color: #1a202c; /* Dark background */
+        }
+        /* Custom styles for better visual appeal, if needed */
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // Ensure React and ReactDOM are available globally
+        const { useState, useEffect, createContext, useContext, useCallback } = React;
+        const ReactDOM = window.ReactDOM;
+
+        // --- Supabase Client Initialization ---
+        const supabaseUrl = 'https://krfrccsetibzmzutfzll.supabase.co';
+        // IMPORTANT: Replace 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtyZnJjY3NldGliem16dXRmemxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg1NjgzNjAsImV4cCI6MjA2NDE0NDM2MH0.wLEUxijlo4PR35aLX2BdJ-99g0cd_JAQPRz9VXM3ihQ' with your actual Supabase 'anon public' key from your Supabase project settings -> API.
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtyZnJjY3NldGliem16dXRmemxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg1NjgzNjAsImV4cCI6MjA2NDE0NDM2MH0.wLEUxijlo4PR35aLX2BdJ-99g0cd_JAQPRz9VXM3ihQ'; 
+
+        // Create the Supabase client instance using the globally loaded Supabase object
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+
+        // --- Supabase Context ---
+        const SupabaseContext = createContext(null);
+
+        // --- Supabase Provider Component ---
+        const SupabaseProvider = ({ children }) => {
+            const [userId, setUserId] = useState(null);
+            const [isAuthReady, setIsAuthReady] = useState(false);
+
+            useEffect(() => {
+                const initializeAuth = async () => {
+                    try {
+                        const { data: { session } } = await supabase.auth.getSession();
+                        let currentUserId = session?.user?.id;
+
+                        if (!currentUserId) {
+                            let anonPlayerId = localStorage.getItem('anon_player_id');
+                            if (!anonPlayerId) {
+                                anonPlayerId = Math.random().toString(36).substring(2, 10);
+                                localStorage.setItem('anon_player_id', anonPlayerId);
+                            }
+                            currentUserId = anonPlayerId;
+                            console.log("Using anonymous player ID:", currentUserId);
+                        } else {
+                            console.log("Using authenticated Supabase user ID:", currentUserId);
+                        }
+                        setUserId(currentUserId);
+                        setIsAuthReady(true);
+
+                        const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+                            const newUserId = session?.user?.id || localStorage.getItem('anon_player_id');
+                            setUserId(newUserId);
+                            console.log("Auth state changed, new user ID:", newUserId);
+                        });
+
+                        return () => {
+                            authListener.subscription.unsubscribe();
+                        };
+
+                    } catch (error) {
+                        console.error("Failed to initialize Supabase Auth or get user ID:", error);
+                        let anonPlayerId = Math.random().toString(36).substring(2, 10);
+                        localStorage.setItem('anon_player_id', anonPlayerId);
+                        setUserId(anonPlayerId);
+                        setIsAuthReady(true);
+                    }
+                };
+
+                initializeAuth();
+            }, []);
+
+            return (
+                <SupabaseContext.Provider value={{ supabase, userId, isAuthReady }}>
+                    {children}
+                </SupabaseContext.Provider>
+            );
+        };
+
+        // --- Custom Hook to use Supabase Context ---
+        const useSupabase = () => {
+            const context = useContext(SupabaseContext);
+            if (!context) {
+                throw new Error('useSupabase must be used within a SupabaseProvider');
+            }
+            return context;
+        };
+
+        // --- Message Modal Component ---
+        const MessageModal = ({ message, onClose }) => {
+            if (!message) return null;
+
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-gray-800 p-6 rounded-lg shadow-xl max-w-sm w-full text-center border border-gray-700">
+                        <p className="text-lg font-semibold mb-4 text-gray-100">{message}</p>
+                        <button
+                            onClick={onClose}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                        >
+                            OK
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- Scoring Summary Modal Component ---
+        const ScoringSummaryModal = ({ summary, onClose }) => {
+            if (!summary || summary.length === 0) return null;
+
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+                    <div className="bg-gray-800 p-8 rounded-lg shadow-xl max-w-2xl w-full border border-gray-700 text-gray-100">
+                        <h2 className="text-3xl font-bold text-center mb-6 text-blue-400">Day Scoring Summary</h2>
+                        <div className="max-h-96 overflow-y-auto pr-2">
+                            {summary.map((playerSummary, index) => (
+                                <div key={index} className="mb-6 pb-4 border-b border-gray-700 last:border-b-0">
+                                    <h3 className="text-xl font-semibold mb-2 text-green-400">{playerSummary.playerName}</h3>
+                                    <p className="text-lg mb-1">Ship Value Points: <span className="font-bold text-yellow-300">{playerSummary.shipValuePoints}</span></p>
+                                    <p className="text-lg font-semibold mt-2">Commodity Bonuses:</p>
+                                    {Object.keys(playerSummary.commodityBonuses).length > 0 ? (
+                                        <ul className="list-disc list-inside ml-4 text-gray-300">
+                                            {Object.entries(playerSummary.commodityBonuses).map(([type, points]) => (
+                                                <li key={type}>{type.charAt(0).toUpperCase() + type.slice(1)}: <span className="font-bold text-yellow-300">{points}</span> points</li>
+                                            ))}
+                                        </ul>
+                                    ) : (
+                                        <p className="text-gray-400 ml-4">No commodity bonuses this day.</p>
+                                    )}
+                                    <p className="text-xl font-bold mt-4 text-purple-400">Total Day Points: {playerSummary.totalDayPoints}</p>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="text-center mt-6">
+                            <button
+                                onClick={onClose}
+                                className="px-6 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition duration-300 ease-in-out"
+                            >
+                                OK
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- Final Score Modal Component ---
+        const FinalScoreModal = ({ finalScores, onClose, onPlayAgain }) => {
+            // Sort scores in descending order
+            const sortedScores = [...finalScores].sort((a, b) => b.money - a.money);
+            const winner = sortedScores[0];
+            const tiedWinners = sortedScores.filter(p => p.money === winner.money);
+
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+                    <div className="bg-gray-800 p-8 rounded-lg shadow-xl max-w-2xl w-full border border-gray-700 text-gray-100 text-center">
+                        <h2 className="text-4xl font-bold text-blue-400 mb-6">Game Over!</h2>
+                        {tiedWinners.length > 1 ? (
+                            <p className="text-2xl font-semibold mb-4 text-yellow-300">
+                                It's a tie between: {tiedWinners.map(p => p.name).join(', ')}!
+                            </p>
+                        ) : (
+                            <p className="text-2xl font-semibold mb-4 text-yellow-300">
+                                Winner: {winner.name}!
+                            </p>
+                        )}
+
+                        <h3 className="text-xl font-semibold text-gray-200 mb-4">Final Scores:</h3>
+                        <div className="max-h-60 overflow-y-auto mb-6">
+                            {sortedScores.map((player, index) => (
+                                <div key={player.id} className={`flex justify-between items-center py-2 px-4 rounded-md mb-2 ${index === 0 ? 'bg-yellow-700 bg-opacity-30 border border-yellow-500' : 'bg-gray-700'}`}>
+                                    <span className="text-lg font-medium">{player.name}</span>
+                                    <span className="text-xl font-bold text-green-400">{player.money} Florins</span>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="flex justify-center gap-4 mt-6">
+                            <button
+                                onClick={onClose}
+                                className="px-6 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition duration-300 ease-in-out"
+                            >
+                                Close
+                            </button>
+                            <button
+                                onClick={onPlayAgain}
+                                className="px-6 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition duration-300 ease-in-out"
+                            >
+                                Play Again
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- Utility function to generate a unique ID ---
+        const generateGameId = () => {
+            return Math.random().toString(36).substring(2, 8).toUpperCase();
+        };
+
+        // --- Helper to get bidding order (players to the left of auctioneer, then auctioneer last) ---
+        const getBiddingOrder = (playerOrder, auctioneerId) => {
+            const order = [...playerOrder];
+            const auctioneerIndex = order.indexOf(auctioneerId);
+            if (auctioneerIndex === -1) return [];
+
+            const biddingSequence = [];
+            let currentIndex = (auctioneerIndex + 1) % order.length;
+
+            while (order[currentIndex] !== auctioneerId) {
+                biddingSequence.push(order[currentIndex]);
+                currentIndex = (currentIndex + 1) % order.length;
+            }
+            biddingSequence.push(auctioneerId);
+            return biddingSequence;
+        };
+
+        // --- Helper to find the next eligible player (ship not full) ---
+        const findNextEligiblePlayer = (gameData, startingPlayerId) => {
+            const playerOrder = gameData.player_order;
+            const totalPlayers = playerOrder.length;
+            let startIndex = playerOrder.indexOf(startingPlayerId);
+            if (startIndex === -1) {
+                console.error("Starting player not found in player order:", startingPlayerId);
+                return { nextPlayerId: null, allShipsFull: true };
+            }
+
+            let nextPlayerId = null;
+            let allShipsFull = true;
+
+            for (let i = 1; i <= totalPlayers; i++) {
+                const potentialNextPlayerIndex = (startIndex + i) % totalPlayers;
+                const potentialNextPlayerId = playerOrder[potentialNextPlayerIndex];
+                const potentialNextPlayer = gameData.players.find(p => p.id === potentialNextPlayerId);
+
+                if (potentialNextPlayer && potentialNextPlayer.ship.length < gameData.ship_capacity) {
+                    nextPlayerId = potentialNextPlayerId;
+                    allShipsFull = false;
+                    break;
+                }
+            }
+            return { nextPlayerId, allShipsFull };
+        };
+
+        // Map commodity types to Tailwind CSS colors for cards
+        const cardColorMap = {
+            cloth: 'bg-blue-300',
+            fur: 'bg-gray-300',
+            grain: 'bg-yellow-200',
+            dye: 'bg-purple-300',
+            spice: 'bg-red-300',
+            gold: 'bg-yellow-400'
+        };
+
+        // Map commodity types to Lucide-React icons (using inline SVGs as fallback for HTML)
+        const commodityIcons = {
+            cloth: <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 inline-block mr-1"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect></svg>,
+            fur: <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 inline-block mr-1"><path d="M17.5 19H14a3 3 0 0 0-3 3v-3.5A3.5 3.5 0 0 0 7.5 15H4a3 3 0 0 1-3-3v-2.5A3.5 3.5 0 0 1 4.5 6H8a3 3 0 0 0 3-3v3.5A3.5 3.5 0 0 0 16.5 9H20a3 3 0 0 1 3 3v2.5A3.5 3.5 0 0 1 19.5 18H17.5"></path></svg>,
+            grain: <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 inline-block mr-1"><path d="M2 22h20"></path><path d="M17 22V5L7 2v17"></path><path d="M6 12.5L10 10l-2 7"></path></svg>,
+            dye: <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 inline-block mr-1"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>,
+            spice: <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 inline-block mr-1"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.27 5.82 22 7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>,
+            gold: <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 inline-block mr-1"><path d="M6 3v6c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V3"></path><path d="M12 11v10"></path><path d="M10 21h4"></path></svg>,
+        };
+
+        // Map player index to Tailwind CSS color classes for consistency
+        const playerColorClasses = [
+            { base: 'red', bg: 'bg-red-700', border: 'border-red-500', token: 'bg-red-500' },
+            { base: 'blue', bg: 'bg-blue-700', border: 'border-blue-500', token: 'bg-blue-500' },
+            { base: 'green', bg: 'bg-green-700', border: 'border-green-500', token: 'bg-green-500' },
+            { base: 'yellow', bg: 'bg-yellow-700', border: 'border-yellow-500', token: 'bg-yellow-500' },
+            { base: 'purple', bg: 'bg-purple-700', border: 'border-purple-500', token: 'bg-purple-500' },
+            { base: 'pink', bg: 'bg-pink-700', border: 'border-pink-500', token: 'bg-pink-500' },
+        ];
+
+        // Helper function to get player-specific color classes
+        const getPlayerColors = (gameData, playerId) => {
+            if (!gameData || !gameData.player_order) {
+                return playerColorClasses[0];
+            }
+            const playerIndex = gameData.player_order.indexOf(playerId);
+            return playerColorClasses[playerIndex % playerColorClasses.length];
+        };
+
+        // --- AI Personalities Definitions ---
+        const AI_PERSONALITIES_DEFINITIONS = [
+            { type: 'Aggressive_High', bidModifier: 1.2, drawModifier: 0.9, commodityPreference: 0.1, goldPreference: 0.2, trackPreference: 0.1, shipFillPreference: 0.3 },
+            { type: 'Aggressive_Moderate', bidModifier: 1.0, drawModifier: 0.8, commodityPreference: 0.1, goldPreference: 0.1, trackPreference: 0.2, shipFillPreference: 0.4 },
+            { type: 'Aggressive_Value', bidModifier: 1.1, drawModifier: 0.8, commodityPreference: 0.3, goldPreference: 0.3, trackPreference: 0.3, shipFillPreference: 0.3 },
+            { type: 'Conservative_Low', bidModifier: 0.5, drawModifier: 0.3, commodityPreference: 0.1, goldPreference: 0.05, trackPreference: 0.1, shipFillPreference: 0.2 },
+            { type: 'Conservative_Balanced', bidModifier: 0.7, drawModifier: 0.5, commodityPreference: 0.1, goldPreference: 0.1, trackPreference: 0.2, shipFillPreference: 0.3 },
+            { type: 'Value_High', bidModifier: 1.0, drawModifier: 0.9, commodityPreference: 0.3, goldPreference: 0.3, trackPreference: 0.2, shipFillPreference: 0.5 },
+            { type: 'Value_Moderate', bidModifier: 0.8, drawModifier: 0.7, commodityPreference: 0.2, goldPreference: 0.2, trackPreference: 0.3, shipFillPreference: 0.6 },
+            { type: 'Ship_Filler_Fast', bidModifier: 0.7, drawModifier: 1.0, commodityPreference: 0.1, goldPreference: 0.05, trackPreference: 0.1, shipFillPreference: 0.9 },
+            { type: 'Ship_Filler_Value', bidModifier: 0.8, drawModifier: 0.9, commodityPreference: 0.1, goldPreference: 0.1, trackPreference: 0.2, shipFillPreference: 0.8 },
+            ...['cloth', 'fur', 'grain', 'dye', 'spice'].flatMap(c => [
+                { type: `Specialist_${c}_Strong`, bidModifier: 1.1, drawModifier: 0.8, commodityFocus: c, commodityPreference: 0.9, goldPreference: 0.1, trackPreference: 0.7, shipFillPreference: 0.5 },
+                { type: `Specialist_${c}_Moderate`, bidModifier: 0.9, drawModifier: 0.7, commodityFocus: c, commodityPreference: 0.7, goldPreference: 0.1, trackPreference: 0.5, shipFillPreference: 0.6 }
+            ]),
+            { type: 'Track_Racer_Aggro', bidModifier: 1.0, drawModifier: 0.9, commodityPreference: 0.5, goldPreference: 0.05, trackPreference: 0.9, shipFillPreference: 0.4 },
+            { type: 'Track_Racer_Balanced', bidModifier: 0.8, drawModifier: 0.7, commodityPreference: 0.4, goldPreference: 0.05, trackPreference: 0.7, shipFillPreference: 0.5 },
+            { type: 'Gold_Hound_Strong', bidModifier: 1.3, drawModifier: 0.9, commodityPreference: 0.1, goldPreference: 1.0, trackPreference: 0.05, shipFillPreference: 0.4 },
+            { type: 'Gold_Hound_Moderate', bidModifier: 1.1, drawModifier: 0.8, commodityPreference: 0.1, goldPreference: 0.8, trackPreference: 0.1, shipFillPreference: 0.5 },
+            { type: 'Balanced_General', bidModifier: 0.9, drawModifier: 0.7, commodityPreference: 0.3, goldPreference: 0.3, trackPreference: 0.5, shipFillPreference: 0.6 },
+            { type: 'Balanced_RiskAverse', bidModifier: 0.7, drawModifier: 0.6, commodityPreference: 0.2, goldPreference: 0.2, trackPreference: 0.4, shipFillPreference: 0.5 },
+            { type: 'Passive_Opportunist', bidModifier: 0.4, drawModifier: 0.4, commodityPreference: 0.1, goldPreference: 0.1, trackPreference: 0.1, shipFillPreference: 0.7 },
+            { type: 'Diversifier_Balanced', bidModifier: 0.8, drawModifier: 0.7, commodityPreference: 0.5, goldPreference: 0.2, trackPreference: 0.4, shipFillPreference: 0.6 },
+            { type: 'Diversifier_Cautious', bidModifier: 0.6, drawModifier: 0.6, commodityPreference: 0.4, goldPreference: 0.1, trackPreference: 0.3, shipFillPreference: 0.5 }
+        ];
+
+        // --- AI Decision Helper Functions ---
+        const calculateAIBid = (player, auctionCards, highestBid, shipCapacity, gameData) => {
+            const personality = player.personality;
+            const minBid = highestBid + 1;
+            const currentMoney = player.money;
+
+            console.log(`[calculateAIBid] AI: ${player.name}, Current Money: ${currentMoney}, Highest Bid: ${highestBid}, Min Bid: ${minBid}`);
+
+            if (player.ship.length + auctionCards.length > shipCapacity) {
+                console.log(`[calculateAIBid] AI ${player.name} cannot accommodate cards. Returning 0.`);
+                return 0;
+            }
+            if (currentMoney < minBid) {
+                console.log(`[calculateAIBid] AI ${player.name} doesn't have enough money. Returning 0.`);
+                return 0;
+            }
+
+            let lotValue = auctionCards.reduce((sum, card) => sum + card.value, 0);
+            let goldCount = auctionCards.filter(card => card.type === 'gold').length;
+            let focusedCommodityCount = 0;
+            if (personality.commodityFocus) {
+                focusedCommodityCount = auctionCards.filter(card => card.type === personality.commodityFocus).length;
+            }
+            console.log(`[calculateAIBid] Base lot value: ${lotValue}, Gold count: ${goldCount}, Focused commodity count: ${focusedCommodityCount}`);
+
+
+            lotValue += goldCount * (personality.goldPreference * 10);
+            lotValue += focusedCommodityCount * (personality.commodityPreference * 5);
+
+            const currentTrackPositions = gameData.commodity_track_positions;
+            let potentialTrackPoints = 0;
+            auctionCards.forEach(card => {
+                if (card.type !== 'gold') {
+                    const currentLevel = currentTrackPositions[card.type]?.[player.id] || 1;
+                    if (currentLevel + 1 === 6) potentialTrackPoints += 5 * personality.trackPreference;
+                    if (currentLevel + 1 === 7) potentialTrackPoints += 10 * personality.trackPreference;
+                    if (currentLevel + 1 === 8) potentialTrackPoints += 20 * personality.trackPreference;
+                }
+            });
+            lotValue += potentialTrackPoints;
+            console.log(`[calculateAIBid] Lot value after gold/commodity/track bonuses: ${lotValue}`);
+
+
+            const emptySlots = shipCapacity - player.ship.length;
+            if (auctionCards.length <= emptySlots) {
+                lotValue += auctionCards.length * (personality.shipFillPreference * 2);
+                console.log(`[calculateAIBid] Lot value after ship fill bonus: ${lotValue}`);
+            }
+
+            let fairPrice = Math.round(lotValue * personality.bidModifier);
+            console.log(`[calculateAIBid] Fair price (modified): ${fairPrice}`);
+
+
+            if (fairPrice < 1 || fairPrice < minBid * 0.75) {
+                console.log(`[calculateAIBid] AI ${player.name} considering passing: Fair price (${fairPrice}) too low compared to min bid (${minBid}). Returning 0.`);
+                return 0;
+            }
+
+            const hasFocusedCommodity = auctionCards.some(card => card.type === personality.commodityFocus);
+            const hasGold = goldCount > 0;
+            if (personality.commodityFocus && !hasFocusedCommodity && !hasGold && Math.random() < (1 - personality.commodityPreference)) {
+                console.log(`[calculateAIBid] AI ${player.name} passing: Not focused commodity or gold, and AI is a specialist. Returning 0.`);
+                return 0;
+            }
+
+            let bid = Math.max(minBid, fairPrice);
+            bid = Math.max(minBid, bid + Math.floor(Math.random() * 3) - 1);
+            bid = Math.min(bid, currentMoney);
+            console.log(`[calculateAIBid] Calculated bid (before final check): ${bid}`);
+
+
+            if (bid < minBid) {
+                console.log(`[calculateAIBid] Final bid (${bid}) is less than min bid (${minBid}). Returning 0.`);
+                return 0;
+            }
+
+            if (personality.bidModifier < 0.7 && bid > currentMoney * 0.5 && Math.random() < 0.3) {
+                console.log(`[calculateAIBid] AI ${player.name} passing: Conservative and bid is high relative to money. Returning 0.`);
+                return 0;
+            }
+            console.log(`[calculateAIBid] Final bid for ${player.name}: ${bid}`);
+            return bid;
+        };
+
+        const shouldAIDrawMore = (player, currentDrawnCards, deckSize, shipCapacity, gameData) => {
+            const personality = player.personality;
+            const currentDrawnCount = currentDrawnCards.length;
+
+            console.log(`[shouldAIDrawMore] AI: ${player.name}, Drawn: ${currentDrawnCount}, Deck: ${deckSize}, ShipCap: ${shipCapacity}`);
+
+            if (currentDrawnCount >= 3 || deckSize === 0) {
+                console.log(`[shouldAIDrawMore] Returning FALSE due to max cards drawn or empty deck.`);
+                return false;
+            }
+            if (currentDrawnCount === 0) {
+                console.log(`[shouldAIDrawMore] Returning TRUE as no cards drawn yet.`);
+                return true;
+            }
+
+            const calculateLotValue = (cards, playerPersonality, currentTrackPositions, currentPlayerId) => {
+                let value = cards.reduce((sum, card) => sum + card.value, 0);
+                const goldCount = cards.filter(card => card.type === 'gold').length;
+                let focusedCommodityCount = 0;
+                if (playerPersonality.commodityFocus) {
+                    focusedCommodityCount = cards.filter(card => card.type === playerPersonality.commodityFocus).length;
+                }
+
+                value += goldCount * (playerPersonality.goldPreference * 10);
+                value += focusedCommodityCount * (playerPersonality.commodityPreference * 5);
+
+                cards.forEach(card => {
+                    if (card.type !== 'gold') {
+                        const currentLevel = currentTrackPositions[card.type]?.[currentPlayerId] || 1;
+                        if (currentLevel + 1 === 6) value += 5 * playerPersonality.trackPreference;
+                        if (currentLevel + 1 === 7) value += 10 * playerPersonality.trackPreference;
+                        if (currentLevel + 1 === 8) value += 20 * playerPersonality.trackPreference;
+                    }
+                });
+                console.log(`[calculateLotValue] Cards: ${cards.map(c => `${c.type}:${c.value}`).join(', ')}, Calculated Value: ${value}`);
+                return value;
+            };
+
+            const currentLotValue = calculateLotValue(currentDrawnCards, personality, gameData.commodity_track_positions, player.id);
+
+            const potentialCardsAfterDraw = currentDrawnCount + 1;
+            const canAnyPlayerAccommodateNextDraw = gameData.players.some(p => p.ship.length + potentialCardsAfterDraw <= shipCapacity);
+            console.log(`[shouldAIDrawMore] Can any player accommodate next draw: ${canAnyPlayerAccommodateNextDraw}`);
+
+            if (!canAnyPlayerAccommodateNextDraw) {
+                console.log(`[shouldAIDrawMore] Returning FALSE because no player can accommodate more cards.`);
+                return false;
+            }
+
+            const nextCard = deckSize > 0 ? gameData.deck[0] : null;
+            let potentialNextLotValue = 0;
+            if (nextCard) {
+                potentialNextLotValue = calculateLotValue([...currentDrawnCards, nextCard], personality, gameData.commodity_track_positions, player.id);
+            }
+            console.log(`[shouldAIDrawMore] Next card: ${nextCard ? `${nextCard.type}:${nextCard.value}` : 'None'}, Potential next lot value: ${potentialNextLotValue}`);
+
+
+            let desireToDraw = personality.drawModifier;
+            console.log(`[shouldAIDrawMore] Initial desireToDraw: ${desireToDraw}`);
+
+            if (currentDrawnCount === 1) {
+                const firstCard = currentDrawnCards[0];
+                if (firstCard.value >= 5 || firstCard.type === 'gold' || (personality.commodityFocus && firstCard.type === personality.commodityFocus && firstCard.value >= 3)) {
+                    if (personality.bidModifier < 0.8 || personality.drawModifier < 0.6) {
+                        desireToDraw -= 0.3;
+                        console.log(`[shouldAIDrawMore] (1 card) Decreased desire due to high value/gold/focus card and low bid/draw modifier.`);
+                    }
+                    if (firstCard.type === 'gold' && personality.goldPreference > 0.7) {
+                        desireToDraw -= 0.4;
+                        console.log(`[shouldAIDrawMore] (1 card) Decreased desire due to gold card and high gold preference.`);
+                    }
+                }
+                if (nextCard && (nextCard.value >= 5 || nextCard.type === 'gold' || (personality.commodityFocus && nextCard.type === personality.commodityFocus && nextCard.value >= 3))) {
+                     desireToDraw += 0.2;
+                     console.log(`[shouldAIDrawMore] (1 card) Increased desire due to good next card.`);
+                }
+
+            } else if (currentDrawnCount === 2) {
+                const [card1, card2] = currentDrawnCards;
+                if (card1.type === card2.type && card1.type !== 'gold' && card1.value >= 3 && card2.value >= 3) {
+                    if (personality.commodityFocus === card1.type || personality.trackPreference > 0.5) {
+                        desireToDraw -= 0.4;
+                        console.log(`[shouldAIDrawMore] (2 cards) Decreased desire due to good commodity pair and focus/track pref.`);
+                    }
+                }
+                if ((card1.type === 'gold' && card2.value >= 4) || (card2.type === 'gold' && card1.value >= 4)) {
+                    if (personality.goldPreference > 0.5) {
+                        desireToDraw -= 0.3;
+                        console.log(`[shouldAIDrawMore] (2 cards) Decreased desire due to gold combo and high gold preference.`);
+                    }
+                }
+                if (nextCard && (nextCard.value >= 5 || nextCard.type === 'gold' || (personality.commodityFocus && nextCard.type === personality.commodityFocus && nextCard.value >= 3))) {
+                    desireToDraw += 0.1;
+                    console.log(`[shouldAIDrawMore] (2 cards) Increased desire due to good next card.`);
+                }
+            }
+
+            const avgCardValue = currentDrawnCards.reduce((sum, card) => sum + card.value, 0) / currentDrawnCount;
+            if (currentLotValue > player.money * 0.3 && personality.bidModifier < 1.0) {
+                desireToDraw -= 0.1;
+                console.log(`[shouldAIDrawMore] Decreased desire due to high lot value relative to money for conservative AI.`);
+            }
+            if (avgCardValue > 3 && personality.drawModifier < 0.7) {
+                desireToDraw -= 0.1;
+                console.log(`[shouldAIDrawMore] Decreased desire due to good average card value for low draw modifier AI.`);
+            }
+
+            const emptySlots = shipCapacity - player.ship.length;
+            if (emptySlots < potentialCardsAfterDraw && personality.shipFillPreference < 0.7) {
+                desireToDraw -= 0.2;
+                console.log(`[shouldAIDrawMore] Decreased desire due to few empty slots and low ship fill preference.`);
+            }
+
+            desireToDraw += (Math.random() * 0.2) - 0.1;
+            console.log(`[shouldAIDrawMore] Final desireToDraw (with random): ${desireToDraw}`);
+
+            const result = desireToDraw > 0.5;
+            console.log(`[shouldAIDrawMore] Final decision: ${result}`);
+            return result;
+        };
+
+
+        // --- Lobby Component ---
+        const Lobby = ({ onGameCreated, onGameJoined }) => {
+            const { supabase, userId, isAuthReady } = useSupabase();
+            const [gameIdInput, setGameIdInput] = useState('');
+            const [creatingGame, setCreatingGame] = useState(false);
+            const [joiningGame, setJoiningGame] = useState(false);
+            const [message, setMessage] = useState('');
+            const [numAIPlayers, setNumAIPlayers] = useState(0);
+
+            const handleCreateGame = async () => {
+                if (!supabase || !isAuthReady || !userId) {
+                    setMessage("Supabase not ready or user ID not available. Please wait.");
+                    return;
+                }
+
+                setCreatingGame(true);
+                const newJoinCode = generateGameId();
+
+                const initialPlayersMap = new Map();
+                initialPlayersMap.set(userId, { id: userId, name: `Player ${userId.substring(0, 4)}`, ship: [], commodityCounts: {}, isAI: false });
+
+                for (let i = 0; i < numAIPlayers; i++) {
+                    const aiId = `AI_${Math.random().toString(36).substring(2, 10)}`;
+                    const randomPersonality = AI_PERSONALITIES_DEFINITIONS[Math.floor(Math.random() * AI_PERSONALITIES_DEFINITIONS.length)];
+                    console.log(`AI ${i + 1} assigned personality: ${randomPersonality.type}`);
+                    initialPlayersMap.set(aiId, {
+                        id: aiId,
+                        name: `AI ${i + 1}`,
+                        ship: [],
+                        commodityCounts: {},
+                        isAI: true,
+                        personality: randomPersonality
+                    });
+                }
+                const initialPlayers = Array.from(initialPlayersMap.values());
+
+                if (initialPlayers.length === 0) {
+                    setMessage("Cannot create a game with 0 players. Please add at least one human or AI player.");
+                    setCreatingGame(false);
+                    return;
+                }
+
+                const initialPlayerOrder = Array.from(initialPlayersMap.keys());
+                for (let i = initialPlayerOrder.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [initialPlayerOrder[i], initialPlayerOrder[j]] = [initialPlayerOrder[j], initialPlayerOrder[i]];
+                }
+
+                const totalPlayers = initialPlayers.length;
+                const initialMoney = (totalPlayers >= 2 && totalPlayers <= 4) ? 40 : 30;
+                const shipCapacity = (totalPlayers === 2) ? 7 : 5;
+
+                initialPlayers.forEach(player => {
+                    player.money = initialMoney;
+                });
+
+                const allCards = [];
+                const commodityTypes = ['cloth', 'fur', 'grain', 'dye', 'spice'];
+                const commodityValues = [0, 1, 2, 3, 4, 5, 5];
+                let cardCounter = 0;
+
+                commodityTypes.forEach(type => {
+                    commodityValues.forEach(value => {
+                        allCards.push({ id: `card_${cardCounter++}`, type: type, value: value });
+                    });
+                });
+                allCards.push({ id: `card_${cardCounter++}`, type: 'gold', value: 10 });
+
+                let cardsToRemove = 0;
+                if (totalPlayers === 2 || totalPlayers === 3) {
+                    cardsToRemove = 18;
+                } else if (totalPlayers === 4) {
+                    cardsToRemove = 12;
+                } else if (totalPlayers === 5) {
+                    cardsToRemove = 6;
+                }
+
+                const shuffledAllCards = [...allCards].sort(() => Math.random() - 0.5);
+                const initialDeck = shuffledAllCards.slice(cardsToRemove);
+
+                const initialCommodityTrackPositions = {};
+                commodityTypes.forEach(type => {
+                    initialCommodityTrackPositions[type] = {};
+                    initialPlayerOrder.forEach(playerId => {
+                        initialCommodityTrackPositions[type][playerId] = 1;
+                    });
+                });
+
+                const initialGameData = {
+                    host_user_id: userId,
+                    join_code: newJoinCode,
+                    players: initialPlayers,
+                    deck: initialDeck,
+                    discard_pile: [],
+                    current_day: 1,
+                    current_player_id: initialPlayerOrder[0],
+                    auction: {
+                        cards: [],
+                        highest_bid: 0,
+                        highest_bidder_id: null,
+                        bids: {},
+                        auctioneer_id: null,
+                        status: 'inactive',
+                        bidding_order: [],
+                        current_bidder_index: -1
+                    },
+                    status: "lobby",
+                    message: "",
+                    player_order: initialPlayerOrder,
+                    commodity_track_positions: initialCommodityTrackPositions,
+                    ship_capacity: shipCapacity,
+                    last_day_scoring_summary: null,
+                    initial_cards_removed_count: cardsToRemove
+                };
+
+                console.log("Attempting to create game with data:", initialGameData);
+
+                try {
+                    const { data, error } = await supabase
+                        .from('games')
+                        .insert(initialGameData)
+                        .select()
+                        .single();
+
+                    if (error) {
+                        console.error("Error creating game:", error);
+                        setMessage(`Failed to create game: ${error.message}`);
+                        return;
+                    }
+
+                    onGameCreated(data.id);
+
+                } catch (e) {
+                    console.error("Error creating game (catch block): ", e);
+                    setMessage("Failed to create game. Please try again.");
+                } finally {
+                    setCreatingGame(false);
+                }
+            };
+
+            const handleJoinGame = async (joinGameIdInput) => {
+                if (!supabase || !isAuthReady || !userId) {
+                    setMessage("Supabase not ready or user ID not available. Please wait.");
+                    return;
+                }
+                if (!joinGameIdInput.trim()) {
+                    setMessage("Please enter a Game ID to join.");
+                    return;
+                }
+
+                setJoiningGame(true);
+
+                try {
+                    const { data: gameDataArray, error: fetchError } = await supabase
+                        .from('games')
+                        .select('*')
+                        .eq('join_code', joinGameIdInput.trim().toUpperCase());
+
+                    if (fetchError) {
+                        console.error("Error fetching game:", fetchError);
+                        setMessage(`Failed to join game: ${fetchError.message}`);
+                        return;
+                    }
+
+                    if (!gameDataArray || gameDataArray.length === 0) {
+                        setMessage("Game not found. Please check the Game ID.");
+                        return;
+                    }
+
+                    const gameData = gameDataArray[0];
+                    const gameId = gameData.id;
+
+                    if (gameData.status !== 'lobby') {
+                        setMessage("This game has already started or is over. You can only join games in the lobby.");
+                        return;
+                    }
+
+                    if (gameData.players.some(p => p.id === userId)) {
+                        setMessage("You are already in this game!");
+                        onGameJoined(gameId);
+                        return;
+                    }
+
+                    if (gameData.players.length >= 6) {
+                        setMessage("This game is full. Maximum 6 players allowed.");
+                        return;
+                    }
+
+                    const newPlayer = {
+                        id: userId,
+                        name: `Player ${userId.substring(0, 4)}`,
+                        ship: [],
+                        commodityCounts: {},
+                        isAI: false,
+                        money: gameData.players[0]?.money || 40
+                    };
+
+                    const updatedPlayers = [...gameData.players, newPlayer];
+                    const updatedPlayerOrder = [...gameData.player_order, userId];
+                    const updatedCommodityTrackPositions = { ...gameData.commodity_track_positions };
+                    Object.keys(updatedCommodityTrackPositions).forEach(type => {
+                        updatedCommodityTrackPositions[type][userId] = 1;
+                    });
+
+                    const totalPlayersAfterJoin = updatedPlayers.length;
+                    const newShipCapacity = (totalPlayersAfterJoin === 2) ? 7 : 5;
+
+                    const { error: updateError } = await supabase
+                        .from('games')
+                        .update({
+                            players: updatedPlayers,
+                            player_order: updatedPlayerOrder,
+                            commodity_track_positions: updatedCommodityTrackPositions,
+                            ship_capacity: newShipCapacity,
+                            message: `${newPlayer.name} has joined the game!`
+                        })
+                        .eq('id', gameId);
+
+                    if (updateError) {
+                        console.error("Error updating game to join:", updateError);
+                        setMessage(`Failed to join game: ${updateError.message}`);
+                        return;
+                    }
+
+                    onGameJoined(gameId);
+
+                } catch (e) {
+                    console.error("Error joining game (catch block): ", e);
+                    setMessage("Failed to join game. Please try again.");
+                } finally {
+                    setJoiningGame(false);
+                }
+            };
+
+            return (
+                <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-4 font-inter">
+                    <MessageModal message={message} onClose={() => setMessage('')} />
+                    <div className="bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-md text-center border border-gray-700">
+                        <h1 className="text-4xl font-extrabold text-gray-100 mb-6">Medici</h1>
+                        <p className="text-gray-300 mb-8">Play with AI or friends!</p>
+
+                        <div className="mb-6">
+                            <div className="flex items-center justify-center mb-4">
+                                <label htmlFor="num-ai" className="mr-3 text-gray-300 font-medium">Number of AI Players:</label>
+                                <select
+                                    id="num-ai"
+                                    value={numAIPlayers}
+                                    onChange={(e) => setNumAIPlayers(parseInt(e.target.value))}
+                                    className="p-2 border border-gray-600 bg-gray-700 text-gray-100 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                >
+                                    <option value={0}>0</option>
+                                    <option value={1}>1</option>
+                                    <option value={2}>2</option>
+                                    <option value={3}>3</option>
+                                    <option value={4}>4</option>
+                                    <option value={5}>5</option>
+                                </select>
+                            </div>
+                            <button
+                                onClick={handleCreateGame}
+                                disabled={creatingGame || !isAuthReady}
+                                className="w-full py-3 px-6 bg-green-600 text-white font-bold rounded-lg shadow-md hover:bg-green-700 transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
+                            >
+                                {creatingGame ? 'Creating Game...' : `Create New Game`}
+                            </button>
+                        </div>
+
+                        <div className="relative flex py-5 items-center">
+                            <div className="flex-grow border-t border-gray-600"></div>
+                            <span className="flex-shrink mx-4 text-gray-400">OR</span>
+                            <div className="flex-grow border-t border-gray-600"></div>
+                        </div>
+
+                        <div className="mb-4">
+                            <input
+                                type="text"
+                                placeholder="Enter Game ID"
+                                value={gameIdInput}
+                                onChange={(e) => setGameIdInput(e.target.value)}
+                                className="w-full p-3 border border-gray-600 bg-gray-700 text-gray-100 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-center uppercase tracking-wider"
+                            />
+                        </div>
+                        <button
+                            onClick={() => handleJoinGame(gameIdInput)}
+                            disabled={joiningGame || !isAuthReady || gameIdInput.trim() === ''}
+                            className="w-full py-3 px-6 bg-blue-600 text-white font-bold rounded-lg shadow-md hover:bg-blue-700 transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
+                        >
+                            {joiningGame ? 'Joining Game...' : 'Join Game'}
+                        </button>
+                    </div>
+                    {userId && isAuthReady && (
+                        <p className="mt-4 text-sm text-gray-400">Your User ID: <span className="font-mono bg-gray-700 px-2 py-1 rounded">{userId}</span></p>
+                    )}
+                </div>
+            );
+        };
+
+        // --- Game Board Component ---
+        const GameBoard = ({ gameId, onGameReset }) => {
+            const { supabase, userId, isAuthReady } = useSupabase();
+            const [gameData, setGameData] = useState(null);
+            const [loadingGame, setLoadingGame] = useState(true);
+            const [message, setMessage] = useState('');
+            const [bidAmount, setBidAmount] = useState(0);
+            const [showFinalScoreModal, setShowFinalScoreModal] = useState(false);
+            const [isProcessingAITurn, setIsProcessingAITurn] = useState(false); // New state for AI turn processing
+
+            const handlePass = useCallback(async () => {
+                if (!supabase || !gameData || gameData.auction.status !== 'bidding') {
+                    setMessage("It's not your turn to pass, or no auction is active.");
+                    return;
+                }
+                const currentPlayer = gameData.players.find(p => p.id === userId);
+                const currentBidderId = gameData.auction.status === 'bidding' && gameData.auction.current_bidder_index !== -1
+                    ? gameData.auction.bidding_order[gameData.auction.current_bidder_index]
+                    : null;
+
+                if (currentBidderId !== userId) {
+                    setMessage("It's not your turn to pass.");
+                    return;
+                }
+
+                const nextBidderIndex = (gameData.auction.current_bidder_index + 1);
+                const isLastBidderInRound = nextBidderIndex === gameData.auction.bidding_order.length;
+
+                try {
+                    if (!isLastBidderInRound) {
+                        const { error } = await supabase
+                            .from('games')
+                            .update({
+                                auction: {
+                                    ...gameData.auction,
+                                    current_bidder_index: nextBidderIndex
+                                },
+                                message: `${currentPlayer.name} passed.`
+                            })
+                            .eq('id', gameId);
+
+                        if (error) throw error;
+
+                    } else {
+                        let auctionWinnerId = gameData.auction.highest_bidder_id;
+                        let winningBid = gameData.auction.highest_bid;
+                        let auctionMessage = "";
+                        let updatedPlayers = [...gameData.players];
+                        let updatedDiscardPile = [...gameData.discard_pile];
+
+                        if (winningBid > 0 && auctionWinnerId) {
+                            const winnerName = gameData.players.find(p => p.id === auctionWinnerId)?.name;
+                            auctionMessage = `Auction ended. ${winnerName} won with a bid of ${winningBid}!`;
+                            updatedPlayers = updatedPlayers.map(p =>
+                                p.id === auctionWinnerId ? { ...p, money: p.money - winningBid, ship: [...p.ship, ...gameData.auction.cards] } : p
+                            );
+                        } else {
+                            auctionMessage = `Auction ended. No one won. Cards discarded.`;
+                            updatedDiscardPile = [...gameData.discard_pile, ...gameData.auction.cards];
+                        }
+
+                        const { nextPlayerId, allShipsFull } = findNextEligiblePlayer(gameData, gameData.current_player_id);
+
+                        if (allShipsFull || (gameData.deck.length === 0 && gameData.auction.cards.length === 0)) {
+                            const { error } = await supabase
+                                .from('games')
+                                .update({
+                                    players: updatedPlayers,
+                                    discard_pile: updatedDiscardPile,
+                                    status: 'day_scoring',
+                                    message: `${auctionMessage} Day ${gameData.current_day} ended. All ships are full or deck is empty!`
+                                })
+                                .eq('id', gameId);
+                            if (error) throw error;
+                        } else {
+                            const { error } = await supabase
+                                .from('games')
+                                .update({
+                                    players: updatedPlayers,
+                                    discard_pile: updatedDiscardPile,
+                                    current_player_id: nextPlayerId,
+                                    auction: {
+                                        cards: [],
+                                        highest_bid: 0,
+                                        highest_bidder_id: null,
+                                        bids: {},
+                                        auctioneer_id: null,
+                                        status: 'inactive',
+                                        bidding_order: [],
+                                        current_bidder_index: -1
+                                    },
+                                    message: `${auctionMessage} Next turn: ${gameData.players.find(p => p.id === nextPlayerId)?.name}.`
+                                })
+                                .eq('id', gameId);
+                            if (error) throw error;
+                        }
+                    }
+                } catch (e) {
+                    console.error("Error passing:", e);
+                    setMessage("Failed to pass.");
+                }
+            }, [supabase, userId, gameData, gameId]);
+
+
+            const handleDrawCard = useCallback(async () => {
+                if (!supabase || !userId || !gameData) {
+                    setMessage("Supabase not ready or game data missing.");
+                    return;
+                }
+
+                const currentPlayer = gameData.players.find(p => p.id === userId);
+
+                if (gameData.current_player_id !== userId || (gameData.auction.status !== 'inactive' && gameData.auction.status !== 'drawing')) {
+                    setMessage("It's not your turn to draw cards.");
+                    return;
+                }
+
+                if (gameData.deck.length === 0) {
+                    setMessage(`No cards left in the deck.`);
+                    if (gameData.auction.cards.length === 0) {
+                         const { nextPlayerId, allShipsFull } = findNextEligiblePlayer(gameData, gameData.current_player_id);
+                         if (allShipsFull) {
+                             const { error } = await supabase
+                                 .from('games')
+                                 .update({
+                                     status: 'day_scoring',
+                                     message: `Day ${gameData.current_day} ended. All ships are full or deck is empty!`
+                                 })
+                                 .eq('id', gameId);
+                             if (error) throw error;
+                         } else {
+                             const { error } = await supabase
+                                 .from('games')
+                                 .update({
+                                     current_player_id: nextPlayerId,
+                                     message: `Deck is empty. ${currentPlayer.name} passed turn.`
+                                 })
+                                 .eq('id', gameId);
+                             if (error) throw error;
+                         }
+                    } else {
+                        const biddingOrder = getBiddingOrder(gameData.player_order, userId);
+                        const { error } = await supabase
+                            .from('games')
+                            .update({
+                                auction: {
+                                    ...gameData.auction,
+                                    status: 'bidding',
+                                    bidding_order: biddingOrder,
+                                    current_bidder_index: 0,
+                                    auctioneer_id: userId // Set auctioneer when auction starts
+                                },
+                                message: `Deck is empty. Auction for ${gameData.auction.cards.length} card(s) begins!`
+                            })
+                            .eq('id', gameId);
+                        if (error) throw error;
+                    }
+                    return;
+                }
+
+                if (gameData.auction.cards.length >= 3) {
+                    setMessage("You can only draw a maximum of 3 cards.");
+                    return;
+                }
+
+                const shipCapacity = gameData.ship_capacity || 5;
+                const potentialCardsAfterDraw = gameData.auction.cards.length + 1;
+
+                const canAnyPlayerAccommodateNextDraw = gameData.players.some(p => p.ship.length + potentialCardsAfterDraw <= shipCapacity);
+
+                if (!canAnyPlayerAccommodateNextDraw) {
+                    setMessage(`Drawing another card would make the lot too large for anyone's ship. Auction for ${gameData.auction.cards.length} card(s) begins!`);
+                    const biddingOrder = getBiddingOrder(gameData.player_order, userId);
+                    const { error } = await supabase
+                        .from('games')
+                        .update({
+                            auction: {
+                                ...gameData.auction,
+                                status: 'bidding',
+                                bidding_order: biddingOrder,
+                                current_bidder_index: 0,
+                                auctioneer_id: userId // Set auctioneer when auction starts
+                            },
+                            message: `No one can accommodate more cards. Auction for ${gameData.auction.cards.length} card(s) begins!`
+                        })
+                        .eq('id', gameId);
+                    if (error) throw error;
+                    setBidAmount(0);
+                    return;
+                }
+
+
+                const drawnCard = gameData.deck[0];
+                const updatedAuctionCards = [...gameData.auction.cards, drawnCard];
+                const remainingDeck = gameData.deck.slice(1);
+
+                let newAuctionStatus = 'drawing';
+                let messageText = `${currentPlayer.name} drew a ${drawnCard.type} card (Value: ${drawnCard.value}).`;
+
+                if (updatedAuctionCards.length === 3 || remainingDeck.length === 0) {
+                    newAuctionStatus = 'bidding';
+                    const biddingOrder = getBiddingOrder(gameData.player_order, userId);
+                    const { error } = await supabase
+                        .from('games')
+                        .update({
+                            deck: remainingDeck,
+                            auction: {
+                                ...gameData.auction,
+                                cards: updatedAuctionCards,
+                                status: newAuctionStatus,
+                                bidding_order: biddingOrder,
+                                current_bidder_index: 0,
+                                auctioneer_id: userId // Set auctioneer when auction starts
+                            },
+                            message: messageText
+                        })
+                        .eq('id', gameId);
+                    if (error) throw error;
+                } else {
+                    const { error } = await supabase
+                        .from('games')
+                        .update({
+                            deck: remainingDeck,
+                            auction: {
+                                ...gameData.auction,
+                                cards: updatedAuctionCards,
+                                status: newAuctionStatus,
+                            },
+                            message: messageText
+                        })
+                        .eq('id', gameId);
+                    if (error) throw error;
+                }
+                setBidAmount(0);
+            }, [supabase, userId, gameData, gameId]);
+
+            const handleStartAuction = useCallback(async () => {
+                if (!supabase || !userId || !gameData || gameData.current_player_id !== userId || gameData.auction.status !== 'drawing' || gameData.auction.cards.length === 0) {
+                    setMessage("Cannot start auction. Either it's not your turn, no cards are drawn, or auction is already active.");
+                    return;
+                }
+
+                const biddingOrder = getBiddingOrder(gameData.player_order, userId);
+
+                try {
+                    const { error } = await supabase
+                        .from('games')
+                        .update({
+                            auction: {
+                                ...gameData.auction,
+                                status: 'bidding',
+                                bidding_order: biddingOrder,
+                                current_bidder_index: 0,
+                                auctioneer_id: userId // Set auctioneer when auction starts
+                            },
+                            message: `Auction for ${gameData.auction.cards.length} card(s)!`
+                        })
+                        .eq('id', gameId);
+                    if (error) throw error;
+                    setBidAmount(0);
+                } catch (e) {
+                    console.error("Error starting auction:", e);
+                    setMessage("Failed to start auction.");
+                }
+            }, [supabase, userId, gameData, gameId]);
+
+
+            const handlePlaceBid = useCallback(async () => {
+                if (!supabase || !userId || !gameData || gameData.auction.status !== 'bidding') {
+                    setMessage("It's not your turn to bid, or no auction is active.");
+                    return;
+                }
+                const currentPlayer = gameData.players.find(p => p.id === userId);
+                const currentBidderId = gameData.auction.status === 'bidding' && gameData.auction.current_bidder_index !== -1
+                    ? gameData.auction.bidding_order[gameData.auction.current_bidder_index]
+                    : null;
+
+                if (currentBidderId !== userId) {
+                    setMessage("It's not your turn to bid.");
+                    return;
+                }
+
+                const shipCapacity = gameData.ship_capacity || 5;
+                if (currentPlayer.ship.length + gameData.auction.cards.length > shipCapacity) {
+                    setMessage("Your ship is full or cannot hold these cards. Your turn will be skipped automatically.");
+                    return;
+                }
+
+                if (bidAmount <= gameData.auction.highest_bid) {
+                    setMessage(`Your bid must be higher than the current highest bid (${gameData.auction.highest_bid}).`);
+                    return;
+                }
+                if (bidAmount > currentPlayer.money) {
+                    setMessage("You don't have enough money for this bid.");
+                    return;
+                }
+                if (bidAmount < 1) {
+                    setMessage("You must bid at least 1 florin.");
+                    return;
+                }
+
+
+                const nextBidderIndex = (gameData.auction.current_bidder_index + 1);
+                const updatedBids = { ...gameData.auction.bids, [userId]: bidAmount };
+                const isLastBidderInRound = nextBidderIndex === gameData.auction.bidding_order.length;
+
+                try {
+                    if (!isLastBidderInRound) {
+                        const { error } = await supabase
+                            .from('games')
+                            .update({
+                                auction: {
+                                    ...gameData.auction,
+                                    highest_bid: bidAmount,
+                                    highest_bidder_id: userId,
+                                    bids: updatedBids,
+                                    current_bidder_index: nextBidderIndex
+                                },
+                                message: `${currentPlayer.name} bid ${bidAmount}.`
+                            })
+                            .eq('id', gameId);
+                        if (error) throw error;
+                    } else {
+                        let auctionWinnerId = userId;
+                        let winningBid = bidAmount;
+                        let auctionMessage = "";
+
+                        const updatedPlayers = gameData.players.map(p =>
+                            p.id === auctionWinnerId ? { ...p, money: p.money - winningBid, ship: [...p.ship, ...gameData.auction.cards] } : p
+                        );
+                        auctionMessage = `Auction ended. ${currentPlayer.name} won with a bid of ${winningBid}!`;
+
+                        const { nextPlayerId, allShipsFull } = findNextEligiblePlayer({ ...gameData, players: updatedPlayers }, gameData.current_player_id);
+
+                        if (allShipsFull || (gameData.deck.length === 0 && gameData.auction.cards.length === 0)) {
+                            const { error } = await supabase
+                                .from('games')
+                                .update({
+                                    players: updatedPlayers,
+                                    status: 'day_scoring',
+                                    message: `${auctionMessage} Day ${gameData.current_day} ended. All ships are full or deck is empty!`
+                                })
+                                .eq('id', gameId);
+                            if (error) throw error;
+                        } else {
+                            const { error } = await supabase
+                                .from('games')
+                                .update({
+                                    players: updatedPlayers,
+                                    current_player_id: nextPlayerId,
+                                    auction: {
+                                        cards: [],
+                                        highest_bid: 0,
+                                        highest_bidder_id: null,
+                                        bids: {},
+                                        auctioneer_id: null,
+                                        status: 'inactive',
+                                        bidding_order: [],
+                                        current_bidder_index: -1
+                                    },
+                                    message: `${auctionMessage} Next turn: ${gameData.players.find(p => p.id === nextPlayerId)?.name}.`
+                                })
+                                .eq('id', gameId);
+                            if (error) throw error;
+                        }
+                    }
+                } catch (e) {
+                    console.error("Error placing bid:", e);
+                    setMessage("Failed to place bid.");
+                }
+            }, [supabase, userId, gameData, gameId, bidAmount]);
+
+
+            // --- Day Scoring Logic ---
+            const handleDayScoring = useCallback(async () => {
+                if (!supabase || !gameData) return;
+
+                let updatedPlayers = [...gameData.players];
+                let newCommodityTrackPositions = { ...gameData.commodity_track_positions };
+                const scoringSummary = [];
+
+                // 1. Ship Value Scoring
+                const playersWithShipValues = updatedPlayers.map(player => ({
+                    ...player,
+                    shipValue: (player.ship || []).reduce((sum, card) => sum + card.value, 0)
+                }));
+
+                playersWithShipValues.sort((a, b) => b.shipValue - a.shipValue);
+
+                const numPlayers = playersWithShipValues.length;
+                const shipPaymentTable = {
+                    2: [20, 0],
+                    3: [30, 15, 0],
+                    4: [30, 20, 10, 0],
+                    5: [30, 20, 10, 5, 0],
+                    6: [30, 20, 15, 10, 5, 0]
+                };
+                const payments = shipPaymentTable[numPlayers];
+
+                let currentRank = 0;
+                for (let i = 0; i < playersWithShipValues.length; i++) {
+                    currentRank = i;
+                    let tiedPlayers = [playersWithShipValues[i]];
+                    let j = i + 1;
+                    while (j < playersWithShipValues.length && playersWithShipValues[j].shipValue === playersWithShipValues[i].shipValue) {
+                        tiedPlayers.push(playersWithShipValues[j]);
+                        j++;
+                    }
+
+                    const totalPaymentForTiedRank = tiedPlayers.reduce((sum, _, idx) => {
+                        const rankPayment = payments[currentRank + idx] || 0;
+                        return sum + rankPayment;
+                    }, 0);
+
+                    const paymentPerTiedPlayer = Math.floor(totalPaymentForTiedRank / tiedPlayers.length);
+
+                    tiedPlayers.forEach(tiedPlayer => {
+                        updatedPlayers = updatedPlayers.map(p =>
+                            p.id === tiedPlayer.id ? { ...p, money: p.money + paymentPerTiedPlayer } : p
+                        );
+                        let playerSummary = scoringSummary.find(s => s.playerId === tiedPlayer.id);
+                        if (!playerSummary) {
+                            const playerObj = gameData.players.find(p => p.id === tiedPlayer.id);
+                            playerSummary = { playerId: tiedPlayer.id, playerName: playerObj?.name, shipValuePoints: 0, commodityBonuses: {}, totalDayPoints: 0 };
+                            scoringSummary.push(playerSummary);
+                        }
+                        playerSummary.shipValuePoints += paymentPerTiedPlayer;
+                        playerSummary.totalDayPoints += paymentPerTiedPlayer;
+                    });
+                    i = j - 1;
+                }
+
+                // 2. Commodity Track Scoring (1st and 2nd place bonuses with ties)
+                const commodityBonusPointsForRanks = [10, 5];
+
+                const commodityTypes = ['cloth', 'fur', 'grain', 'dye', 'spice'];
+
+                commodityTypes.forEach(type => {
+                    updatedPlayers.forEach(player => {
+                        const cardsOfThisType = (player.ship || []).filter(card => card.type === type).length;
+                        const currentLevel = newCommodityTrackPositions[type]?.[player.id] || 1;
+                        newCommodityTrackPositions[type][player.id] = Math.min(8, currentLevel + cardsOfThisType);
+                    });
+
+                    const eligiblePlayersOnTrack = updatedPlayers.filter(player => newCommodityTrackPositions[type]?.[player.id] > 1).map(player => ({
+                        id: player.id,
+                        name: player.name,
+                        position: newCommodityTrackPositions[type]?.[player.id]
+                    }));
+
+                    eligiblePlayersOnTrack.sort((a, b) => b.position - a.position);
+
+                    const rankings = [];
+                    if (eligiblePlayersOnTrack.length > 0) {
+                        let currentRankGroup = { position: eligiblePlayersOnTrack[0].position, players: [eligiblePlayersOnTrack[0].id] };
+                        for (let i = 1; i < eligiblePlayersOnTrack.length; i++) {
+                            if (eligiblePlayersOnTrack[i].position === currentRankGroup.position) {
+                                currentRankGroup.players.push(eligiblePlayersOnTrack[i].id);
+                            } else {
+                                rankings.push(currentRankGroup);
+                                currentRankGroup = { position: eligiblePlayersOnTrack[i].position, players: [eligiblePlayersOnTrack[i].id] };
+                            }
+                        }
+                        rankings.push(currentRankGroup);
+                    }
+
+                    let currentRankIndex = 0;
+                    for (const rankGroup of rankings) {
+                        let totalPointsForGroup = 0;
+                        const numPlayersInGroup = rankGroup.players.length;
+
+                        for (let i = 0; i < numPlayersInGroup; i++) {
+                            const pointsForThisSubRank = commodityBonusPointsForRanks[currentRankIndex + i] || 0;
+                            totalPointsForGroup += pointsForThisSubRank;
+                        }
+
+                        const pointsPerPlayer = Math.floor(totalPointsForGroup / numPlayersInGroup);
+
+                        rankGroup.players.forEach(playerId => {
+                            updatedPlayers = updatedPlayers.map(player =>
+                                player.id === playerId ? { ...player, money: player.money + pointsPerPlayer } : p
+                            );
+                            let playerSummary = scoringSummary.find(s => s.playerId === playerId);
+                            if (!playerSummary) {
+                                const playerObj = gameData.players.find(p => p.id === playerId);
+                                playerSummary = { playerId: playerId, playerName: playerObj?.name, shipValuePoints: 0, commodityBonuses: {}, totalDayPoints: 0 };
+                                scoringSummary.push(playerSummary);
+                            }
+                            playerSummary.commodityBonuses[type] = (playerSummary.commodityBonuses[type] || 0) + pointsPerPlayer;
+                            playerSummary.totalDayPoints += pointsPerPlayer;
+                        });
+                        currentRankIndex += numPlayersInGroup;
+                    }
+
+                    // 3. Commodity Track Level-Based Bonuses (no ties, per player)
+                    const trackLevelBonusPoints = {
+                        6: 5,
+                        7: 10,
+                        8: 20
+                    };
+
+                    updatedPlayers.forEach(player => {
+                        const finalPosition = newCommodityTrackPositions[type]?.[player.id];
+                        const bonus = trackLevelBonusPoints[finalPosition] || 0;
+
+                        if (bonus > 0) {
+                            updatedPlayers = updatedPlayers.map(p =>
+                                p.id === player.id ? { ...p, money: p.money + bonus } : p
+                            );
+                            let playerSummary = scoringSummary.find(s => s.playerId === player.id);
+                            if (!playerSummary) {
+                                playerSummary = { playerId: player.id, playerName: player.name, shipValuePoints: 0, commodityBonuses: {}, totalDayPoints: 0 };
+                                scoringSummary.push(playerSummary);
+                            }
+                            playerSummary.commodityBonuses[type] = (playerSummary.commodityBonuses[type] || 0) + bonus;
+                            playerSummary.totalDayPoints += bonus;
+                        }
+                    });
+                });
+
+
+                try {
+                    const { error } = await supabase
+                        .from('games')
+                        .update({
+                            players: updatedPlayers,
+                            commodity_track_positions: newCommodityTrackPositions,
+                            last_day_scoring_summary: scoringSummary,
+                            status: 'awaiting_scoring_ack',
+                            message: `Day ${gameData.current_day} scoring complete! Review your points.`
+                        })
+                        .eq('id', gameId);
+                    if (error) throw error;
+                    console.log("Day Scoring Complete. Players updated in Supabase:", updatedPlayers);
+                } catch (e) {
+                    console.error("Error during day scoring:", e);
+                    setMessage("Failed to complete day scoring.");
+                }
+            }, [supabase, gameData, gameId]);
+
+            const handleScoringAcknowledged = useCallback(async () => {
+                if (!supabase || !gameData) return;
+
+                console.log("[handleScoringAcknowledged] === START ===");
+                console.log("[handleScoringAcknowledged] Current gameData.deck (before collecting from ships):", gameData.deck);
+                console.log("[handleScoringAcknowledged] Current gameData.discard_pile (before collecting from ships):", gameData.discard_pile);
+                gameData.players.forEach(p => console.log(`[handleScoringAcknowledged] Player ${p.name}'s ship (before reset):`, p.ship));
+
+
+                let playersForNextDay = [...gameData.players];
+                console.log("[handleScoringAcknowledged] Players before day transition (should have updated money):", playersForNextDay);
+
+                let newDeck = [];
+                let newDiscardPile = [];
+                let nextCurrentPlayerId = null;
+                let newGameStatus = 'playing';
+                let newGameMessage = '';
+                let shouldShowFinalScore = false;
+
+                const numPlayers = playersForNextDay.length;
+
+                let nextDay = gameData.current_day + 1;
+                if (nextDay > 3) {
+                    newGameStatus = 'game_over';
+                    newGameMessage = 'Game Over! Final Scoring Completed.';
+                    shouldShowFinalScore = true;
+                } else {
+                    let allCardsInPlay = [...gameData.deck, ...gameData.discard_pile];
+                    gameData.players.forEach(player => {
+                        if (player.ship && player.ship.length > 0) {
+                            allCardsInPlay = [...allCardsInPlay, ...player.ship];
+                        }
+                    });
+                    console.log(`[handleScoringAcknowledged] Total cards collected for reshuffle (deck + discard + ships): ${allCardsInPlay.length}`);
+
+                    playersForNextDay = playersForNextDay.map(player => ({
+                        ...player,
+                        ship: []
+                    }));
+
+                    const shuffledAllCardsInPlay = [...allCardsInPlay].sort(() => Math.random() - 0.5);
+
+                    const expectedDeckSize = 36 - gameData.initial_cards_removed_count;
+                    newDeck = shuffledAllCardsInPlay.slice(0, expectedDeckSize);
+                    newDiscardPile = shuffledAllCardsInPlay.slice(expectedDeckSize);
+
+                    console.log(`[handleScoringAcknowledged] Day ${nextDay} starts. Expected deck size: ${expectedDeckSize}, New deck size: ${newDeck.length}, New discard pile size: ${newDiscardPile.length}`);
+
+
+                    const playersSortedByMoney = [...playersForNextDay].sort((a, b) => a.money - b.money);
+                    nextCurrentPlayerId = playersSortedByMoney[0].id;
+                    newGameMessage = `Day ${nextDay} begins! ${playersSortedByMoney[0].name} starts.`;
+                }
+
+                try {
+                    const { error } = await supabase
+                        .from('games')
+                        .update({
+                            players: playersForNextDay,
+                            current_day: nextDay,
+                            deck: newDeck,
+                            discard_pile: newDiscardPile,
+                            current_player_id: nextCurrentPlayerId,
+                            status: newGameStatus,
+                            message: newGameMessage,
+                            last_day_scoring_summary: null,
+                            auction: {
+                                cards: [],
+                                highest_bid: 0,
+                                highest_bidder_id: null,
+                                bids: {},
+                                auctioneer_id: null,
+                                status: 'inactive',
+                                bidding_order: [],
+                                current_bidder_index: -1
+                            }
+                        })
+                        .eq('id', gameId);
+                    if (error) throw error;
+
+                    if (shouldShowFinalScore) {
+                        setShowFinalScoreModal(true);
+                    }
+                    console.log("[handleScoringAcknowledged] Supabase updated for next day/game over. Players:", playersForNextDay);
+                    console.log("[handleScoringAcknowledged] Next Current Player ID:", nextCurrentPlayerId);
+                    console.log("[handleScoringAcknowledged] New Deck Length after update to Supabase:", newDeck.length);
+                    console.log("[handleScoringAcknowledged] === END ===");
+                } catch (e) {
+                    console.error("Error acknowledging scoring:", e);
+                    setMessage("Failed to proceed after scoring.");
+                }
+            }, [supabase, gameData, gameId]);
+
+
+            useEffect(() => {
+                if (gameData?.status === 'day_scoring' && !loadingGame) {
+                    console.log("Initiating day scoring...");
+                    handleDayScoring();
+                }
+            }, [gameData?.status, loadingGame, handleDayScoring]);
+
+
+            useEffect(() => {
+                if (!supabase || !gameId || !isAuthReady) return;
+
+                const gameChannel = supabase
+                    .channel(`game_${gameId}`)
+                    .on(
+                        'postgres_changes',
+                        {
+                            event: '*',
+                            schema: 'public',
+                            table: 'games',
+                            filter: `id=eq.${gameId}`,
+                        },
+                        (payload) => {
+                            if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
+                                console.log("[DEBUG] Realtime Update: Payload received. New status:", payload.new.status);
+                                setGameData(payload.new);
+                                setLoadingGame(false);
+                                console.log("Game Data Updated by Realtime:", payload.new);
+                                console.log("Players array after update:", payload.new.players);
+                            } else if (payload.eventType === 'DELETE') {
+                                setMessage("Game was deleted or ended by host.");
+                                setGameData(null);
+                                setLoadingGame(false);
+                            }
+                        }
+                    )
+                    .subscribe((status) => {
+                        if (status === 'SUBSCRIBED') {
+                            console.log(`Subscribed to game ${gameId} changes.`);
+                            supabase
+                                .from('games')
+                                .select('*')
+                                .eq('id', gameId)
+                                .single()
+                                .then(({ data, error }) => {
+                                    if (error) console.error('Error fetching initial game state:', error);
+                                    else if (data) {
+                                        setGameData(data);
+                                        setLoadingGame(false);
+                                        console.log("Initial Game Data Fetched:", data);
+                                    } else {
+                                        setMessage("Game not found or deleted.");
+                                        setLoadingGame(false);
+                                    }
+                                });
+                        } else if (status === 'CHANNEL_ERROR') {
+                            console.error(`Error subscribing to channel ${gameId}`);
+                            setMessage("Error connecting to game updates.");
+                            setLoadingGame(false);
+                        }
+                    });
+
+                return () => {
+                    console.log(`Unsubscribing from game ${gameId} channel.`);
+                    supabase.removeChannel(gameChannel);
+                };
+            }, [supabase, gameId, isAuthReady]);
+
+            // Effect to log gameData.status whenever it changes
+            useEffect(() => {
+                if (gameData) {
+                    console.log("[DEBUG] gameData.status changed:", gameData.status);
+                }
+            }, [gameData?.status]);
+
+
+            // --- AI and Human Auto-Skip Turn Logic ---
+            useEffect(() => {
+                console.log("[DEBUG useEffect] GameData changed. Current status:", gameData?.status, "Current Player ID:", gameData?.current_player_id, "User ID:", userId);
+                if (!gameData || !supabase || !isAuthReady) {
+                    console.log("[DEBUG useEffect] Skipping AI/Human turn logic: gameData, supabase, or auth not ready.");
+                    return;
+                }
+
+                const currentBidderId = gameData.auction.status === 'bidding' && gameData.auction.current_bidder_index !== -1
+                    ? gameData.auction.bidding_order[gameData.auction.current_bidder_index]
+                    : null;
+
+                const currentActivePlayerId = gameData.auction.status === 'inactive' || gameData.auction.status === 'drawing'
+                    ? gameData.current_player_id
+                    : currentBidderId; // Use currentBidderId if auction is bidding
+
+                const currentActivePlayer = gameData.players.find(p => p.id === currentActivePlayerId);
+
+                // Only proceed if there's an active player and the game is in 'playing' state
+                if (gameData.status === "playing" && currentActivePlayer) {
+                    console.log(`[DEBUG AutoSkip] Current Active Player: ${currentActivePlayer.name} (ID: ${currentActivePlayer.id}). Is AI: ${currentActivePlayer.isAI}. Auction Status: ${gameData.auction.status}`);
+
+                    // If it's a human player's turn, just log and return. No AI logic for them.
+                    if (currentActivePlayer.id === userId) {
+                        console.log(`[Human Turn] It's your turn, ${currentActivePlayer.name}. Auction Status: ${gameData.auction.status}, Current Bidder: ${currentBidderId === userId ? 'You' : (currentBidderId ? 'Other' : 'None')}.`);
+                        setIsProcessingAITurn(false); // Ensure AI indicator is off for human turn
+
+                        // Specific message for human player if their ship is full and it's their turn to draw
+                        if (gameData.current_player_id === userId && (gameData.auction.status === 'inactive' || gameData.auction.status === 'drawing') && currentActivePlayer.ship.length === shipCapacity && gameData.auction.cards.length === 0) {
+                            setMessage("Your ship is full. Your turn will be skipped. Waiting for other players to fill their ships or for the day to end.");
+                        }
+                        return; // IMPORTANT: Exit here for human player turns.
+                    }
+
+                    // If it's an AI player's turn
+                    setIsProcessingAITurn(true); // AI starts thinking
+
+                    const handleAutoSkipTurn = async () => {
+                        try { // Added try-catch here
+                            console.log(`[AutoSkip AI Logic] Running for ${currentActivePlayer.name}. Status: ${gameData.status}, Deck size: ${gameData.deck.length}, Auction Cards: ${gameData.auction.cards.length}, Ships full: ${gameData.players.every(p => p.ship.length === shipCapacity)}`);
+
+                            const shipCapacity = gameData.ship_capacity || 5;
+
+                            // Scenario 1: Only one player left with open slots and it's their turn (AI or human)
+                            const playersWithOpenSlots = gameData.players.filter(p => p.ship.length < shipCapacity);
+                            const numPlayersWithOpenSlots = playersWithOpenSlots.length;
+
+                            if (numPlayersWithOpenSlots === 1 && gameData.current_player_id === playersWithOpenSlots[0].id && gameData.auction.cards.length === 0) {
+                                const soleEligiblePlayer = playersWithOpenSlots[0];
+                                const cardsToFillShip = shipCapacity - soleEligiblePlayer.ship.length;
+                                const numCardsToDraw = Math.min(cardsToFillShip, gameData.deck.length);
+
+                                if (numCardsToDraw > 0) {
+                                    console.log(`${soleEligiblePlayer.name} is the last player with open slots and it's their turn. Drawing ${numCardsToDraw} cards for free.`);
+
+                                    const drawnCards = gameData.deck.slice(0, numCardsToDraw);
+                                    const remainingDeck = gameData.deck.slice(numCardsToDraw);
+
+                                    const updatedPlayers = gameData.players.map(p =>
+                                        p.id === soleEligiblePlayer.id ? { ...p, ship: [...p.ship, ...drawnCards] } : p
+                                    );
+
+                                    let updatedDiscardPile = [...gameData.discard_pile];
+                                    if (gameData.auction.cards.length > 0) {
+                                        updatedDiscardPile = [...updatedDiscardPile, ...gameData.auction.cards];
+                                    }
+
+                                    const { error } = await supabase
+                                        .from('games')
+                                        .update({
+                                            players: updatedPlayers,
+                                            deck: remainingDeck,
+                                            discard_pile: updatedDiscardPile,
+                                            status: 'day_scoring',
+                                            message: `${soleEligiblePlayer.name} filled their ship with ${numCardsToDraw} cards for free! Day ${gameData.current_day} ended.`,
+                                            auction: {
+                                                cards: [],
+                                                highest_bid: 0,
+                                                highest_bidder_id: null,
+                                                auctioneer_id: null,
+                                                bids: {},
+                                                bidding_order: [],
+                                                current_bidder_index: -1,
+                                            }
+                                        })
+                                        .eq('id', gameId);
+                                    if (error) throw error;
+                                    setIsProcessingAITurn(false);
+                                    return;
+                                }
+                            }
+
+                            // Scenario 2: Current player's ship is full at the start of their draw turn (AI or human)
+                            if (gameData.current_player_id === currentActivePlayerId && (gameData.auction.status === 'inactive' || gameData.auction.status === 'drawing')) {
+                                if (currentActivePlayer.ship.length === shipCapacity && gameData.auction.cards.length === 0) {
+                                    console.log(`${currentActivePlayer.name}'s ship is full at the start of their draw turn. Skipping turn.`);
+                                    const { nextPlayerId, allShipsFull } = findNextEligiblePlayer(gameData, currentActivePlayer.id);
+                                    console.log(`[findNextEligiblePlayer result] nextPlayerId: ${nextPlayerId}, allShipsFull: ${allShipsFull}`);
+
+                                    if (allShipsFull) {
+                                        const { error } = await supabase
+                                            .from('games')
+                                            .update({
+                                                status: 'day_scoring',
+                                                message: `Day ${gameData.current_day} ended. All ships are full!`
+                                            })
+                                            .eq('id', gameId);
+                                        if (error) throw error;
+                                    } else {
+                                        const { error } = await supabase
+                                            .from('games')
+                                            .update({
+                                                current_player_id: nextPlayerId,
+                                                message: `${currentActivePlayer.name}'s ship is full. Skipping turn.`
+                                            })
+                                            .eq('id', gameId);
+                                        if (error) throw error;
+                                    }
+                                    setIsProcessingAITurn(false);
+                                    return;
+                                }
+                            }
+
+                            // Scenario 3: Current bidder's ship would be overfilled (AI or human)
+                            if (gameData.auction.status === 'bidding' && currentBidderId === currentActivePlayerId) {
+                                if (currentActivePlayer.ship.length + gameData.auction.cards.length > shipCapacity) {
+                                    console.log(`${currentActivePlayer.name}'s ship is full or would be overfilled. Automatically passing bid.`);
+
+                                    // This block is only for AI now, as human case is handled by `return;` above
+                                    const nextBidderIndex = (gameData.auction.current_bidder_index + 1);
+                                    const isLastBidderInRound = nextBidderIndex === gameData.auction.bidding_order.length;
+
+                                    if (!isLastBidderInRound) {
+                                        const { error } = await supabase
+                                            .from('games')
+                                            .update({
+                                                auction: {
+                                                    ...gameData.auction,
+                                                    current_bidder_index: nextBidderIndex
+                                                },
+                                                message: `${currentActivePlayer.name} passed (ship full).`
+                                            })
+                                            .eq('id', gameId);
+                                        if (error) throw error;
+                                    } else {
+                                        let auctionWinnerId = gameData.auction.highest_bidder_id;
+                                        let winningBid = gameData.auction.highest_bid;
+                                        let auctionMessage = "";
+                                        let updatedPlayers = [...gameData.players];
+                                        let updatedDiscardPile = [...gameData.discard_pile];
+
+                                        if (winningBid > 0 && auctionWinnerId) {
+                                            const winnerName = gameData.players.find(p => p.id === auctionWinnerId)?.name;
+                                            auctionMessage = `Auction ended. ${winnerName} won with a bid of ${winningBid}!`;
+                                            updatedPlayers = updatedPlayers.map(p =>
+                                                p.id === auctionWinnerId ? { ...p, money: p.money - winningBid, ship: [...p.ship, ...gameData.auction.cards] } : p
+                                            );
+                                        } else {
+                                            auctionMessage = `Auction ended. No one won. Cards discarded.`;
+                                            updatedDiscardPile = [...updatedDiscardPile, ...gameData.auction.cards];
+                                        }
+
+                                        const { nextPlayerId, allShipsFull } = findNextEligiblePlayer(gameData, gameData.current_player_id);
+                                        console.log(`[findNextEligiblePlayer result for auction end] nextPlayerId: ${nextPlayerId}, allShipsFull: ${allShipsFull}`);
+
+                                        if (allShipsFull) {
+                                            const { error } = await supabase
+                                                .from('games')
+                                                .update({
+                                                    status: 'day_scoring',
+                                                    message: `Day ${gameData.current_day} ended. All ships are full!`
+                                                })
+                                                .eq('id', gameId);
+                                            if (error) throw error;
+                                        } else {
+                                            const { error } = await supabase
+                                                .from('games')
+                                                .update({
+                                                    players: updatedPlayers,
+                                                    discard_pile: updatedDiscardPile,
+                                                    current_player_id: nextPlayerId,
+                                                    auction: {
+                                                        cards: [],
+                                                        highest_bid: 0,
+                                                        highest_bidder_id: null,
+                                                        auctioneer_id: null,
+                                                        bids: {},
+                                                        bidding_order: [],
+                                                        current_bidder_index: -1,
+                                                    },
+                                                })
+                                                .eq('id', gameId);
+                                            if (error) throw error;
+                                        }
+                                    }
+                                    setIsProcessingAITurn(false);
+                                    return;
+                                }
+                            }
+
+                            // --- AI Specific Logic ---
+                            if (currentActivePlayer.isAI) {
+                                if (gameData.auction.status === 'inactive' || gameData.auction.status === 'drawing') {
+                                    console.log(`AI ${currentActivePlayer.name} is deciding to draw or start auction.`);
+                                    await new Promise(resolve => setTimeout(resolve, 2000));
+
+                                    const shouldDraw = shouldAIDrawMore(currentActivePlayer, gameData.auction.cards, gameData.deck.length, shipCapacity, gameData);
+                                    console.log(`[shouldAIDrawMore result] shouldDraw: ${shouldDraw}`);
+
+                                    if (shouldDraw) {
+                                        const drawnCard = gameData.deck[0];
+                                        const updatedAuctionCards = [...gameData.auction.cards, drawnCard];
+                                        const remainingDeck = gameData.deck.slice(1);
+
+                                        let newAuctionStatus = 'drawing';
+                                        let messageText = `AI ${currentActivePlayer.name} drew a ${drawnCard.type} card (Value: ${drawnCard.value}).`;
+
+                                        if (updatedAuctionCards.length === 3 || remainingDeck.length === 0) {
+                                            newAuctionStatus = 'bidding';
+                                            const biddingOrder = getBiddingOrder(gameData.player_order, currentActivePlayer.id);
+                                            const { error } = await supabase
+                                                .from('games')
+                                                .update({
+                                                    deck: remainingDeck,
+                                                    auction: {
+                                                        ...gameData.auction,
+                                                        cards: updatedAuctionCards,
+                                                        status: newAuctionStatus,
+                                                        bidding_order: biddingOrder,
+                                                        current_bidder_index: 0,
+                                                        auctioneer_id: currentActivePlayer.id
+                                                    },
+                                                    message: messageText
+                                                })
+                                                .eq('id', gameId);
+                                            if (error) throw error;
+                                            console.log(`AI ${currentActivePlayer.name} finished drawing, auction status: bidding.`);
+                                        } else {
+                                            const { error } = await supabase
+                                                .from('games')
+                                                .update({
+                                                    deck: remainingDeck,
+                                                    auction: {
+                                                        ...gameData.auction,
+                                                        cards: updatedAuctionCards,
+                                                        status: newAuctionStatus,
+                                                    },
+                                                    message: messageText
+                                                })
+                                                .eq('id', gameId);
+                                            if (error) throw error;
+                                            console.log(`AI ${currentActivePlayer.name} drew another card. Current auction cards: ${updatedAuctionCards.length}.`);
+                                        }
+                                    } else { // AI decided not to draw more
+                                        if (gameData.auction.cards.length > 0) {
+                                            console.log(`AI ${currentActivePlayer.name} decided to start auction with ${gameData.auction.cards.length} cards.`);
+                                            const biddingOrder = getBiddingOrder(gameData.player_order, currentActivePlayer.id);
+                                            const { error } = await supabase
+                                                .from('games')
+                                                .update({
+                                                    auction: {
+                                                        ...gameData.auction,
+                                                        status: 'bidding',
+                                                        bidding_order: biddingOrder,
+                                                        current_bidder_index: 0,
+                                                        auctioneer_id: currentActivePlayer.id
+                                                    },
+                                                    message: `AI ${currentActivePlayer.name} decided to start auction for ${gameData.auction.cards.length} card(s)!`
+                                                })
+                                                .eq('id', gameId);
+                                            if (error) throw error;
+                                            console.log(`AI ${currentActivePlayer.name} decided to start auction.`);
+                                        } else {
+                                            // AI passes turn (no cards drawn, decided not to draw, deck might be empty)
+                                            console.log(`AI ${currentActivePlayer.name} decided not to draw and no cards in auction. Passing turn.`);
+                                            const { nextPlayerId, allShipsFull } = findNextEligiblePlayer(gameData, currentActivePlayer.id);
+                                            console.log(`[findNextEligiblePlayer result for passing] nextPlayerId: ${nextPlayerId}, allShipsFull: ${allShipsFull}`);
+                                            if (allShipsFull) {
+                                                const { error } = await supabase
+                                                    .from('games')
+                                                    .update({
+                                                        status: 'day_scoring',
+                                                        message: `Day ${gameData.current_day} ended. All ships are full!`
+                                                    })
+                                                    .eq('id', gameId);
+                                                if (error) throw error;
+                                                console.log(`Day ${gameData.current_day} ended due to all ships full.`);
+                                            } else {
+                                                const { error } = await supabase
+                                                    .from('games')
+                                                    .update({
+                                                        current_player_id: nextPlayerId,
+                                                        message: `AI ${currentActivePlayer.name} passed turn (couldn't draw or chose not to).`
+                                                    })
+                                                    .eq('id', gameId);
+                                                if (error) throw error;
+                                                console.log(`AI ${currentActivePlayer.name} passed turn.`);
+                                            }
+                                        }
+                                    }
+                                }
+                                else if (gameData.auction.status === 'bidding') {
+                                    console.log(`AI ${currentActivePlayer.name} is deciding to bid or pass. Current highest bid: ${gameData.auction.highest_bid}`);
+                                    await new Promise(resolve => setTimeout(resolve, 1500));
+
+                                    const aiBid = calculateAIBid(currentActivePlayer, gameData.auction.cards, gameData.auction.highest_bid, shipCapacity, gameData);
+                                    console.log(`[calculateAIBid result] aiBid: ${aiBid}`);
+
+                                    const nextBidderIndex = (gameData.auction.current_bidder_index + 1);
+                                    const isLastBidderInRound = nextBidderIndex === gameData.auction.bidding_order.length;
+
+                                    if (!isLastBidderInRound) {
+                                        const updateData = {
+                                            auction: {
+                                                ...gameData.auction,
+                                                current_bidder_index: nextBidderIndex,
+                                            },
+                                            message: `${currentActivePlayer.name} ${aiBid > 0 ? `bid ${aiBid}` : 'passed'}.`
+                                        };
+                                        if (aiBid > gameData.auction.highest_bid) {
+                                            updateData.auction.highest_bid = aiBid;
+                                            updateData.auction.highest_bidder_id = currentActivePlayer.id;
+                                            updateData.auction.bids = { ...gameData.auction.bids, [currentActivePlayer.id]: aiBid };
+                                        }
+                                        const { error } = await supabase.from('games').update(updateData).eq('id', gameId);
+                                        if (error) throw error;
+                                        console.log(`AI ${currentActivePlayer.name} moved to next bidder.`);
+                                    } else {
+                                        console.log(`Auction cycle complete for AI ${currentActivePlayer.name}. Resolving auction.`);
+                                        let auctionWinnerId = gameData.auction.highest_bidder_id;
+                                        let winningBid = gameData.auction.highest_bid;
+                                        let auctionMessage = "";
+                                        let updatedPlayers = [...gameData.players];
+                                        let updatedDiscardPile = [...gameData.discard_pile];
+
+                                        if (aiBid > winningBid && currentActivePlayer.id === gameData.auction.auctioneer_id) {
+                                            auctionWinnerId = currentActivePlayer.id;
+                                            winningBid = aiBid;
+                                        }
+
+                                        if (winningBid > 0 && auctionWinnerId) {
+                                            const winnerName = gameData.players.find(p => p.id === auctionWinnerId)?.name;
+                                            auctionMessage = `Auction ended. ${winnerName} won with a bid of ${winningBid}!`;
+                                            updatedPlayers = updatedPlayers.map(p =>
+                                                p.id === auctionWinnerId ? { ...p, money: p.money - winningBid, ship: [...p.ship, ...gameData.auction.cards] } : p
+                                            );
+                                            console.log(`${winnerName} won the auction for ${winningBid}. Cards:`, gameData.auction.cards);
+                                        } else {
+                                            auctionMessage = `Auction ended. No one won. Cards discarded.`;
+                                            updatedDiscardPile = [...updatedDiscardPile, ...gameData.auction.cards];
+                                            console.log(`Auction ended with no winner. Cards discarded:`, gameData.auction.cards);
+                                        }
+
+                                        const { nextPlayerId, allShipsFull } = findNextEligiblePlayer({ ...gameData, players: updatedPlayers }, gameData.current_player_id);
+                                        console.log(`[findNextEligiblePlayer result for auction end] nextPlayerId: ${nextPlayerId}, allShipsFull: ${allShipsFull}`);
+
+                                        if (allShipsFull) {
+                                            const { error } = await supabase
+                                                .from('games')
+                                                .update({
+                                                    status: 'day_scoring',
+                                                    message: `Day ${gameData.current_day} ended. All ships are full!`
+                                                })
+                                                .eq('id', gameId);
+                                            if (error) throw error;
+                                        } else {
+                                            const { error } = await supabase
+                                                .from('games')
+                                                .update({
+                                                    players: updatedPlayers,
+                                                    discard_pile: updatedDiscardPile,
+                                                    current_player_id: nextPlayerId,
+                                                    auction: {
+                                                        cards: [],
+                                                        highest_bid: 0,
+                                                        highest_bidder_id: null,
+                                                        auctioneer_id: null,
+                                                        bids: {},
+                                                        bidding_order: [],
+                                                        current_bidder_index: -1,
+                                                    },
+                                                })
+                                                .eq('id', gameId);
+                                            if (error) throw error;
+                                        }
+                                    }
+                                }
+                            }
+                            setIsProcessingAITurn(false); // AI finished thinking
+                        } catch (error) {
+                            console.error(`[handleAutoSkipTurn Error for AI ${currentActivePlayer.name}]`, error);
+                            setMessage(`AI ${currentActivePlayer.name} encountered an error. Check console for details.`);
+                            setIsProcessingAITurn(false); // Ensure AI indicator is off
+                        }
+                    };
+
+                    const timeoutId = setTimeout(() => {
+                        handleAutoSkipTurn();
+                    }, currentActivePlayer.isAI ? 1500 : 500);
+
+                    return () => clearTimeout(timeoutId);
+                }
+            }, [gameData, supabase, isAuthReady, userId, gameId, handlePass]); // Added handlePass to dependencies as it's called.
+
+
+            if (loadingGame) {
+                return (
+                    <div className="flex items-center justify-center min-h-screen bg-gray-900 font-inter">
+                        <p className="text-xl text-gray-300">Loading Game...</p>
+                    </div>
+                );
+            }
+
+            if (!gameData) {
+                return (
+                    <div className="flex items-center justify-center min-h-screen bg-gray-900 font-inter">
+                        <MessageModal message={message} onClose={() => setMessage('')} />
+                        <p className="text-xl text-red-400">Game data not available.</p>
+                    </div>
+                );
+            }
+
+            const isCreator = gameData.host_user_id === userId;
+
+            // Simplified for clarity: isHumanPlayerTurn is true if the current_player_id is the human user
+            const isHumanCurrentPlayer = gameData.current_player_id === userId && gameData.players.some(p => p.id === userId && !p.isAI);
+
+            const shipCapacity = gameData.ship_capacity || 5;
+            const commodityTypes = ['cloth', 'fur', 'grain', 'dye', 'spice'];
+            const trackLevels = [
+                { level: 1, score: 0 },
+                { level: 2, score: 0 },
+                { level: 3, score: 0 },
+                { level: 4, score: 0 },
+                { level: 5, score: 0 },
+                { level: 6, score: 5 },
+                { level: 7, score: 10 },
+                { level: 8, score: 20 }
+            ];
+
+
+            const currentBidderId = gameData.auction.status === 'bidding' && gameData.auction.current_bidder_index !== -1
+                ? gameData.auction.bidding_order[gameData.auction.current_bidder_index]
+                : null;
+
+            const uniquePlayers = Array.from(new Map(gameData.players.map(player => [player.id, player])).values());
+
+
+            const currentPlayerObject = gameData.players.find(p => p.id === gameData.current_player_id);
+            const currentPlayerDisplay = currentPlayerObject
+                ? (currentPlayerObject.isAI
+                    ? `${currentPlayerObject.name} (AI)`
+                    : `${currentPlayerObject.name}`)
+                : 'Unknown Player';
+
+            const currentBidderObject = gameData.players.find(p => p.id === currentBidderId);
+            const currentBidderDisplay = currentBidderObject
+                ? (currentBidderObject.isAI
+                    ? `${currentBidderObject.name} (AI)`
+                    : `${currentBidderObject.name}`)
+                : 'Unknown Bidder';
+
+            const highestBidderName = gameData.auction.highest_bidder_id
+                ? (gameData.auction.highest_bidder_id === userId
+                    ? "You"
+                    : gameData.players.find(p => p.id === gameData.auction.highest_bidder_id)?.name || 'Unknown')
+                : "N/A";
+
+            const auctioneerName = gameData.auction.auctioneer_id
+                ? gameData.players.find(p => p.id === gameData.auction.auctioneer_id)?.name || 'Unknown'
+                : 'N/A';
+
+
+            return (
+                <div className="flex flex-col items-center min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-4 font-inter">
+                    <MessageModal message={message} onClose={() => setMessage('')} />
+                    {gameData.status === 'awaiting_scoring_ack' && gameData.last_day_scoring_summary && (
+                        <ScoringSummaryModal summary={gameData.last_day_scoring_summary} onClose={handleScoringAcknowledged} />
+                    )}
+
+                    {showFinalScoreModal && (
+                        <FinalScoreModal
+                            finalScores={gameData.players}
+                            onClose={() => setShowFinalScoreModal(false)}
+                            onPlayAgain={onGameReset}
+                        />
+                    )}
+
+                    <h1 className="text-3xl md:text-4xl font-extrabold text-gray-100 mb-4">Medici Game: <span className="text-blue-400">{gameData.join_code}</span></h1>
+                    <p className="text-lg text-gray-300 mb-6">Current Day: {gameData.current_day} | Status: {gameData.status}</p>
+                    {gameData.message && <p className="text-md text-green-400 font-semibold mb-4">{gameData.message}</p>}
+
+                    {console.log("[DEBUG] Start Game button visibility check: isCreator =", isCreator, "gameData.status =", gameData.status)}
+                    {isCreator && gameData.status === "lobby" && (
+                        <button
+                            onClick={async () => {
+                                console.log("Start Game button clicked.");
+                                console.log("Current gameData.player_order:", gameData.player_order);
+                                try {
+                                    const shuffledPlayerOrder = [...gameData.player_order];
+                                    if (shuffledPlayerOrder.length === 0) {
+                                        setMessage("Cannot start game: No players in game.");
+                                        console.error("Attempted to start game with empty player_order.");
+                                        return;
+                                    }
+                                    for (let i = shuffledPlayerOrder.length - 1; i > 0; i--) {
+                                        const j = Math.floor(Math.random() * (i + 1));
+                                        [shuffledPlayerOrder[i], shuffledPlayerOrder[j]] = [shuffledPlayerOrder[j], shuffledPlayerOrder[i]];
+                                    }
+                                    console.log("Shuffled player order:", shuffledPlayerOrder);
+                                    console.log("Next current player ID (shuffledPlayerOrder[0]):", shuffledPlayerOrder[0]);
+
+                                    const { error } = await supabase
+                                        .from('games')
+                                        .update({
+                                            status: "playing",
+                                            message: "Game has started!",
+                                            current_player_id: shuffledPlayerOrder[0],
+                                            player_order: shuffledPlayerOrder,
+                                            auction: { 
+                                                cards: [],
+                                                highest_bid: 0,
+                                                highest_bidder_id: null,
+                                                bids: {},
+                                                auctioneer_id: null, // Ensure all properties are present
+                                                status: 'inactive',
+                                                bidding_order: [],
+                                                current_bidder_index: -1
+                                            } 
+                                        })
+                                        .eq('id', gameId);
+                                    if (error) {
+                                        console.error("Supabase update error when starting game:", error);
+                                        setMessage(`Failed to start game: ${error.message}`);
+                                        throw error; // Re-throw to be caught by outer catch
+                                    }
+                                    setMessage("Game started!");
+                                    console.log("Game status updated to 'playing' in Supabase.");
+                                } catch (e) {
+                                    console.error("Error starting game (catch block):", e);
+                                    setMessage("Failed to start game. Please check console for details.");
+                                }
+                            }}
+                            className="px-8 py-3 bg-purple-600 text-white font-bold rounded-lg shadow-md hover:bg-purple-700 transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 mb-8"
+                        >
+                            Start Game
+                        </button>
+                    )}
+
+                    <div className="w-full max-w-6xl bg-gray-800 rounded-xl shadow-2xl p-6 grid grid-cols-1 md:grid-cols-2 gap-8 border border-gray-700">
+                        <div className="col-span-1 md:col-span-2">
+                            <h2 className="text-2xl font-bold text-gray-100 mb-4 mt-6">Your Actions</h2>
+                            <div className="bg-gray-700 p-6 rounded-lg shadow-md flex flex-wrap gap-4 justify-center border border-gray-600">
+                                {gameData.status === "playing" ? (
+                                    <>
+                                        {/* Buttons for Drawing/Starting Auction (only for the current player/auctioneer) */}
+                                        {isHumanCurrentPlayer && (gameData.auction.status === 'inactive' || gameData.auction.status === 'drawing') && gameData.auction.cards.length < 3 && gameData.deck.length > 0 && (
+                                            <button onClick={handleDrawCard} className="px-6 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition duration-300 ease-in-out">Draw Card ({gameData.auction.cards.length}/3)</button>
+                                        )}
+                                        {isHumanCurrentPlayer && gameData.auction.status === 'drawing' && gameData.auction.cards.length > 0 && (
+                                            <button onClick={handleStartAuction} className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300 ease-in-out">Start Auction</button>
+                                        )}
+
+                                        {/* Buttons for Bidding (only for the current bidder) */}
+                                        {gameData.auction.status === 'bidding' && currentBidderId === userId && (
+                                            <div className="flex flex-col items-center w-full">
+                                                <input
+                                                    type="number"
+                                                    value={bidAmount}
+                                                    onChange={(e) => setBidAmount(parseInt(e.target.value) || 0)}
+                                                    min={gameData.auction.highest_bid + 1}
+                                                    className="w-32 p-2 border border-gray-600 bg-gray-700 text-gray-100 rounded-md text-center mb-3"
+                                                    placeholder="Your Bid"
+                                                />
+                                                <div className="flex gap-4">
+                                                    <button
+                                                        onClick={handlePlaceBid}
+                                                        className="px-6 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition duration-300 ease-in-out"
+                                                    >
+                                                        Place Bid
+                                                    </button>
+                                                    <button
+                                                        onClick={handlePass}
+                                                        className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300 ease-in-out"
+                                                    >
+                                                        Pass
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Messages when it's not your turn */}
+                                        {!(isHumanCurrentPlayer || (gameData.auction.status === 'bidding' && currentBidderId === userId)) && (
+                                            <p className="text-gray-400 flex items-center justify-center">
+                                                {isProcessingAITurn && (
+                                                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                    </svg>
+                                                )}
+                                                {gameData.auction.status === 'bidding' ?
+                                                    `Waiting for ${currentBidderDisplay} to bid...` :
+                                                    `Waiting for ${currentPlayerDisplay} to draw cards...`}
+                                            </p>
+                                        )}
+                                        {gameData.status === 'day_scoring' && (
+                                            <p className="text-green-400 font-bold">Day ended! Time for scoring.</p>
+                                        )}
+                                    </>
+                                ) : (
+                                    <p className="text-gray-400">Game not started yet. {isCreator ? "Click 'Start Game' above." : "Waiting for game creator to start."}</p>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="col-span-full flex flex-col items-center justify-center">
+                            <h2 className="text-2xl font-bold text-gray-100 mb-4">Current Auction</h2>
+                            <div className="bg-gray-700 p-4 rounded-lg shadow-md min-h-[100px] flex flex-col items-center justify-center w-full max-w-md mx-auto border border-gray-600">
+                                {gameData.auction.cards && gameData.auction.cards.length > 0 ? (
+                                    <>
+                                        <div className="flex flex-wrap gap-2 justify-center mb-2">
+                                            {gameData.auction.cards.map((card) => (
+                                                <div key={card.id} className={`border border-gray-500 rounded-md p-2 text-center shadow-sm ${cardColorMap[card.type] || 'bg-gray-600'}`}>
+                                                    <p className="font-semibold text-gray-800 capitalize flex items-center justify-center">
+                                                        {commodityIcons[card.type] || null} {card.type}
+                                                    </p>
+                                                    <p className="text-lg font-bold text-gray-900">{card.value}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        {gameData.auction.status === 'bidding' && (
+                                            <>
+                                                <p className="w-full text-center mt-2 text-lg font-bold text-blue-400">
+                                                    Highest Bid: {gameData.auction.highest_bid} by {highestBidderName}
+                                                </p>
+                                                <p className="w-full text-center text-md text-gray-400">
+                                                    Auctioneer: {auctioneerName}
+                                                </p>
+                                                <p className="w-full text-center text-md text-gray-300 font-semibold mt-2">
+                                                    Current Bidder: {currentBidderDisplay}
+                                                </p>
+                                            </>
+                                        )}
+                                        {gameData.auction.status === 'drawing' && (
+                                            <p className="w-full text-center mt-2 text-lg font-bold text-gray-300">
+                                                Drawing cards for auction...
+                                            </p>
+                                        )}
+                                    </>
+                                ) : (
+                                    <p className="text-gray-400">No active auction.</p>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="col-span-1 md:col-span-2">
+                            <h2 className="text-2xl font-bold text-gray-100 mb-4">Players</h2>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {uniquePlayers.map(player => (
+                                    <div key={player.id} className={`p-4 rounded-lg shadow-md ${player.id === userId ? 'border-2 border-blue-500' : ''} ${getPlayerColors(gameData, player.id).bg} border-l-8 ${getPlayerColors(gameData, player.id).border} text-gray-100`}>
+                                        <p className="font-semibold text-gray-100">{player.name} {player.id === userId && "(You)"} {player.isAI && "(AI)"}</p>
+                                        <p className="text-sm text-gray-300">ID: <span className="font-mono text-xs">{player.id}</span></p>
+                                        <p className="text-sm text-gray-300">Money: {player.money}</p>
+                                        <p className="text-sm text-gray-300">Ship Cards: {player.ship ? player.ship.length : 0}/{shipCapacity}</p>
+                                        {player.ship && player.ship.length > 0 && (
+                                            <div className="mt-2 text-sm">
+                                                <p className="font-semibold text-gray-200">Ship Contents:</p>
+                                                <div className="flex flex-wrap gap-1 mt-1">
+                                                    {(player.ship || []).sort((a, b) => {
+                                                        if (a.type < b.type) return -1;
+                                                        if (a.type > b.type) return 1;
+                                                        return a.value - b.value;
+                                                    }).map((card) => (
+                                                        <span key={card.id} className={`px-2 py-1 rounded-md text-xs font-medium text-gray-800 ${cardColorMap[card.type] || 'bg-gray-600'} flex items-center justify-center border border-gray-500`}>
+                                                            {commodityIcons[card.type] || null} {card.type.substring(0, 3).toUpperCase()}-<span className="font-bold text-sm">{card.value}</span>
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="col-span-1">
+                            <h2 className="text-2xl font-bold text-gray-100 mb-4">Game Info</h2>
+                            <div className="bg-gray-700 p-4 rounded-lg shadow-md border border-gray-600">
+                                <p className="text-gray-300">Creator: {gameData.host_user_id === userId ? "You" : gameData.host_user_id?.substring(0,4)}</p>
+                                <p className="text-gray-300">Current Player: {currentPlayerDisplay}</p>
+                                <p className="text-gray-300">Cards in Deck: {gameData.deck.length}</p>
+                            </div>
+                        </div>
+
+                        {gameData.discard_pile && gameData.discard_pile.length > 0 && (
+                            <div className="col-span-1">
+                                <h2 className="text-2xl font-bold text-gray-100 mb-4">Discard Pile</h2>
+                                <div className="bg-gray-700 p-4 rounded-lg shadow-md border border-gray-600 max-h-48 overflow-y-auto">
+                                    <div className="flex flex-wrap gap-1">
+                                        {gameData.discard_pile.sort((a, b) => {
+                                            if (a.type < b.type) return -1;
+                                            if (a.type > b.type) return 1;
+                                            return a.value - b.value;
+                                        }).map((card) => (
+                                            <span key={card.id} className={`px-2 py-1 rounded-md text-xs font-medium text-gray-800 ${cardColorMap[card.type] || 'bg-gray-600'} flex items-center justify-center border border-gray-500`}>
+                                                {commodityIcons[card.type] || null} {card.type.substring(0, 3).toUpperCase()}-<span className="font-bold text-sm">{card.value}</span>
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="col-span-full flex flex-col items-center">
+                            <h2 className="text-2xl font-bold text-gray-100 mb-4">Commodity Tracks</h2>
+                            <div className="flex flex-wrap justify-center gap-4 w-full max-w-6xl mx-auto">
+                                {commodityTypes.map(type => (
+                                    <div key={type} className="bg-gray-700 p-3 rounded-lg shadow-md flex flex-col items-center border border-gray-600 w-full max-w-[250px]">
+                                        <h3 className="font-bold text-lg text-gray-100 capitalize mb-2">{type}</h3>
+                                        <div className="flex flex-col-reverse w-full items-center">
+                                            {Array.from({ length: 8 }).map((_, levelIndex) => {
+                                                const displayLevel = levelIndex + 1;
+                                                return (
+                                                    <div key={`${type}-${displayLevel}`} className={`relative w-full h-8 border-b border-gray-600 flex items-center justify-center ${displayLevel === 1 ? 'bg-yellow-600' : 'bg-gray-800'}`}>
+                                                        <span className="absolute left-1 text-xs text-gray-400">{displayLevel}</span>
+                                                        {uniquePlayers.map(player => {
+                                                            if (gameData.commodity_track_positions[type] && gameData.commodity_track_positions[type][player.id] === displayLevel) {
+                                                                return (
+                                                                    <div
+                                                                        key={`${type}-${displayLevel}-${player.id}`}
+                                                                        className={`w-5 h-5 rounded-full ${getPlayerColors(gameData, player.id).token} flex items-center justify-center text-white text-xs font-bold shadow-sm mx-0.5`}
+                                                                        title={`${player.name} is at level ${displayLevel}`}
+                                                                    >
+                                                                        {player.name?.substring(0,1)}
+                                                                    </div>
+                                                                );
+                                                            }
+                                                            return null;
+                                                        })}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- Main App Component ---
+        const App = () => {
+            const [gameId, setGameId] = useState(null);
+
+            const resetGame = useCallback(() => {
+                setGameId(null);
+            }, []);
+
+            return (
+                <SupabaseProvider>
+                    {gameId ? (
+                        <GameBoard gameId={gameId} onGameReset={resetGame} />
+                    ) : (
+                        <Lobby
+                            onGameCreated={setGameId}
+                            onGameJoined={setGameId}
+                        />
+                    )}
+                </SupabaseProvider>
+            );
+        };
+
+        // Render the App component
+        const container = document.getElementById('root');
+        const root = ReactDOM.createRoot(container);
+        root.render(<App />);
+    </script>
+</body>
+</html>
