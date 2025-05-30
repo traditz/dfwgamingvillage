@@ -32,11 +32,13 @@
         const ReactDOM = window.ReactDOM;
 
         // --- Supabase Client Initialization ---
-        // IMPORTANT: Replace 'YOUR_SUPABASE_URL' and 'YOUR_SUPABASE_ANON_KEY' with your actual Supabase project URL and Anon Key.
-        // You can find these in your Supabase project settings under 'API'.
-        // Ensure Realtime is enabled for the 'games' table in your Supabase project settings.
-        const supabaseUrl = 'https://krfrccsetibzmzutfzll.supabase.co';
-        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtyZnJjY3NldGliem16dXRmemxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg1NjgzNjAsImV4cCI6MjA2NDE0NDM2MH0.wLEUxijlo4PR35aLX2BdJ-99g0cd_JAQPRz9VXM3ihQ';
+        // IMPORTANT: In a real-world application, these environment variables would be
+        // injected by a build tool (e.g., Vite, Create React App, Next.js) during compilation.
+        // For this direct HTML file, `process.env` will be undefined.
+        // You would typically set up your build process to replace these placeholders
+        // with the actual values from your .env file.
+        const supabaseUrl = process.env.VITE_SUPABASE_URL || 'YOUR_SUPABASE_URL_FALLBACK';
+        const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY_FALLBACK';
 
         // Create the Supabase client instance using the globally loaded Supabase object
         const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
@@ -245,24 +247,30 @@
             let startIndex = playerOrder.indexOf(startingPlayerId);
             if (startIndex === -1) {
                 console.error("Starting player not found in player order:", startingPlayerId);
-                return { nextPlayerId: null, allShipsFull: true };
+                return { nextPlayerId: null, allShipsFull: true, singlePlayerWithSpaceId: null };
             }
 
             let nextPlayerId = null;
-            let allShipsFull = true;
+            let playersWithSpace = [];
 
+            // Iterate through players in order, starting from the one after the current starting player
             for (let i = 1; i <= totalPlayers; i++) {
                 const potentialNextPlayerIndex = (startIndex + i) % totalPlayers;
                 const potentialNextPlayerId = playerOrder[potentialNextPlayerIndex];
                 const potentialNextPlayer = (gameData.players || []).find(p => p.id === potentialNextPlayerId); // Defensive check
 
                 if (potentialNextPlayer && potentialNextPlayer.ship.length < gameData.ship_capacity) {
-                    nextPlayerId = potentialNextPlayerId;
-                    allShipsFull = false;
-                    break;
+                    playersWithSpace.push(potentialNextPlayerId);
+                    if (nextPlayerId === null) { // Keep track of the *first* next player in order
+                        nextPlayerId = potentialNextPlayerId;
+                    }
                 }
             }
-            return { nextPlayerId, allShipsFull };
+
+            const allShipsFull = playersWithSpace.length === 0;
+            const singlePlayerWithSpaceId = playersWithSpace.length === 1 ? playersWithSpace[0] : null;
+
+            return { nextPlayerId, allShipsFull, singlePlayerWithSpaceId };
         };
 
         // Map commodity types to Tailwind CSS colors for cards
@@ -903,7 +911,7 @@
                         }
 
                         // Determine the next player or if day scoring should begin
-                        const { nextPlayerId, allShipsFull } = findNextEligiblePlayer(gameData, gameData.current_player_id);
+                        const { nextPlayerId, allShipsFull, singlePlayerWithSpaceId } = findNextEligiblePlayer({ ...gameData, players: updatedPlayers }, gameData.current_player_id);
 
                         console.log("[DEBUG handleAuctionWin] gameData.auction AFTER reset:", {
                             cards: [],
@@ -918,7 +926,36 @@
                         console.log("[DEBUG handleAuctionWin] next current_player_id:", nextPlayerId);
 
 
-                        if (allShipsFull || gameData.deck.length === 0) { // If all ships are full OR deck is empty, trigger day scoring
+                        if (singlePlayerWithSpaceId && gameData.deck.length > 0) {
+                            // Auto-fill the single player's ship
+                            let playerToFill = updatedPlayers.find(p => p.id === singlePlayerWithSpaceId);
+                            let cardsToDraw = gameData.ship_capacity - playerToFill.ship.length;
+                            let drawnCards = [];
+                            let remainingDeck = [...gameData.deck];
+
+                            for (let i = 0; i < cardsToDraw && remainingDeck.length > 0; i++) {
+                                drawnCards.push(remainingDeck.shift());
+                            }
+
+                            playerToFill = {
+                                ...playerToFill,
+                                ship: [...playerToFill.ship, ...drawnCards]
+                            };
+                            updatedPlayers = updatedPlayers.map(p => p.id === singlePlayerWithSpaceId ? playerToFill : p);
+
+                            const { error } = await supabase
+                                .from('games')
+                                .update({
+                                    players: updatedPlayers,
+                                    deck: remainingDeck, // Update remaining deck
+                                    discard_pile: updatedDiscardPile, // Ensure discard pile is also updated
+                                    status: 'day_scoring',
+                                    message: `${playerToFill.name}'s ship was automatically filled. Day ${gameData.current_day} ended.`
+                                })
+                                .eq('id', gameId);
+                            if (error) throw error;
+                        } else if (allShipsFull || gameData.deck.length === 0) {
+                            // Existing logic for day scoring
                             const { error } = await supabase
                                 .from('games')
                                 .update({
@@ -930,6 +967,7 @@
                                 .eq('id', gameId);
                             if (error) throw error;
                         } else {
+                            // Existing logic for next turn
                             const { error } = await supabase
                                 .from('games')
                                 .update({
@@ -971,6 +1009,41 @@
                     setMessage("It's not your turn to draw cards.");
                     return;
                 }
+
+                // Check for "last player with space" rule before drawing
+                const { singlePlayerWithSpaceId } = findNextEligiblePlayer(gameData, gameData.current_player_id);
+
+                if (singlePlayerWithSpaceId === userId && gameData.auction.cards.length === 0 && gameData.deck.length > 0) {
+                    console.log("Human player is the only one with space. Auto-filling ship.");
+                    let playerToFill = (gameData.players || []).find(p => p.id === userId);
+                    let cardsToDraw = gameData.ship_capacity - playerToFill.ship.length;
+                    let drawnCards = [];
+                    let remainingDeck = [...gameData.deck];
+
+                    for (let i = 0; i < cardsToDraw && remainingDeck.length > 0; i++) {
+                        drawnCards.push(remainingDeck.shift());
+                    }
+
+                    playerToFill = {
+                        ...playerToFill,
+                        ship: [...playerToFill.ship, ...drawnCards]
+                    };
+                    const updatedPlayers = (gameData.players || []).map(p => p.id === userId ? playerToFill : p);
+
+                    const { error } = await supabase
+                        .from('games')
+                        .update({
+                            players: updatedPlayers,
+                            deck: remainingDeck,
+                            status: 'day_scoring',
+                            message: `Your ship was automatically filled as you were the last with space! Day ${gameData.current_day} ended.`
+                        })
+                        .eq('id', gameId);
+                    if (error) throw error;
+                    setBidAmount(0);
+                    return; // Crucial: exit after auto-filling
+                }
+
 
                 if (gameData.deck.length === 0) {
                     setMessage(`No cards left in the deck.`);
@@ -1179,7 +1252,7 @@
                         auctionMessage = `Auction ended. ${currentPlayer.name} won with a bid of ${winningBid}!`;
 
                         // Determine the next player or if day scoring should begin
-                        const { nextPlayerId, allShipsFull } = findNextEligiblePlayer({ ...gameData, players: updatedPlayers }, gameData.current_player_id);
+                        const { nextPlayerId, allShipsFull, singlePlayerWithSpaceId } = findNextEligiblePlayer({ ...gameData, players: updatedPlayers }, gameData.current_player_id);
 
                         console.log("[DEBUG handleAuctionWin] gameData.auction AFTER reset:", {
                             cards: [],
@@ -1194,7 +1267,34 @@
                         console.log("[DEBUG handleAuctionWin] next current_player_id:", nextPlayerId);
 
 
-                        if (allShipsFull || gameData.deck.length === 0) { // If all ships are full OR deck is empty, trigger day scoring
+                        if (singlePlayerWithSpaceId && gameData.deck.length > 0) {
+                            // Auto-fill the single player's ship
+                            let playerToFill = updatedPlayers.find(p => p.id === singlePlayerWithSpaceId);
+                            let cardsToDraw = gameData.ship_capacity - playerToFill.ship.length;
+                            let drawnCards = [];
+                            let remainingDeck = [...gameData.deck];
+
+                            for (let i = 0; i < cardsToDraw && remainingDeck.length > 0; i++) {
+                                drawnCards.push(remainingDeck.shift());
+                            }
+
+                            playerToFill = {
+                                ...playerToFill,
+                                ship: [...playerToFill.ship, ...drawnCards]
+                            };
+                            updatedPlayers = updatedPlayers.map(p => p.id === singlePlayerWithSpaceId ? playerToFill : p);
+
+                            const { error } = await supabase
+                                .from('games')
+                                .update({
+                                    players: updatedPlayers,
+                                    deck: remainingDeck, // Update remaining deck
+                                    status: 'day_scoring',
+                                    message: `${playerToFill.name}'s ship was automatically filled. Day ${gameData.current_day} ended.`
+                                })
+                                .eq('id', gameId);
+                            if (error) throw error;
+                        } else if (allShipsFull || gameData.deck.length === 0) { // If all ships are full OR deck is empty, trigger day scoring
                             const { error } = await supabase
                                 .from('games')
                                 .update({
@@ -1649,11 +1749,6 @@
 
                             const shipCapacity = gameData.ship_capacity || 5;
 
-                            // Scenario 1: Only one player left with open slots and it's their turn (AI or human)
-                            // This scenario is now handled by the general "deck empty" or "all ships full" logic
-                            // and the "current player's ship is full" auto-skip.
-                            // Removing this specific block to simplify and avoid redundant checks.
-
                             // Scenario 2: Current player's ship is full at the start of their draw turn (AI)
                             if (gameData.current_player_id === currentActivePlayerId && (gameData.auction.status === 'inactive' || gameData.auction.status === 'drawing')) {
                                  console.log(`[AI Draw Turn Check] AI: ${currentActivePlayer.name}, Ship Length: ${currentActivePlayer.ship.length}, Ship Capacity: ${shipCapacity}, Auction Cards: ${gameData.auction.cards.length}`);
@@ -1715,9 +1810,38 @@
                                         }
 
                                         // Determine the next player or if day scoring should begin
-                                        const { nextPlayerId, allShipsFull } = findNextEligiblePlayer({ ...gameData, players: updatedPlayers }, gameData.current_player_id);
-                                        console.log(`[findNextEligiblePlayer result for auction end] nextPlayerId: ${nextPlayerId}, allShipsFull: ${allShipsFull}`);
-                                        if (allShipsFull || gameData.deck.length === 0) { // If all ships are full OR deck is empty, trigger day scoring
+                                        const { nextPlayerId, allShipsFull, singlePlayerWithSpaceId } = findNextEligiblePlayer({ ...gameData, players: updatedPlayers }, gameData.current_player_id);
+                                        console.log(`[findNextEligiblePlayer result for auction end] nextPlayerId: ${nextPlayerId}, allShipsFull: ${allShipsFull}, singlePlayerWithSpaceId: ${singlePlayerWithSpaceId}`);
+                                        if (singlePlayerWithSpaceId && gameData.deck.length > 0) {
+                                            // Auto-fill the single player's ship
+                                            let playerToFill = updatedPlayers.find(p => p.id === singlePlayerWithSpaceId);
+                                            let cardsToDraw = gameData.ship_capacity - playerToFill.ship.length;
+                                            let drawnCards = [];
+                                            let remainingDeck = [...gameData.deck];
+
+                                            for (let i = 0; i < cardsToDraw && remainingDeck.length > 0; i++) {
+                                                drawnCards.push(remainingDeck.shift());
+                                            }
+
+                                            playerToFill = {
+                                                ...playerToFill,
+                                                ship: [...playerToFill.ship, ...drawnCards]
+                                            };
+                                            updatedPlayers = updatedPlayers.map(p => p.id === singlePlayerWithSpaceId ? playerToFill : p);
+
+                                            const { error } = await supabase
+                                                .from('games')
+                                                .update({
+                                                    players: updatedPlayers,
+                                                    deck: remainingDeck, // Update remaining deck
+                                                    discard_pile: updatedDiscardPile, // Ensure discard pile is also updated
+                                                    status: 'day_scoring',
+                                                    message: `${playerToFill.name}'s ship was automatically filled. Day ${gameData.current_day} ended.`
+                                                })
+                                                .eq('id', gameId);
+                                            if (error) console.error("Error updating game to day_scoring (AI bidding overfill auto-fill):", error);
+                                            else console.log("[AI Bidding Overfill Auto-fill] Supabase update to day_scoring SUCCESS.");
+                                        } else if (allShipsFull || gameData.deck.length === 0) { // If all ships are full OR deck is empty, trigger day scoring
                                             console.log("[AI Bidding Overfill End Auction] Preparing Supabase update to day_scoring.");
                                             const { error } = await supabase
                                                 .from('games')
@@ -1763,6 +1887,41 @@
                                 if (gameData.auction.status === 'inactive' || gameData.auction.status === 'drawing') {
                                     console.log(`AI ${currentActivePlayer.name} is deciding to draw or start auction.`);
                                     await new Promise(resolve => setTimeout(resolve, 2000)); // Small delay for AI "thinking"
+
+                                    // Check for "last player with space" rule before AI draws
+                                    const { singlePlayerWithSpaceId } = findNextEligiblePlayer(gameData, gameData.current_player_id);
+
+                                    if (singlePlayerWithSpaceId === currentActivePlayerId && gameData.auction.cards.length === 0 && gameData.deck.length > 0) {
+                                        console.log(`AI ${currentActivePlayer.name} is the only player with space. Auto-filling ship.`);
+                                        let playerToFill = currentActivePlayer;
+                                        let cardsToDraw = gameData.ship_capacity - playerToFill.ship.length;
+                                        let drawnCards = [];
+                                        let remainingDeck = [...gameData.deck];
+
+                                        for (let i = 0; i < cardsToDraw && remainingDeck.length > 0; i++) {
+                                            drawnCards.push(remainingDeck.shift());
+                                        }
+
+                                        playerToFill = {
+                                            ...playerToFill,
+                                            ship: [...playerToFill.ship, ...drawnCards]
+                                        };
+                                        const updatedPlayers = (gameData.players || []).map(p => p.id === currentActivePlayerId ? playerToFill : p);
+
+                                        await supabase
+                                            .from('games')
+                                            .update({
+                                                players: updatedPlayers,
+                                                deck: remainingDeck,
+                                                status: 'day_scoring',
+                                                message: `AI ${currentActivePlayer.name}'s ship was automatically filled. Day ${gameData.current_day} ended.`
+                                            })
+                                            .eq('id', gameId);
+                                        console.log("[DEBUG] Setting isProcessingAITurn to FALSE after AI auto-fill.");
+                                        setIsProcessingAITurn(false);
+                                        return; // Crucial: exit after auto-filling
+                                    }
+
 
                                     const shouldDraw = shouldAIDrawMore(currentActivePlayer, gameData.auction.cards, gameData.deck.length, shipCapacity, gameData);
                                     console.log(`[shouldAIDrawMore result] shouldDraw: ${shouldDraw}`);
@@ -1989,9 +2148,38 @@
                                             }
 
                                             // Determine the next player or if day scoring should begin
-                                            const { nextPlayerId, allShipsFull } = findNextEligiblePlayer({ ...gameData, players: updatedPlayers }, gameData.current_player_id);
-                                            console.log(`[findNextEligiblePlayer result for auction end] nextPlayerId: ${nextPlayerId}, allShipsFull: ${allShipsFull}`);
-                                            if (allShipsFull || gameData.deck.length === 0) { // If all ships are full OR deck is empty, trigger day scoring
+                                            const { nextPlayerId, allShipsFull, singlePlayerWithSpaceId } = findNextEligiblePlayer({ ...gameData, players: updatedPlayers }, gameData.current_player_id);
+                                            console.log(`[findNextEligiblePlayer result for auction end] nextPlayerId: ${nextPlayerId}, allShipsFull: ${allShipsFull}, singlePlayerWithSpaceId: ${singlePlayerWithSpaceId}`);
+                                            if (singlePlayerWithSpaceId && gameData.deck.length > 0) {
+                                                // Auto-fill the single player's ship
+                                                let playerToFill = updatedPlayers.find(p => p.id === singlePlayerWithSpaceId);
+                                                let cardsToDraw = gameData.ship_capacity - playerToFill.ship.length;
+                                                let drawnCards = [];
+                                                let remainingDeck = [...gameData.deck];
+
+                                                for (let i = 0; i < cardsToDraw && remainingDeck.length > 0; i++) {
+                                                    drawnCards.push(remainingDeck.shift());
+                                                }
+
+                                                playerToFill = {
+                                                    ...playerToFill,
+                                                    ship: [...playerToFill.ship, ...drawnCards]
+                                                };
+                                                updatedPlayers = updatedPlayers.map(p => p.id === singlePlayerWithSpaceId ? playerToFill : p);
+
+                                                const { error } = await supabase
+                                                    .from('games')
+                                                    .update({
+                                                        players: updatedPlayers,
+                                                        deck: remainingDeck, // Update remaining deck
+                                                        discard_pile: updatedDiscardPile, // Ensure discard pile is also updated
+                                                        status: 'day_scoring',
+                                                        message: `${playerToFill.name}'s ship was automatically filled. Day ${gameData.current_day} ended.`
+                                                    })
+                                                    .eq('id', gameId);
+                                                if (error) console.error("Error updating game to day_scoring (AI bid pass auto-fill):", error);
+                                                else console.log("[AI Bid Pass Auto-fill] Supabase update to day_scoring SUCCESS.");
+                                            } else if (allShipsFull || gameData.deck.length === 0) { // If all ships are full OR deck is empty, trigger day scoring
                                                 console.log("[AI Bid Pass End Auction] Preparing Supabase update to day_scoring.");
                                                 const { error } = await supabase
                                                     .from('games')
@@ -2056,9 +2244,37 @@
                                             );
 
                                             // Determine the next player or if day scoring should begin
-                                            const { nextPlayerId, allShipsFull } = findNextEligiblePlayer({ ...gameData, players: updatedPlayers }, gameData.current_player_id);
-                                            console.log(`[findNextEligiblePlayer result for auction end] nextPlayerId: ${nextPlayerId}, allShipsFull: ${allShipsFull}`);
-                                            if (allShipsFull || gameData.deck.length === 0) { // If all ships are full OR deck is empty, trigger day scoring
+                                            const { nextPlayerId, allShipsFull, singlePlayerWithSpaceId } = findNextEligiblePlayer({ ...gameData, players: updatedPlayers }, gameData.current_player_id);
+                                            console.log(`[findNextEligiblePlayer result for auction end] nextPlayerId: ${nextPlayerId}, allShipsFull: ${allShipsFull}, singlePlayerWithSpaceId: ${singlePlayerWithSpaceId}`);
+                                            if (singlePlayerWithSpaceId && gameData.deck.length > 0) {
+                                                // Auto-fill the single player's ship
+                                                let playerToFill = updatedPlayers.find(p => p.id === singlePlayerWithSpaceId);
+                                                let cardsToDraw = gameData.ship_capacity - playerToFill.ship.length;
+                                                let drawnCards = [];
+                                                let remainingDeck = [...gameData.deck];
+
+                                                for (let i = 0; i < cardsToDraw && remainingDeck.length > 0; i++) {
+                                                    drawnCards.push(remainingDeck.shift());
+                                                }
+
+                                                playerToFill = {
+                                                    ...playerToFill,
+                                                    ship: [...playerToFill.ship, ...drawnCards]
+                                                };
+                                                updatedPlayers = updatedPlayers.map(p => p.id === singlePlayerWithSpaceId ? playerToFill : p);
+
+                                                const { error } = await supabase
+                                                    .from('games')
+                                                    .update({
+                                                        players: updatedPlayers,
+                                                        deck: remainingDeck, // Update remaining deck
+                                                        status: 'day_scoring',
+                                                        message: `${playerToFill.name}'s ship was automatically filled. Day ${gameData.current_day} ended.`
+                                                    })
+                                                    .eq('id', gameId);
+                                                if (error) console.error("Error updating game to day_scoring (AI bid win auto-fill):", error);
+                                                else console.log("[AI Bid Win Auto-fill] Supabase update to day_scoring SUCCESS.");
+                                            } else if (allShipsFull || gameData.deck.length === 0) { // If all ships are full OR deck is empty, trigger day scoring
                                                 console.log("[AI Bid Win End Auction] Preparing Supabase update to day_scoring.");
                                                 const { error } = await supabase
                                                     .from('games')
