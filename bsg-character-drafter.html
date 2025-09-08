@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BSG Character Draft</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            color: #e5e5e5;
+        }
+        .card {
+            background-color: #1a1a1a;
+            border: 1px solid #333;
+            transition: all 0.2s ease-in-out;
+        }
+        .card:not(.disabled):hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            border-color: #0099ff;
+        }
+        .card.disabled {
+            filter: grayscale(100%);
+            opacity: 0.4;
+            pointer-events: none;
+        }
+        .btn-primary {
+            background-color: #007acc;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #005fa3;
+        }
+        .btn-primary:disabled {
+            background-color: #004c7a;
+            cursor: not-allowed;
+        }
+        .btn-secondary {
+            background-color: #333;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #444;
+        }
+        .modal {
+            background-color: rgba(10, 10, 10, 0.85);
+        }
+        .modal-content {
+            background-color: #1a1a1a;
+        }
+        .highlight-turn {
+            background-color: #007acc;
+            color: white;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div id="app" class="min-h-screen flex flex-col items-center justify-center p-4">
+        <!-- Main container that will be controlled by JavaScript -->
+    </div>
+
+    <!-- Modal for Character Details -->
+    <div id="modal-container" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal">
+        <div id="modal-content" class="modal-content rounded-lg shadow-2xl w-full max-w-lg p-6 relative border border-gray-700">
+            <!-- Modal content will be injected here by JavaScript -->
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, updateDoc, collection, serverTimestamp, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- DATA: Character Information ---
+        const characters = [
+            { id: 1, name: "William Adama", type: "Military Leader", abilities: { positive1: "Command Authority: When you draw a Crisis Card, all 1 strength Skill Cards count positive for the skill check.", positive2: "Inspirational Leader: Action: Once per game, after resolving a skill check, instead of discarding the used Skill Cards, draw them into your hand.", negative: "Emotionally Attached: You may not activate the \"Admiral's Quarters\" location." }, setup: "" },
+            { id: 2, name: "Laura Roslin", type: "Political Leader", abilities: { positive1: "Religious Visions: When you draw Crisis Cards, draw 2 and choose 1 to resolve. Place the other on the bottom of the deck.", positive2: "Skilled Politician: Action: Once per game, draw 4 Quorum Cards. Choose 1 to resolve and place the rest on the bottom of the deck. You do not need to be President to use this ability.", negative: "Terminal Illness: In order to activate a location, you must first discard 2 Skill Cards." }, setup: "" },
+            { id: 3, name: "Gaius Baltar", type: "Political Leader", abilities: { positive1: "Delusional Intuition: After you draw a Crisis Card, draw 1 Skill Card of your choice (it may be from outside your skill set).", positive2: "Cylon Detector: Action: Once per game, you may look at all Loyalty Cards belonging to another player.", negative: "Coward: You start the game with 2 Loyalty Cards instead of 1." }, setup: "" },
+            { id: 4, name: "Tom Zarek", type: "Political Leader", abilities: { positive1: "Friends in Low Places: When a player activates the \"Administration\" or \"Brig\" location, you may choose to reduce or increase the difficulty by 2.", positive2: "Unconventional Tactics: Action: Once per game, lose 1 population to gain 1 of any other resource type.", negative: "Convicted Criminal: You may not activate locations occupied by other characters (except the \"Brig\")." }, setup: "" },
+            { id: 5, name: "Lee \"Apollo\" Adama", type: "Pilot", abilities: { positive1: "Alert Viper Pilot: When a viper is placed in a space area from the \"Reserves\", you may choose to pilot it and take 1 action. You may only do this when you are on a Galactica location, excluding the \"Brig\".", positive2: "CAG: Action: Once per game, you may activate up to 6 unmanned Vipers.", negative: "Headstrong: When you are forced to discard Skill Cards, you must discard randomly." }, setup: "Skill set includes Leadership/Politics." },
+            { id: 6, name: "Kara \"Starbuck\" Thrace", type: "Pilot", abilities: { positive1: "Expert Pilot: When you start your turn piloting a Viper, you may take 2 Actions during your Action Step (instead of 1).", positive2: "Secret Destiny: Once per game, immediately after a Crisis Card is revealed, discard it and draw a new one.", negative: "Insubordinate: When a player chooses you with the \"Admiral's Quarters\" location, reduce the difficulty by 3." }, setup: "Skill set includes Leadership/Engineering." },
+            { id: 7, name: "Karl \"Helo\" Agathon", type: "Military Leader", abilities: { positive1: "ECO Officer: During your turn, you may reroll a die that was just rolled (once per turn). You must use the new result.", positive2: "Moral Compass: Once per game, after a player makes a choice on a Crisis Card, you may change it.", negative: "Stranded: Your character is not placed on the board at the start of the game. At the start of your 2nd turn, place your character on the \"Hangar Deck\" location." }, setup: "" },
+            { id: 8, name: "Saul Tigh", type: "Military Leader", abilities: { positive1: "Cylon Hatred: When a player activates the \"Admiral's Quarters\" location, you may choose to reduce the difficulty by 3.", positive2: "Declare Martial Law: Action: Once per game, give the President title to the Admiral.", negative: "Alcoholic: At the start of any player's turn, if you have exactly 1 Skill Card in you hand, you must discard it." }, setup: "" },
+            { id: 9, name: "Galen \"Chief\" Tyrol", type: "Support", abilities: { positive1: "Maintenance Engineer: During your turn, after you use a \"Repair\" Skill Card, you may take another action (once per turn).", positive2: "Blind Devotion: Once per game, after cards have been added to a Skill Check (but before revealing them), you may choose a skill type. All cards of the chosen type are considered strength 0.", negative: "Union Leader: Your hand size is 8." }, setup: "" },
+            { id: 10, name: "Sharon \"Boomer\" Valerii", type: "Pilot", abilities: { positive1: "Recon: At the end of your turn, you may look at the top of the Crisis Deck and place it on the top or bottom.", positive2: "Mysterious Intuition: Once per game, before resolving a Skill Check on a Crisis Card, choose the result (Pass or Fail) instead of resolving it normally.", negative: "Sleeper Agent: During the Sleeper Agent phase, you are dealt 2 Loyalty Cards. You must keep both." }, setup: "" },
+            { id: 13, name: "Helena Cain", type: "Military Leader", abilities: { positive1: "Ambitious: When you are in the Admiral's Quarters, you may discard 1 Skill Card to treat the check as a pass. You become Admiral.", positive2: "Blind Jump: Action: Once per game, jump the fleet without spending fuel. Population is lost on a roll of 6 or less.", negative: "Bent on Revenge: You may not play more than 3 cards into any skill check." }, setup: "" },
+            { id: 14, name: "Ellen Tigh", type: "Political Leader", abilities: { positive1: "Politically Adroit: Once per turn, when you play a Quorum card, you may draw a card from the skill deck of your choice.", positive2: "Manipulative: At the end of your turn, you may give a player a card from your hand to take a card of your choice from theirs.", negative: "Self-Preservation: When a character is sent to the Brig, you must discard your entire hand of skill cards." }, setup: "" },
+            { id: 15, name: "Anastasia \"Dee\" Dualla", type: "Support", abilities: { positive1: "Efficient: When you activate Communications, you may move 2 civilian ships instead of 1.", positive2: "Fast Learner: Once per game, before you make a skill check, you may look at the top 3 cards of any skill deck and add one to your hand.", negative: "Emotionally Fragile: Your hand size is 8." }, setup: "" },
+            { id: 16, name: "Louanne \"Kat\" Katraine", type: "Pilot", abilities: { positive1: "Hot Shot: You may re-roll a die roll when piloting a viper.", positive2: "Stim Junkie: Once per game, you may take 3 actions.", negative: "Addiction: At the start of your turn, you must discard 1 skill card." }, setup: "" },
+            { id: 17, name: "Cally Henderson", type: "Support", abilities: { positive1: "Quick Fix: Once per turn, you may repair a damaged location by discarding an Engineering card.", positive2: "Tigh's Pet: Once per game, if you are on the same location as Saul Tigh, you may exchange your entire hand with him.", negative: "Impressionable: When you receive a 'You are a Cylon' card, you must reveal it immediately." }, setup: "" },
+            { id: 18, name: "Tory Foster", type: "Political Leader", abilities: { positive1: "Adapts to Survive: After the 'Sleeper Agent' phase, draw 2 skill cards instead of 1 during your receive skills step.", positive2: "Nothing but the Truth: Once per game, you may force a player to show you one of their loyalty cards.", negative: "Amoral: When you draw a Mutiny card, you must give it to another player." }, setup: "" },
+            { id: 19, name: "Felix Gaeta", type: "Military Leader", abilities: { positive1: "FTL Operator: When the fleet jumps, reduce the population loss by 1.", positive2: "Ship's Systems: Once per game, you may look at the top of the Destination deck and place it on the top or bottom.", negative: "Idealistic: You may not use the action on the Admiral's Quarters location." }, setup: "" },
+            { id: 20, name: "Brendan \"Hot Dog\" Costanza", type: "Pilot", abilities: { positive1: "Escort: When you launch a viper, you may escort one civilian ship to an adjacent space.", positive2: "Buck Rogers: Once per game, you may automatically destroy up to 2 raiders in your space.", negative: "Green: You must discard 1 skill card to activate an unmanned viper." }, setup: "" },
+            { id: 21, name: "Samuel T. Anders", type: "Pilot", abilities: { positive1: "Star Player: When a skill check is passed, you may draw a card from that skill deck.", positive2: "Longshot: Once per game, you may choose to automatically succeed at a skill check.", negative: "Starts on Colonial One: Your starting location is Colonial One." }, setup: "" },
+            { id: 11, name: "'Caprica' Six", type: "Cylon Leader", abilities: { positive1: "Intimate: When you move to a location with another player, you may draw 1 random skill card from their hand, and they draw 1 from the deck of your choice.", positive2: "Human Delusion: Once per game, you may play any number of skill cards after the reveal of a skill check.", negative: "Conflicted Loyalties: You must discard 1 skill card to activate the 'Cylon Fleet' location." }, setup: "" },
+            { id: 12, name: "Leoben Conoy", type: "Cylon Leader", abilities: { positive1: "Cryptic Message: At the start of your turn, look at the top card of the crisis deck. You may place it on the top or bottom.", positive2: "Glimpse the Face of God: Once per game, you may look at another player's loyalty cards.", negative: "Clouded: You may not play Treachery skill cards." }, setup: "" },
+            { id: 22, name: "Athena (Sharon Agathon)", type: "Cylon Leader", abilities: { positive1: "For Love: When a player must discard Skill Cards, you may draw 1 Treachery to reduce the amount by 1.", positive2: "Resolute: Action: Once per game, you may activate any undamaged location.", negative: "Infiltration: Your hand size is 6." }, setup: "" },
+            { id: 23, name: "Aaron Doral", type: "Cylon Leader", abilities: { positive1: "Industrious: You may draw 2 extra skill cards while infiltrating. This is disregarded if you are in 'Sickbay'.", positive2: "Meticulous: Once per game, when you use an action to end infiltration, you may move to any Cylon location and take an action.", negative: "Vanity: You cannot contribute to skill checks during another player's Action step." }, setup: "" },
+            { id: 24, name: "Simon O'Neill", type: "Cylon Leader", abilities: { positive1: "Calculating: You may contribute 2 cards to skill checks (3 if infiltrating). Not if in the 'Brig'.", positive2: "Modifications: Once per game, during the 'Activate Cylon Ships' step, you may choose which ship type to activate, or to launch raiders.", negative: "Logic-Bound: You must play 1 skill card face up for skill checks." }, setup: "" },
+            { id: 25, name: "D'Anna Biers", type: "Cylon Leader", abilities: { positive1: "Visions: When you draw a crisis card, you may discard a skill card to draw a new one.", positive2: "In The Know: Once per game, you may look at the top 3 cards of the Destination deck and rearrange them in any order.", negative: "Final Five Obsession: When moving from the Hub after it is destroyed, you must discard a Super Crisis to move." }, setup: "" },
+            { id: 26, name: "'Doc' Sherman Cottle", type: "Support", abilities: { positive1: "Field Surgeon: When you move to a location with a character in \"Sickbay\", you may discard 1 skill card to move them to your location.", positive2: "Patch Them Up: Action: Once per game, choose a player (including yourself). That player draws skill cards up to their hand size.", negative: "Gruff: You cannot play skill cards with a strength of 1." }, setup: "" },
+            { id: 27, name: "Romo Lampkin", type: "Political Leader", abilities: { positive1: "Legal Defense: When a player is sent to the \"Brig\", you may choose to take a Mutiny card to cancel it.", positive2: "Inspirational Orator: Action: Once per game, you may choose another player. That player gives you their hand and you give them yours.", negative: "Kleptomaniac: When another player gives you 1 or more skill cards, you must give them one from your hand." }, setup: "" },
+            { id: 28, name: "Admiral Jack Fisk", type: "Military Leader", abilities: { positive1: "Black Marketeer: Once during your turn you may discard a card to draw a card from the bottom of any skill deck.", positive2: "Loyal Aide: Once per game, you may choose to pass or fail a skill check with a difficulty of 7 or less.", negative: "Trusting: You cannot look at another player's loyalty cards." }, setup: "" },
+            { id: 29, name: "Kendra Shaw", type: "Military Leader", abilities: { positive1: "Promotion: When the Admiral title is passed to you, you may draw 2 skill cards from the deck of your choice.", positive2: "Field Promotion: Action: Once per game, choose a character. Give that character the Admiral or President title.", negative: "By the Book: You may only contribute a maximum of 1 skill card to skill checks." }, setup: "" },
+            { id: 30, name: "Lee Adama (alt)", type: "Political Leader", abilities: { positive1: "Forward Thinker: After you play an \"Executive Order\" skill card, you may activate your current location.", positive2: "Choose a Different Path: Once per game, you may change the result of a crisis card to \"Current Player Discards 5 Skill Cards.\"", negative: "Moral Dilemma: When you draw a Mutiny card, you must discard 2 skill cards." }, setup: "" },
+            { id: 31, name: "Galen Tyrol (alt)", type: "Military Leader", abilities: { positive1: "Demoralized: At the start of your turn, if morale is at 2 or less, you may draw 1 skill card of your choice.", positive2: "Reckless: Once per game, when you are in a viper, you may destroy it to destroy 5 raiders, 2 heavy raiders, or 1 basestar in your space area.", negative: "Work a Grudge: You may not use the action of the \"Command\" location." }, setup: "" },
+            { id: 32, name: "Helo Agathon (alt)", type: "Pilot", abilities: { positive1: "Takes Risks: Once during your turn, you may choose to re-roll a die. You must use the new result.", positive2: "Believer: Once per game, after a player makes a choice on a crisis card, you may change it.", negative: "On the Run: Your hand size is 8." }, setup: "" },
+            { id: 33, name: "Tom Zarek (alt)", type: "Support", abilities: { positive1: "Charismatic: When you draw a mutiny card, you may look at it and give it to any player.", positive2: "Exploit a Weakness: Once per game, you may choose to reduce the strength of all non-helpful skill cards to 0.", negative: "Unforgiving: You may not give skill cards to other players." }, setup: "" },
+        ];
+
+        // --- Firebase Configuration ---
+        let db, auth;
+        let userId;
+        let gameUnsubscribe = null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        // --- App State ---
+        let appState = {
+            gameId: null,
+            playerName: localStorage.getItem('bsgPlayerName') || '',
+            gameData: null,
+        };
+        
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+          apiKey: "AIzaSyC73JtYpZC-PIiQCQVubVIENAd2brZSES4",
+          authDomain: "bsg-character-draft.firebaseapp.com",
+          projectId: "bsg-character-draft",
+          storageBucket: "bsg-character-draft.firebasestorage.app",
+          messagingSenderId: "1023995706387",
+          appId: "1:1023995706387:web:ecea10d5e19b2db736d3e6",
+          measurementId: "G-NN96MHGDJH"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
+        
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                userId = user.uid;
+                init();
+            } else {
+                 try {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (error) {
+                    console.error("Authentication failed:", error);
+                }
+            }
+        });
+
+        // --- Main Initialization ---
+        function init() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const gameIdFromUrl = urlParams.get('game');
+            if (gameIdFromUrl) {
+                appState.gameId = gameIdFromUrl;
+                joinGame();
+            } else {
+                renderHomeScreen();
+            }
+        }
+
+        // --- Rendering Functions ---
+        const AppContainer = document.getElementById('app');
+
+        function renderHomeScreen() {
+            AppContainer.innerHTML = `
+                <div class="text-center p-8 rounded-lg shadow-2xl max-w-md w-full card">
+                    <h1 class="text-4xl font-bold text-red-500 mb-2">BSG DRAFT</h1>
+                    <p class="text-gray-400 mb-6">Battlestar Galactica Character Draft</p>
+                    <div class="space-y-4">
+                        <input id="playerName" type="text" placeholder="Enter Your Name" value="${appState.playerName}" class="w-full px-4 py-2 rounded-md bg-gray-800 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input id="playerCount" type="number" min="3" max="7" placeholder="Number of Players (3-7)" class="w-full px-4 py-2 rounded-md bg-gray-800 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button id="createGameBtn" class="w-full py-2 px-4 rounded-md font-semibold btn-primary">Create New Game</button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('createGameBtn').addEventListener('click', createGame);
+            document.getElementById('playerName').addEventListener('input', (e) => {
+                appState.playerName = e.target.value;
+                localStorage.setItem('bsgPlayerName', appState.playerName);
+            });
+        }
+
+        function renderLobbyScreen() {
+            const { players = [], playerCount = 0, admin = '' } = appState.gameData;
+            const isFull = players.length >= playerCount;
+            const isAdmin = userId === admin;
+            const gameQuery = `?game=${appState.gameId}`;
+
+            AppContainer.innerHTML = `
+                <div class="text-center p-8 rounded-lg shadow-2xl max-w-2xl w-full card">
+                    <h2 class="text-2xl font-bold mb-4">Game Lobby</h2>
+                    <p class="text-gray-400 mb-6">To invite players, follow these two steps:</p>
+                    
+                    <div class="text-left bg-gray-800 p-4 rounded-lg border border-gray-700">
+                        <p class="font-bold text-lg mb-2">Step 1: You (The Admin) Copy the Game ID</p>
+                        <div class="flex items-center">
+                            <input id="shareQuery" type="text" readonly value="${gameQuery}" class="w-full px-4 py-2 text-center rounded-l-md bg-gray-900 border border-gray-600 cursor-pointer" onclick="this.select()">
+                            <button id="copyQueryBtn" class="py-2 px-4 rounded-r-md btn-secondary whitespace-nowrap">Copy ID</button>
+                        </div>
+                    </div>
+
+                    <div class="text-left bg-gray-800 p-4 rounded-lg border border-gray-700 mt-4">
+                        <p class="font-bold text-lg mb-2">Step 2: Tell Your Friends</p>
+                        <p class="text-gray-400">Have them open the same app link you are using now. Then, tell them to paste the <strong class="text-white">Game ID</strong> at the end of their URL and press Enter.</p>
+                    </div>
+
+
+                    <h3 class="text-xl mb-2 mt-6">${players.length} / ${playerCount} Players Joined</h3>
+                    <div id="playerList" class="space-y-2 mb-6">
+                        ${players.map(p => `<div class="p-2 rounded bg-gray-700">${p.name} ${p.uid === admin ? '(Admin)' : ''}</div>`).join('')}
+                    </div>
+                    ${isAdmin && isFull ? `<button id="startGameBtn" class="w-full py-2 px-4 rounded-md font-semibold btn-primary">Start Draft</button>` : ''}
+                    ${isAdmin && !isFull ? `<p class="text-yellow-400">Waiting for ${playerCount - players.length} more player(s)...</p>` : ''}
+                    ${!isAdmin && isFull ? `<p class="text-green-400">Lobby is full! Waiting for Admin to start the game.</p>` : ''}
+                </div>
+            `;
+            if(document.getElementById('startGameBtn')) {
+                document.getElementById('startGameBtn').addEventListener('click', startDraft);
+            }
+            document.getElementById('copyQueryBtn').addEventListener('click', () => {
+                 const queryField = document.getElementById('shareQuery');
+                 queryField.select();
+                 try {
+                    document.execCommand('copy');
+                    alert('Game ID copied to clipboard!');
+                 } catch (err) {
+                    console.error('Failed to copy text: ', err);
+                 }
+            });
+        }
+
+        function renderDraftScreen() {
+            const { players, draftOrder, currentPlayerIndex, draftedCharacters } = appState.gameData;
+            if (!players || !draftOrder || currentPlayerIndex === undefined) return;
+            
+            const currentPlayerUid = draftOrder[currentPlayerIndex];
+            const currentPlayer = players.find(p => p.uid === currentPlayerUid);
+            const isMyTurn = userId === currentPlayerUid;
+            
+            const availableCharacters = getValidCharacters();
+            
+            AppContainer.innerHTML = `
+                <div class="w-full max-w-7xl">
+                    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                        <!-- Player List -->
+                        <div class="lg:col-span-1 p-4 rounded-lg card">
+                            <h2 class="text-xl font-bold mb-4 border-b border-gray-600 pb-2">Draft Order</h2>
+                            <div class="space-y-3">
+                                ${draftOrder.map((uid, index) => {
+                                    const player = players.find(p => p.uid === uid);
+                                    const characterId = draftedCharacters[uid];
+                                    const character = characterId ? characters.find(c => c.id === characterId) : null;
+                                    return `
+                                        <div class="p-3 rounded-md ${index === currentPlayerIndex ? 'highlight-turn' : 'bg-gray-700'}">
+                                            <p class="font-semibold">${index + 1}. ${player?.name || '...'} ${uid === userId ? '(You)' : ''}</p>
+                                            ${character ? `<p class="text-sm text-gray-300">${character.name}</p>` : `<p class="text-sm text-gray-400 italic">Picking...</p>`}
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+
+                        <!-- Character Grid -->
+                        <div class="lg:col-span-3">
+                            <div class="text-center mb-6">
+                                <h1 class="text-3xl font-bold">${isMyTurn ? "Your Turn to Draft!" : `Waiting for ${currentPlayer?.name || '...'}...`}</h1>
+                                <p class="text-gray-400">Click on a character to view their abilities.</p>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                                ${characters.map(char => {
+                                    const isDrafted = Object.values(draftedCharacters).includes(char.id);
+                                    return `
+                                        <div 
+                                            class="card p-4 rounded-lg flex flex-col items-center text-center cursor-pointer ${isDrafted ? 'disabled' : ''}"
+                                            onclick="showCharacterDetails(${char.id})">
+                                            <h3 class="text-lg font-bold ${getCharacterTypeColor(char.type)}">${char.name}</h3>
+                                            <p class="text-sm text-gray-400 mb-2">${char.type}</p>
+                                            ${isDrafted ? '<p class="text-red-500 font-bold mt-auto">DRAFTED</p>' : ''}
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function renderSummaryScreen() {
+             const { players, draftOrder, draftedCharacters } = appState.gameData;
+             AppContainer.innerHTML = `
+                <div class="text-center p-8 rounded-lg shadow-2xl max-w-3xl w-full card">
+                    <h1 class="text-3xl font-bold text-green-500 mb-4">Draft Complete!</h1>
+                    <p class="text-gray-400 mb-6">Review the draft results and prepare for the game.</p>
+                    <div class="space-y-4">
+                        ${draftOrder.map(uid => {
+                            const player = players.find(p => p.uid === uid);
+                            const characterId = draftedCharacters[uid];
+                            const character = characters.find(c => c.id === characterId);
+                            return `
+                                <div class="p-4 rounded-lg bg-gray-800 border border-gray-700 text-left">
+                                    <p class="text-xl font-semibold">${player.name} drafted:</p>
+                                    <h3 class="text-2xl font-bold ${getCharacterTypeColor(character.type)}">${character.name} <span class="text-lg font-normal text-gray-400">(${character.type})</span></h3>
+                                    ${character.setup ? `<p class="text-yellow-400 text-sm mt-1"><strong>Setup:</strong> ${character.setup}</p>` : ''}
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                    <button onclick="startNewDraft()" class="mt-8 py-2 px-6 rounded-md font-semibold btn-secondary">Start New Draft</button>
+                </div>
+             `;
+        }
+        
+        // --- Game Logic Functions ---
+        
+        function getGameDocRef(gameId) {
+            return doc(db, `artifacts/${appId}/public/data/bsg-drafts`, gameId);
+        }
+
+        async function createGame() {
+            const createButton = document.getElementById('createGameBtn');
+            const playerName = document.getElementById('playerName').value;
+            const playerCount = parseInt(document.getElementById('playerCount').value);
+
+            if (!playerName || !playerCount || playerCount < 3 || playerCount > 7) {
+                alert("Please enter your name and a valid player count (3-7).");
+                return;
+            }
+
+            createButton.disabled = true;
+            createButton.textContent = 'Creating...';
+
+            const gameId = 'bsg-' + Math.random().toString(36).substring(2, 9);
+            
+            const newGameData = {
+                admin: userId,
+                playerCount: playerCount,
+                players: [{ name: playerName, uid: userId }],
+                gameState: 'lobby',
+                createdAt: serverTimestamp(),
+            };
+
+            try {
+                const gameRef = getGameDocRef(gameId);
+                await setDoc(gameRef, newGameData);
+                
+                appState.gameId = gameId;
+                appState.gameData = newGameData;
+                joinGame();
+                renderLobbyScreen();
+
+            } catch (error) {
+                console.error("Error creating game:", error);
+                alert("Could not create the game. Please check your connection and try again.");
+                createButton.disabled = false;
+                createButton.textContent = 'Create New Game';
+            }
+        }
+
+        async function verifyGameExistsWithRetries(gameId) {
+            const gameRef = getGameDocRef(gameId);
+            let retries = 5;
+            while (retries > 0) {
+                const docSnap = await getDoc(gameRef);
+                if (docSnap.exists()) {
+                    return true;
+                }
+                await new Promise(resolve => setTimeout(resolve, 500)); 
+                retries--;
+            }
+            return false;
+        }
+
+        function joinGame() {
+            if (gameUnsubscribe) gameUnsubscribe();
+
+            let hasCheckedForGame = false; 
+
+            gameUnsubscribe = onSnapshot(getGameDocRef(appState.gameId), async (docSnap) => {
+                if (docSnap.exists()) {
+                    appState.gameData = docSnap.data();
+                    
+                    const playerExists = appState.gameData.players.some(p => p.uid === userId);
+                    if (!playerExists && appState.gameData.gameState === 'lobby' && appState.gameData.players.length < appState.gameData.playerCount) {
+                        if (!appState.playerName) {
+                            appState.playerName = prompt("Please enter your name to join:");
+                            if(appState.playerName) localStorage.setItem('bsgPlayerName', appState.playerName);
+                            else { 
+                                const baseUrl = window.location.href.split('?')[0];
+                                window.location.href = baseUrl;
+                                return;
+                            }
+                        }
+                        const updatedPlayers = [...appState.gameData.players, { name: appState.playerName, uid: userId }];
+                        await updateDoc(getGameDocRef(appState.gameId), { players: updatedPlayers });
+                    }
+                    
+                    renderCurrentGameState();
+                } else if (!hasCheckedForGame) {
+                    hasCheckedForGame = true;
+                    const gameExists = await verifyGameExistsWithRetries(appState.gameId);
+                    if (!gameExists) {
+                        console.error("Game not found after retries.");
+                        alert("Game not found! Returning to home screen.");
+                        const baseUrl = window.location.href.split('?')[0];
+                        window.location.href = baseUrl;
+                    }
+                }
+            });
+        }
+        
+        async function startDraft() {
+            const { players } = appState.gameData;
+            const draftOrder = [...players].sort(() => Math.random() - 0.5).map(p => p.uid);
+            
+            await updateDoc(getGameDocRef(appState.gameId), {
+                gameState: 'drafting',
+                draftOrder,
+                currentPlayerIndex: 0,
+                draftedCharacters: {},
+            });
+        }
+        
+        async function draftCharacter(characterId) {
+            const { currentPlayerIndex, draftOrder, draftedCharacters } = appState.gameData;
+            const currentPlayerUid = draftOrder[currentPlayerIndex];
+
+            if(userId !== currentPlayerUid) {
+                console.warn("Not your turn!");
+                return;
+            }
+            
+            const newDraftedCharacters = { ...draftedCharacters, [currentPlayerUid]: characterId };
+            const nextPlayerIndex = currentPlayerIndex + 1;
+            
+            if (nextPlayerIndex >= draftOrder.length) {
+                await updateDoc(getGameDocRef(appState.gameId), {
+                    gameState: 'finished',
+                    draftedCharacters: newDraftedCharacters,
+                    currentPlayerIndex: nextPlayerIndex,
+                });
+            } else {
+                 await updateDoc(getGameDocRef(appState.gameId), {
+                    draftedCharacters: newDraftedCharacters,
+                    currentPlayerIndex: nextPlayerIndex,
+                });
+            }
+        }
+        
+        function getValidCharacters() {
+            const { draftedCharacters, playerCount } = appState.gameData;
+            const draftedIds = Object.values(draftedCharacters);
+            let availablePool = characters.filter(c => !draftedIds.includes(c.id));
+            
+            if (playerCount < 7) {
+                availablePool = availablePool.filter(c => c.type !== 'Cylon Leader');
+            }
+
+            const counts = availablePool.reduce((acc, char) => {
+                if (['Military Leader', 'Political Leader', 'Pilot'].includes(char.type)) {
+                    acc[char.type] = (acc[char.type] || 0) + 1;
+                }
+                return acc;
+            }, {});
+            
+            const maxCount = Math.max(0, ...Object.values(counts));
+            
+            const validTypes = Object.keys(counts).filter(type => counts[type] === maxCount);
+
+            validTypes.push('Support', 'Cylon Leader');
+            
+            return availablePool.filter(char => validTypes.includes(char.type));
+        }
+
+        function renderCurrentGameState() {
+            if (!appState.gameData) return;
+            switch (appState.gameData.gameState) {
+                case 'lobby':
+                    renderLobbyScreen();
+                    break;
+                case 'drafting':
+                    renderDraftScreen();
+                    break;
+                case 'finished':
+                    renderSummaryScreen();
+                    break;
+                default:
+                    renderHomeScreen();
+            }
+        }
+        
+        // --- Helper & Modal Functions ---
+        function getCharacterTypeColor(type) {
+            switch (type) {
+                case 'Military Leader': return 'text-red-400';
+                case 'Political Leader': return 'text-blue-400';
+                case 'Pilot': return 'text-green-400';
+                case 'Support': return 'text-yellow-400';
+                case 'Cylon Leader': return 'text-purple-400';
+                default: return 'text-gray-300';
+            }
+        }
+        
+        function startNewDraft() {
+            const baseUrl = window.location.href.split('?')[0];
+            window.location.href = baseUrl;
+        }
+
+        function showCharacterDetails(characterId) {
+            const character = characters.find(c => c.id === characterId);
+            if (!character) return;
+
+            const modalContent = document.getElementById('modal-content');
+            const modalContainer = document.getElementById('modal-container');
+            
+            const { draftOrder, currentPlayerIndex, draftedCharacters } = appState.gameData;
+            const currentPlayerUid = draftOrder ? draftOrder[currentPlayerIndex] : null;
+            const isMyTurn = userId === currentPlayerUid;
+            
+            const isDrafted = Object.values(draftedCharacters).includes(character.id);
+            const availableForDraft = getValidCharacters().some(c => c.id === characterId);
+            
+            const draftButtonHtml = isMyTurn && !isDrafted && availableForDraft
+                ? `<button onclick="draftCharacterAndCloseModal(${character.id})" class="w-full mt-6 py-2 px-4 rounded-md font-semibold btn-primary">Draft ${character.name}</button>`
+                : '';
+
+            modalContent.innerHTML = `
+                <button onclick="hideCharacterDetails()" class="absolute top-2 right-3 text-2xl font-bold text-gray-500 hover:text-white">&times;</button>
+                <h2 class="text-3xl font-bold ${getCharacterTypeColor(character.type)} mb-2">${character.name}</h2>
+                <p class="text-lg text-gray-400 mb-4">${character.type}</p>
+                <div class="space-y-3 text-left max-h-[50vh] overflow-y-auto pr-2">
+                    <p><strong class="text-green-400">+</strong> ${character.abilities.positive1}</p>
+                    <p><strong class="text-green-400">+</strong> ${character.abilities.positive2}</p>
+                    <p><strong class="text-red-400">-</strong> ${character.abilities.negative}</p>
+                </div>
+                ${character.setup ? `<p class="mt-4 text-yellow-400 text-sm"><strong>Setup:</strong> ${character.setup}</p>` : ''}
+                ${draftButtonHtml}
+            `;
+
+            modalContainer.classList.remove('hidden');
+            modalContainer.classList.add('flex');
+        }
+
+        function hideCharacterDetails() {
+            const modalContainer = document.getElementById('modal-container');
+            modalContainer.classList.add('hidden');
+            modalContainer.classList.remove('flex');
+        }
+        
+        function draftCharacterAndCloseModal(characterId) {
+            draftCharacter(characterId);
+            hideCharacterDetails();
+        }
+
+        window.draftCharacter = draftCharacter; 
+        window.startNewDraft = startNewDraft;
+        window.showCharacterDetails = showCharacterDetails;
+        window.hideCharacterDetails = hideCharacterDetails;
+        window.draftCharacterAndCloseModal = draftCharacterAndCloseModal;
+    </script>
+</body>
+</html>
+
