@@ -73,7 +73,7 @@
 
     <!-- Modal for Character Details -->
     <div id="modal-container" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal">
-        <div id="modal-content" class="modal-content rounded-lg shadow-2xl w-full max-w-2xl p-6 relative border border-gray-700">
+        <div id="modal-content" class="modal-content rounded-lg shadow-2xl w-full max-w-4xl p-6 relative border border-gray-700">
             <!-- Modal content will be injected here by JavaScript -->
         </div>
     </div>
@@ -299,7 +299,10 @@
                                     const draftedCardHtml = character ? `
                                         <div class="flex items-center space-x-2 mt-1 cursor-pointer" onclick="showCharacterDetails(${character.id})">
                                             <img src="${character.imageUrl}" class="w-10 h-auto rounded-sm"/>
-                                            <p class="text-sm text-gray-300">${character.name}</p>
+                                            <div>
+                                                <p class="text-sm text-gray-300">${character.name}</p>
+                                                <p class="text-xs ${getCharacterTypeColor(character.type)}">${character.type}</p>
+                                            </div>
                                         </div>
                                     ` : `<p class="text-sm text-gray-400 italic">Picking...</p>`;
                                     return `
@@ -324,7 +327,7 @@
                                         <div>
                                             <h2 class="text-2xl font-bold mb-4 ${getCharacterTypeColor(type)}">${type}s</h2>
                                             <hr class="border-gray-700 mb-4"/>
-                                            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                                 ${groupedCharacters[type].map(char => {
                                                     const isDrafted = Object.values(draftedCharacters).includes(char.id);
                                                     const borderColorClass = getCharacterTypeBorderColor(char.type);
@@ -687,3 +690,4 @@
     </script>
 </body>
 </html>
+
