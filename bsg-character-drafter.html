@@ -73,7 +73,7 @@
 
     <!-- Modal for Character Details -->
     <div id="modal-container" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal">
-        <div id="modal-content" class="modal-content rounded-lg shadow-2xl w-full max-w-xl p-6 relative border border-gray-700">
+        <div id="modal-content" class="modal-content rounded-lg shadow-2xl w-full max-w-2xl p-6 relative border border-gray-700">
             <!-- Modal content will be injected here by JavaScript -->
         </div>
     </div>
@@ -635,9 +635,7 @@
             modalContent.innerHTML = `
                 <button onclick="hideCharacterDetails()" class="absolute top-2 right-3 text-2xl font-bold text-gray-500 hover:text-white">&times;</button>
                 <div class="text-center">
-                    <img src="${character.imageUrl}" alt="${character.name}" class="w-full max-w-sm mx-auto h-auto rounded-lg mb-4">
-                    <h2 class="text-3xl font-bold ${getCharacterTypeColor(character.type)}">${character.name}</h2>
-                    <p class="text-lg text-gray-400 mb-6">${character.type}</p>
+                    <img src="${character.imageUrl}" alt="${character.name}" class="w-full h-auto rounded-lg mb-4">
                     <div class="flex space-x-4 justify-center">
                         <button onclick="hideCharacterDetails()" class="py-2 px-6 rounded-md font-semibold btn-secondary">Cancel</button>
                         ${draftButtonHtml}
