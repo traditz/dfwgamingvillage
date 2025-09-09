@@ -170,13 +170,13 @@
         };
         
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-          apiKey: "AIzaSyC73JtYpZC-PIiQCQVubVIENAd2brZSES4",
-          authDomain: "bsg-character-draft.firebaseapp.com",
-          projectId: "bsg-character-draft",
-          storageBucket: "bsg-character-draft.firebasestorage.app",
-          messagingSenderId: "1023995706387",
-          appId: "1:1023995706387:web:ecea10d5e19b2db736d3e6",
-          measurementId: "G-NN96MHGDJH"
+         apiKey: "AIzaSyC73JtYpZC-PIiQCQVubVIENAd2brZSES4",
+         authDomain: "bsg-character-draft.firebaseapp.com",
+         projectId: "bsg-character-draft",
+         storageBucket: "bsg-character-draft.firebasestorage.app",
+         messagingSenderId: "1023995706387",
+         appId: "1:1023995706387:web:ecea10d5e19b2db736d3e6",
+         measurementId: "G-NN96MHGDJH"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -255,7 +255,24 @@
 
                     <h3 class="text-xl mb-2 mt-6">${players.length} / ${playerCount} Players Joined</h3>
                     <div id="playerList" class="space-y-2 mb-6">
-                        ${players.map(p => `<div class="p-2 rounded bg-gray-700">${p.name} ${p.uid === admin ? '(Admin)' : ''}</div>`).join('')}
+                        ${players.map(p => {
+                            // Show kick button for admin, but not for themselves
+                            const kickButton = isAdmin && p.uid !== admin ? `<button onclick="kickPlayer('${p.uid}')" class="text-xs bg-red-600 hover:bg-red-700 px-2 py-1 rounded">Kick</button>` : '';
+                            // Show change name button only for the current player
+                            const changeNameButton = p.uid === userId ? `<button onclick="changePlayerName()" class="text-xs bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded">Change Name</button>` : '';
+                            // Add tags like (Admin) and (You)
+                            const playerTag = p.uid === admin ? '(Admin)' : (p.uid === userId ? '(You)' : '');
+
+                            return `
+                                <div class="flex justify-between items-center p-2 rounded bg-gray-700 text-left">
+                                    <span>${p.name} <span class="text-gray-400 text-sm">${playerTag}</span></span>
+                                    <div class="space-x-2">
+                                        ${changeNameButton}
+                                        ${kickButton}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
                     </div>
                     <div class="flex space-x-2">
                         ${isAdmin && isFull ? `<button id="startGameBtn" class="w-full py-2 px-4 rounded-md font-semibold btn-primary">Start Draft</button>` : ''}
@@ -631,19 +648,36 @@
                     const oldGameState = appState.gameData ? appState.gameData.gameState : null;
                     appState.gameData = docSnap.data();
                     
-                    const playerExists = appState.gameData.players.some(p => p.uid === userId);
-                    if (!playerExists && appState.gameData.gameState === 'lobby' && appState.gameData.players.length < appState.gameData.playerCount) {
+                    const playerExistsByUID = appState.gameData.players.some(p => p.uid === userId);
+                    const canJoin = appState.gameData.gameState === 'lobby' && appState.gameData.players.length < appState.gameData.playerCount;
+
+                    if (!playerExistsByUID && canJoin) {
+                        // Prompt for name if it's not in localStorage (e.g., new device)
                         if (!appState.playerName) {
-                            appState.playerName = prompt("Please enter your name to join:");
-                            if(appState.playerName) localStorage.setItem('bsgPlayerName', appState.playerName);
-                            else { 
+                            appState.playerName = prompt("Please enter your name.\n\nIf you are rejoining from a new device, you MUST use the same name you used originally.");
+                            if (appState.playerName) {
+                                localStorage.setItem('bsgPlayerName', appState.playerName);
+                            } else { // User cancelled the prompt
                                 const baseUrl = window.location.href.split('?')[0];
                                 window.location.href = baseUrl;
                                 return;
                             }
                         }
-                        const updatedPlayers = [...appState.gameData.players, { name: appState.playerName, uid: userId }];
-                        await updateDoc(getGameDocRef(appState.gameId), { players: updatedPlayers });
+
+                        // Check if a player with the same name is already in the lobby
+                        const existingPlayerByName = appState.gameData.players.find(p => p.name.toLowerCase() === appState.playerName.toLowerCase());
+
+                        if (existingPlayerByName) {
+                            // Player is rejoining, so update their UID
+                            const updatedPlayers = appState.gameData.players.map(p => 
+                                p.name.toLowerCase() === appState.playerName.toLowerCase() ? { ...p, uid: userId } : p
+                            );
+                            await updateDoc(getGameDocRef(appState.gameId), { players: updatedPlayers });
+                        } else {
+                            // It's a new player, add them to the lobby
+                            const updatedPlayers = [...appState.gameData.players, { name: appState.playerName, uid: userId }];
+                            await updateDoc(getGameDocRef(appState.gameId), { players: updatedPlayers });
+                        }
                     }
                     
                     if (appState.gameData.gameState === 'skillSelection' && oldGameState !== 'finished') {
@@ -703,6 +737,54 @@
                 currentPlayerIndex: 0,
                 draftedCharacters: {},
             });
+        }
+        
+        async function kickPlayer(playerUidToKick) {
+            // Ensure only the admin can perform this action
+            if (userId !== appState.gameData.admin) {
+                console.error("Only the admin can kick players.");
+                return;
+            }
+            
+            // Create a new player list without the kicked player
+            const updatedPlayers = appState.gameData.players.filter(p => p.uid !== playerUidToKick);
+            
+            try {
+                await updateDoc(getGameDocRef(appState.gameId), { players: updatedPlayers });
+            } catch (error) {
+                console.error("Error kicking player:", error);
+                alert("Failed to kick player.");
+            }
+        }
+
+        async function changePlayerName() {
+            const currentName = appState.playerName;
+            const newName = prompt("Enter your new name:", currentName);
+
+            // Proceed only if the new name is valid and different from the old one
+            if (newName && newName.trim() !== '' && newName !== currentName) {
+                // Update local state and storage first for a responsive feel
+                appState.playerName = newName;
+                localStorage.setItem('bsgPlayerName', newName);
+
+                // Create the updated players array for Firestore
+                const updatedPlayers = appState.gameData.players.map(p => {
+                    if (p.uid === userId) {
+                        return { ...p, name: newName };
+                    }
+                    return p;
+                });
+
+                try {
+                    await updateDoc(getGameDocRef(appState.gameId), { players: updatedPlayers });
+                } catch (error) {
+                    console.error("Error changing name:", error);
+                    alert("Failed to change name. Reverting.");
+                    // Revert local changes if the database update fails
+                    appState.playerName = currentName;
+                    localStorage.setItem('bsgPlayerName', currentName);
+                }
+            }
         }
 
         function simulateBotPick() {
@@ -791,8 +873,8 @@
                 });
             } else {
                  await updateDoc(getGameDocRef(appState.gameId), {
-                     draftedCharacters: newDraftedCharacters,
-                     currentPlayerIndex: nextPlayerIndex,
+                      draftedCharacters: newDraftedCharacters,
+                      currentPlayerIndex: nextPlayerIndex,
                  });
             }
         }
@@ -926,10 +1008,10 @@
             
             if(appState.gameData.gameState !== 'drafting') {
                 modalContent.innerHTML = `
-                 <button onclick="hideCharacterDetails()" class="absolute top-2 right-3 text-2xl font-bold text-gray-500 hover:text-white">&times;</button>
-                 <div class="text-center">
-                     <img src="${character.imageUrl}" alt="${character.name}" class="w-full h-auto rounded-lg mb-4">
-                 </div>`;
+                   <button onclick="hideCharacterDetails()" class="absolute top-2 right-3 text-2xl font-bold text-gray-500 hover:text-white">&times;</button>
+                   <div class="text-center">
+                       <img src="${character.imageUrl}" alt="${character.name}" class="w-full h-auto rounded-lg mb-4">
+                   </div>`;
                 modalContainer.classList.remove('hidden');
                 modalContainer.classList.add('flex');
                 return;
@@ -988,8 +1070,9 @@
         window.fillWithBotsAndStart = fillWithBotsAndStart;
         window.selectSkillCards = selectSkillCards;
         window.simulateBotSkillSelections = simulateBotSkillSelections;
+        window.kickPlayer = kickPlayer;
+        window.changePlayerName = changePlayerName;
 
     </script>
 </body>
 </html>
-
