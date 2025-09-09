@@ -14,13 +14,13 @@
         }
         .card {
             background-color: #1a1a1a;
-            border: 1px solid #333;
+            border-width: 2px;
+            border-color: #333;
             transition: all 0.2s ease-in-out;
         }
         .card:not(.disabled):hover {
             transform: translateY(-4px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-            border-color: #0099ff;
         }
         .card.disabled {
             filter: grayscale(100%);
@@ -59,6 +59,11 @@
             color: #d1d5db; /* gray-300 */
             text-shadow: 0 0 4px #ef4444, 0 0 6px #ef4444; /* red-500 glow */
         }
+        .border-political { border-color: #f59e0b; }
+        .border-military { border-color: #22c55e; }
+        .border-pilot { border-color: #ef4444; }
+        .border-support { border-color: #3b82f6; }
+        .border-cylon { border-color: #9ca3af; }
     </style>
 </head>
 <body class="antialiased">
@@ -68,7 +73,7 @@
 
     <!-- Modal for Character Details -->
     <div id="modal-container" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal">
-        <div id="modal-content" class="modal-content rounded-lg shadow-2xl w-full max-w-md p-6 relative border border-gray-700">
+        <div id="modal-content" class="modal-content rounded-lg shadow-2xl w-full max-w-lg p-6 relative border border-gray-700">
             <!-- Modal content will be injected here by JavaScript -->
         </div>
     </div>
@@ -294,11 +299,11 @@
                         <div class="lg:col-span-3">
                             <div class="text-center mb-6">
                                 <h1 class="text-3xl font-bold">${isMyTurn ? "Your Turn to Draft!" : `Waiting for ${currentPlayer?.name || '...'}...`}</h1>
-                                <p class="text-gray-400">Click on a character to view their abilities.</p>
                             </div>
-                            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                                 ${characters.map(char => {
                                     const isDrafted = Object.values(draftedCharacters).includes(char.id);
+                                    const borderColorClass = getCharacterTypeBorderColor(char.type);
                                     const charImage = char.imageUrl ? `
                                         <div class="relative">
                                             <img src="${char.imageUrl}" alt="${char.name}" class="w-full h-auto rounded-md">
@@ -316,7 +321,7 @@
                                     `;
                                     return `
                                         <div 
-                                            class="card rounded-lg cursor-pointer ${isDrafted ? 'disabled' : ''}"
+                                            class="card rounded-lg cursor-pointer ${borderColorClass} ${isDrafted ? 'disabled' : ''}"
                                             onclick="showCharacterDetails(${char.id})">
                                             ${charImage}
                                         </div>
@@ -592,6 +597,17 @@
                 default: return 'text-gray-300';
             }
         }
+
+        function getCharacterTypeBorderColor(type) {
+             switch (type) {
+                case 'Military Leader': return 'border-green-500';
+                case 'Political Leader': return 'border-yellow-500';
+                case 'Pilot': return 'border-red-500';
+                case 'Support': return 'border-blue-500';
+                case 'Cylon Leader': return 'border-gray-500';
+                default: return 'border-gray-700';
+            }
+        }
         
         function startNewDraft() {
             const baseUrl = window.location.href.split('?')[0];
@@ -613,7 +629,7 @@
             const availableForDraft = getValidCharacters().some(c => c.id === characterId);
             
             const draftButtonHtml = isMyTurn && !isDrafted && availableForDraft
-                ? `<button onclick="draftCharacterAndCloseModal(${character.id})" class="w-full mt-6 py-2 px-4 rounded-md font-semibold btn-primary">Draft ${character.name}</button>`
+                ? `<button onclick="draftCharacterAndCloseModal(${character.id})" class="py-2 px-6 rounded-md font-semibold btn-primary">Draft this Character</button>`
                 : '';
 
             modalContent.innerHTML = `
