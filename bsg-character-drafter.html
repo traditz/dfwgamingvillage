@@ -137,7 +137,7 @@
             // Cylon Leaders
             { id: 11, name: "'Caprica' Six", type: "Cylon Leader", skills: ['Leadership', 'Treachery', 'Engineering'], imageUrl: "https://www.dfwgamingvillage.com/images/Caprica%20Six.png" },
             { id: 12, name: "Leoben Conoy", type: "Cylon Leader", skills: ['Politics', 'Treachery', 'Engineering'], imageUrl: "https://www.dfwgamingvillage.com/images/Leoben%20Conoy.png" },
-            { id: 22, name: "Sharon Agathon (Athena)", type: "Cylon Leader", skills: ['Piloting', 'Leadership', 'Engineering'], imageUrl: "https://www.dfwgamingvillage.com/images/Sharon%20Athena%20Agathon%20(Cylon%20Leader).png" },
+            { id: 22, name: "Sharon Agathon (Athena)", type: "Cylon Leader", skills: ['Tactics', 'Leadership', 'Engineering'], imageUrl: "https://www.dfwgamingvillage.com/images/Sharon%20Athena%20Agathon%20(Cylon%20Leader).png" },
             { id: 23, name: "Aaron Doral", type: "Cylon Leader", skills: ['Treachery', 'Politics', 'Tactics'], imageUrl: "https://www.dfwgamingvillage.com/images/Aaron%20Doral.png" },
             { id: 24, name: "Simon O'Neill", type: "Cylon Leader", skills: ['Engineering', 'Treachery', 'Tactics'], imageUrl: "https://www.dfwgamingvillage.com/images/Simon%20O'Neill.png" },
             { id: 25, name: "D'Anna Biers", type: "Cylon Leader", skills: ['Leadership', 'Politics', 'Treachery', 'Engineering'], imageUrl: "https://www.dfwgamingvillage.com/images/D'Anna%20Biers.png" },
@@ -395,7 +395,7 @@
         }
 
         function renderSkillSelectionScreen() {
-            const { players, draftOrder, draftedCharacters, skillSelections = {} } = appState.gameData;
+            const { players, draftOrder, draftedCharacters, skillSelections = {}, admin } = appState.gameData;
             
             const myCharacterId = draftedCharacters[userId];
             const myCharacter = characters.find(c => c.id === myCharacterId);
@@ -462,6 +462,11 @@
                     </div>
                 </div>
             `;
+            
+            // Trigger bot selections if I am the admin
+            if (userId === admin) {
+                setTimeout(simulateBotSkillSelections, 1500);
+            }
 
             if (!isFirstPlayer && !hasSelected) {
                 const checkboxes = document.querySelectorAll('#skill-options input[type="checkbox"]');
@@ -671,7 +676,7 @@
 
         function simulateBotPick() {
             const { draftedCharacters } = appState.gameData;
-            const validForBot = getValidCharacters(); // Gets characters of valid types
+            const validForBot = getValidCharacters();
 
             const draftedIds = Object.values(draftedCharacters);
             const allUnavailableIds = new Set(draftedIds);
@@ -687,6 +692,47 @@
             if (trulyAvailable.length > 0) {
                 const pick = trulyAvailable[Math.floor(Math.random() * trulyAvailable.length)];
                 draftCharacter(pick.id);
+            }
+        }
+        
+        async function simulateBotSkillSelections() {
+            const { draftOrder, draftedCharacters, skillSelections = {}, admin } = appState.gameData;
+            if (userId !== admin) return;
+
+            const updates = {};
+            let needsUpdate = false;
+
+            // Iterate through all players who are eligible to pick skills (everyone but player 1)
+            for (let i = 1; i < draftOrder.length; i++) {
+                const playerUid = draftOrder[i];
+                const playerIsBot = playerUid.startsWith('bot-');
+                const botHasNotSelected = !skillSelections[playerUid];
+
+                if (playerIsBot && botHasNotSelected) {
+                    const characterId = draftedCharacters[playerUid];
+                    const character = characters.find(c => c.id === characterId);
+                    if (!character) continue;
+
+                    const isCylon = character.type === 'Cylon Leader';
+                    const isAthena = character.name === 'Sharon Agathon (Athena)';
+                    const cardsToDraw = (isCylon && !isAthena) ? 2 : 3;
+                    
+                    const availableSkills = [...character.skills];
+                    const shuffledSkills = availableSkills.sort(() => 0.5 - Math.random());
+                    
+                    const selectedSkills = shuffledSkills.slice(0, cardsToDraw);
+
+                    updates[`skillSelections.${playerUid}`] = selectedSkills;
+                    needsUpdate = true;
+                }
+            }
+
+            if (needsUpdate) {
+                try {
+                    await updateDoc(getGameDocRef(appState.gameId), updates);
+                } catch (error) {
+                    console.error("Bot failed to select skills:", error);
+                }
             }
         }
 
@@ -705,12 +751,11 @@
             const nextPlayerIndex = currentPlayerIndex + 1;
             
             if (nextPlayerIndex >= draftOrder.length) {
-                // Draft is over, transition to skill selection
                 await updateDoc(getGameDocRef(appState.gameId), {
                     gameState: 'skillSelection',
                     draftedCharacters: newDraftedCharacters,
                     currentPlayerIndex: nextPlayerIndex,
-                    skillSelections: {} // Initialize skill selections map
+                    skillSelections: {}
                 });
             } else {
                  await updateDoc(getGameDocRef(appState.gameId), {
@@ -904,6 +949,8 @@
         window.draftCharacterAndCloseModal = draftCharacterAndCloseModal;
         window.fillWithBotsAndStart = fillWithBotsAndStart;
         window.selectSkillCards = selectSkillCards;
+        window.simulateBotSkillSelections = simulateBotSkillSelections;
+
     </script>
 </body>
 </html>
