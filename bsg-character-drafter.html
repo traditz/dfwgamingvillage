@@ -68,14 +68,11 @@
 </head>
 <body class="antialiased">
     <div id="app" class="min-h-screen flex flex-col items-center justify-center p-4">
-        <!-- Main container that will be controlled by JavaScript -->
-    </div>
+        </div>
 
-    <!-- Modal for Character Details -->
     <div id="modal-container" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal">
         <div id="modal-content" class="modal-content rounded-lg shadow-2xl w-full max-w-4xl p-6 relative border border-gray-700">
-            <!-- Modal content will be injected here by JavaScript -->
-        </div>
+            </div>
     </div>
 
     <script type="module">
@@ -119,8 +116,7 @@
             { id: 17, name: "Cally Tyrol", type: "Support", imageUrl: "https://www.dfwgamingvillage.com/images/Callandra%20Cally%20Tyrol.png" },
             { id: 26, name: "Sherman Cottle", type: "Support", imageUrl: "https://www.dfwgamingvillage.com/images/Sherman%20Doc%20Cottle.png" },
             { id: 3, name: "Gaius Baltar", type: "Support", imageUrl: "https://www.dfwgamingvillage.com/images/Gaius%20Baltar.png" },
-      
-
+    
             // Cylon Leaders
             { id: 11, name: "'Caprica' Six", type: "Cylon Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Caprica%20Six.png" },
             { id: 12, name: "Leoben Conoy", type: "Cylon Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Leoben%20Conoy.png" },
@@ -129,6 +125,14 @@
             { id: 24, name: "Simon O'Neill", type: "Cylon Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Simon%20O'Neill.png" },
             { id: 25, name: "D'Anna Biers", type: "Cylon Leader", imageUrl: "https://www.dfwgamingvillage.com/images/D'Anna%20Biers.png" },
             { id: 34, name: "Cavil", type: "Cylon Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Cavil.png" },
+        ];
+
+        // --- NEW: Alternate Character Pairs ---
+        const alternateCharacterPairs = [
+            [5, 30],  // Lee Adama (Pilot, Political)
+            [4, 33],  // Tom Zarek (Political, Military)
+            [7, 32],  // Karl Agathon (Military, Pilot)
+            [3, 35]   // Gaius Baltar (Support, Political)
         ];
 
         // --- Firebase Configuration ---
@@ -145,13 +149,13 @@
         };
         
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-          apiKey: "AIzaSyC73JtYpZC-PIiQCQVubVIENAd2brZSES4",
-          authDomain: "bsg-character-draft.firebaseapp.com",
-          projectId: "bsg-character-draft",
-          storageBucket: "bsg-character-draft.firebasestorage.app",
-          messagingSenderId: "1023995706387",
-          appId: "1:1023995706387:web:ecea10d5e19b2db736d3e6",
-          measurementId: "G-NN96MHGDJH"
+         apiKey: "AIzaSyC73JtYpZC-PIiQCQVubVIENAd2brZSES4",
+         authDomain: "bsg-character-draft.firebaseapp.com",
+         projectId: "bsg-character-draft",
+         storageBucket: "bsg-character-draft.firebasestorage.app",
+         messagingSenderId: "1023995706387",
+         appId: "1:1023995706387:web:ecea10d5e19b2db736d3e6",
+         measurementId: "G-NN96MHGDJH"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -164,14 +168,14 @@
                 init();
             } else {
                  try {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                } catch (error) {
-                    console.error("Authentication failed:", error);
-                }
+                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                         await signInWithCustomToken(auth, __initial_auth_token);
+                     } else {
+                         await signInAnonymously(auth);
+                     }
+                 } catch (error) {
+                     console.error("Authentication failed:", error);
+                 }
             }
         });
 
@@ -250,10 +254,10 @@
                  const urlField = document.getElementById('shareUrl');
                  urlField.select();
                  try {
-                    document.execCommand('copy');
-                    alert('Game link copied to clipboard!');
+                     document.execCommand('copy');
+                     alert('Game link copied to clipboard!');
                  } catch (err) {
-                    console.error('Failed to copy text: ', err);
+                     console.error('Failed to copy text: ', err);
                  }
             });
         }
@@ -273,6 +277,20 @@
                 setTimeout(simulateBotPick, 1500);
             }
 
+            // --- UPDATED: Logic to handle alternates and hiding types ---
+            const validDraftableCharacters = getValidCharacters();
+            const validTypesForDraft = new Set(validDraftableCharacters.map(c => c.type));
+
+            const draftedIds = Object.values(draftedCharacters);
+            const allUnavailableIds = new Set(draftedIds);
+            draftedIds.forEach(id => {
+                const pair = alternateCharacterPairs.find(p => p.includes(id));
+                if (pair) {
+                    pair.forEach(altId => allUnavailableIds.add(altId));
+                }
+            });
+            // --- END UPDATE ---
+
             const groupedCharacters = characters.reduce((acc, char) => {
                 const type = char.type;
                 if (!acc[type]) {
@@ -287,7 +305,6 @@
             AppContainer.innerHTML = `
                 <div class="w-full max-w-7xl">
                     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                        <!-- Player List -->
                         <div class="lg:col-span-1 p-4 rounded-lg card">
                             <h2 class="text-xl font-bold mb-4 border-b border-gray-600 pb-2">Draft Order</h2>
                             <div class="space-y-3">
@@ -314,31 +331,40 @@
                             </div>
                         </div>
 
-                        <!-- Character Grid -->
                         <div class="lg:col-span-3">
                             <div class="text-center mb-6">
                                 <h1 class="text-3xl font-bold">${isMyTurn ? "Your Turn to Draft!" : `Waiting for ${currentPlayer?.name || '...'}...`}</h1>
                             </div>
                             <div class="space-y-8">
                                 ${characterOrder.map(type => {
+                                    // --- UPDATED: Hides ineligible types ---
+                                    if (!validTypesForDraft.has(type) && isMyTurn) return '';
                                     if (!groupedCharacters[type]) return '';
+
                                     return `
                                         <div>
                                             <h2 class="text-2xl font-bold mb-4 ${getCharacterTypeColor(type)}">${type}s</h2>
                                             <hr class="border-gray-700 mb-4"/>
                                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                                 ${groupedCharacters[type].map(char => {
-                                                    const isDrafted = Object.values(draftedCharacters).includes(char.id);
+                                                    // --- UPDATED: Distinguishes drafted vs unavailable alternates ---
+                                                    const isActuallyDrafted = draftedIds.includes(char.id);
+                                                    const isUnavailable = allUnavailableIds.has(char.id);
                                                     const borderColorClass = getCharacterTypeBorderColor(char.type);
                                                     return `
                                                         <div 
-                                                            class="card rounded-lg cursor-pointer ${borderColorClass} ${isDrafted ? 'disabled' : ''}"
+                                                            class="card rounded-lg cursor-pointer ${borderColorClass} ${isUnavailable ? 'disabled' : ''}"
                                                             onclick="showCharacterDetails(${char.id})">
                                                             <div class="relative">
                                                                 <img src="${char.imageUrl}" alt="${char.name}" class="w-full h-auto rounded-md">
-                                                                ${isDrafted ? `
+                                                                ${isActuallyDrafted ? `
                                                                     <div class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center rounded-md">
                                                                         <p class="text-red-500 text-2xl font-bold tracking-widest -rotate-12">DRAFTED</p>
+                                                                    </div>
+                                                                ` : ''}
+                                                                ${isUnavailable && !isActuallyDrafted ? `
+                                                                    <div class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center rounded-md">
+                                                                        <p class="text-yellow-500 text-2xl font-bold tracking-widest -rotate-12">UNAVAILABLE</p>
                                                                     </div>
                                                                 ` : ''}
                                                             </div>
@@ -359,28 +385,28 @@
         function renderSummaryScreen() {
              const { players, draftOrder, draftedCharacters } = appState.gameData;
              AppContainer.innerHTML = `
-                <div class="text-center p-8 rounded-lg shadow-2xl max-w-3xl w-full card">
-                    <h1 class="text-3xl font-bold text-green-500 mb-4">Draft Complete!</h1>
-                    <p class="text-gray-400 mb-6">Review the draft results and prepare for the game.</p>
-                    <div class="space-y-4">
-                        ${draftOrder.map(uid => {
-                            const player = players.find(p => p.uid === uid);
-                            const characterId = draftedCharacters[uid];
-                            const character = characters.find(c => c.id === characterId);
-                            return `
-                                <div class="p-4 rounded-lg bg-gray-800 border border-gray-700 text-left flex items-center space-x-4">
-                                    <img src="${character.imageUrl}" alt="${character.name}" class="w-24 h-auto rounded-md">
-                                    <div>
-                                        <p class="text-xl font-semibold">${player.name} drafted:</p>
-                                        <h3 class="text-2xl font-bold ${getCharacterTypeColor(character.type)}">${character.name} <span class="text-lg font-normal text-gray-400">(${character.type})</span></h3>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
-                    <button onclick="startNewDraft()" class="mt-8 py-2 px-6 rounded-md font-semibold btn-secondary">Start New Draft</button>
-                </div>
-             `;
+                 <div class="text-center p-8 rounded-lg shadow-2xl max-w-3xl w-full card">
+                     <h1 class="text-3xl font-bold text-green-500 mb-4">Draft Complete!</h1>
+                     <p class="text-gray-400 mb-6">Review the draft results and prepare for the game.</p>
+                     <div class="space-y-4">
+                         ${draftOrder.map(uid => {
+                             const player = players.find(p => p.uid === uid);
+                             const characterId = draftedCharacters[uid];
+                             const character = characters.find(c => c.id === characterId);
+                             return `
+                                 <div class="p-4 rounded-lg bg-gray-800 border border-gray-700 text-left flex items-center space-x-4">
+                                     <img src="${character.imageUrl}" alt="${character.name}" class="w-24 h-auto rounded-md">
+                                     <div>
+                                         <p class="text-xl font-semibold">${player.name} drafted:</p>
+                                         <h3 class="text-2xl font-bold ${getCharacterTypeColor(character.type)}">${character.name} <span class="text-lg font-normal text-gray-400">(${character.type})</span></h3>
+                                     </div>
+                                 </div>
+                             `;
+                         }).join('')}
+                     </div>
+                     <button onclick="startNewDraft()" class="mt-8 py-2 px-6 rounded-md font-semibold btn-secondary">Start New Draft</button>
+                 </div>
+               `;
         }
         
         // --- Game Logic Functions ---
@@ -516,9 +542,24 @@
         }
 
         function simulateBotPick() {
-            const available = getValidCharacters();
-            if (available.length > 0) {
-                const pick = available[Math.floor(Math.random() * available.length)];
+            // --- UPDATED: Bot now respects alternate character rules ---
+            const { draftedCharacters } = appState.gameData;
+            const validForBot = getValidCharacters(); // Gets characters of valid types
+
+            // Now, filter out any unavailable alternates
+            const draftedIds = Object.values(draftedCharacters);
+            const allUnavailableIds = new Set(draftedIds);
+            draftedIds.forEach(id => {
+                const pair = alternateCharacterPairs.find(p => p.includes(id));
+                if (pair) {
+                    pair.forEach(altId => allUnavailableIds.add(altId));
+                }
+            });
+
+            const trulyAvailable = validForBot.filter(c => !allUnavailableIds.has(c.id));
+
+            if (trulyAvailable.length > 0) {
+                const pick = trulyAvailable[Math.floor(Math.random() * trulyAvailable.length)];
                 draftCharacter(pick.id);
             }
         }
@@ -546,15 +587,16 @@
                 });
             } else {
                  await updateDoc(getGameDocRef(appState.gameId), {
-                    draftedCharacters: newDraftedCharacters,
-                    currentPlayerIndex: nextPlayerIndex,
-                });
+                     draftedCharacters: newDraftedCharacters,
+                     currentPlayerIndex: nextPlayerIndex,
+                 });
             }
         }
         
         function getValidCharacters() {
             const { draftedCharacters, playerCount } = appState.gameData;
             const draftedIds = Object.values(draftedCharacters);
+            // This pool correctly includes un-drafted alternates for the count.
             let availablePool = characters.filter(c => !draftedIds.includes(c.id));
             
             if (playerCount < 7) {
@@ -622,13 +664,13 @@
 
         function getCharacterTypeBorderColor(type) {
              switch (type) {
-                case 'Military Leader': return 'border-green-500';
-                case 'Political Leader': return 'border-yellow-500';
-                case 'Pilot': return 'border-red-500';
-                case 'Support': return 'border-blue-500';
-                case 'Cylon Leader': return 'border-gray-500';
-                default: return 'border-gray-700';
-            }
+                 case 'Military Leader': return 'border-green-500';
+                 case 'Political Leader': return 'border-yellow-500';
+                 case 'Pilot': return 'border-red-500';
+                 case 'Support': return 'border-blue-500';
+                 case 'Cylon Leader': return 'border-gray-500';
+                 default: return 'border-gray-700';
+             }
         }
         
         function startNewDraft() {
@@ -647,10 +689,19 @@
             const currentPlayerUid = draftOrder ? draftOrder[currentPlayerIndex] : null;
             const isMyTurn = userId === currentPlayerUid;
             
-            const isDrafted = draftedCharacters && Object.values(draftedCharacters).includes(character.id);
-            const availableForDraft = getValidCharacters().some(c => c.id === characterId);
+            // --- UPDATED: Modal now checks for all unavailable characters ---
+            const draftedIds = draftedCharacters ? Object.values(draftedCharacters) : [];
+            const allUnavailableIds = new Set(draftedIds);
+            draftedIds.forEach(id => {
+                const pair = alternateCharacterPairs.find(p => p.includes(id));
+                if (pair) {
+                    pair.forEach(altId => allUnavailableIds.add(altId));
+                }
+            });
+            const isUnavailable = allUnavailableIds.has(character.id);
+            const isCharacterTypeValid = getValidCharacters().some(c => c.id === characterId);
             
-            const draftButtonHtml = isMyTurn && !isDrafted && availableForDraft
+            const draftButtonHtml = isMyTurn && !isUnavailable && isCharacterTypeValid
                 ? `<button onclick="draftCharacterAndCloseModal(${character.id})" class="py-2 px-6 rounded-md font-semibold btn-primary">Draft this Character</button>`
                 : '';
 
@@ -689,4 +740,3 @@
     </script>
 </body>
 </html>
-
