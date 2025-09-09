@@ -212,13 +212,19 @@
                     <div id="playerList" class="space-y-2 mb-6">
                         ${players.map(p => `<div class="p-2 rounded bg-gray-700">${p.name} ${p.uid === admin ? '(Admin)' : ''}</div>`).join('')}
                     </div>
-                    ${isAdmin && isFull ? `<button id="startGameBtn" class="w-full py-2 px-4 rounded-md font-semibold btn-primary">Start Draft</button>` : ''}
-                    ${isAdmin && !isFull ? `<p class="text-yellow-400">Waiting for ${playerCount - players.length} more player(s)...</p>` : ''}
-                    ${!isAdmin && isFull ? `<p class="text-green-400">Lobby is full! Waiting for Admin to start the game.</p>` : ''}
+                    <div class="flex space-x-2">
+                        ${isAdmin && isFull ? `<button id="startGameBtn" class="w-full py-2 px-4 rounded-md font-semibold btn-primary">Start Draft</button>` : ''}
+                        ${isAdmin && !isFull ? `<button id="addBotsBtn" class="w-full py-2 px-4 rounded-md font-semibold btn-secondary">Fill with Bots & Start</button>` : ''}
+                    </div>
+                    ${isAdmin && !isFull ? `<p class="text-yellow-400 mt-4">Waiting for ${playerCount - players.length} more player(s)...</p>` : ''}
+                    ${!isAdmin && isFull ? `<p class="text-green-400 mt-4">Lobby is full! Waiting for Admin to start the game.</p>` : ''}
                 </div>
             `;
             if(document.getElementById('startGameBtn')) {
                 document.getElementById('startGameBtn').addEventListener('click', startDraft);
+            }
+            if(document.getElementById('addBotsBtn')) {
+                document.getElementById('addBotsBtn').addEventListener('click', fillWithBotsAndStart);
             }
             document.getElementById('copyUrlBtn').addEventListener('click', () => {
                  const urlField = document.getElementById('shareUrl');
@@ -233,14 +239,19 @@
         }
 
         function renderDraftScreen() {
-            const { players, draftOrder, currentPlayerIndex, draftedCharacters } = appState.gameData;
+            const { players, draftOrder, currentPlayerIndex, draftedCharacters, admin } = appState.gameData;
             if (!players || !draftOrder || currentPlayerIndex === undefined) return;
             
             const currentPlayerUid = draftOrder[currentPlayerIndex];
             const currentPlayer = players.find(p => p.uid === currentPlayerUid);
             const isMyTurn = userId === currentPlayerUid;
             
-            const availableCharacters = getValidCharacters();
+            // Bot simulation logic
+            const isAdmin = userId === admin;
+            const isBotTurn = currentPlayerUid.startsWith('bot-');
+            if (isAdmin && isBotTurn) {
+                setTimeout(simulateBotPick, 1500);
+            }
             
             AppContainer.innerHTML = `
                 <div class="w-full max-w-7xl">
@@ -424,11 +435,44 @@
             });
         }
         
+        async function fillWithBotsAndStart() {
+            const { players, playerCount } = appState.gameData;
+            const botsNeeded = playerCount - players.length;
+            if (botsNeeded <= 0) return;
+
+            const botPlayers = Array.from({ length: botsNeeded }, (_, i) => ({
+                name: `Bot ${i + 1}`,
+                uid: `bot-${crypto.randomUUID()}`
+            }));
+
+            const allPlayers = [...players, ...botPlayers];
+            const draftOrder = allPlayers.sort(() => Math.random() - 0.5).map(p => p.uid);
+
+            await updateDoc(getGameDocRef(appState.gameId), {
+                players: allPlayers,
+                gameState: 'drafting',
+                draftOrder,
+                currentPlayerIndex: 0,
+                draftedCharacters: {},
+            });
+        }
+
+        function simulateBotPick() {
+            const available = getValidCharacters();
+            if (available.length > 0) {
+                const pick = available[Math.floor(Math.random() * available.length)];
+                draftCharacter(pick.id);
+            }
+        }
+
         async function draftCharacter(characterId) {
-            const { currentPlayerIndex, draftOrder, draftedCharacters } = appState.gameData;
+            const { currentPlayerIndex, draftOrder, draftedCharacters, admin } = appState.gameData;
             const currentPlayerUid = draftOrder[currentPlayerIndex];
 
-            if(userId !== currentPlayerUid) {
+            // Allow the action if it's the current player's turn OR if the admin is forcing a bot pick.
+            const isBotTurn = currentPlayerUid.startsWith('bot-');
+            const isAdmin = userId === admin;
+            if (userId !== currentPlayerUid && !(isAdmin && isBotTurn)) {
                 console.warn("Not your turn!");
                 return;
             }
@@ -460,7 +504,7 @@
             }
 
             const counts = availablePool.reduce((acc, char) => {
-                if (['Military Leader', 'Political Leader', 'Pilot'].includes(char.type)) {
+                if (['Military Leader', 'Political Leader', 'Pilot', 'Support'].includes(char.type)) {
                     acc[char.type] = (acc[char.type] || 0) + 1;
                 }
                 return acc;
@@ -470,7 +514,12 @@
             
             const validTypes = Object.keys(counts).filter(type => counts[type] === maxCount);
 
-            validTypes.push('Support', 'Cylon Leader');
+            if (!validTypes.includes('Support')) {
+                 validTypes.push('Support');
+            }
+            if (playerCount >= 7 && !validTypes.includes('Cylon Leader')) {
+                validTypes.push('Cylon Leader');
+            }
             
             return availablePool.filter(char => validTypes.includes(char.type));
         }
@@ -560,6 +609,7 @@
         window.showCharacterDetails = showCharacterDetails;
         window.hideCharacterDetails = hideCharacterDetails;
         window.draftCharacterAndCloseModal = draftCharacterAndCloseModal;
+        window.fillWithBotsAndStart = fillWithBotsAndStart; // Expose test function
     </script>
 </body>
 </html>
