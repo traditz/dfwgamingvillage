@@ -36,6 +36,7 @@
         }
         .btn-primary:disabled {
             background-color: #004c7a;
+            opacity: 0.6;
             cursor: not-allowed;
         }
         .btn-secondary {
@@ -59,20 +60,41 @@
             color: #d1d5db; /* gray-300 */
             text-shadow: 0 0 4px #ef4444, 0 0 6px #ef4444; /* red-500 glow */
         }
-        .border-political { border-color: #f59e0b; }
-        .border-military { border-color: #22c55e; }
-        .border-pilot { border-color: #ef4444; }
-        .border-support { border-color: #3b82f6; }
-        .border-cylon { border-color: #9ca3af; }
+        .skill-checkbox {
+            display: none; /* Hide the default checkbox */
+        }
+        .skill-label {
+            border: 2px solid #4a5568; /* gray-600 */
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem; /* rounded-md */
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            user-select: none;
+        }
+        .skill-label:hover {
+            background-color: #2d3748; /* gray-700 */
+        }
+        .skill-checkbox:checked + .skill-label {
+            border-color: #3b82f6; /* blue-500 */
+            background-color: #1e40af; /* blue-800 */
+            color: white;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }
+        .skill-checkbox:disabled + .skill-label {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: #1a202c; /* gray-800 */
+            border-color: #2d3748; /* gray-700 */
+        }
     </style>
 </head>
 <body class="antialiased">
     <div id="app" class="min-h-screen flex flex-col items-center justify-center p-4">
-        </div>
+    </div>
 
     <div id="modal-container" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal">
         <div id="modal-content" class="modal-content rounded-lg shadow-2xl w-full max-w-4xl p-6 relative border border-gray-700">
-            </div>
+        </div>
     </div>
 
     <script type="module">
@@ -80,54 +102,49 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot, updateDoc, collection, serverTimestamp, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- DATA: Character Information ---
+        // --- DATA: Character Information with Skills ---
         const characters = [
             // Political Leaders
-            { id: 2, name: "Laura Roslin", type: "Political Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Laura%20Roslin.png" },
-            { id: 30, name: "Lee Adama (alt)", type: "Political Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Lee%20Adama%20(Political%20Leader).png" },
-            { id: 4, name: "Tom Zarek", type: "Political Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Tom%20Zarek%20(Political%20Leader).png" },
-            { id: 14, name: "Ellen Tigh", type: "Political Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Ellen%20Tigh.png" },
-            { id: 27, name: "Romo Lampkin", type: "Political Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Romo%20Lampkin.png" },
-            { id: 18, name: "Tory Foster", type: "Political Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Tory%20Foster.png" },
-            { id: 35, name: "Gaius Baltar (alt)", type: "Political Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Gaius%20Baltar%20(Political%20Leader).png" },
-
+            { id: 2, name: "Laura Roslin", type: "Political Leader", skills: ['Politics', 'Leadership'], imageUrl: "https://www.dfwgamingvillage.com/images/Laura%20Roslin.png" },
+            { id: 30, name: "Lee Adama (alt)", type: "Political Leader", skills: ['Politics', 'Leadership', 'Tactics', 'Piloting'], imageUrl: "https://www.dfwgamingvillage.com/images/Lee%20Adama%20(Political%20Leader).png" },
+            { id: 4, name: "Tom Zarek", type: "Political Leader", skills: ['Politics', 'Leadership', 'Tactics'], imageUrl: "https://www.dfwgamingvillage.com/images/Tom%20Zarek%20(Political%20Leader).png" },
+            { id: 14, name: "Ellen Tigh", type: "Political Leader", skills: ['Politics', 'Leadership', 'Treachery'], imageUrl: "https://www.dfwgamingvillage.com/images/Ellen%20Tigh.png" },
+            { id: 27, name: "Romo Lampkin", type: "Political Leader", skills: ['Politics', 'Tactics'], imageUrl: "https://www.dfwgamingvillage.com/images/Romo%20Lampkin.png" },
+            { id: 18, name: "Tory Foster", type: "Political Leader", skills: ['Politics', 'Leadership', 'Tactics'], imageUrl: "https://www.dfwgamingvillage.com/images/Tory%20Foster.png" },
+            { id: 35, name: "Gaius Baltar (alt)", type: "Political Leader", skills: ['Politics', 'Leadership', 'Engineering'], imageUrl: "https://www.dfwgamingvillage.com/images/Gaius%20Baltar%20(Political%20Leader).png" },
             // Military Leaders
-            { id: 1, name: "William Adama", type: "Military Leader", imageUrl: "https://www.dfwgamingvillage.com/images/William%20Adama.png" },
-            { id: 8, name: "Saul Tigh", type: "Military Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Saul%20Tigh.png" },
-            { id: 13, name: "Helena Cain", type: "Military Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Helena%20Cain.png" },
-            { id: 7, name: "Karl Agathon", type: "Military Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Karl%20Helo%20Agathon.png" },
-            { id: 19, name: "Felix Gaeta", type: "Military Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Felix%20Gaeta.png" },
-            { id: 33, name: "Tom Zarek (alt)", type: "Military Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Tom%20Zarek%20(Military%20Leader).png" },
-            { id: 36, name: "Louis Hoshi", type: "Military Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Louis%20Hoshi.png" },
-            
-                        
+            { id: 1, name: "William Adama", type: "Military Leader", skills: ['Leadership', 'Tactics'], imageUrl: "https://www.dfwgamingvillage.com/images/William%20Adama.png" },
+            { id: 8, name: "Saul Tigh", type: "Military Leader", skills: ['Leadership', 'Tactics'], imageUrl: "https://www.dfwgamingvillage.com/images/Saul%20Tigh.png" },
+            { id: 13, name: "Helena Cain", type: "Military Leader", skills: ['Leadership', 'Tactics'], imageUrl: "https://www.dfwgamingvillage.com/images/Helena%20Cain.png" },
+            { id: 7, name: "Karl Agathon", type: "Military Leader", skills: ['Leadership', 'Tactics', 'Piloting'], imageUrl: "https://www.dfwgamingvillage.com/images/Karl%20Helo%20Agathon.png" },
+            { id: 19, name: "Felix Gaeta", type: "Military Leader", skills: ['Politics', 'Leadership', 'Tactics', 'Engineering'], imageUrl: "https://www.dfwgamingvillage.com/images/Felix%20Gaeta.png" },
+            { id: 33, name: "Tom Zarek (alt)", type: "Military Leader", skills: ['Politics', 'Leadership', 'Tactics'], imageUrl: "https://www.dfwgamingvillage.com/images/Tom%20Zarek%20(Military%20Leader).png" },
+            { id: 36, name: "Louis Hoshi", type: "Military Leader", skills: ['Leadership', 'Tactics', 'Engineering'], imageUrl: "https://www.dfwgamingvillage.com/images/Louis%20Hoshi.png" },
             // Pilots
-            { id: 6, name: "Kara Thrace", type: "Pilot", imageUrl: "https://www.dfwgamingvillage.com/images/Kara%20Starbuck%20Thrace.png" },
-            { id: 5, name: "Lee Adama", type: "Pilot", imageUrl: "https://www.dfwgamingvillage.com/images/Lee%20Apollo%20Adama%20(Pilot).png" },
-            { id: 10, name: "Sharon Valerii", type: "Pilot", imageUrl: "https://www.dfwgamingvillage.com/images/Sharon%20Boomer%20Valerii.png" },
-            { id: 16, name: "Louanne Katraine", type: "Pilot", imageUrl: "https://www.dfwgamingvillage.com/images/Louanne%20Kat%20Katraine.png" },
-            { id: 20, name: "Brendan Costanza", type: "Pilot", imageUrl: "https://www.dfwgamingvillage.com/images/Brendan%20Hot%20Dog%20Costanza.png" },
-            { id: 21, name: "Samuel Anders", type: "Pilot", imageUrl: "https://www.dfwgamingvillage.com/images/Samuel%20T.%20Anders.png" },
-            { id: 32, name: "Karl Agathon (alt)", type: "Pilot", imageUrl: "https://www.dfwgamingvillage.com/images/Karl%20Helo%20Agathon%20(Pilot).png" },
-            
+            { id: 6, name: "Kara Thrace", type: "Pilot", skills: ['Tactics', 'Piloting', 'Leadership', 'Engineering'], imageUrl: "https://www.dfwgamingvillage.com/images/Kara%20Starbuck%20Thrace.png" },
+            { id: 5, name: "Lee Adama", type: "Pilot", skills: ['Tactics', 'Piloting', 'Leadership', 'Politics'], imageUrl: "https://www.dfwgamingvillage.com/images/Lee%20Apollo%20Adama%20(Pilot).png" },
+            { id: 10, name: "Sharon Valerii", type: "Pilot", skills: ['Tactics', 'Piloting', 'Engineering'], imageUrl: "https://www.dfwgamingvillage.com/images/Sharon%20Boomer%20Valerii.png" },
+            { id: 16, name: "Louanne Katraine", type: "Pilot", skills: ['Leadership', 'Tactics', 'Piloting'], imageUrl: "https://www.dfwgamingvillage.com/images/Louanne%20Kat%20Katraine.png" },
+            { id: 20, name: "Brendan Costanza", type: "Pilot", skills: ['Leadership', 'Engineering', 'Tactics', 'Piloting'], imageUrl: "https://www.dfwgamingvillage.com/images/Brendan%20Hot%20Dog%20Costanza.png" },
+            { id: 21, name: "Samuel Anders", type: "Pilot", skills: ['Leadership', 'Tactics', 'Piloting'], imageUrl: "https://www.dfwgamingvillage.com/images/Samuel%20T.%20Anders.png" },
+            { id: 32, name: "Karl Agathon (alt)", type: "Pilot", skills: ['Leadership', 'Tactics', 'Piloting'], imageUrl: "https://www.dfwgamingvillage.com/images/Karl%20Helo%20Agathon%20(Pilot).png" },
             // Support
-            { id: 9, name: "Galen Tyrol", type: "Support", imageUrl: "https://www.dfwgamingvillage.com/images/Chief%20Galen%20Tyrol.png" },
-            { id: 15, name: "Anastasia Dualla", type: "Support", imageUrl: "https://www.dfwgamingvillage.com/images/Anastasia%20Dee%20Dualla.png" },
-            { id: 17, name: "Cally Tyrol", type: "Support", imageUrl: "https://www.dfwgamingvillage.com/images/Callandra%20Cally%20Tyrol.png" },
-            { id: 26, name: "Sherman Cottle", type: "Support", imageUrl: "https://www.dfwgamingvillage.com/images/Sherman%20Doc%20Cottle.png" },
-            { id: 3, name: "Gaius Baltar", type: "Support", imageUrl: "https://www.dfwgamingvillage.com/images/Gaius%20Baltar.png" },
-    
+            { id: 9, name: "Galen Tyrol", type: "Support", skills: ['Politics', 'Leadership', 'Engineering'], imageUrl: "https://www.dfwgamingvillage.com/images/Chief%20Galen%20Tyrol.png" },
+            { id: 15, name: "Anastasia Dualla", type: "Support", skills: ['Leadership', 'Tactics', 'Engineering'], imageUrl: "https://www.dfwgamingvillage.com/images/Anastasia%20Dee%20Dualla.png" },
+            { id: 17, name: "Cally Tyrol", type: "Support", skills: ['Politics', 'Engineering', 'Leadership', 'Tactics'], imageUrl: "https://www.dfwgamingvillage.com/images/Callandra%20Cally%20Tyrol.png" },
+            { id: 26, name: "Sherman Cottle", type: "Support", skills: ['Politics', 'Tactics', 'Engineering'], imageUrl: "https://www.dfwgamingvillage.com/images/Sherman%20Doc%20Cottle.png" },
+            { id: 3, name: "Gaius Baltar", type: "Support", skills: ['Politics', 'Leadership', 'Engineering'], imageUrl: "https://www.dfwgamingvillage.com/images/Gaius%20Baltar.png" },
             // Cylon Leaders
-            { id: 11, name: "'Caprica' Six", type: "Cylon Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Caprica%20Six.png" },
-            { id: 12, name: "Leoben Conoy", type: "Cylon Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Leoben%20Conoy.png" },
-            { id: 22, name: "Sharon Agathon (Athena)", type: "Cylon Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Sharon%20Athena%20Agathon%20(Cylon%20Leader).png" },
-            { id: 23, name: "Aaron Doral", type: "Cylon Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Aaron%20Doral.png" },
-            { id: 24, name: "Simon O'Neill", type: "Cylon Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Simon%20O'Neill.png" },
-            { id: 25, name: "D'Anna Biers", type: "Cylon Leader", imageUrl: "https://www.dfwgamingvillage.com/images/D'Anna%20Biers.png" },
-            { id: 34, name: "Cavil", type: "Cylon Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Cavil.png" },
+            { id: 11, name: "'Caprica' Six", type: "Cylon Leader", skills: ['Leadership', 'Treachery', 'Engineering'], imageUrl: "https://www.dfwgamingvillage.com/images/Caprica%20Six.png" },
+            { id: 12, name: "Leoben Conoy", type: "Cylon Leader", skills: ['Politics', 'Treachery', 'Engineering'], imageUrl: "https://www.dfwgamingvillage.com/images/Leoben%20Conoy.png" },
+            { id: 22, name: "Sharon Agathon (Athena)", type: "Cylon Leader", skills: ['Piloting', 'Leadership', 'Engineering'], imageUrl: "https://www.dfwgamingvillage.com/images/Sharon%20Athena%20Agathon%20(Cylon%20Leader).png" },
+            { id: 23, name: "Aaron Doral", type: "Cylon Leader", skills: ['Treachery', 'Politics', 'Tactics'], imageUrl: "https://www.dfwgamingvillage.com/images/Aaron%20Doral.png" },
+            { id: 24, name: "Simon O'Neill", type: "Cylon Leader", skills: ['Engineering', 'Treachery', 'Tactics'], imageUrl: "https://www.dfwgamingvillage.com/images/Simon%20O'Neill.png" },
+            { id: 25, name: "D'Anna Biers", type: "Cylon Leader", skills: ['Leadership', 'Politics', 'Treachery', 'Engineering'], imageUrl: "https://www.dfwgamingvillage.com/images/D'Anna%20Biers.png" },
+            { id: 34, name: "Cavil", type: "Cylon Leader", skills: ['Tactics', 'Treachery', 'Engineering'], imageUrl: "https://www.dfwgamingvillage.com/images/Cavil.png" },
         ];
 
-        // --- NEW: Alternate Character Pairs ---
+        // --- Alternate Character Pairs ---
         const alternateCharacterPairs = [
             [5, 30],  // Lee Adama (Pilot, Political)
             [4, 33],  // Tom Zarek (Political, Military)
@@ -149,13 +166,13 @@
         };
         
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-         apiKey: "AIzaSyC73JtYpZC-PIiQCQVubVIENAd2brZSES4",
-         authDomain: "bsg-character-draft.firebaseapp.com",
-         projectId: "bsg-character-draft",
-         storageBucket: "bsg-character-draft.firebasestorage.app",
-         messagingSenderId: "1023995706387",
-         appId: "1:1023995706387:web:ecea10d5e19b2db736d3e6",
-         measurementId: "G-NN96MHGDJH"
+          apiKey: "AIzaSyC73JtYpZC-PIiQCQVubVIENAd2brZSES4",
+          authDomain: "bsg-character-draft.firebaseapp.com",
+          projectId: "bsg-character-draft",
+          storageBucket: "bsg-character-draft.firebasestorage.app",
+          messagingSenderId: "1023995706387",
+          appId: "1:1023995706387:web:ecea10d5e19b2db736d3e6",
+          measurementId: "G-NN96MHGDJH"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -217,7 +234,7 @@
             const { players = [], playerCount = 0, admin = '' } = appState.gameData;
             const isFull = players.length >= playerCount;
             const isAdmin = userId === admin;
-            const fullGameUrl = `https://www.dfwgamingvillage.com/bsg-character-drafter.html?game=${appState.gameId}`;
+            const fullGameUrl = `${window.location.origin}${window.location.pathname}?game=${appState.gameId}`;
 
             AppContainer.innerHTML = `
                 <div class="text-center p-8 rounded-lg shadow-2xl max-w-2xl w-full card">
@@ -277,7 +294,6 @@
                 setTimeout(simulateBotPick, 1500);
             }
 
-            // --- UPDATED: Logic to handle alternates and hiding types ---
             const validDraftableCharacters = getValidCharacters();
             const validTypesForDraft = new Set(validDraftableCharacters.map(c => c.type));
 
@@ -289,7 +305,6 @@
                     pair.forEach(altId => allUnavailableIds.add(altId));
                 }
             });
-            // --- END UPDATE ---
 
             const groupedCharacters = characters.reduce((acc, char) => {
                 const type = char.type;
@@ -337,7 +352,6 @@
                             </div>
                             <div class="space-y-8">
                                 ${characterOrder.map(type => {
-                                    // --- UPDATED: Hides ineligible types ---
                                     if (!validTypesForDraft.has(type) && isMyTurn) return '';
                                     if (!groupedCharacters[type]) return '';
 
@@ -347,13 +361,11 @@
                                             <hr class="border-gray-700 mb-4"/>
                                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                                 ${groupedCharacters[type].map(char => {
-                                                    // --- UPDATED: Distinguishes drafted vs unavailable alternates ---
                                                     const isActuallyDrafted = draftedIds.includes(char.id);
                                                     const isUnavailable = allUnavailableIds.has(char.id);
-                                                    const borderColorClass = getCharacterTypeBorderColor(char.type);
                                                     return `
                                                         <div 
-                                                            class="card rounded-lg cursor-pointer ${borderColorClass} ${isUnavailable ? 'disabled' : ''}"
+                                                            class="card rounded-lg cursor-pointer border-2 ${isUnavailable ? 'border-gray-600' : getCharacterTypeBorderColor(char.type)} ${isUnavailable ? 'disabled' : ''}"
                                                             onclick="showCharacterDetails(${char.id})">
                                                             <div class="relative">
                                                                 <img src="${char.imageUrl}" alt="${char.name}" class="w-full h-auto rounded-md">
@@ -381,24 +393,126 @@
                 </div>
             `;
         }
+
+        function renderSkillSelectionScreen() {
+            const { players, draftOrder, draftedCharacters, skillSelections = {} } = appState.gameData;
+            
+            const myCharacterId = draftedCharacters[userId];
+            const myCharacter = characters.find(c => c.id === myCharacterId);
+            const isFirstPlayer = userId === draftOrder[0];
+            const hasSelected = !!skillSelections[userId];
+            
+            const cardsToDraw = (myCharacter && myCharacter.type === 'Cylon Leader' && myCharacter.name !== 'Sharon Agathon (Athena)') ? 2 : 3;
+
+            let mySelectionUI = '';
+            if (isFirstPlayer) {
+                mySelectionUI = `<p class="text-lg text-yellow-400">As the first player, you do not select starting skill cards. Waiting for other players...</p>`;
+            } else if (hasSelected) {
+                mySelectionUI = `<p class="text-lg text-green-400">You have selected your skills. Waiting for other players...</p>`;
+            } else if (myCharacter) {
+                mySelectionUI = `
+                    <div class="text-center">
+                        <img src="${myCharacter.imageUrl}" class="w-full max-w-sm mx-auto rounded-lg mb-4 border-2 ${getCharacterTypeBorderColor(myCharacter.type)}">
+                        <p class="text-lg text-gray-300 mb-4">Select <span class="font-bold text-white">${cardsToDraw}</span> skill cards from your available skills:</p>
+                        <div id="skill-options" class="flex flex-wrap justify-center gap-4 mb-6">
+                            ${myCharacter.skills.map(skill => `
+                                <div>
+                                    <input type="checkbox" id="skill-${skill}" name="skill" value="${skill}" class="skill-checkbox">
+                                    <label for="skill-${skill}" class="skill-label">${skill}</label>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <button id="confirmSkillsBtn" class="py-2 px-6 rounded-md font-semibold btn-primary" disabled>Confirm Selection</button>
+                    </div>
+                `;
+            }
+
+            const allPlayersStatus = draftOrder.map(uid => {
+                const player = players.find(p => p.uid === uid);
+                const character = characters.find(c => c.id === draftedCharacters[uid]);
+                let status;
+                if (uid === draftOrder[0]) {
+                    status = `<span class="text-gray-400">First Player</span>`;
+                } else if (skillSelections[uid]) {
+                    status = `<span class="text-green-400">Skills Selected</span>`;
+                } else {
+                    status = `<span class="text-yellow-400">Selecting...</span>`;
+                }
+                return `
+                    <div class="p-4 rounded-lg bg-gray-800 border border-gray-700 text-left flex items-center space-x-4">
+                        <img src="${character.imageUrl}" alt="${character.name}" class="w-16 h-auto rounded-md">
+                        <div>
+                            <p class="text-lg font-semibold">${player.name}</p>
+                            <h3 class="text-md font-bold ${getCharacterTypeColor(character.type)}">${character.name}</h3>
+                            ${status}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            AppContainer.innerHTML = `
+                <div class="max-w-4xl w-full">
+                    <div class="text-center p-8 rounded-lg shadow-2xl w-full card mb-6">
+                        <h1 class="text-3xl font-bold text-blue-400 mb-4">Skill Card Selection</h1>
+                        ${mySelectionUI}
+                    </div>
+                    <div class="p-8 rounded-lg shadow-2xl w-full card">
+                        <h2 class="text-2xl font-bold mb-4">Player Status</h2>
+                        <div class="space-y-4">${allPlayersStatus}</div>
+                    </div>
+                </div>
+            `;
+
+            if (!isFirstPlayer && !hasSelected) {
+                const checkboxes = document.querySelectorAll('#skill-options input[type="checkbox"]');
+                const confirmBtn = document.getElementById('confirmSkillsBtn');
+                checkboxes.forEach(checkbox => {
+                    checkbox.addEventListener('change', () => {
+                        const checkedCount = document.querySelectorAll('#skill-options input[type="checkbox"]:checked').length;
+                        if (checkedCount >= cardsToDraw) {
+                            checkboxes.forEach(cb => {
+                                if (!cb.checked) cb.disabled = true;
+                            });
+                        } else {
+                            checkboxes.forEach(cb => cb.disabled = false);
+                        }
+                        confirmBtn.disabled = (checkedCount !== cardsToDraw);
+                    });
+                });
+                confirmBtn.addEventListener('click', selectSkillCards);
+            }
+        }
         
         function renderSummaryScreen() {
-             const { players, draftOrder, draftedCharacters } = appState.gameData;
+             const { players, draftOrder, draftedCharacters, skillSelections = {} } = appState.gameData;
              AppContainer.innerHTML = `
                  <div class="text-center p-8 rounded-lg shadow-2xl max-w-3xl w-full card">
-                     <h1 class="text-3xl font-bold text-green-500 mb-4">Draft Complete!</h1>
-                     <p class="text-gray-400 mb-6">Review the draft results and prepare for the game.</p>
+                     <h1 class="text-3xl font-bold text-green-500 mb-4">Setup Complete!</h1>
+                     <p class="text-gray-400 mb-6">Review the final results and prepare for the game.</p>
                      <div class="space-y-4">
-                         ${draftOrder.map(uid => {
+                         ${draftOrder.map((uid, index) => {
                              const player = players.find(p => p.uid === uid);
                              const characterId = draftedCharacters[uid];
                              const character = characters.find(c => c.id === characterId);
+                             const skills = skillSelections[uid];
+                             
+                             let skillsHtml = '';
+                             if (index === 0) {
+                                 skillsHtml = `<p class="text-sm text-gray-400 italic mt-2">No starting skills (First Player)</p>`;
+                             } else if (skills) {
+                                 skillsHtml = `<div class="mt-2">
+                                     <span class="font-semibold text-gray-300">Skills: </span>
+                                     ${skills.map(s => `<span class="font-bold ${getSkillColor(s)}">${s}</span>`).join(', ')}
+                                 </div>`;
+                             }
+
                              return `
                                  <div class="p-4 rounded-lg bg-gray-800 border border-gray-700 text-left flex items-center space-x-4">
                                      <img src="${character.imageUrl}" alt="${character.name}" class="w-24 h-auto rounded-md">
                                      <div>
                                          <p class="text-xl font-semibold">${player.name} drafted:</p>
                                          <h3 class="text-2xl font-bold ${getCharacterTypeColor(character.type)}">${character.name} <span class="text-lg font-normal text-gray-400">(${character.type})</span></h3>
+                                         ${skillsHtml}
                                      </div>
                                  </div>
                              `;
@@ -476,6 +590,7 @@
 
             gameUnsubscribe = onSnapshot(getGameDocRef(appState.gameId), async (docSnap) => {
                 if (docSnap.exists()) {
+                    const oldGameState = appState.gameData ? appState.gameData.gameState : null;
                     appState.gameData = docSnap.data();
                     
                     const playerExists = appState.gameData.players.some(p => p.uid === userId);
@@ -493,7 +608,20 @@
                         await updateDoc(getGameDocRef(appState.gameId), { players: updatedPlayers });
                     }
                     
+                    // Check if skill selection is complete and update state
+                    if (appState.gameData.gameState === 'skillSelection' && oldGameState !== 'finished') {
+                        const { draftOrder, skillSelections = {} } = appState.gameData;
+                        const eligiblePlayers = draftOrder.length - 1;
+                        const selectedPlayers = Object.keys(skillSelections).length;
+                        if (selectedPlayers >= eligiblePlayers) {
+                             await updateDoc(getGameDocRef(appState.gameId), { gameState: 'finished' });
+                             // The snapshot listener will catch this change and re-render.
+                             return; 
+                        }
+                    }
+
                     renderCurrentGameState();
+
                 } else if (!hasCheckedForGame) {
                     hasCheckedForGame = true;
                     const gameExists = await verifyGameExistsWithRetries(appState.gameId);
@@ -542,11 +670,9 @@
         }
 
         function simulateBotPick() {
-            // --- UPDATED: Bot now respects alternate character rules ---
             const { draftedCharacters } = appState.gameData;
             const validForBot = getValidCharacters(); // Gets characters of valid types
 
-            // Now, filter out any unavailable alternates
             const draftedIds = Object.values(draftedCharacters);
             const allUnavailableIds = new Set(draftedIds);
             draftedIds.forEach(id => {
@@ -568,7 +694,6 @@
             const { currentPlayerIndex, draftOrder, draftedCharacters, admin } = appState.gameData;
             const currentPlayerUid = draftOrder[currentPlayerIndex];
 
-            // Allow the action if it's the current player's turn OR if the admin is forcing a bot pick.
             const isBotTurn = currentPlayerUid.startsWith('bot-');
             const isAdmin = userId === admin;
             if (userId !== currentPlayerUid && !(isAdmin && isBotTurn)) {
@@ -580,10 +705,12 @@
             const nextPlayerIndex = currentPlayerIndex + 1;
             
             if (nextPlayerIndex >= draftOrder.length) {
+                // Draft is over, transition to skill selection
                 await updateDoc(getGameDocRef(appState.gameId), {
-                    gameState: 'finished',
+                    gameState: 'skillSelection',
                     draftedCharacters: newDraftedCharacters,
                     currentPlayerIndex: nextPlayerIndex,
+                    skillSelections: {} // Initialize skill selections map
                 });
             } else {
                  await updateDoc(getGameDocRef(appState.gameId), {
@@ -592,11 +719,25 @@
                  });
             }
         }
+
+        async function selectSkillCards() {
+            const selectedSkills = Array.from(document.querySelectorAll('#skill-options input[type="checkbox"]:checked')).map(cb => cb.value);
+            if(selectedSkills.length === 0) return;
+
+            const updates = {};
+            updates[`skillSelections.${userId}`] = selectedSkills;
+
+            try {
+                await updateDoc(getGameDocRef(appState.gameId), updates);
+            } catch (error) {
+                console.error("Error saving skill selection:", error);
+                alert("Could not save your selection. Please try again.");
+            }
+        }
         
         function getValidCharacters() {
             const { draftedCharacters, playerCount } = appState.gameData;
             const draftedIds = Object.values(draftedCharacters);
-            // This pool correctly includes un-drafted alternates for the count.
             let availablePool = characters.filter(c => !draftedIds.includes(c.id));
             
             if (playerCount < 7) {
@@ -642,6 +783,9 @@
                 case 'drafting':
                     renderDraftScreen();
                     break;
+                case 'skillSelection':
+                    renderSkillSelectionScreen();
+                    break;
                 case 'finished':
                     renderSummaryScreen();
                     break;
@@ -673,6 +817,18 @@
              }
         }
         
+        function getSkillColor(skill) {
+            switch (skill) {
+                case 'Politics': return 'text-yellow-400';
+                case 'Leadership': return 'text-green-400';
+                case 'Tactics': return 'text-red-400';
+                case 'Piloting': return 'text-purple-400';
+                case 'Engineering': return 'text-blue-400';
+                case 'Treachery': return 'text-gray-400';
+                default: return 'text-white';
+            }
+        }
+
         function startNewDraft() {
             const baseUrl = window.location.href.split('?')[0];
             window.location.href = baseUrl;
@@ -685,11 +841,21 @@
             const modalContent = document.getElementById('modal-content');
             const modalContainer = document.getElementById('modal-container');
             
+            if(appState.gameData.gameState !== 'drafting') {
+                modalContent.innerHTML = `
+                 <button onclick="hideCharacterDetails()" class="absolute top-2 right-3 text-2xl font-bold text-gray-500 hover:text-white">&times;</button>
+                 <div class="text-center">
+                     <img src="${character.imageUrl}" alt="${character.name}" class="w-full h-auto rounded-lg mb-4">
+                 </div>`;
+                modalContainer.classList.remove('hidden');
+                modalContainer.classList.add('flex');
+                return;
+            }
+
             const { draftOrder, currentPlayerIndex, draftedCharacters } = appState.gameData;
             const currentPlayerUid = draftOrder ? draftOrder[currentPlayerIndex] : null;
             const isMyTurn = userId === currentPlayerUid;
             
-            // --- UPDATED: Modal now checks for all unavailable characters ---
             const draftedIds = draftedCharacters ? Object.values(draftedCharacters) : [];
             const allUnavailableIds = new Set(draftedIds);
             draftedIds.forEach(id => {
@@ -736,7 +902,8 @@
         window.showCharacterDetails = showCharacterDetails;
         window.hideCharacterDetails = hideCharacterDetails;
         window.draftCharacterAndCloseModal = draftCharacterAndCloseModal;
-        window.fillWithBotsAndStart = fillWithBotsAndStart; // Expose test function
+        window.fillWithBotsAndStart = fillWithBotsAndStart;
+        window.selectSkillCards = selectSkillCards;
     </script>
 </body>
 </html>
