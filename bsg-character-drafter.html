@@ -86,6 +86,10 @@
             background-color: #1a202c; /* gray-800 */
             border-color: #2d3748; /* gray-700 */
         }
+        .skill-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -413,12 +417,16 @@
                 mySelectionUI = `
                     <div class="text-center">
                         <img src="${myCharacter.imageUrl}" class="w-full max-w-sm mx-auto rounded-lg mb-4 border-2 ${getCharacterTypeBorderColor(myCharacter.type)}">
-                        <p class="text-lg text-gray-300 mb-4">Select <span class="font-bold text-white">${cardsToDraw}</span> skill cards from your available skills:</p>
-                        <div id="skill-options" class="flex flex-wrap justify-center gap-4 mb-6">
+                        <p id="skill-selection-feedback" class="text-lg text-gray-300 mb-4">Select <span class="font-bold text-white">0 / ${cardsToDraw}</span> skill cards from your available skills:</p>
+                        <div id="skill-options" class="flex flex-wrap justify-center items-center gap-4 mb-6">
                             ${myCharacter.skills.map(skill => `
-                                <div>
-                                    <input type="checkbox" id="skill-${skill}" name="skill" value="${skill}" class="skill-checkbox">
-                                    <label for="skill-${skill}" class="skill-label">${skill}</label>
+                                <div class="flex flex-col items-center p-3 rounded-lg bg-gray-800 border border-gray-700 min-w-[120px]">
+                                    <span class="font-semibold ${getSkillColor(skill)} mb-2">${skill}</span>
+                                    <div class="flex items-center space-x-3">
+                                        <button data-skill="${skill}" class="skill-btn skill-decrement bg-gray-600 hover:bg-gray-500 rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold">-</button>
+                                        <span id="skill-count-${skill}" class="text-xl font-bold w-6 text-center">0</span>
+                                        <button data-skill="${skill}" class="skill-btn skill-increment bg-gray-600 hover:bg-gray-500 rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold">+</button>
+                                    </div>
                                 </div>
                             `).join('')}
                         </div>
@@ -463,28 +471,53 @@
                 </div>
             `;
             
-            // Trigger bot selections if I am the admin
             if (userId === admin) {
                 setTimeout(simulateBotSkillSelections, 1500);
             }
 
-            if (!isFirstPlayer && !hasSelected) {
-                const checkboxes = document.querySelectorAll('#skill-options input[type="checkbox"]');
+            if (!isFirstPlayer && !hasSelected && myCharacter) {
+                const skillCounts = {};
+                myCharacter.skills.forEach(skill => {
+                    skillCounts[skill] = 0;
+                });
+
                 const confirmBtn = document.getElementById('confirmSkillsBtn');
-                checkboxes.forEach(checkbox => {
-                    checkbox.addEventListener('change', () => {
-                        const checkedCount = document.querySelectorAll('#skill-options input[type="checkbox"]:checked').length;
-                        if (checkedCount >= cardsToDraw) {
-                            checkboxes.forEach(cb => {
-                                if (!cb.checked) cb.disabled = true;
-                            });
-                        } else {
-                            checkboxes.forEach(cb => cb.disabled = false);
+                const feedbackEl = document.getElementById('skill-selection-feedback');
+
+                const updateTotal = () => {
+                    const total = Object.values(skillCounts).reduce((sum, count) => sum + count, 0);
+                    
+                    feedbackEl.innerHTML = `Select <span class="font-bold text-white">${total} / ${cardsToDraw}</span> skill cards from your available skills:`;
+
+                    const incrementBtns = document.querySelectorAll('.skill-increment');
+                    incrementBtns.forEach(btn => {
+                        btn.disabled = total >= cardsToDraw;
+                    });
+
+                    const decrementBtns = document.querySelectorAll('.skill-decrement');
+                    decrementBtns.forEach(btn => {
+                        const skill = btn.dataset.skill;
+                        btn.disabled = skillCounts[skill] <= 0;
+                    });
+
+                    confirmBtn.disabled = total !== cardsToDraw;
+                };
+
+                document.querySelectorAll('.skill-btn').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const skill = button.dataset.skill;
+                        if (button.classList.contains('skill-increment')) {
+                            skillCounts[skill]++;
+                        } else if (button.classList.contains('skill-decrement')) {
+                            skillCounts[skill]--;
                         }
-                        confirmBtn.disabled = (checkedCount !== cardsToDraw);
+                        document.getElementById(`skill-count-${skill}`).textContent = skillCounts[skill];
+                        updateTotal();
                     });
                 });
-                confirmBtn.addEventListener('click', selectSkillCards);
+                
+                confirmBtn.addEventListener('click', () => selectSkillCards(skillCounts));
+                updateTotal();
             }
         }
         
@@ -613,14 +646,12 @@
                         await updateDoc(getGameDocRef(appState.gameId), { players: updatedPlayers });
                     }
                     
-                    // Check if skill selection is complete and update state
                     if (appState.gameData.gameState === 'skillSelection' && oldGameState !== 'finished') {
                         const { draftOrder, skillSelections = {} } = appState.gameData;
                         const eligiblePlayers = draftOrder.length - 1;
                         const selectedPlayers = Object.keys(skillSelections).length;
                         if (selectedPlayers >= eligiblePlayers) {
                              await updateDoc(getGameDocRef(appState.gameId), { gameState: 'finished' });
-                             // The snapshot listener will catch this change and re-render.
                              return; 
                         }
                     }
@@ -702,7 +733,6 @@
             const updates = {};
             let needsUpdate = false;
 
-            // Iterate through all players who are eligible to pick skills (everyone but player 1)
             for (let i = 1; i < draftOrder.length; i++) {
                 const playerUid = draftOrder[i];
                 const playerIsBot = playerUid.startsWith('bot-');
@@ -717,10 +747,12 @@
                     const isAthena = character.name === 'Sharon Agathon (Athena)';
                     const cardsToDraw = (isCylon && !isAthena) ? 2 : 3;
                     
-                    const availableSkills = [...character.skills];
-                    const shuffledSkills = availableSkills.sort(() => 0.5 - Math.random());
-                    
-                    const selectedSkills = shuffledSkills.slice(0, cardsToDraw);
+                    const availableSkills = character.skills;
+                    const selectedSkills = [];
+                    for (let j = 0; j < cardsToDraw; j++) {
+                        const randomSkill = availableSkills[Math.floor(Math.random() * availableSkills.length)];
+                        selectedSkills.push(randomSkill);
+                    }
 
                     updates[`skillSelections.${playerUid}`] = selectedSkills;
                     needsUpdate = true;
@@ -765,8 +797,14 @@
             }
         }
 
-        async function selectSkillCards() {
-            const selectedSkills = Array.from(document.querySelectorAll('#skill-options input[type="checkbox"]:checked')).map(cb => cb.value);
+        async function selectSkillCards(skillCounts) {
+            const selectedSkills = [];
+            for (const skill in skillCounts) {
+                for (let i = 0; i < skillCounts[skill]; i++) {
+                    selectedSkills.push(skill);
+                }
+            }
+
             if(selectedSkills.length === 0) return;
 
             const updates = {};
@@ -954,3 +992,4 @@
     </script>
 </body>
 </html>
+
