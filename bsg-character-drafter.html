@@ -68,7 +68,7 @@
 
     <!-- Modal for Character Details -->
     <div id="modal-container" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal">
-        <div id="modal-content" class="modal-content rounded-lg shadow-2xl w-full max-w-lg p-6 relative border border-gray-700">
+        <div id="modal-content" class="modal-content rounded-lg shadow-2xl w-full max-w-4xl p-6 relative border border-gray-700">
             <!-- Modal content will be injected here by JavaScript -->
         </div>
     </div>
@@ -114,7 +114,7 @@
             { id: 15, name: "Anastasia Dualla", type: "Support", imageUrl: "https://www.dfwgamingvillage.com/images/Anastasia%20Dee%20Dualla.png", skillSet: "2 Tactics, 2 Politics, 1 Engineering/Leadership", startLocation: "Command", succession: { adm: 10, pres: 22, cag: 10 }, abilities: { positive1: "Efficient: When you activate Communications, you may move 2 civilian ships instead of 1.", positive2: "Fast Learner: Before you make a skill check, you may look at the top 3 cards of any skill deck and add one to your hand. 1x per game.", negative: "Emotionally Fragile: Your hand size is 8." } },
             { id: 17, name: "Cally Tyrol", type: "Support", imageUrl: "https://www.dfwgamingvillage.com/images/Callandra%20Cally%20Tyrol.png", skillSet: "2 Engineering, 2 Politics, 1 Leadership/Tactics", startLocation: "Hangar Deck", succession: { adm: 11, pres: 23, cag: 11 }, abilities: { positive1: "Quick Fix: Once per turn, you may repair a damaged location by discarding an Engineering card.", positive2: "Tigh's Pet: If you are on the same location as Saul Tigh, you may exchange your entire hand with him. 1x per game.", negative: "Impressionable: When you receive a 'You are a Cylon' card, you must reveal it immediately." } },
             { id: 26, name: "Sherman Cottle", type: "Support", imageUrl: "https://www.dfwgamingvillage.com/images/Sherman%20Doc%20Cottle.png", skillSet: "2 Engineering, 2 Politics, 1 Leadership/Tactics", startLocation: "Sickbay", succession: { adm: 13, pres: 24, cag: 13 }, abilities: { positive1: "Field Surgeon: When you move to a location with a character in \"Sickbay\", you may discard 1 skill card to move them to your location.", positive2: "Patch Them Up: Action: Choose a player. That player draws skill cards up to their hand size. 1x per game.", negative: "Gruff: You cannot play skill cards with a strength of 1." } },
-            { id: 33, name: "Tom Zarek (alt)", type: "Support", imageUrl: "https://www.dfwgamingvillage.com/images/Tom%20Zarek%20(Military%20Leader).png", skillSet: "2 Politics, 2 Leadership, 1 Tactics", startLocation: "Colonial One", succession: { adm: 14, pres: 4, cag: 12 }, abilities: { positive1: "Charismatic: When you draw a mutiny card, you may look at it and give it to any player.", positive2: "Exploit a Weakness: Reduce the strength of all non-helpful skill cards to 0. 1x per game.", negative: "Unforgiving: You may not give skill cards to other players." } },
+            { id: 33, name: "Tom Zarek (alt)", type: "Support", imageUrl: "https://www.dfwgamingvillage.com/images/Tom%20Zarek%20(Support).png", skillSet: "2 Politics, 2 Leadership, 1 Tactics", startLocation: "Colonial One", succession: { adm: 14, pres: 4, cag: 12 }, abilities: { positive1: "Charismatic: When you draw a mutiny card, you may look at it and give it to any player.", positive2: "Exploit a Weakness: Reduce the strength of all non-helpful skill cards to 0. 1x per game.", negative: "Unforgiving: You may not give skill cards to other players." } },
             { id: 36, name: "Louis Hoshi", type: "Support", imageUrl: "https://www.dfwgamingvillage.com/images/Louis%20Hoshi.png", skillSet: "Data Needed", startLocation: "Data Needed", succession: {}, abilities: { positive1: "Data Needed", positive2: "Data Needed", negative: "Data Needed" } },
 
             // Cylon Leaders
@@ -624,22 +624,28 @@
 
             modalContent.innerHTML = `
                 <button onclick="hideCharacterDetails()" class="absolute top-2 right-3 text-2xl font-bold text-gray-500 hover:text-white">&times;</button>
-                <h2 class="text-3xl font-bold ${getCharacterTypeColor(character.type)} mb-2">${character.name}</h2>
-                <p class="text-lg text-gray-400 mb-4">${character.type}</p>
-                
-                <div class="text-left bg-gray-900 p-3 rounded-md mb-4">
-                    <p><strong>Skills:</strong> ${character.skillSet}</p>
-                    <p><strong>Starts at:</strong> ${character.startLocation}</p>
-                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <img src="${character.imageUrl}" alt="${character.name}" class="w-full h-auto rounded-lg">
+                    </div>
+                    <div>
+                        <h2 class="text-3xl font-bold ${getCharacterTypeColor(character.type)} mb-2">${character.name}</h2>
+                        <p class="text-lg text-gray-400 mb-4">${character.type}</p>
+                        
+                        <div class="text-left bg-gray-900 p-3 rounded-md mb-4">
+                            <p><strong>Skills:</strong> ${character.skillSet}</p>
+                            <p><strong>Starts at:</strong> ${character.startLocation}</p>
+                        </div>
 
-                <div class="space-y-3 text-left max-h-[40vh] overflow-y-auto pr-2">
-                    <p><strong class="text-green-400">+</strong> ${character.abilities.positive1}</p>
-                    <p><strong class="text-green-400">+</strong> ${character.abilities.positive2}</p>
-                    <p><strong class="text-red-400">-</strong> ${character.abilities.negative}</p>
+                        <div class="space-y-3 text-left max-h-[30vh] overflow-y-auto pr-2">
+                            <p><strong class="text-green-400">+</strong> ${character.abilities.positive1}</p>
+                            <p><strong class="text-green-400">+</strong> ${character.abilities.positive2}</p>
+                            <p><strong class="text-red-400">-</strong> ${character.abilities.negative}</p>
+                        </div>
+                        ${successionHtml}
+                        ${draftButtonHtml}
+                    </div>
                 </div>
-                ${successionHtml}
-                ${character.setup ? `<p class="mt-4 text-yellow-400 text-sm"><strong>Setup:</strong> ${character.setup}</p>` : ''}
-                ${draftButtonHtml}
             `;
 
             modalContainer.classList.remove('hidden');
