@@ -68,7 +68,7 @@
 
     <!-- Modal for Character Details -->
     <div id="modal-container" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal">
-        <div id="modal-content" class="modal-content rounded-lg shadow-2xl w-full max-w-4xl p-6 relative border border-gray-700">
+        <div id="modal-content" class="modal-content rounded-lg shadow-2xl w-full max-w-md p-6 relative border border-gray-700">
             <!-- Modal content will be injected here by JavaScript -->
         </div>
     </div>
@@ -81,50 +81,50 @@
         // --- DATA: Character Information ---
         const characters = [
             // Political Leaders
-            { id: 2, name: "Laura Roslin", type: "Political Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Laura%20Roslin.png", skillSet: "3 Politics, 2 Leadership", startLocation: "President's Office", succession: { adm: 26, pres: 1, cag: 26 }, abilities: { positive1: "Religious Visions: Draw 2 Crisis Cards, resolve 1, other to bottom of deck.", positive2: "Skilled Politician: Action: Draw 4 Quorum, resolve 1. President role not needed. 1x per game.", negative: "Terminal Illness: Discard 2 Skill Cards to activate a location." } },
-            { id: 3, name: "Gaius Baltar", type: "Political Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Gaius%20Baltar.png", skillSet: "2 Politics, 1 Leadership, 1 Engineering", startLocation: "Research Lab", succession: { adm: 23, pres: 2, cag: 23 }, abilities: { positive1: "Delusional Intuition: After drawing Crisis Card, draw 1 of any Skill Card.", positive2: "Cylon Detector: Action: Look at all Loyalty Cards of another player. 1x per game.", negative: "Coward: Starts game with 2 Loyalty Cards (not 1)." } },
-            { id: 30, name: "Lee Adama (alt)", type: "Political Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Lee%20Adama%20(Political%20Leader).png", skillSet: "1 Tactics, 2 Piloting, 2 Leadership/Politics", startLocation: "Admiral's Quarters", succession: { adm: 19, pres: 3, cag: 8 }, abilities: { positive1: "Forward Thinker: After playing an \"Executive Order\" skill card you may activate your current location.", positive2: "Choose a Different Path: Change result of Crisis to Current Player Discards 5 cards. 1x per game.", negative: "Moral Dilemma: When you draw Mutiny you must discard 2 skill cards." } },
-            { id: 4, name: "Tom Zarek", type: "Political Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Tom%20Zarek%20(Political%20Leader).png", skillSet: "2 Politics, 2 Leadership, 1 Tactics", startLocation: "Administration", succession: { adm: 8, pres: 3, cag: 3 }, abilities: { positive1: "Friends in Low Places: May + or - 2 difficulty when a player activates Brig or Administration.", positive2: "Unconventional Tactics: Lose 1 population to gain 1 other resource. 1x per game.", negative: "Convicted Criminal: Cannot activate locations occupied by others (except Brig)." } },
-            { id: 14, name: "Ellen Tigh", type: "Political Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Ellen%20Tigh.png", skillSet: "3 Politics, 1 Leadership, 1 Tactics/Engineering", startLocation: "Administration", succession: { adm: 24, pres: 4, cag: 24 }, abilities: { positive1: "Politically Adroit: When you play a Quorum card, you may draw 1 card from skill deck of choice. 1x per turn.", positive2: "Manipulative: At end of turn you may give a player a card from your hand to take a card of your choice from theirs.", negative: "Self-Preservation: When a character is sent to the Brig, you must discard your entire hand." } },
-            { id: 27, name: "Romo Lampkin", type: "Political Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Romo%20Lampkin.png", skillSet: "3 Politics, 2 Leadership/Tactics", startLocation: "President's Office", succession: { adm: 25, pres: 5, cag: 25 }, abilities: { positive1: "Legal Defense: When a player is sent to the Brig, you may take a Mutiny card to cancel it.", positive2: "Inspirational Orator: Action: Choose another player. That player gives you their hand and you give them yours. 1x per game.", negative: "Kleptomaniac: When another player gives you 1 or more skill cards, you must give them one from your hand." } },
-            { id: 18, name: "Tory Foster", type: "Political Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Tory%20Foster.png", skillSet: "2 Politics, 2 Leadership, 1 Tactics", startLocation: "Press Room", succession: { adm: 27, pres: 6, cag: 27 }, abilities: { positive1: "Adapts to Survive: After the 'Sleeper Agent' phase, draw 2 skill cards instead of 1.", positive2: "Nothing but the Truth: Force a player to show you one of their loyalty cards. 1x per game.", negative: "Amoral: When you draw a Mutiny card, you must give it to another player." } },
-            { id: 35, name: "Gaius Baltar (alt)", type: "Political Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Gaius%20Baltar%20(Political%20Leader).png", skillSet: "Data Needed", startLocation: "Data Needed", succession: {}, abilities: { positive1: "Data Needed", positive2: "Data Needed", negative: "Data Needed" } },
+            { id: 2, name: "Laura Roslin", type: "Political Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Laura%20Roslin.png" },
+            { id: 3, name: "Gaius Baltar", type: "Political Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Gaius%20Baltar.png" },
+            { id: 30, name: "Lee Adama (alt)", type: "Political Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Lee%20Adama%20(Political%20Leader).png" },
+            { id: 4, name: "Tom Zarek", type: "Political Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Tom%20Zarek%20(Political%20Leader).png" },
+            { id: 14, name: "Ellen Tigh", type: "Political Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Ellen%20Tigh.png" },
+            { id: 27, name: "Romo Lampkin", type: "Political Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Romo%20Lampkin.png" },
+            { id: 18, name: "Tory Foster", type: "Political Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Tory%20Foster.png" },
+            { id: 35, name: "Gaius Baltar (alt)", type: "Political Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Gaius%20Baltar%20(Political%20Leader).png" },
 
             // Military Leaders
-            { id: 1, name: "William Adama", type: "Military Leader", imageUrl: "https://www.dfwgamingvillage.com/images/William%20Adama.png", skillSet: "3 Leadership, 2 Tactics", startLocation: "Admiral's Quarters", succession: { adm: 1, pres: 8, cag: 1 }, abilities: { positive1: "Command Authority: When you draw a Crisis Card, all 1 strength Skill Cards count positive for the skill check.", positive2: "Inspirational Leader: Action: After resolving a skill check, draw the used cards into your hand. 1x per game.", negative: "Emotionally Attached: You may not activate the \"Admiral's Quarters\" location." } },
-            { id: 8, name: "Saul Tigh", type: "Military Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Saul%20Tigh.png", skillSet: "2 Leadership, 3 Tactics", startLocation: "Command", succession: { adm: 2, pres: 9, cag: 2 }, abilities: { positive1: "Cylon Hatred: When a player activates the \"Admiral's Quarters\" location, you may reduce the difficulty by 3.", positive2: "Declare Martial Law: Action: Give the President title to the Admiral. 1x per game.", negative: "Alcoholic: At the start of any player's turn, if you have exactly 1 Skill Card, you must discard it." } },
-            { id: 13, name: "Helena Cain", type: "Military Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Helena%20Cain.png", skillSet: "2 Leadership, 3 Tactics, 1 Engineering", startLocation: "Pegasus CIC", succession: { adm: 3, pres: 10, cag: 10 }, abilities: { positive1: "Ambitious: In the Admiral's Quarters, discard 1 skill card to treat the check as a pass. You become Admiral.", positive2: "Blind Jump: Action: Jump the fleet without spending fuel. Population is lost on a roll of 6 or less. 1x per game.", negative: "Bent on Revenge: You may not play more than 3 cards into any skill check." } },
-            { id: 7, name: "Karl Agathon", type: "Military Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Karl%20Helo%20Agathon.png", skillSet: "2 Leadership, 2 Tactics, 1 Piloting", startLocation: "Armory", succession: { adm: 4, pres: 11, cag: 11 }, abilities: { positive1: "ECO Officer: During your turn, you may reroll a die that was just rolled (once per turn).", positive2: "Moral Compass: After a player makes a choice on a Crisis Card, you may change it. 1x per game.", negative: "Stranded: Not placed on the board at start. On 2nd turn, place at \"Hangar Deck\"." } },
-            { id: 19, name: "Felix Gaeta", type: "Military Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Felix%20Gaeta.png", skillSet: "2 Leadership, 2 Tactics, 1 Politics/Engineering", startLocation: "Command", succession: { adm: 5, pres: 12, cag: 12 }, abilities: { positive1: "FTL Operator: When the fleet jumps, reduce the population loss by 1.", positive2: "Ship's Systems: Look at the top of the Destination deck and place it on the top or bottom. 1x per game.", negative: "Idealistic: You may not use the action on the Admiral's Quarters location." } },
-            { id: 28, name: "Jack Fisk", type: "Military Leader", skillSet: "2 Leadership, 2 Tactics, 1 Politics/Piloting", startLocation: "Hangar Deck", succession: { adm: 6, pres: 13, cag: 13 }, abilities: { positive1: "Black Marketeer: Once during your turn you may discard a card to draw from the bottom of any skill deck.", positive2: "Loyal Aide: You may choose to pass or fail a skill check with a difficulty of 7 or less. 1x per game.", negative: "Trusting: You cannot look at another player's loyalty cards." } },
-            { id: 29, name: "Kendra Shaw", type: "Military Leader", skillSet: "2 Leadership, 2 Tactics, 1 Engineering/Piloting", startLocation: "Pegasus CIC", succession: { adm: 7, pres: 14, cag: 14 }, abilities: { positive1: "Promotion: When the Admiral title is passed to you, you may draw 2 skill cards of your choice.", positive2: "Field Promotion: Action: Give a character the Admiral or President title. 1x per game.", negative: "By the Book: You may only contribute a maximum of 1 skill card to skill checks." } },
-            { id: 31, name: "Galen Tyrol (alt)", type: "Military Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Chief%20Galen%20Tyrol%20(Military%20Leader).png", skillSet: "2 Leadership, 2 Tactics, 1 Engineering", startLocation: "Command", succession: { adm: 20, pres: 18, cag: 18 }, abilities: { positive1: "Demoralized: At start of turn, if morale is at 2 or less, you may draw 1 skill card of your choice.", positive2: "Reckless: While in a viper, may destroy it to destroy 5 raiders, 2 heavy raiders, or 1 basestar in your space. 1x per game.", negative: "Work a Grudge: You may not use the action of the \"Command\" location." } },
+            { id: 1, name: "William Adama", type: "Military Leader", imageUrl: "https://www.dfwgamingvillage.com/images/William%20Adama.png" },
+            { id: 8, name: "Saul Tigh", type: "Military Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Saul%20Tigh.png" },
+            { id: 13, name: "Helena Cain", type: "Military Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Helena%20Cain.png" },
+            { id: 7, name: "Karl Agathon", type: "Military Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Karl%20Helo%20Agathon.png" },
+            { id: 19, name: "Felix Gaeta", type: "Military Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Felix%20Gaeta.png" },
+            { id: 28, name: "Jack Fisk", type: "Military Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Admiral%20Jack%20Fisk.png" },
+            { id: 29, name: "Kendra Shaw", type: "Military Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Kendra%20Shaw.png" },
+            { id: 31, name: "Galen Tyrol (alt)", type: "Military Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Chief%20Galen%20Tyrol%20(Military%20Leader).png" },
             
             // Pilots
-            { id: 6, name: "Kara Thrace", type: "Pilot", imageUrl: "https://www.dfwgamingvillage.com/images/Kara%20Starbuck%20Thrace.png", skillSet: "2 Tactics, 2 Piloting, 1 Leadership/Engineering", startLocation: "Hangar Deck", succession: { adm: 16, pres: 16, cag: 1 }, abilities: { positive1: "Expert Pilot: When you start your turn piloting a Viper, you may take 2 Actions.", positive2: "Secret Destiny: Immediately after a Crisis Card is revealed, discard it and draw a new one. 1x per game.", negative: "Insubordinate: When a player chooses you with the \"Admiral's Quarters\" location, reduce the difficulty by 3." } },
-            { id: 5, name: "Lee Adama", type: "Pilot", imageUrl: "https://www.dfwgamingvillage.com/images/Lee%20Apollo%20Adama%20(Pilot).png", skillSet: "2 Tactics, 2 Piloting, 1 Leadership/Politics", startLocation: "Hangar Deck", succession: { adm: 15, pres: 7, cag: 2 }, abilities: { positive1: "Alert Viper Pilot: When a viper is placed in Reserves, you may pilot it and take 1 action. (Not from Brig).", positive2: "CAG: Action: Activate up to 6 unmanned Vipers. 1x per game.", negative: "Headstrong: When forced to discard Skill Cards, you must discard randomly." } },
-            { id: 10, name: "Sharon Valerii", type: "Pilot", imageUrl: "https://www.dfwgamingvillage.com/images/Sharon%20Boomer%20Valerii.png", skillSet: "2 Tactics, 2 Piloting, 1 Engineering", startLocation: "Armory", succession: { adm: 18, pres: 17, cag: 4 }, abilities: { positive1: "Recon: At the end of your turn, you may look at the top of the Crisis Deck and place it on the top or bottom.", positive2: "Mysterious Intuition: Before resolving a Skill Check, choose the result (Pass/Fail) instead. 1x per game.", negative: "Sleeper Agent: During Sleeper phase, dealt 2 Loyalty Cards and must keep both." } },
-            { id: 16, name: "Louanne Katraine", type: "Pilot", imageUrl: "https://www.dfwgamingvillage.com/images/Louanne%20Kat%20Katraine.png", skillSet: "2 Tactics, 2 Piloting, 1 Leadership/Politics", startLocation: "Hangar Deck", succession: { adm: 17, pres: 15, cag: 5 }, abilities: { positive1: "Hot Shot: You may re-roll a die roll when piloting a viper.", positive2: "Stim Junkie: Once per game, you may take 3 actions.", negative: "Addiction: At the start of your turn, you must discard 1 skill card." } },
-            { id: 20, name: "Brendan Costanza", type: "Pilot", imageUrl: "https://www.dfwgamingvillage.com/images/Brendan%20Hot%20Dog%20Costanza.png", skillSet: "2 Tactics, 2 Piloting, 1 Engineering/Leadership", startLocation: "Hangar Deck", succession: { adm: 21, pres: 19, cag: 6 }, abilities: { positive1: "Escort: When you launch a viper, you may escort one civilian ship to an adjacent space.", positive2: "Buck Rogers: Automatically destroy up to 2 raiders in your space. 1x per game.", negative: "Green: You must discard 1 skill card to activate an unmanned viper." } },
-            { id: 21, name: "Samuel Anders", type: "Pilot", imageUrl: "https://www.dfwgamingvillage.com/images/Samuel%20T.%20Anders.png", skillSet: "2 Leadership, 2 Tactics, 1 Piloting", startLocation: "Colonial One", succession: { adm: 22, pres: 20, cag: 7 }, abilities: { positive1: "Star Player: When a skill check is passed, you may draw a card from that skill deck.", positive2: "Longshot: Choose to automatically succeed at a skill check. 1x per game.", negative: "Starts on Colonial One: Your starting location is Colonial One." } },
-            { id: 32, name: "Karl Agathon (alt)", type: "Pilot", imageUrl: "https://www.dfwgamingvillage.com/images/Karl%20Helo%20Agathon%20(Pilot).png", skillSet: "2 Tactics, 2 Piloting, 1 Leadership/Engineering", startLocation: "Armory", succession: { adm: 12, pres: 11, cag: 11 }, abilities: { positive1: "Takes Risks: Once during your turn, you may choose to re-roll a die. You must use the new result.", positive2: "Believer: After a player makes a choice on a crisis card, you may change it. 1x per game.", negative: "On the Run: Your hand size is 8." } },
+            { id: 6, name: "Kara Thrace", type: "Pilot", imageUrl: "https://www.dfwgamingvillage.com/images/Kara%20Starbuck%20Thrace.png" },
+            { id: 5, name: "Lee Adama", type: "Pilot", imageUrl: "https://www.dfwgamingvillage.com/images/Lee%20Apollo%20Adama%20(Pilot).png" },
+            { id: 10, name: "Sharon Valerii", type: "Pilot", imageUrl: "https://www.dfwgamingvillage.com/images/Sharon%20Boomer%20Valerii.png" },
+            { id: 16, name: "Louanne Katraine", type: "Pilot", imageUrl: "https://www.dfwgamingvillage.com/images/Louanne%20Kat%20Katraine.png" },
+            { id: 20, name: "Brendan Costanza", type: "Pilot", imageUrl: "https://www.dfwgamingvillage.com/images/Brendan%20Hot%20Dog%20Costanza.png" },
+            { id: 21, name: "Samuel Anders", type: "Pilot", imageUrl: "https://www.dfwgamingvillage.com/images/Samuel%20T.%20Anders.png" },
+            { id: 32, name: "Karl Agathon (alt)", type: "Pilot", imageUrl: "https://www.dfwgamingvillage.com/images/Karl%20Helo%20Agathon%20(Pilot).png" },
             
             // Support
-            { id: 9, name: "Galen Tyrol", type: "Support", imageUrl: "https://www.dfwgamingvillage.com/images/Chief%20Galen%20Tyrol.png", skillSet: "3 Engineering, 2 Leadership", startLocation: "Hangar Deck", succession: { adm: 9, pres: 21, cag: 9 }, abilities: { positive1: "Maintenance Engineer: During your turn, after you use a \"Repair\" Skill Card, you may take another action.", positive2: "Blind Devotion: After cards are added to a skill check, choose a type. All cards of that type are strength 0. 1x per game.", negative: "Union Leader: Your hand size is 8." } },
-            { id: 15, name: "Anastasia Dualla", type: "Support", imageUrl: "https://www.dfwgamingvillage.com/images/Anastasia%20Dee%20Dualla.png", skillSet: "2 Tactics, 2 Politics, 1 Engineering/Leadership", startLocation: "Command", succession: { adm: 10, pres: 22, cag: 10 }, abilities: { positive1: "Efficient: When you activate Communications, you may move 2 civilian ships instead of 1.", positive2: "Fast Learner: Before you make a skill check, you may look at the top 3 cards of any skill deck and add one to your hand. 1x per game.", negative: "Emotionally Fragile: Your hand size is 8." } },
-            { id: 17, name: "Cally Tyrol", type: "Support", imageUrl: "https://www.dfwgamingvillage.com/images/Callandra%20Cally%20Tyrol.png", skillSet: "2 Engineering, 2 Politics, 1 Leadership/Tactics", startLocation: "Hangar Deck", succession: { adm: 11, pres: 23, cag: 11 }, abilities: { positive1: "Quick Fix: Once per turn, you may repair a damaged location by discarding an Engineering card.", positive2: "Tigh's Pet: If you are on the same location as Saul Tigh, you may exchange your entire hand with him. 1x per game.", negative: "Impressionable: When you receive a 'You are a Cylon' card, you must reveal it immediately." } },
-            { id: 26, name: "Sherman Cottle", type: "Support", imageUrl: "https://www.dfwgamingvillage.com/images/Sherman%20Doc%20Cottle.png", skillSet: "2 Engineering, 2 Politics, 1 Leadership/Tactics", startLocation: "Sickbay", succession: { adm: 13, pres: 24, cag: 13 }, abilities: { positive1: "Field Surgeon: When you move to a location with a character in \"Sickbay\", you may discard 1 skill card to move them to your location.", positive2: "Patch Them Up: Action: Choose a player. That player draws skill cards up to their hand size. 1x per game.", negative: "Gruff: You cannot play skill cards with a strength of 1." } },
-            { id: 33, name: "Tom Zarek (alt)", type: "Support", imageUrl: "https://www.dfwgamingvillage.com/images/Tom%20Zarek%20(Support).png", skillSet: "2 Politics, 2 Leadership, 1 Tactics", startLocation: "Colonial One", succession: { adm: 14, pres: 4, cag: 12 }, abilities: { positive1: "Charismatic: When you draw a mutiny card, you may look at it and give it to any player.", positive2: "Exploit a Weakness: Reduce the strength of all non-helpful skill cards to 0. 1x per game.", negative: "Unforgiving: You may not give skill cards to other players." } },
-            { id: 36, name: "Louis Hoshi", type: "Support", imageUrl: "https://www.dfwgamingvillage.com/images/Louis%20Hoshi.png", skillSet: "Data Needed", startLocation: "Data Needed", succession: {}, abilities: { positive1: "Data Needed", positive2: "Data Needed", negative: "Data Needed" } },
+            { id: 9, name: "Galen Tyrol", type: "Support", imageUrl: "https://www.dfwgamingvillage.com/images/Chief%20Galen%20Tyrol.png" },
+            { id: 15, name: "Anastasia Dualla", type: "Support", imageUrl: "https://www.dfwgamingvillage.com/images/Anastasia%20Dee%20Dualla.png" },
+            { id: 17, name: "Cally Tyrol", type: "Support", imageUrl: "https://www.dfwgamingvillage.com/images/Callandra%20Cally%20Tyrol.png" },
+            { id: 26, name: "Sherman Cottle", type: "Support", imageUrl: "https://www.dfwgamingvillage.com/images/Sherman%20Doc%20Cottle.png" },
+            { id: 33, name: "Tom Zarek (alt)", type: "Support", imageUrl: "https://www.dfwgamingvillage.com/images/Tom%20Zarek%20(Support).png" },
+            { id: 36, name: "Louis Hoshi", type: "Support", imageUrl: "https://www.dfwgamingvillage.com/images/Louis%20Hoshi.png" },
 
             // Cylon Leaders
-            { id: 11, name: "'Caprica' Six", type: "Cylon Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Caprica%20Six.png", skillSet: "1 Leadership, 1 Treachery, 1 Politics/Engineering", startLocation: "Caprica", succession: {}, abilities: { positive1: "Intimate: When you move to a location with another player, draw 1 random skill card from them; they draw 1 of your choice.", positive2: "Human Delusion: May play any number of skill cards after the reveal of a skill check. 1x per game.", negative: "Conflicted Loyalties: Must discard 1 skill card to activate the 'Cylon Fleet' location." } },
-            { id: 12, name: "Leoben Conoy", type: "Cylon Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Leoben%20Conoy.png", skillSet: "1 Leadership, 1 Treachery, 1 Politics/Piloting", startLocation: "Caprica", succession: {}, abilities: { positive1: "Cryptic Message: At start of turn, look at top card of crisis deck. May place on top or bottom.", positive2: "Glimpse the Face of God: Look at another player's loyalty cards. 1x per game.", negative: "Clouded: You may not play Treachery skill cards." } },
-            { id: 22, name: "Sharon Agathon (Athena)", type: "Cylon Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Sharon%20Athena%20Agathon%20(Cylon%20Leader).png", skillSet: "1 Tactics, 1 Leadership, 1 Piloting/Engineering", startLocation: "Hangar Deck (Infiltrating)", succession: {}, abilities: { positive1: "For Love: When a player must discard Skill cards, you may draw 1 Treachery to reduce the amount by 1.", positive2: "Resolute: Action: Activate any undamaged location. 1x per game.", negative: "Infiltration: Your hand size is 6." } },
-            { id: 23, name: "Aaron Doral", type: "Cylon Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Aaron%20Doral.png", skillSet: "1 Treachery, 1 Politics, 1 Leadership/Tactics", startLocation: "Caprica", succession: {}, abilities: { positive1: "Industrious: Draw 2 extra cards while infiltrating. (Not in Sickbay).", positive2: "Meticulous: When using an action to end infiltration, may move to any Cylon location and act. 1x per game.", negative: "Vanity: Cannot contribute to skill checks during another player's Action step." } },
-            { id: 24, name: "Simon O'Neill", type: "Cylon Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Simon%20O'Neill.png", skillSet: "1 Engineering, 1 Treachery, 1 Leadership/Tactics", startLocation: "Cylon Fleet", succession: {}, abilities: { positive1: "Calculating: May contribute 2 cards to skill checks (3 if infiltrating). Not in the Brig.", positive2: "Modifications: During 'Activate Cylon Ships' step, choose ship type to activate or launch raiders. 1x per game.", negative: "Logic-Bound: Must play 1 skill card face up for skill checks." } },
-            { id: 25, name: "D'Anna Biers", type: "Cylon Leader", imageUrl: "https://www.dfwgamingvillage.com/images/D'Anna%20Biers.png", skillSet: "1 Treachery, 1 Politics, 1 Leadership/Piloting", startLocation: "Caprica", succession: {}, abilities: { positive1: "Visions: When you draw a crisis card, you may discard a skill card to draw a new one.", positive2: "In The Know: Look at the top 3 cards of the Destination deck and rearrange them in any order. 1x per game.", negative: "Final Five Obsession: When moving from the Hub after it's destroyed, must discard a Super Crisis to move." } },
-            { id: 34, name: "Cavil", type: "Cylon Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Cavil.png", skillSet: "Data Needed", startLocation: "Data Needed", succession: {}, abilities: { positive1: "Data Needed", positive2: "Data Needed", negative: "Data Needed" } },
+            { id: 11, name: "'Caprica' Six", type: "Cylon Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Caprica%20Six.png" },
+            { id: 12, name: "Leoben Conoy", type: "Cylon Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Leoben%20Conoy.png" },
+            { id: 22, name: "Sharon Agathon (Athena)", type: "Cylon Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Sharon%20Athena%20Agathon%20(Cylon%20Leader).png" },
+            { id: 23, name: "Aaron Doral", type: "Cylon Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Aaron%20Doral.png" },
+            { id: 24, name: "Simon O'Neill", type: "Cylon Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Simon%20O'Neill.png" },
+            { id: 25, name: "D'Anna Biers", type: "Cylon Leader", imageUrl: "https://www.dfwgamingvillage.com/images/D'Anna%20Biers.png" },
+            { id: 34, name: "Cavil", type: "Cylon Leader", imageUrl: "https://www.dfwgamingvillage.com/images/Cavil.png" },
         ];
 
         // --- Firebase Configuration ---
@@ -301,7 +301,7 @@
                                     const isDrafted = Object.values(draftedCharacters).includes(char.id);
                                     const charImage = char.imageUrl ? `
                                         <div class="relative">
-                                            <img src="${char.imageUrl}" alt="${char.name}" class="w-full h-auto rounded-md aspect-[7/10] object-cover">
+                                            <img src="${char.imageUrl}" alt="${char.name}" class="w-full h-auto rounded-md">
                                             ${isDrafted ? `
                                                 <div class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center rounded-md">
                                                     <p class="text-red-500 text-2xl font-bold tracking-widest -rotate-12">DRAFTED</p>
@@ -341,10 +341,12 @@
                             const characterId = draftedCharacters[uid];
                             const character = characters.find(c => c.id === characterId);
                             return `
-                                <div class="p-4 rounded-lg bg-gray-800 border border-gray-700 text-left">
-                                    <p class="text-xl font-semibold">${player.name} drafted:</p>
-                                    <h3 class="text-2xl font-bold ${getCharacterTypeColor(character.type)}">${character.name} <span class="text-lg font-normal text-gray-400">(${character.type})</span></h3>
-                                    ${character.setup ? `<p class="text-yellow-400 text-sm mt-1"><strong>Setup:</strong> ${character.setup}</p>` : ''}
+                                <div class="p-4 rounded-lg bg-gray-800 border border-gray-700 text-left flex items-center space-x-4">
+                                    <img src="${character.imageUrl}" alt="${character.name}" class="w-24 h-auto rounded-md">
+                                    <div>
+                                        <p class="text-xl font-semibold">${player.name} drafted:</p>
+                                        <h3 class="text-2xl font-bold ${getCharacterTypeColor(character.type)}">${character.name} <span class="text-lg font-normal text-gray-400">(${character.type})</span></h3>
+                                    </div>
                                 </div>
                             `;
                         }).join('')}
@@ -613,36 +615,15 @@
             const draftButtonHtml = isMyTurn && !isDrafted && availableForDraft
                 ? `<button onclick="draftCharacterAndCloseModal(${character.id})" class="w-full mt-6 py-2 px-4 rounded-md font-semibold btn-primary">Draft ${character.name}</button>`
                 : '';
-            
-            const successionHtml = character.succession && Object.keys(character.succession).length > 0 ? `
-                <div class="mt-4 text-sm text-gray-400 grid grid-cols-3 gap-2 text-center">
-                    <div><strong>ADM:</strong> ${character.succession.adm}</div>
-                    <div><strong>PRES:</strong> ${character.succession.pres}</div>
-                    <div><strong>CAG:</strong> ${character.succession.cag}</div>
-                </div>
-            ` : '';
 
             modalContent.innerHTML = `
                 <button onclick="hideCharacterDetails()" class="absolute top-2 right-3 text-2xl font-bold text-gray-500 hover:text-white">&times;</button>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <img src="${character.imageUrl}" alt="${character.name}" class="w-full h-auto rounded-lg">
-                    </div>
-                    <div>
-                        <h2 class="text-3xl font-bold ${getCharacterTypeColor(character.type)} mb-2">${character.name}</h2>
-                        <p class="text-lg text-gray-400 mb-4">${character.type}</p>
-                        
-                        <div class="text-left bg-gray-900 p-3 rounded-md mb-4">
-                            <p><strong>Skills:</strong> ${character.skillSet}</p>
-                            <p><strong>Starts at:</strong> ${character.startLocation}</p>
-                        </div>
-
-                        <div class="space-y-3 text-left max-h-[30vh] overflow-y-auto pr-2">
-                            <p><strong class="text-green-400">+</strong> ${character.abilities.positive1}</p>
-                            <p><strong class="text-green-400">+</strong> ${character.abilities.positive2}</p>
-                            <p><strong class="text-red-400">-</strong> ${character.abilities.negative}</p>
-                        </div>
-                        ${successionHtml}
+                <div class="text-center">
+                    <img src="${character.imageUrl}" alt="${character.name}" class="w-full max-w-sm mx-auto h-auto rounded-lg mb-4">
+                    <h2 class="text-3xl font-bold ${getCharacterTypeColor(character.type)}">${character.name}</h2>
+                    <p class="text-lg text-gray-400 mb-6">${character.type}</p>
+                    <div class="flex space-x-4 justify-center">
+                        <button onclick="hideCharacterDetails()" class="py-2 px-6 rounded-md font-semibold btn-secondary">Cancel</button>
                         ${draftButtonHtml}
                     </div>
                 </div>
