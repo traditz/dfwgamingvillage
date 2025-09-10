@@ -256,16 +256,17 @@
                     <h3 class="text-xl mb-2 mt-6">${players.length} / ${playerCount} Players Joined</h3>
                     <div id="playerList" class="space-y-2 mb-6">
                         ${players.map(p => {
-                            // Show kick button for admin, but not for themselves
                             const kickButton = isAdmin && p.uid !== admin ? `<button onclick="kickPlayer('${p.uid}')" class="text-xs bg-red-600 hover:bg-red-700 px-2 py-1 rounded">Kick</button>` : '';
-                            // Show change name button only for the current player
                             const changeNameButton = p.uid === userId ? `<button onclick="changePlayerName()" class="text-xs bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded">Change Name</button>` : '';
-                            // Add tags like (Admin) and (You)
                             const playerTag = p.uid === admin ? '(Admin)' : (p.uid === userId ? '(You)' : '');
+                            const rejoinCodeDisplay = p.uid === userId ? `<div class="text-xs text-cyan-400 mt-1">Rejoin Code: <strong class="tracking-widest">${p.rejoinCode}</strong></div>` : '';
 
                             return `
                                 <div class="flex justify-between items-center p-2 rounded bg-gray-700 text-left">
-                                    <span>${p.name} <span class="text-gray-400 text-sm">${playerTag}</span></span>
+                                    <div>
+                                        <span>${p.name} <span class="text-gray-400 text-sm">${playerTag}</span></span>
+                                        ${rejoinCodeDisplay}
+                                    </div>
                                     <div class="space-x-2">
                                         ${changeNameButton}
                                         ${kickButton}
@@ -652,31 +653,52 @@
                     const canJoin = appState.gameData.gameState === 'lobby' && appState.gameData.players.length < appState.gameData.playerCount;
 
                     if (!playerExistsByUID && canJoin) {
-                        // Prompt for name if it's not in localStorage (e.g., new device)
-                        if (!appState.playerName) {
-                            appState.playerName = prompt("Please enter your name.\n\nIf you are rejoining from a new device, you MUST use the same name you used originally.");
-                            if (appState.playerName) {
-                                localStorage.setItem('bsgPlayerName', appState.playerName);
-                            } else { // User cancelled the prompt
-                                const baseUrl = window.location.href.split('?')[0];
-                                window.location.href = baseUrl;
-                                return;
-                            }
+                        // Prompt for name OR rejoin code
+                        const userInput = prompt("Enter your name to join, or a Rejoin Code to sync your account.");
+                        
+                        if (!userInput || userInput.trim() === '') {
+                             const baseUrl = window.location.href.split('?')[0];
+                             window.location.href = baseUrl;
+                             return;
                         }
 
-                        // Check if a player with the same name is already in the lobby
-                        const existingPlayerByName = appState.gameData.players.find(p => p.name.toLowerCase() === appState.playerName.toLowerCase());
+                        // --- NEW REJOIN LOGIC ---
+                        const playerByCode = appState.gameData.players.find(p => p.rejoinCode === userInput.toUpperCase());
 
-                        if (existingPlayerByName) {
-                            // Player is rejoining, so update their UID
+                        if (playerByCode) {
+                            // User entered a valid rejoin code. Let's sync them.
+                            appState.playerName = playerByCode.name;
+                            localStorage.setItem('bsgPlayerName', playerByCode.name);
+
                             const updatedPlayers = appState.gameData.players.map(p => 
-                                p.name.toLowerCase() === appState.playerName.toLowerCase() ? { ...p, uid: userId } : p
+                                p.rejoinCode === userInput.toUpperCase() ? { ...p, uid: userId } : p
                             );
                             await updateDoc(getGameDocRef(appState.gameId), { players: updatedPlayers });
+
                         } else {
-                            // It's a new player, add them to the lobby
-                            const updatedPlayers = [...appState.gameData.players, { name: appState.playerName, uid: userId }];
-                            await updateDoc(getGameDocRef(appState.gameId), { players: updatedPlayers });
+                            // User entered a name, not a code. Proceed with original join logic.
+                            appState.playerName = userInput;
+                            localStorage.setItem('bsgPlayerName', userInput);
+                            
+                            const existingPlayerByName = appState.gameData.players.find(p => p.name.toLowerCase() === appState.playerName.toLowerCase());
+
+                            if (existingPlayerByName) {
+                                // Player is rejoining with the same name, update their UID
+                                const updatedPlayers = appState.gameData.players.map(p => 
+                                    p.name.toLowerCase() === appState.playerName.toLowerCase() ? { ...p, uid: userId } : p
+                                );
+                                await updateDoc(getGameDocRef(appState.gameId), { players: updatedPlayers });
+                            } else {
+                                // It's a new player, generate a rejoin code and add them to the lobby
+                                const rejoinCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+                                const newPlayer = { 
+                                    name: appState.playerName, 
+                                    uid: userId, 
+                                    rejoinCode: rejoinCode 
+                                };
+                                const updatedPlayers = [...appState.gameData.players, newPlayer];
+                                await updateDoc(getGameDocRef(appState.gameId), { players: updatedPlayers });
+                            }
                         }
                     }
                     
@@ -905,7 +927,8 @@
             const draftedIds = Object.values(draftedCharacters);
             let availablePool = characters.filter(c => !draftedIds.includes(c.id));
             
-            if (playerCount < 7) {
+            // Cylon Leaders available in games of 4+ players
+            if (playerCount < 4) {
                 availablePool = availablePool.filter(c => c.type !== 'Cylon Leader');
             }
 
@@ -913,6 +936,15 @@
                 const char = characters.find(c => c.id === id);
                 return char && char.type === 'Cylon Leader';
             });
+            
+            // Force Cylon Leader pick for last player in 7-player game
+            const numDrafted = Object.values(draftedCharacters).length;
+            const isLastPlayerTurn = numDrafted === playerCount - 1;
+
+            if (playerCount === 7 && isLastPlayerTurn && !isCylonDrafted) {
+                // If it's the last pick in a 7p game and no Cylon is taken, it's the only option.
+                return availablePool.filter(char => char.type === 'Cylon Leader');
+            }
 
             if (isCylonDrafted) {
                 availablePool = availablePool.filter(c => c.type !== 'Cylon Leader');
@@ -932,7 +964,7 @@
             if (!validTypes.includes('Support')) {
                  validTypes.push('Support');
             }
-            if (playerCount >= 7 && !validTypes.includes('Cylon Leader') && !isCylonDrafted) {
+            if (playerCount >= 4 && !validTypes.includes('Cylon Leader') && !isCylonDrafted) {
                 validTypes.push('Cylon Leader');
             }
             
@@ -986,10 +1018,10 @@
             switch (skill) {
                 case 'Politics': return 'text-yellow-400';
                 case 'Leadership': return 'text-green-400';
-                case 'Tactics': return 'text-red-400';
-                case 'Piloting': return 'text-purple-400';
+                case 'Tactics': return 'text-purple-400';
+                case 'Piloting': return 'text-red-400';
                 case 'Engineering': return 'text-blue-400';
-                case 'Treachery': return 'text-gray-400';
+                case 'Treachery': return 'text-orange-400';
                 default: return 'text-white';
             }
         }
