@@ -585,7 +585,7 @@
             return doc(db, `artifacts/${appId}/public/data/bsg-drafts`, gameId);
         }
 
-        async function createGame() {
+async function createGame() {
             const createButton = document.getElementById('createGameBtn');
             const playerName = document.getElementById('playerName').value;
             const playerCount = parseInt(document.getElementById('playerCount').value);
@@ -600,10 +600,19 @@
 
             const gameId = 'bsg-' + Math.random().toString(36).substring(2, 9);
             
+            // --- FIX IS HERE ---
+            // Generate a rejoin code for the admin when the game is created
+            const rejoinCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+            const adminPlayer = { 
+                name: playerName, 
+                uid: userId, 
+                rejoinCode: rejoinCode 
+            };
+            
             const newGameData = {
                 admin: userId,
                 playerCount: playerCount,
-                players: [{ name: playerName, uid: userId }],
+                players: [adminPlayer], // Use the new adminPlayer object
                 gameState: 'lobby',
                 createdAt: serverTimestamp(),
             };
