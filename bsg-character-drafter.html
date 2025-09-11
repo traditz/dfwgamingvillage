@@ -233,6 +233,22 @@
                 localStorage.setItem('bsgPlayerName', appState.playerName);
             });
         }
+        
+        // NEW: On-page UI for joining a game
+        function renderJoinScreen() {
+             AppContainer.innerHTML = `
+                <div class="text-center p-8 rounded-lg shadow-2xl max-w-md w-full card">
+                    <h2 class="text-2xl font-bold mb-4">Joining Game</h2>
+                    <p class="text-gray-400 mb-6">Enter your name to join, or enter a Rejoin Code to sync with an existing spot.</p>
+                    <div id="joinError" class="text-red-400 mb-4 hidden"></div>
+                    <div class="space-y-4">
+                        <input id="joinInput" type="text" placeholder="Your Name or Rejoin Code" class="w-full px-4 py-2 rounded-md bg-gray-800 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button id="joinGameBtn" class="w-full py-2 px-4 rounded-md font-semibold btn-primary">Join Game</button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('joinGameBtn').addEventListener('click', handleJoinAttempt);
+        }
 
         function renderLobbyScreen() {
             const { players = [], playerCount = 0, admin = '' } = appState.gameData;
@@ -259,7 +275,7 @@
                             const kickButton = isAdmin && p.uid !== admin ? `<button onclick="kickPlayer('${p.uid}')" class="text-xs bg-red-600 hover:bg-red-700 px-2 py-1 rounded">Kick</button>` : '';
                             const changeNameButton = p.uid === userId ? `<button onclick="changePlayerName()" class="text-xs bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded">Change Name</button>` : '';
                             const playerTag = p.uid === admin ? '(Admin)' : (p.uid === userId ? '(You)' : '');
-                            const rejoinCodeDisplay = p.uid === userId ? `<div class="text-xs text-cyan-400 mt-1">Rejoin Code: <strong class="tracking-widest">${p.rejoinCode}</strong></div>` : '';
+                            const rejoinCodeDisplay = p.uid === userId && p.rejoinCode ? `<div class="text-xs text-cyan-400 mt-1">Rejoin Code: <strong class="tracking-widest">${p.rejoinCode}</strong></div>` : '';
 
                             return `
                                 <div class="flex justify-between items-center p-2 rounded bg-gray-700 text-left">
@@ -309,9 +325,8 @@
             const currentPlayer = players.find(p => p.uid === currentPlayerUid);
             const isMyTurn = userId === currentPlayerUid;
             
-            // Bot simulation logic
             const isAdmin = userId === admin;
-            const isBotTurn = currentPlayerUid.startsWith('bot-');
+            const isBotTurn = currentPlayerUid && currentPlayerUid.startsWith('bot-');
             if (isAdmin && isBotTurn) {
                 setTimeout(simulateBotPick, 1500);
             }
@@ -349,6 +364,7 @@
                                     const player = players.find(p => p.uid === uid);
                                     const characterId = draftedCharacters[uid];
                                     const character = characterId ? characters.find(c => c.id === characterId) : null;
+                                    const rejoinCodeDisplay = uid === userId && player.rejoinCode ? `<div class="text-xs text-cyan-400 mt-1">Rejoin Code: <strong class="tracking-widest">${player.rejoinCode}</strong></div>` : '';
                                     const draftedCardHtml = character ? `
                                         <div class="flex items-center space-x-2 mt-1 cursor-pointer" onclick="showCharacterDetails(${character.id})">
                                             <img src="${character.imageUrl}" class="w-10 h-auto rounded-sm"/>
@@ -361,6 +377,7 @@
                                     return `
                                         <div class="p-3 rounded-md ${index === currentPlayerIndex ? 'highlight-turn' : 'bg-gray-700'}">
                                             <p class="font-semibold">${index + 1}. ${player?.name || '...'} ${uid === userId ? '(You)' : ''}</p>
+                                            ${rejoinCodeDisplay}
                                             ${draftedCardHtml}
                                         </div>
                                     `;
@@ -585,7 +602,7 @@
             return doc(db, `artifacts/${appId}/public/data/bsg-drafts`, gameId);
         }
 
-async function createGame() {
+        async function createGame() {
             const createButton = document.getElementById('createGameBtn');
             const playerName = document.getElementById('playerName').value;
             const playerCount = parseInt(document.getElementById('playerCount').value);
@@ -600,8 +617,6 @@ async function createGame() {
 
             const gameId = 'bsg-' + Math.random().toString(36).substring(2, 9);
             
-            // --- FIX IS HERE ---
-            // Generate a rejoin code for the admin when the game is created
             const rejoinCode = Math.random().toString(36).substring(2, 8).toUpperCase();
             const adminPlayer = { 
                 name: playerName, 
@@ -612,7 +627,7 @@ async function createGame() {
             const newGameData = {
                 admin: userId,
                 playerCount: playerCount,
-                players: [adminPlayer], // Use the new adminPlayer object
+                players: [adminPlayer],
                 gameState: 'lobby',
                 createdAt: serverTimestamp(),
             };
@@ -623,8 +638,8 @@ async function createGame() {
                 
                 appState.gameId = gameId;
                 appState.gameData = newGameData;
+                window.history.pushState({}, '', `?game=${gameId}`);
                 joinGame();
-                renderLobbyScreen();
 
             } catch (error) {
                 console.error("Error creating game:", error);
@@ -659,69 +674,30 @@ async function createGame() {
                     appState.gameData = docSnap.data();
                     
                     const playerExistsByUID = appState.gameData.players.some(p => p.uid === userId);
-                    const canJoin = appState.gameData.gameState === 'lobby' && appState.gameData.players.length < appState.gameData.playerCount;
 
-                    if (!playerExistsByUID && canJoin) {
-                        // Prompt for name OR rejoin code
-                        const userInput = prompt("Enter your name to join, or a Rejoin Code to sync your account.");
-                        
-                        if (!userInput || userInput.trim() === '') {
-                             const baseUrl = window.location.href.split('?')[0];
-                             window.location.href = baseUrl;
-                             return;
+                    if (playerExistsByUID) {
+                        // Player is already in the game, update their local name state and render
+                        const me = appState.gameData.players.find(p => p.uid === userId);
+                        if (me) {
+                            appState.playerName = me.name;
+                            localStorage.setItem('bsgPlayerName', me.name);
                         }
-
-                        // --- NEW REJOIN LOGIC ---
-                        const playerByCode = appState.gameData.players.find(p => p.rejoinCode === userInput.toUpperCase());
-
-                        if (playerByCode) {
-                            // User entered a valid rejoin code. Let's sync them.
-                            appState.playerName = playerByCode.name;
-                            localStorage.setItem('bsgPlayerName', playerByCode.name);
-
-                            const updatedPlayers = appState.gameData.players.map(p => 
-                                p.rejoinCode === userInput.toUpperCase() ? { ...p, uid: userId } : p
-                            );
-                            await updateDoc(getGameDocRef(appState.gameId), { players: updatedPlayers });
-
-                        } else {
-                            // User entered a name, not a code. Proceed with original join logic.
-                            appState.playerName = userInput;
-                            localStorage.setItem('bsgPlayerName', userInput);
-                            
-                            const existingPlayerByName = appState.gameData.players.find(p => p.name.toLowerCase() === appState.playerName.toLowerCase());
-
-                            if (existingPlayerByName) {
-                                // Player is rejoining with the same name, update their UID
-                                const updatedPlayers = appState.gameData.players.map(p => 
-                                    p.name.toLowerCase() === appState.playerName.toLowerCase() ? { ...p, uid: userId } : p
-                                );
-                                await updateDoc(getGameDocRef(appState.gameId), { players: updatedPlayers });
-                            } else {
-                                // It's a new player, generate a rejoin code and add them to the lobby
-                                const rejoinCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-                                const newPlayer = { 
-                                    name: appState.playerName, 
-                                    uid: userId, 
-                                    rejoinCode: rejoinCode 
-                                };
-                                const updatedPlayers = [...appState.gameData.players, newPlayer];
-                                await updateDoc(getGameDocRef(appState.gameId), { players: updatedPlayers });
-                            }
-                        }
+                        renderCurrentGameState();
+                    } else {
+                        // New connection: show the join screen. The actual joining is handled by handleJoinAttempt
+                        renderJoinScreen();
                     }
                     
+                    // Check if the skill selection phase is complete to move to the finished screen
                     if (appState.gameData.gameState === 'skillSelection' && oldGameState !== 'finished') {
                         const { draftOrder, skillSelections = {} } = appState.gameData;
-                        const eligiblePlayers = draftOrder.length - 1;
-                        const selectedPlayers = Object.keys(skillSelections).length;
+                        const eligiblePlayers = draftOrder.filter(uid => !uid.startsWith('bot-')).length - 1;
+                        const selectedPlayers = Object.keys(skillSelections).filter(uid => !uid.startsWith('bot-')).length;
                         if (selectedPlayers >= eligiblePlayers) {
                              await updateDoc(getGameDocRef(appState.gameId), { gameState: 'finished' });
                              return; 
                         }
                     }
-
-                    renderCurrentGameState();
 
                 } else if (!hasCheckedForGame) {
                     hasCheckedForGame = true;
@@ -729,11 +705,77 @@ async function createGame() {
                     if (!gameExists) {
                         console.error("Game not found after retries.");
                         alert("Game not found! Returning to home screen.");
-                        const baseUrl = window.location.href.split('?')[0];
-                        window.location.href = baseUrl;
+                        window.location.href = window.location.href.split('?')[0];
                     }
                 }
             });
+        }
+        
+        // NEW: Handles the on-page join form submission
+        async function handleJoinAttempt() {
+            const joinButton = document.getElementById('joinGameBtn');
+            const userInput = document.getElementById('joinInput').value.trim();
+            const errorDiv = document.getElementById('joinError');
+
+            joinButton.disabled = true;
+            joinButton.textContent = 'Joining...';
+            errorDiv.classList.add('hidden');
+
+            if (!userInput) {
+                errorDiv.textContent = 'Please enter a name or code.';
+                errorDiv.classList.remove('hidden');
+                joinButton.disabled = false;
+                joinButton.textContent = 'Join Game';
+                return;
+            }
+
+            const playerByCode = appState.gameData.players.find(p => p.rejoinCode && p.rejoinCode === userInput.toUpperCase());
+
+            if (playerByCode) {
+                // User entered a valid rejoin code. Sync them.
+                const updatedPlayers = appState.gameData.players.map(p => 
+                    p.rejoinCode === userInput.toUpperCase() ? { ...p, uid: userId } : p
+                );
+                await updateDoc(getGameDocRef(appState.gameId), { players: updatedPlayers });
+            } else {
+                // User is joining with a name. This is only allowed in the lobby.
+                if (appState.gameData.gameState !== 'lobby') {
+                    errorDiv.textContent = 'Game has started. You can only join with a valid Rejoin Code.';
+                    errorDiv.classList.remove('hidden');
+                    joinButton.disabled = false;
+                    joinButton.textContent = 'Join Game';
+                    return;
+                }
+
+                if (appState.gameData.players.length >= appState.gameData.playerCount) {
+                    errorDiv.textContent = 'This lobby is full.';
+                    errorDiv.classList.remove('hidden');
+                    joinButton.disabled = false;
+                    joinButton.textContent = 'Join Game';
+                    return;
+                }
+
+                const newPlayerName = userInput;
+                const existingPlayerByName = appState.gameData.players.find(p => p.name.toLowerCase() === newPlayerName.toLowerCase());
+
+                if (existingPlayerByName) {
+                    // A different player already has this name
+                    errorDiv.textContent = 'This name is already taken.';
+                    errorDiv.classList.remove('hidden');
+                    joinButton.disabled = false;
+                    joinButton.textContent = 'Join Game';
+                } else {
+                    // It's a new player. Generate code and add them.
+                    const rejoinCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+                    const newPlayer = { 
+                        name: newPlayerName, 
+                        uid: userId, 
+                        rejoinCode: rejoinCode 
+                    };
+                    const updatedPlayers = [...appState.gameData.players, newPlayer];
+                    await updateDoc(getGameDocRef(appState.gameId), { players: updatedPlayers });
+                }
+            }
         }
         
         async function startDraft() {
@@ -771,15 +813,8 @@ async function createGame() {
         }
         
         async function kickPlayer(playerUidToKick) {
-            // Ensure only the admin can perform this action
-            if (userId !== appState.gameData.admin) {
-                console.error("Only the admin can kick players.");
-                return;
-            }
-            
-            // Create a new player list without the kicked player
+            if (userId !== appState.gameData.admin) return;
             const updatedPlayers = appState.gameData.players.filter(p => p.uid !== playerUidToKick);
-            
             try {
                 await updateDoc(getGameDocRef(appState.gameId), { players: updatedPlayers });
             } catch (error) {
@@ -792,16 +827,19 @@ async function createGame() {
             const currentName = appState.playerName;
             const newName = prompt("Enter your new name:", currentName);
 
-            // Proceed only if the new name is valid and different from the old one
             if (newName && newName.trim() !== '' && newName !== currentName) {
-                // Update local state and storage first for a responsive feel
-                appState.playerName = newName;
-                localStorage.setItem('bsgPlayerName', newName);
+                const isNameTaken = appState.gameData.players.some(p => p.name.toLowerCase() === newName.trim().toLowerCase() && p.uid !== userId);
+                if (isNameTaken) {
+                    alert("This name is already taken by another player.");
+                    return;
+                }
 
-                // Create the updated players array for Firestore
+                appState.playerName = newName.trim();
+                localStorage.setItem('bsgPlayerName', newName.trim());
+
                 const updatedPlayers = appState.gameData.players.map(p => {
                     if (p.uid === userId) {
-                        return { ...p, name: newName };
+                        return { ...p, name: newName.trim() };
                     }
                     return p;
                 });
@@ -811,7 +849,6 @@ async function createGame() {
                 } catch (error) {
                     console.error("Error changing name:", error);
                     alert("Failed to change name. Reverting.");
-                    // Revert local changes if the database update fails
                     appState.playerName = currentName;
                     localStorage.setItem('bsgPlayerName', currentName);
                 }
@@ -848,25 +885,17 @@ async function createGame() {
 
             for (let i = 1; i < draftOrder.length; i++) {
                 const playerUid = draftOrder[i];
-                const playerIsBot = playerUid.startsWith('bot-');
-                const botHasNotSelected = !skillSelections[playerUid];
-
-                if (playerIsBot && botHasNotSelected) {
+                if (playerUid.startsWith('bot-') && !skillSelections[playerUid]) {
                     const characterId = draftedCharacters[playerUid];
                     const character = characters.find(c => c.id === characterId);
                     if (!character) continue;
 
-                    const isCylon = character.type === 'Cylon Leader';
-                    const isAthena = character.name === 'Sharon Agathon (Athena)';
-                    const cardsToDraw = (isCylon && !isAthena) ? 2 : 3;
+                    const cardsToDraw = (character.type === 'Cylon Leader' && character.name !== 'Sharon Agathon (Athena)') ? 2 : 3;
                     
-                    const availableSkills = character.skills;
                     const selectedSkills = [];
                     for (let j = 0; j < cardsToDraw; j++) {
-                        const randomSkill = availableSkills[Math.floor(Math.random() * availableSkills.length)];
-                        selectedSkills.push(randomSkill);
+                        selectedSkills.push(character.skills[Math.floor(Math.random() * character.skills.length)]);
                     }
-
                     updates[`skillSelections.${playerUid}`] = selectedSkills;
                     needsUpdate = true;
                 }
@@ -936,7 +965,6 @@ async function createGame() {
             const draftedIds = Object.values(draftedCharacters);
             let availablePool = characters.filter(c => !draftedIds.includes(c.id));
             
-            // Cylon Leaders available in games of 4+ players
             if (playerCount < 4) {
                 availablePool = availablePool.filter(c => c.type !== 'Cylon Leader');
             }
@@ -946,12 +974,10 @@ async function createGame() {
                 return char && char.type === 'Cylon Leader';
             });
             
-            // Force Cylon Leader pick for last player in 7-player game
             const numDrafted = Object.values(draftedCharacters).length;
             const isLastPlayerTurn = numDrafted === playerCount - 1;
 
             if (playerCount === 7 && isLastPlayerTurn && !isCylonDrafted) {
-                // If it's the last pick in a 7p game and no Cylon is taken, it's the only option.
                 return availablePool.filter(char => char.type === 'Cylon Leader');
             }
 
@@ -1036,8 +1062,7 @@ async function createGame() {
         }
 
         function startNewDraft() {
-            const baseUrl = window.location.href.split('?')[0];
-            window.location.href = baseUrl;
+            window.location.href = window.location.href.split('?')[0];
         }
 
         function showCharacterDetails(characterId) {
