@@ -189,13 +189,13 @@
                 init();
             } else {
                  try {
-                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                         await signInWithCustomToken(auth, __initial_auth_token);
-                     } else {
-                         await signInAnonymously(auth);
-                     }
+                      if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                          await signInWithCustomToken(auth, __initial_auth_token);
+                      } else {
+                          await signInAnonymously(auth);
+                      }
                  } catch (error) {
-                     console.error("Authentication failed:", error);
+                      console.error("Authentication failed:", error);
                  }
             }
         });
@@ -559,41 +559,41 @@
         function renderSummaryScreen() {
              const { players, draftOrder, draftedCharacters, skillSelections = {} } = appState.gameData;
              AppContainer.innerHTML = `
-                 <div class="text-center p-8 rounded-lg shadow-2xl max-w-3xl w-full card">
-                     <h1 class="text-3xl font-bold text-green-500 mb-4">Setup Complete!</h1>
-                     <p class="text-gray-400 mb-6">Review the final results and prepare for the game.</p>
-                     <div class="space-y-4">
-                         ${draftOrder.map((uid, index) => {
-                             const player = players.find(p => p.uid === uid);
-                             const characterId = draftedCharacters[uid];
-                             const character = characters.find(c => c.id === characterId);
-                             const skills = skillSelections[uid];
-                             
-                             let skillsHtml = '';
-                             if (index === 0) {
-                                 skillsHtml = `<p class="text-sm text-gray-400 italic mt-2">No starting skills (First Player)</p>`;
-                             } else if (skills) {
-                                 skillsHtml = `<div class="mt-2">
-                                     <span class="font-semibold text-gray-300">Skills: </span>
-                                     ${skills.map(s => `<span class="font-bold ${getSkillColor(s)}">${s}</span>`).join(', ')}
-                                 </div>`;
-                             }
+                  <div class="text-center p-8 rounded-lg shadow-2xl max-w-3xl w-full card">
+                       <h1 class="text-3xl font-bold text-green-500 mb-4">Setup Complete!</h1>
+                       <p class="text-gray-400 mb-6">Review the final results and prepare for the game.</p>
+                       <div class="space-y-4">
+                            ${draftOrder.map((uid, index) => {
+                                 const player = players.find(p => p.uid === uid);
+                                 const characterId = draftedCharacters[uid];
+                                 const character = characters.find(c => c.id === characterId);
+                                 const skills = skillSelections[uid];
+                                 
+                                 let skillsHtml = '';
+                                 if (index === 0) {
+                                      skillsHtml = `<p class="text-sm text-gray-400 italic mt-2">No starting skills (First Player)</p>`;
+                                 } else if (skills) {
+                                      skillsHtml = `<div class="mt-2">
+                                           <span class="font-semibold text-gray-300">Skills: </span>
+                                           ${skills.map(s => `<span class="font-bold ${getSkillColor(s)}">${s}</span>`).join(', ')}
+                                      </div>`;
+                                 }
 
-                             return `
-                                 <div class="p-4 rounded-lg bg-gray-800 border border-gray-700 text-left flex items-center space-x-4">
-                                     <img src="${character.imageUrl}" alt="${character.name}" class="w-24 h-auto rounded-md">
-                                     <div>
-                                         <p class="text-xl font-semibold">${player.name} drafted:</p>
-                                         <h3 class="text-2xl font-bold ${getCharacterTypeColor(character.type)}">${character.name} <span class="text-lg font-normal text-gray-400">(${character.type})</span></h3>
-                                         ${skillsHtml}
-                                     </div>
-                                 </div>
-                             `;
-                         }).join('')}
-                     </div>
-                     <button onclick="startNewDraft()" class="mt-8 py-2 px-6 rounded-md font-semibold btn-secondary">Start New Draft</button>
-                 </div>
-               `;
+                                 return `
+                                      <div class="p-4 rounded-lg bg-gray-800 border border-gray-700 text-left flex items-center space-x-4">
+                                           <img src="${character.imageUrl}" alt="${character.name}" class="w-24 h-auto rounded-md">
+                                           <div>
+                                                <p class="text-xl font-semibold">${player.name} drafted:</p>
+                                                <h3 class="text-2xl font-bold ${getCharacterTypeColor(character.type)}">${character.name} <span class="text-lg font-normal text-gray-400">(${character.type})</span></h3>
+                                                ${skillsHtml}
+                                           </div>
+                                      </div>
+                                 `;
+                            }).join('')}
+                       </div>
+                       <button onclick="startNewDraft()" class="mt-8 py-2 px-6 rounded-md font-semibold btn-secondary">Start New Draft</button>
+                  </div>
+              `;
         }
         
         // --- Game Logic Functions ---
@@ -694,8 +694,8 @@
                         const eligiblePlayers = draftOrder.filter(uid => !uid.startsWith('bot-')).length - 1;
                         const selectedPlayers = Object.keys(skillSelections).filter(uid => !uid.startsWith('bot-')).length;
                         if (selectedPlayers >= eligiblePlayers) {
-                             await updateDoc(getGameDocRef(appState.gameId), { gameState: 'finished' });
-                             return; 
+                            await updateDoc(getGameDocRef(appState.gameId), { gameState: 'finished' });
+                            return; 
                         }
                     }
 
@@ -733,10 +733,20 @@
 
             if (playerByCode) {
                 // User entered a valid rejoin code. Sync them.
+                const originalUid = playerByCode.uid;
+                const isAdminRejoining = originalUid === appState.gameData.admin;
+
                 const updatedPlayers = appState.gameData.players.map(p => 
                     p.rejoinCode === userInput.toUpperCase() ? { ...p, uid: userId } : p
                 );
-                await updateDoc(getGameDocRef(appState.gameId), { players: updatedPlayers });
+                
+                const updatePayload = { players: updatedPlayers };
+                if (isAdminRejoining) {
+                    updatePayload.admin = userId; // <-- THE FIX: Update the admin UID as well
+                }
+                
+                await updateDoc(getGameDocRef(appState.gameId), updatePayload);
+
             } else {
                 // User is joining with a name. This is only allowed in the lobby.
                 if (appState.gameData.gameState !== 'lobby') {
@@ -933,9 +943,9 @@
                 });
             } else {
                  await updateDoc(getGameDocRef(appState.gameId), {
-                      draftedCharacters: newDraftedCharacters,
-                      currentPlayerIndex: nextPlayerIndex,
-                 });
+                       draftedCharacters: newDraftedCharacters,
+                       currentPlayerIndex: nextPlayerIndex,
+                  });
             }
         }
 
@@ -1040,12 +1050,12 @@
 
         function getCharacterTypeBorderColor(type) {
              switch (type) {
-                 case 'Military Leader': return 'border-green-500';
-                 case 'Political Leader': return 'border-yellow-500';
-                 case 'Pilot': return 'border-red-500';
-                 case 'Support': return 'border-blue-500';
-                 case 'Cylon Leader': return 'border-gray-500';
-                 default: return 'border-gray-700';
+                  case 'Military Leader': return 'border-green-500';
+                  case 'Political Leader': return 'border-yellow-500';
+                  case 'Pilot': return 'border-red-500';
+                  case 'Support': return 'border-blue-500';
+                  case 'Cylon Leader': return 'border-gray-500';
+                  default: return 'border-gray-700';
              }
         }
         
@@ -1074,10 +1084,10 @@
             
             if(appState.gameData.gameState !== 'drafting') {
                 modalContent.innerHTML = `
-                   <button onclick="hideCharacterDetails()" class="absolute top-2 right-3 text-2xl font-bold text-gray-500 hover:text-white">&times;</button>
-                   <div class="text-center">
-                       <img src="${character.imageUrl}" alt="${character.name}" class="w-full h-auto rounded-lg mb-4">
-                   </div>`;
+                    <button onclick="hideCharacterDetails()" class="absolute top-2 right-3 text-2xl font-bold text-gray-500 hover:text-white">&times;</button>
+                    <div class="text-center">
+                        <img src="${character.imageUrl}" alt="${character.name}" class="w-full h-auto rounded-lg mb-4">
+                    </div>`;
                 modalContainer.classList.remove('hidden');
                 modalContainer.classList.add('flex');
                 return;
