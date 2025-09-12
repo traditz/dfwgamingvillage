@@ -711,7 +711,6 @@
             });
         }
         
-        // NEW: Handles the on-page join form submission
         async function handleJoinAttempt() {
             const joinButton = document.getElementById('joinGameBtn');
             const userInput = document.getElementById('joinInput').value.trim();
@@ -732,9 +731,19 @@
             const playerByCode = appState.gameData.players.find(p => p.rejoinCode && p.rejoinCode === userInput.toUpperCase());
 
             if (playerByCode) {
-                // User entered a valid rejoin code. Sync them.
+                // --- DEBUG LOGS START ---
+                console.log("--- ADMIN REJOIN DEBUG ---");
+                console.log("Found player by rejoin code:", playerByCode);
+
                 const originalUid = playerByCode.uid;
+                console.log("Original UID from player record:", originalUid);
+                console.log("Current Game Admin UID:", appState.gameData.admin);
+                
                 const isAdminRejoining = originalUid === appState.gameData.admin;
+                console.log("Is the rejoining player the admin? ->", isAdminRejoining);
+
+                console.log("New session UID for this device:", userId);
+                // --- DEBUG LOGS END ---
 
                 const updatedPlayers = appState.gameData.players.map(p => 
                     p.rejoinCode === userInput.toUpperCase() ? { ...p, uid: userId } : p
@@ -742,7 +751,7 @@
                 
                 const updatePayload = { players: updatedPlayers };
                 if (isAdminRejoining) {
-                    updatePayload.admin = userId; // <-- THE FIX: Update the admin UID as well
+                    updatePayload.admin = userId;
                 }
                 
                 await updateDoc(getGameDocRef(appState.gameId), updatePayload);
