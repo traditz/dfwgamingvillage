@@ -4,95 +4,48 @@ document.addEventListener('DOMContentLoaded', function() {
     const BGG_USERNAME = 'traditz';
 
     /**
-     * Fetches detailed game data using a list of game IDs.
-     * @param {string[]} gameIds - An array of BGG game IDs.
-     * @returns {Promise<object[]>} A promise that resolves to an array of game detail objects.
-     */
-    async function fetchGameDetails(gameIds) {
-        if (gameIds.length === 0) return [];
-        
-        const ids = gameIds.join(',');
-        const url = `https://boardgamegeek.com/xmlapi2/thing?id=${ids}&stats=1`;
-        const response = await fetch(url);
-
-        if (!response.ok) {
-            throw new Error(`BGG Thing API responded with status: ${response.status}`);
-        }
-        
-        const text = await response.text();
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(text, "text/xml");
-        const items = xml.querySelectorAll("item");
-        const gameDetails = [];
-
-        items.forEach(item => {
-            const stats = item.querySelector("stats");
-            const mechanics = Array.from(item.querySelectorAll('link[type="boardgamemechanic"]'))
-                                   .map(link => link.getAttribute('value'));
-
-            gameDetails.push({
-                id: item.getAttribute("id"),
-                name: item.querySelector("name")?.getAttribute("value") || "Unknown Name",
-                year: item.querySelector("yearpublished")?.getAttribute("value") || "N/A",
-                image: item.querySelector("image")?.textContent || "",
-                minPlayers: parseInt(stats?.getAttribute("minplayers") || "1"),
-                maxPlayers: parseInt(stats?.getAttribute("maxplayers") || "1"),
-                playTime: stats?.getAttribute("playingtime") || "N/A",
-                bggLink: `https://boardgamegeek.com/boardgame/${item.getAttribute("id")}`,
-                mechanics: mechanics
-            });
-        });
-
-        return gameDetails;
-    }
-
-    /**
-     * Fetches the user's collection, then fetches details in batches.
+     * Fetches the user's collection from BGG. This is now a single, fast API call.
      */
     async function fetchBGGCollection() {
         const container = document.getElementById("game-container");
         container.innerHTML = "<p>Loading game library from BGG...</p>";
 
         try {
-            const collectionUrl = `https://boardgamegeek.com/xmlapi2/collection?username=${BGG_USERNAME}&own=1&excludesubtype=boardgameexpansion`;
-            let response = await fetch(collectionUrl);
+            const url = `https://boardgamegeek.com/xmlapi2/collection?username=${BGG_USERNAME}&own=1&stats=1&excludesubtype=boardgameexpansion`;
+            let response = await fetch(url);
             
+            // Handle BGG's "please wait" 202 status
             while (response.status === 202) {
                 container.innerHTML = "<p>BoardGameGeek is preparing your collection. Please wait...</p>";
                 await new Promise(resolve => setTimeout(resolve, 5000));
-                response = await fetch(collectionUrl);
+                response = await fetch(url);
             }
 
             if (!response.ok) {
-                throw new Error(`BGG Collection API responded with status: ${response.status}`);
+                throw new Error(`BGG API responded with status: ${response.status}`);
             }
 
             const text = await response.text();
             const parser = new DOMParser();
             const xml = parser.parseFromString(text, "text/xml");
-            const gameIds = Array.from(xml.querySelectorAll("item")).map(item => item.getAttribute("objectid"));
+            const items = xml.querySelectorAll("item");
+            const gamesList = [];
 
-            if (gameIds.length > 0) {
-                const BATCH_SIZE = 100; // How many games to fetch per API call
-                let detailedGames = [];
+            items.forEach(item => {
+                const stats = item.querySelector("stats");
+                gamesList.push({
+                    id: item.getAttribute("objectid"),
+                    name: item.querySelector("name")?.textContent || "Unknown Name",
+                    year: item.querySelector("yearpublished")?.textContent || "N/A",
+                    image: item.querySelector("image")?.textContent || "",
+                    minPlayers: parseInt(stats?.getAttribute("minplayers") || "1"),
+                    maxPlayers: parseInt(stats?.getAttribute("maxplayers") || "1"),
+                    playTime: stats?.getAttribute("playingtime") || "N/A",
+                    bggLink: `https://boardgamegeek.com/boardgame/${item.getAttribute("objectid")}`
+                });
+            });
 
-                for (let i = 0; i < gameIds.length; i += BATCH_SIZE) {
-                    const batchIds = gameIds.slice(i, i + BATCH_SIZE);
-                    
-                    const currentCount = Math.min(i + BATCH_SIZE, gameIds.length);
-                    container.innerHTML = `<p>Fetching details for games ${i + 1}-${currentCount} of ${gameIds.length}...</p>`;
-                    
-                    const batchDetails = await fetchGameDetails(batchIds);
-                    detailedGames.push(...batchDetails);
-                    
-                    // Add a 1-second delay between batches to be polite to the BGG API
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                }
-
-                allGames = detailedGames.sort((a, b) => a.name.localeCompare(b.name));
-                populateMechanicsFilter();
-            }
-
+            allGames = gamesList.sort((a, b) => a.name.localeCompare(b.name));
             collectionLoaded = true;
             displayGames(allGames);
 
@@ -100,26 +53,6 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error("Error fetching BGG collection:", error);
             container.innerHTML = `<p style='color:red;'>Failed to load game library. Please try again later. The console may have more details.</p><p style='color:#ccc; font-size: small'>Error: ${error.message}</p>`;
         }
-    }
-
-    /**
-     * Populates the mechanics filter dropdown with unique, sorted mechanics.
-     */
-    function populateMechanicsFilter() {
-        const mechanics = new Set();
-        allGames.forEach(game => {
-            game.mechanics.forEach(mech => mechanics.add(mech));
-        });
-
-        const filterDropdown = document.getElementById('mechanics-filter');
-        const sortedMechanics = Array.from(mechanics).sort();
-        
-        sortedMechanics.forEach(mech => {
-            const option = document.createElement('option');
-            option.value = mech;
-            option.textContent = mech;
-            filterDropdown.appendChild(option);
-        });
     }
     
     /**
@@ -129,4 +62,43 @@ document.addEventListener('DOMContentLoaded', function() {
         const container = document.getElementById("game-container");
 
         if (gameList.length === 0 && collectionLoaded) {
-            container.innerHTML = "<p>No games found matching your criteria.</
+            container.innerHTML = "<p>No games found matching your criteria.</p>";
+            return;
+        }
+
+        container.innerHTML = gameList.map(game => `
+            <div class="game-card">
+                <a href="${game.bggLink}" target="_blank">
+                    <img src="${game.image}" alt="Box art for ${game.name}" loading="lazy" />
+                    <h3>${game.name} (${game.year})</h3>
+                </a>
+                <div>
+                    <p>Players: ${game.minPlayers} - ${game.maxPlayers}</p>
+                    <p>Playtime: ${game.playTime} min</p>
+                </div>
+            </div>
+        `).join("");
+    }
+
+    /**
+     * Filters the collection based on name and player count.
+     */
+    window.searchGames = function() {
+        if (!collectionLoaded) return;
+
+        const searchQuery = document.getElementById("search-input").value.toLowerCase();
+        const playerCount = parseInt(document.getElementById("player-count").value);
+
+        const filteredGames = allGames.filter(game => {
+            const nameMatch = game.name.toLowerCase().includes(searchQuery);
+            const playerMatch = isNaN(playerCount) || (playerCount >= game.minPlayers && playerCount <= game.maxPlayers);
+            
+            return nameMatch && playerMatch;
+        });
+
+        displayGames(filteredGames);
+    }
+
+    // Initial call to start the process.
+    fetchBGGCollection();
+});
