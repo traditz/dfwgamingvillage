@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     // --- Configuration ---
-    const BGG_USERNAME = 'Cram_s'; // Your BGG username
+    const BGG_USERNAME = 'traditz'; // Your BGG username
     const API_URL = `https://boardgamegeek.com/xmlapi2/collection?username=${BGG_USERNAME}&stats=1`;
 
     // --- State Variables ---
