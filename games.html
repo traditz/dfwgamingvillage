@@ -54,7 +54,7 @@
             justify-content: center;
             gap: 10px;
         }
-        .search-container input {
+        .search-container input, .search-container select {
             padding: 10px;
             font-size: 16px;
             border: none;
@@ -62,20 +62,24 @@
             width: 100%;
             max-width: 300px;
             box-sizing: border-box;
+            background-color: #333;
+            color: white;
         }
         .games-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
             padding: 20px;
         }
         .game-card {
-            background-color: #111;
-            padding: 15px;
-            padding-bottom: 0px;
+            background-color: #1a1a1a;
             border-radius: 10px;
             text-align: center;
-            box-shadow: 0 4px 8px rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 15px;
         }
         .game-card img {
             width: 100%;
@@ -83,25 +87,32 @@
             border-radius: 5px;
         }
         .game-card a {
-            color: white; /* Makes the game name white */
-            text-decoration: none; /* Removes the underline */
+            color: white;
+            text-decoration: none;
         }
         .game-card a:hover {
-            color: #ddd; /* Slightly lighter color on hover */
+            color: #ddd;
+        }
+        .game-card h3 {
+            margin: 10px 0 5px 0;
+            font-size: 1em;
+        }
+        .game-card p {
+            margin: 4px 0;
+            font-size: 0.9em;
+            color: #ccc;
         }
         .footer {
             background-color: #222;
             padding: 20px;
             margin-top: 20px;
         }
-
-        /* Responsive Design */
         @media (max-width: 768px) {
             .search-container {
                 flex-direction: column;
                 align-items: center;
             }
-            .search-container input {
+            .search-container input, .search-container select {
                 width: 90%;
             }
             .games-container {
@@ -126,12 +137,13 @@
     <div class="content">
         <h1>Board Game Library</h1>
         <p>Browse the DFW Gaming Village Library</p>
-        <p>(Expansions not included in the list but we probably have it)</p>
-
-        <!-- Search and Filter Section -->
+        
         <div class="search-container">
             <input type="text" id="search-input" placeholder="Search by game name..." oninput="searchGames()">
-            <input type="number" id="max-players" placeholder="Player count" oninput="searchGames()">
+            <input type="number" id="player-count" placeholder="Player count" oninput="searchGames()">
+            <select id="mechanics-filter" onchange="searchGames()">
+                <option value="">Filter by Mechanic</option>
+            </select>
         </div>
 
         <div id="game-container" class="games-container">Loading games...</div>
