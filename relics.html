@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👑TI4 Relics👑</title>
+    <style>
+        body {
+            background-color: #222;
+            color: #eee;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 960px;
+            margin: auto;
+        }
+        h1 {
+            text-align: center;
+            color: #ffc107;
+        }
+        .btn {
+            display: inline-block;
+            margin-bottom: 15px;
+            background: #333;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+        .relic-card {
+            background-color: #333;
+            border: 1px solid #444;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .relic-card h2 {
+            margin-top: 0;
+            color: #ffc107;
+        }
+        #relic-select, #ds-toggle-label {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            background-color: #333;
+            color: #eee;
+            border: 1px solid #444;
+            border-radius: 5px;
+        }
+        #ds-toggle {
+            margin-right: 10px;
+        }
+    </style>
+    <script>
+        function filterRelics() {
+            const showDS = document.getElementById('ds-toggle').checked;
+            const relics = document.querySelectorAll('.relic-card');
+            relics.forEach(relic => {
+                if (relic.dataset.ds === 'true' && !showDS) {
+                    relic.style.display = 'none';
+                } else {
+                    relic.style.display = 'block';
+                }
+            });
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            filterRelics(); // Initial filter on page load
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>TI4 Relics</h1>
+        <a href="ti4-faction-database.html" class="btn">← Return to TI4 Database</a>
+        
+        <label id="ds-toggle-label" for="ds-toggle">
+            <input type="checkbox" id="ds-toggle" onchange="filterRelics()">
+            Show Discordant Stars Relics
+        </label>
+
+        <select id="relic-select" onchange="window.location.hash=this.value">
+            <option value="">Select a relic...</option>
+            <option value="#accretion-engine">Accretion Engine</option>
+            <option value="#azdel’s-key">Azdel’s Key</option>
+            <option value="#book-of-latvinia">Book of Latvinia</option>
+            <option value="#circlet-of-the-void">Circlet of the Void</option>
+            <option value="#dominus-orb">Dominus Orb</option>
+            <option value="#dynamis-core">Dynamis Core</option>
+            <option value="#e6-g0-network">E6-G0 Network</option>
+            <option value="#eye-of-vogul">Eye of Vogul</option>
+            <option value="#forgotten-throne">Forgotten Throne</option>
+            <option value="#heart-of-ixth">Heart of Ixth</option>
+            <option value="#jr-xs455-0">JR-XS455-0</option>
+            <option value="#maw-of-worlds">Maw of Worlds</option>
+            <option value="#metali-void-armaments">Metali Void Armaments</option>
+            <option value="#metali-void-shielding">Metali Void Shielding</option>
+            <option value="#nano-forge">Nano-Forge</option>
+            <option value="#neuraloop">Neuraloop</option>
+            <option value="#scepter-of-emelpar">Scepter of Emelpar</option>
+            <option value="#shard-of-the-throne">Shard of the Throne</option>
+            <option value="#starfall-array">Starfall Array</option>
+            <option value="#stellar-converter">Stellar Converter</option>
+            <option value="#the-codex">The Codex</option>
+            <option value="#the-crown-of-emphidia">The Crown of Emphidia</option>
+            <option value="#the-crown-of-thalnos">The Crown of Thalnos</option>
+            <option value="#the-obsidian">The Obsidian</option>
+            <option value="#the-prophet's-tears">The Prophet's Tears</option>
+            <option value="#the-quantumcore">The Quantumcore</option>
+            <option value="#the-silver-flame">The Silver Flame</option>
+            <option value="#the-triad">The Triad</option>
+            <option value="#twilight-mirror">Twilight Mirror</option>
+        </select>
+        <div id="accretion-engine" class="relic-card" data-ds="true">
+            <h2>Accretion Engine</h2>
+            <p>Apply +1 to the PRODUCTION value of each of your units with PRODUCTION. When you produce 1 or more units, reduce the combined cost of the produced units by 1.</p>
+        </div>
+        <div id="azdel’s-key" class="relic-card" data-ds="true">
+            <h2>Azdel’s Key</h2>
+            <p>ACTION: Purge this card to draw 3 system tiles with a blue-colored back at random; place 1 of those tiles at the edge of the game board, adjacent to at least 2 other systems. Purge the rest.</p>
+        </div>
+        <div id="book-of-latvinia" class="relic-card" data-ds="false">
+            <h2>Book of Latvinia</h2>
+            <p>When you gain this card, research up to 2 technologies that have no prerequisites. ACTION: Purge this card; if you control planets that have all 4 types of technology specialties, gain 1 victory point. Otherwise, gain the speaker token.</p>
+        </div>
+        <div id="circlet-of-the-void" class="relic-card" data-ds="false">
+            <h2>Circlet of the Void</h2>
+            <p>Your units do not roll for gravity rifts, and you ignore the movement effects of other anomalies. ACTION: Exhaust this card to explore a frontier token in a system that does not contain any other players' ships.</p>
+        </div>
+        <div id="dominus-orb" class="relic-card" data-ds="false">
+            <h2>Dominus Orb</h2>
+            <p>Before you move units during a tactical action, you may purge this card to move and transport units that are in systems that contain 1 of your command tokens.</p>
+        </div>
+        <div id="dynamis-core" class="relic-card" data-ds="false">
+            <h2>Dynamis Core</h2>
+            <p>While this card is in your play area, your commodity value is increased by 2. ACTION: Purge this card to gain trade goods equal to your printed commodity value +2.</p>
+        </div>
+        <div id="e6-g0-network" class="relic-card" data-ds="true">
+            <h2>E6-G0 Network</h2>
+            <p>You may have 2 additional action cards in your hand, game effects cannot prevent you from using this ability. At any time, you may exhaust this card to draw 1 action card.</p>
+        </div>
+        <div id="eye-of-vogul" class="relic-card" data-ds="true">
+            <h2>Eye of Vogul</h2>
+            <p>After you activate a system: Purge this card to treat 2 of your ships as adjacent to the active system until the end of this tactical action.</p>
+        </div>
+        <div id="forgotten-throne" class="relic-card" data-ds="true">
+            <h2>Forgotten Throne</h2>
+            <p>ACTION: Purge this card to either gain 1 relic or immediately score 1 scored secret objective, or 1 of your unscored secret objectives, if you fulfill its requirements.</p>
+        </div>
+        <div id="heart-of-ixth" class="relic-card" data-ds="false">
+            <h2>Heart of Ixth</h2>
+            <p>After any die is rolled, you may exhaust this card to add or subtract 1 from its result. </p>
+        </div>
+        <div id="jr-xs455-0" class="relic-card" data-ds="false">
+            <h2>JR-XS455-0</h2>
+            <p>ACTION: Exhaust this agent and choose a player; that player may spend 3 resources to place a structure on a planet they control. If they do not, they gain 1 trade good.</p>
+        </div>
+        <div id="maw-of-worlds" class="relic-card" data-ds="false">
+            <h2>Maw of Worlds</h2>
+            <p>At the start of the agenda phase, you may purge this card and exhaust all of your planets to gain any 1 technology.</p>
+        </div>
+        <div id="metali-void-armaments" class="relic-card" data-ds="false">
+            <h2>Metali Void Armaments</h2>
+            <p>During the "Anti-Fighter Barrage" step of space combat, you may resolve ANTI-FIGHTER BARRAGE 6 (x3) against your opponent's units.</p>
+        </div>
+        <div id="metali-void-shielding" class="relic-card" data-ds="false">
+            <h2>Metali Void Shielding</h2>
+            <p>Each time hits are produced against 1 or more of your non-fighter ships, 1 of those ships may use SUSTAIN DAMAGE as if it had that ability.</p>
+        </div>
+        <div id="nano-forge" class="relic-card" data-ds="false">
+            <h2>Nano-Forge</h2>
+            <p>ACTION: Attach this card to a non-legendary, non-home planet you control; its resource and influence values are increased by 2 and it is a legendary planet.</p>
+        </div>
+        <div id="neuraloop" class="relic-card" data-ds="false">
+            <h2>Neuraloop</h2>
+            <p>When a public objective is revealed, you may purge one of your relics to discard that objective and replace it with a random objective from any objective deck; that objective is a public objective, even if it is a secret objective.</p>
+        </div>
+        <div id="scepter-of-emelpar" class="relic-card" data-ds="false">
+            <h2>Scepter of Emelpar</h2>
+            <p>When you would spend a token from your strategy pool, you may exhaust this card to spend a token from your reinforcements instead.</p>
+        </div>
+        <div id="shard-of-the-throne" class="relic-card" data-ds="false">
+            <h2>Shard of the Throne</h2>
+            <p>When you gain this card, gain 1 victory point. When you lose this card, lose 1 victory point. When a player gains control of a legendary planet you control, or a planet you control in your home system, that player gains this card. </p>
+        </div>
+        <div id="starfall-array" class="relic-card" data-ds="true">
+            <h2>Starfall Array</h2>
+            <p>When 1 or more of your units roll dice for a unit ability, you may apply +1 to the result of each of those dice, and 1 of those units may roll 1 additional die.</p>
+        </div>
+        <div id="stellar-converter" class="relic-card" data-ds="false">
+            <h2>Stellar Converter</h2>
+            <p>ACTION: Choose 1 non-home, non-legendary planet other than Mecatol Rex in a system that is adjacent to 1 or more of your units that have BOMBARDMENT; destroy all units on that planet and purge its attachments and its planet card. Then, place the destroyed planet token on that planet and purge this card.</p>
+        </div>
+        <div id="the-codex" class="relic-card" data-ds="false">
+            <h2>The Codex</h2>
+            <p>ACTION: Purge this card to take up to 3 action cards of your choice from the action card discard pile.</p>
+        </div>
+        <div id="the-crown-of-emphidia" class="relic-card" data-ds="false">
+            <h2>The Crown of Emphidia</h2>
+            <p>After you perform a tactical action, you may exhaust this card to explore 1 planet you control. At the end of the status phase, if you control the "Tomb of Emphidia", you may purge this card to gain 1 victory point.</p>
+        </div>
+        <div id="the-crown-of-thalnos" class="relic-card" data-ds="false">
+            <h2>The Crown of Thalnos</h2>
+            <p>During each combat round, this card's owner may reroll any number of their dice, applying +1 to the results; any units that reroll dice but do not produce at least 1 hit are destroyed.</p>
+        </div>
+        <div id="the-obsidian" class="relic-card" data-ds="false">
+            <h2>The Obsidian</h2>
+            <p>When you gain this card, draw 1 secret objective. You can have 1 additional scored or unscored secret objective.</p>
+        </div>
+        <div id="the-prophet's-tears" class="relic-card" data-ds="false">
+            <h2>The Prophet's Tears</h2>
+            <p>When you research a technology, you may exhaust this card to ignore 1 prerequisite or draw 1 action card.</p>
+        </div>
+        <div id="the-quantumcore" class="relic-card" data-ds="false">
+            <h2>The Quantumcore</h2>
+            <p>When you gain this card, gain your breakthrough. You have SYNERGY for all technology types.</p>
+        </div>
+        <div id="the-silver-flame" class="relic-card" data-ds="false">
+            <h2>The Silver Flame</h2>
+            <p>The Silver Flame may be exchanged as part of a transaction. ACTION: Roll 1 die and purge this card; if the result is a 10, gain 1 victory point. Otherwise, purge your home system and all units in it; you cannot score public objectives. Put The Fracture into play if it is not already. </p>
+        </div>
+        <div id="the-triad" class="relic-card" data-ds="false">
+            <h2>The Triad</h2>
+            <p>This card can be readied and spent as if it were a planet card. Its resource and influence values are equal to 3 plus the number of different types of relic fragments you own.</p>
+        </div>
+        <div id="twilight-mirror" class="relic-card" data-ds="true">
+            <h2>Twilight Mirror</h2>
+            <p>At the start of the agenda phase, you may purge this card to resolve 1 non-strategic action.</p>
+        </div>
+    </div>
+</body>
+</html>
