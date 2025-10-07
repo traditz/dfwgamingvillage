@@ -1,9 +1,9 @@
-<div style="font-family: Arial, sans-serif; color: #ffffff;">
+<div style="background-color: #1e1e1e !important; padding: 20px !important; color: #ffffff; font-family: Arial, sans-serif;">
   <a href="https://www.dfwgamingvillage.com/ti.html" style="display: inline-block; margin-bottom: 15px; padding: 8px 12px; background-color: #f9d342; color: #000; text-decoration: none; border-radius: 5px; font-weight: bold;">← Back to TI4 Faction Database</a>
   
   <h1 style="color: #f9d342;"><img src="images/legendary.png" alt="Legendary Icon" style="height: 1em; vertical-align: middle; margin-right: 10px;" />Twilight Imperium 4 Legendary Planets<img src="images/legendary.png" alt="Legendary Icon" style="height: 1em; vertical-align: middle; margin-left: 10px;" /></h1>
   
-  <label style="font-size: 16px;"><input type="checkbox" id="toggleDS" checked /> Show Discordant Stars Planets</label>
+  <label style="font-size: 16px; color: #dddddd;"><input type="checkbox" id="toggleDS" checked /> Show Discordant Stars Planets</label>
 
   <h2 style="color: #f9d342;">Official Planets</h2>
   
@@ -88,29 +88,19 @@
   </div>
 
   <script>
-    // This script might be stripped by your editor, but if it runs, it will work.
-    document.getElementById('toggleDS').addEventListener('change', function () {
-      const dsPlanets = document.querySelectorAll('.ds-only');
-      dsPlanets.forEach(p => {
-        p.style.display = this.checked ? 'block' : 'none';
-      });
-      // Also toggle the h2 title for the section
-      const dsTitle = document.querySelector('h2.ds-only');
-      if (dsTitle) {
-          dsTitle.style.display = this.checked ? 'block' : 'none';
-      }
-    });
-    // Run once on load to set the initial state
     document.addEventListener('DOMContentLoaded', function() {
-        const toggle = document.getElementById('toggleDS');
-        const dsPlanets = document.querySelectorAll('.ds-only');
-        dsPlanets.forEach(p => {
-            p.style.display = toggle.checked ? 'block' : 'none';
+      const toggle = document.getElementById('toggleDS');
+      const dsElements = document.querySelectorAll('.ds-only');
+
+      function updateVisibility() {
+        const isChecked = toggle.checked;
+        dsElements.forEach(el => {
+          el.style.display = isChecked ? 'block' : 'none';
         });
-        const dsTitle = document.querySelector('h2.ds-only');
-        if (dsTitle) {
-            dsTitle.style.display = toggle.checked ? 'block' : 'none';
-        }
+      }
+
+      toggle.addEventListener('change', updateVisibility);
+      updateVisibility(); 
     });
   </script>
 </div>
