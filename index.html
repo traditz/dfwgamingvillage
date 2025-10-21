@@ -32,7 +32,6 @@
             height: auto;
         }
         
-        /* This is the rule that was added back */
         .nav {
             background-color: #222;
             padding: 15px;
@@ -75,6 +74,18 @@
             background-color: #222;
             padding: 20px;
             margin-top: 20px;
+        }
+
+        /* --- ADD THIS FOR MOBILE --- */
+        @media (max-width: 600px) {
+            .nav {
+                flex-direction: column; /* Stacks the buttons vertically */
+                align-items: center;     /* Centers the stacked buttons */
+            }
+            .nav a {
+                width: 90%;  /* Makes each button 90% wide */
+                margin: 8px 0; /* Adds better vertical spacing */
+            }
         }
     </style>
 </head>
