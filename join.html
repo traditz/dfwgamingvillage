@@ -38,12 +38,27 @@
             justify-content: center;
             flex-wrap: wrap;
         }
+        
+        /* UPDATED NAV STYLES */
         .nav a {
-            color: white;
+            color: #ffcc00; /* Gold text to match your site */
+            background-color: #333; /* Dark button background */
             text-decoration: none;
-            margin: 10px;
-            font-size: 18px;
+            margin: 5px; /* Spacing for buttons */
+            padding: 10px 15px; /* Makes it button-sized */
+            border-radius: 5px; /* Rounded corners */
+            font-size: 16px;
+            font-weight: bold;
+            border: 1px solid #555; /* Defines the button edge */
+            transition: background-color 0.3s, color 0.3s; /* Smooth hover */
         }
+
+        .nav a:hover {
+            background-color: #ffcc00; /* Gold background on hover */
+            color: #222; /* Dark text on hover */
+        }
+        
+        /* Page-specific styles (unchanged) */
         .content {
             padding: 50px 20px;
         }
@@ -81,6 +96,18 @@
             padding: 20px;
             margin-top: 20px;
         }
+        
+        /* ADDED MOBILE FIX */
+        @media (max-width: 600px) {
+            .nav {
+                padding: 10px 5px; /* Tighter padding on the nav bar */
+            }
+            .nav a {
+                font-size: 12px;  /* Even smaller text */
+                padding: 5px 8px; /* Even smaller button padding */
+                margin: 3px;      /* Tighter spacing between buttons */
+            }
+        }
     </style>
 </head>
 <body>
@@ -91,8 +118,11 @@
         <a href="games.html">Game Library</a>
         <a href="events.html">Events</a>
         <a href="player-aids.html">Player Aids</a>
+        <a href="donate.html">Donate</a>
+        <a href="supporters.html">Supporters</a>
         <a href="contact.html">Contact</a>
     </div>
+    
     <div class="banner">
         <img src="banner.png" alt="DFW Gaming Village Banner">
     </div>
@@ -100,7 +130,6 @@
         <h1>Join the Community</h1>
         <p>Become a part of the DFW Gaming Village! Join us on Discord and Facebook to stay updated on events and connect with other board game enthusiasts.</p>
 
-        <!-- Button Links -->
         <div class="button-container">
             <a href="https://discord.gg/BMYyM88Shs" target="_blank" class="join-button">
                 <img src="discord-icon.png" alt="Discord Logo"> Join Our Discord
