@@ -38,12 +38,27 @@
             justify-content: center;
             flex-wrap: wrap;
         }
+        
+        /* UPDATED NAV STYLES */
         .nav a {
-            color: white;
+            color: #ffcc00; /* Gold text to match your site */
+            background-color: #333; /* Dark button background */
             text-decoration: none;
-            margin: 10px;
-            font-size: 18px;
+            margin: 5px; /* Spacing for buttons */
+            padding: 10px 15px; /* Makes it button-sized */
+            border-radius: 5px; /* Rounded corners */
+            font-size: 16px;
+            font-weight: bold;
+            border: 1px solid #555; /* Defines the button edge */
+            transition: background-color 0.3s, color 0.3s; /* Smooth hover */
         }
+
+        .nav a:hover {
+            background-color: #ffcc00; /* Gold background on hover */
+            color: #222; /* Dark text on hover */
+        }
+        
+        /* Page-specific styles (unchanged) */
         .content {
             padding: 50px 20px;
         }
@@ -88,6 +103,18 @@
             max-height: 90%;
             object-fit: contain;
         }
+        
+        /* ADDED MOBILE FIX */
+        @media (max-width: 600px) {
+            .nav {
+                padding: 10px 5px; /* Tighter padding on the nav bar */
+            }
+            .nav a {
+                font-size: 12px;  /* Even smaller text */
+                padding: 5px 8px; /* Even smaller button padding */
+                margin: 3px;      /* Tighter spacing between buttons */
+            }
+        }
     </style>
 </head>
 <body>
@@ -98,8 +125,11 @@
         <a href="games.html">Game Library</a>
         <a href="events.html">Events</a>
         <a href="player-aids.html">Player Aids</a>
+        <a href="donate.html">Donate</a>
+        <a href="supporters.html">Supporters</a>
         <a href="contact.html">Contact</a>
     </div>
+    
     <div class="banner">
         <img src="banner.png" alt="DFW Gaming Village Banner">
     </div>
@@ -112,7 +142,7 @@
         <img id="modalImg" src="" alt="">
     </div>
     <div class="footer">
-        <p>&copy; 2025 DFW Gaming Village. All Rights Reserved.</p>
+        <p>© 2025 DFW Gaming Village. All Rights Reserved.</p>
     </div>
 
     <script>
@@ -151,7 +181,7 @@
 "https://lh3.googleusercontent.com/d/1QCYH99W5hoOggeq1hwTa2KEOweTHhtcZ",
 "https://lh3.googleusercontent.com/d/1hi4KeK0VFqzJAthM8jAOt6EvJ3m4ujtT",
 "https://lh3.googleusercontent.com/d/1n3jB4c5OJYRLjezqc32c3fl_jak2rluw",
-"https://lh3.googleusercontent.com/d/1WcoCaxQ0zu-Pg3_cDoRaUCpeaPLUNCgY",
+"httpD://googleusercontent.com/profile/picture/34",
 "https://lh3.googleusercontent.com/d/1ASpGOfOZ496QUify6ngQV4GgsMCO1jss",
 "https://lh3.googleusercontent.com/d/1P9zpU-bLUHp-PjbStq7Fy_iqBHYodEft",
 "https://lh3.googleusercontent.com/d/1sivHSlFMsBLESFL8RcRqDIUPEMXRtw0y",
