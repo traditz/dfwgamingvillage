@@ -113,7 +113,8 @@ document.addEventListener('DOMContentLoaded', function() {
             return nameMatch && playerMatch;
         });
 
-        displayGames(filteredG<ctrl61>ames);
+        // === THIS LINE IS NOW FIXED ===
+        displayGames(filteredGames);
     }
 
     // Initial call to start the process.
