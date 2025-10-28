@@ -11,19 +11,19 @@ document.addEventListener('DOMContentLoaded', function() {
         container.innerHTML = "<p>Loading game library from BGG...</p>";
 
         // === ADDED FOR TOKEN AUTH ===
-        **const BGG_TOKEN = "ee6de5d1-dc6b-4648-b71f-32c62f18fa95";**
-        **const fetchOptions = {**
-        ** headers: {**
-        ** 'Authorization': `Bearer ${BGG_TOKEN}`**
-        ** }**
-        **};**
+        const BGG_TOKEN = "ee6de5d1-dc6b-4648-b71f-32c62f18fa95";
+        const fetchOptions = {
+         headers: {
+           'Authorization': `Bearer ${BGG_TOKEN}`
+         }
+        };
         // ============================
 
         try {
             const url = `https://boardgamegeek.com/xmlapi2/collection?username=${BGG_USERNAME}&own=1&stats=1&excludesubtype=boardgameexpansion`;
             
             // Pass the fetchOptions to the fetch call
-            let response = await fetch(url, **fetchOptions**);
+            let response = await fetch(url, fetchOptions);
             
             // Handle BGG's "please wait" 202 status
             while (response.status === 202) {
@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 await new Promise(resolve => setTimeout(resolve, 5000));
                 
                 // Pass the fetchOptions to this fetch call as well
-                response = await fetch(url, **fetchOptions**);
+                response = await fetch(url, fetchOptions);
             }
 
             if (!response.ok) {
@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return nameMatch && playerMatch;
         });
 
-        displayGames(filteredGames);
+        displayGames(filteredG<ctrl61>ames);
     }
 
     // Initial call to start the process.
