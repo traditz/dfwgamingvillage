@@ -1297,7 +1297,7 @@
     "Faction Promissory Note 2:": "",
     "Faction Promissory Note 3:": "",
     "Faction Promissory Note 4:": "",
-    "Faction Technology 1:": "YELLOW: When one of your ships is destroyed, you may produce a ship of the same type at a space dock in your home system. PREREQ: YELLOW",
+    "Faction Technology 1:": "YELLOW: Subatomic Splicer: When one of your ships is destroyed, you may produce a ship of the same type at a space dock in your home system. PREREQ: YELLOW",
     "Faction Technology 2:": "",
     "Faction Technology 3:": "",
     "Faction Specific Unit 1:": "DESTROYER: Exile I: || COST: 1 || COMBAT: 8 || MOVE: 2 || At the end of any players combat in this units system or an adjacent system, you may place one inactive breach in the system. Anti-Fighter Barrage 9 (x2)",
