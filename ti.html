@@ -103,8 +103,8 @@ body {
     border: none;
     border-radius: 5px;
     cursor: pointer;
-  
-  
+   
+   
 }
 </style>
 <script>
@@ -172,20 +172,21 @@ function populateFactionMenu() {
 function replaceTechWords(text) {
     if (!text) return "";
     return text.replace(/YELLOW/g, '<img src="images/cybernetic.png" class="tech-icon">')
-              .replace(/RED/g, '<img src="images/warfare.png" class="tech-icon">')
-              .replace(/GREEN/g, '<img src="images/biotic.png" class="tech-icon">')
-              .replace(/BLUE/g, '<img src="images/propulsion.png" class="tech-icon">');
+               .replace(/RED/g, '<img src="images/warfare.png" class="tech-icon">')
+               .replace(/GREEN/g, '<img src="images/biotic.png" class="tech-icon">')
+               .replace(/BLUE/g, '<img src="images/propulsion.png" class="tech-icon">');
 }
 
 function replaceMonumentWords(text) {
     if (!text) return "";
     return text.replace(/GREEN/g, '<img src="images/industrial.png" class="monument-icon">')
-              .replace(/BLUE/g, '<img src="images/cultural.png" class="monument-icon">')
-              .replace(/RED/g, '<img src="images/hazardous.png" class="monument-icon">')
-              .replace(/LEGENDARY/g, '<img src="images/legendary.png" class="monument-icon">')
-              .replace(/MECATOL REX/g, '<img src="images/rex.png" class="monument-icon">');
+               .replace(/BLUE/g, '<img src="images/cultural.png" class="monument-icon">')
+               .replace(/RED/g, '<img src="images/hazardous.png" class="monument-icon">')
+               .replace(/LEGENDARY/g, '<img src="images/legendary.png" class="monument-icon">')
+               .replace(/MECATOL REX/g, '<img src="images/rex.png" class="monument-icon">');
 }
 
+// --- THIS IS THE UPDATED FUNCTION ---
 function displayFactionInfo(selectedFaction) {
     const infoDiv = document.getElementById("factionInfo");
     const menu = document.getElementById("factionMenu");
@@ -220,7 +221,7 @@ function displayFactionInfo(selectedFaction) {
         h2.textContent = key.replace(/_/g, " ");
         let p = document.createElement("p");
 
-        if (key.includes("Technology") || key.includes("Unit")) {
+        if (key.includes("Technology") || key.includes("Unit") || key.includes("Breakthrough")) {
             p.innerHTML = replaceTechWords(value);
         } else if (key === "Monument:") {
             p.innerHTML = replaceMonumentWords(value);
@@ -232,6 +233,7 @@ function displayFactionInfo(selectedFaction) {
         infoDiv.appendChild(section);
     });;
 }
+// --- END OF UPDATED FUNCTION ---
 
 function showFactionMenu() {
     document.getElementById("factionMenu").style.display = "flex";
