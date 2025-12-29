@@ -954,10 +954,23 @@ btnBack.addEventListener("click", () => {
 });
 
 btnHostTable.addEventListener("click", async () => {
-  if (!currentUser) return alert("Please sign in first.");
-  if (!currentGameDayId) return;
-  await hostTableFlow(currentGameDayId);
+  try {
+    if (!currentUser) {
+      alert("Please sign in first.");
+      return;
+    }
+    if (!currentGameDayId) {
+      alert("Please click a Game Day first (from the left list), then host a table.");
+      return;
+    }
+
+    await hostTableFlow(currentGameDayId);
+  } catch (e) {
+    console.error("Host Table failed:", e);
+    alert(`Host Table failed: ${e?.message || e}`);
+  }
 });
+
 
 btnWantToPlay.addEventListener("click", async () => {
   if (!currentUser) return alert("Please sign in first.");
