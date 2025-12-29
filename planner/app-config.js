@@ -16,3 +16,10 @@ export const BGG_THING_URL = "https://us-central1-dfwgv-planner.cloudfunctions.n
 
 // Firebase Functions callable region
 export const FUNCTIONS_REGION = "us-central1";
+
+// Discord OAuth constants (used by app.js to build the authorize URL)
+export const DISCORD_AUTH_ENDPOINT = "https://discord.com/api/oauth2/authorize";
+export const DISCORD_RESPONSE_TYPE = "code";
+export const DISCORD_SCOPES = "identify";
+export const DISCORD_PROMPT = "consent";
+
