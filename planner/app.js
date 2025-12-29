@@ -143,6 +143,47 @@ function closeModal() {
   modalBody.innerHTML = "";
 }
 
+function qs(sel) {
+  return modalBody.querySelector(sel);
+}
+
+function fmtLocalDatetimeValue(date = new Date()) {
+  const pad = (n) => String(n).padStart(2, "0");
+  const yyyy = date.getFullYear();
+  const mm = pad(date.getMonth() + 1);
+  const dd = pad(date.getDate());
+  const hh = pad(date.getHours());
+  const mi = pad(date.getMinutes());
+  return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+}
+
+function parseDatetimeLocalToISO(v) {
+  // v like "2025-12-29T18:30"
+  const d = new Date(v);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toISOString();
+}
+
+function showInlineError(msg) {
+  const el = qs("#modalError");
+  if (!el) return;
+  el.textContent = msg ? String(msg) : "";
+  el.style.display = msg ? "" : "none";
+}
+
+function showInlineStatus(msg) {
+  const el = qs("#modalStatus");
+  if (!el) return;
+  el.textContent = msg ? String(msg) : "";
+  el.style.display = msg ? "" : "none";
+}
+
+function unwrapCallableError(e) {
+  // Firebase callable errors often look like: FirebaseError: functions/invalid-argument
+  const msg = e?.message || String(e);
+  return msg;
+}
+
 // -----------------------------
 // Discord OAuth (PKCE + state)
 // -----------------------------
@@ -245,7 +286,14 @@ async function handleDiscordCallbackIfPresent() {
   }
 
   try {
-    openModal("Discord Sign-in", `<div class="muted">Signing you in…</div>`);
+    openModal("Discord Sign-in", `
+      <div class="modalStack">
+        <div class="muted">Signing you in…</div>
+        <div class="modalStatus" id="modalStatus" style="display:none;"></div>
+        <div class="modalError" id="modalError" style="display:none;"></div>
+      </div>
+    `);
+
     const url = `${DISCORD_AUTH_FUNCTION_URL}?code=${encodeURIComponent(code)}`;
     const r = await fetch(url);
     const j = await r.json();
@@ -271,7 +319,7 @@ async function handleDiscordCallbackIfPresent() {
 }
 
 // -----------------------------
-// BGG proxy helpers
+// BGG proxy helpers (your Cloud Functions)
 // -----------------------------
 async function bggSearch(q) {
   const url = `${BGG_SEARCH_URL}?q=${encodeURIComponent(q)}`;
@@ -290,32 +338,352 @@ async function bggThing(id) {
 }
 
 // -----------------------------
-// Prompt-based picker (kept for now)
+// Modal: Search + select a BGG game (with box art + year)
 // -----------------------------
-async function promptPickBGGThing() {
-  const q = window.prompt("Search BoardGameGeek for a game name:");
-  if (!q) return null;
+function openGameSearchModal({ title }) {
+  return new Promise((resolve) => {
+    openModal(title, `
+      <div class="modalStack">
+        <div class="modalRow">
+          <input id="bggQuery" class="input" type="text" placeholder="Search BoardGameGeek (e.g. Catan, Twilight Imperium)..." />
+          <button class="btn btn-primary" id="btnDoSearch">Search</button>
+        </div>
 
-  const items = await bggSearch(q);
-  if (!items.length) {
-    alert("No results.");
-    return null;
-  }
+        <div class="modalHint muted">Tip: try a few words. Results show year + box art. Click one to select.</div>
 
-  const lines = items.slice(0, 10).map((it, i) => `${i + 1}) ${it.name} (id=${it.bggId})`);
-  const pick = window.prompt(`Pick a game number:\n\n${lines.join("\n")}\n\nEnter 1-${Math.min(10, items.length)}`);
-  if (!pick) return null;
+        <div class="modalStatus" id="modalStatus" style="display:none;"></div>
+        <div class="modalError" id="modalError" style="display:none;"></div>
 
-  const idx = Number(pick) - 1;
-  if (!Number.isFinite(idx) || idx < 0 || idx >= Math.min(10, items.length)) {
-    alert("Invalid selection.");
-    return null;
-  }
+        <div class="searchResults" id="results"></div>
 
-  const chosen = items[idx];
-  const full = await bggThing(chosen.bggId);
-  const expansions = full.expansions || [];
-  return { ...chosen, expansions };
+        <div class="modalActions">
+          <button class="btn" id="btnCancel">Cancel</button>
+        </div>
+      </div>
+    `);
+
+    const input = qs("#bggQuery");
+    const btnSearch = qs("#btnDoSearch");
+    const results = qs("#results");
+    const btnCancel = qs("#btnCancel");
+
+    let closed = false;
+    let lastRun = 0;
+
+    const done = (val) => {
+      if (closed) return;
+      closed = true;
+      closeModal();
+      resolve(val);
+    };
+
+    btnCancel.addEventListener("click", () => done(null));
+
+    const renderResults = (items) => {
+      results.innerHTML = "";
+      if (!items.length) {
+        results.innerHTML = `<div class="muted">No results.</div>`;
+        return;
+      }
+
+      for (const it of items) {
+        const year = it.year ? String(it.year) : "";
+        const sub = [
+          year ? `Year: ${year}` : "",
+          (it.minPlayers && it.maxPlayers) ? `Players: ${it.minPlayers}-${it.maxPlayers}` : ""
+        ].filter(Boolean).join(" • ");
+
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = "resultCard";
+        card.innerHTML = `
+          <div class="resultThumb">
+            ${it.thumbUrl ? `<img src="${esc(it.thumbUrl)}" alt="" loading="lazy" />` : `<div class="thumbph">🎲</div>`}
+          </div>
+          <div class="resultBody">
+            <div class="resultTitle">${esc(it.name || "Unknown")}</div>
+            <div class="resultMeta muted">${esc(sub)}</div>
+          </div>
+        `;
+
+        card.addEventListener("click", async () => {
+          try {
+            showInlineError("");
+            showInlineStatus("Loading game details…");
+            const full = await bggThing(it.bggId);
+            showInlineStatus("");
+
+            // Normalize "thing" object used by the next modal:
+            const expansions = full.expansions || [];
+            done({
+              bggId: it.bggId,
+              name: it.name,
+              thumbUrl: it.thumbUrl || "",
+              year: it.year || null,
+              minPlayers: it.minPlayers || null,
+              maxPlayers: it.maxPlayers || null,
+              expansions
+            });
+          } catch (e) {
+            showInlineStatus("");
+            showInlineError(unwrapCallableError(e));
+          }
+        });
+
+        results.appendChild(card);
+      }
+    };
+
+    const runSearch = async () => {
+      const q = String(input.value || "").trim();
+      if (!q) {
+        showInlineError("Type a search term first.");
+        return;
+      }
+
+      const runId = ++lastRun;
+      showInlineError("");
+      showInlineStatus("Searching…");
+      results.innerHTML = "";
+
+      try {
+        const items = await bggSearch(q);
+        if (runId !== lastRun) return; // stale
+        showInlineStatus("");
+        renderResults(items);
+      } catch (e) {
+        if (runId !== lastRun) return;
+        showInlineStatus("");
+        showInlineError(unwrapCallableError(e));
+      }
+    };
+
+    btnSearch.addEventListener("click", runSearch);
+    input.addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter") runSearch();
+    });
+
+    // autofocus
+    setTimeout(() => input.focus(), 50);
+
+    // nice: debounce while typing
+    input.addEventListener("input", () => {
+      const now = Date.now();
+      if (now - lastRun < 250) return;
+      // no auto-search until at least 3 chars to reduce spam
+      if (String(input.value || "").trim().length >= 3) {
+        // soft debounce
+        const stamp = Date.now();
+        setTimeout(() => {
+          if (Date.now() - stamp >= 260) runSearch();
+        }, 300);
+      }
+    });
+  });
+}
+
+// -----------------------------
+// Modal: host table form (no prompts)
+// -----------------------------
+function openHostTableFormModal({ gamedayId, thing }) {
+  return new Promise((resolve) => {
+    const defaultStart = fmtLocalDatetimeValue(new Date(Date.now() + 60 * 60 * 1000));
+    const defaultCap = thing?.maxPlayers || "";
+
+    openModal("Host a Table", `
+      <div class="modalStack">
+        <div class="gameHeader">
+          <div class="gameHeaderThumb">
+            ${thing.thumbUrl ? `<img src="${esc(thing.thumbUrl)}" alt="" loading="lazy" />` : `<div class="thumbph">🎲</div>`}
+          </div>
+          <div class="gameHeaderBody">
+            <div class="gameHeaderTitle">${esc(thing.name)}</div>
+            <div class="muted">
+              ${thing.year ? `Year: ${esc(thing.year)}` : ""}
+              ${(thing.minPlayers && thing.maxPlayers) ? ` • Players: ${esc(thing.minPlayers)}-${esc(thing.maxPlayers)}` : ""}
+            </div>
+          </div>
+        </div>
+
+        <div class="modalGrid">
+          <label class="field">
+            <div class="label">Start time</div>
+            <input id="startTime" class="input" type="datetime-local" value="${esc(defaultStart)}" />
+          </label>
+
+          <label class="field">
+            <div class="label">Seats</div>
+            <input id="capacity" class="input" type="number" min="1" step="1" placeholder="e.g. 4" value="${esc(defaultCap)}" />
+            <div class="hint muted">Defaults to max players if known.</div>
+          </label>
+
+          <label class="field fieldSpan2">
+            <div class="label">Notes</div>
+            <textarea id="notes" class="textarea" rows="3" placeholder="Optional: teach game, bring expansion, start at 2pm, etc."></textarea>
+          </label>
+        </div>
+
+        <div class="expBlock">
+          <div class="label">Expansions (optional)</div>
+          <div class="expList" id="expList">
+            ${thing.expansions?.length
+              ? thing.expansions.slice(0, 40).map((e) => `
+                <label class="check">
+                  <input type="checkbox" value="${esc(e.bggId)}" />
+                  <span>${esc(e.name)}</span>
+                </label>
+              `).join("")
+              : `<div class="muted">No expansions found for this title.</div>`
+            }
+          </div>
+        </div>
+
+        <div class="modalStatus" id="modalStatus" style="display:none;"></div>
+        <div class="modalError" id="modalError" style="display:none;"></div>
+
+        <div class="modalActions">
+          <button class="btn" id="btnCancel">Cancel</button>
+          <button class="btn btn-primary" id="btnCreate">Create table</button>
+        </div>
+      </div>
+    `);
+
+    const btnCancel = qs("#btnCancel");
+    const btnCreate = qs("#btnCreate");
+
+    const done = (val) => {
+      closeModal();
+      resolve(val);
+    };
+
+    btnCancel.addEventListener("click", () => done(null));
+
+    btnCreate.addEventListener("click", async () => {
+      showInlineError("");
+      showInlineStatus("");
+
+      const startVal = qs("#startTime").value;
+      const startIso = parseDatetimeLocalToISO(startVal);
+      if (!startIso) {
+        showInlineError("Please choose a valid start time.");
+        return;
+      }
+
+      const capRaw = Number(qs("#capacity").value || 0);
+      const capFinal = (Number.isFinite(capRaw) && capRaw > 0)
+        ? capRaw
+        : (Number(thing.maxPlayers) || 0);
+
+      if (!capFinal || capFinal < 1) {
+        showInlineError("Please set Seats (capacity).");
+        return;
+      }
+
+      const notes = String(qs("#notes").value || "").trim();
+
+      const expList = qs("#expList");
+      const checked = Array.from(expList.querySelectorAll('input[type="checkbox"]:checked'))
+        .map((c) => String(c.value))
+        .filter(Boolean);
+
+      try {
+        btnCreate.disabled = true;
+        btnCancel.disabled = true;
+        showInlineStatus("Creating table…");
+
+        await fnCreateTable({
+          gamedayId,
+          bggId: String(thing.bggId),
+          gameName: thing.name,
+          thumbUrl: thing.thumbUrl || "",
+          startTime: startIso,
+          capacity: capFinal,
+          notes,
+          expansionIds: checked
+        });
+
+        showInlineStatus("Created!");
+        setTimeout(() => done({ ok: true }), 350);
+      } catch (e) {
+        btnCreate.disabled = false;
+        btnCancel.disabled = false;
+        showInlineStatus("");
+        showInlineError(unwrapCallableError(e));
+      }
+    });
+  });
+}
+
+// -----------------------------
+// Modal: want to play form
+// -----------------------------
+function openWantToPlayFormModal({ gamedayId, thing }) {
+  return new Promise((resolve) => {
+    openModal("Want to Play", `
+      <div class="modalStack">
+        <div class="gameHeader">
+          <div class="gameHeaderThumb">
+            ${thing.thumbUrl ? `<img src="${esc(thing.thumbUrl)}" alt="" loading="lazy" />` : `<div class="thumbph">🎲</div>`}
+          </div>
+          <div class="gameHeaderBody">
+            <div class="gameHeaderTitle">${esc(thing.name)}</div>
+            <div class="muted">${thing.year ? `Year: ${esc(thing.year)}` : ""}</div>
+          </div>
+        </div>
+
+        <label class="field">
+          <div class="label">Notes (optional)</div>
+          <textarea id="notes" class="textarea" rows="3" placeholder="Looking for players, prefer 5p, can teach, etc."></textarea>
+        </label>
+
+        <div class="modalStatus" id="modalStatus" style="display:none;"></div>
+        <div class="modalError" id="modalError" style="display:none;"></div>
+
+        <div class="modalActions">
+          <button class="btn" id="btnCancel">Cancel</button>
+          <button class="btn btn-primary" id="btnPost">Post</button>
+        </div>
+      </div>
+    `);
+
+    const btnCancel = qs("#btnCancel");
+    const btnPost = qs("#btnPost");
+
+    const done = (val) => {
+      closeModal();
+      resolve(val);
+    };
+
+    btnCancel.addEventListener("click", () => done(null));
+
+    btnPost.addEventListener("click", async () => {
+      showInlineError("");
+      showInlineStatus("");
+      const notes = String(qs("#notes").value || "").trim();
+
+      try {
+        btnPost.disabled = true;
+        btnCancel.disabled = true;
+        showInlineStatus("Posting…");
+
+        await fnCreateWantToPlay({
+          gamedayId,
+          bggId: String(thing.bggId),
+          gameName: thing.name,
+          thumbUrl: thing.thumbUrl || "",
+          notes
+        });
+
+        showInlineStatus("Posted!");
+        setTimeout(() => done({ ok: true }), 350);
+      } catch (e) {
+        btnPost.disabled = false;
+        btnCancel.disabled = false;
+        showInlineStatus("");
+        showInlineError(unwrapCallableError(e));
+      }
+    });
+  });
 }
 
 // -----------------------------
@@ -431,7 +799,7 @@ function renderTablesPage() {
       try {
         await fnJoinTable({ gamedayId: currentGameDayId, tableId: t.id });
       } catch (e) {
-        alert(`Join failed: ${e?.message || e}`);
+        alert(`Join failed: ${unwrapCallableError(e)}`);
       }
     });
 
@@ -441,7 +809,7 @@ function renderTablesPage() {
       try {
         await fnLeaveTable({ gamedayId: currentGameDayId, tableId: t.id });
       } catch (e) {
-        alert(`Leave failed: ${e?.message || e}`);
+        alert(`Leave failed: ${unwrapCallableError(e)}`);
       }
     });
 
@@ -461,7 +829,9 @@ function renderWants(items) {
     const el = document.createElement("div");
     el.className = "listitem";
     el.innerHTML = `
-      <div class="title">${bggUrl ? `<a href="${esc(bggUrl)}" target="_blank" rel="noopener">${esc(p.gameName || "Game")}</a>` : esc(p.gameName || "Game")}</div>
+      <div class="title">
+        ${bggUrl ? `<a href="${esc(bggUrl)}" target="_blank" rel="noopener">${esc(p.gameName || "Game")}</a>` : esc(p.gameName || "Game")}
+      </div>
       <div class="meta">${esc(p.createdByDisplayName || p.createdByUid || "Someone")}${p.notes ? ` • ${esc(p.notes)}` : ""}</div>
     `;
     wantsList.appendChild(el);
@@ -484,88 +854,25 @@ function openGameDay(gd) {
   currentGameDayId = gd.id;
   gamedayTitle.textContent = gd.title || "Game Day";
   const startsAt = gd.startsAt?.toDate ? gd.startsAt.toDate() : gd.startsAt;
-  gamedayMeta.innerHTML = `
-    <div class="muted">${esc(fmtDate(startsAt))}${gd.location ? ` • ${esc(gd.location)}` : ""}</div>
-  `;
+  gamedayMeta.innerHTML = `<div class="muted">${esc(fmtDate(startsAt))}${gd.location ? ` • ${esc(gd.location)}` : ""}</div>`;
   showGameDayCard();
   subscribeGameDayDetails(gd.id);
 }
 
 async function hostTableFlow(gamedayId) {
-  try {
-    const thing = await promptPickBGGThing();
-    if (!thing) return;
-
-    const start = window.prompt("Start time (YYYY-MM-DD HH:MM) e.g. 2026-01-05 14:00");
-    if (!start) return;
-    const startIso = new Date(start.replace(" ", "T")).toISOString();
-
-    const capStr = window.prompt("Seat count (capacity). Leave blank to use game max players.");
-    const capacity = capStr ? Number(capStr) : 0;
-
-    let expansionIds = [];
-    if (thing.expansions && thing.expansions.length) {
-      const wantExp = window.confirm("Add expansions? (OK = yes, Cancel = skip)");
-      if (wantExp) {
-        const expLines = thing.expansions.slice(0, 20).map((e, i) => `${i + 1}) ${e.name} (id=${e.bggId})`);
-        const pick = window.prompt(`Enter expansion indexes separated by commas (e.g. 1,3,5)\n\n${expLines.join("\n")}`);
-        if (pick) {
-          const chosen = pick
-            .split(",")
-            .map((s) => Number(s.trim()) - 1)
-            .filter((n) => Number.isFinite(n) && n >= 0 && n < Math.min(20, thing.expansions.length));
-          expansionIds = chosen.map((i) => String(thing.expansions[i].bggId));
-        }
-      }
-    }
-
-    const notes = window.prompt("Notes (optional):") || "";
-
-    // ✅ FIX: match Cloud Function createTable() contract
-    const capFinal = (capacity && Number.isFinite(capacity) && capacity > 0)
-      ? capacity
-      : (thing.maxPlayers || thing.maxplayers || 0);
-
-    if (!capFinal || capFinal < 1) {
-      alert("Capacity is required (and the selected game has no max player count to default to).");
-      return;
-    }
-
-    await fnCreateTable({
-      gamedayId,
-      bggId: String(thing.bggId),
-      gameName: thing.name,
-      thumbUrl: thing.thumbUrl || "",
-      startTime: startIso,
-      capacity: capFinal,
-      notes,
-      expansionIds
-    });
-  } catch (e) {
-    alert(`Host table failed: ${e?.message || e}`);
-  }
+  const thing = await openGameSearchModal({ title: "Select a game to host" });
+  if (!thing) return;
+  await openHostTableFormModal({ gamedayId, thing });
 }
 
 async function wantToPlayFlow(gamedayId) {
-  try {
-    const thing = await promptPickBGGThing();
-    if (!thing) return;
-    const notes = window.prompt("Notes (optional):") || "";
-
-    // ✅ FIX: match Cloud Function createWantToPlay() contract
-    await fnCreateWantToPlay({
-      gamedayId,
-      bggId: String(thing.bggId),
-      gameName: thing.name,
-      thumbUrl: thing.thumbUrl || "",
-      notes
-    });
-  } catch (e) {
-    alert(`Want to play failed: ${e?.message || e}`);
-  }
+  const thing = await openGameSearchModal({ title: "Select a game you want to play" });
+  if (!thing) return;
+  await openWantToPlayFormModal({ gamedayId, thing });
 }
 
 async function createGamedayPromptFlow() {
+  // Keeping as prompt for now (admin-only). If you want, we can convert this to a modal too.
   try {
     const title = window.prompt("Game Day title:");
     if (!title) return;
@@ -579,7 +886,7 @@ async function createGamedayPromptFlow() {
       startsAt: new Date(startsAt.replace(" ", "T")).toISOString()
     });
   } catch (e) {
-    alert(`Create Game Day failed: ${e?.message || e}`);
+    alert(`Create Game Day failed: ${unwrapCallableError(e)}`);
   }
 }
 
@@ -598,7 +905,7 @@ async function doEmailSignIn() {
     await signInWithEmailAndPassword(auth, email, pass);
     showEmailCard(false);
   } catch (e) {
-    emailMsg.textContent = e?.message || String(e);
+    emailMsg.textContent = unwrapCallableError(e);
   }
 }
 
@@ -614,7 +921,7 @@ async function doEmailSignUp() {
     await createUserWithEmailAndPassword(auth, email, pass);
     showEmailCard(false);
   } catch (e) {
-    emailMsg.textContent = e?.message || String(e);
+    emailMsg.textContent = unwrapCallableError(e);
   }
 }
 
