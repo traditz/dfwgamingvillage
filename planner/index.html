@@ -5,7 +5,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>DFWGV Planner</title>
-  <link rel="stylesheet" href="./styles.css" />
+
+  <!-- Cache-bust so GitHub Pages stops serving old CSS -->
+  <link rel="stylesheet" href="./styles.css?v=20251228a" />
 </head>
 <body>
   <header class="topbar">
@@ -48,7 +50,7 @@
         </div>
         <div class="muted">Click a Game Day to open its planner.</div>
 
-        <!-- List of game days (we render upcoming + archive in here without ruining the look) -->
+        <!-- List of game days -->
         <div id="gamedayList" class="list"></div>
       </section>
 
@@ -97,6 +99,7 @@
     </div>
   </div>
 
-  <script type="module" src="./app.js"></script>
+  <!-- Cache-bust so GitHub Pages stops serving old JS -->
+  <script type="module" src="./app.js?v=20251228a"></script>
 </body>
 </html>
