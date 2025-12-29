@@ -320,3 +320,20 @@ input, select, textarea{
 .check { display:flex; gap:10px; align-items:flex-start; }
 .check input { margin-top: 3px; }
 
+/* ================================
+   Hosted Table Gradient Separator
+   ================================ */
+
+/* Adds a soft gradient divider above every table after the first */
+.table + .table::before {
+  content: "";
+  display: block;
+  height: 1px;
+  margin: 0 0 12px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 255, 255, 0.18),
+    transparent
+  );
+}
