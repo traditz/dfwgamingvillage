@@ -324,16 +324,30 @@ input, select, textarea{
    Hosted Table Gradient Separator
    ================================ */
 
-/* Adds a soft gradient divider above every table after the first */
-.table + .table::before {
-  content: "";
-  display: block;
-  height: 1px;
-  margin: 0 0 12px;
+/* Works for older builds that render tables with class="table" */
+.table + .table::before{
+  content:"";
+  display:block;
+  height:1px;
+  margin:0 0 12px;
   background: linear-gradient(
     to right,
     transparent,
-    rgba(255, 255, 255, 0.18),
+    rgba(255,255,255,.18),
+    transparent
+  );
+}
+
+/* Works for current builds that render hosted tables with class="tablecard" */
+.tablecard + .tablecard::before{
+  content:"";
+  display:block;
+  height:1px;
+  margin:0 0 12px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255,255,255,.18),
     transparent
   );
 }
