@@ -1,6 +1,6 @@
 // PATH: planner/app.js
 import { firebaseConfig } from "./firebase-config.js";
-import { appConfig } from "./app-config.js";
+import appConfig from "./app-config.js";
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {
@@ -244,7 +244,6 @@ async function handleDiscordCallbackIfPresent() {
     return;
   }
 
-  // Exchange the Discord code for Firebase custom token via Cloud Function
   try {
     openModal("Discord Sign-in", `<div class="muted">Signing you in…</div>`);
     const url = `${DISCORD_AUTH_FUNCTION_URL}?code=${encodeURIComponent(code)}`;
@@ -272,7 +271,7 @@ async function handleDiscordCallbackIfPresent() {
 }
 
 // -----------------------------
-// BGG proxy helpers (your Cloud Functions)
+// BGG proxy helpers
 // -----------------------------
 async function bggSearch(q) {
   const url = `${BGG_SEARCH_URL}?q=${encodeURIComponent(q)}`;
@@ -522,7 +521,7 @@ async function hostTableFlow(gamedayId) {
 
     const notes = window.prompt("Notes (optional):") || "";
 
-    // ===== CHANGE #1: payload now matches Cloud Function createTable() =====
+    // ✅ FIX: match Cloud Function createTable() contract
     const capFinal = (capacity && Number.isFinite(capacity) && capacity > 0)
       ? capacity
       : (thing.maxPlayers || thing.maxplayers || 0);
@@ -542,7 +541,6 @@ async function hostTableFlow(gamedayId) {
       notes,
       expansionIds
     });
-    // ================================================================
   } catch (e) {
     alert(`Host table failed: ${e?.message || e}`);
   }
@@ -554,7 +552,7 @@ async function wantToPlayFlow(gamedayId) {
     if (!thing) return;
     const notes = window.prompt("Notes (optional):") || "";
 
-    // ===== CHANGE #2: payload now matches Cloud Function createWantToPlay() =====
+    // ✅ FIX: match Cloud Function createWantToPlay() contract
     await fnCreateWantToPlay({
       gamedayId,
       bggId: String(thing.bggId),
@@ -562,7 +560,6 @@ async function wantToPlayFlow(gamedayId) {
       thumbUrl: thing.thumbUrl || "",
       notes
     });
-    // ========================================================================
   } catch (e) {
     alert(`Want to play failed: ${e?.message || e}`);
   }
