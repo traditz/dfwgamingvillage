@@ -7,7 +7,7 @@
   <title>DFWGV Planner</title>
 
   <!-- Cache-bust so GitHub Pages stops serving old CSS -->
-  <link rel="stylesheet" href="./styles.css?v=20251228a" />
+  <link rel="stylesheet" href="./styles.css?v=20251228e" />
 </head>
 <body>
   <header class="topbar">
@@ -88,18 +88,19 @@
     </section>
   </main>
 
-  <!-- Modal -->
+  <!-- Modal (matches the CSS below) -->
   <div class="modal" id="modal" style="display:none;">
-    <div class="modalInner">
+    <div class="modalCard">
       <div class="modalHead">
         <h3 id="modalTitle">Modal</h3>
         <button class="btn" id="btnModalClose">✕</button>
       </div>
-      <div id="modalBody"></div>
+      <div class="modalBody" id="modalBody"></div>
+      <!-- modalFoot gets injected by JS -->
     </div>
   </div>
 
-  <!-- Cache-bust so GitHub Pages stops serving old JS -->
-  <script type="module" src="../app.js?v=20251228d"></script>
+  <!-- FIX: app.js must be loaded from the same folder as this index.html -->
+  <script type="module" src="./app.js?v=20251228e"></script>
 </body>
 </html>
