@@ -972,7 +972,7 @@ if (btnHostTable) btnHostTable.addEventListener("click", async () => {
     await hostTableFlow(currentGameDayId);
   } catch (e) {
     console.error("Host Table failed:", e);
-    alert(`Host Table failed: ${e?.messageareiB4 - 8, ## dWZ, 'e?.message || e}`);
+    alert(`Host Table failed: ${e?.message || e}`);
   }
 });
 
