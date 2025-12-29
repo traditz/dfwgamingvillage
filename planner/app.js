@@ -22,6 +22,7 @@ import {
 import {
   getFirestore,
   collection,
+  doc,
   query,
   where,
   orderBy,
@@ -35,7 +36,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const functions = getFunctions(app, FUNCTIONS_REGION);
 
-// --- Callable functions ---
+// --- Callable functions (Cloud Functions) ---
 const fnCreateGameDay = httpsCallable(functions, "createGameDay");
 const fnDeleteGameDay = httpsCallable(functions, "deleteGameDay");
 const fnCreateTable = httpsCallable(functions, "createTable");
@@ -43,7 +44,7 @@ const fnCreateWantToPlay = httpsCallable(functions, "createWantToPlay");
 const fnJoinTable = httpsCallable(functions, "joinTable");
 const fnLeaveTable = httpsCallable(functions, "leaveTable");
 
-// --- UI (matches your index.html) ---
+// --- UI ---
 const authStatus = document.querySelector("#authStatus");
 const btnDiscord = document.querySelector("#btnDiscord");
 const btnEmail = document.querySelector("#btnEmail");
@@ -60,46 +61,93 @@ const emailMsg = document.querySelector("#emailMsg");
 const btnCreateGameDay = document.querySelector("#btnCreateGameDay");
 const gamedayList = document.querySelector("#gamedayList");
 
+// Right panel (selected Game Day)
+const gamedayCard = document.querySelector("#gamedayCard");
+const gamedayTitle = document.querySelector("#gamedayTitle");
+const gamedayMeta = document.querySelector("#gamedayMeta");
+const btnBack = document.querySelector("#btnBack");
+const btnHostTable = document.querySelector("#btnHostTable");
+const btnWantToPlay = document.querySelector("#btnWantToPlay");
+const btnRefresh = document.querySelector("#btnRefresh");
+
+const tablePager = document.querySelector("#tablePager");
+const btnPrev = document.querySelector("#btnPrev");
+const btnNext = document.querySelector("#btnNext");
+const pageInfo = document.querySelector("#pageInfo");
+const tablesList = document.querySelector("#tablesList");
+const wantsList = document.querySelector("#wantsList");
+
+// Modal
+const modal = document.querySelector("#modal");
+const modalTitle = document.querySelector("#modalTitle");
+const modalBody = document.querySelector("#modalBody");
+const btnModalClose = document.querySelector("#btnModalClose");
+
 // --- State ---
+let selectedGameDayId = null;
+let selectedGameDayDoc = null;
+
 let gamedays = [];
-let expandedId = null;
-let tablesByDay = new Map();
-let wantsByDay = new Map();
-let unsubs = new Map();
+let unsubGamedays = null;
+let unsubTables = null;
+let unsubWants = null;
+const unsubSignupsByTable = new Map();
+
+let tables = [];
+let wants = [];
+let page = 0;
+const PAGE_SIZE = 5;
 
 // --- Helpers ---
 function isAdmin() {
   return !!auth.currentUser && auth.currentUser.uid === OWNER_UID;
 }
+
 function escapeHtml(s) {
-  return String(s || "").replace(/[&<>"']/g, (c) => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  return String(s ?? "").replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
   }[c]));
 }
-function tsToMs(ts) {
-  if (!ts) return 0;
-  if (typeof ts.toMillis === "function") return ts.toMillis();
-  if (typeof ts.seconds === "number") return ts.seconds * 1000;
-  return new Date(ts).getTime();
-}
-function fmtDateTime(ms) {
-  if (!ms) return "";
-  return new Date(ms).toLocaleString();
-}
-function isPast(ms) {
-  return ms > 0 && ms < Date.now();
+
+function fmtTimestamp(ts) {
+  if (!ts) return "";
+  try {
+    if (typeof ts.toDate === "function") return ts.toDate().toLocaleString();
+    if (typeof ts === "string") return new Date(ts).toLocaleString();
+    if (ts instanceof Date) return ts.toLocaleString();
+  } catch {}
+  return String(ts);
 }
 
-// --- Discord OAuth state handling ---
+function showModal(title, html) {
+  modalTitle.textContent = title;
+  modalBody.innerHTML = html;
+  modal.style.display = "flex";
+}
+function closeModal() {
+  modal.style.display = "none";
+  modalBody.innerHTML = "";
+}
+btnModalClose?.addEventListener("click", closeModal);
+modal?.addEventListener("click", (e) => {
+  if (e.target === modal) closeModal();
+});
+
+// --- Discord OAuth ---
 function randomState() {
-  const buf = new Uint8Array(16);
-  crypto.getRandomValues(buf);
-  return Array.from(buf).map(b => b.toString(16).padStart(2, "0")).join("");
+  const a = new Uint8Array(16);
+  crypto.getRandomValues(a);
+  return [...a].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-function buildDiscordAuthorizeUrl() {
+function buildDiscordAuthUrl() {
   const state = randomState();
-  sessionStorage.setItem("dfwgv_discord_oauth_state", state);
+  // localStorage survives refresh + works across a dedicated callback page
+  localStorage.setItem("dfwgv_discord_oauth_state", state);
 
   const params = new URLSearchParams({
     client_id: DISCORD_CLIENT_ID,
@@ -115,14 +163,15 @@ async function completeDiscordCallbackIfPresent() {
   const url = new URL(window.location.href);
   const code = url.searchParams.get("code");
   const returnedState = url.searchParams.get("state");
-
   if (!code) return; // not a callback
 
-  const expectedState = sessionStorage.getItem("dfwgv_discord_oauth_state");
-  sessionStorage.removeItem("dfwgv_discord_oauth_state");
+  const expectedState = localStorage.getItem("dfwgv_discord_oauth_state");
+  localStorage.removeItem("dfwgv_discord_oauth_state");
 
   if (!returnedState) throw new Error("Missing ?state from Discord.");
-  if (!expectedState || returnedState !== expectedState) throw new Error("OAuth state mismatch. Try signing in again.");
+  if (!expectedState || returnedState !== expectedState) {
+    throw new Error("OAuth state mismatch. Click “Sign in with Discord” again (single tab) and complete the login flow.");
+  }
 
   const r = await fetch(`${DISCORD_AUTH_FUNCTION_URL}?code=${encodeURIComponent(code)}`);
   const txt = await r.text();
@@ -133,9 +182,15 @@ async function completeDiscordCallbackIfPresent() {
 
   await signInWithCustomToken(auth, data.firebaseToken);
 
+  // Clean URL
   url.searchParams.delete("code");
   url.searchParams.delete("state");
   window.history.replaceState({}, "", url.toString());
+
+  // If we're on a dedicated callback page, bounce back to the planner root.
+  if (window.location.pathname.includes("/planner/auth/")) {
+    window.location.href = "/planner/";
+  }
 }
 
 // --- BGG helpers ---
@@ -145,256 +200,263 @@ async function bggSearch(q) {
   if (!r.ok) throw new Error(`BGG search failed: ${t}`);
   return (JSON.parse(t).items || []);
 }
+
 async function bggThing(id) {
   const r = await fetch(`${BGG_THING_URL}?id=${encodeURIComponent(id)}`);
   const t = await r.text();
   if (!r.ok) throw new Error(`BGG thing failed: ${t}`);
-  return JSON.parse(t).thing;
+  return JSON.parse(t);
 }
+
 async function promptPickBGGThing() {
-  const q = window.prompt("Search BoardGameGeek (example: catan)");
+  const q = window.prompt("Search BoardGameGeek (enter game name):");
   if (!q) return null;
 
   const items = await bggSearch(q);
   if (!items.length) {
-    alert("No results.");
+    window.alert("No results found.");
     return null;
   }
 
-  const lines = items.map(
-    (it, i) => `${i + 1}) ${it.name} (${it.minPlayers || "?"}-${it.maxPlayers || "?"}p • ${it.durationMin || "?"}m)`
-  );
-
+  const lines = items.slice(0, 15).map((it, i) => `${i + 1}) ${it.name} (id=${it.bggId})`);
   const pick = window.prompt(`Pick a game by number:\n\n${lines.join("\n")}`);
-  const idx = Number(pick);
-  if (!Number.isFinite(idx) || idx < 1 || idx > items.length) return null;
-
-  return await bggThing(items[idx - 1].bggId);
-}
-
-// --- Firestore subscriptions ---
-function unsubscribeDay(gamedayId) {
-  const tkey = `tables:${gamedayId}`;
-  const pkey = `posts:${gamedayId}`;
-  if (unsubs.has(tkey)) { try { unsubs.get(tkey)(); } catch {} unsubs.delete(tkey); }
-  if (unsubs.has(pkey)) { try { unsubs.get(pkey)(); } catch {} unsubs.delete(pkey); }
-  tablesByDay.delete(gamedayId);
-  wantsByDay.delete(gamedayId);
-}
-
-function ensureDaySubscriptions(gamedayId) {
-  if (!gamedayId) return;
-
-  const tkey = `tables:${gamedayId}`;
-  if (!unsubs.has(tkey)) {
-    const tq = query(collection(db, "gamedays", gamedayId, "tables"), orderBy("startTime", "asc"));
-    const unsubTables = onSnapshot(tq, (snap) => {
-      const tables = snap.docs.map((d) => {
-        const t = { id: d.id, ...d.data() };
-        t.startTimeMs = tsToMs(t.startTime);
-        return t;
-      });
-      tablesByDay.set(gamedayId, tables);
-      render();
-    });
-    unsubs.set(tkey, unsubTables);
+  if (!pick) return null;
+  const idx = Number(pick) - 1;
+  if (Number.isNaN(idx) || idx < 0 || idx >= Math.min(items.length, 15)) {
+    window.alert("Invalid selection.");
+    return null;
   }
 
-  const pkey = `posts:${gamedayId}`;
-  if (!unsubs.has(pkey)) {
-    const pq = query(collection(db, "gamedays", gamedayId, "posts"), orderBy("createdAt", "asc"));
-    const unsubPosts = onSnapshot(pq, (snap) => {
-      wantsByDay.set(gamedayId, snap.docs.map((d) => ({ id: d.id, ...d.data() })));
-      render();
-    });
-    unsubs.set(pkey, unsubPosts);
-  }
+  return await bggThing(items[idx].bggId);
 }
 
-function subscribeGamedays() {
-  const qy = query(
-    collection(db, "gamedays"),
-    where("status", "==", "published"),
-    orderBy("startsAt", "asc")
-  );
+// --- Rendering: left list ---
+function renderGameDayList() {
+  gamedayList.innerHTML = gamedays.map((gd) => {
+    const starts = fmtTimestamp(gd.startsAt);
+    const loc = gd.location ? ` • ${escapeHtml(gd.location)}` : "";
+    return `
+      <div class="listitem ${gd.id === selectedGameDayId ? "selected" : ""}" data-gameday="${gd.id}">
+        <div class="li-main">
+          <div class="li-title">${escapeHtml(gd.title || "Game Day")}</div>
+          <div class="muted">${escapeHtml(starts)}${loc}</div>
+        </div>
+        <div class="li-actions">
+          <button class="btn" data-open="${gd.id}">Open</button>
+          ${isAdmin() ? `<button class="btn" data-del="${gd.id}">Delete</button>` : ""}
+        </div>
+      </div>
+    `;
+  }).join("");
 
-  onSnapshot(qy, (snap) => {
-    gamedays = snap.docs.map((d) => {
-      const gd = { id: d.id, ...d.data() };
-      gd.startsAtMs = tsToMs(gd.startsAt);
-      return gd;
-    });
-
-    if (expandedId && !gamedays.find(g => g.id === expandedId)) expandedId = null;
-    render();
-    if (expandedId) ensureDaySubscriptions(expandedId);
-  }, (err) => {
-    gamedayList.innerHTML = `<div class="muted">Error loading gamedays: ${escapeHtml(err.message)}</div>`;
+  gamedayList.querySelectorAll("[data-open]").forEach((b) => {
+    b.onclick = () => openGameDay(b.getAttribute("data-open"));
   });
-}
-
-// --- Rendering (inline open under clicked day) ---
-function render() {
-  const upcoming = gamedays.filter(g => !isPast(g.startsAtMs));
-  const archived = gamedays.filter(g => isPast(g.startsAtMs));
-
-  const parts = [];
-  parts.push(`<div class="muted" style="margin-bottom:10px;">Click a Game Day to open its planner.</div>`);
-
-  parts.push(`<div class="muted" style="margin-top:8px;">📅 <b>Upcoming</b></div>`);
-  parts.push(renderCards(upcoming, false));
-
-  parts.push(`<div class="muted" style="margin-top:14px;">🗃️ <b>Archive</b> (read-only)</div>`);
-  parts.push(renderCards(archived, true));
-
-  gamedayList.innerHTML = parts.join("\n");
-  wireButtons();
-}
-
-function renderCards(days, archived) {
-  if (!days.length) {
-    return `<div class="muted" style="margin:10px 0;">${archived ? "No archived game days yet." : "No upcoming game days yet."}</div>`;
-  }
-
-  return days.map((gd) => {
-    const open = expandedId === gd.id;
-
-    return `
-      <div class="gamedayCard">
-        <div class="gamedayHeader">
-          <div>
-            <div class="gamedayTitle">${escapeHtml(gd.title || "Untitled Game Day")}</div>
-            <div class="gamedayMeta">${escapeHtml(fmtDateTime(gd.startsAtMs))}${gd.location ? " • " + escapeHtml(gd.location) : ""}</div>
-          </div>
-        </div>
-
-        <div class="gamedayActions">
-          <button class="btn secondary" data-open="${escapeHtml(gd.id)}">${open ? "Close" : "Open"}</button>
-          ${(!archived && isAdmin()) ? `<button class="btn danger" data-del="${escapeHtml(gd.id)}">Delete</button>` : ""}
-        </div>
-
-        ${open ? `<div class="gamedayDetails">${renderOpen(gd, archived)}</div>` : ""}
-      </div>
-    `;
-  }).join("\n");
-}
-
-function renderOpen(gd, archived) {
-  const tables = tablesByDay.get(gd.id) || [];
-  const wants = wantsByDay.get(gd.id) || [];
-  const myUid = auth.currentUser?.uid || "";
-
-  const actions = archived ? `
-    <div class="muted">Archived (read-only)</div>
-  ` : `
-    <div class="row">
-      <button class="btn" data-host="${escapeHtml(gd.id)}">➕ Host a Table</button>
-      <button class="btn secondary" data-want="${escapeHtml(gd.id)}">🙋 Want to Play</button>
-      <button class="btn secondary" data-refresh="${escapeHtml(gd.id)}">🔄 Refresh</button>
-    </div>
-  `;
-
-  const tablesHtml = tables.length ? tables.map((t) => {
-    const link = t.bggUrl
-      ? `<a href="${escapeHtml(t.bggUrl)}" target="_blank" rel="noopener">${escapeHtml(t.gameName || "Unknown Game")}</a>`
-      : `${escapeHtml(t.gameName || "Unknown Game")}`;
-
-    const exps = Array.isArray(t.expansions) ? t.expansions.map(e => e?.name).filter(Boolean) : [];
-    const confirmed = Array.isArray(t.confirmedNames) ? t.confirmedNames : [];
-    const waitlist = Array.isArray(t.waitlistNames) ? t.waitlistNames : [];
-    const isHost = t.hostUid && myUid && t.hostUid === myUid;
-
-    return `
-      <div class="tableItem">
-        ${t.thumbUrl ? `<img class="thumb" src="${escapeHtml(t.thumbUrl)}" alt="">` : `<div class="thumb"></div>`}
-        <div class="tableMain">
-          <div class="tableTitle">${link}</div>
-          <div class="tableMeta">
-            👤 Host: <b>${escapeHtml(t.hostDisplayName || "Unknown")}</b> •
-            🕒 Start: <b>${escapeHtml(fmtDateTime(t.startTimeMs))}</b> •
-            🎟 Seats: <b>${escapeHtml(String(t.capacity || 0))}</b>
-          </div>
-          <div class="pills">
-            <span class="pill">🧩 Expansions: ${escapeHtml(exps.join(", ") || "None")}</span>
-            <span class="pill">✅ Roster: ${escapeHtml(confirmed.join(", ") || "—")}</span>
-            <span class="pill">⏳ Waitlist: ${escapeHtml(waitlist.join(", ") || "—")}</span>
-          </div>
-
-          ${archived ? "" : `
-            <div class="gamedayActions" style="margin-top:10px;">
-              <button class="btn secondary" data-join="${escapeHtml(gd.id)}:${escapeHtml(t.id)}">Join</button>
-              <button class="btn secondary" data-leave="${escapeHtml(gd.id)}:${escapeHtml(t.id)}">${isHost ? "Leave (Host = Delete)" : "Leave"}</button>
-            </div>
-          `}
-        </div>
-      </div>
-    `;
-  }).join(`<div class="hr"></div>`) : `<div class="muted">No hosted tables yet.</div>`;
-
-  const wantsHtml = wants.length ? wants.map((p) => {
-    const link = p.bggUrl
-      ? `<a href="${escapeHtml(p.bggUrl)}" target="_blank" rel="noopener">${escapeHtml(p.gameName || "Unknown Game")}</a>`
-      : `${escapeHtml(p.gameName || "Unknown Game")}`;
-
-    return `
-      <div class="tableItem">
-        ${p.thumbUrl ? `<img class="thumb" src="${escapeHtml(p.thumbUrl)}" alt="">` : `<div class="thumb"></div>`}
-        <div class="tableMain">
-          <div class="tableTitle">${link}</div>
-          <div class="tableMeta">Requested by <b>${escapeHtml(p.createdByDisplayName || "Unknown")}</b>${p.notes ? " • " + escapeHtml(p.notes) : ""}</div>
-        </div>
-      </div>
-    `;
-  }).join(`<div class="hr"></div>`) : `<div class="muted">No Want to Play posts yet.</div>`;
-
-  return `
-    ${actions}
-    <div class="hr"></div>
-    <h3>🎲 Hosted Tables</h3>
-    ${tablesHtml}
-    <div class="hr"></div>
-    <h3>🙋 Want to Play</h3>
-    ${wantsHtml}
-  `;
-}
-
-function wireButtons() {
-  document.querySelectorAll("[data-open]").forEach((b) => {
-    b.onclick = () => {
-      const id = b.getAttribute("data-open");
-      expandedId = (expandedId === id) ? null : id;
-      for (const g of gamedays) if (g.id !== expandedId) unsubscribeDay(g.id);
-      render();
-      if (expandedId) ensureDaySubscriptions(expandedId);
-    };
-  });
-
-  document.querySelectorAll("[data-del]").forEach((b) => {
+  gamedayList.querySelectorAll("[data-del]").forEach((b) => {
     b.onclick = async () => {
       const id = b.getAttribute("data-del");
-      if (!confirm("Delete this Game Day? This removes all tables, signups, and want-to-play posts.")) return;
+      if (!confirm("Delete this Game Day? This cannot be undone.")) return;
       await fnDeleteGameDay({ gamedayId: id });
-      if (expandedId === id) expandedId = null;
     };
   });
+}
 
-  document.querySelectorAll("[data-host]").forEach((b) => b.onclick = () => hostTableFlow(b.getAttribute("data-host")));
-  document.querySelectorAll("[data-want]").forEach((b) => b.onclick = () => wantToPlayFlow(b.getAttribute("data-want")));
-  document.querySelectorAll("[data-refresh]").forEach((b) => b.onclick = () => render());
+// --- Rendering: right panel ---
+function renderSelectedMeta() {
+  if (!selectedGameDayDoc) return;
+  const gd = selectedGameDayDoc;
+  const parts = [
+    gd.startsAt ? `🕒 ${escapeHtml(fmtTimestamp(gd.startsAt))}` : "",
+    gd.location ? `📍 ${escapeHtml(gd.location)}` : "",
+    gd.status ? `🏷 ${escapeHtml(gd.status)}` : ""
+  ].filter(Boolean);
 
-  document.querySelectorAll("[data-join]").forEach((b) => {
+  gamedayTitle.textContent = gd.title || "Game Day";
+  gamedayMeta.innerHTML = parts.map((p) => `<div>${p}</div>`).join("");
+}
+
+function renderWants() {
+  wantsList.innerHTML = wants.map((w) => {
+    const who = w.createdByDisplayName ? ` • ${escapeHtml(w.createdByDisplayName)}` : "";
+    const note = w.notes ? `<div class="muted">${escapeHtml(w.notes)}</div>` : "";
+    return `
+      <div class="listitem">
+        <div class="li-main">
+          <div class="li-title">${escapeHtml(w.gameName || "Want to Play")}${who}</div>
+          ${note}
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderTablesPage() {
+  const start = page * PAGE_SIZE;
+  const slice = tables.slice(start, start + PAGE_SIZE);
+
+  if (tables.length > PAGE_SIZE) {
+    tablePager.style.display = "flex";
+    pageInfo.textContent = `Page ${page + 1} / ${Math.ceil(tables.length / PAGE_SIZE)}`;
+  } else {
+    tablePager.style.display = "none";
+    pageInfo.textContent = "";
+  }
+
+  btnPrev.disabled = page <= 0;
+  btnNext.disabled = start + PAGE_SIZE >= tables.length;
+
+  tablesList.innerHTML = slice.map((t) => {
+    const startTime = fmtTimestamp(t.startTime);
+    const cap = t.capacity ? Number(t.capacity) : 0;
+    const confirmed = Number(t.confirmedCount || 0);
+    const wait = Number(t.waitlistCount || 0);
+
+    const exp = (t.expansions && t.expansions.length)
+      ? `<div class="muted">Expansions: ${t.expansions.map((e) => escapeHtml(e.name)).join(", ")}</div>`
+      : "";
+
+    const note = t.notes ? `<div class="muted">${escapeHtml(t.notes)}</div>` : "";
+
+    const joinBtn = auth.currentUser ? `<button class="btn btn-primary" data-join="${t.id}">Join</button>` : "";
+    const leaveBtn = auth.currentUser ? `<button class="btn" data-leave="${t.id}">Leave</button>` : "";
+
+    return `
+      <div class="table">
+        <div class="tableHead">
+          <div>
+            <div class="tableTitle">${escapeHtml(t.gameName || "Table")}</div>
+            <div class="muted">${escapeHtml(startTime)} • Seats: ${confirmed}/${cap || "?"} • Wait: ${wait}</div>
+            ${exp}
+            ${note}
+          </div>
+          <div class="tableBtns">
+            ${joinBtn}
+            ${leaveBtn}
+          </div>
+        </div>
+        <div class="rosters" id="roster-${escapeHtml(t.id)}">
+          <div class="muted">Loading roster…</div>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  tablesList.querySelectorAll("[data-join]").forEach((b) => {
     b.onclick = async () => {
-      const [gamedayId, tableId] = b.getAttribute("data-join").split(":");
-      await fnJoinTable({ gamedayId, tableId });
+      const tableId = b.getAttribute("data-join");
+      await fnJoinTable({ gamedayId: selectedGameDayId, tableId });
     };
+  });
+  tablesList.querySelectorAll("[data-leave]").forEach((b) => {
+    b.onclick = async () => {
+      const tableId = b.getAttribute("data-leave");
+      await fnLeaveTable({ gamedayId: selectedGameDayId, tableId });
+    };
+  });
+}
+
+function renderRoster(tableId, signups) {
+  const el = document.querySelector(`#roster-${CSS.escape(tableId)}`);
+  if (!el) return;
+
+  const confirmed = signups.filter((s) => s.status === "confirmed");
+  const wait = signups.filter((s) => s.status === "waitlist");
+
+  const fmtNames = (arr) => arr.length ? arr.map((s) => escapeHtml(s.displayName || s.uid)).join(", ") : "—";
+
+  el.innerHTML = `
+    <div><strong>Confirmed:</strong> ${fmtNames(confirmed)}</div>
+    <div><strong>Waitlist:</strong> ${fmtNames(wait)}</div>
+  `;
+}
+
+// --- Subscriptions ---
+function unsubscribeSelected() {
+  if (unsubTables) unsubTables();
+  if (unsubWants) unsubWants();
+  unsubTables = null;
+  unsubWants = null;
+
+  for (const u of unsubSignupsByTable.values()) {
+    try { u(); } catch {}
+  }
+  unsubSignupsByTable.clear();
+
+  tables = [];
+  wants = [];
+  page = 0;
+}
+
+function subscribeSelected(gamedayId) {
+  unsubscribeSelected();
+
+  const tablesQ = query(collection(db, `gamedays/${gamedayId}/tables`), orderBy("startTime", "asc"));
+  unsubTables = onSnapshot(tablesQ, (snap) => {
+    tables = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+    renderTablesPage();
+
+    const visibleIds = new Set(tables.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE).map((t) => t.id));
+
+    for (const [tableId, unsub] of [...unsubSignupsByTable.entries()]) {
+      if (!visibleIds.has(tableId)) {
+        try { unsub(); } catch {}
+        unsubSignupsByTable.delete(tableId);
+      }
+    }
+
+    for (const tableId of visibleIds) {
+      if (unsubSignupsByTable.has(tableId)) continue;
+      const signupsQ = query(
+        collection(db, `gamedays/${gamedayId}/tables/${tableId}/signups`),
+        orderBy("joinedAt", "asc")
+      );
+      const unsub = onSnapshot(signupsQ, (s) => {
+        const signups = s.docs.map((d) => d.data());
+        renderRoster(tableId, signups);
+      }, (err) => {
+        const el = document.querySelector(`#roster-${CSS.escape(tableId)}`);
+        if (el) el.innerHTML = `<div class="muted">Roster unavailable (${escapeHtml(err.message)})</div>`;
+      });
+      unsubSignupsByTable.set(tableId, unsub);
+    }
+  }, (err) => {
+    tablesList.innerHTML = `<div class="muted">Failed to load tables: ${escapeHtml(err.message)}</div>`;
   });
 
-  document.querySelectorAll("[data-leave]").forEach((b) => {
-    b.onclick = async () => {
-      const [gamedayId, tableId] = b.getAttribute("data-leave").split(":");
-      await fnLeaveTable({ gamedayId, tableId });
-    };
+  const wantsQ = query(collection(db, `gamedays/${gamedayId}/posts`), orderBy("createdAt", "desc"));
+  unsubWants = onSnapshot(wantsQ, (snap) => {
+    wants = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
+      .filter((p) => p.kind === "want_to_play");
+    renderWants();
+  }, (err) => {
+    wantsList.innerHTML = `<div class="muted">Failed to load wants: ${escapeHtml(err.message)}</div>`;
   });
+}
+
+async function openGameDay(id) {
+  selectedGameDayId = id;
+  page = 0;
+  gamedayCard.style.display = "block";
+
+  const gdRef = doc(db, "gamedays", id);
+  if (window.__unsubGdDoc) { try { window.__unsubGdDoc(); } catch {} }
+  window.__unsubGdDoc = onSnapshot(gdRef, (d) => {
+    selectedGameDayDoc = d.exists() ? { id: d.id, ...d.data() } : null;
+    if (!selectedGameDayDoc) return;
+    renderSelectedMeta();
+    renderGameDayList();
+  });
+
+  subscribeSelected(id);
+}
+
+function closeGameDay() {
+  selectedGameDayId = null;
+  selectedGameDayDoc = null;
+  gamedayCard.style.display = "none";
+  unsubscribeSelected();
+  renderGameDayList();
 }
 
 // --- Flows ---
@@ -415,10 +477,8 @@ async function hostTableFlow(gamedayId) {
       const wantExp = window.confirm("Add expansions? (OK = yes, Cancel = skip)");
       if (wantExp) {
         const expLines = thing.expansions.slice(0, 20).map((e, i) => `${i + 1}) ${e.name} (id=${e.bggId})`);
-        const pick = window.prompt(`Enter expansion ids separated by commas (or blank):\n\n${expLines.join("\n")}`);
-        if (pick && pick.trim()) {
-          expansionIds = pick.split(",").map(s => Number(s.trim())).filter(n => Number.isFinite(n) && n > 0);
-        }
+        const pick = window.prompt(`Enter expansion ids separated by commas (or blank to skip):\n\n${expLines.join("\n")}`);
+        if (pick) expansionIds = pick.split(",").map((s) => s.trim()).filter(Boolean);
       }
     }
 
@@ -426,14 +486,16 @@ async function hostTableFlow(gamedayId) {
 
     await fnCreateTable({
       gamedayId,
-      baseThing: thing,
-      capacity,
+      bggId: String(thing.bggId),
+      gameName: thing.name,
+      thumbUrl: thing.thumbUrl || "",
       startTime: startIso,
+      capacity,
       notes,
       expansionIds
     });
   } catch (e) {
-    alert(`Host table failed: ${e?.message || e}`);
+    alert(e?.message || String(e));
   }
 }
 
@@ -442,86 +504,138 @@ async function wantToPlayFlow(gamedayId) {
     const thing = await promptPickBGGThing();
     if (!thing) return;
     const notes = window.prompt("Notes (optional):") || "";
-    await fnCreateWantToPlay({ gamedayId, thing, notes });
+    await fnCreateWantToPlay({
+      gamedayId,
+      bggId: String(thing.bggId),
+      gameName: thing.name,
+      thumbUrl: thing.thumbUrl || "",
+      notes
+    });
   } catch (e) {
-    alert(`Want to play failed: ${e?.message || e}`);
+    alert(e?.message || String(e));
   }
 }
 
-async function createGamedayPromptFlow() {
+async function createGameDayFlow() {
   try {
     const title = window.prompt("Game Day title:");
     if (!title) return;
+    const starts = window.prompt("Start date/time (YYYY-MM-DD HH:MM) e.g. 2026-01-05 10:00");
+    if (!starts) return;
+    const startsIso = new Date(starts.replace(" ", "T")).toISOString();
     const location = window.prompt("Location (optional):") || "";
-    const startsAtLocal = window.prompt("Start date/time (YYYY-MM-DD HH:MM) e.g. 2026-01-05 18:00");
-    if (!startsAtLocal) return;
-    const iso = new Date(startsAtLocal.replace(" ", "T")).toISOString();
-    await fnCreateGameDay({ title, location, startsAt: iso });
+    await fnCreateGameDay({ title, startsAt: startsIso, location });
   } catch (e) {
-    alert(`Create failed: ${e?.message || e}`);
+    alert(e?.message || String(e));
   }
 }
 
-// --- Email sign-in ---
-function showEmailCard(show) {
-  emailCard.style.display = show ? "" : "none";
+// --- Wire UI ---
+btnDiscord?.addEventListener("click", () => {
+  window.location.href = buildDiscordAuthUrl();
+});
+
+btnEmail?.addEventListener("click", () => {
+  emailCard.style.display = "block";
   emailMsg.textContent = "";
+});
+
+btnEmailCancel?.addEventListener("click", () => {
+  emailCard.style.display = "none";
+  emailMsg.textContent = "";
+});
+
+btnEmailSignIn?.addEventListener("click", async () => {
+  try {
+    emailMsg.textContent = "Signing in…";
+    await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
+    emailCard.style.display = "none";
+    emailMsg.textContent = "";
+  } catch (e) {
+    emailMsg.textContent = e?.message || String(e);
+  }
+});
+
+btnEmailSignUp?.addEventListener("click", async () => {
+  try {
+    emailMsg.textContent = "Creating account…";
+    await createUserWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
+    emailCard.style.display = "none";
+    emailMsg.textContent = "";
+  } catch (e) {
+    emailMsg.textContent = e?.message || String(e);
+  }
+});
+
+btnSignOut?.addEventListener("click", () => signOut(auth));
+
+btnCreateGameDay?.addEventListener("click", createGameDayFlow);
+
+btnBack?.addEventListener("click", closeGameDay);
+btnHostTable?.addEventListener("click", () => selectedGameDayId && hostTableFlow(selectedGameDayId));
+btnWantToPlay?.addEventListener("click", () => selectedGameDayId && wantToPlayFlow(selectedGameDayId));
+btnRefresh?.addEventListener("click", () => selectedGameDayId && subscribeSelected(selectedGameDayId));
+
+btnPrev?.addEventListener("click", () => {
+  if (page <= 0) return;
+  page -= 1;
+  renderTablesPage();
+  subscribeSelected(selectedGameDayId);
+});
+btnNext?.addEventListener("click", () => {
+  if ((page + 1) * PAGE_SIZE >= tables.length) return;
+  page += 1;
+  renderTablesPage();
+  subscribeSelected(selectedGameDayId);
+});
+
+// --- Auth + boot ---
+function setAuthedUi(user) {
+  if (!user) {
+    authStatus.textContent = "Not signed in";
+    btnDiscord.style.display = "inline-flex";
+    btnEmail.style.display = "inline-flex";
+    btnSignOut.style.display = "none";
+    btnCreateGameDay.style.display = "none";
+    return;
+  }
+  authStatus.textContent = `Signed in: ${user.uid}`;
+  btnDiscord.style.display = "none";
+  btnEmail.style.display = "none";
+  btnSignOut.style.display = "inline-flex";
+  btnCreateGameDay.style.display = isAdmin() ? "inline-flex" : "none";
 }
-btnEmail.onclick = () => showEmailCard(true);
-btnEmailCancel.onclick = () => showEmailCard(false);
 
-btnEmailSignIn.onclick = async () => {
-  emailMsg.textContent = "";
-  try {
-    await signInWithEmailAndPassword(auth, emailInput.value.trim(), passwordInput.value);
-    showEmailCard(false);
-  } catch (e) {
-    emailMsg.textContent = e?.message || String(e);
-  }
-};
+function subscribeGameDays() {
+  if (unsubGamedays) unsubGamedays();
 
-btnEmailSignUp.onclick = async () => {
-  emailMsg.textContent = "";
-  try {
-    await createUserWithEmailAndPassword(auth, emailInput.value.trim(), passwordInput.value);
-    showEmailCard(false);
-  } catch (e) {
-    emailMsg.textContent = e?.message || String(e);
-  }
-};
+  const qDays = query(
+    collection(db, "gamedays"),
+    where("status", "==", "published"),
+    orderBy("startsAt", "asc")
+  );
 
-// --- Auth buttons ---
-btnDiscord.onclick = () => { window.location.href = buildDiscordAuthorizeUrl(); };
-btnSignOut.onclick = async () => { await signOut(auth); };
+  unsubGamedays = onSnapshot(qDays, (snap) => {
+    gamedays = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    renderGameDayList();
+  }, (err) => {
+    gamedayList.innerHTML = `<div class="muted">Failed to load Game Days: ${escapeHtml(err.message)}</div>`;
+  });
+}
 
-// --- Boot ---
-(async function boot() {
-  btnCreateGameDay.onclick = createGamedayPromptFlow;
-
+async function boot() {
   try {
     await completeDiscordCallbackIfPresent();
   } catch (e) {
+    authStatus.textContent = `Discord Sign-in failed. ${e?.message || e}`;
     console.error(e);
-    alert(`Sign-in failed.\n${e?.message || e}`);
   }
 
   onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      authStatus.textContent = "Signed out";
-      btnDiscord.style.display = "";
-      btnEmail.style.display = "";
-      btnSignOut.style.display = "none";
-      btnCreateGameDay.style.display = "none";
-      gamedayList.innerHTML = `<div class="muted">Sign in to view game days.</div>`;
-      return;
-    }
-
-    authStatus.textContent = "Signed in";
-    btnDiscord.style.display = "none";
-    btnEmail.style.display = "none";
-    btnSignOut.style.display = "";
-    btnCreateGameDay.style.display = isAdmin() ? "" : "none";
-
-    subscribeGamedays();
+    setAuthedUi(user);
   });
-})();
+
+  subscribeGameDays();
+}
+
+boot();
