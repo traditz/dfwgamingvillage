@@ -34,7 +34,7 @@ const BGG_SEARCH_URL = "https://us-central1-dfwgv-planner.cloudfunctions.net/bgg
 const BGG_THING_URL  = "https://us-central1-dfwgv-planner.cloudfunctions.net/bggThing";
 
 // Discord OAuth (Client ID is NOT secret) — put your actual Application ID here:
-const DISCORD_CLIENT_ID = "PASTE_YOUR_DISCORD_APPLICATION_ID";
+const DISCORD_CLIENT_ID = "1454339984004743334";
 // Must match the redirect you added in Discord portal
 const DISCORD_REDIRECT_URI = "https://dfwgamingvillage.com/planner/auth/discord-callback.html";
 // We only need identify to get the Discord user id/username
