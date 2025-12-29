@@ -928,32 +928,32 @@ async function doEmailSignUp() {
 // -----------------------------
 // Event wiring
 // -----------------------------
-btnModalClose.addEventListener("click", closeModal);
+if (btnModalClose) btnModalClose.addEventListener("click", closeModal);
 
-btnDiscord.addEventListener("click", async () => {
+if (btnDiscord) btnDiscord.addEventListener("click", async () => {
   const url = await buildDiscordAuthUrl();
   window.location.href = url;
 });
 
-btnEmail.addEventListener("click", () => showEmailCard(true));
-btnEmailCancel.addEventListener("click", () => showEmailCard(false));
-btnEmailSignIn.addEventListener("click", doEmailSignIn);
-btnEmailSignUp.addEventListener("click", doEmailSignUp);
+if (btnEmail) btnEmail.addEventListener("click", () => showEmailCard(true));
+if (btnEmailCancel) btnEmailCancel.addEventListener("click", () => showEmailCard(false));
+if (btnEmailSignIn) btnEmailSignIn.addEventListener("click", doEmailSignIn);
+if (btnEmailSignUp) btnEmailSignUp.addEventListener("click", doEmailSignUp);
 
-btnSignOut.addEventListener("click", async () => {
+if (btnSignOut) btnSignOut.addEventListener("click", async () => {
   await signOut(auth);
 });
 
-btnCreateGameDay.addEventListener("click", async () => {
+if (btnCreateGameDay) btnCreateGameDay.addEventListener("click", async () => {
   if (!currentUser) return alert("Please sign in first.");
   await createGamedayPromptFlow();
 });
 
-btnBack.addEventListener("click", () => {
+if (btnBack) btnBack.addEventListener("click", () => {
   showGameDayList();
 });
 
-btnHostTable.addEventListener("click", async () => {
+if (btnHostTable) btnHostTable.addEventListener("click", async () => {
   try {
     if (!currentUser) {
       alert("Please sign in first.");
@@ -972,22 +972,22 @@ btnHostTable.addEventListener("click", async () => {
 });
 
 
-btnWantToPlay.addEventListener("click", async () => {
+if (btnWantToPlay) btnWantToPlay.addEventListener("click", async () => {
   if (!currentUser) return alert("Please sign in first.");
   if (!currentGameDayId) return;
   await wantToPlayFlow(currentGameDayId);
 });
 
-btnRefresh.addEventListener("click", () => {
+if (btnRefresh) btnRefresh.addEventListener("click", () => {
   if (currentGameDayId) subscribeGameDayDetails(currentGameDayId);
 });
 
 // pager
-btnPrev.addEventListener("click", () => {
+if (btnPrev) btnPrev.addEventListener("click", () => {
   currentPage = Math.max(0, currentPage - 1);
   renderTablesPage();
 });
-btnNext.addEventListener("click", () => {
+if (btnNext) btnNext.addEventListener("click", () => {
   const pages = Math.max(1, Math.ceil(currentTables.length / PAGE_SIZE));
   currentPage = Math.min(pages - 1, currentPage + 1);
   renderTablesPage();
