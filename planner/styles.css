@@ -237,3 +237,86 @@ input, select, textarea{
 }
 
 .hr{ height:1px; background: var(--line); margin: 12px 0; }
+
+/* --- Modal UX improvements --- */
+.modalStack { display: flex; flex-direction: column; gap: 12px; }
+.modalRow { display: flex; gap: 10px; align-items: center; }
+.modalActions { display:flex; justify-content: flex-end; gap: 10px; margin-top: 6px; }
+
+.input, .textarea {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  color: inherit;
+  padding: 10px 12px;
+  outline: none;
+}
+.textarea { resize: vertical; }
+
+.modalGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.fieldSpan2 { grid-column: 1 / -1; }
+
+.field .label { font-weight: 600; margin-bottom: 6px; }
+.field .hint { margin-top: 6px; font-size: 12px; opacity: 0.8; }
+
+.modalStatus, .modalError {
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.modalStatus { background: rgba(0, 200, 120, 0.12); border: 1px solid rgba(0, 200, 120, 0.18); }
+.modalError { background: rgba(255, 80, 80, 0.12); border: 1px solid rgba(255, 80, 80, 0.18); }
+.modalHint { font-size: 13px; }
+
+/* --- Search results list --- */
+.searchResults {
+  max-height: 420px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-right: 4px;
+}
+
+.resultCard {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 12px;
+  text-align: left;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.05);
+  padding: 10px;
+  cursor: pointer;
+}
+.resultCard:hover { background: rgba(255,255,255,.08); }
+.resultThumb img { width: 56px; height: 56px; object-fit: cover; border-radius: 10px; display:block; }
+.resultThumb .thumbph { width: 56px; height: 56px; border-radius: 10px; display:flex; align-items:center; justify-content:center; background: rgba(255,255,255,.08); }
+.resultTitle { font-weight: 700; line-height: 1.2; }
+.resultMeta { font-size: 12px; margin-top: 4px; }
+
+/* --- Selected game header in forms --- */
+.gameHeader {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.04);
+}
+.gameHeaderThumb img { width: 64px; height: 64px; object-fit: cover; border-radius: 12px; display:block; }
+.gameHeaderThumb .thumbph { width: 64px; height: 64px; border-radius: 12px; display:flex; align-items:center; justify-content:center; background: rgba(255,255,255,.08); }
+.gameHeaderTitle { font-size: 16px; font-weight: 800; }
+
+/* --- Expansions list --- */
+.expBlock .label { font-weight: 700; margin-bottom: 8px; }
+.expList { max-height: 200px; overflow: auto; display:flex; flex-direction: column; gap: 8px; padding-right: 4px; }
+.check { display:flex; gap:10px; align-items:flex-start; }
+.check input { margin-top: 3px; }
+
