@@ -1,3 +1,4 @@
+<!-- PATH: planner/index.html -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -7,41 +8,91 @@
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
-  <div class="wrap">
-    <header class="topbar">
-      <div class="brand">DFWGV Planner</div>
-      <div class="auth">
-        <span id="authState">Loading auth…</span>
-        <button id="btnDiscordSignIn" class="btn">Discord Sign-in</button>
-        <button id="btnSignOut" class="btn secondary" style="display:none;">Sign out</button>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">🎲</div>
+      <div>
+        <div class="title">DFWGV Planner</div>
+        <div class="subtitle">Game Day table planning (Discord ↔ Website sync)</div>
       </div>
-    </header>
+    </div>
 
-    <section class="card" id="adminPanel" style="display:none;">
-      <h2>Admin</h2>
+    <div class="authbar" id="authbar">
+      <div class="auth-status" id="authStatus">Loading auth…</div>
+      <button class="btn" id="btnDiscord">Sign in with Discord</button>
+      <button class="btn" id="btnEmail">Email sign-in</button>
+      <button class="btn btn-danger" id="btnSignOut">Sign out</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card" id="emailCard" style="display:none;">
+      <h2>Email sign-in</h2>
       <div class="row">
-        <input id="gdTitle" class="input" placeholder="Game Day title" />
-        <input id="gdLocation" class="input" placeholder="Location (optional)" />
-        <input id="gdStartsAt" class="input" type="datetime-local" />
-        <button id="btnCreateGameday" class="btn">Create Game Day</button>
+        <input id="email" type="email" placeholder="email" />
+        <input id="password" type="password" placeholder="password" />
       </div>
-      <div class="muted">Admin-only: create/delete game days.</div>
+      <div class="row">
+        <button class="btn btn-primary" id="btnEmailSignIn">Sign in</button>
+        <button class="btn" id="btnEmailSignUp">Create account</button>
+        <button class="btn" id="btnEmailCancel">Cancel</button>
+      </div>
+      <div class="muted" id="emailMsg"></div>
     </section>
 
-    <section class="card">
-      <h2>Upcoming Game Days</h2>
-      <div id="gamedaysUpcoming" class="stack"></div>
-    </section>
+    <section class="grid">
+      <section class="card">
+        <div class="cardhead">
+          <h2>📅 Upcoming Game Days</h2>
+          <button class="btn btn-primary" id="btnCreateGameDay">Create Game Day (Admin)</button>
+        </div>
+        <div class="muted">Click a Game Day to open its planner.</div>
+        <div id="gamedayList" class="list"></div>
+      </section>
 
-    <section class="card">
-      <h2>Archive</h2>
-      <div class="muted">Past events are read-only.</div>
-      <div id="gamedaysArchived" class="stack"></div>
-    </section>
+      <section class="card" id="gamedayCard" style="display:none;">
+        <div class="cardhead">
+          <h2 id="gamedayTitle">Game Day</h2>
+          <button class="btn" id="btnBack">← Back</button>
+        </div>
 
-    <footer class="footer muted">
-      DFW Gaming Village • Planner
-    </footer>
+        <div class="gamedayMeta" id="gamedayMeta"></div>
+
+        <div class="actions">
+          <button class="btn btn-primary" id="btnHostTable">➕ Host a Table</button>
+          <button class="btn btn-primary" id="btnWantToPlay">🙋 Want to Play</button>
+          <button class="btn" id="btnRefresh">🔄 Refresh</button>
+        </div>
+
+        <div class="split">
+          <div>
+            <h3>🎲 Hosted Tables</h3>
+            <div class="pager" id="tablePager" style="display:none;">
+              <button class="btn" id="btnPrev">⬅ Prev</button>
+              <div class="muted" id="pageInfo"></div>
+              <button class="btn" id="btnNext">Next ➡</button>
+            </div>
+            <div id="tablesList" class="tables"></div>
+          </div>
+
+          <div>
+            <h3>🙋 Want to Play</h3>
+            <div id="wantsList" class="list"></div>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <!-- Modal -->
+  <div class="modal" id="modal" style="display:none;">
+    <div class="modalInner">
+      <div class="modalHead">
+        <h3 id="modalTitle">Modal</h3>
+        <button class="btn" id="btnModalClose">✕</button>
+      </div>
+      <div id="modalBody"></div>
+    </div>
   </div>
 
   <script type="module" src="./app.js"></script>
