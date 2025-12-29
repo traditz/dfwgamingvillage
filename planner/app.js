@@ -1,6 +1,6 @@
 // PATH: planner/app.js
 import { firebaseConfig } from "./firebase-config.js";
-import appConfig from "./app-config.js";
+import * as appConfig from "./app-config.js";
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {
