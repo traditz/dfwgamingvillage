@@ -44,7 +44,7 @@ const fnCreateWantToPlay = httpsCallable(functions, "createWantToPlay");
 const fnJoinTable = httpsCallable(functions, "joinTable");
 const fnLeaveTable = httpsCallable(functions, "leaveTable");
 
-// --- UI ---
+// --- UI elements (must exist in your index.html) ---
 const authStatus = document.querySelector("#authStatus");
 const btnDiscord = document.querySelector("#btnDiscord");
 const btnEmail = document.querySelector("#btnEmail");
@@ -61,7 +61,6 @@ const emailMsg = document.querySelector("#emailMsg");
 const btnCreateGameDay = document.querySelector("#btnCreateGameDay");
 const gamedayList = document.querySelector("#gamedayList");
 
-// Right panel (selected Game Day)
 const gamedayCard = document.querySelector("#gamedayCard");
 const gamedayTitle = document.querySelector("#gamedayTitle");
 const gamedayMeta = document.querySelector("#gamedayMeta");
@@ -77,7 +76,6 @@ const pageInfo = document.querySelector("#pageInfo");
 const tablesList = document.querySelector("#tablesList");
 const wantsList = document.querySelector("#wantsList");
 
-// Modal
 const modal = document.querySelector("#modal");
 const modalTitle = document.querySelector("#modalTitle");
 const modalBody = document.querySelector("#modalBody");
@@ -89,6 +87,7 @@ let selectedGameDayDoc = null;
 
 let gamedays = [];
 let unsubGamedays = null;
+
 let unsubTables = null;
 let unsubWants = null;
 const unsubSignupsByTable = new Map();
@@ -105,11 +104,7 @@ function isAdmin() {
 
 function escapeHtml(s) {
   return String(s ?? "").replace(/[&<>"']/g, (c) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;"
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
   }[c]));
 }
 
@@ -123,6 +118,11 @@ function fmtTimestamp(ts) {
   return String(ts);
 }
 
+function bggUrl(bggId) {
+  if (!bggId) return null;
+  return `https://boardgamegeek.com/boardgame/${encodeURIComponent(String(bggId))}`;
+}
+
 function showModal(title, html) {
   modalTitle.textContent = title;
   modalBody.innerHTML = html;
@@ -133,11 +133,9 @@ function closeModal() {
   modalBody.innerHTML = "";
 }
 btnModalClose?.addEventListener("click", closeModal);
-modal?.addEventListener("click", (e) => {
-  if (e.target === modal) closeModal();
-});
+modal?.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
 
-// --- Discord OAuth ---
+// --- Discord OAuth (state stored in BOTH to avoid mismatch) ---
 function randomState() {
   const a = new Uint8Array(16);
   crypto.getRandomValues(a);
@@ -146,8 +144,8 @@ function randomState() {
 
 function buildDiscordAuthUrl() {
   const state = randomState();
-  // localStorage survives refresh + works across a dedicated callback page
   localStorage.setItem("dfwgv_discord_oauth_state", state);
+  sessionStorage.setItem("dfwgv_discord_oauth_state", state);
 
   const params = new URLSearchParams({
     client_id: DISCORD_CLIENT_ID,
@@ -163,14 +161,18 @@ async function completeDiscordCallbackIfPresent() {
   const url = new URL(window.location.href);
   const code = url.searchParams.get("code");
   const returnedState = url.searchParams.get("state");
-  if (!code) return; // not a callback
+  if (!code) return;
 
-  const expectedState = localStorage.getItem("dfwgv_discord_oauth_state");
+  const expectedState =
+    sessionStorage.getItem("dfwgv_discord_oauth_state") ||
+    localStorage.getItem("dfwgv_discord_oauth_state");
+
+  sessionStorage.removeItem("dfwgv_discord_oauth_state");
   localStorage.removeItem("dfwgv_discord_oauth_state");
 
   if (!returnedState) throw new Error("Missing ?state from Discord.");
   if (!expectedState || returnedState !== expectedState) {
-    throw new Error("OAuth state mismatch. Click “Sign in with Discord” again (single tab) and complete the login flow.");
+    throw new Error("State mismatch (blocked for safety). Try signing in again.");
   }
 
   const r = await fetch(`${DISCORD_AUTH_FUNCTION_URL}?code=${encodeURIComponent(code)}`);
@@ -179,7 +181,6 @@ async function completeDiscordCallbackIfPresent() {
 
   const data = JSON.parse(txt);
   if (!data.firebaseToken) throw new Error("discordAuth did not return firebaseToken");
-
   await signInWithCustomToken(auth, data.firebaseToken);
 
   // Clean URL
@@ -187,7 +188,7 @@ async function completeDiscordCallbackIfPresent() {
   url.searchParams.delete("state");
   window.history.replaceState({}, "", url.toString());
 
-  // If we're on a dedicated callback page, bounce back to the planner root.
+  // bounce from /planner/auth/ back to /planner/
   if (window.location.pathname.includes("/planner/auth/")) {
     window.location.href = "/planner/";
   }
@@ -208,26 +209,106 @@ async function bggThing(id) {
   return JSON.parse(t);
 }
 
-async function promptPickBGGThing() {
-  const q = window.prompt("Search BoardGameGeek (enter game name):");
-  if (!q) return null;
+function toLocalDatetimeValue(date = new Date()) {
+  const pad = (n) => String(n).padStart(2, "0");
+  const d = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
 
-  const items = await bggSearch(q);
-  if (!items.length) {
-    window.alert("No results found.");
-    return null;
-  }
+async function pickGameModal({ title = "Pick a game" } = {}) {
+  return new Promise((resolve) => {
+    const html = `
+      <div class="row" style="justify-content:space-between; gap:12px;">
+        <div style="flex:1; min-width:240px;">
+          <label class="muted">Search</label>
+          <input class="input" id="bggQ" placeholder="e.g. Twilight Imperium" />
+        </div>
+        <div style="margin-top:18px;">
+          <button class="btn btn-primary" id="bggSearchBtn">Search</button>
+        </div>
+      </div>
 
-  const lines = items.slice(0, 15).map((it, i) => `${i + 1}) ${it.name} (id=${it.bggId})`);
-  const pick = window.prompt(`Pick a game by number:\n\n${lines.join("\n")}`);
-  if (!pick) return null;
-  const idx = Number(pick) - 1;
-  if (Number.isNaN(idx) || idx < 0 || idx >= Math.min(items.length, 15)) {
-    window.alert("Invalid selection.");
-    return null;
-  }
+      <div class="hr"></div>
 
-  return await bggThing(items[idx].bggId);
+      <div id="bggResults" class="list"></div>
+
+      <div class="hr"></div>
+
+      <div class="row" style="justify-content:flex-end;">
+        <button class="btn" id="bggCancel">Cancel</button>
+      </div>
+    `;
+    showModal(title, html);
+
+    const qEl = modalBody.querySelector("#bggQ");
+    const resultsEl = modalBody.querySelector("#bggResults");
+    const searchBtn = modalBody.querySelector("#bggSearchBtn");
+    const cancelBtn = modalBody.querySelector("#bggCancel");
+
+    const renderResults = (items) => {
+      resultsEl.innerHTML = items.map((it) => {
+        const u = bggUrl(it.bggId);
+        return `
+          <div class="listitem" style="align-items:center;">
+            <div class="li-main" style="flex:1;">
+              <img class="thumb" src="${escapeHtml(it.thumbUrl || "")}" alt="" onerror="this.style.display='none'"/>
+              <div style="min-width:0;">
+                <div class="li-title">${escapeHtml(it.name)}</div>
+                <div class="li-sub">
+                  <span class="badge">BGG #${escapeHtml(it.bggId)}</span>
+                  ${u ? `<a href="${escapeHtml(u)}" target="_blank" rel="noopener">View on BGG</a>` : ""}
+                </div>
+              </div>
+            </div>
+            <div class="li-actions">
+              <button class="btn btn-success" data-pick="${escapeHtml(it.bggId)}">Select</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      resultsEl.querySelectorAll("[data-pick]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          try {
+            btn.disabled = true;
+            btn.textContent = "Loading…";
+            const thing = await bggThing(btn.getAttribute("data-pick"));
+            closeModal();
+            resolve(thing);
+          } catch (e) {
+            btn.disabled = false;
+            btn.textContent = "Select";
+            alert(e?.message || String(e));
+          }
+        });
+      });
+    };
+
+    searchBtn.addEventListener("click", async () => {
+      try {
+        const q = qEl.value.trim();
+        if (!q) return;
+        searchBtn.disabled = true;
+        searchBtn.textContent = "Searching…";
+        const items = await bggSearch(q);
+        renderResults(items.slice(0, 25));
+      } catch (e) {
+        resultsEl.innerHTML = `<div class="muted">${escapeHtml(e?.message || String(e))}</div>`;
+      } finally {
+        searchBtn.disabled = false;
+        searchBtn.textContent = "Search";
+      }
+    });
+
+    qEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") searchBtn.click();
+    });
+
+    cancelBtn.addEventListener("click", () => {
+      closeModal();
+      resolve(null);
+    });
+  });
 }
 
 // --- Rendering: left list ---
@@ -236,14 +317,16 @@ function renderGameDayList() {
     const starts = fmtTimestamp(gd.startsAt);
     const loc = gd.location ? ` • ${escapeHtml(gd.location)}` : "";
     return `
-      <div class="listitem ${gd.id === selectedGameDayId ? "selected" : ""}" data-gameday="${gd.id}">
+      <div class="listitem ${gd.id === selectedGameDayId ? "selected" : ""}">
         <div class="li-main">
-          <div class="li-title">${escapeHtml(gd.title || "Game Day")}</div>
-          <div class="muted">${escapeHtml(starts)}${loc}</div>
+          <div style="min-width:0;">
+            <div class="li-title">${escapeHtml(gd.title || "Game Day")}</div>
+            <div class="li-sub">${escapeHtml(starts)}${loc}</div>
+          </div>
         </div>
         <div class="li-actions">
-          <button class="btn" data-open="${gd.id}">Open</button>
-          ${isAdmin() ? `<button class="btn" data-del="${gd.id}">Delete</button>` : ""}
+          <button class="btn btn-primary" data-open="${gd.id}">Open</button>
+          ${isAdmin() ? `<button class="btn btn-danger" data-del="${gd.id}">Delete</button>` : ""}
         </div>
       </div>
     `;
@@ -279,11 +362,18 @@ function renderWants() {
   wantsList.innerHTML = wants.map((w) => {
     const who = w.createdByDisplayName ? ` • ${escapeHtml(w.createdByDisplayName)}` : "";
     const note = w.notes ? `<div class="muted">${escapeHtml(w.notes)}</div>` : "";
+    const u = bggUrl(w.bggId);
     return `
       <div class="listitem">
-        <div class="li-main">
-          <div class="li-title">${escapeHtml(w.gameName || "Want to Play")}${who}</div>
-          ${note}
+        <div class="li-main" style="flex:1;">
+          <img class="thumb" src="${escapeHtml(w.thumbUrl || "")}" alt="" onerror="this.style.display='none'"/>
+          <div style="min-width:0;">
+            <div class="li-title">${escapeHtml(w.gameName || "Want to Play")}${who}</div>
+            <div class="li-sub">
+              ${u ? `<a href="${escapeHtml(u)}" target="_blank" rel="noopener">BoardGameGeek</a>` : `<span class="muted">No BGG link</span>`}
+            </div>
+            ${note}
+          </div>
         </div>
       </div>
     `;
@@ -310,30 +400,39 @@ function renderTablesPage() {
     const cap = t.capacity ? Number(t.capacity) : 0;
     const confirmed = Number(t.confirmedCount || 0);
     const wait = Number(t.waitlistCount || 0);
+    const u = bggUrl(t.bggId);
 
     const exp = (t.expansions && t.expansions.length)
-      ? `<div class="muted">Expansions: ${t.expansions.map((e) => escapeHtml(e.name)).join(", ")}</div>`
+      ? `<div class="tableMeta">Expansions: ${t.expansions.map((e) => escapeHtml(e.name)).join(", ")}</div>`
       : "";
 
-    const note = t.notes ? `<div class="muted">${escapeHtml(t.notes)}</div>` : "";
+    const note = t.notes ? `<div class="tableMeta">${escapeHtml(t.notes)}</div>` : "";
 
-    const joinBtn = auth.currentUser ? `<button class="btn btn-primary" data-join="${t.id}">Join</button>` : "";
+    const joinBtn = auth.currentUser ? `<button class="btn btn-success" data-join="${t.id}">Join</button>` : "";
     const leaveBtn = auth.currentUser ? `<button class="btn" data-leave="${t.id}">Leave</button>` : "";
 
     return `
       <div class="table">
         <div class="tableHead">
-          <div>
-            <div class="tableTitle">${escapeHtml(t.gameName || "Table")}</div>
-            <div class="muted">${escapeHtml(startTime)} • Seats: ${confirmed}/${cap || "?"} • Wait: ${wait}</div>
-            ${exp}
-            ${note}
+          <div class="li-main" style="align-items:flex-start; flex:1;">
+            <img class="thumb" src="${escapeHtml(t.thumbUrl || "")}" alt="" onerror="this.style.display='none'"/>
+            <div style="min-width:0;">
+              <div class="tableTitle">
+                ${escapeHtml(t.gameName || "Table")}
+                ${u ? ` <span class="badge"><a href="${escapeHtml(u)}" target="_blank" rel="noopener">BGG</a></span>` : ""}
+              </div>
+              <div class="tableMeta">${escapeHtml(startTime)} • Seats: ${confirmed}/${cap || "?"} • Wait: ${wait}</div>
+              ${exp}
+              ${note}
+            </div>
           </div>
+
           <div class="tableBtns">
             ${joinBtn}
             ${leaveBtn}
           </div>
         </div>
+
         <div class="rosters" id="roster-${escapeHtml(t.id)}">
           <div class="muted">Loading roster…</div>
         </div>
@@ -362,11 +461,19 @@ function renderRoster(tableId, signups) {
   const confirmed = signups.filter((s) => s.status === "confirmed");
   const wait = signups.filter((s) => s.status === "waitlist");
 
-  const fmtNames = (arr) => arr.length ? arr.map((s) => escapeHtml(s.displayName || s.uid)).join(", ") : "—";
+  const fmt = (arr) => arr.length
+    ? arr.map((s) => escapeHtml(s.displayName || s.uid)).join(", ")
+    : "—";
 
   el.innerHTML = `
-    <div><strong>Confirmed:</strong> ${fmtNames(confirmed)}</div>
-    <div><strong>Waitlist:</strong> ${fmtNames(wait)}</div>
+    <div class="rosterBox">
+      <strong>Confirmed</strong>
+      <div>${fmt(confirmed)}</div>
+    </div>
+    <div class="rosterBox">
+      <strong>Waitlist</strong>
+      <div>${fmt(wait)}</div>
+    </div>
   `;
 }
 
@@ -393,9 +500,9 @@ function subscribeSelected(gamedayId) {
   const tablesQ = query(collection(db, `gamedays/${gamedayId}/tables`), orderBy("startTime", "asc"));
   unsubTables = onSnapshot(tablesQ, (snap) => {
     tables = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-
     renderTablesPage();
 
+    // Only subscribe rosters for the visible page
     const visibleIds = new Set(tables.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE).map((t) => t.id));
 
     for (const [tableId, unsub] of [...unsubSignupsByTable.entries()]) {
@@ -459,51 +566,162 @@ function closeGameDay() {
   renderGameDayList();
 }
 
-// --- Flows ---
+// --- Modal forms (create gameday / host table / want to play) ---
+async function createGameDayFlow() {
+  const now = toLocalDatetimeValue(new Date());
+  showModal("Create Game Day", `
+    <div>
+      <label class="muted">Title <span class="kbd">required</span></label>
+      <input class="input" id="gdTitle" placeholder="e.g. DFWGV Saturday Game Day" />
+    </div>
+    <div style="margin-top:10px;">
+      <label class="muted">Start date/time <span class="kbd">required</span></label>
+      <input class="input" id="gdStarts" type="datetime-local" value="${escapeHtml(now)}" />
+    </div>
+    <div style="margin-top:10px;">
+      <label class="muted">Location</label>
+      <input class="input" id="gdLoc" placeholder="e.g. Madness Games & Comics" />
+    </div>
+    <div class="modalFoot">
+      <button class="btn" id="gdCancel">Cancel</button>
+      <button class="btn btn-primary" id="gdCreate">Create</button>
+    </div>
+  `);
+
+  modalBody.querySelector("#gdCancel").onclick = () => closeModal();
+  modalBody.querySelector("#gdCreate").onclick = async () => {
+    const title = modalBody.querySelector("#gdTitle").value.trim();
+    const starts = modalBody.querySelector("#gdStarts").value;
+    const location = modalBody.querySelector("#gdLoc").value.trim();
+
+    if (!title) return alert("Title is required.");
+    if (!starts) return alert("Start date/time is required.");
+
+    const startsIso = new Date(starts).toISOString();
+    await fnCreateGameDay({ title, startsAt: startsIso, location });
+    closeModal();
+  };
+}
+
 async function hostTableFlow(gamedayId) {
-  try {
-    const thing = await promptPickBGGThing();
-    if (!thing) return;
+  const thing = await pickGameModal({ title: "Host a table — pick a game" });
+  if (!thing) return;
 
-    const start = window.prompt("Start time (YYYY-MM-DD HH:MM) e.g. 2026-01-05 14:00");
-    if (!start) return;
-    const startIso = new Date(start.replace(" ", "T")).toISOString();
+  const defaultStart = toLocalDatetimeValue(new Date(Date.now() + 60 * 60 * 1000));
+  const maxPlayers = Number(thing.maxPlayers || 0) || 0;
+  const defaultCap = maxPlayers || 6;
 
-    const capStr = window.prompt("Seat count (capacity). Leave blank to use game max players.");
-    const capacity = capStr ? Number(capStr) : 0;
+  const expHtml = (thing.expansions && thing.expansions.length)
+    ? `
+      <div class="hr"></div>
+      <div class="muted">Expansions (optional)</div>
+      <div class="list" style="margin-top:8px; max-height:220px; overflow:auto; padding-right:6px;">
+        ${thing.expansions.slice(0, 40).map((e) => `
+          <label class="listitem" style="justify-content:flex-start;">
+            <input type="checkbox" class="expPick" value="${escapeHtml(e.bggId)}" style="margin-right:10px;" />
+            <div style="min-width:0;">
+              <div class="li-title">${escapeHtml(e.name)}</div>
+              <div class="li-sub">BGG #${escapeHtml(e.bggId)}</div>
+            </div>
+          </label>
+        `).join("")}
+      </div>
+    `
+    : `<div class="hr"></div><div class="muted">No expansions detected for this title.</div>`;
 
-    let expansionIds = [];
-    if (thing.expansions && thing.expansions.length) {
-      const wantExp = window.confirm("Add expansions? (OK = yes, Cancel = skip)");
-      if (wantExp) {
-        const expLines = thing.expansions.slice(0, 20).map((e, i) => `${i + 1}) ${e.name} (id=${e.bggId})`);
-        const pick = window.prompt(`Enter expansion ids separated by commas (or blank to skip):\n\n${expLines.join("\n")}`);
-        if (pick) expansionIds = pick.split(",").map((s) => s.trim()).filter(Boolean);
-      }
-    }
+  const u = bggUrl(thing.bggId);
 
-    const notes = window.prompt("Notes (optional):") || "";
+  showModal("Host a table", `
+    <div class="listitem" style="justify-content:flex-start;">
+      <img class="thumb" src="${escapeHtml(thing.thumbUrl || "")}" alt="" onerror="this.style.display='none'"/>
+      <div style="min-width:0;">
+        <div class="li-title">${escapeHtml(thing.name)}</div>
+        <div class="li-sub">
+          ${u ? `<a href="${escapeHtml(u)}" target="_blank" rel="noopener">View on BoardGameGeek</a>` : ""}
+          ${maxPlayers ? ` • <span class="badge">Max players: ${escapeHtml(maxPlayers)}</span>` : ""}
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:10px;">
+      <label class="muted">Start time <span class="kbd">required</span></label>
+      <input class="input" id="tStart" type="datetime-local" value="${escapeHtml(defaultStart)}" />
+    </div>
+
+    <div style="margin-top:10px;">
+      <label class="muted">Seat count (capacity) <span class="kbd">required</span></label>
+      <input class="input" id="tCap" type="number" min="1" step="1" value="${escapeHtml(defaultCap)}" />
+      <div class="muted" style="font-size:12px; margin-top:6px;">Used for confirmed vs waitlist.</div>
+    </div>
+
+    <div style="margin-top:10px;">
+      <label class="muted">Notes</label>
+      <textarea class="input" id="tNotes" placeholder="Optional details (teach, experience level, house rules, etc.)"></textarea>
+    </div>
+
+    ${expHtml}
+
+    <div class="modalFoot">
+      <button class="btn" id="tCancel">Cancel</button>
+      <button class="btn btn-primary" id="tCreate">Create Table</button>
+    </div>
+  `);
+
+  modalBody.querySelector("#tCancel").onclick = () => closeModal();
+  modalBody.querySelector("#tCreate").onclick = async () => {
+    const startVal = modalBody.querySelector("#tStart").value;
+    const capVal = Number(modalBody.querySelector("#tCap").value);
+    const notes = modalBody.querySelector("#tNotes").value.trim();
+
+    if (!startVal) return alert("Start time is required.");
+    if (!capVal || capVal < 1) return alert("Capacity must be at least 1.");
+
+    const expansionIds = [...modalBody.querySelectorAll(".expPick:checked")].map((c) => String(c.value));
 
     await fnCreateTable({
       gamedayId,
       bggId: String(thing.bggId),
       gameName: thing.name,
       thumbUrl: thing.thumbUrl || "",
-      startTime: startIso,
-      capacity,
+      startTime: new Date(startVal).toISOString(),
+      capacity: capVal,
       notes,
       expansionIds
     });
-  } catch (e) {
-    alert(e?.message || String(e));
-  }
+
+    closeModal();
+  };
 }
 
 async function wantToPlayFlow(gamedayId) {
-  try {
-    const thing = await promptPickBGGThing();
-    if (!thing) return;
-    const notes = window.prompt("Notes (optional):") || "";
+  const thing = await pickGameModal({ title: "Want to play — pick a game" });
+  if (!thing) return;
+
+  const u = bggUrl(thing.bggId);
+
+  showModal("Post: Want to Play", `
+    <div class="listitem" style="justify-content:flex-start;">
+      <img class="thumb" src="${escapeHtml(thing.thumbUrl || "")}" alt="" onerror="this.style.display='none'"/>
+      <div style="min-width:0;">
+        <div class="li-title">${escapeHtml(thing.name)}</div>
+        <div class="li-sub">${u ? `<a href="${escapeHtml(u)}" target="_blank" rel="noopener">View on BoardGameGeek</a>` : ""}</div>
+      </div>
+    </div>
+
+    <div style="margin-top:10px;">
+      <label class="muted">Notes</label>
+      <textarea class="input" id="wNotes" placeholder="Optional: preferred time, player count, teach, etc."></textarea>
+    </div>
+
+    <div class="modalFoot">
+      <button class="btn" id="wCancel">Cancel</button>
+      <button class="btn btn-primary" id="wPost">Post</button>
+    </div>
+  `);
+
+  modalBody.querySelector("#wCancel").onclick = () => closeModal();
+  modalBody.querySelector("#wPost").onclick = async () => {
+    const notes = modalBody.querySelector("#wNotes").value.trim();
     await fnCreateWantToPlay({
       gamedayId,
       bggId: String(thing.bggId),
@@ -511,40 +729,21 @@ async function wantToPlayFlow(gamedayId) {
       thumbUrl: thing.thumbUrl || "",
       notes
     });
-  } catch (e) {
-    alert(e?.message || String(e));
-  }
-}
-
-async function createGameDayFlow() {
-  try {
-    const title = window.prompt("Game Day title:");
-    if (!title) return;
-    const starts = window.prompt("Start date/time (YYYY-MM-DD HH:MM) e.g. 2026-01-05 10:00");
-    if (!starts) return;
-    const startsIso = new Date(starts.replace(" ", "T")).toISOString();
-    const location = window.prompt("Location (optional):") || "";
-    await fnCreateGameDay({ title, startsAt: startsIso, location });
-  } catch (e) {
-    alert(e?.message || String(e));
-  }
+    closeModal();
+  };
 }
 
 // --- Wire UI ---
-btnDiscord?.addEventListener("click", () => {
-  window.location.href = buildDiscordAuthUrl();
-});
+btnDiscord?.addEventListener("click", () => { window.location.href = buildDiscordAuthUrl(); });
 
 btnEmail?.addEventListener("click", () => {
   emailCard.style.display = "block";
   emailMsg.textContent = "";
 });
-
 btnEmailCancel?.addEventListener("click", () => {
   emailCard.style.display = "none";
   emailMsg.textContent = "";
 });
-
 btnEmailSignIn?.addEventListener("click", async () => {
   try {
     emailMsg.textContent = "Signing in…";
@@ -555,7 +754,6 @@ btnEmailSignIn?.addEventListener("click", async () => {
     emailMsg.textContent = e?.message || String(e);
   }
 });
-
 btnEmailSignUp?.addEventListener("click", async () => {
   try {
     emailMsg.textContent = "Creating account…";
@@ -568,7 +766,6 @@ btnEmailSignUp?.addEventListener("click", async () => {
 });
 
 btnSignOut?.addEventListener("click", () => signOut(auth));
-
 btnCreateGameDay?.addEventListener("click", createGameDayFlow);
 
 btnBack?.addEventListener("click", closeGameDay);
