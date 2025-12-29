@@ -216,6 +216,8 @@ async function buildDiscordAuthUrl() {
   sessionStorage.setItem("discord_oauth_state", state);
   sessionStorage.setItem("discord_pkce_verifier", verifier);
 
+  sessionStorage.setItem("discord_return_to", window.location.href);
+
   const params = new URLSearchParams({
     client_id: DISCORD_CLIENT_ID,
     redirect_uri: DISCORD_REDIRECT_URI,
@@ -309,6 +311,11 @@ async function handleDiscordCallbackIfPresent() {
 
     const { signInWithCustomToken } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js");
     await signInWithCustomToken(auth, firebaseToken);
+
+    const returnTo = sessionStorage.getItem("discord_return_to") || "/planner/";
+    window.location.replace(returnTo);
+    return;
+
 
     closeModal();
   } catch (e) {
