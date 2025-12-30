@@ -788,6 +788,23 @@ function renderTablesPage() {
     const canJoin = !!currentUser;
     const bggUrl = t.bggId ? `https://boardgamegeek.com/boardgame/${encodeURIComponent(t.bggId)}` : null;
 
+    const expansions = Array.isArray(t.expansions) ? t.expansions : [];
+    const expansionsHtml = expansions.length
+      ? `
+        <div class="muted" style="margin-top:8px;">
+          <div style="font-weight:600; margin-bottom:4px;">Expansions:</div>
+          ${expansions.map((e) => {
+            const expId = e?.bggId ?? "";
+            const expName = e?.name ?? "";
+            const expUrl = expId ? `https://boardgamegeek.com/boardgame/${encodeURIComponent(expId)}` : null;
+            return expUrl
+              ? `<div><a href="${esc(expUrl)}" target="_blank" rel="noopener">${esc(expName)}</a></div>`
+              : `<div>${esc(expName)}</div>`;
+          }).join("")}
+        </div>
+      `
+      : "";
+
     const el = document.createElement("div");
     el.className = "tablecard";
     el.innerHTML = `
@@ -806,6 +823,7 @@ function renderTablesPage() {
           <div class="muted">Seats: ${confirmed}/${cap} ${wait ? ` • Waitlist: ${wait}` : ""}</div>
         </div>
         ${t.notes ? `<div class="notes">${esc(t.notes)}</div>` : ""}
+        ${expansionsHtml}
         <div class="row3">
           <button class="btn btn-primary" data-action="join" ${canJoin ? "" : "disabled"}>Join</button>
           <button class="btn" data-action="leave" ${canJoin ? "" : "disabled"}>Leave</button>
