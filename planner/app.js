@@ -216,6 +216,7 @@ async function buildDiscordAuthUrl() {
   sessionStorage.setItem("discord_oauth_state", state);
   sessionStorage.setItem("discord_pkce_verifier", verifier);
 
+  // remember where to return after callback
   sessionStorage.setItem("discord_return_to", window.location.href);
 
   const params = new URLSearchParams({
@@ -315,7 +316,6 @@ async function handleDiscordCallbackIfPresent() {
     const returnTo = sessionStorage.getItem("discord_return_to") || "/planner/";
     window.location.replace(returnTo);
     return;
-
 
     closeModal();
   } catch (e) {
