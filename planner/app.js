@@ -302,7 +302,15 @@ async function handleDiscordCallbackIfPresent() {
       </div>
     `);
 
-    const url = `${DISCORD_AUTH_FUNCTION_URL}?code=${encodeURIComponent(code)}`;
+    const verifier = sessionStorage.getItem("discord_pkce_verifier");
+    if (!verifier) throw new Error("Missing PKCE code_verifier in sessionStorage.");
+
+    const url =
+      `${DISCORD_AUTH_FUNCTION_URL}` +
+      `?code=${encodeURIComponent(code)}` +
+      `&code_verifier=${encodeURIComponent(verifier)}` +
+      `&redirect_uri=${encodeURIComponent(DISCORD_REDIRECT_URI)}`;
+
     const r = await fetch(url);
     const j = await r.json();
     if (!r.ok) throw new Error(j?.error || `HTTP ${r.status}`);
