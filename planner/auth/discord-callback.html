@@ -1,35 +1,34 @@
-<!-- PATH: planner/auth/discord-callback.html -->
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Discord Sign-in…</title>
-  <link rel="stylesheet" href="../styles.css?v=20251228e" />
+  <title>Discord Sign-in</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding:24px}
+    .muted{opacity:.75}
+  </style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">
-      <div class="logo">🎲</div>
-      <div>
-        <div class="title">DFWGV Planner</div>
-        <div class="subtitle">Completing Discord sign-in…</div>
-      </div>
-    </div>
-  </header>
+  <h2>Discord Sign-in</h2>
+  <div class="muted">Completing login and redirecting back to the planner…</div>
 
-  <main class="container">
-    <section class="card">
-      <div class="cardhead">
-        <h2>Discord Sign-in</h2>
-      </div>
-      <div class="cardbody">
-        <div class="muted">Completing login and redirecting back to the planner…</div>
-      </div>
-    </section>
-  </main>
+  <script>
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get("code");
+      const state = params.get("state");
 
-  <!-- IMPORTANT: load the planner app so it can complete the OAuth callback -->
-  <script type="module" src="../app.js?v=20251228e"></script>
+      // If Discord returned an error, just bounce back to planner with the same params.
+      const returnToRaw = sessionStorage.getItem("discord_return_to") || "/planner/";
+      const returnTo = new URL(returnToRaw, window.location.origin);
+
+      if (code) returnTo.searchParams.set("code", code);
+      if (state) returnTo.searchParams.set("state", state);
+
+      // Keep the user on the same origin and hand off to app.js on the planner page
+      window.location.replace(returnTo.toString());
+    })();
+  </script>
 </body>
 </html>
