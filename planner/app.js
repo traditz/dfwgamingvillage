@@ -104,6 +104,10 @@ let currentTables = [];
 let currentPage = 0;
 const PAGE_SIZE = 8;
 
+// roster (per-table signups)
+const rosterByTableId = new Map(); // tableId -> { confirmed: string[], waitlist: string[] }
+const rosterUnsubsByTableId = new Map(); // tableId -> unsubscribe()
+
 // unsubscribe handles
 let unsubGameDays = null;
 let unsubTables = null;
@@ -184,6 +188,56 @@ function unwrapCallableError(e) {
   // Firebase callable errors often look like: FirebaseError: functions/invalid-argument
   const msg = e?.message || String(e);
   return msg;
+}
+
+function stopRosterListenersExcept(keepIds = new Set()) {
+  for (const [tableId, unsub] of rosterUnsubsByTableId.entries()) {
+    if (!keepIds.has(tableId)) {
+      try { unsub(); } catch {}
+      rosterUnsubsByTableId.delete(tableId);
+      rosterByTableId.delete(tableId);
+    }
+  }
+}
+
+function ensureRosterListener(gamedayId, tableId) {
+  if (rosterUnsubsByTableId.has(tableId)) return;
+
+  const signupsRef = collection(db, "gamedays", gamedayId, "tables", tableId, "signups");
+  // Show players in join order (or whatever joinedAt represents)
+  const signupsQ = query(signupsRef, orderBy("joinedAt", "asc"));
+
+  const unsub = onSnapshot(signupsQ, (snap) => {
+    const confirmed = [];
+    const waitlist = [];
+
+    snap.forEach((d) => {
+      const s = d.data() || {};
+      const name = String(s.displayName || d.id || "").trim();
+      if (!name) return;
+      if (s.status === "waitlist") waitlist.push(name);
+      else confirmed.push(name);
+    });
+
+    rosterByTableId.set(tableId, { confirmed, waitlist });
+    updateRosterDom(tableId);
+  });
+
+  rosterUnsubsByTableId.set(tableId, unsub);
+}
+
+function updateRosterDom(tableId) {
+  // This is safe even if the table isn't currently rendered.
+  const host = tablesList?.querySelector?.(`[data-roster-for="${CSS.escape(String(tableId))}"]`);
+  if (!host) return;
+
+  const roster = rosterByTableId.get(tableId) || { confirmed: [], waitlist: [] };
+
+  const cEl = host.querySelector('[data-roster-kind="confirmed"]');
+  const wEl = host.querySelector('[data-roster-kind="waitlist"]');
+
+  if (cEl) cEl.textContent = roster.confirmed.length ? roster.confirmed.join(", ") : "—";
+  if (wEl) wEl.textContent = roster.waitlist.length ? roster.waitlist.join(", ") : "—";
 }
 
 // -----------------------------
@@ -754,6 +808,12 @@ function renderTablesPage() {
   const startIdx = currentPage * PAGE_SIZE;
   const pageItems = currentTables.slice(startIdx, startIdx + PAGE_SIZE);
 
+  const visibleIds = new Set(pageItems.map((t) => t.id));
+  stopRosterListenersExcept(visibleIds);
+  for (const t of pageItems) {
+    if (currentGameDayId) ensureRosterListener(currentGameDayId, t.id);
+  }
+
   if (total > PAGE_SIZE) {
     tablePager.style.display = "";
     pageInfo.textContent = `Page ${currentPage + 1} / ${pages}`;
@@ -812,6 +872,20 @@ function renderTablesPage() {
         </div>
         ${t.notes ? `<div class="notes"><span style="font-weight:600;">Notes:</span> ${esc(t.notes)}</div>` : ""}
         ${expansionsHtml}
+        <div class="roster" data-roster-for="${esc(t.id)}" style="margin-top:8px;">
+          <div class="muted" style="font-weight:600; margin-bottom:4px;">Players:</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div>
+              <div class="muted" style="font-weight:600;">✅ Confirmed</div>
+              <div class="muted" data-roster-kind="confirmed">—</div>
+            </div>
+            <div>
+              <div class="muted" style="font-weight:600;">⏳ Waitlist</div>
+              <div class="muted" data-roster-kind="waitlist">—</div>
+            </div>
+          </div>
+        </div>
+
         <div class="row3">
           <button class="btn btn-primary" data-action="join" ${canJoin ? "" : "disabled"}>Join</button>
           <button class="btn" data-action="leave" ${canJoin ? "" : "disabled"}>Leave</button>
@@ -840,6 +914,8 @@ function renderTablesPage() {
     });
 
     tablesList.appendChild(el);
+    // Populate roster immediately if we already have it.
+    updateRosterDom(t.id);
   }
 }
 
@@ -868,6 +944,7 @@ function renderWants(items) {
 // Flows
 // -----------------------------
 function showGameDayList() {
+  stopRosterListenersExcept(new Set());
   currentGameDayId = null;
   gamedayCard.style.display = "none";
 }
