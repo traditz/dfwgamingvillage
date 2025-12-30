@@ -486,19 +486,7 @@ function openGameSearchModal({ title }) {
     // autofocus
     setTimeout(() => input.focus(), 50);
 
-    // nice: debounce while typing
-    input.addEventListener("input", () => {
-      const now = Date.now();
-      if (now - lastRun < 250) return;
-      // no auto-search until at least 3 chars to reduce spam
-      if (String(input.value || "").trim().length >= 3) {
-        // soft debounce
-        const stamp = Date.now();
-        setTimeout(() => {
-          if (Date.now() - stamp >= 260) runSearch();
-        }, 300);
-      }
-    });
+
   });
 }
 
