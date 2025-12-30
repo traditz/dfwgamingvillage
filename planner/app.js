@@ -822,7 +822,7 @@ function renderTablesPage() {
           <div class="muted">Host: ${esc(t.hostDisplayName || t.hostUid || "Unknown")}</div>
           <div class="muted">Seats: ${confirmed}/${cap} ${wait ? ` • Waitlist: ${wait}` : ""}</div>
         </div>
-        ${t.notes ? `<div class="notes">${esc(t.notes)}</div>` : ""}
+        ${t.notes ? `<div class="notes"><span style="font-weight:600;">Notes:</span> ${esc(t.notes)}</div>` : ""}
         ${expansionsHtml}
         <div class="row3">
           <button class="btn btn-primary" data-action="join" ${canJoin ? "" : "disabled"}>Join</button>
