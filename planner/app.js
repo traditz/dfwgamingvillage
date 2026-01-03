@@ -33,7 +33,8 @@ const {
   DISCORD_PROMPT,
   DISCORD_AUTH_FUNCTION_URL,
   BGG_SEARCH_URL,
-  BGG_THING_URL
+  BGG_THING_URL,
+  OWNER_UID
 } = appConfig;
 
 // -----------------------------
@@ -46,9 +47,11 @@ const functions = getFunctions(app, FUNCTIONS_REGION);
 
 // --- Callable functions ---
 const fnCreateGameDay = httpsCallable(functions, "createGameDay");
-const fnDeleteGameDay = httpsCallable(functions, "deleteGameDay");
+const fnDeleteGameDay = httpsCallable(functions, "deleteGameDay"); // NEW
 const fnCreateTable = httpsCallable(functions, "createTable");
+const fnDeleteTable = httpsCallable(functions, "deleteTable"); // NEW
 const fnCreateWantToPlay = httpsCallable(functions, "createWantToPlay");
+const fnDeleteWantToPlay = httpsCallable(functions, "deleteWantToPlay"); // NEW
 const fnJoinTable = httpsCallable(functions, "joinTable");
 const fnLeaveTable = httpsCallable(functions, "leaveTable");
 
@@ -133,6 +136,10 @@ function fmtDate(d) {
   } catch {
     return String(d || "");
   }
+}
+
+function isAdmin() {
+  return currentUser && (currentUser.uid === appConfig.OWNER_UID);
 }
 
 function openModal(title, html) {
@@ -319,7 +326,8 @@ function setButtonsForAuth(user) {
     btnDiscord.style.display = "none";
     btnEmail.style.display = "none";
     btnSignOut.style.display = "";
-    btnCreateGameDay.style.display = "";
+    // Only admin sees the create button
+    btnCreateGameDay.style.display = isAdmin() ? "" : "none";
   } else {
     btnDiscord.style.display = "";
     btnEmail.style.display = "";
@@ -795,6 +803,28 @@ function renderGameDays(list) {
       <div class="title">${esc(gd.title || "Game Day")}</div>
       <div class="meta">${esc(fmtDate(startsAt))}${gd.location ? ` • ${esc(gd.location)}` : ""}</div>
     `;
+
+    // NEW: Delete button for admin
+    if (isAdmin()) {
+      const delBtn = document.createElement("button");
+      delBtn.className = "btn btn-danger";
+      delBtn.style.marginLeft = "auto";
+      delBtn.style.fontSize = "12px";
+      delBtn.style.padding = "4px 8px";
+      delBtn.textContent = "Del";
+      delBtn.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        if (confirm("Delete this Game Day? This will wipe all tables.")) {
+            try {
+                await fnDeleteGameDay({ gamedayId: gd.id });
+            } catch (err) {
+                alert(unwrapCallableError(err));
+            }
+        }
+      });
+      el.appendChild(delBtn);
+    }
+
     el.addEventListener("click", () => openGameDay(gd));
     gamedayList.appendChild(el);
   }
@@ -834,6 +864,10 @@ function renderTablesPage() {
     const wait = Number(t.waitlistCount || 0);
 
     const canJoin = !!currentUser;
+    // NEW: Check permissions for deletion
+    const isHost = currentUser && (currentUser.uid === t.hostUid);
+    const canDelete = isHost || isAdmin();
+
     const bggUrl = t.bggId ? `https://boardgamegeek.com/boardgame/${encodeURIComponent(t.bggId)}` : null;
 
     const expansions = Array.isArray(t.expansions) ? t.expansions : [];
@@ -889,6 +923,7 @@ function renderTablesPage() {
         <div class="row3">
           <button class="btn btn-primary" data-action="join" ${canJoin ? "" : "disabled"}>Join</button>
           <button class="btn" data-action="leave" ${canJoin ? "" : "disabled"}>Leave</button>
+          ${canDelete ? `<button class="btn btn-danger" data-action="delete" style="margin-left:auto;">Delete Table</button>` : ""}
         </div>
       </div>
     `;
@@ -913,6 +948,21 @@ function renderTablesPage() {
       }
     });
 
+    // NEW: Delete handler
+    const delBtn = el.querySelector('[data-action="delete"]');
+    if (delBtn) {
+        delBtn.addEventListener("click", async (ev) => {
+            ev.stopPropagation();
+            if (confirm("Are you sure you want to delete this table?")) {
+                try {
+                    await fnDeleteTable({ gamedayId: currentGameDayId, tableId: t.id });
+                } catch (e) {
+                    alert(`Delete failed: ${unwrapCallableError(e)}`);
+                }
+            }
+        });
+    }
+
     tablesList.appendChild(el);
     // Populate roster immediately if we already have it.
     updateRosterDom(t.id);
@@ -927,6 +977,9 @@ function renderWants(items) {
   }
 
   for (const p of items) {
+    const isCreator = currentUser && (currentUser.uid === p.createdByUid);
+    const canDelete = isCreator || isAdmin();
+
     const bggUrl = p.bggId ? `https://boardgamegeek.com/boardgame/${encodeURIComponent(p.bggId)}` : null;
     const el = document.createElement("div");
     el.className = "listitem";
@@ -935,7 +988,24 @@ function renderWants(items) {
         ${bggUrl ? `<a href="${esc(bggUrl)}" target="_blank" rel="noopener">${esc(p.gameName || "Game")}</a>` : esc(p.gameName || "Game")}
       </div>
       <div class="meta">${esc(p.createdByDisplayName || p.createdByUid || "Someone")}${p.notes ? ` • ${esc(p.notes)}` : ""}</div>
+      ${canDelete ? `<button class="btn btn-danger" style="margin-left:auto; font-size:12px; padding:4px 8px;">Del</button>` : ""}
     `;
+
+    // NEW: Delete handler
+    const delBtn = el.querySelector("button");
+    if (delBtn) {
+        delBtn.addEventListener("click", async (ev) => {
+            ev.stopPropagation();
+            if (confirm("Delete this request?")) {
+                try {
+                    await fnDeleteWantToPlay({ gamedayId: currentGameDayId, postId: p.id });
+                } catch (e) {
+                    alert(`Delete failed: ${unwrapCallableError(e)}`);
+                }
+            }
+        });
+    }
+
     wantsList.appendChild(el);
   }
 }
@@ -1111,6 +1181,16 @@ onAuthStateChanged(auth, async (user) => {
     setAuthStatus("Not signed in.");
   }
   setButtonsForAuth(user);
+
+  // Re-render to show/hide delete buttons on auth change
+  if (currentGameDayId) {
+    renderTablesPage();
+    // Re-fetching wants not stored locally, but a refresh button click works.
+    // Ideally we would re-render wants here too if we kept them in state,
+    // but app logic re-subscribes. We can leave as is or force re-render if posts stored in var.
+    // Current code doesn't store posts in a global var to re-render, only tables.
+    // But table re-render covers the critical part.
+  }
 });
 
 // start
