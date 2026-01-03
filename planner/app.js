@@ -256,6 +256,18 @@ function updateRosterDom(tableId) {
 
   if (cEl) cEl.textContent = roster.confirmed.length ? roster.confirmed.join(", ") : "—";
   if (wEl) wEl.textContent = roster.waitlist.length ? roster.waitlist.join(", ") : "—";
+
+  // NEW: Update seat count text dynamically from the roster
+  const card = host.closest(".tablecard");
+  if (card) {
+    const seatsEl = card.querySelector(`[data-seats-root="${CSS.escape(String(tableId))}"]`);
+    if (seatsEl) {
+      const cap = seatsEl.getAttribute("data-cap");
+      const confCount = roster.confirmed.length;
+      const waitCount = roster.waitlist.length;
+      seatsEl.textContent = `Seats: ${confCount}/${cap}${waitCount ? ` • Waitlist: ${waitCount}` : ""}`;
+    }
+  }
 }
 
 // -----------------------------
@@ -913,7 +925,7 @@ function renderTablesPage() {
         </div>
         <div class="row2">
           <div class="muted">Host: ${esc(t.hostDisplayName || t.hostUid || "Unknown")}</div>
-          <div class="muted">Seats: ${confirmed}/${cap} ${wait ? ` • Waitlist: ${wait}` : ""}</div>
+          <div class="muted" data-seats-root="${esc(t.id)}" data-cap="${cap}">Seats: ${confirmed}/${cap} ${wait ? ` • Waitlist: ${wait}` : ""}</div>
         </div>
         ${t.notes ? `<div class="notes"><span style="font-weight:600;">Notes:</span> ${esc(t.notes)}</div>` : ""}
         ${expansionsHtml}
