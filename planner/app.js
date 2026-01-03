@@ -47,11 +47,11 @@ const functions = getFunctions(app, FUNCTIONS_REGION);
 
 // --- Callable functions ---
 const fnCreateGameDay = httpsCallable(functions, "createGameDay");
-const fnDeleteGameDay = httpsCallable(functions, "deleteGameDay"); // NEW
+const fnDeleteGameDay = httpsCallable(functions, "deleteGameDay");
 const fnCreateTable = httpsCallable(functions, "createTable");
-const fnDeleteTable = httpsCallable(functions, "deleteTable"); // NEW
+const fnDeleteTable = httpsCallable(functions, "deleteTable");
 const fnCreateWantToPlay = httpsCallable(functions, "createWantToPlay");
-const fnDeleteWantToPlay = httpsCallable(functions, "deleteWantToPlay"); // NEW
+const fnDeleteWantToPlay = httpsCallable(functions, "deleteWantToPlay");
 const fnJoinTable = httpsCallable(functions, "joinTable");
 const fnLeaveTable = httpsCallable(functions, "leaveTable");
 
@@ -138,8 +138,19 @@ function fmtDate(d) {
   }
 }
 
+// FIX: Robust check for admin ID (handles both "123" and "discord:123")
 function isAdmin() {
-  return currentUser && (currentUser.uid === appConfig.OWNER_UID);
+  if (!currentUser) return false;
+  const owner = appConfig.OWNER_UID;
+  if (!owner) return false;
+  
+  // Exact match (if config has "discord:123")
+  if (currentUser.uid === owner) return true;
+  
+  // Prefix match (if config has "123" but user is "discord:123")
+  if (currentUser.uid === `discord:${owner}`) return true;
+  
+  return false;
 }
 
 function openModal(title, html) {
