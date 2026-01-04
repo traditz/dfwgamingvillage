@@ -1049,7 +1049,7 @@ function renderTablesPage() {
       <div class="body">
         <div class="row1">
           <div class="name">
-            ${bggUrl ? `<a href="${esc(bggUrl)}" target="_blank" rel="noopener" style="color:#fff;">${esc(t.gameName || "Game")}</a>` : esc(t.gameName || "Game")}
+            ${bggUrl ? `<a href="${esc(bggUrl)}" target="_blank" rel="noopener">${esc(t.gameName || "Game")}</a>` : esc(t.gameName || "Game")}
           </div>
           <div class="time">${timeDisplay}</div>
         </div>
