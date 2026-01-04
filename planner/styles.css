@@ -14,10 +14,13 @@
 }
 
 *{ box-sizing:border-box; }
-html,body{ height:100%; }
+
+/* FIX: Changed height:100% to min-height:100vh to fix scrolling cut-off */
+html { min-height: 100%; }
 body{
+  min-height: 100vh;
   margin:0;
-  background-attachment: fixed; /* FIX: Prevents gradient reset on scroll */
+  background-attachment: fixed;
   background:
     radial-gradient(1200px 600px at 20% 0%, rgba(110,168,255,.20), transparent 60%),
     radial-gradient(900px 500px at 90% 20%, rgba(79,227,194,.14), transparent 55%),
@@ -51,23 +54,19 @@ a:hover{ text-decoration:underline; }
   align-items:center;
   gap: 12px;
 }
+
+/* FIX: Removed background, border, and shadow (the "bubble") */
 .logo{
-  width: 42px;
-  height: 42px;
-  border-radius: 14px;
+  width: 48px;  /* Slightly larger to fit icon better */
+  height: 48px;
   display:grid;
   place-items:center;
-  background: linear-gradient(135deg, rgba(110,168,255,.20), rgba(79,227,194,.12));
-  border: 1px solid var(--line);
-  box-shadow: var(--shadow);
-  font-size: 20px;
+  /* background, border, box-shadow removed */
 }
-/* FIX: Logo image styling */
 .logo img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  border-radius: 13px;
+  object-fit: contain; /* Ensures the whole logo is visible */
 }
 
 .title{ font-weight: 800; letter-spacing: .2px; }
