@@ -667,8 +667,9 @@ function openHostTableFormModal({ gamedayId, thing }) {
         ? capRaw
         : (Number(thing.maxPlayers) || 0);
 
-      if (!capFinal || capFinal < 1) {
-        showInlineError("Please set Seats (capacity).");
+      // UPDATED VALIDATION LINE
+      if (!capFinal || capFinal < 2 || capFinal > 999) {
+        showInlineError("Seats must be between 2 and 999.");
         return;
       }
 
