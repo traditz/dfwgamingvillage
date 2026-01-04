@@ -49,6 +49,7 @@ const functions = getFunctions(app, FUNCTIONS_REGION);
 const fnCreateGameDay = httpsCallable(functions, "createGameDay");
 const fnDeleteGameDay = httpsCallable(functions, "deleteGameDay");
 const fnCreateTable = httpsCallable(functions, "createTable");
+const fnUpdateTable = httpsCallable(functions, "updateTable"); // NEW
 const fnDeleteTable = httpsCallable(functions, "deleteTable");
 const fnCreateWantToPlay = httpsCallable(functions, "createWantToPlay");
 const fnDeleteWantToPlay = httpsCallable(functions, "deleteWantToPlay");
@@ -108,7 +109,7 @@ let currentPage = 0;
 const PAGE_SIZE = 8;
 
 // roster (per-table signups)
-const rosterByTableId = new Map(); // tableId -> { confirmed: string[], waitlist: string[] }
+const rosterByTableId = new Map(); // tableId -> { confirmed: string[], waitlist: string[], confirmedIds: Set, waitlistIds: Set }
 const rosterUnsubsByTableId = new Map(); // tableId -> unsubscribe()
 
 // unsubscribe handles
@@ -228,17 +229,31 @@ function ensureRosterListener(gamedayId, tableId) {
   const unsub = onSnapshot(signupsQ, (snap) => {
     const confirmed = [];
     const waitlist = [];
+    // Capture IDs to check if "I" am joined
+    const confirmedIds = new Set();
+    const waitlistIds = new Set();
 
     snap.forEach((d) => {
       const s = d.data() || {};
       const name = String(s.displayName || d.id || "").trim();
+      const uid = s.uid || d.id;
+      
       if (!name) return;
-      if (s.status === "waitlist") waitlist.push(name);
-      else confirmed.push(name);
+      
+      if (s.status === "waitlist") {
+          waitlist.push(name);
+          waitlistIds.add(uid);
+      } else {
+          confirmed.push(name);
+          confirmedIds.add(uid);
+      }
     });
 
-    rosterByTableId.set(tableId, { confirmed, waitlist });
+    rosterByTableId.set(tableId, { confirmed, waitlist, confirmedIds, waitlistIds });
     updateRosterDom(tableId);
+    // Re-render table card buttons (Join/Leave state) without full refresh
+    // We trigger a light re-render of this card if possible, but simplicity:
+    renderTablesPage(); 
   });
 
   rosterUnsubsByTableId.set(tableId, unsub);
@@ -671,7 +686,7 @@ function openHostTableFormModal({ gamedayId, thing }) {
         ? capRaw
         : (Number(thing.maxPlayers) || 0);
 
-      // UPDATED VALIDATION LINE
+      // UPDATED VALIDATION LINE: 2 to 999
       if (!capFinal || capFinal < 2 || capFinal > 999) {
         showInlineError("Seats must be between 2 and 999.");
         return;
@@ -710,6 +725,59 @@ function openHostTableFormModal({ gamedayId, thing }) {
       }
     });
   });
+}
+
+// -----------------------------
+// Modal: Edit Table (NEW)
+// -----------------------------
+function openEditTableModal(t) {
+    openModal("Edit Table", `
+      <div class="modalStack">
+        <div class="modalGrid">
+          <label class="field"><div class="label">Start</div><input id="editStart" class="input" type="datetime-local" /></label>
+          <label class="field"><div class="label">Seats</div><input id="editCap" class="input" type="number" min="2" max="999" /></label>
+          <label class="field fieldSpan2"><div class="label">Notes</div><textarea id="editNotes" class="textarea" rows="3"></textarea></label>
+        </div>
+        <div class="modalStatus" id="modalStatus" style="display:none;"></div>
+        <div class="modalError" id="modalError" style="display:none;"></div>
+        <div class="modalActions">
+            <button class="btn" id="btnCancel">Cancel</button>
+            <button class="btn btn-primary" id="btnSave">Save Changes</button>
+        </div>
+      </div>
+    `);
+    
+    // Pre-fill
+    const startVal = t.startTime ? fmtLocalDatetimeValue(t.startTime.toDate ? t.startTime.toDate() : new Date(t.startTime)) : "";
+    qs("#editStart").value = startVal;
+    qs("#editCap").value = t.capacity;
+    qs("#editNotes").value = t.notes || "";
+
+    qs("#btnCancel").onclick = closeModal;
+    qs("#btnSave").onclick = async () => {
+        const startIso = parseDatetimeLocalToISO(qs("#editStart").value);
+        const cap = Number(qs("#editCap").value);
+        const notes = qs("#editNotes").value;
+        
+        if (!startIso || cap < 2 || cap > 999) {
+            showInlineError("Invalid Start or Seats (must be 2-999).");
+            return;
+        }
+        
+        showInlineStatus("Saving...");
+        try {
+            await fnUpdateTable({
+                gamedayId: currentGameDayId,
+                tableId: t.id,
+                startTime: startIso,
+                capacity: cap,
+                notes: notes
+            });
+            closeModal();
+        } catch (e) {
+            showInlineStatus(unwrapCallableError(e));
+        }
+    };
 }
 
 // -----------------------------
@@ -887,14 +955,21 @@ function renderTablesPage() {
 
   for (const t of pageItems) {
     const startTime = t.startTime?.toDate ? t.startTime.toDate() : t.startTime;
+    const timeDisplay = startTime ? esc(fmtDate(startTime)) : "TBD";
+
     const cap = Number(t.capacity || 0);
     const confirmed = Number(t.confirmedCount || 0);
     const wait = Number(t.waitlistCount || 0);
 
-    const canJoin = !!currentUser;
+    const roster = rosterByTableId.get(t.id);
+    const isSignedUp = roster && (roster.confirmedIds.has(currentUser?.uid) || roster.waitlistIds.has(currentUser?.uid));
+
+    const canJoin = !!currentUser && !isSignedUp;
+    
     // NEW: Check permissions for deletion
     const isHost = currentUser && (currentUser.uid === t.hostUid);
     const canDelete = isHost || isAdmin();
+    const canEdit = isHost;
 
     const bggUrl = t.bggId ? `https://boardgamegeek.com/boardgame/${encodeURIComponent(t.bggId)}` : null;
 
@@ -924,9 +999,9 @@ function renderTablesPage() {
       <div class="body">
         <div class="row1">
           <div class="name">
-            ${bggUrl ? `<a href="${esc(bggUrl)}" target="_blank" rel="noopener">${esc(t.gameName || "Game")}</a>` : esc(t.gameName || "Game")}
+            ${bggUrl ? `<a href="${esc(bggUrl)}" target="_blank" rel="noopener" style="color:#fff;">${esc(t.gameName || "Game")}</a>` : esc(t.gameName || "Game")}
           </div>
-          <div class="time">${esc(fmtDate(startTime))}</div>
+          <div class="time">${timeDisplay}</div>
         </div>
         <div class="row2">
           <div class="muted">Host: ${esc(t.hostDisplayName || t.hostUid || "Unknown")}</div>
@@ -949,14 +1024,19 @@ function renderTablesPage() {
         </div>
 
         <div class="row3">
-          <button class="btn btn-primary" data-action="join" ${canJoin ? "" : "disabled"}>Join</button>
-          <button class="btn" data-action="leave" ${canJoin ? "" : "disabled"}>Leave</button>
-          ${canDelete ? `<button class="btn btn-danger" data-action="delete" style="margin-left:auto;">Delete Table</button>` : ""}
+          ${isSignedUp 
+             ? `<button class="btn" disabled style="opacity:0.5; cursor:default;">✅ Joined</button>` 
+             : `<button class="btn btn-primary" data-action="join" ${canJoin ? "" : "disabled"}>Join</button>`
+          }
+          <button class="btn" data-action="leave" ${isSignedUp ? "" : "disabled style='display:none;'"}>Leave</button>
+          
+          ${canEdit ? `<button class="btn" data-action="edit">Edit</button>` : ""}
+          ${canDelete ? `<button class="btn btn-danger" data-action="delete" style="margin-left:auto;">Del</button>` : ""}
         </div>
       </div>
     `;
 
-    el.querySelector('[data-action="join"]').addEventListener("click", async (ev) => {
+    el.querySelector('[data-action="join"]')?.addEventListener("click", async (ev) => {
       ev.stopPropagation();
       if (!currentUser) return alert("Please sign in first.");
       try {
@@ -966,14 +1046,23 @@ function renderTablesPage() {
       }
     });
 
-    el.querySelector('[data-action="leave"]').addEventListener("click", async (ev) => {
+    el.querySelector('[data-action="leave"]')?.addEventListener("click", async (ev) => {
       ev.stopPropagation();
       if (!currentUser) return alert("Please sign in first.");
+      
+      // HOST LEAVE WARNING
+      if (isHost && !confirm("⚠️ Warning: You are the host.\n\nLeaving will DELETE this table and remove all players.\n\nAre you sure?")) return;
+
       try {
         await fnLeaveTable({ gamedayId: currentGameDayId, tableId: t.id });
       } catch (e) {
         alert(`Leave failed: ${unwrapCallableError(e)}`);
       }
+    });
+
+    el.querySelector('[data-action="edit"]')?.addEventListener("click", async (ev) => {
+      ev.stopPropagation();
+      openEditTableModal(t);
     });
 
     // NEW: Delete handler
