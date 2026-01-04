@@ -44,11 +44,19 @@ a:hover{ text-decoration:underline; }
   z-index: 5;
   backdrop-filter: blur(10px);
   background: rgba(255, 255, 255, 0.12);
-  border-bottom: 1px solid var(--line);
-}
-.topbar{
+  
+  /* FIX: Partial width sticky header */
+  width: fit-content;
   padding: 14px;
+  padding-right: 24px; /* Add breathing room on the right */
+  
+  /* Border styling to make it look like a floating card */
+  border: 1px solid var(--line);
+  border-top: 0;
+  border-left: 0;
+  border-bottom-right-radius: var(--radius);
 }
+
 .brand{
   display:flex;
   align-items:center;
@@ -57,16 +65,15 @@ a:hover{ text-decoration:underline; }
 
 /* FIX: Removed background, border, and shadow (the "bubble") */
 .logo{
-  width: 48px;  /* Slightly larger to fit icon better */
+  width: 48px;
   height: 48px;
   display:grid;
   place-items:center;
-  /* background, border, box-shadow removed */
 }
 .logo img {
   width: 100%;
   height: 100%;
-  object-fit: contain; /* Ensures the whole logo is visible */
+  object-fit: contain;
 }
 
 .title{ font-weight: 800; letter-spacing: .2px; }
