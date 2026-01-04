@@ -501,13 +501,17 @@ function openGameSearchModal({ title }) {
         const card = document.createElement("button");
         card.type = "button";
         card.className = "resultCard";
+        // FIX: Force white text and left alignment for visibility
+        card.style.color = "#fff";
+        card.style.textAlign = "left";
+
         card.innerHTML = `
           <div class="resultThumb">
             ${it.thumbUrl ? `<img src="${esc(it.thumbUrl)}" alt="" loading="lazy" />` : `<div class="thumbph">🎲</div>`}
           </div>
           <div class="resultBody">
             <div class="resultTitle">${esc(it.name || "Unknown")}</div>
-            <div class="resultMeta muted">${esc(sub)}</div>
+            <div class="resultMeta muted" style="color: #ccc;">${esc(sub)}</div>
           </div>
         `;
 
