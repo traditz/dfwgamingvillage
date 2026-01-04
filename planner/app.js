@@ -183,11 +183,61 @@ function fmtLocalDatetimeValue(date = new Date()) {
   return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
 }
 
+// FIX: Parse local input as Dallas/Central time specifically
 function parseDatetimeLocalToISO(v) {
-  // v like "2025-12-29T18:30"
+  // v is "YYYY-MM-DDTHH:MM"
+  if (!v) return null;
   const d = new Date(v);
   if (Number.isNaN(d.getTime())) return null;
-  return d.toISOString();
+
+  // We need to attach the correct offset for America/Chicago for that date.
+  // Using Intl.DateTimeFormat to find the offset part (e.g., "GMT-6" or "GMT-5")
+  // or simply construct a date string that specifies the timezone if supported by Date constructor,
+  // but standard JS Date parses ISO as UTC or Local.
+  
+  // Robust method: Create a date object, treat it as UTC, then adjust by the offset of Chicago.
+  // 1. Get offset for this date in Chicago
+  // We can use toLocaleString with timeZone: 'America/Chicago' to compare.
+  
+  // Simple heuristic for now: Standard Time (Nov-Mar) is -06:00, DST (Mar-Nov) is -05:00.
+  // Let's use a trick to force browser to parse it as Chicago time.
+  // Since we can't easily rely on browser timezone, we append the offset manually if we knew it.
+  
+  // BETTER FIX: Send the string to backend as-is? Backend expects ISO.
+  // Let's use the offset of the TARGET date in Chicago.
+  // "en-US" format with timeZoneName: "shortOffset" -> "1/3/2026, 2:00 PM GMT-6"
+  
+  try {
+      // Create a dummy date to check offset for the selected time
+      // Treat the input string as if it were UTC to get the components right first
+      const isoAsUtc = v + "Z"; 
+      const refDate = new Date(isoAsUtc);
+      
+      // Get the offset string for Chicago at this time (e.g., "GMT-6")
+      const parts = new Intl.DateTimeFormat('en-US', {
+          timeZone: 'America/Chicago',
+          timeZoneName: 'shortOffset'
+      }).formatToParts(refDate);
+      
+      const offsetPart = parts.find(p => p.type === 'timeZoneName')?.value; // e.g. "GMT-6" or "GMT-5"
+      if (!offsetPart) return new Date(v).toISOString(); // Fallback
+      
+      // Extract -6 or -5
+      const offset = offsetPart.replace("GMT", ""); // "-6" or "-5"
+      const offsetNum = parseInt(offset);
+      
+      // Re-construct ISO string with offset
+      // "2026-01-03T14:00" + "-06:00" -> "2026-01-03T14:00:00-06:00"
+      // We need to ensure HH:MM format for offset
+      const absOffset = Math.abs(offsetNum);
+      const sign = offsetNum >= 0 ? "+" : "-";
+      const offsetStr = `${sign}${String(absOffset).padStart(2, '0')}:00`;
+      
+      return `${v}:00${offsetStr}`;
+  } catch (e) {
+      console.error("Timezone parse error", e);
+      return new Date(v).toISOString(); // Fallback to local
+  }
 }
 
 function showInlineError(msg) {
