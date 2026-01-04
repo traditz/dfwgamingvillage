@@ -6,9 +6,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/fireba
 import {
   getAuth,
   onAuthStateChanged,
-  signOut,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword
+  signOut
+  // REMOVED: signInWithEmailAndPassword, createUserWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {
   getFirestore,
@@ -49,7 +48,7 @@ const functions = getFunctions(app, FUNCTIONS_REGION);
 const fnCreateGameDay = httpsCallable(functions, "createGameDay");
 const fnDeleteGameDay = httpsCallable(functions, "deleteGameDay");
 const fnCreateTable = httpsCallable(functions, "createTable");
-const fnUpdateTable = httpsCallable(functions, "updateTable"); // NEW
+const fnUpdateTable = httpsCallable(functions, "updateTable");
 const fnDeleteTable = httpsCallable(functions, "deleteTable");
 const fnCreateWantToPlay = httpsCallable(functions, "createWantToPlay");
 const fnDeleteWantToPlay = httpsCallable(functions, "deleteWantToPlay");
@@ -61,16 +60,9 @@ const fnLeaveTable = httpsCallable(functions, "leaveTable");
 // -----------------------------
 const authStatus = document.querySelector("#authStatus");
 const btnDiscord = document.querySelector("#btnDiscord");
-const btnEmail = document.querySelector("#btnEmail");
 const btnSignOut = document.querySelector("#btnSignOut");
 
-const emailCard = document.querySelector("#emailCard");
-const emailMsg = document.querySelector("#emailMsg");
-const inputEmail = document.querySelector("#email");
-const inputPassword = document.querySelector("#password");
-const btnEmailSignIn = document.querySelector("#btnEmailSignIn");
-const btnEmailSignUp = document.querySelector("#btnEmailSignUp");
-const btnEmailCancel = document.querySelector("#btnEmailCancel");
+// REMOVED: Email UI bindings (emailCard, inputs, buttons)
 
 const btnCreateGameDay = document.querySelector("#btnCreateGameDay");
 
@@ -185,50 +177,25 @@ function fmtLocalDatetimeValue(date = new Date()) {
 
 // FIX: Parse local input as Dallas/Central time specifically
 function parseDatetimeLocalToISO(v) {
-  // v is "YYYY-MM-DDTHH:MM"
   if (!v) return null;
   const d = new Date(v);
   if (Number.isNaN(d.getTime())) return null;
 
-  // We need to attach the correct offset for America/Chicago for that date.
-  // Using Intl.DateTimeFormat to find the offset part (e.g., "GMT-6" or "GMT-5")
-  // or simply construct a date string that specifies the timezone if supported by Date constructor,
-  // but standard JS Date parses ISO as UTC or Local.
-  
-  // Robust method: Create a date object, treat it as UTC, then adjust by the offset of Chicago.
-  // 1. Get offset for this date in Chicago
-  // We can use toLocaleString with timeZone: 'America/Chicago' to compare.
-  
-  // Simple heuristic for now: Standard Time (Nov-Mar) is -06:00, DST (Mar-Nov) is -05:00.
-  // Let's use a trick to force browser to parse it as Chicago time.
-  // Since we can't easily rely on browser timezone, we append the offset manually if we knew it.
-  
-  // BETTER FIX: Send the string to backend as-is? Backend expects ISO.
-  // Let's use the offset of the TARGET date in Chicago.
-  // "en-US" format with timeZoneName: "shortOffset" -> "1/3/2026, 2:00 PM GMT-6"
-  
   try {
-      // Create a dummy date to check offset for the selected time
-      // Treat the input string as if it were UTC to get the components right first
       const isoAsUtc = v + "Z"; 
       const refDate = new Date(isoAsUtc);
       
-      // Get the offset string for Chicago at this time (e.g., "GMT-6")
       const parts = new Intl.DateTimeFormat('en-US', {
           timeZone: 'America/Chicago',
           timeZoneName: 'shortOffset'
       }).formatToParts(refDate);
       
-      const offsetPart = parts.find(p => p.type === 'timeZoneName')?.value; // e.g. "GMT-6" or "GMT-5"
-      if (!offsetPart) return new Date(v).toISOString(); // Fallback
+      const offsetPart = parts.find(p => p.type === 'timeZoneName')?.value; 
+      if (!offsetPart) return new Date(v).toISOString(); 
       
-      // Extract -6 or -5
-      const offset = offsetPart.replace("GMT", ""); // "-6" or "-5"
+      const offset = offsetPart.replace("GMT", ""); 
       const offsetNum = parseInt(offset);
       
-      // Re-construct ISO string with offset
-      // "2026-01-03T14:00" + "-06:00" -> "2026-01-03T14:00:00-06:00"
-      // We need to ensure HH:MM format for offset
       const absOffset = Math.abs(offsetNum);
       const sign = offsetNum >= 0 ? "+" : "-";
       const offsetStr = `${sign}${String(absOffset).padStart(2, '0')}:00`;
@@ -236,7 +203,7 @@ function parseDatetimeLocalToISO(v) {
       return `${v}:00${offsetStr}`;
   } catch (e) {
       console.error("Timezone parse error", e);
-      return new Date(v).toISOString(); // Fallback to local
+      return new Date(v).toISOString(); 
   }
 }
 
@@ -255,7 +222,6 @@ function showInlineStatus(msg) {
 }
 
 function unwrapCallableError(e) {
-  // Firebase callable errors often look like: FirebaseError: functions/invalid-argument
   const msg = e?.message || String(e);
   return msg;
 }
@@ -274,13 +240,11 @@ function ensureRosterListener(gamedayId, tableId) {
   if (rosterUnsubsByTableId.has(tableId)) return;
 
   const signupsRef = collection(db, "gamedays", gamedayId, "tables", tableId, "signups");
-  // Show players in join order (or whatever joinedAt represents)
   const signupsQ = query(signupsRef, orderBy("joinedAt", "asc"));
 
   const unsub = onSnapshot(signupsQ, (snap) => {
     const confirmed = [];
     const waitlist = [];
-    // Capture IDs to check if "I" am joined
     const confirmedIds = new Set();
     const waitlistIds = new Set();
 
@@ -302,7 +266,6 @@ function ensureRosterListener(gamedayId, tableId) {
 
     rosterByTableId.set(tableId, { confirmed, waitlist, confirmedIds, waitlistIds });
     updateRosterDom(tableId);
-    // Re-render table card buttons (Join/Leave state) without full refresh
     renderTablesPage(); 
   });
 
@@ -310,7 +273,6 @@ function ensureRosterListener(gamedayId, tableId) {
 }
 
 function updateRosterDom(tableId) {
-  // This is safe even if the table isn't currently rendered.
   const host = tablesList?.querySelector?.(`[data-roster-for="${CSS.escape(String(tableId))}"]`);
   if (!host) return;
 
@@ -322,7 +284,6 @@ function updateRosterDom(tableId) {
   if (cEl) cEl.textContent = roster.confirmed.length ? roster.confirmed.join(", ") : "—";
   if (wEl) wEl.textContent = roster.waitlist.length ? roster.waitlist.join(", ") : "—";
 
-  // NEW: Update seat count text dynamically from the roster
   const card = host.closest(".tablecard");
   if (card) {
     const seatsEl = card.querySelector(`[data-seats-root="${CSS.escape(String(tableId))}"]`);
@@ -364,8 +325,6 @@ async function buildDiscordAuthUrl() {
 
   sessionStorage.setItem("discord_oauth_state", state);
   sessionStorage.setItem("discord_pkce_verifier", verifier);
-
-  // remember where to return after callback
   sessionStorage.setItem("discord_return_to", window.location.href);
 
   const params = new URLSearchParams({
@@ -402,23 +361,19 @@ function setAuthStatus(text) {
   authStatus.textContent = text;
 }
 
-function showEmailCard(show) {
-  emailCard.style.display = show ? "" : "none";
-  emailMsg.textContent = "";
-}
+// REMOVED: showEmailCard() function
 
 function setButtonsForAuth(user) {
-  if (!btnDiscord || !btnEmail || !btnSignOut || !btnCreateGameDay) return;
+  if (!btnDiscord || !btnSignOut || !btnCreateGameDay) return;
 
   if (user) {
     btnDiscord.style.display = "none";
-    btnEmail.style.display = "none";
+    // REMOVED: btnEmail logic
     btnSignOut.style.display = "";
-    // Only admin sees the create button
     btnCreateGameDay.style.display = isAdmin() ? "" : "none";
   } else {
     btnDiscord.style.display = "";
-    btnEmail.style.display = "";
+    // REMOVED: btnEmail logic
     btnSignOut.style.display = "none";
     btnCreateGameDay.style.display = "none";
   }
@@ -587,7 +542,6 @@ function openGameSearchModal({ title }) {
             const full = await bggThing(it.bggId);
             showInlineStatus("");
 
-            // Normalize "thing" object used by the next modal:
             const expansions = full.expansions || [];
             done({
               bggId: it.bggId,
@@ -622,7 +576,7 @@ function openGameSearchModal({ title }) {
 
       try {
         const items = await bggSearch(q);
-        if (runId !== lastRun) return; // stale
+        if (runId !== lastRun) return; 
         showInlineStatus("");
         renderResults(items);
       } catch (e) {
@@ -637,10 +591,7 @@ function openGameSearchModal({ title }) {
       if (ev.key === "Enter") runSearch();
     });
 
-    // autofocus
     setTimeout(() => input.focus(), 50);
-
-
   });
 }
 
@@ -1230,40 +1181,7 @@ async function createGamedayPromptFlow() {
   }
 }
 
-// -----------------------------
-// Email Auth flows
-// -----------------------------
-async function doEmailSignIn() {
-  emailMsg.textContent = "";
-  const email = inputEmail.value.trim();
-  const pass = inputPassword.value;
-  if (!email || !pass) {
-    emailMsg.textContent = "Email and password required.";
-    return;
-  }
-  try {
-    await signInWithEmailAndPassword(auth, email, pass);
-    showEmailCard(false);
-  } catch (e) {
-    emailMsg.textContent = unwrapCallableError(e);
-  }
-}
-
-async function doEmailSignUp() {
-  emailMsg.textContent = "";
-  const email = inputEmail.value.trim();
-  const pass = inputPassword.value;
-  if (!email || !pass) {
-    emailMsg.textContent = "Email and password required.";
-    return;
-  }
-  try {
-    await createUserWithEmailAndPassword(auth, email, pass);
-    showEmailCard(false);
-  } catch (e) {
-    emailMsg.textContent = unwrapCallableError(e);
-  }
-}
+// REMOVED: doEmailSignIn, doEmailSignUp
 
 // -----------------------------
 // Event wiring
@@ -1275,10 +1193,7 @@ if (btnDiscord) btnDiscord.addEventListener("click", async () => {
   window.location.href = url;
 });
 
-if (btnEmail) btnEmail.addEventListener("click", () => showEmailCard(true));
-if (btnEmailCancel) btnEmailCancel.addEventListener("click", () => showEmailCard(false));
-if (btnEmailSignIn) btnEmailSignIn.addEventListener("click", doEmailSignIn);
-if (btnEmailSignUp) btnEmailSignUp.addEventListener("click", doEmailSignUp);
+// REMOVED: btnEmail, btnEmailCancel, btnEmailSignIn, btnEmailSignUp listeners
 
 if (btnSignOut) btnSignOut.addEventListener("click", async () => {
   await signOut(auth);
