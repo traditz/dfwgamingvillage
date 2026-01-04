@@ -130,10 +130,11 @@ function esc(s) {
   }[m]));
 }
 
+// FIX: Force America/Chicago timezone for display
 function fmtDate(d) {
   try {
     const dt = d instanceof Date ? d : new Date(d);
-    return dt.toLocaleString();
+    return dt.toLocaleString("en-US", { timeZone: "America/Chicago" });
   } catch {
     return String(d || "");
   }
@@ -252,7 +253,6 @@ function ensureRosterListener(gamedayId, tableId) {
     rosterByTableId.set(tableId, { confirmed, waitlist, confirmedIds, waitlistIds });
     updateRosterDom(tableId);
     // Re-render table card buttons (Join/Leave state) without full refresh
-    // We trigger a light re-render of this card if possible, but simplicity:
     renderTablesPage(); 
   });
 
