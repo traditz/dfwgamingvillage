@@ -1,4 +1,3 @@
-<!-- PATH: planner/index.html -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -6,13 +5,12 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>DFWGV Planner</title>
 
-  <!-- Cache-bust so GitHub Pages stops serving old CSS -->
   <link rel="stylesheet" href="./styles.css?v=20251228e" />
 </head>
 <body>
   <header class="topbar">
     <div class="brand">
-      <div class="logo">🎲</div>
+      <div class="logo"><img src="./64.png" alt="Logo" /></div>
       <div>
         <div class="title">DFWGV Planner</div>
         <div class="subtitle">Game Day table planning (Discord ↔ Website sync)</div>
@@ -50,7 +48,6 @@
         </div>
         <div class="muted">Click a Game Day to open its planner.</div>
 
-        <!-- List of game days -->
         <div id="gamedayList" class="list"></div>
       </section>
 
@@ -88,7 +85,6 @@
     </section>
   </main>
 
-  <!-- Modal (matches the CSS below) -->
   <div class="modal" id="modal" style="display:none;">
     <div class="modalCard">
       <div class="modalHead">
@@ -96,11 +92,9 @@
         <button class="btn" id="btnModalClose">✕</button>
       </div>
       <div class="modalBody" id="modalBody"></div>
-      <!-- modalFoot gets injected by JS -->
-    </div>
+      </div>
   </div>
 
-  <!-- FIX: app.js must be loaded from the same folder as this index.html -->
   <script type="module" src="./app.js?v=20251228e"></script>
 </body>
 </html>
