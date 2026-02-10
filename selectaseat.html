@@ -67,8 +67,13 @@
             },
 
             login() {
-                const uri = encodeURIComponent(window.location.href.split('#')[0]);
-                window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${uri}&response_type=token&scope=identify`;
+               // This must match EXACTLY what is in your Discord Developer Portal Redirects list
+                const REDIRECT_URI = 'https://traditz.github.io/dfwgamingvillage/selectaseat.html';
+
+                const uri = encodeURIComponent(REDIRECT_URI);
+                const authUrl = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${uri}&response_type=token&scope=identify`;
+                console.log("Redirecting to:", authUrl); // This helps you debug if it fails again
+                window.location.href = authUrl;
             },
 
             async confirmSelection() {
