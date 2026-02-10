@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, set, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, set, remove, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
@@ -37,6 +37,7 @@
             seats: {},
             selection: null,
             loading: true,
+            userCurrentSeat: null,
 
             async init() {
                 const fragment = new URLSearchParams(window.location.hash.slice(1));
@@ -59,7 +60,6 @@
 
                 if (this.user && ADMIN_IDS.includes(this.user.id)) this.isAdmin = true;
 
-                // Listen for LAN changes
                 onValue(ref(db, 'lans'), (snapshot) => {
                     const data = snapshot.val() || {};
                     this.allLans = Object.keys(data);
@@ -69,6 +69,17 @@
                             this.currentLan = this.allLans[0];
                         }
                         this.seats = data[this.currentLan]?.seats || {};
+                        
+                        // Check if current user is already sitting
+                        this.userCurrentSeat = null;
+                        if (this.user) {
+                            for (let [key, value] of Object.entries(this.seats)) {
+                                if (value && value.id === this.user.id) {
+                                    this.userCurrentSeat = key;
+                                    break;
+                                }
+                            }
+                        }
                     }
                     this.loading = false;
                 });
@@ -81,33 +92,50 @@
 
             async confirmSelection() {
                 if (!this.user) return this.login();
+                
+                // 1. Remove from old seat if they have one
+                if (this.userCurrentSeat) {
+                    await remove(ref(db, `lans/${this.currentLan}/seats/${this.userCurrentSeat}`));
+                }
+
+                // 2. Occupy new seat
                 await set(ref(db, `lans/${this.currentLan}/seats/${this.selection}`), {
                     username: this.user.username,
                     avatar: this.user.avatar,
                     id: this.user.id
                 });
+                
                 this.selection = null;
             },
 
+            async leaveSeat(id) {
+                if (confirm(`Leave your current seat (${id})?`)) {
+                    await remove(ref(db, `lans/${this.currentLan}/seats/${id}`));
+                }
+            },
+
             async kickUser(id) {
-                if (confirm(`Kick player from ${id}?`)) {
+                if (confirm(`Admin Action: Kick player from seat ${id}?`)) {
                     await remove(ref(db, `lans/${this.currentLan}/seats/${id}`));
                 }
             },
 
             async createNewLAN() {
-                const name = prompt("New Event Name (e.g. Winter_Bash):");
+                const name = prompt("New Event Name (e.g. Summer_Slam):");
                 if (!name) return;
                 const clean = name.replace(/\s+/g, '_');
-                const base = { 1:null, 2:null, 3:null, 4:null, 5:null, 6:null, 7:null, 8:null, U1:null, U2:null, U3:null, U4:null };
-                await set(ref(db, `lans/${clean}/seats`), base);
+                const base = { 
+                    created_at: Date.now(),
+                    seats: { 1:null, 2:null, 3:null, 4:null, 5:null, 6:null, 7:null, 8:null, U1:null, U2:null, U3:null, U4:null } 
+                };
+                await set(ref(db, `lans/${clean}`), base);
                 this.changeLan(clean);
             },
 
             changeLan(name) {
                 this.currentLan = name;
                 localStorage.setItem('last_lan', name);
-                location.reload(); // Refresh to ensure clean state
+                location.reload(); 
             },
 
             logout() {
@@ -123,18 +151,18 @@
 
     <header class="max-w-5xl mx-auto flex justify-between items-center mb-10">
         <div>
-            <h1 class="text-3xl font-black text-indigo-500 tracking-tighter" x-text="currentLan ? currentLan.replace(/_/g,' ') : 'No Active Event'"></h1>
-            <p class="text-xs text-slate-500 uppercase font-bold tracking-widest">LAN Village Seating</p>
+            <h1 class="text-3xl font-black text-indigo-500 tracking-tighter" x-text="currentLan ? currentLan.replace(/_/g,' ') : 'Selecting Event...'"></h1>
+            <p class="text-xs text-slate-500 uppercase font-bold tracking-widest">Village Seating Map</p>
         </div>
         <template x-if="user">
             <div class="flex items-center gap-4 bg-slate-800 p-2 pr-4 rounded-full border border-slate-700">
                 <img :src="user.avatar" class="w-8 h-8 rounded-full border border-indigo-500">
                 <span class="text-sm font-bold" x-text="user.username"></span>
-                <button @click="logout()" class="text-[10px] text-slate-500 hover:text-white ml-2 uppercase">Logout</button>
+                <button @click="logout()" class="text-[10px] text-slate-500 hover:text-white ml-2 uppercase font-black">Logout</button>
             </div>
         </template>
         <template x-if="!user">
-            <button @click="login()" class="bg-[#5865F2] px-6 py-2 rounded-lg font-bold">Login with Discord</button>
+            <button @click="login()" class="bg-[#5865F2] hover:bg-[#4752C4] px-6 py-2 rounded-lg font-bold shadow-xl transition-transform active:scale-95">Login with Discord</button>
         </template>
     </header>
 
@@ -142,8 +170,8 @@
         <div class="max-w-5xl mx-auto mb-10 bg-indigo-900/20 border border-indigo-500/30 p-4 rounded-2xl flex justify-between items-center">
             <button @click="createNewLAN()" class="bg-indigo-600 px-4 py-2 rounded-lg text-xs font-bold transition hover:bg-indigo-500">CREATE NEW EVENT</button>
             <div class="flex items-center gap-3">
-                <span class="text-xs text-slate-400">Switch Event:</span>
-                <select @change="changeLan($event.target.value)" class="bg-slate-800 text-xs border border-slate-700 rounded px-3 py-1.5 outline-none">
+                <span class="text-xs text-slate-400 font-bold uppercase">Active Event:</span>
+                <select @change="changeLan($event.target.value)" class="bg-slate-800 text-xs border border-slate-700 rounded px-3 py-1.5 outline-none font-bold text-indigo-400">
                     <template x-for="lan in allLans">
                         <option :value="lan" x-text="lan.replace(/_/g,' ')" :selected="lan === currentLan"></option>
                     </template>
@@ -155,51 +183,76 @@
     <main class="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-12" x-show="!loading">
         <div class="lg:col-span-3 space-y-24 bg-slate-800/40 p-10 rounded-3xl border border-slate-700 relative shadow-2xl">
             <h3 class="absolute top-4 left-6 text-[10px] font-black text-slate-500 uppercase tracking-widest">Area 1</h3>
+            
             <div class="grid grid-cols-4 gap-6 table-wall pt-8">
                 <template x-for="id in [1,2,3,4]">
                     <div class="relative group">
-                        <button @click="if(!seats[id]) selection = id" :class="seats[id] ? 'bg-slate-900' : (selection == id ? 'bg-indigo-600 border-indigo-400' : 'bg-slate-800 border-slate-700 hover:border-indigo-500')" class="w-full h-24 rounded-2xl border-2 transition-all flex items-center justify-center overflow-hidden">
-                            <template x-if="seats[id]"><img :src="seats[id].avatar" class="w-full h-full object-cover"></template>
+                        <button @click="if(!seats[id]) selection = id" :class="seats[id] ? 'bg-slate-900 border-slate-800' : (selection == id ? 'bg-indigo-600 border-indigo-400 scale-105' : 'bg-slate-800 border-slate-700 hover:border-indigo-500')" class="w-full h-28 rounded-2xl border-2 transition-all flex flex-col items-center justify-center p-2">
+                            <template x-if="seats[id]">
+                                <div class="flex flex-col items-center">
+                                    <img :src="seats[id].avatar" class="w-12 h-12 rounded-full mb-1">
+                                    <span class="text-[10px] font-bold truncate w-20 text-center" x-text="seats[id].username"></span>
+                                </div>
+                            </template>
                             <template x-if="!seats[id]"><span class="text-2xl font-black text-slate-600" x-text="id"></span></template>
                         </button>
-                        <template x-if="isAdmin && seats[id]"><button @click="kickUser(id)" class="absolute -top-2 -right-2 bg-red-600 w-6 h-6 rounded-full text-xs font-bold border-2 border-slate-900">✕</button></template>
+                        <template x-if="isAdmin && seats[id]"><button @click="kickUser(id)" class="absolute -top-2 -right-2 bg-red-600 w-6 h-6 rounded-full text-xs font-bold border-2 border-slate-900 z-10 shadow-lg">✕</button></template>
+                        <template x-if="user && seats[id] && seats[id].id === user.id && !isAdmin"><button @click="leaveSeat(id)" class="absolute -top-2 -right-2 bg-slate-600 w-6 h-6 rounded-full text-[10px] font-bold border-2 border-slate-900 z-10 shadow-lg">OUT</button></template>
                     </div>
                 </template>
             </div>
+
             <div class="grid grid-cols-4 gap-6 border-b-4 border-slate-700 pb-8">
                 <template x-for="id in [5,6,7,8]">
                     <div class="relative group">
-                        <button @click="if(!seats[id]) selection = id" :class="seats[id] ? 'bg-slate-900' : (selection == id ? 'bg-indigo-600 border-indigo-400' : 'bg-slate-800 border-slate-700 hover:border-indigo-500')" class="w-full h-24 rounded-2xl border-2 transition-all flex items-center justify-center overflow-hidden">
-                            <template x-if="seats[id]"><img :src="seats[id].avatar" class="w-full h-full object-cover"></template>
+                        <button @click="if(!seats[id]) selection = id" :class="seats[id] ? 'bg-slate-900 border-slate-800' : (selection == id ? 'bg-indigo-600 border-indigo-400 scale-105' : 'bg-slate-800 border-slate-700 hover:border-indigo-500')" class="w-full h-28 rounded-2xl border-2 transition-all flex flex-col items-center justify-center p-2">
+                            <template x-if="seats[id]">
+                                <div class="flex flex-col items-center">
+                                    <img :src="seats[id].avatar" class="w-12 h-12 rounded-full mb-1">
+                                    <span class="text-[10px] font-bold truncate w-20 text-center" x-text="seats[id].username"></span>
+                                </div>
+                            </template>
                             <template x-if="!seats[id]"><span class="text-2xl font-black text-slate-600" x-text="id"></span></template>
                         </button>
-                        <template x-if="isAdmin && seats[id]"><button @click="kickUser(id)" class="absolute -top-2 -right-2 bg-red-600 w-6 h-6 rounded-full text-xs font-bold border-2 border-slate-900">✕</button></template>
+                        <template x-if="isAdmin && seats[id]"><button @click="kickUser(id)" class="absolute -top-2 -right-2 bg-red-600 w-6 h-6 rounded-full text-xs font-bold border-2 border-slate-900 z-10 shadow-lg">✕</button></template>
+                        <template x-if="user && seats[id] && seats[id].id === user.id && !isAdmin"><button @click="leaveSeat(id)" class="absolute -top-2 -right-2 bg-slate-600 w-6 h-6 rounded-full text-[10px] font-bold border-2 border-slate-900 z-10 shadow-lg">OUT</button></template>
                     </div>
                 </template>
             </div>
         </div>
 
-        <div class="bg-slate-800/40 p-8 rounded-3xl border border-slate-700 relative h-fit">
+        <div class="bg-slate-800/40 p-8 rounded-3xl border border-slate-700 relative h-fit shadow-2xl">
             <h3 class="absolute top-4 left-6 text-[10px] font-black text-amber-500/60 uppercase tracking-widest">Area 2: Upstairs</h3>
             <div class="grid grid-cols-1 gap-6 table-wall pt-8">
                 <template x-for="id in ['U1','U2','U3','U4']">
                     <div class="relative group">
-                        <button @click="if(!seats[id]) selection = id" :class="seats[id] ? 'bg-slate-900' : (selection == id ? 'bg-indigo-600 border-indigo-400' : 'bg-slate-800 border-slate-700 hover:border-indigo-500')" class="w-full h-20 rounded-2xl border-2 transition-all flex items-center justify-center overflow-hidden">
-                            <template x-if="seats[id]"><img :src="seats[id].avatar" class="w-full h-full object-cover"></template>
+                        <button @click="if(!seats[id]) selection = id" :class="seats[id] ? 'bg-slate-900 border-slate-800' : (selection == id ? 'bg-indigo-600 border-indigo-400 scale-105' : 'bg-slate-800 border-slate-700 hover:border-indigo-500')" class="w-full h-24 rounded-2xl border-2 transition-all flex flex-col items-center justify-center p-2">
+                            <template x-if="seats[id]">
+                                <div class="flex flex-col items-center">
+                                    <img :src="seats[id].avatar" class="w-10 h-10 rounded-full mb-1">
+                                    <span class="text-[10px] font-bold truncate w-20 text-center" x-text="seats[id].username"></span>
+                                </div>
+                            </template>
                             <template x-if="!seats[id]"><span class="text-2xl font-black text-slate-600" x-text="id"></span></template>
                         </button>
-                        <template x-if="isAdmin && seats[id]"><button @click="kickUser(id)" class="absolute -top-2 -right-2 bg-red-600 w-6 h-6 rounded-full text-xs font-bold border-2 border-slate-900">✕</button></template>
+                        <template x-if="isAdmin && seats[id]"><button @click="kickUser(id)" class="absolute -top-2 -right-2 bg-red-600 w-6 h-6 rounded-full text-xs font-bold border-2 border-slate-900 z-10 shadow-lg">✕</button></template>
+                        <template x-if="user && seats[id] && seats[id].id === user.id && !isAdmin"><button @click="leaveSeat(id)" class="absolute -top-2 -right-2 bg-slate-600 w-6 h-6 rounded-full text-[10px] font-bold border-2 border-slate-900 z-10 shadow-lg">OUT</button></template>
                     </div>
                 </template>
             </div>
         </div>
     </main>
 
-    <div x-show="selection" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-indigo-600 px-8 py-4 rounded-2xl shadow-2xl border border-indigo-400 flex items-center gap-8 z-50">
-        <p class="font-bold">Claim Seat <span x-text="selection"></span>?</p>
-        <div class="flex gap-2">
-            <button @click="confirmSelection()" class="bg-white text-indigo-700 px-6 py-2 rounded-xl font-black hover:bg-slate-100 transition">CONFIRM</button>
-            <button @click="selection = null" class="text-xs font-bold opacity-60">Cancel</button>
+    <div x-show="selection" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-indigo-600 px-8 py-4 rounded-2xl shadow-2xl border border-indigo-400 flex flex-col items-center gap-2 z-50">
+        <template x-if="userCurrentSeat">
+            <p class="text-[10px] uppercase font-bold text-indigo-200">This will move you from <span x-text="userCurrentSeat"></span> to <span x-text="selection"></span></p>
+        </template>
+        <div class="flex items-center gap-6">
+            <p class="font-bold">Claim Seat <span x-text="selection"></span>?</p>
+            <div class="flex gap-2">
+                <button @click="confirmSelection()" class="bg-white text-indigo-700 px-6 py-2 rounded-xl font-black hover:bg-slate-100 transition shadow-lg">CONFIRM</button>
+                <button @click="selection = null" class="text-xs font-bold opacity-60 px-2 uppercase">Cancel</button>
+            </div>
         </div>
     </div>
 </body>
