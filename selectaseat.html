@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, set, remove, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, set, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
@@ -70,7 +70,6 @@
                         }
                         this.seats = data[this.currentLan]?.seats || {};
                         
-                        // Check if current user is already sitting
                         this.userCurrentSeat = null;
                         if (this.user) {
                             for (let [key, value] of Object.entries(this.seats)) {
@@ -80,6 +79,9 @@
                                 }
                             }
                         }
+                    } else {
+                        this.seats = {};
+                        this.currentLan = '';
                     }
                     this.loading = false;
                 });
@@ -92,19 +94,14 @@
 
             async confirmSelection() {
                 if (!this.user) return this.login();
-                
-                // 1. Remove from old seat if they have one
                 if (this.userCurrentSeat) {
                     await remove(ref(db, `lans/${this.currentLan}/seats/${this.userCurrentSeat}`));
                 }
-
-                // 2. Occupy new seat
                 await set(ref(db, `lans/${this.currentLan}/seats/${this.selection}`), {
                     username: this.user.username,
                     avatar: this.user.avatar,
                     id: this.user.id
                 });
-                
                 this.selection = null;
             },
 
@@ -121,7 +118,7 @@
             },
 
             async createNewLAN() {
-                const name = prompt("New Event Name (e.g. Summer_Slam):");
+                const name = prompt("New Event Name:");
                 if (!name) return;
                 const clean = name.replace(/\s+/g, '_');
                 const base = { 
@@ -130,6 +127,15 @@
                 };
                 await set(ref(db, `lans/${clean}`), base);
                 this.changeLan(clean);
+            },
+
+            async deleteCurrentLAN() {
+                if (!this.currentLan) return;
+                const check = confirm(`WARNING: Are you sure you want to delete "${this.currentLan.replace(/_/g, ' ')}"? All seating data will be lost forever.`);
+                if (check) {
+                    await remove(ref(db, `lans/${this.currentLan}`));
+                    location.reload();
+                }
             },
 
             changeLan(name) {
@@ -151,8 +157,8 @@
 
     <header class="max-w-5xl mx-auto flex justify-between items-center mb-10">
         <div>
-            <h1 class="text-3xl font-black text-indigo-500 tracking-tighter" x-text="currentLan ? currentLan.replace(/_/g,' ') : 'Selecting Event...'"></h1>
-            <p class="text-xs text-slate-500 uppercase font-bold tracking-widest">Village Seating Map</p>
+            <h1 class="text-3xl font-black text-indigo-500 tracking-tighter" x-text="currentLan ? currentLan.replace(/_/g,' ') : 'No Active Event'"></h1>
+            <p class="text-xs text-slate-500 uppercase font-bold tracking-widest text-glow">Gaming Village Seats</p>
         </div>
         <template x-if="user">
             <div class="flex items-center gap-4 bg-slate-800 p-2 pr-4 rounded-full border border-slate-700">
@@ -167,11 +173,14 @@
     </header>
 
     <template x-if="isAdmin">
-        <div class="max-w-5xl mx-auto mb-10 bg-indigo-900/20 border border-indigo-500/30 p-4 rounded-2xl flex justify-between items-center">
-            <button @click="createNewLAN()" class="bg-indigo-600 px-4 py-2 rounded-lg text-xs font-bold transition hover:bg-indigo-500">CREATE NEW EVENT</button>
+        <div class="max-w-5xl mx-auto mb-10 bg-slate-800/80 border border-slate-700 p-4 rounded-2xl flex flex-wrap gap-4 items-center justify-between shadow-lg">
+            <div class="flex gap-2">
+                <button @click="createNewLAN()" class="bg-indigo-600 px-4 py-2 rounded-lg text-xs font-bold transition hover:bg-indigo-500">NEW EVENT</button>
+                <button @click="deleteCurrentLAN()" class="bg-red-900/40 border border-red-700/50 text-red-500 px-4 py-2 rounded-lg text-xs font-bold transition hover:bg-red-600 hover:text-white">DELETE EVENT</button>
+            </div>
             <div class="flex items-center gap-3">
                 <span class="text-xs text-slate-400 font-bold uppercase">Active Event:</span>
-                <select @change="changeLan($event.target.value)" class="bg-slate-800 text-xs border border-slate-700 rounded px-3 py-1.5 outline-none font-bold text-indigo-400">
+                <select @change="changeLan($event.target.value)" class="bg-slate-900 text-xs border border-slate-700 rounded px-3 py-1.5 outline-none font-bold text-indigo-400">
                     <template x-for="lan in allLans">
                         <option :value="lan" x-text="lan.replace(/_/g,' ')" :selected="lan === currentLan"></option>
                     </template>
@@ -182,7 +191,7 @@
 
     <main class="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-12" x-show="!loading">
         <div class="lg:col-span-3 space-y-24 bg-slate-800/40 p-10 rounded-3xl border border-slate-700 relative shadow-2xl">
-            <h3 class="absolute top-4 left-6 text-[10px] font-black text-slate-500 uppercase tracking-widest">Area 1</h3>
+            <h3 class="absolute top-4 left-6 text-[10px] font-black text-slate-500 uppercase tracking-widest">Main Floor</h3>
             
             <div class="grid grid-cols-4 gap-6 table-wall pt-8">
                 <template x-for="id in [1,2,3,4]">
@@ -222,7 +231,7 @@
         </div>
 
         <div class="bg-slate-800/40 p-8 rounded-3xl border border-slate-700 relative h-fit shadow-2xl">
-            <h3 class="absolute top-4 left-6 text-[10px] font-black text-amber-500/60 uppercase tracking-widest">Area 2: Upstairs</h3>
+            <h3 class="absolute top-4 left-6 text-[10px] font-black text-amber-500/60 uppercase tracking-widest">Upstairs</h3>
             <div class="grid grid-cols-1 gap-6 table-wall pt-8">
                 <template x-for="id in ['U1','U2','U3','U4']">
                     <div class="relative group">
@@ -243,7 +252,7 @@
         </div>
     </main>
 
-    <div x-show="selection" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-indigo-600 px-8 py-4 rounded-2xl shadow-2xl border border-indigo-400 flex flex-col items-center gap-2 z-50">
+    <div x-show="selection" x-transition class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-indigo-600 px-8 py-4 rounded-2xl shadow-2xl border border-indigo-400 flex flex-col items-center gap-2 z-50">
         <template x-if="userCurrentSeat">
             <p class="text-[10px] uppercase font-bold text-indigo-200">This will move you from <span x-text="userCurrentSeat"></span> to <span x-text="selection"></span></p>
         </template>
