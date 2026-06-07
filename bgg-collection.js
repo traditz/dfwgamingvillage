@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let allGames = [];
     let collectionLoaded = false;
     const BGG_USERNAME = 'traditz';
+    const BGG_COLLECTION_URL = 'https://dfwgv-bgg-proxy.joemsprague.workers.dev/api/bgg-collection';
 
     /**
      * Fetches the user's collection from BGG. This is now a single, fast API call.
@@ -11,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
         container.innerHTML = "<p>Loading game library from BGG...</p>";
 
         try {
-            const url = `https://boardgamegeek.com/xmlapi2/collection?username=${BGG_USERNAME}&own=1&stats=1&excludesubtype=boardgameexpansion`;
+            const url = `${BGG_COLLECTION_URL}?username=${encodeURIComponent(BGG_USERNAME)}`;
             
             let response = await fetch(url);
             
