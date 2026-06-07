@@ -1,0 +1,269 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: #101014;
+  color: #e0e0e0;
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+  margin: 0;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+a {
+  color: inherit;
+}
+
+.container,
+.page-shell {
+  background: #1b1b22;
+  border: 1px solid #33333d;
+  border-radius: 8px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+  margin: 0 auto;
+  max-width: 1120px;
+  padding: clamp(16px, 3vw, 28px);
+  width: 100%;
+}
+
+.page-header,
+.container > h1,
+.page-shell > h1 {
+  color: #ffffff !important;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 1.05;
+  margin: 0 0 22px;
+  text-align: center;
+}
+
+.section-title,
+.container > h2,
+.page-shell > h2 {
+  color: #f5c542 !important;
+  font-size: clamp(1.3rem, 3vw, 1.8rem);
+  line-height: 1.2;
+  margin: 26px 0 14px;
+}
+
+.btn,
+.nav-link,
+body > a,
+.page-shell > a {
+  align-items: center;
+  background: #202029 !important;
+  border: 1px solid #3d3d48 !important;
+  border-radius: 8px !important;
+  color: #ffffff !important;
+  display: inline-flex !important;
+  font-weight: 700;
+  gap: 8px;
+  justify-content: center;
+  min-height: 48px;
+  padding: 10px 14px;
+  text-align: center;
+  text-decoration: none;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn {
+  margin: 0 0 20px !important;
+  width: auto;
+}
+
+.btn:hover,
+.btn:focus-visible,
+.nav-link:hover,
+.nav-link:focus-visible,
+body > a:hover,
+body > a:focus-visible,
+.page-shell > a:hover,
+.page-shell > a:focus-visible {
+  background: #2b2b36 !important;
+  border-color: #f5c542 !important;
+  transform: translateY(-1px);
+}
+
+label {
+  color: #f1f1f4;
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+select,
+#event-select,
+#relic-select {
+  background: #111116;
+  border: 1px solid #4a4a55;
+  border-radius: 7px;
+  color: #f4f4f6;
+  display: block;
+  font-size: 1rem;
+  min-height: 42px;
+  padding: 8px 10px;
+  width: 100%;
+}
+
+#event-select,
+#relic-select {
+  margin-bottom: 20px;
+}
+
+.toggle-control,
+#ds-toggle-label,
+.page-shell > label {
+  align-items: center;
+  background: #24242d !important;
+  border: 1px solid #4a4a55;
+  border-radius: 7px;
+  color: #f1f1f4 !important;
+  display: inline-flex !important;
+  gap: 8px;
+  margin: 0 0 20px;
+  min-height: 42px;
+  padding: 8px 12px;
+  width: auto !important;
+}
+
+input[type="checkbox"] {
+  accent-color: #f5c542;
+}
+
+.icon,
+.planet img,
+.page-header img,
+.page-shell h1 img {
+  height: 18px !important;
+  margin: 0 4px;
+  object-fit: contain;
+  vertical-align: middle;
+  width: 18px;
+}
+
+.card-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.event-card,
+.relic-card,
+.planet,
+.tech {
+  background: #24242c !important;
+  border: 1px solid #373741 !important;
+  border-radius: 8px !important;
+  color: #e0e0e0;
+  margin: 0 !important;
+  padding: 14px !important;
+}
+
+.event-card,
+.relic-card,
+.planet {
+  margin-bottom: 14px !important;
+}
+
+.event-card h2,
+.relic-card h2,
+.tech strong,
+.planet > strong:first-child {
+  color: #f5c542;
+}
+
+.event-card h2,
+.relic-card h2 {
+  font-size: 1.1rem;
+  line-height: 1.25;
+  margin: 0 0 8px;
+}
+
+.event-card p,
+.relic-card p,
+.planet,
+.tech {
+  line-height: 1.55;
+}
+
+.event-card p,
+.relic-card p {
+  margin: 0;
+}
+
+.event-card p + p,
+.event-card ul {
+  margin-top: 10px;
+}
+
+.complexity,
+.prereq {
+  color: #b8b8c4 !important;
+  font-style: italic;
+}
+
+.color-section {
+  background: #1b1b22;
+  border: 1px solid #33333d !important;
+  border-radius: 8px !important;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 22px !important;
+  padding: 16px !important;
+}
+
+.color-section h2 {
+  color: #ffffff;
+  font-size: clamp(1.25rem, 3vw, 1.7rem);
+  grid-column: 1 / -1;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.color-section.green {
+  border-left: 5px solid #3fc56b !important;
+}
+
+.color-section.blue {
+  border-left: 5px solid #5da7ff !important;
+}
+
+.color-section.yellow {
+  border-left: 5px solid #f5c542 !important;
+}
+
+.color-section.red {
+  border-left: 5px solid #ff5d5d !important;
+}
+
+.reference-controls {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 720px) {
+  body {
+    padding: 12px;
+  }
+
+  .container,
+  .page-shell {
+    padding: 16px;
+  }
+
+  .btn,
+  .toggle-control,
+  #ds-toggle-label,
+  .page-shell > label {
+    justify-content: flex-start;
+    width: 100% !important;
+  }
+
+  .color-section {
+    grid-template-columns: 1fr;
+    padding: 14px !important;
+  }
+}
