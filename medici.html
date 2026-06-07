@@ -32,13 +32,9 @@
         const ReactDOM = window.ReactDOM;
 
         // --- Supabase Client Initialization ---
-        // IMPORTANT: In a real-world application, these environment variables would be
-        // injected by a build tool (e.g., Vite, Create React App, Next.js) during compilation.
-        // For this direct HTML file, `process.env` will be undefined.
-        // You would typically set up your build process to replace these placeholders
-        // with the actual values from your .env file.
-        const supabaseUrl = process.env.VITE_SUPABASE_URL || 'YOUR_SUPABASE_URL_FALLBACK';
-        const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY_FALLBACK';
+        // This page is served as static HTML, so browser-safe config must be provided directly.
+        const supabaseUrl = 'https://krfrccsetibzmzutfzll.supabase.co';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtyZnJjY3NldGliem16dXRmemxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg1NjgzNjAsImV4cCI6MjA2NDE0NDM2MH0.wLEUxijlo4PR35aLX2BdJ-99g0cd_JAQPRz9VXM3ihQ';
 
         // Create the Supabase client instance using the globally loaded Supabase object
         const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
