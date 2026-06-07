@@ -6,29 +6,202 @@
     <meta property="og:title" content="DFW Gaming Village" />
     <meta property="og:description" content="TI4 Faction Reference" />
     <meta property="og:image" content="https://www.dfwgamingvillage.com/banner_cropped.png" />
-    <meta property="og:url" content="https://www.dfwgamingvillage.com/ti4.html" />
+    <meta property="og:url" content="https://www.dfwgamingvillage.com/ti.html" />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="https://www.dfwgamingvillage.com/banner.png" />
 <title>TI4 Faction Database</title>
 <style>
+* {
+    box-sizing: border-box;
+}
+
 body {
     font-family: Arial, sans-serif;
-    text-align: center;
-    background-color: #121212;
+    background: #101014;
     color: #e0e0e0;
+    margin: 0;
+    min-height: 100vh;
     padding: 20px;
 }
+
+.page-shell {
+    width: min(1120px, 100%);
+    margin: 0 auto;
+}
+
+.top-nav {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 10px;
+    width: min(1120px, 100%);
+    margin: 0 auto 22px;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 10px 14px;
+    border: 1px solid #3d3d48;
+    border-radius: 8px;
+    background: #202029;
+    color: #ffffff;
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+    transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.nav-link:hover,
+.nav-link:focus-visible {
+    background: #2b2b36;
+    border-color: #f5c542;
+    transform: translateY(-1px);
+}
+
+.nav-link img {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+}
+
+.nav-link .tech-stack {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.nav-link .tech-stack img {
+    width: 14px;
+    height: 14px;
+}
+
+.nav-symbol {
+    color: #f5c542;
+    font-weight: 900;
+}
+
+.page-header {
+    margin: 0 auto 20px;
+    text-align: center;
+}
+
+.page-header h1 {
+    color: #ffffff;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    line-height: 1.05;
+    margin: 0;
+}
+
+.page-header p {
+    color: #b8b8c4;
+    font-size: 1rem;
+    margin: 10px auto 0;
+    max-width: 680px;
+}
+
 #container {
-    background: #1e1e1e;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
-    display: inline-block;
+    background: #1b1b22;
+    border: 1px solid #33333d;
+    border-radius: 8px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+    padding: clamp(16px, 3vw, 28px);
     text-align: left;
-    width: 80%;
-    max-width: 800px;
+    width: 100%;
+    max-width: 1120px;
+    margin: 0 auto;
 }
+
+body > h1 {
+    color: #ffffff;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    line-height: 1.05;
+    margin: 0 auto 20px;
+    text-align: center;
+    width: min(1120px, 100%);
+}
+
+#container > label {
+    color: #f1f1f4;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+#container > label:first-child {
+    display: block;
+    margin-bottom: 7px;
+}
+
+#container > label:nth-of-type(2) {
+    align-items: center;
+    background: #24242d;
+    border: 1px solid #4a4a55;
+    border-radius: 7px;
+    display: inline-flex;
+    gap: 8px;
+    min-height: 42px;
+    margin-left: 10px;
+    padding: 8px 12px;
+    vertical-align: top;
+}
+
+#container > label:nth-of-type(2) input {
+    accent-color: #f5c542;
+}
+
+.controls {
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) auto auto;
+    gap: 12px;
+    align-items: end;
+    margin-bottom: 20px;
+}
+
+.control-group {
+    display: grid;
+    gap: 7px;
+}
+
+.control-label {
+    color: #f1f1f4;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+#factionDropdown {
+    width: 100%;
+    min-height: 42px;
+    border: 1px solid #4a4a55;
+    border-radius: 7px;
+    background: #111116;
+    color: #f4f4f6;
+    font-size: 1rem;
+    padding: 8px 10px;
+}
+
+.toggle-control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 42px;
+    padding: 8px 12px;
+    border: 1px solid #4a4a55;
+    border-radius: 7px;
+    background: #24242d;
+    color: #f1f1f4;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.toggle-control input {
+    accent-color: #f5c542;
+}
+
 .faction-header {
     display: flex;
     align-items: center;
@@ -37,90 +210,265 @@ body {
     margin-top: 20px;
 }
 .faction-header img {
-    width: 75px;
-    height: auto;
-    border-radius: 10px;
+    width: 82px;
+    height: 82px;
+    border: 1px solid #464653;
+    border-radius: 8px;
+    object-fit: contain;
+    padding: 6px;
+    background: #111116;
 }
+
 .faction-header h2 {
     margin: 0;
-    font-size: 1.5em;
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
     color: #ffffff;
 }
+
 .info-section {
-    margin-top: 10px;
-    padding: 10px;
-    border-radius: 5px;
-    background: #2a2a2a;
+    margin-top: 12px;
+    padding: 14px;
+    border: 1px solid #373741;
+    border-radius: 8px;
+    background: #24242c;
     color: #e0e0e0;
 }
+
+.info-section h2 {
+    color: #f5c542;
+    font-size: 1rem;
+    line-height: 1.25;
+    margin: 0 0 8px;
+}
+
+.info-section p {
+    line-height: 1.55;
+    margin: 0;
+}
+
 .tech-icon, .monument-icon {
     width: 20px;
     height: 20px;
     vertical-align: middle;
     margin-right: 5px;
 }
+
 #factionMenu {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin: 20px auto;
-    gap: 10px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 12px;
 }
+
 .faction-tile {
-    background: #2a2a2a;
+    appearance: none;
+    width: 100%;
+    min-height: 142px;
+    background: #24242d;
+    border: 1px solid #393944;
     border-radius: 8px;
-    padding: 10px;
+    color: #f4f4f6;
     cursor: pointer;
+    display: grid;
+    grid-template-rows: 72px 1fr;
+    gap: 8px;
+    justify-items: center;
+    align-items: center;
+    padding: 12px 10px;
     text-align: center;
-    flex: 1 1 calc(33.33% - 20px);
-    max-width: 120px;
-    transition: background 0.3s;
+    transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
-  .ds-faction {
-    border: 2px solid #ff9800;
-    box-shadow: 0 0 8px rgba(255, 152, 0, 0.5);
+
+.faction-tile:hover,
+.faction-tile:focus-visible {
+    background: #30303a;
+    border-color: #f5c542;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28);
+    transform: translateY(-2px);
+    outline: none;
 }
-.faction-tile:hover {
-    background: #3a3a3a;
+
+.ds-faction {
+    border-color: #ff9800;
+    box-shadow: inset 0 0 0 1px rgba(255, 152, 0, 0.35);
 }
+
 .faction-tile img {
-    width: 60px;
-    height: auto;
+    width: 68px;
+    height: 68px;
+    object-fit: contain;
     border-radius: 6px;
-    margin-bottom: 5px;
+    padding: 5px;
+    background: #121218;
 }
-  .ds-faction {
-    border: 2px solid #ff9800;
-    box-shadow: 0 0 8px rgba(255, 152, 0, 0.5);
+
+.faction-tile span {
+    align-self: start;
+    font-size: 0.9rem;
+    font-weight: 700;
+    line-height: 1.25;
 }
 
 #menuToggle {
     display: none;
-    margin-left: 10px;
-    padding: 5px 10px;
-    background-color: #333;
-    color: white;
-    border: none;
-    border-radius: 5px;
+    min-height: 42px;
+    padding: 8px 12px;
+    background-color: #f5c542;
+    color: #161616;
+    border: 1px solid #f5c542;
+    border-radius: 7px;
     cursor: pointer;
-   
-   
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+#menuToggle:hover,
+#menuToggle:focus-visible {
+    background-color: #ffe08a;
+}
+
+@media (max-width: 860px) {
+    .top-nav {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .controls {
+        grid-template-columns: 1fr;
+    }
+
+    .toggle-control,
+    #menuToggle {
+        justify-content: flex-start;
+        width: 100%;
+    }
+
+    #container > label:nth-of-type(2) {
+        margin: 10px 0 0;
+        width: 100%;
+    }
+}
+
+@media (max-width: 560px) {
+    body {
+        padding: 12px;
+    }
+
+    .top-nav {
+        grid-template-columns: 1fr;
+    }
+
+    .nav-link {
+        justify-content: flex-start;
+    }
+
+    #factionDropdown {
+        width: 100%;
+    }
+
+    #factionMenu {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .faction-tile {
+        min-height: 132px;
+        padding: 10px 8px;
+    }
+
+    .faction-tile img {
+        width: 60px;
+        height: 60px;
+    }
+
+    .faction-header {
+        flex-direction: column;
+        text-align: center;
+    }
 }
 </style>
 <script>
-let factionData = {};
+let factionData = [];
 let showDS = localStorage.getItem("showDS") === "true";
+
+function factionSlug(name) {
+    return name.replace(/\s+/g, "_").toLowerCase();
+}
+
+function factionFromHash() {
+    const match = window.location.hash.match(/^#faction=(.+)$/);
+    return match ? decodeURIComponent(match[1]) : "";
+}
+
+function isDiscordantStarsFaction(faction) {
+    const dsKey = Object.keys(faction).find(k => k.trim().toLowerCase() === "ds:");
+    return Boolean(dsKey && String(faction[dsKey]).toLowerCase() === "yes");
+}
+
+function findFactionBySlug(slug) {
+    return factionData.find(faction => factionSlug(faction["Faction Name:"]) === slug);
+}
+
+function normalizeNavigationLinks() {
+    const linkConfig = {
+        "player-aids.html": '<span class="nav-symbol">&larr;</span> Player Aids',
+        "ti4legendaryplanets.html": '<img src="images/legendary.png" alt=""> Legendary Planets',
+        "ti4tech.html": '<span class="tech-stack" aria-hidden="true"><img src="images/biotic.png" alt=""><img src="images/cybernetic.png" alt=""><img src="images/propulsion.png" alt=""><img src="images/warfare.png" alt=""></span> Technologies',
+        "galactic_events.html": '<span class="nav-symbol">GE</span> Galactic Events',
+        "relics.html": '<img src="images/legendary.png" alt=""> Relics'
+    };
+    const nav = document.createElement("nav");
+    nav.className = "top-nav";
+    nav.setAttribute("aria-label", "TI4 reference navigation");
+
+    document.querySelectorAll("body > a").forEach(link => {
+        const href = link.getAttribute("href");
+        if (!linkConfig[href]) return;
+
+        link.removeAttribute("style");
+        link.className = "nav-link";
+        link.innerHTML = linkConfig[href];
+        nav.appendChild(link);
+    });
+
+    const heading = document.querySelector("body > h1");
+    if (heading && nav.children.length) {
+        heading.before(nav);
+    }
+}
+
+function normalizeControls() {
+    const container = document.getElementById("container");
+    const factionLabel = document.querySelector('label[for="factionDropdown"]');
+    const dropdown = document.getElementById("factionDropdown");
+    const dsCheckbox = document.getElementById("dsToggle");
+    const dsLabel = dsCheckbox ? dsCheckbox.closest("label") : null;
+    const menuToggle = document.getElementById("menuToggle");
+
+    if (!container || !factionLabel || !dropdown || !dsLabel || !menuToggle) return;
+
+    const controls = document.createElement("div");
+    controls.className = "controls";
+
+    const controlGroup = document.createElement("div");
+    controlGroup.className = "control-group";
+    factionLabel.className = "control-label";
+    factionLabel.textContent = "Select a Faction";
+    controlGroup.appendChild(factionLabel);
+    controlGroup.appendChild(dropdown);
+
+    dsLabel.className = "toggle-control";
+
+    controls.appendChild(controlGroup);
+    controls.appendChild(dsLabel);
+    controls.appendChild(menuToggle);
+    container.insertBefore(controls, document.getElementById("factionMenu"));
+}
 
 function populateDropdown() {
     const dropdown = document.getElementById("factionDropdown");
     dropdown.innerHTML = '<option value="">--Choose a faction--</option>';
 
     factionData.forEach(faction => {
-      if (!showDS) {
-  const dsKey = Object.keys(faction).find(k => k.trim().toLowerCase() === "ds:");
-  if (dsKey && String(faction[dsKey]).toLowerCase() === "yes") return;
-}
-
+        if (!showDS && isDiscordantStarsFaction(faction)) return;
 
         let option = document.createElement("option");
         option.value = faction["Faction Name:"];
@@ -134,18 +482,15 @@ function populateFactionMenu() {
     menu.innerHTML = "";
 
     factionData.forEach(faction => {
-        // Try to find a DS-related key (case-insensitive, spacing tolerant)
-        const dsKey = Object.keys(faction).find(k => k.trim().toLowerCase() === "ds:");
-        const isDSFaction = dsKey && String(faction[dsKey]).toLowerCase() === "yes";
+        const isDSFaction = isDiscordantStarsFaction(faction);
 
-        // Skip DS factions if checkbox is not checked
         if (!showDS && isDSFaction) return;
 
-        // Create faction tile
-        let tile = document.createElement("div");
+        let tile = document.createElement("button");
+        tile.type = "button";
         tile.className = "faction-tile";
+        tile.setAttribute("aria-label", `View ${faction["Faction Name:"]}`);
 
-        // Visually highlight DS factions
         if (isDSFaction) {
             tile.classList.add("ds-faction");
         }
@@ -156,10 +501,10 @@ function populateFactionMenu() {
         };
 
         let icon = document.createElement("img");
-        icon.src = `images/${faction["Faction Name:"].replace(/ /g, "_").toLowerCase()}.png`;
+        icon.src = `images/${factionSlug(faction["Faction Name:"])}.png`;
         icon.alt = `${faction["Faction Name:"]} Icon`;
 
-        let label = document.createElement("div");
+        let label = document.createElement("span");
         label.textContent = faction["Faction Name:"];
 
         tile.appendChild(icon);
@@ -186,23 +531,47 @@ function replaceMonumentWords(text) {
                .replace(/MECATOL REX/g, '<img src="images/rex.png" class="monument-icon">');
 }
 
-// --- THIS IS THE UPDATED FUNCTION ---
-function displayFactionInfo(selectedFaction) {
+function displayFactionInfo(selectedFaction, options = {}) {
+    const { updateHistory = true, scroll = true } = options;
     const infoDiv = document.getElementById("factionInfo");
     const menu = document.getElementById("factionMenu");
     const toggleBtn = document.getElementById("menuToggle");
+
+    if (!selectedFaction) {
+        showFactionMenu({ updateHistory });
+        return;
+    }
+
+    let faction = factionData.find(f => f["Faction Name:"] === selectedFaction);
+    if (!faction) return;
+    if (!showDS && isDiscordantStarsFaction(faction)) {
+        showFactionMenu({ updateHistory });
+        return;
+    }
+
+    const dropdown = document.getElementById("factionDropdown");
+    dropdown.value = selectedFaction;
     infoDiv.innerHTML = "";
     menu.style.display = "none";
     toggleBtn.style.display = "inline-block";
 
-    let faction = factionData.find(f => f["Faction Name:"] === selectedFaction);
-    if (!faction) return;
+    if (updateHistory) {
+        history.pushState(
+            { view: "faction", faction: selectedFaction },
+            "",
+            `${window.location.pathname}${window.location.search}#faction=${encodeURIComponent(factionSlug(selectedFaction))}`
+        );
+    }
+
+    if (scroll) {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
 
     let headerDiv = document.createElement("div");
     headerDiv.className = "faction-header";
 
     let icon = document.createElement("img");
-    icon.src = `images/${selectedFaction.replace(/ /g, "_").toLowerCase()}.png`;
+    icon.src = `images/${factionSlug(selectedFaction)}.png`;
     icon.alt = `${selectedFaction} Icon`;
 
     let title = document.createElement("h2");
@@ -231,16 +600,40 @@ function displayFactionInfo(selectedFaction) {
         section.appendChild(h2);
         section.appendChild(p);
         infoDiv.appendChild(section);
-    });;
+    });
 }
-// --- END OF UPDATED FUNCTION ---
 
-function showFactionMenu() {
-    document.getElementById("factionMenu").style.display = "flex";
+function showFactionMenu(options = {}) {
+    const { updateHistory = false, scroll = false } = options;
+    document.getElementById("factionMenu").style.display = "grid";
     document.getElementById("menuToggle").style.display = "none";
+    document.getElementById("factionInfo").innerHTML = "";
+    document.getElementById("factionDropdown").value = "";
+
+    if (updateHistory) {
+        history.pushState({ view: "menu" }, "", `${window.location.pathname}${window.location.search}`);
+    }
+
+    if (scroll) {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+}
+
+function openFactionFromCurrentUrl() {
+    const slug = factionFromHash();
+    const faction = slug ? findFactionBySlug(slug) : null;
+
+    if (faction) {
+        displayFactionInfo(faction["Faction Name:"], { updateHistory: false, scroll: false });
+    } else {
+        showFactionMenu();
+    }
 }
 
 document.addEventListener("DOMContentLoaded", function() {
+    normalizeNavigationLinks();
+    normalizeControls();
+
     const dsCheckbox = document.getElementById("dsToggle");
 
     // Restore from localStorage
@@ -252,6 +645,7 @@ document.addEventListener("DOMContentLoaded", function() {
         localStorage.setItem("showDS", showDS);
         populateDropdown();
         populateFactionMenu();
+        openFactionFromCurrentUrl();
     });
 
     fetch("factionData_with_icons.json")
@@ -260,7 +654,11 @@ document.addEventListener("DOMContentLoaded", function() {
             factionData = data;
             populateDropdown();
             populateFactionMenu();
+            history.replaceState({ view: factionFromHash() ? "faction" : "menu" }, "", window.location.href);
+            openFactionFromCurrentUrl();
         });
+
+    window.addEventListener("popstate", openFactionFromCurrentUrl);
 });
 
 
@@ -295,7 +693,7 @@ document.addEventListener("DOMContentLoaded", function() {
     <select id="factionDropdown" onchange="displayFactionInfo(this.value)">
         <option value="">--Choose a faction--</option>
     </select>
-    <button id="menuToggle" onclick="showFactionMenu()">Show Faction Menu</button>
+    <button id="menuToggle" onclick="showFactionMenu({ updateHistory: true, scroll: true })">Faction List</button>
     <div id="factionMenu"></div>
     <div id="factionInfo"></div>
 </div>
