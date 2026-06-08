@@ -51,6 +51,12 @@ function esc(s) {
 function asDate(v) {
   if (!v) return null;
   if (v.toDate) return v.toDate();
+  if (typeof v.seconds === "number") {
+    return new Date((v.seconds * 1000) + Math.floor((v.nanoseconds || 0) / 1000000));
+  }
+  if (typeof v._seconds === "number") {
+    return new Date((v._seconds * 1000) + Math.floor((v._nanoseconds || 0) / 1000000));
+  }
   const d = new Date(v);
   return Number.isNaN(d.getTime()) ? null : d;
 }
