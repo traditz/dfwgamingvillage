@@ -18,6 +18,15 @@
   border-top: 1px solid var(--line);
 }
 
+.historySection {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.pastEventsPanel[hidden] {
+  display: none;
+}
+
 .eventTile {
   display: flex;
   min-height: 148px;
@@ -71,9 +80,20 @@
 }
 
 .eventPill.is-history {
-  border-color: rgba(148, 163, 184, .28);
-  background: rgba(148, 163, 184, .10);
-  color: #d1d5db;
+  border-color: rgba(248, 113, 113, .45);
+  background: rgba(185, 28, 28, .18);
+  color: #fecaca;
+}
+
+.historyNotice {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid rgba(248, 113, 113, .36);
+  border-radius: var(--radius);
+  background: rgba(185, 28, 28, .14);
+  color: #fee2e2;
+  font-size: 14px;
+  font-weight: 800;
 }
 
 .publicActions {
@@ -187,6 +207,7 @@
   }
 
   .publicActions .btn,
+  .historySection .btn,
   .chip {
     width: 100%;
     justify-content: center;

@@ -21,8 +21,11 @@ const eventListView = document.querySelector("#eventListView");
 const eventDetailView = document.querySelector("#eventDetailView");
 const upcomingEvents = document.querySelector("#upcomingEvents");
 const pastEvents = document.querySelector("#pastEvents");
+const btnPastEventsToggle = document.querySelector("#btnPastEventsToggle");
+const pastEventsPanel = document.querySelector("#pastEventsPanel");
 const eventTitle = document.querySelector("#eventTitle");
 const eventMeta = document.querySelector("#eventMeta");
+const historyNotice = document.querySelector("#historyNotice");
 const publicTables = document.querySelector("#publicTables");
 const publicWants = document.querySelector("#publicWants");
 const btnShare = document.querySelector("#btnShare");
@@ -88,7 +91,16 @@ function eventUrl(id) {
 function isPastEvent(gd) {
   const d = asDate(gd.startsAt);
   if (!d) return false;
-  return d.getTime() < Date.now();
+  return centralDateKey(d) < centralDateKey(new Date());
+}
+
+function centralDateKey(date) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Chicago",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(date);
 }
 
 function renderEventCollection(host, items, emptyText) {
@@ -126,6 +138,16 @@ function renderEventList(items) {
 
   renderEventCollection(upcomingEvents, upcoming, "No upcoming public events.");
   renderEventCollection(pastEvents, past, "No past public events yet.");
+  if (btnPastEventsToggle) {
+    btnPastEventsToggle.disabled = past.length === 0;
+    btnPastEventsToggle.setAttribute("aria-label", past.length
+      ? `View ${past.length} past event${past.length === 1 ? "" : "s"}`
+      : "No past events yet");
+  }
+  if (pastEventsPanel) {
+    pastEventsPanel.hidden = true;
+  }
+  btnPastEventsToggle?.setAttribute("aria-expanded", "false");
 }
 
 function renderTables() {
@@ -228,11 +250,15 @@ async function loadEvent(id) {
   eventDetailView.style.display = "";
   pageTitle.textContent = gd.title || "DFWGV Game Day";
   eventTitle.textContent = gd.title || "DFWGV Game Day";
+  const isPast = isPastEvent(gd);
   eventMeta.innerHTML = `
-    ${isPastEvent(gd) ? `<span class="eventPill is-history">Past Event</span>` : ""}
+    ${isPast ? `<span class="eventPill is-history">Past Event</span>` : ""}
     <span class="eventPill">${esc(fmtDate(gd.startsAt))}</span>
     ${gd.location ? `<span class="eventPill">${esc(gd.location)}</span>` : ""}
   `;
+  if (historyNotice) {
+    historyNotice.style.display = isPast ? "" : "none";
+  }
   btnOpenPlanner.href = `../?event=${encodeURIComponent(id)}`;
   btnCalendar.href = calendarUrl(gd);
 
@@ -267,6 +293,13 @@ btnShare?.addEventListener("click", async () => {
   } catch {
     window.prompt("Copy event link:", window.location.href);
   }
+});
+
+btnPastEventsToggle?.addEventListener("click", () => {
+  if (!pastEventsPanel) return;
+  const shouldShow = pastEventsPanel.hidden;
+  pastEventsPanel.hidden = !shouldShow;
+  btnPastEventsToggle.setAttribute("aria-expanded", String(shouldShow));
 });
 
 const params = new URLSearchParams(window.location.search);

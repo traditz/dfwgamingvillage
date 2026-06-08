@@ -247,6 +247,14 @@ a:hover {
   letter-spacing: .08em;
 }
 
+.cardActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 h3 {
   margin: 14px 0 8px;
   color: var(--text);
@@ -359,6 +367,10 @@ textarea:focus {
   margin-top: 4px;
   color: var(--muted);
   font-size: 13px;
+}
+
+.pastEventItem {
+  cursor: default;
 }
 
 .actions {
@@ -730,6 +742,7 @@ textarea:focus {
   }
 
   .cardhead,
+  .cardActions,
   .actions,
   .modalRow,
   .modalActions {
@@ -737,7 +750,12 @@ textarea:focus {
     flex-direction: column;
   }
 
+  .cardActions {
+    width: 100%;
+  }
+
   .cardhead .btn,
+  .cardActions .btn,
   .actions .btn,
   .modalActions .btn {
     width: 100%;

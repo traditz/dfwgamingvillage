@@ -65,6 +65,7 @@ const btnSignOut = document.querySelector("#btnSignOut");
 // REMOVED: Email UI bindings (emailCard, inputs, buttons)
 
 const btnCreateGameDay = document.querySelector("#btnCreateGameDay");
+const btnPastEvents = document.querySelector("#btnPastEvents");
 
 const gamedayList = document.querySelector("#gamedayList");
 const gamedayCard = document.querySelector("#gamedayCard");
@@ -95,6 +96,7 @@ const btnModalClose = document.querySelector("#btnModalClose");
 let currentUser = null;
 let currentGameDayId = null;
 let currentGameDays = [];
+let currentPastGameDays = [];
 let initialEventId = new URLSearchParams(window.location.search).get("event") || "";
 
 // tables pagination
@@ -132,6 +134,44 @@ function fmtDate(d) {
   } catch {
     return String(d || "");
   }
+}
+
+function asDate(v) {
+  if (!v) return null;
+  if (v.toDate) return v.toDate();
+  const d = v instanceof Date ? v : new Date(v);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function centralDateKey(date) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Chicago",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(date);
+}
+
+function isPastGameDay(gd) {
+  const startsAt = asDate(gd?.startsAt);
+  if (!startsAt) return false;
+  return centralDateKey(startsAt) < centralDateKey(new Date());
+}
+
+function sortByStartsAtAsc(items) {
+  return [...items].sort((a, b) => {
+    const aTime = asDate(a.startsAt)?.getTime() ?? Number.MAX_SAFE_INTEGER;
+    const bTime = asDate(b.startsAt)?.getTime() ?? Number.MAX_SAFE_INTEGER;
+    return aTime - bTime;
+  });
+}
+
+function sortByStartsAtDesc(items) {
+  return [...items].sort((a, b) => {
+    const aTime = asDate(a.startsAt)?.getTime() ?? 0;
+    const bTime = asDate(b.startsAt)?.getTime() ?? 0;
+    return bTime - aTime;
+  });
 }
 
 // FIX: Robust check for admin ID (handles both "123" and "discord:123")
@@ -889,62 +929,106 @@ function subscribeGameDayDetails(gamedayId) {
 // Rendering
 // -----------------------------
 function renderGameDays(list) {
-  currentGameDays = list;
-  gamedayList.innerHTML = "";
-  if (!list.length) {
-    gamedayList.innerHTML = `<div class="muted">No upcoming game days.</div>`;
-    return;
+  const sorted = sortByStartsAtAsc(list);
+  const visibleGameDays = sorted.filter((gd) => !isPastGameDay(gd));
+  currentGameDays = visibleGameDays;
+  currentPastGameDays = sortByStartsAtDesc(sorted.filter(isPastGameDay));
+  if (btnPastEvents) {
+    btnPastEvents.disabled = currentPastGameDays.length === 0;
+    btnPastEvents.setAttribute("aria-label", currentPastGameDays.length
+      ? `View ${currentPastGameDays.length} past event${currentPastGameDays.length === 1 ? "" : "s"}`
+      : "No past events yet");
   }
-  for (const gd of list) {
-    const startsAt = gd.startsAt?.toDate ? gd.startsAt.toDate() : gd.startsAt;
-    const el = document.createElement("div");
-    el.className = "listitem";
-    el.innerHTML = `
-      <div>
-        <div class="title">${esc(gd.title || "Game Day")}</div>
-        <div class="meta">${esc(fmtDate(startsAt))}${gd.location ? ` • ${esc(gd.location)}` : ""}</div>
-      </div>
-    `;
 
-    const publicLink = document.createElement("a");
-    publicLink.className = "btn";
-    publicLink.href = `./events/?id=${encodeURIComponent(gd.id)}`;
-    publicLink.textContent = "Public";
-    publicLink.addEventListener("click", (e) => e.stopPropagation());
-    el.appendChild(publicLink);
+  gamedayList.innerHTML = "";
+  if (!visibleGameDays.length) {
+    gamedayList.innerHTML = `<div class="muted">No upcoming game days.</div>`;
+  } else {
+    for (const gd of visibleGameDays) {
+      const startsAt = asDate(gd.startsAt);
+      const el = document.createElement("div");
+      el.className = "listitem";
+      el.innerHTML = `
+        <div>
+          <div class="title">${esc(gd.title || "Game Day")}</div>
+          <div class="meta">${esc(fmtDate(startsAt))}${gd.location ? ` • ${esc(gd.location)}` : ""}</div>
+        </div>
+      `;
 
-    // NEW: Delete button for admin
-    if (isAdmin()) {
-      const delBtn = document.createElement("button");
-      delBtn.className = "btn btn-danger";
-      delBtn.style.marginLeft = "auto";
-      delBtn.style.fontSize = "12px";
-      delBtn.style.padding = "4px 8px";
-      delBtn.textContent = "Delete";
-      delBtn.addEventListener("click", async (e) => {
-        e.stopPropagation();
-        if (confirm("Delete this Game Day? This will wipe all tables.")) {
-            try {
-                await fnDeleteGameDay({ gamedayId: gd.id });
-            } catch (err) {
-                alert(unwrapCallableError(err));
-            }
-        }
-      });
-      el.appendChild(delBtn);
+      const publicLink = document.createElement("a");
+      publicLink.className = "btn";
+      publicLink.href = `./events/?id=${encodeURIComponent(gd.id)}`;
+      publicLink.textContent = "Public";
+      publicLink.addEventListener("click", (e) => e.stopPropagation());
+      el.appendChild(publicLink);
+
+      // NEW: Delete button for admin
+      if (isAdmin()) {
+        const delBtn = document.createElement("button");
+        delBtn.className = "btn btn-danger";
+        delBtn.style.marginLeft = "auto";
+        delBtn.style.fontSize = "12px";
+        delBtn.style.padding = "4px 8px";
+        delBtn.textContent = "Delete";
+        delBtn.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          if (confirm("Delete this Game Day? This will wipe all tables.")) {
+              try {
+                  await fnDeleteGameDay({ gamedayId: gd.id });
+              } catch (err) {
+                  alert(unwrapCallableError(err));
+              }
+          }
+        });
+        el.appendChild(delBtn);
+      }
+
+      el.addEventListener("click", () => openGameDay(gd));
+      gamedayList.appendChild(el);
     }
-
-    el.addEventListener("click", () => openGameDay(gd));
-    gamedayList.appendChild(el);
   }
 
   if (initialEventId) {
-    const match = list.find((gd) => gd.id === initialEventId);
+    const match = sorted.find((gd) => gd.id === initialEventId);
     if (match) {
       initialEventId = "";
       openGameDay(match);
     }
   }
+}
+
+function openPastEventsModal() {
+  if (!currentPastGameDays.length) {
+    openModal("Past Events", `<div class="muted">No past events yet.</div>`);
+    return;
+  }
+
+  openModal("Past Events", `
+    <div class="modalStack">
+      <div class="muted">Past game days are kept for history and sorted by most recent first.</div>
+      <div class="list">
+        ${currentPastGameDays.map((gd) => `
+          <div class="listitem pastEventItem" data-gameday-id="${esc(gd.id)}">
+            <div>
+              <div class="title">${esc(gd.title || "Game Day")}</div>
+              <div class="meta">${esc(fmtDate(asDate(gd.startsAt)))}${gd.location ? ` • ${esc(gd.location)}` : ""}</div>
+            </div>
+            <a class="btn" href="./events/?id=${encodeURIComponent(gd.id)}">Public</a>
+            <button class="btn btn-primary" data-action="open-past" data-gameday-id="${esc(gd.id)}">Open</button>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+  `);
+
+  modalBody.querySelectorAll('[data-action="open-past"]').forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const gd = currentPastGameDays.find((item) => item.id === btn.getAttribute("data-gameday-id"));
+      if (!gd) return;
+      closeModal();
+      openGameDay(gd);
+    });
+  });
 }
 
 function renderTablesPage() {
@@ -1223,6 +1307,8 @@ if (btnCreateGameDay) btnCreateGameDay.addEventListener("click", async () => {
   if (!currentUser) return alert("Please sign in first.");
   await createGamedayPromptFlow();
 });
+
+if (btnPastEvents) btnPastEvents.addEventListener("click", openPastEventsModal);
 
 if (btnBack) btnBack.addEventListener("click", () => {
   showGameDayList();

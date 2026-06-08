@@ -23,7 +23,7 @@
   <meta name="theme-color" content="#d71920" />
 
   <link rel="icon" href="./dfwgv-icon.png" />
-  <link rel="stylesheet" href="./styles.css?v=20260608-v1" />
+  <link rel="stylesheet" href="./styles.css?v=20260608-v2" />
 </head>
 <body>
   <header class="topbar">
@@ -60,7 +60,10 @@
       <section class="card">
         <div class="cardhead">
           <h2>Upcoming Game Days</h2>
-          <button class="btn btn-primary" id="btnCreateGameDay">Create Game Day (Admin)</button>
+          <div class="cardActions">
+            <button class="btn" id="btnPastEvents">Past Events</button>
+            <button class="btn btn-primary" id="btnCreateGameDay">Create Game Day (Admin)</button>
+          </div>
         </div>
         <div class="muted">Click a Game Day to open its planner.</div>
         <div id="gamedayList" class="list"></div>
@@ -110,6 +113,6 @@
     </div>
   </div>
 
-  <script type="module" src="./app.js?v=20260608-v1"></script>
+  <script type="module" src="./app.js?v=20260608-v2"></script>
 </body>
 </html>

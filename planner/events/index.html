@@ -7,8 +7,8 @@
   <meta name="description" content="Public DFW Gaming Village game day pages." />
   <meta name="theme-color" content="#d71920" />
   <link rel="icon" href="../dfwgv-icon.png" />
-  <link rel="stylesheet" href="../styles.css?v=20260608-v1" />
-  <link rel="stylesheet" href="./event.css?v=20260608-v1" />
+  <link rel="stylesheet" href="../styles.css?v=20260608-v2" />
+  <link rel="stylesheet" href="./event.css?v=20260608-v2" />
 </head>
 <body>
   <header class="topbar">
@@ -47,8 +47,10 @@
         <h3>Upcoming Events</h3>
         <div id="upcomingEvents" class="eventGrid"></div>
       </div>
-      <div class="eventSection">
-        <h3>Past Events</h3>
+      <div class="eventSection historySection">
+        <button class="btn" id="btnPastEventsToggle" type="button" aria-expanded="false">Past Events</button>
+      </div>
+      <div class="eventSection pastEventsPanel" id="pastEventsPanel" hidden>
         <div id="pastEvents" class="eventGrid"></div>
       </div>
     </section>
@@ -60,6 +62,9 @@
           <button class="btn" id="btnShare">Share</button>
         </div>
         <div class="eventMeta" id="eventMeta"></div>
+        <div class="historyNotice" id="historyNotice" style="display:none;">
+          This is a past event. Tables and posts are retained here for history.
+        </div>
         <div class="publicActions">
           <a class="btn btn-primary" id="btnOpenPlanner" href="../">Host or Join</a>
           <a class="btn" id="btnCalendar" href="#">Add to Calendar</a>
@@ -87,6 +92,6 @@
     </section>
   </main>
 
-  <script type="module" src="./event.js?v=20260608-v1"></script>
+  <script type="module" src="./event.js?v=20260608-v2"></script>
 </body>
 </html>
