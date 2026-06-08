@@ -1,0 +1,157 @@
+.adminShell {
+  padding-bottom: 60px;
+}
+
+.adminHero {
+  min-height: 210px;
+}
+
+.adminGrid {
+  display: grid;
+  grid-template-columns: 380px minmax(0, 1fr);
+  gap: 14px;
+}
+
+.adminGrid > .card:nth-child(3),
+.adminGrid > .card:nth-child(4) {
+  grid-column: 1 / -1;
+}
+
+.adminRows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.adminRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, .045);
+  cursor: pointer;
+}
+
+.adminRow:hover,
+.adminRow.is-active {
+  border-color: rgba(255, 61, 69, .45);
+  background: rgba(215, 25, 32, .11);
+}
+
+.rowTitle {
+  color: var(--text);
+  font-weight: 950;
+}
+
+.rowMeta {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.statusPill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: capitalize;
+}
+
+.statusPill.published {
+  border-color: rgba(34, 197, 94, .35);
+  background: rgba(34, 197, 94, .12);
+  color: #bbf7d0;
+}
+
+.statusPill.draft {
+  border-color: rgba(245, 158, 11, .35);
+  background: rgba(245, 158, 11, .12);
+  color: #fed7aa;
+}
+
+.statusPill.archived {
+  color: #cbd5e1;
+}
+
+.adminForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 180px;
+  gap: 12px;
+}
+
+.adminActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.healthGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.healthCard {
+  min-height: 104px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, .045);
+}
+
+.healthLabel {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.healthValue {
+  margin-top: 12px;
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 950;
+}
+
+@media (max-width: 1040px) {
+  .adminGrid,
+  .healthGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .adminGrid > .card:nth-child(3),
+  .adminGrid > .card:nth-child(4) {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 680px) {
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .adminActions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .adminActions .btn {
+    width: 100%;
+  }
+}

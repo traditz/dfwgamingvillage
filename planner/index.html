@@ -3,83 +3,97 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  
+
   <title>DFWGV Planner</title>
   <meta name="title" content="DFWGV Planner" />
-  <meta name="description" content="Game Day table planning (Discord ↔ Website sync). Host tables, join games, and manage waitlists instantly." />
+  <meta name="description" content="DFW Gaming Village game day planning. Host tables, join games, and manage waitlists across Discord and the web." />
 
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://dfwgamingvillage.com/planner/" />
   <meta property="og:title" content="DFWGV Planner" />
-  <meta property="og:description" content="Game Day table planning (Discord ↔ Website sync). Host tables, join games, and manage waitlists instantly." />
-  <meta property="og:image" content="https://dfwgamingvillage.com/planner/plannerbanner.png" />
+  <meta property="og:description" content="DFW Gaming Village game day planning. Host tables, join games, and manage waitlists across Discord and the web." />
+  <meta property="og:image" content="https://dfwgamingvillage.com/planner/banner2.png" />
 
   <meta property="twitter:card" content="summary_large_image" />
   <meta property="twitter:url" content="https://dfwgamingvillage.com/planner/" />
   <meta property="twitter:title" content="DFWGV Planner" />
-  <meta property="twitter:description" content="Game Day table planning (Discord ↔ Website sync). Host tables, join games, and manage waitlists instantly." />
-  <meta property="twitter:image" content="https://dfwgamingvillage.com/planner/plannerbanner.png" />
+  <meta property="twitter:description" content="DFW Gaming Village game day planning. Host tables, join games, and manage waitlists across Discord and the web." />
+  <meta property="twitter:image" content="https://dfwgamingvillage.com/planner/banner2.png" />
 
-  <meta name="theme-color" content="#6ea8ff" />
+  <meta name="theme-color" content="#d71920" />
 
-  <link rel="stylesheet" href="./styles.css?v=20251228e" />
+  <link rel="icon" href="./dfwgv-icon.png" />
+  <link rel="stylesheet" href="./styles.css?v=20260608-v1" />
 </head>
 <body>
   <header class="topbar">
     <div class="brand">
-      <div class="logo"><img src="./64.png" alt="Logo" /></div>
+      <div class="logo"><img src="./dfwgv-icon.png" alt="DFW Gaming Village logo" /></div>
       <div>
         <div class="title">DFWGV Planner</div>
-        <div class="subtitle">Game Day table planning (Discord ↔ Website sync)</div>
+        <div class="subtitle">Game day planning for DFW Gaming Village</div>
       </div>
     </div>
 
+    <nav class="topnav" aria-label="Planner navigation">
+      <a href="./">Planner</a>
+      <a href="./events/">Public Events</a>
+      <a href="./admin/">Admin</a>
+    </nav>
+
     <div class="authbar" id="authbar">
-      <div class="auth-status" id="authStatus">Loading auth…</div>
+      <div class="auth-status" id="authStatus">Loading auth...</div>
       <button class="btn" id="btnDiscord">Sign in with Discord</button>
       <button class="btn btn-danger" id="btnSignOut">Sign out</button>
     </div>
   </header>
 
   <main class="container">
+    <section class="plannerHero" aria-label="DFW Gaming Village Planner">
+      <img src="./banner2.png" alt="DFW Gaming Village" />
+      <div class="heroCopy">
+        <div class="eyebrow">Discord and website sync</div>
+        <h1>Plan the next game day without spreadsheet chaos.</h1>
+      </div>
+    </section>
+
     <section class="grid">
       <section class="card">
         <div class="cardhead">
-          <h2>📅 Upcoming Game Days</h2>
+          <h2>Upcoming Game Days</h2>
           <button class="btn btn-primary" id="btnCreateGameDay">Create Game Day (Admin)</button>
         </div>
         <div class="muted">Click a Game Day to open its planner.</div>
-
         <div id="gamedayList" class="list"></div>
       </section>
 
       <section class="card" id="gamedayCard" style="display:none;">
         <div class="cardhead">
           <h2 id="gamedayTitle">Game Day</h2>
-          <button class="btn" id="btnBack">← Back</button>
+          <button class="btn" id="btnBack">Back</button>
         </div>
 
         <div class="gamedayMeta" id="gamedayMeta"></div>
 
         <div class="actions">
-          <button class="btn btn-primary" id="btnHostTable">➕ Host a Table</button>
-          <button class="btn btn-primary" id="btnWantToPlay">🙋 Want to Play</button>
-          <button class="btn" id="btnRefresh">🔄 Refresh</button>
+          <button class="btn btn-primary" id="btnHostTable">Host a Table</button>
+          <button class="btn btn-primary" id="btnWantToPlay">Want to Play</button>
+          <button class="btn" id="btnRefresh">Refresh</button>
         </div>
 
         <div class="split">
           <div>
-            <h3>🎲 Hosted Tables</h3>
+            <h3>Hosted Tables</h3>
             <div class="pager" id="tablePager" style="display:none;">
-              <button class="btn" id="btnPrev">⬅ Prev</button>
+              <button class="btn" id="btnPrev">Prev</button>
               <div class="muted" id="pageInfo"></div>
-              <button class="btn" id="btnNext">Next ➡</button>
+              <button class="btn" id="btnNext">Next</button>
             </div>
             <div id="tablesList" class="tables"></div>
           </div>
 
           <div>
-            <h3>🙋 Want to Play</h3>
+            <h3>Want to Play</h3>
             <div id="wantsList" class="list"></div>
           </div>
         </div>
@@ -91,12 +105,12 @@
     <div class="modalCard">
       <div class="modalHead">
         <h3 id="modalTitle">Modal</h3>
-        <button class="btn" id="btnModalClose">✕</button>
+        <button class="btn" id="btnModalClose" aria-label="Close modal">Close</button>
       </div>
       <div class="modalBody" id="modalBody"></div>
-      </div>
+    </div>
   </div>
 
-  <script type="module" src="./app.js?v=20251228e"></script>
+  <script type="module" src="./app.js?v=20260608-v1"></script>
 </body>
 </html>

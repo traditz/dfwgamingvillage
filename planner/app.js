@@ -94,6 +94,8 @@ const btnModalClose = document.querySelector("#btnModalClose");
 // -----------------------------
 let currentUser = null;
 let currentGameDayId = null;
+let currentGameDays = [];
+let initialEventId = new URLSearchParams(window.location.search).get("event") || "";
 
 // tables pagination
 let currentTables = [];
@@ -887,6 +889,7 @@ function subscribeGameDayDetails(gamedayId) {
 // Rendering
 // -----------------------------
 function renderGameDays(list) {
+  currentGameDays = list;
   gamedayList.innerHTML = "";
   if (!list.length) {
     gamedayList.innerHTML = `<div class="muted">No upcoming game days.</div>`;
@@ -897,9 +900,18 @@ function renderGameDays(list) {
     const el = document.createElement("div");
     el.className = "listitem";
     el.innerHTML = `
-      <div class="title">${esc(gd.title || "Game Day")}</div>
-      <div class="meta">${esc(fmtDate(startsAt))}${gd.location ? ` • ${esc(gd.location)}` : ""}</div>
+      <div>
+        <div class="title">${esc(gd.title || "Game Day")}</div>
+        <div class="meta">${esc(fmtDate(startsAt))}${gd.location ? ` • ${esc(gd.location)}` : ""}</div>
+      </div>
     `;
+
+    const publicLink = document.createElement("a");
+    publicLink.className = "btn";
+    publicLink.href = `./events/?id=${encodeURIComponent(gd.id)}`;
+    publicLink.textContent = "Public";
+    publicLink.addEventListener("click", (e) => e.stopPropagation());
+    el.appendChild(publicLink);
 
     // NEW: Delete button for admin
     if (isAdmin()) {
@@ -924,6 +936,14 @@ function renderGameDays(list) {
 
     el.addEventListener("click", () => openGameDay(gd));
     gamedayList.appendChild(el);
+  }
+
+  if (initialEventId) {
+    const match = list.find((gd) => gd.id === initialEventId);
+    if (match) {
+      initialEventId = "";
+      openGameDay(match);
+    }
   }
 }
 

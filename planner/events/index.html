@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DFWGV Public Events</title>
+  <meta name="description" content="Public DFW Gaming Village game day pages." />
+  <meta name="theme-color" content="#d71920" />
+  <link rel="icon" href="../dfwgv-icon.png" />
+  <link rel="stylesheet" href="../styles.css?v=20260608-v1" />
+  <link rel="stylesheet" href="./event.css?v=20260608-v1" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo"><img src="../dfwgv-icon.png" alt="DFW Gaming Village logo" /></div>
+      <div>
+        <div class="title">DFWGV Events</div>
+        <div class="subtitle">Public game day pages</div>
+      </div>
+    </div>
+    <nav class="topnav" aria-label="Planner navigation">
+      <a href="../">Planner</a>
+      <a href="./">Public Events</a>
+      <a href="../admin/">Admin</a>
+    </nav>
+    <div class="authbar">
+      <a class="btn btn-primary" href="../">Sign in to join</a>
+    </div>
+  </header>
+
+  <main class="container publicShell">
+    <section class="plannerHero publicHero" aria-label="DFW Gaming Village public event">
+      <img src="../banner2.png" alt="DFW Gaming Village" />
+      <div class="heroCopy">
+        <div class="eyebrow">Public Event</div>
+        <h1 id="pageTitle">DFWGV Game Day</h1>
+      </div>
+    </section>
+
+    <section id="eventListView" class="card">
+      <div class="cardhead">
+        <h2>Published Events</h2>
+        <a class="btn" href="../">Open Planner</a>
+      </div>
+      <div id="eventList" class="eventGrid"></div>
+    </section>
+
+    <section id="eventDetailView" class="eventLayout" style="display:none;">
+      <section class="card eventSummary">
+        <div class="cardhead">
+          <h2 id="eventTitle">Game Day</h2>
+          <button class="btn" id="btnShare">Share</button>
+        </div>
+        <div class="eventMeta" id="eventMeta"></div>
+        <div class="publicActions">
+          <a class="btn btn-primary" id="btnOpenPlanner" href="../">Host or Join</a>
+          <a class="btn" id="btnCalendar" href="#">Add to Calendar</a>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="cardhead">
+          <h2>Hosted Tables</h2>
+          <div class="filterbar" id="filters">
+            <button class="chip is-active" data-filter="all">All</button>
+            <button class="chip" data-filter="open">Open Seats</button>
+            <button class="chip" data-filter="waitlist">Waitlist</button>
+          </div>
+        </div>
+        <div id="publicTables" class="publicTables"></div>
+      </section>
+
+      <section class="card">
+        <div class="cardhead">
+          <h2>Want to Play</h2>
+        </div>
+        <div id="publicWants" class="list"></div>
+      </section>
+    </section>
+  </main>
+
+  <script type="module" src="./event.js?v=20260608-v1"></script>
+</body>
+</html>

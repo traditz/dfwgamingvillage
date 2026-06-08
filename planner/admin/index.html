@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DFWGV Planner Admin</title>
+  <meta name="description" content="Admin dashboard for DFWGV Planner." />
+  <meta name="theme-color" content="#d71920" />
+  <link rel="icon" href="../dfwgv-icon.png" />
+  <link rel="stylesheet" href="../styles.css?v=20260608-v1" />
+  <link rel="stylesheet" href="./admin.css?v=20260608-v1" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo"><img src="../dfwgv-icon.png" alt="DFW Gaming Village logo" /></div>
+      <div>
+        <div class="title">DFWGV Admin</div>
+        <div class="subtitle">Planner operations dashboard</div>
+      </div>
+    </div>
+    <nav class="topnav" aria-label="Planner navigation">
+      <a href="../">Planner</a>
+      <a href="../events/">Public Events</a>
+      <a href="./">Admin</a>
+    </nav>
+    <div class="authbar">
+      <div class="auth-status" id="authStatus">Checking access...</div>
+      <a class="btn" href="../">Planner Sign In</a>
+    </div>
+  </header>
+
+  <main class="container adminShell">
+    <section class="plannerHero adminHero" aria-label="DFWGV Planner admin">
+      <img src="../banner2.png" alt="DFW Gaming Village" />
+      <div class="heroCopy">
+        <div class="eyebrow">V1.0 Operations</div>
+        <h1>Admin dashboard for events, tables, sync, and safety.</h1>
+      </div>
+    </section>
+
+    <section id="blockedState" class="card">
+      <div class="cardhead">
+        <h2>Admin Access</h2>
+      </div>
+      <div class="muted">Sign in from the planner with the configured owner account to use the admin dashboard.</div>
+    </section>
+
+    <section id="adminApp" class="adminGrid" style="display:none;">
+      <section class="card">
+        <div class="cardhead">
+          <h2>Events</h2>
+          <button class="btn btn-primary" id="btnNewEvent">New Event</button>
+        </div>
+        <div id="eventRows" class="adminRows"></div>
+      </section>
+
+      <section class="card">
+        <div class="cardhead">
+          <h2>Event Detail</h2>
+          <a class="btn" id="publicLink" href="../events/">Public Page</a>
+        </div>
+        <form id="eventForm" class="adminForm">
+          <input type="hidden" id="eventId" />
+          <label class="field">
+            <div class="label">Title</div>
+            <input id="eventTitle" required maxlength="120" />
+          </label>
+          <div class="formGrid">
+            <label class="field">
+              <div class="label">Start</div>
+              <input id="eventStart" type="datetime-local" required />
+            </label>
+            <label class="field">
+              <div class="label">Status</div>
+              <select id="eventStatus">
+                <option value="draft">Draft</option>
+                <option value="published">Published</option>
+                <option value="archived">Archived</option>
+              </select>
+            </label>
+          </div>
+          <label class="field">
+            <div class="label">Location</div>
+            <input id="eventLocation" maxlength="160" />
+          </label>
+          <div class="adminActions">
+            <button class="btn btn-primary" type="submit">Save Event</button>
+            <button class="btn btn-danger" type="button" id="btnDeleteEvent">Delete Event</button>
+          </div>
+          <div class="modalStatus" id="statusBox" style="display:none;"></div>
+          <div class="modalError" id="errorBox" style="display:none;"></div>
+        </form>
+      </section>
+
+      <section class="card">
+        <div class="cardhead">
+          <h2>Readiness</h2>
+        </div>
+        <div class="healthGrid">
+          <div class="healthCard">
+            <div class="healthLabel">Firestore Rules</div>
+            <div class="healthValue">Public published reads</div>
+          </div>
+          <div class="healthCard">
+            <div class="healthLabel">Writes</div>
+            <div class="healthValue">Functions only</div>
+          </div>
+          <div class="healthCard">
+            <div class="healthLabel">Discord Sync</div>
+            <div class="healthValue">Bot watcher</div>
+          </div>
+          <div class="healthCard">
+            <div class="healthLabel">Audit Log</div>
+            <div class="healthValue">Planned</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="cardhead">
+          <h2>Tables</h2>
+        </div>
+        <div id="tableRows" class="adminRows"></div>
+      </section>
+    </section>
+  </main>
+
+  <script type="module" src="./admin.js?v=20260608-v1"></script>
+</body>
+</html>
