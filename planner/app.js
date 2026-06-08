@@ -920,7 +920,7 @@ function renderGameDays(list) {
       delBtn.style.marginLeft = "auto";
       delBtn.style.fontSize = "12px";
       delBtn.style.padding = "4px 8px";
-      delBtn.textContent = "Del";
+      delBtn.textContent = "Delete";
       delBtn.addEventListener("click", async (e) => {
         e.stopPropagation();
         if (confirm("Delete this Game Day? This will wipe all tables.")) {
@@ -1052,7 +1052,7 @@ function renderTablesPage() {
           <button class="btn" data-action="leave" ${isSignedUp ? "" : "disabled style='display:none;'"}>Leave</button>
           
           ${canEdit ? `<button class="btn" data-action="edit">Edit</button>` : ""}
-          ${canDelete ? `<button class="btn btn-danger" data-action="delete" style="margin-left:auto;">Del</button>` : ""}
+          ${canDelete ? `<button class="btn btn-danger" data-action="delete" style="margin-left:auto;">Delete</button>` : ""}
         </div>
       </div>
     `;
@@ -1126,7 +1126,7 @@ function renderWants(items) {
         ${bggUrl ? `<a href="${esc(bggUrl)}" target="_blank" rel="noopener">${esc(p.gameName || "Game")}</a>` : esc(p.gameName || "Game")}
       </div>
       <div class="meta">${esc(p.createdByDisplayName || p.createdByUid || "Someone")}${p.notes ? ` • ${esc(p.notes)}` : ""}</div>
-      ${canDelete ? `<button class="btn btn-danger" style="margin-left:auto; font-size:12px; padding:4px 8px;">Del</button>` : ""}
+      ${canDelete ? `<button class="btn btn-danger" style="margin-left:auto; font-size:12px; padding:4px 8px;">Delete</button>` : ""}
     `;
 
     // NEW: Delete handler

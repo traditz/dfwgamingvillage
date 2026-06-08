@@ -12,6 +12,12 @@
   gap: 12px;
 }
 
+.eventSection + .eventSection {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
 .eventTile {
   display: flex;
   min-height: 148px;
@@ -64,6 +70,12 @@
   font-weight: 800;
 }
 
+.eventPill.is-history {
+  border-color: rgba(148, 163, 184, .28);
+  background: rgba(148, 163, 184, .10);
+  color: #d1d5db;
+}
+
 .publicActions {
   display: flex;
   gap: 10px;
@@ -82,8 +94,8 @@
 }
 
 .chip.is-active {
-  border-color: rgba(215, 25, 32, .65);
-  background: rgba(215, 25, 32, .2);
+  border-color: rgba(248, 113, 113, .42);
+  background: rgba(185, 28, 28, .16);
   color: var(--text);
 }
 

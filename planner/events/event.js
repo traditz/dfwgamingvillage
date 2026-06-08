@@ -19,7 +19,8 @@ const db = getFirestore(app);
 const pageTitle = document.querySelector("#pageTitle");
 const eventListView = document.querySelector("#eventListView");
 const eventDetailView = document.querySelector("#eventDetailView");
-const eventList = document.querySelector("#eventList");
+const upcomingEvents = document.querySelector("#upcomingEvents");
+const pastEvents = document.querySelector("#pastEvents");
 const eventTitle = document.querySelector("#eventTitle");
 const eventMeta = document.querySelector("#eventMeta");
 const publicTables = document.querySelector("#publicTables");
@@ -84,10 +85,16 @@ function eventUrl(id) {
   return `./?id=${encodeURIComponent(id)}`;
 }
 
-function renderEventList(items) {
-  eventList.innerHTML = "";
+function isPastEvent(gd) {
+  const d = asDate(gd.startsAt);
+  if (!d) return false;
+  return d.getTime() < Date.now();
+}
+
+function renderEventCollection(host, items, emptyText) {
+  host.innerHTML = "";
   if (!items.length) {
-    eventList.innerHTML = `<div class="muted">No published game days yet.</div>`;
+    host.innerHTML = `<div class="muted">${esc(emptyText)}</div>`;
     return;
   }
 
@@ -102,8 +109,23 @@ function renderEventList(items) {
       </div>
       <a class="btn btn-primary" href="${eventUrl(gd.id)}">View Event</a>
     `;
-    eventList.appendChild(el);
+    host.appendChild(el);
   }
+}
+
+function renderEventList(items) {
+  const upcoming = [];
+  const past = [];
+  for (const gd of items) {
+    if (isPastEvent(gd)) past.push(gd);
+    else upcoming.push(gd);
+  }
+
+  upcoming.sort((a, b) => (asDate(a.startsAt)?.getTime() || 0) - (asDate(b.startsAt)?.getTime() || 0));
+  past.sort((a, b) => (asDate(b.startsAt)?.getTime() || 0) - (asDate(a.startsAt)?.getTime() || 0));
+
+  renderEventCollection(upcomingEvents, upcoming, "No upcoming public events.");
+  renderEventCollection(pastEvents, past, "No past public events yet.");
 }
 
 function renderTables() {
@@ -188,7 +210,8 @@ async function loadEvent(id) {
   if (!snap.exists()) {
     eventListView.style.display = "";
     eventDetailView.style.display = "none";
-    eventList.innerHTML = `<div class="muted">That event was not found or is not public.</div>`;
+    upcomingEvents.innerHTML = `<div class="muted">That event was not found or is not public.</div>`;
+    pastEvents.innerHTML = "";
     return;
   }
 
@@ -196,7 +219,8 @@ async function loadEvent(id) {
   if (gd.status !== "published") {
     eventListView.style.display = "";
     eventDetailView.style.display = "none";
-    eventList.innerHTML = `<div class="muted">That event is not public yet.</div>`;
+    upcomingEvents.innerHTML = `<div class="muted">That event is not public yet.</div>`;
+    pastEvents.innerHTML = "";
     return;
   }
 
@@ -205,6 +229,7 @@ async function loadEvent(id) {
   pageTitle.textContent = gd.title || "DFWGV Game Day";
   eventTitle.textContent = gd.title || "DFWGV Game Day";
   eventMeta.innerHTML = `
+    ${isPastEvent(gd) ? `<span class="eventPill is-history">Past Event</span>` : ""}
     <span class="eventPill">${esc(fmtDate(gd.startsAt))}</span>
     ${gd.location ? `<span class="eventPill">${esc(gd.location)}</span>` : ""}
   `;
