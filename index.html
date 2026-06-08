@@ -3,93 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta property="og:title" content="DFW Gaming Village" />
-    <meta property="og:description" content="Gaming and Social Events" />
-    <meta property="og:image" content="https://www.dfwgamingvillage.com/banner_cropped.png" />
-    <meta property="og:url" content="https://www.dfwgamingvillage.com/" />
-    <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:image" content="https://www.dfwgamingvillage.com/banner.png" />
+    <meta property="og:title" content="DFW Gaming Village">
+    <meta property="og:description" content="Gaming and Social Events">
+    <meta property="og:image" content="https://www.dfwgamingvillage.com/banner_cropped.png">
+    <meta property="og:url" content="https://www.dfwgamingvillage.com/">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://www.dfwgamingvillage.com/banner.png">
     <title>DFW Gaming Village</title>
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #000;
-            color: white;
-            text-align: center;
-        }
-        .banner {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #111;
-            padding: 20px 0;
-        }
-        .banner img {
-            max-width: 100%;
-            height: auto;
-        }
-        
-        .nav {
-            background-color: #222;
-            padding: 15px;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        
-        .nav a {
-            color: #ffcc00; /* Gold text to match your site */
-            background-color: #333; /* Dark button background */
-            text-decoration: none;
-            margin: 5px; /* Spacing for buttons */
-            padding: 10px 15px; /* Makes it button-sized */
-            border-radius: 5px; /* Rounded corners */
-            font-size: 16px;
-            font-weight: bold;
-            border: 1px solid #555; /* Defines the button edge */
-            transition: background-color 0.3s, color 0.3s; /* Smooth hover */
-        }
-
-        .nav a:hover {
-            background-color: #ffcc00; /* Gold background on hover */
-            color: #222; /* Dark text on hover */
-        }
-        .content {
-            padding: 50px 20px;
-            max-width: 800px;
-            margin: 0 auto;
-            line-height: 1.6;
-        }
-        .content a {
-            color: #ffcc00; /* Highlight links in gold */
-            text-decoration: none;
-        }
-        .content a:hover {
-            text-decoration: underline;
-        }
-        .footer {
-            background-color: #222;
-            padding: 20px;
-            margin-top: 20px;
-        }
-
-        /* --- THIS BLOCK IS UPDATED --- */
-       @media (max-width: 600px) {
-            .nav {
-                padding: 10px 5px; /* Tighter padding on the nav bar */
-            }
-            .nav a {
-                font-size: 12px;  /* Even smaller text */
-                padding: 5px 8px; /* Even smaller button padding */
-                margin: 3px;      /* Tighter spacing between buttons */
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="community.css?v=20260607-gallery-center">
 </head>
-<body>
+<body data-page="home">
     <div class="nav">
         <a href="index.html">Home</a>
         <a href="join.html">Join the Community</a>
@@ -101,22 +25,26 @@
         <a href="supporters.html">Supporters</a>
         <a href="contact.html">Contact</a>
     </div>
+
     <div class="banner">
         <img src="banner.png" alt="DFW Gaming Village Banner">
     </div>
-<div class="content">
+
+    <main class="content narrow">
         <h1>Welcome to DFW Gaming Village</h1>
         <p>DFW Gaming Village is a registered 501(c)(3) nonprofit organization dedicated to building community through tabletop gaming.</p>
         <p>We host gaming and social events across North Texas and provide a traveling board game library for our members, local organizations, and conventions.
         As a charitable nonprofit, our mission is to promote social connection, education, and accessible gaming experiences for everyone.</p>
-        <p>On this website, you’ll find our <a href="games.html">game library</a>, links to our
-        <a href="https://www.facebook.com/groups/dfwgamingvillage" target="_blank">Facebook group</a> and
-        <a href="https://discord.gg/BMYyM88Shs" target="_blank">Discord</a>, our <a href="events.html">event calendar</a>, and ways to
+        <p>On this website, you'll find our <a href="games.html">game library</a>, links to our
+        <a href="https://www.facebook.com/groups/dfwgamingvillage" target="_blank" rel="noopener">Facebook group</a> and
+        <a href="https://discord.gg/BMYyM88Shs" target="_blank" rel="noopener">Discord</a>, our <a href="events.html">event calendar</a>, and ways to
         <a href="contact.html">contact</a> and donate to our mission.</p>
         <p><i>All donations to DFW Gaming Village are tax-deductible to the extent permitted by law.</i></p>
-    </div>
-    <div class="footer">
+    </main>
+
+    <footer class="footer">
         <p>&copy; 2026 DFW Gaming Village. All Rights Reserved.</p>
-    </div>
+    </footer>
+    <script src="site-analytics.js?v=20260607-analytics"></script>
 </body>
 </html>
