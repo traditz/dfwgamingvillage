@@ -110,6 +110,7 @@ const PAGE_SIZE = 8;
 // roster (per-table signups)
 const rosterByTableId = new Map(); // tableId -> { confirmed: string[], waitlist: string[], confirmedIds: Set, waitlistIds: Set }
 const rosterUnsubsByTableId = new Map(); // tableId -> unsubscribe()
+const bggMetaCache = new Map(); // bggId -> Promise<{ bggYear, bggRating }>
 
 // unsubscribe handles
 let unsubGameDays = null;
@@ -183,6 +184,60 @@ function sortByStartsAtDesc(items) {
     const bTime = asDate(b.startsAt)?.getTime() ?? 0;
     return bTime - aTime;
   });
+}
+
+function normalizeBggThingPayload(payload) {
+  if (!payload || typeof payload !== "object") return {};
+  const thing = payload.thing && typeof payload.thing === "object" ? payload.thing : payload;
+  return {
+    ...thing,
+    expansions: thing.expansions || payload.expansions || []
+  };
+}
+
+function gameYear(item) {
+  const year = Number(item?.bggYear ?? item?.year ?? 0);
+  return Number.isFinite(year) && year > 0 ? String(year) : "";
+}
+
+function gameRating(item) {
+  const rating = Number(item?.bggRating ?? item?.rating ?? 0);
+  return Number.isFinite(rating) && rating > 0 ? rating.toFixed(1) : "";
+}
+
+function gameMetaText(item) {
+  const parts = [];
+  const year = gameYear(item);
+  const rating = gameRating(item);
+  if (year) parts.push(`Year: ${year}`);
+  if (rating) parts.push(`BGG: ${rating}`);
+  return parts.join(" • ");
+}
+
+async function fetchBggMeta(bggId) {
+  const key = String(bggId || "").trim();
+  if (!key) return {};
+  if (!bggMetaCache.has(key)) {
+    bggMetaCache.set(key, bggThing(key).then((payload) => {
+      const thing = normalizeBggThingPayload(payload);
+      return {
+        bggYear: thing.year || thing.bggYear || null,
+        bggRating: thing.bggRating || thing.rating || null
+      };
+    }).catch(() => ({})));
+  }
+  return bggMetaCache.get(key);
+}
+
+async function hydrateGameMeta(root, item) {
+  const host = root?.querySelector?.("[data-game-meta]");
+  if (!host || !item?.bggId || gameMetaText(item)) return;
+  const meta = await fetchBggMeta(item.bggId);
+  const text = gameMetaText(meta);
+  if (text) {
+    host.textContent = text;
+    host.style.display = "";
+  }
 }
 
 // FIX: Robust check for admin ID (handles both "123" and "discord:123")
@@ -593,16 +648,19 @@ function openGameSearchModal({ title }) {
             showInlineError("");
             showInlineStatus("Loading game details…");
             const full = await bggThing(it.bggId);
+            const thing = normalizeBggThingPayload(full);
             showInlineStatus("");
 
-            const expansions = full.expansions || [];
+            const expansions = thing.expansions || [];
             done({
               bggId: it.bggId,
-              name: it.name,
-              thumbUrl: it.thumbUrl || "",
-              year: it.year || null,
-              minPlayers: it.minPlayers || null,
-              maxPlayers: it.maxPlayers || null,
+              name: thing.name || it.name,
+              thumbUrl: thing.thumbUrl || it.thumbUrl || "",
+              year: thing.year || it.year || null,
+              bggYear: thing.year || it.year || null,
+              bggRating: thing.bggRating || it.bggRating || null,
+              minPlayers: thing.minPlayers || it.minPlayers || null,
+              maxPlayers: thing.maxPlayers || it.maxPlayers || null,
               expansions
             });
           } catch (e) {
@@ -763,6 +821,8 @@ function openHostTableFormModal({ gamedayId, thing }) {
           bggId: String(thing.bggId),
           gameName: thing.name,
           thumbUrl: thing.thumbUrl || "",
+          bggYear: thing.bggYear || thing.year || null,
+          bggRating: thing.bggRating || null,
           startTime: startIso,
           capacity: capFinal,
           notes,
@@ -891,6 +951,8 @@ function openWantToPlayFormModal({ gamedayId, thing }) {
           bggId: String(thing.bggId),
           gameName: thing.name,
           thumbUrl: thing.thumbUrl || "",
+          bggYear: thing.bggYear || thing.year || null,
+          bggRating: thing.bggRating || null,
           notes
         });
 
@@ -1149,6 +1211,7 @@ function renderTablesPage() {
         <div class="row1">
           <div class="name">
             ${bggUrl ? `<a href="${esc(bggUrl)}" target="_blank" rel="noopener">${esc(t.gameName || "Game")}</a>` : esc(t.gameName || "Game")}
+            <div class="gameMeta" data-game-meta ${gameMetaText(t) ? "" : "style=\"display:none;\""}>${esc(gameMetaText(t))}</div>
           </div>
           <div class="time">${timeDisplay}</div>
         </div>
@@ -1233,6 +1296,7 @@ function renderTablesPage() {
     }
 
     tablesList.appendChild(el);
+    hydrateGameMeta(el, t);
     // Populate roster immediately if we already have it.
     updateRosterDom(t.id);
   }
@@ -1256,6 +1320,7 @@ function renderWants(items) {
     el.innerHTML = `
       <div class="title">
         ${bggUrl ? `<a href="${esc(bggUrl)}" target="_blank" rel="noopener">${esc(p.gameName || "Game")}</a>` : esc(p.gameName || "Game")}
+        <div class="gameMeta" data-game-meta ${gameMetaText(p) ? "" : "style=\"display:none;\""}>${esc(gameMetaText(p))}</div>
       </div>
       <div class="meta">${esc(p.createdByDisplayName || p.createdByUid || "Someone")}${p.notes ? ` • ${esc(p.notes)}` : ""}</div>
       ${canDelete ? `<button class="btn btn-danger" style="margin-left:auto; font-size:12px; padding:4px 8px;">Delete</button>` : ""}
@@ -1277,6 +1342,7 @@ function renderWants(items) {
     }
 
     wantsList.appendChild(el);
+    hydrateGameMeta(el, p);
   }
 }
 

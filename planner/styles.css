@@ -369,6 +369,14 @@ textarea:focus {
   font-size: 13px;
 }
 
+.gameMeta {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.25;
+}
+
 .pastEventItem {
   cursor: default;
 }

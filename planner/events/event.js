@@ -1,4 +1,5 @@
 import { firebaseConfig } from "../firebase-config.js";
+import * as appConfig from "../app-config.js";
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {
@@ -37,6 +38,7 @@ let activeFilter = "all";
 let tables = [];
 let unsubTables = null;
 let unsubPosts = null;
+const bggMetaCache = new Map();
 
 function esc(s) {
   return String(s ?? "").replace(/[&<>"']/g, (m) => ({
@@ -59,6 +61,68 @@ function asDate(v) {
   }
   const d = new Date(v);
   return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function normalizeBggThingPayload(payload) {
+  if (!payload || typeof payload !== "object") return {};
+  const thing = payload.thing && typeof payload.thing === "object" ? payload.thing : payload;
+  return {
+    ...thing,
+    expansions: thing.expansions || payload.expansions || []
+  };
+}
+
+async function bggThing(id) {
+  const url = `${appConfig.BGG_THING_URL}?id=${encodeURIComponent(id)}`;
+  const r = await fetch(url);
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(`BGG thing failed: ${JSON.stringify(j)}`);
+  return j;
+}
+
+function gameYear(item) {
+  const year = Number(item?.bggYear ?? item?.year ?? 0);
+  return Number.isFinite(year) && year > 0 ? String(year) : "";
+}
+
+function gameRating(item) {
+  const rating = Number(item?.bggRating ?? item?.rating ?? 0);
+  return Number.isFinite(rating) && rating > 0 ? rating.toFixed(1) : "";
+}
+
+function gameMetaText(item) {
+  const parts = [];
+  const year = gameYear(item);
+  const rating = gameRating(item);
+  if (year) parts.push(`Year: ${year}`);
+  if (rating) parts.push(`BGG: ${rating}`);
+  return parts.join(" • ");
+}
+
+async function fetchBggMeta(bggId) {
+  const key = String(bggId || "").trim();
+  if (!key) return {};
+  if (!bggMetaCache.has(key)) {
+    bggMetaCache.set(key, bggThing(key).then((payload) => {
+      const thing = normalizeBggThingPayload(payload);
+      return {
+        bggYear: thing.year || thing.bggYear || null,
+        bggRating: thing.bggRating || thing.rating || null
+      };
+    }).catch(() => ({})));
+  }
+  return bggMetaCache.get(key);
+}
+
+async function hydrateGameMeta(root, item) {
+  const host = root?.querySelector?.("[data-game-meta]");
+  if (!host || !item?.bggId || gameMetaText(item)) return;
+  const meta = await fetchBggMeta(item.bggId);
+  const text = gameMetaText(meta);
+  if (text) {
+    host.textContent = text;
+    host.style.display = "";
+  }
 }
 
 function fmtDate(v) {
@@ -190,6 +254,7 @@ function renderTables() {
       <div>
         <div class="publicTableTitle">
           ${bggUrl ? `<a href="${esc(bggUrl)}" target="_blank" rel="noopener">${esc(t.gameName || "Game")}</a>` : esc(t.gameName || "Game")}
+          <div class="gameMeta" data-game-meta ${gameMetaText(t) ? "" : "style=\"display:none;\""}>${esc(gameMetaText(t))}</div>
         </div>
         <div class="seatBadge ${openSeats ? "is-open" : ""}">
           ${openSeats ? `${openSeats} open seat${openSeats === 1 ? "" : "s"}` : `Waitlist ${wait}`}
@@ -200,6 +265,7 @@ function renderTables() {
       </div>
     `;
     publicTables.appendChild(el);
+    hydrateGameMeta(el, t);
   }
 }
 
@@ -219,11 +285,13 @@ function renderWants(posts) {
       <div>
         <div class="title">
           ${bggUrl ? `<a href="${esc(bggUrl)}" target="_blank" rel="noopener">${esc(p.gameName || "Game")}</a>` : esc(p.gameName || "Game")}
+          <div class="gameMeta" data-game-meta ${gameMetaText(p) ? "" : "style=\"display:none;\""}>${esc(gameMetaText(p))}</div>
         </div>
         <div class="meta">${esc(p.createdByDisplayName || "Someone")}${p.notes ? ` - ${esc(p.notes)}` : ""}</div>
       </div>
     `;
     publicWants.appendChild(el);
+    hydrateGameMeta(el, p);
   }
 }
 
