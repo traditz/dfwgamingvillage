@@ -68,6 +68,8 @@ const btnCreateGameDay = document.querySelector("#btnCreateGameDay");
 const btnPastEvents = document.querySelector("#btnPastEvents");
 
 const gamedayList = document.querySelector("#gamedayList");
+const pastEventsPanel = document.querySelector("#pastEventsPanel");
+const pastGamedayList = document.querySelector("#pastGamedayList");
 const gamedayCard = document.querySelector("#gamedayCard");
 const gamedayTitle = document.querySelector("#gamedayTitle");
 const gamedayMeta = document.querySelector("#gamedayMeta");
@@ -95,6 +97,7 @@ const btnModalClose = document.querySelector("#btnModalClose");
 // -----------------------------
 let currentUser = null;
 let currentGameDayId = null;
+let currentGameDay = null;
 let currentGameDays = [];
 let currentPastGameDays = [];
 let initialEventId = new URLSearchParams(window.location.search).get("event") || "";
@@ -144,12 +147,14 @@ function asDate(v) {
 }
 
 function centralDateKey(date) {
-  return new Intl.DateTimeFormat("en-CA", {
+  const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: "America/Chicago",
     year: "numeric",
     month: "2-digit",
     day: "2-digit"
-  }).format(date);
+  }).formatToParts(date);
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
 }
 
 function isPastGameDay(gd) {
@@ -935,10 +940,15 @@ function renderGameDays(list) {
   currentPastGameDays = sortByStartsAtDesc(sorted.filter(isPastGameDay));
   if (btnPastEvents) {
     btnPastEvents.disabled = currentPastGameDays.length === 0;
+    if (currentPastGameDays.length === 0 && pastEventsPanel) {
+      pastEventsPanel.style.display = "none";
+    }
+    btnPastEvents.setAttribute("aria-expanded", pastEventsPanel?.style.display !== "none" ? "true" : "false");
     btnPastEvents.setAttribute("aria-label", currentPastGameDays.length
       ? `View ${currentPastGameDays.length} past event${currentPastGameDays.length === 1 ? "" : "s"}`
       : "No past events yet");
   }
+  renderPastGameDays();
 
   gamedayList.innerHTML = "";
   if (!visibleGameDays.length) {
@@ -997,44 +1007,70 @@ function renderGameDays(list) {
   }
 }
 
-function openPastEventsModal() {
+function renderPastGameDays() {
+  if (!pastGamedayList) return;
+  pastGamedayList.innerHTML = "";
   if (!currentPastGameDays.length) {
-    openModal("Past Events", `<div class="muted">No past events yet.</div>`);
+    pastGamedayList.innerHTML = `<div class="muted">No past events yet.</div>`;
     return;
   }
 
-  openModal("Past Events", `
-    <div class="modalStack">
-      <div class="muted">Past game days are kept for history and sorted by most recent first.</div>
-      <div class="list">
-        ${currentPastGameDays.map((gd) => `
-          <div class="listitem pastEventItem" data-gameday-id="${esc(gd.id)}">
-            <div>
-              <div class="title">${esc(gd.title || "Game Day")}</div>
-              <div class="meta">${esc(fmtDate(asDate(gd.startsAt)))}${gd.location ? ` • ${esc(gd.location)}` : ""}</div>
-            </div>
-            <a class="btn" href="./events/?id=${encodeURIComponent(gd.id)}">Public</a>
-            <button class="btn btn-primary" data-action="open-past" data-gameday-id="${esc(gd.id)}">Open</button>
-          </div>
-        `).join("")}
+  for (const gd of currentPastGameDays) {
+    const el = document.createElement("div");
+    el.className = "listitem pastEventItem";
+    el.innerHTML = `
+      <div>
+        <div class="title">${esc(gd.title || "Game Day")}</div>
+        <div class="meta">${esc(fmtDate(asDate(gd.startsAt)))}${gd.location ? ` • ${esc(gd.location)}` : ""}</div>
       </div>
-    </div>
-  `);
+    `;
 
-  modalBody.querySelectorAll('[data-action="open-past"]').forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const gd = currentPastGameDays.find((item) => item.id === btn.getAttribute("data-gameday-id"));
-      if (!gd) return;
-      closeModal();
-      openGameDay(gd);
-    });
-  });
+    const publicLink = document.createElement("a");
+    publicLink.className = "btn";
+    publicLink.href = `./events/?id=${encodeURIComponent(gd.id)}`;
+    publicLink.textContent = "Public";
+    publicLink.addEventListener("click", (e) => e.stopPropagation());
+    el.appendChild(publicLink);
+
+    el.addEventListener("click", () => openGameDay(gd));
+    pastGamedayList.appendChild(el);
+  }
+}
+
+function togglePastEvents() {
+  if (!pastEventsPanel || !btnPastEvents) return;
+  const show = pastEventsPanel.style.display === "none";
+  pastEventsPanel.style.display = show ? "" : "none";
+  btnPastEvents.setAttribute("aria-expanded", String(show));
+}
+
+function setPastEventActions(isPast) {
+  if (btnHostTable) {
+    btnHostTable.disabled = isPast;
+    btnHostTable.title = isPast ? "Past events are read-only." : "";
+  }
+  if (btnWantToPlay) {
+    btnWantToPlay.disabled = isPast;
+    btnWantToPlay.title = isPast ? "Past events are read-only." : "";
+  }
+}
+
+function currentEventIsPast() {
+  return currentGameDay ? isPastGameDay(currentGameDay) : false;
+}
+
+function stopPastEventAction(ev) {
+  if (!currentEventIsPast()) return false;
+  ev?.stopPropagation?.();
+  alert("Past events are read-only.");
+  return true;
 }
 
 function renderTablesPage() {
   const total = currentTables.length;
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   currentPage = Math.max(0, Math.min(currentPage, pages - 1));
+  const isPast = currentEventIsPast();
 
   const startIdx = currentPage * PAGE_SIZE;
   const pageItems = currentTables.slice(startIdx, startIdx + PAGE_SIZE);
@@ -1069,12 +1105,12 @@ function renderTablesPage() {
     const roster = rosterByTableId.get(t.id);
     const isSignedUp = roster && (roster.confirmedIds.has(currentUser?.uid) || roster.waitlistIds.has(currentUser?.uid));
 
-    const canJoin = !!currentUser && !isSignedUp;
+    const canJoin = !!currentUser && !isSignedUp && !isPast;
     
     // NEW: Check permissions for deletion
     const isHost = currentUser && (currentUser.uid === t.hostUid);
-    const canDelete = isHost || isAdmin();
-    const canEdit = isHost;
+    const canDelete = !isPast && (isHost || isAdmin());
+    const canEdit = !isPast && isHost;
 
     const bggUrl = t.bggId ? `https://boardgamegeek.com/boardgame/${encodeURIComponent(t.bggId)}` : null;
 
@@ -1131,9 +1167,9 @@ function renderTablesPage() {
         <div class="row3">
           ${isSignedUp 
              ? `<button class="btn" disabled style="opacity:0.5; cursor:default;">✅ Joined</button>` 
-             : `<button class="btn btn-primary" data-action="join" ${canJoin ? "" : "disabled"}>Join</button>`
+             : `<button class="btn btn-primary" data-action="join" ${canJoin ? "" : "disabled"} title="${isPast ? "Past events are read-only." : ""}">Join</button>`
           }
-          <button class="btn" data-action="leave" ${isSignedUp ? "" : "disabled style='display:none;'"}>Leave</button>
+          <button class="btn" data-action="leave" ${isSignedUp && !isPast ? "" : "disabled style='display:none;'"}>Leave</button>
           
           ${canEdit ? `<button class="btn" data-action="edit">Edit</button>` : ""}
           ${canDelete ? `<button class="btn btn-danger" data-action="delete" style="margin-left:auto;">Delete</button>` : ""}
@@ -1143,6 +1179,7 @@ function renderTablesPage() {
 
     el.querySelector('[data-action="join"]')?.addEventListener("click", async (ev) => {
       ev.stopPropagation();
+      if (stopPastEventAction(ev)) return;
       if (!currentUser) return alert("Please sign in first.");
       try {
         await fnJoinTable({ gamedayId: currentGameDayId, tableId: t.id });
@@ -1153,6 +1190,7 @@ function renderTablesPage() {
 
     el.querySelector('[data-action="leave"]')?.addEventListener("click", async (ev) => {
       ev.stopPropagation();
+      if (stopPastEventAction(ev)) return;
       if (!currentUser) return alert("Please sign in first.");
       
       // HOST LEAVE WARNING
@@ -1167,6 +1205,7 @@ function renderTablesPage() {
 
     el.querySelector('[data-action="edit"]')?.addEventListener("click", async (ev) => {
       ev.stopPropagation();
+      if (stopPastEventAction(ev)) return;
       openEditTableModal(t);
     });
 
@@ -1193,6 +1232,7 @@ function renderTablesPage() {
 
 function renderWants(items) {
   wantsList.innerHTML = "";
+  const isPast = currentEventIsPast();
   if (!items.length) {
     wantsList.innerHTML = `<div class="muted">No “want to play” posts yet.</div>`;
     return;
@@ -1200,7 +1240,7 @@ function renderWants(items) {
 
   for (const p of items) {
     const isCreator = currentUser && (currentUser.uid === p.createdByUid);
-    const canDelete = isCreator || isAdmin();
+    const canDelete = !isPast && (isCreator || isAdmin());
 
     const bggUrl = p.bggId ? `https://boardgamegeek.com/boardgame/${encodeURIComponent(p.bggId)}` : null;
     const el = document.createElement("div");
@@ -1238,6 +1278,8 @@ function renderWants(items) {
 function showGameDayList() {
   stopRosterListenersExcept(new Set());
   currentGameDayId = null;
+  currentGameDay = null;
+  setPastEventActions(false);
   gamedayCard.style.display = "none";
 }
 
@@ -1247,9 +1289,17 @@ function showGameDayCard() {
 
 function openGameDay(gd) {
   currentGameDayId = gd.id;
+  currentGameDay = gd;
   gamedayTitle.textContent = gd.title || "Game Day";
-  const startsAt = gd.startsAt?.toDate ? gd.startsAt.toDate() : gd.startsAt;
-  gamedayMeta.innerHTML = `<div class="muted">${esc(fmtDate(startsAt))}${gd.location ? ` • ${esc(gd.location)}` : ""}</div>`;
+  const startsAt = asDate(gd.startsAt);
+  const isPast = isPastGameDay(gd);
+  gamedayMeta.innerHTML = `
+    <div class="muted">
+      ${isPast ? `<span class="eventPill is-history">Past Event</span> ` : ""}
+      ${esc(fmtDate(startsAt))}${gd.location ? ` • ${esc(gd.location)}` : ""}
+    </div>
+  `;
+  setPastEventActions(isPast);
   showGameDayCard();
   subscribeGameDayDetails(gd.id);
 }
@@ -1308,7 +1358,7 @@ if (btnCreateGameDay) btnCreateGameDay.addEventListener("click", async () => {
   await createGamedayPromptFlow();
 });
 
-if (btnPastEvents) btnPastEvents.addEventListener("click", openPastEventsModal);
+if (btnPastEvents) btnPastEvents.addEventListener("click", togglePastEvents);
 
 if (btnBack) btnBack.addEventListener("click", () => {
   showGameDayList();
@@ -1316,6 +1366,7 @@ if (btnBack) btnBack.addEventListener("click", () => {
 
 if (btnHostTable) btnHostTable.addEventListener("click", async () => {
   try {
+    if (stopPastEventAction()) return;
     if (!currentUser) {
       alert("Please sign in first.");
       return;
@@ -1334,6 +1385,7 @@ if (btnHostTable) btnHostTable.addEventListener("click", async () => {
 
 
 if (btnWantToPlay) btnWantToPlay.addEventListener("click", async () => {
+  if (stopPastEventAction()) return;
   if (!currentUser) return alert("Please sign in first.");
   if (!currentGameDayId) return;
   await wantToPlayFlow(currentGameDayId);

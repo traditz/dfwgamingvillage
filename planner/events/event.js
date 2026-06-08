@@ -95,12 +95,14 @@ function isPastEvent(gd) {
 }
 
 function centralDateKey(date) {
-  return new Intl.DateTimeFormat("en-CA", {
+  const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: "America/Chicago",
     year: "numeric",
     month: "2-digit",
     day: "2-digit"
-  }).format(date);
+  }).formatToParts(date);
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
 }
 
 function renderEventCollection(host, items, emptyText) {
@@ -260,6 +262,8 @@ async function loadEvent(id) {
     historyNotice.style.display = isPast ? "" : "none";
   }
   btnOpenPlanner.href = `../?event=${encodeURIComponent(id)}`;
+  btnOpenPlanner.textContent = isPast ? "View in Planner" : "Host or Join";
+  btnOpenPlanner.classList.toggle("btn-primary", !isPast);
   btnCalendar.href = calendarUrl(gd);
 
   if (unsubTables) unsubTables();

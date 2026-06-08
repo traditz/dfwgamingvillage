@@ -373,6 +373,39 @@ textarea:focus {
   cursor: default;
 }
 
+.pastEventsPanel {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.pastEventsLabel {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.eventPill {
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, .055);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.eventPill.is-history {
+  border-color: rgba(248, 113, 113, .45);
+  background: rgba(185, 28, 28, .18);
+  color: #fecaca;
+}
+
 .actions {
   display: flex;
   gap: 10px;
