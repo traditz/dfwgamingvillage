@@ -3,6 +3,7 @@ main = "src/worker.js"
 compatibility_date = "2025-01-01"
 workers_dev = true
 
-[[analytics_engine_datasets]]
-binding = "PAGE_VIEWS"
-dataset = "dfwgv_page_views"
+[[d1_databases]]
+binding = "ANALYTICS_DB"
+database_name = "dfwgv-analytics"
+database_id = "36785673-2da0-44ba-bc96-18482a742f95"

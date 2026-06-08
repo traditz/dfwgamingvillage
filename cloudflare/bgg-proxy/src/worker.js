@@ -1,6 +1,5 @@
 const BGG_COLLECTION_URL = "https://boardgamegeek.com/xmlapi2/collection";
 const DEFAULT_USERNAME = "traditz";
-const ANALYTICS_DATASET = "dfwgv_page_views";
 const ALLOWED_ORIGINS = new Set([
   "https://www.dfwgamingvillage.com",
   "https://dfwgamingvillage.com",
@@ -39,6 +38,33 @@ function jsonResponse(body, status, cors) {
   });
 }
 
+function isAuthorized(request, env) {
+  const expectedToken = env.ANALYTICS_ADMIN_TOKEN;
+  const authorization = request.headers.get("Authorization") || "";
+  const token = authorization.startsWith("Bearer ") ? authorization.slice(7).trim() : "";
+
+  return Boolean(expectedToken && token && token === expectedToken);
+}
+
+function getAnalyticsRange(range) {
+  const ranges = {
+    "24h": "-1 day",
+    "7d": "-7 days",
+    "30d": "-30 days",
+    "90d": "-90 days"
+  };
+
+  return ranges[range] || ranges["7d"];
+}
+
+function requireAnalyticsDb(env) {
+  if (!env.ANALYTICS_DB) {
+    throw new Error("Analytics database is not configured.");
+  }
+
+  return env.ANALYTICS_DB;
+}
+
 async function handlePageView(request, env, cors) {
   if (request.method !== "POST") {
     return new Response("Method not allowed", {
@@ -65,91 +91,54 @@ async function handlePageView(request, env, cors) {
     });
   }
 
-  const requestUrl = new URL(request.url);
+  const db = requireAnalyticsDb(env);
   const country = request.cf?.country || "";
   const userAgent = clampString(request.headers.get("User-Agent"), 300);
   const refererHeader = clampString(request.headers.get("Referer"), 500);
   const referrer = clampString(payload.referrer, 500) || refererHeader;
   const utm = payload.utm && typeof payload.utm === "object" ? payload.utm : {};
 
-  const dataPoint = {
-    blobs: [
+  await db.prepare(`
+    INSERT INTO page_views (
+      timestamp,
       page,
-      clampString(payload.title, 180),
-      clampString(payload.query, 300),
+      query,
+      title,
       referrer,
-      clampString(payload.language, 40),
-      clampString(payload.timezone, 80),
+      language,
+      timezone,
       country,
-      userAgent,
-      clampString(utm.utm_source, 120),
-      clampString(utm.utm_medium, 120),
-      clampString(utm.utm_campaign, 120)
-    ],
-    doubles: [
-      Number(payload.viewportWidth) || 0,
-      Number(payload.viewportHeight) || 0,
-      Number(payload.screenWidth) || 0,
-      Number(payload.screenHeight) || 0
-    ],
-    indexes: [
-      clampString(payload.sessionId, 80) || `${requestUrl.hostname}-unknown`
-    ]
-  };
-
-  if (env.PAGE_VIEWS?.writeDataPoint) {
-    env.PAGE_VIEWS.writeDataPoint(dataPoint);
-  } else {
-    console.log(JSON.stringify({ type: "page_view", dataPoint }));
-  }
+      user_agent,
+      utm_source,
+      utm_medium,
+      utm_campaign,
+      viewport_width,
+      viewport_height,
+      screen_width,
+      screen_height,
+      session_id
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).bind(
+    clampString(payload.timestamp, 40) || new Date().toISOString(),
+    page,
+    clampString(payload.query, 300),
+    clampString(payload.title, 180),
+    referrer,
+    clampString(payload.language, 40),
+    clampString(payload.timezone, 80),
+    country,
+    userAgent,
+    clampString(utm.utm_source, 120),
+    clampString(utm.utm_medium, 120),
+    clampString(utm.utm_campaign, 120),
+    Number(payload.viewportWidth) || 0,
+    Number(payload.viewportHeight) || 0,
+    Number(payload.screenWidth) || 0,
+    Number(payload.screenHeight) || 0,
+    clampString(payload.sessionId, 80)
+  ).run();
 
   return jsonResponse({ ok: true }, 202, cors);
-}
-
-function isAuthorized(request, env) {
-  const expectedToken = env.ANALYTICS_ADMIN_TOKEN;
-  const authorization = request.headers.get("Authorization") || "";
-  const token = authorization.startsWith("Bearer ") ? authorization.slice(7).trim() : "";
-
-  return Boolean(expectedToken && token && token === expectedToken);
-}
-
-function getAnalyticsInterval(range) {
-  const ranges = {
-    "24h": "1 DAY",
-    "7d": "7 DAY",
-    "30d": "30 DAY",
-    "90d": "90 DAY"
-  };
-
-  return ranges[range] || ranges["7d"];
-}
-
-async function queryAnalyticsEngine(env, sql) {
-  const accountId = env.CLOUDFLARE_ACCOUNT_ID;
-  const apiToken = env.CLOUDFLARE_API_TOKEN;
-
-  if (!accountId || !apiToken) {
-    throw new Error("Analytics query credentials are not configured.");
-  }
-
-  const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${accountId}/analytics_engine/sql`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiToken}`,
-      "Content-Type": "text/plain; charset=utf-8"
-    },
-    body: sql
-  });
-
-  const text = await response.text();
-
-  if (!response.ok) {
-    throw new Error(`Analytics query failed: ${response.status} ${text.slice(0, 240)}`);
-  }
-
-  const parsed = JSON.parse(text);
-  return Array.isArray(parsed) ? parsed : parsed.data || parsed.rows || [];
 }
 
 async function handleAnalyticsSummary(request, env, cors) {
@@ -164,119 +153,147 @@ async function handleAnalyticsSummary(request, env, cors) {
     return jsonResponse({ ok: false, error: "Unauthorized" }, 401, cors);
   }
 
+  const db = requireAnalyticsDb(env);
   const url = new URL(request.url);
   const range = url.searchParams.get("range") || "7d";
-  const interval = getAnalyticsInterval(range);
-  const where = `timestamp > NOW() - INTERVAL '${interval}'`;
+  const since = getAnalyticsRange(range);
 
-  const queries = {
-    overview: `
+  const bindSince = (statement) => db.prepare(statement).bind(since);
+  const [overview, topPages, daily, referrers, countries, campaigns, recent] = await Promise.all([
+    bindSince(`
       SELECT
-        SUM(_sample_interval) AS views,
-        uniq(index1) AS sessions,
-        uniq(blob1) AS pages
-      FROM ${ANALYTICS_DATASET}
-      WHERE ${where}
-      FORMAT JSON
-    `,
-    topPages: `
+        COUNT(*) AS views,
+        COUNT(DISTINCT session_id) AS sessions,
+        COUNT(DISTINCT page) AS pages
+      FROM page_views
+      WHERE datetime(timestamp) >= datetime('now', ?)
+    `).first(),
+    bindSince(`
       SELECT
-        blob1 AS page,
-        SUM(_sample_interval) AS views,
-        uniq(index1) AS sessions
-      FROM ${ANALYTICS_DATASET}
-      WHERE ${where}
+        page,
+        COUNT(*) AS views,
+        COUNT(DISTINCT session_id) AS sessions
+      FROM page_views
+      WHERE datetime(timestamp) >= datetime('now', ?)
       GROUP BY page
       ORDER BY views DESC
       LIMIT 25
-      FORMAT JSON
-    `,
-    daily: `
+    `).all(),
+    bindSince(`
       SELECT
-        toStartOfDay(timestamp) AS day,
-        SUM(_sample_interval) AS views,
-        uniq(index1) AS sessions
-      FROM ${ANALYTICS_DATASET}
-      WHERE ${where}
+        date(timestamp) AS day,
+        COUNT(*) AS views,
+        COUNT(DISTINCT session_id) AS sessions
+      FROM page_views
+      WHERE datetime(timestamp) >= datetime('now', ?)
       GROUP BY day
       ORDER BY day ASC
-      FORMAT JSON
-    `,
-    referrers: `
+    `).all(),
+    bindSince(`
       SELECT
-        if(blob4 = '', '(direct)', blob4) AS referrer,
-        SUM(_sample_interval) AS views
-      FROM ${ANALYTICS_DATASET}
-      WHERE ${where}
+        COALESCE(NULLIF(referrer, ''), '(direct)') AS referrer,
+        COUNT(*) AS views
+      FROM page_views
+      WHERE datetime(timestamp) >= datetime('now', ?)
       GROUP BY referrer
       ORDER BY views DESC
       LIMIT 20
-      FORMAT JSON
-    `,
-    countries: `
+    `).all(),
+    bindSince(`
       SELECT
-        if(blob7 = '', '(unknown)', blob7) AS country,
-        SUM(_sample_interval) AS views
-      FROM ${ANALYTICS_DATASET}
-      WHERE ${where}
+        COALESCE(NULLIF(country, ''), '(unknown)') AS country,
+        COUNT(*) AS views
+      FROM page_views
+      WHERE datetime(timestamp) >= datetime('now', ?)
       GROUP BY country
       ORDER BY views DESC
       LIMIT 20
-      FORMAT JSON
-    `,
-    campaigns: `
+    `).all(),
+    bindSince(`
       SELECT
-        if(blob9 = '', '(none)', blob9) AS source,
-        if(blob10 = '', '', blob10) AS medium,
-        if(blob11 = '', '', blob11) AS campaign,
-        SUM(_sample_interval) AS views
-      FROM ${ANALYTICS_DATASET}
-      WHERE ${where}
+        COALESCE(NULLIF(utm_source, ''), '(none)') AS source,
+        COALESCE(utm_medium, '') AS medium,
+        COALESCE(utm_campaign, '') AS campaign,
+        COUNT(*) AS views
+      FROM page_views
+      WHERE datetime(timestamp) >= datetime('now', ?)
       GROUP BY source, medium, campaign
       ORDER BY views DESC
       LIMIT 20
-      FORMAT JSON
-    `,
-    recent: `
+    `).all(),
+    bindSince(`
       SELECT
         timestamp,
-        blob1 AS page,
-        blob4 AS referrer,
-        blob7 AS country
-      FROM ${ANALYTICS_DATASET}
-      WHERE ${where}
+        page,
+        referrer,
+        country
+      FROM page_views
+      WHERE datetime(timestamp) >= datetime('now', ?)
       ORDER BY timestamp DESC
       LIMIT 50
-      FORMAT JSON
-    `
-  };
+    `).all()
+  ]);
 
-  try {
-    const [overview, topPages, daily, referrers, countries, campaigns, recent] = await Promise.all([
-      queryAnalyticsEngine(env, queries.overview),
-      queryAnalyticsEngine(env, queries.topPages),
-      queryAnalyticsEngine(env, queries.daily),
-      queryAnalyticsEngine(env, queries.referrers),
-      queryAnalyticsEngine(env, queries.countries),
-      queryAnalyticsEngine(env, queries.campaigns),
-      queryAnalyticsEngine(env, queries.recent)
-    ]);
+  return jsonResponse({
+    ok: true,
+    range,
+    generatedAt: new Date().toISOString(),
+    overview: overview || { views: 0, sessions: 0, pages: 0 },
+    topPages: topPages.results || [],
+    daily: daily.results || [],
+    referrers: referrers.results || [],
+    countries: countries.results || [],
+    campaigns: campaigns.results || [],
+    recent: recent.results || []
+  }, 200, cors);
+}
 
-    return jsonResponse({
-      ok: true,
-      range,
-      generatedAt: new Date().toISOString(),
-      overview: overview[0] || { views: 0, sessions: 0, pages: 0 },
-      topPages,
-      daily,
-      referrers,
-      countries,
-      campaigns,
-      recent
-    }, 200, cors);
-  } catch (error) {
-    return jsonResponse({ ok: false, error: error.message }, 500, cors);
+async function handleBggCollection(request, env, cors, incomingUrl) {
+  if (request.method !== "GET") {
+    return new Response("Method not allowed", {
+      status: 405,
+      headers: { ...cors, "Content-Type": "text/plain; charset=utf-8" }
+    });
   }
+
+  if (!env.BGG_TOKEN) {
+    return new Response("BGG token is not configured.", {
+      status: 500,
+      headers: { ...cors, "Content-Type": "text/plain; charset=utf-8" }
+    });
+  }
+
+  const username = incomingUrl.searchParams.get("username") || DEFAULT_USERNAME;
+  if (!validateUsername(username)) {
+    return new Response("Invalid username", {
+      status: 400,
+      headers: { ...cors, "Content-Type": "text/plain; charset=utf-8" }
+    });
+  }
+
+  const bggUrl = new URL(BGG_COLLECTION_URL);
+  bggUrl.searchParams.set("username", username);
+  bggUrl.searchParams.set("own", "1");
+  bggUrl.searchParams.set("stats", "1");
+  bggUrl.searchParams.set("excludesubtype", "boardgameexpansion");
+
+  const bggResponse = await fetch(bggUrl.toString(), {
+    headers: {
+      Authorization: `Bearer ${env.BGG_TOKEN}`
+    }
+  });
+
+  const body = await bggResponse.text();
+  const contentType = bggResponse.headers.get("Content-Type") || "application/xml; charset=utf-8";
+
+  return new Response(body, {
+    status: bggResponse.status,
+    headers: {
+      ...cors,
+      "Content-Type": contentType,
+      "Cache-Control": bggResponse.status === 200 ? "public, max-age=900" : "no-store"
+    }
+  });
 }
 
 export default {
@@ -296,57 +313,13 @@ export default {
       return handleAnalyticsSummary(request, env, cors);
     }
 
-    if (request.method !== "GET") {
-      return new Response("Method not allowed", {
-        status: 405,
-        headers: { ...cors, "Content-Type": "text/plain; charset=utf-8" }
-      });
+    if (incomingUrl.pathname === "/api/bgg-collection") {
+      return handleBggCollection(request, env, cors, incomingUrl);
     }
 
-    if (!env.BGG_TOKEN) {
-      return new Response("BGG token is not configured.", {
-        status: 500,
-        headers: { ...cors, "Content-Type": "text/plain; charset=utf-8" }
-      });
-    }
-
-    if (incomingUrl.pathname !== "/api/bgg-collection") {
-      return new Response("Not found", {
-        status: 404,
-        headers: { ...cors, "Content-Type": "text/plain; charset=utf-8" }
-      });
-    }
-
-    const username = incomingUrl.searchParams.get("username") || DEFAULT_USERNAME;
-    if (!validateUsername(username)) {
-      return new Response("Invalid username", {
-        status: 400,
-        headers: { ...cors, "Content-Type": "text/plain; charset=utf-8" }
-      });
-    }
-
-    const bggUrl = new URL(BGG_COLLECTION_URL);
-    bggUrl.searchParams.set("username", username);
-    bggUrl.searchParams.set("own", "1");
-    bggUrl.searchParams.set("stats", "1");
-    bggUrl.searchParams.set("excludesubtype", "boardgameexpansion");
-
-    const bggResponse = await fetch(bggUrl.toString(), {
-      headers: {
-        Authorization: `Bearer ${env.BGG_TOKEN}`
-      }
-    });
-
-    const body = await bggResponse.text();
-    const contentType = bggResponse.headers.get("Content-Type") || "application/xml; charset=utf-8";
-
-    return new Response(body, {
-      status: bggResponse.status,
-      headers: {
-        ...cors,
-        "Content-Type": contentType,
-        "Cache-Control": bggResponse.status === 200 ? "public, max-age=900" : "no-store"
-      }
+    return new Response("Not found", {
+      status: 404,
+      headers: { ...cors, "Content-Type": "text/plain; charset=utf-8" }
     });
   }
 };
