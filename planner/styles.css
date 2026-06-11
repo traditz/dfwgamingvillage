@@ -359,11 +359,16 @@ textarea:focus {
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
   padding: 12px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: rgba(255, 255, 255, .045);
   cursor: pointer;
+}
+
+.listitem > * {
+  min-width: 0;
 }
 
 .listitem:hover {
@@ -379,6 +384,9 @@ textarea:focus {
   margin-top: 4px;
   color: var(--muted);
   font-size: 13px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
 }
 
 .gameMeta {
@@ -536,6 +544,9 @@ textarea:focus {
   border-left: 3px solid var(--accent);
   background: rgba(0, 0, 0, .18);
   color: #e7e7ec;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: pre-wrap;
 }
 
 .roster {
