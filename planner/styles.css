@@ -70,7 +70,7 @@ a:hover {
   gap: 18px;
   padding: 12px 18px;
   border-bottom: 1px solid var(--line);
-  background: rgba(6, 6, 8, .88);
+  background: rgba(18, 18, 22, .92);
   backdrop-filter: blur(14px);
 }
 
@@ -87,9 +87,19 @@ a:hover {
   display: grid;
   place-items: center;
   overflow: hidden;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(255, 255, 255, .18);
   border-radius: var(--radius);
-  background: #000;
+  background: linear-gradient(145deg, rgba(255, 255, 255, .12), rgba(0, 0, 0, .38));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), 0 10px 24px rgba(0, 0, 0, .28);
+  text-decoration: none;
+}
+
+.logo:hover,
+.logo:focus-visible {
+  border-color: rgba(248, 113, 113, .5);
+  background: linear-gradient(145deg, rgba(255, 255, 255, .16), rgba(39, 39, 44, .72));
+  outline: none;
+  text-decoration: none;
 }
 
 .logo img {
@@ -125,17 +135,19 @@ a:hover {
   display: inline-flex;
   align-items: center;
   padding: 0 12px;
-  border: 1px solid transparent;
+  border: 1px solid rgba(255, 255, 255, .14);
   border-radius: var(--radius);
-  color: var(--muted);
+  background: rgba(255, 255, 255, .075);
+  color: #f2f2f4;
   font-size: 13px;
   font-weight: 750;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, .18);
 }
 
 .topnav a:hover {
   color: var(--text);
-  border-color: var(--line);
-  background: rgba(255, 255, 255, .05);
+  border-color: rgba(248, 113, 113, .38);
+  background: rgba(185, 28, 28, .18);
   text-decoration: none;
 }
 
@@ -527,10 +539,87 @@ textarea:focus {
 }
 
 .roster {
+  margin-top: 10px;
   padding: 10px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: rgba(0, 0, 0, .18);
+}
+
+.rosterTopline {
+  margin-bottom: 8px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.rosterGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.rosterGroup {
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid rgba(255, 255, 255, .09);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, .035);
+}
+
+.rosterGroupHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.rosterCount {
+  min-width: 24px;
+  min-height: 24px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid rgba(248, 113, 113, .28);
+  border-radius: 999px;
+  background: rgba(185, 28, 28, .14);
+  color: #fecaca;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.rosterNames {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.rosterChip,
+.rosterEmpty {
+  min-height: 26px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.rosterChip {
+  border: 1px solid rgba(255, 255, 255, .12);
+  background: rgba(255, 255, 255, .07);
+  color: #f2f2f4;
+}
+
+.rosterEmpty {
+  border: 1px dashed rgba(255, 255, 255, .12);
+  color: var(--muted);
 }
 
 .modal {
@@ -818,6 +907,10 @@ textarea:focus {
 
   .row3 .btn {
     flex: 1 1 42%;
+  }
+
+  .rosterGrid {
+    grid-template-columns: 1fr;
   }
 
   .modal {

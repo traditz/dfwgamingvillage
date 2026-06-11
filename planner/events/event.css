@@ -197,7 +197,32 @@
 
 @media (max-width: 680px) {
   .publicHero {
-    min-height: 170px;
+    min-height: 0;
+    display: block;
+  }
+
+  .publicHero img {
+    position: static;
+    display: block;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .publicHero::after {
+    display: none;
+  }
+
+  .publicHero .heroCopy {
+    max-width: none;
+    padding: 12px 14px 14px;
+    background: rgba(12, 12, 15, .96);
+    border-top: 1px solid var(--line);
+  }
+
+  .publicHero .heroCopy h1 {
+    margin-top: 6px;
+    font-size: 23px;
+    line-height: 1.12;
   }
 
   .publicActions,

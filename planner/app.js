@@ -388,9 +388,13 @@ function updateRosterDom(tableId) {
 
   const cEl = host.querySelector('[data-roster-kind="confirmed"]');
   const wEl = host.querySelector('[data-roster-kind="waitlist"]');
+  const cCountEl = host.querySelector('[data-roster-count="confirmed"]');
+  const wCountEl = host.querySelector('[data-roster-count="waitlist"]');
 
-  if (cEl) cEl.textContent = roster.confirmed.length ? roster.confirmed.join(", ") : "—";
-  if (wEl) wEl.textContent = roster.waitlist.length ? roster.waitlist.join(", ") : "—";
+  if (cEl) cEl.innerHTML = rosterNamesHtml(roster.confirmed);
+  if (wEl) wEl.innerHTML = rosterNamesHtml(roster.waitlist);
+  if (cCountEl) cCountEl.textContent = String(roster.confirmed.length);
+  if (wCountEl) wCountEl.textContent = String(roster.waitlist.length);
 
   const card = host.closest(".tablecard");
   if (card) {
@@ -402,6 +406,11 @@ function updateRosterDom(tableId) {
       seatsEl.textContent = `Seats: ${confCount}/${cap}${waitCount ? ` • Waitlist: ${waitCount}` : ""}`;
     }
   }
+}
+
+function rosterNamesHtml(names) {
+  if (!names?.length) return `<span class="rosterEmpty">None yet</span>`;
+  return names.map((name) => `<span class="rosterChip">${esc(name)}</span>`).join("");
 }
 
 // -----------------------------
@@ -1247,6 +1256,30 @@ function renderTablesPage() {
         </div>
       </div>
     `;
+
+    const rosterEl = el.querySelector(".roster");
+    if (rosterEl) {
+      rosterEl.removeAttribute("style");
+      rosterEl.innerHTML = `
+        <div class="rosterTopline">Players</div>
+        <div class="rosterGrid">
+          <div class="rosterGroup">
+            <div class="rosterGroupHead">
+              <span>Confirmed</span>
+              <span class="rosterCount" data-roster-count="confirmed">${confirmed}</span>
+            </div>
+            <div class="rosterNames" data-roster-kind="confirmed"><span class="rosterEmpty">None yet</span></div>
+          </div>
+          <div class="rosterGroup">
+            <div class="rosterGroupHead">
+              <span>Waitlist</span>
+              <span class="rosterCount" data-roster-count="waitlist">${wait}</span>
+            </div>
+            <div class="rosterNames" data-roster-kind="waitlist"><span class="rosterEmpty">None yet</span></div>
+          </div>
+        </div>
+      `;
+    }
 
     el.querySelector('[data-action="join"]')?.addEventListener("click", async (ev) => {
       ev.stopPropagation();
