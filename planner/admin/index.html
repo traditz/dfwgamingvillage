@@ -7,8 +7,8 @@
   <meta name="description" content="Admin dashboard for DFWGV Planner." />
   <meta name="theme-color" content="#d71920" />
   <link rel="icon" href="../dfwgv-icon.png" />
-  <link rel="stylesheet" href="../styles.css?v=20260610-v1" />
-  <link rel="stylesheet" href="./admin.css?v=20260610-v1" />
+  <link rel="stylesheet" href="../styles.css?v=20260611-v1" />
+  <link rel="stylesheet" href="./admin.css?v=20260611-v1" />
 </head>
 <body>
   <header class="topbar">
@@ -95,6 +95,20 @@
         </form>
       </section>
 
+      <section class="card discordCard">
+        <div class="cardhead">
+          <h2>Discord Binding</h2>
+        </div>
+        <div class="discordStatus" id="discordStatusValue">Select an event.</div>
+        <div class="discordHelp" id="discordHelp">
+          Create events here, then bind one to the desired Discord channel with the bot.
+        </div>
+        <div class="commandBox" id="discordCommand">/planner_bind gameday_id:&lt;event id&gt;</div>
+        <div class="adminActions">
+          <button class="btn" type="button" id="btnCopyBindCommand">Copy Bind Command</button>
+        </div>
+      </section>
+
       <section class="card">
         <div class="cardhead">
           <h2>Readiness</h2>
@@ -128,6 +142,6 @@
     </section>
   </main>
 
-  <script type="module" src="./admin.js?v=20260610-v1"></script>
+  <script type="module" src="./admin.js?v=20260611-v1"></script>
 </body>
 </html>

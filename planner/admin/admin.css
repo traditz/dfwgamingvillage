@@ -12,8 +12,8 @@
   gap: 14px;
 }
 
-.adminGrid > .card:nth-child(3),
-.adminGrid > .card:nth-child(4) {
+.adminGrid > .card:nth-child(4),
+.adminGrid > .card:nth-child(5) {
   grid-column: 1 / -1;
 }
 
@@ -50,6 +50,54 @@
   margin-top: 4px;
   color: var(--muted);
   font-size: 12px;
+}
+
+.discordCard {
+  grid-column: 2;
+  align-self: start;
+}
+
+.discordStatus {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, .045);
+  color: var(--muted);
+  font-weight: 900;
+}
+
+.discordStatus.is-linked {
+  border-color: rgba(34, 197, 94, .35);
+  background: rgba(34, 197, 94, .12);
+  color: #bbf7d0;
+}
+
+.discordStatus.is-unlinked {
+  border-color: rgba(245, 158, 11, .35);
+  background: rgba(245, 158, 11, .12);
+  color: #fed7aa;
+}
+
+.discordHelp {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.commandBox {
+  margin: 12px 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, .28);
+  color: var(--text);
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 13px;
+  overflow-wrap: anywhere;
 }
 
 .statusPill {
@@ -135,8 +183,12 @@
     grid-template-columns: 1fr;
   }
 
-  .adminGrid > .card:nth-child(3),
-  .adminGrid > .card:nth-child(4) {
+  .adminGrid > .card:nth-child(4),
+  .adminGrid > .card:nth-child(5) {
+    grid-column: auto;
+  }
+
+  .discordCard {
     grid-column: auto;
   }
 }

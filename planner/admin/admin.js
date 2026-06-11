@@ -35,6 +35,10 @@ const eventStatus = document.querySelector("#eventStatus");
 const eventLocation = document.querySelector("#eventLocation");
 const btnDeleteEvent = document.querySelector("#btnDeleteEvent");
 const publicLink = document.querySelector("#publicLink");
+const discordStatusValue = document.querySelector("#discordStatusValue");
+const discordHelp = document.querySelector("#discordHelp");
+const discordCommand = document.querySelector("#discordCommand");
+const btnCopyBindCommand = document.querySelector("#btnCopyBindCommand");
 const statusBox = document.querySelector("#statusBox");
 const errorBox = document.querySelector("#errorBox");
 
@@ -109,6 +113,7 @@ function selectEvent(id) {
   eventStatus.value = gd.status || "draft";
   eventLocation.value = gd.location || "";
   publicLink.href = `../events/?id=${encodeURIComponent(gd.id)}`;
+  renderDiscordBinding(gd);
   renderEvents();
   subscribeTables(gd.id);
 }
@@ -121,8 +126,55 @@ function newEvent() {
   eventStatus.value = "draft";
   eventLocation.value = "";
   publicLink.href = "../events/";
+  renderDiscordBinding(null);
   tableRows.innerHTML = `<div class="muted">Save the event before managing tables.</div>`;
   renderEvents();
+}
+
+function discordBinding(gd) {
+  const discord = gd?.discord && typeof gd.discord === "object" ? gd.discord : {};
+  const channelId = String(discord.channelId || "").trim();
+  return {
+    channelId,
+    channelName: String(discord.channelName || "").trim(),
+    messageId: String(discord.plannerMessageId || "").trim(),
+    lastSyncedAt: discord.lastSyncedAt || null
+  };
+}
+
+function bindCommand(gamedayId) {
+  return `/planner_bind gameday_id:${gamedayId}`;
+}
+
+function renderDiscordBinding(gd) {
+  if (!discordStatusValue || !discordHelp || !discordCommand || !btnCopyBindCommand) return;
+
+  if (!gd?.id) {
+    discordStatusValue.textContent = "Save or select an event first.";
+    discordStatusValue.className = "discordStatus";
+    discordHelp.textContent = "Create events here, then bind one to the desired Discord channel with the bot.";
+    discordCommand.textContent = "/planner_bind gameday_id:<event id>";
+    btnCopyBindCommand.disabled = true;
+    return;
+  }
+
+  const binding = discordBinding(gd);
+  const command = bindCommand(gd.id);
+  discordCommand.textContent = command;
+  btnCopyBindCommand.disabled = false;
+
+  if (binding.channelId) {
+    const label = binding.channelName ? `#${binding.channelName}` : `channel ${binding.channelId}`;
+    discordStatusValue.textContent = `Linked to ${label}`;
+    discordStatusValue.className = "discordStatus is-linked";
+    const syncText = binding.lastSyncedAt ? ` Last sync: ${fmtDate(binding.lastSyncedAt)}.` : "";
+    discordHelp.textContent = `Run /planner_event in Discord to inspect it, /planner_refresh to rebuild the board, or /planner_unbind in that channel to detach it.${syncText}`;
+    return;
+  }
+
+  discordStatusValue.textContent = "Not linked to Discord";
+  discordStatusValue.className = "discordStatus is-unlinked";
+  discordHelp.textContent = "Run this in the Discord channel that should host the planner board.";
 }
 
 function renderEvents() {
@@ -140,6 +192,7 @@ function renderEvents() {
       <div>
         <div class="rowTitle">${esc(gd.title || "Game Day")}</div>
         <div class="rowMeta">${esc(fmtDate(gd.startsAt))}${gd.location ? ` - ${esc(gd.location)}` : ""}</div>
+        <div class="rowMeta">${discordBinding(gd).channelId ? `Discord: ${esc(discordBinding(gd).channelName ? `#${discordBinding(gd).channelName}` : discordBinding(gd).channelId)}` : "Discord: Not linked"}</div>
       </div>
       <span class="statusPill ${esc(gd.status || "draft")}">${esc(gd.status || "draft")}</span>
     `;
@@ -228,6 +281,17 @@ btnDeleteEvent?.addEventListener("click", async () => {
   } catch (e) {
     showStatus("");
     showError(e?.message || String(e));
+  }
+});
+
+btnCopyBindCommand?.addEventListener("click", async () => {
+  if (!eventId.value) return;
+  const command = bindCommand(eventId.value);
+  try {
+    await navigator.clipboard.writeText(command);
+    showStatus("Discord bind command copied.");
+  } catch {
+    showError(command);
   }
 });
 
