@@ -1043,20 +1043,20 @@ function renderGameDays(list) {
         </div>
       `;
 
+      const actions = document.createElement("div");
+      actions.className = "eventCardFooter plannerEventActions";
+
       const publicLink = document.createElement("a");
       publicLink.className = "btn eventCardAction";
       publicLink.href = `./events/?id=${encodeURIComponent(gd.id)}`;
       publicLink.textContent = "Public";
       publicLink.addEventListener("click", (e) => e.stopPropagation());
-      el.appendChild(publicLink);
+      actions.appendChild(publicLink);
 
       // NEW: Delete button for admin
       if (isAdmin()) {
         const delBtn = document.createElement("button");
-        delBtn.className = "btn btn-danger";
-        delBtn.style.marginLeft = "auto";
-        delBtn.style.fontSize = "12px";
-        delBtn.style.padding = "4px 8px";
+        delBtn.className = "btn btn-danger eventCardAction";
         delBtn.textContent = "Delete";
         delBtn.addEventListener("click", async (e) => {
           e.stopPropagation();
@@ -1068,9 +1068,10 @@ function renderGameDays(list) {
               }
           }
         });
-        el.appendChild(delBtn);
+        actions.appendChild(delBtn);
       }
 
+      el.appendChild(actions);
       el.addEventListener("click", () => openGameDay(gd));
       el.addEventListener("keydown", (e) => {
         if (e.target.closest("a, button")) return;
@@ -1111,13 +1112,17 @@ function renderPastGameDays() {
       </div>
     `;
 
+    const actions = document.createElement("div");
+    actions.className = "eventCardFooter plannerEventActions";
+
     const publicLink = document.createElement("a");
     publicLink.className = "btn eventCardAction";
     publicLink.href = `./events/?id=${encodeURIComponent(gd.id)}`;
     publicLink.textContent = "Public";
     publicLink.addEventListener("click", (e) => e.stopPropagation());
-    el.appendChild(publicLink);
+    actions.appendChild(publicLink);
 
+    el.appendChild(actions);
     el.addEventListener("click", () => openGameDay(gd));
     el.addEventListener("keydown", (e) => {
       if (e.target.closest("a, button")) return;

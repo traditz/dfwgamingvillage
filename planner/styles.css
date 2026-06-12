@@ -508,6 +508,10 @@ textarea:focus {
   flex-wrap: wrap;
 }
 
+.plannerEventActions {
+  align-self: center;
+}
+
 .eventCardAction {
   align-self: center;
   white-space: nowrap;
