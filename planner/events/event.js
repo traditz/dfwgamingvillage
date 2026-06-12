@@ -183,16 +183,36 @@ function renderEventCollection(host, items, emptyText) {
   }
 
   for (const gd of items) {
+    const isPast = isPastEvent(gd);
     const el = document.createElement("article");
-    el.className = "eventTile";
+    el.className = "eventTile eventCard";
+    el.tabIndex = 0;
+    el.setAttribute("role", "link");
+    el.setAttribute("aria-label", `Open ${gd.title || "DFWGV Game Day"}`);
     el.innerHTML = `
-      <div>
-        <div class="eventTileTitle">${esc(gd.title || "DFWGV Game Day")}</div>
-        <div class="publicTableMeta">${esc(fmtDate(gd.startsAt))}</div>
-        ${gd.location ? `<div class="publicTableMeta">${esc(gd.location)}</div>` : ""}
+      <div class="eventCardMain">
+        <div class="eventCardKicker">${isPast ? "Past Event" : "Upcoming Event"}</div>
+        <div class="eventTileTitle eventCardTitle">${esc(gd.title || "DFWGV Game Day")}</div>
+        <div class="eventCardMeta">${esc(fmtDate(gd.startsAt))}</div>
+        ${gd.location ? `<div class="eventCardMeta">${esc(gd.location)}</div>` : ""}
       </div>
-      <a class="btn btn-primary" href="${eventUrl(gd.id)}">View Event</a>
+      <div class="eventCardFooter">
+        ${isPast ? `<span class="eventCardStatus">History</span>` : `<span class="eventCardStatus is-live">Open</span>`}
+        <a class="btn btn-primary eventCardAction" href="${eventUrl(gd.id)}">${isPast ? "Open History" : "Open Event"}</a>
+      </div>
     `;
+    const openEvent = () => { window.location.href = eventUrl(gd.id); };
+    el.addEventListener("click", (ev) => {
+      if (ev.target.closest("a, button")) return;
+      openEvent();
+    });
+    el.addEventListener("keydown", (ev) => {
+      if (ev.target.closest("a, button")) return;
+      if (ev.key === "Enter" || ev.key === " ") {
+        ev.preventDefault();
+        openEvent();
+      }
+    });
     host.appendChild(el);
   }
 }

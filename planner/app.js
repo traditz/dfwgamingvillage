@@ -1034,7 +1034,8 @@ function renderGameDays(list) {
     for (const gd of visibleGameDays) {
       const startsAt = asDate(gd.startsAt);
       const el = document.createElement("div");
-      el.className = "listitem";
+      el.className = "listitem eventCard";
+      el.tabIndex = 0;
       el.innerHTML = `
         <div>
           <div class="title">${esc(gd.title || "Game Day")}</div>
@@ -1043,7 +1044,7 @@ function renderGameDays(list) {
       `;
 
       const publicLink = document.createElement("a");
-      publicLink.className = "btn";
+      publicLink.className = "btn eventCardAction";
       publicLink.href = `./events/?id=${encodeURIComponent(gd.id)}`;
       publicLink.textContent = "Public";
       publicLink.addEventListener("click", (e) => e.stopPropagation());
@@ -1071,6 +1072,13 @@ function renderGameDays(list) {
       }
 
       el.addEventListener("click", () => openGameDay(gd));
+      el.addEventListener("keydown", (e) => {
+        if (e.target.closest("a, button")) return;
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          openGameDay(gd);
+        }
+      });
       gamedayList.appendChild(el);
     }
   }
@@ -1094,7 +1102,8 @@ function renderPastGameDays() {
 
   for (const gd of currentPastGameDays) {
     const el = document.createElement("div");
-    el.className = "listitem pastEventItem";
+    el.className = "listitem eventCard pastEventItem";
+    el.tabIndex = 0;
     el.innerHTML = `
       <div>
         <div class="title">${esc(gd.title || "Game Day")}</div>
@@ -1103,13 +1112,20 @@ function renderPastGameDays() {
     `;
 
     const publicLink = document.createElement("a");
-    publicLink.className = "btn";
+    publicLink.className = "btn eventCardAction";
     publicLink.href = `./events/?id=${encodeURIComponent(gd.id)}`;
     publicLink.textContent = "Public";
     publicLink.addEventListener("click", (e) => e.stopPropagation());
     el.appendChild(publicLink);
 
     el.addEventListener("click", () => openGameDay(gd));
+    el.addEventListener("keydown", (e) => {
+      if (e.target.closest("a, button")) return;
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openGameDay(gd);
+      }
+    });
     pastGamedayList.appendChild(el);
   }
 }

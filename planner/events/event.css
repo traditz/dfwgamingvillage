@@ -3,18 +3,22 @@
 }
 
 .publicHero {
-  min-height: 210px;
+  min-height: 0;
+}
+
+.publicPageHeader {
+  margin-bottom: clamp(18px, 3vw, 32px);
 }
 
 .eventGrid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 14px;
 }
 
 .eventSection + .eventSection {
-  margin-top: 18px;
-  padding-top: 14px;
+  margin-top: clamp(18px, 3vw, 26px);
+  padding-top: clamp(16px, 2.5vw, 22px);
   border-top: 1px solid var(--line);
 }
 
@@ -29,14 +33,17 @@
 
 .eventTile {
   display: flex;
-  min-height: 148px;
+  min-height: 172px;
   flex-direction: column;
   justify-content: space-between;
   gap: 14px;
-  padding: 14px;
+  padding: 16px;
   border: 1px solid var(--line);
+  border-left: 3px solid var(--gold);
   border-radius: var(--radius);
-  background: rgba(255, 255, 255, .045);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .07), rgba(255, 255, 255, .028)),
+    rgba(18, 18, 22, .78);
 }
 
 .eventTileTitle {
@@ -49,19 +56,32 @@
 .eventLayout {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 14px;
+  gap: clamp(14px, 2.5vw, 22px);
 }
 
 .eventSummary {
   position: sticky;
-  top: 84px;
+  top: 92px;
   z-index: 3;
+  padding: clamp(16px, 2.5vw, 22px);
+}
+
+.eventSummary .cardhead {
+  align-items: flex-start;
+}
+
+.eventSummary .cardhead h2 {
+  font-size: clamp(18px, 2.4vw, 26px);
+  line-height: 1.15;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 .eventMeta {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+  margin-top: 4px;
 }
 
 .eventPill,
@@ -100,7 +120,7 @@
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
-  margin-top: 14px;
+  margin-top: clamp(16px, 2.5vw, 22px);
 }
 
 .filterbar {
@@ -218,19 +238,6 @@
 
   .publicHero::after {
     display: none;
-  }
-
-  .publicHero .heroCopy {
-    max-width: none;
-    padding: 12px 14px 14px;
-    background: rgba(12, 12, 15, .96);
-    border-top: 1px solid var(--line);
-  }
-
-  .publicHero .heroCopy h1 {
-    margin-top: 6px;
-    font-size: 23px;
-    line-height: 1.12;
   }
 
   .publicActions,
