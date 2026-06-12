@@ -318,6 +318,7 @@ function renderWants(posts) {
 async function loadList() {
   eventListView.style.display = "";
   eventDetailView.style.display = "none";
+  pageTitle.textContent = "DFWGV Events";
   const q = query(collection(db, "gamedays"), where("status", "==", "published"), orderBy("startsAt", "asc"));
   const snap = await getDocs(q);
   renderEventList(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
@@ -344,7 +345,7 @@ async function loadEvent(id) {
 
   eventListView.style.display = "none";
   eventDetailView.style.display = "";
-  pageTitle.textContent = gd.title || "DFWGV Game Day";
+  pageTitle.textContent = "";
   eventTitle.textContent = gd.title || "DFWGV Game Day";
   const isPast = isPastEvent(gd);
   eventMeta.innerHTML = `

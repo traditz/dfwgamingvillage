@@ -229,15 +229,16 @@ a:hover {
 
 .plannerBanner {
   min-height: 0;
-  display: block;
+  display: flex;
+  justify-content: center;
   margin-bottom: 0;
-  padding: clamp(8px, 1.8vw, 14px);
+  padding: clamp(6px, 1.4vw, 10px);
 }
 
 .plannerBanner img {
   position: static;
   display: block;
-  width: 100%;
+  width: min(100%, 760px);
   max-width: 100%;
   height: auto;
   object-fit: contain;
@@ -269,6 +270,10 @@ a:hover {
   line-height: 1.12;
   letter-spacing: 0;
   overflow-wrap: anywhere;
+}
+
+.plannerPageHeader h1:empty {
+  display: none;
 }
 
 .grid {
