@@ -61,6 +61,7 @@ const fnLeaveTable = httpsCallable(functions, "leaveTable");
 const authStatus = document.querySelector("#authStatus");
 const btnDiscord = document.querySelector("#btnDiscord");
 const btnSignOut = document.querySelector("#btnSignOut");
+const adminLinks = document.querySelectorAll("[data-admin-link]");
 
 // REMOVED: Email UI bindings (emailCard, inputs, buttons)
 
@@ -241,18 +242,45 @@ async function hydrateGameMeta(root, item) {
 }
 
 // FIX: Robust check for admin ID (handles both "123" and "discord:123")
-function isAdmin() {
-  if (!currentUser) return false;
+function isAdminUser(user) {
+  if (!user) return false;
   const owner = appConfig.OWNER_UID;
   if (!owner) return false;
   
   // Exact match (if config has "discord:123")
-  if (currentUser.uid === owner) return true;
+  if (user.uid === owner) return true;
   
   // Prefix match (if config has "123" but user is "discord:123")
-  if (currentUser.uid === `discord:${owner}`) return true;
+  if (user.uid === `discord:${owner}`) return true;
   
   return false;
+}
+
+function isAdmin() {
+  return isAdminUser(currentUser);
+}
+
+function setAdminNavVisibility(user) {
+  adminLinks.forEach((link) => {
+    link.hidden = !isAdminUser(user);
+  });
+}
+
+async function displayNameForUser(user) {
+  if (!user) return "";
+  try {
+    const token = await user.getIdTokenResult();
+    const claims = token?.claims || {};
+    return (
+      claims.discordDisplayName ||
+      claims.discordUsername ||
+      user.displayName ||
+      user.email ||
+      (user.uid?.startsWith("discord:") ? "Discord user" : user.uid)
+    );
+  } catch {
+    return user.displayName || user.email || (user.uid?.startsWith("discord:") ? "Discord user" : user.uid);
+  }
 }
 
 function openModal(title, html) {
@@ -487,7 +515,7 @@ function setButtonsForAuth(user) {
     btnDiscord.style.display = "none";
     // REMOVED: btnEmail logic
     btnSignOut.style.display = "";
-    btnCreateGameDay.style.display = isAdmin() ? "" : "none";
+    btnCreateGameDay.style.display = isAdminUser(user) ? "" : "none";
   } else {
     btnDiscord.style.display = "";
     // REMOVED: btnEmail logic
@@ -1539,12 +1567,10 @@ if (btnNext) btnNext.addEventListener("click", () => {
 // -----------------------------
 onAuthStateChanged(auth, async (user) => {
   currentUser = user || null;
+  setAdminNavVisibility(currentUser);
   if (user) {
-    const name =
-      user.displayName ||
-      user.email ||
-      (user.uid?.startsWith("discord:") ? user.uid.replace("discord:", "Discord ") : user.uid);
-    setAuthStatus(`Signed in: ${name}`);
+    const name = await displayNameForUser(user);
+    setAuthStatus(`Signed in as: ${name}`);
   } else {
     setAuthStatus("Not signed in.");
   }

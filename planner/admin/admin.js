@@ -22,6 +22,7 @@ const fnUpdateGameDay = httpsCallable(functions, "updateGameDay");
 const fnDeleteGameDay = httpsCallable(functions, "deleteGameDay");
 
 const authStatus = document.querySelector("#authStatus");
+const adminLinks = document.querySelectorAll("[data-admin-link]");
 const blockedState = document.querySelector("#blockedState");
 const adminApp = document.querySelector("#adminApp");
 const eventRows = document.querySelector("#eventRows");
@@ -62,6 +63,29 @@ function isAdmin(user) {
   if (!user) return false;
   const owner = appConfig.OWNER_UID;
   return user.uid === owner || user.uid === `discord:${owner}`;
+}
+
+function setAdminNavVisibility(user) {
+  adminLinks.forEach((link) => {
+    link.hidden = !isAdmin(user);
+  });
+}
+
+async function displayNameForUser(user) {
+  if (!user) return "";
+  try {
+    const token = await user.getIdTokenResult();
+    const claims = token?.claims || {};
+    return (
+      claims.discordDisplayName ||
+      claims.discordUsername ||
+      user.displayName ||
+      user.email ||
+      (user.uid?.startsWith("discord:") ? "Discord user" : user.uid)
+    );
+  } catch {
+    return user.displayName || user.email || (user.uid?.startsWith("discord:") ? "Discord user" : user.uid);
+  }
 }
 
 function asDate(v) {
@@ -295,8 +319,9 @@ btnCopyBindCommand?.addEventListener("click", async () => {
   }
 });
 
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
   currentUser = user || null;
+  setAdminNavVisibility(currentUser);
   if (!isAdmin(currentUser)) {
     authStatus.textContent = currentUser ? "Signed in, not admin." : "Not signed in.";
     blockedState.style.display = "";
@@ -304,7 +329,7 @@ onAuthStateChanged(auth, (user) => {
     return;
   }
 
-  authStatus.textContent = `Admin: ${currentUser.displayName || currentUser.uid}`;
+  authStatus.textContent = `Admin: ${await displayNameForUser(currentUser)}`;
   blockedState.style.display = "none";
   adminApp.style.display = "";
   subscribeEvents();

@@ -3,6 +3,10 @@ import * as appConfig from "../app-config.js";
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {
+  getAuth,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import {
   getFirestore,
   collection,
   doc,
@@ -15,6 +19,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 const db = getFirestore(app);
 
 const pageTitle = document.querySelector("#pageTitle");
@@ -33,12 +38,26 @@ const btnShare = document.querySelector("#btnShare");
 const btnOpenPlanner = document.querySelector("#btnOpenPlanner");
 const btnCalendar = document.querySelector("#btnCalendar");
 const filters = document.querySelector("#filters");
+const adminLinks = document.querySelectorAll("[data-admin-link]");
 
 let activeFilter = "all";
 let tables = [];
 let unsubTables = null;
 let unsubPosts = null;
 const bggMetaCache = new Map();
+
+function isAdminUser(user) {
+  if (!user) return false;
+  const owner = appConfig.OWNER_UID;
+  if (!owner) return false;
+  return user.uid === owner || user.uid === `discord:${owner}`;
+}
+
+function setAdminNavVisibility(user) {
+  adminLinks.forEach((link) => {
+    link.hidden = !isAdminUser(user);
+  });
+}
 
 function esc(s) {
   return String(s ?? "").replace(/[&<>"']/g, (m) => ({
@@ -399,6 +418,10 @@ btnPastEventsToggle?.addEventListener("click", () => {
   const shouldShow = pastEventsPanel.hidden;
   pastEventsPanel.hidden = !shouldShow;
   btnPastEventsToggle.setAttribute("aria-expanded", String(shouldShow));
+});
+
+onAuthStateChanged(auth, (user) => {
+  setAdminNavVisibility(user || null);
 });
 
 const params = new URLSearchParams(window.location.search);

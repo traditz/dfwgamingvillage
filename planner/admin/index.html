@@ -7,8 +7,8 @@
   <meta name="description" content="Admin dashboard for DFWGV Planner." />
   <meta name="theme-color" content="#d71920" />
   <link rel="icon" href="../dfwgv-icon.png" />
-  <link rel="stylesheet" href="../styles.css?v=20260612-v3" />
-  <link rel="stylesheet" href="./admin.css?v=20260611-v1" />
+  <link rel="stylesheet" href="../styles.css?v=20260612-v4" />
+  <link rel="stylesheet" href="./admin.css?v=20260612-v2" />
 </head>
 <body>
   <header class="topbar">
@@ -24,7 +24,7 @@
     <nav class="topnav" aria-label="Planner navigation">
       <a href="../">Planner</a>
       <a href="../events/">Events</a>
-      <a href="./">Admin</a>
+      <a href="./" data-admin-link hidden>Admin</a>
     </nav>
     <div class="authbar">
       <div class="auth-status" id="authStatus">Checking access...</div>
@@ -142,6 +142,6 @@
     </section>
   </main>
 
-  <script type="module" src="./admin.js?v=20260611-v1"></script>
+  <script type="module" src="./admin.js?v=20260612-v2"></script>
 </body>
 </html>

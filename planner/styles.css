@@ -153,6 +153,10 @@ a:hover {
   text-decoration: none;
 }
 
+.topnav a[hidden] {
+  display: none;
+}
+
 .authbar {
   display: flex;
   align-items: center;
