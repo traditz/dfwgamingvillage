@@ -1384,6 +1384,22 @@ function renderTablesPage() {
   }
 }
 
+function wantPostHtml(p, bggUrl, canDelete = false) {
+  return `
+    <div class="wantGame">
+      <div class="title">
+        ${bggUrl ? `<a href="${esc(bggUrl)}" target="_blank" rel="noopener">${esc(p.gameName || "Game")}</a>` : esc(p.gameName || "Game")}
+        <div class="gameMeta" data-game-meta ${gameMetaText(p) ? "" : "style=\"display:none;\""}>${esc(gameMetaText(p))}</div>
+      </div>
+    </div>
+    <div class="wantDetails">
+      <div class="wantBy"><span>Requested by</span> ${esc(p.createdByDisplayName || p.createdByUid || "Someone")}</div>
+      ${p.notes ? `<div class="wantNote"><span>Note</span> <div class="wantNoteText">${esc(p.notes)}</div></div>` : ""}
+    </div>
+    ${canDelete ? `<div class="wantActions"><button class="btn btn-danger btn-small">Delete</button></div>` : ""}
+  `;
+}
+
 function renderWants(items) {
   wantsList.innerHTML = "";
   const isPast = currentEventIsPast();
@@ -1398,15 +1414,8 @@ function renderWants(items) {
 
     const bggUrl = p.bggId ? `https://boardgamegeek.com/boardgame/${encodeURIComponent(p.bggId)}` : null;
     const el = document.createElement("div");
-    el.className = "listitem";
-    el.innerHTML = `
-      <div class="title">
-        ${bggUrl ? `<a href="${esc(bggUrl)}" target="_blank" rel="noopener">${esc(p.gameName || "Game")}</a>` : esc(p.gameName || "Game")}
-        <div class="gameMeta" data-game-meta ${gameMetaText(p) ? "" : "style=\"display:none;\""}>${esc(gameMetaText(p))}</div>
-      </div>
-      <div class="meta">${esc(p.createdByDisplayName || p.createdByUid || "Someone")}${p.notes ? ` • ${esc(p.notes)}` : ""}</div>
-      ${canDelete ? `<button class="btn btn-danger" style="margin-left:auto; font-size:12px; padding:4px 8px;">Delete</button>` : ""}
-    `;
+    el.className = "listitem wantItem";
+    el.innerHTML = wantPostHtml(p, bggUrl, canDelete);
 
     // NEW: Delete handler
     const delBtn = el.querySelector("button");

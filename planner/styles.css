@@ -444,6 +444,80 @@ textarea:focus {
   white-space: normal;
 }
 
+.wantItem {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 10px 14px;
+  cursor: default;
+}
+
+.wantGame {
+  min-width: 0;
+}
+
+.wantGame .title {
+  max-width: 100%;
+  color: #ff7a82;
+  font-weight: 950;
+  line-height: 1.12;
+  overflow-wrap: anywhere;
+}
+
+.wantDetails {
+  grid-column: 1;
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.wantBy,
+.wantNote {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.wantBy span,
+.wantNote span {
+  display: inline-block;
+  margin-right: 5px;
+  color: var(--gold);
+  font-size: 11px;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.wantNote {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+}
+
+.wantNoteText {
+  min-width: 0;
+  color: #e7e7ec;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.wantActions {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  justify-self: end;
+}
+
+.btn-small {
+  min-height: 32px;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
 .eventCard {
   position: relative;
   display: flex;

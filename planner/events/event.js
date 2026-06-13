@@ -308,6 +308,21 @@ function renderTables() {
   }
 }
 
+function wantPostHtml(p, bggUrl) {
+  return `
+    <div class="wantGame">
+      <div class="title">
+        ${bggUrl ? `<a href="${esc(bggUrl)}" target="_blank" rel="noopener">${esc(p.gameName || "Game")}</a>` : esc(p.gameName || "Game")}
+        <div class="gameMeta" data-game-meta ${gameMetaText(p) ? "" : "style=\"display:none;\""}>${esc(gameMetaText(p))}</div>
+      </div>
+    </div>
+    <div class="wantDetails">
+      <div class="wantBy"><span>Requested by</span> ${esc(p.createdByDisplayName || "Someone")}</div>
+      ${p.notes ? `<div class="wantNote"><span>Note</span> <div class="wantNoteText">${esc(p.notes)}</div></div>` : ""}
+    </div>
+  `;
+}
+
 function renderWants(posts) {
   publicWants.innerHTML = "";
   const wants = posts.filter((p) => p.kind === "want_to_play");
@@ -319,16 +334,8 @@ function renderWants(posts) {
   for (const p of wants) {
     const bggUrl = p.bggId ? `https://boardgamegeek.com/boardgame/${encodeURIComponent(p.bggId)}` : "";
     const el = document.createElement("div");
-    el.className = "listitem";
-    el.innerHTML = `
-      <div>
-        <div class="title">
-          ${bggUrl ? `<a href="${esc(bggUrl)}" target="_blank" rel="noopener">${esc(p.gameName || "Game")}</a>` : esc(p.gameName || "Game")}
-          <div class="gameMeta" data-game-meta ${gameMetaText(p) ? "" : "style=\"display:none;\""}>${esc(gameMetaText(p))}</div>
-        </div>
-        <div class="meta">${esc(p.createdByDisplayName || "Someone")}${p.notes ? ` - ${esc(p.notes)}` : ""}</div>
-      </div>
-    `;
+    el.className = "listitem wantItem";
+    el.innerHTML = wantPostHtml(p, bggUrl);
     publicWants.appendChild(el);
     hydrateGameMeta(el, p);
   }
