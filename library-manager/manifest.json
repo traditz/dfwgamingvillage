@@ -1,0 +1,20 @@
+{
+  "short_name": "DFWGV Library",
+  "name": "DFW Gaming Village Library Manager",
+  "icons": [
+    {
+      "src": "dfwgv-icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "logo512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#d71920",
+  "background_color": "#060608"
+}
