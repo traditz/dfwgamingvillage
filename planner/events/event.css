@@ -64,9 +64,6 @@
 }
 
 .eventSummary {
-  position: sticky;
-  top: 92px;
-  z-index: 3;
   padding: clamp(16px, 2.5vw, 22px);
 }
 
@@ -222,9 +219,6 @@
     grid-template-columns: 1fr;
   }
 
-  .eventSummary {
-    position: static;
-  }
 }
 
 @media (max-width: 680px) {
