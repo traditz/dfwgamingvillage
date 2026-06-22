@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items totalitems="3" pubdate="Sun, 22 Jun 2026 00:00:00 +0000">
+  <item objecttype="thing" objectid="342942" subtype="boardgame">
+    <name sortindex="1">Ark Nova</name>
+    <yearpublished>2021</yearpublished>
+    <image>https://cf.geekdo-images.com/SoU8p28Sk1s8MSvoM4N9Pw__thumb/img/3zCpYO1AJTcrZ-Dr1JhFszJ2hPE=/fit-in/200x150/filters:strip_icc()/pic6293412.jpg</image>
+    <thumbnail>https://cf.geekdo-images.com/SoU8p28Sk1s8MSvoM4N9Pw__thumb/img/3zCpYO1AJTcrZ-Dr1JhFszJ2hPE=/fit-in/200x150/filters:strip_icc()/pic6293412.jpg</thumbnail>
+    <stats minplayers="1" maxplayers="4" playingtime="150">
+      <rating value="N/A"><average value="8.54"/><bayesaverage value="8.35"/></rating>
+    </stats>
+    <status own="0" wanttoplay="1"/>
+    <numplays>1</numplays>
+  </item>
+  <item objecttype="thing" objectid="224517" subtype="boardgame">
+    <name sortindex="1">Brass: Birmingham</name>
+    <yearpublished>2018</yearpublished>
+    <image>https://cf.geekdo-images.com/x3zxjr-Vw5iU4yDPg70Jgw__original/img/FdoqUlBNN-Ru5fkUDmK6Xp6X5xc=/0x0/filters:format(jpeg)/pic3490053.jpg</image>
+    <thumbnail>https://cf.geekdo-images.com/x3zxjr-Vw5iU4yDPg70Jgw__thumb/img/PpsvEsREYMzCQ7uZB7Zm9wEQ8zM=/fit-in/200x150/filters:strip_icc()/pic3490053.jpg</thumbnail>
+    <stats minplayers="2" maxplayers="4" playingtime="120">
+      <rating value="N/A"><average value="8.56"/><bayesaverage value="8.39"/></rating>
+    </stats>
+    <status own="0" wanttoplay="1"/>
+    <numplays>0</numplays>
+  </item>
+  <item objecttype="thing" objectid="162886" subtype="boardgame">
+    <name sortindex="1">Spirit Island</name>
+    <yearpublished>2017</yearpublished>
+    <image>https://cf.geekdo-images.com/kjCm4Zv8jXSGfAUVQUKQTw__original/img/4LXZDEqGRPb6BkjmlW6V4r-OY-E=/0x0/filters:format(jpeg)/pic7013651.jpg</image>
+    <thumbnail>https://cf.geekdo-images.com/kjCm4Zv8jXSGfAUVQUKQTw__thumb/img/G_mczjYNAg3T2lEr5tnYz0xj1Lk=/fit-in/200x150/filters:strip_icc()/pic7013651.jpg</thumbnail>
+    <stats minplayers="1" maxplayers="4" playingtime="120">
+      <rating value="N/A"><average value="8.31"/><bayesaverage value="8.09"/></rating>
+    </stats>
+    <status own="0" wanttoplay="1"/>
+    <numplays>0</numplays>
+  </item>
+</items>

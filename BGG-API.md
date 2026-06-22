@@ -56,6 +56,30 @@ All are served from the proxy base URL above.
   origin there to call the proxy from a new host (localhost:8080 is included for
   local testing).
 
+## Testing locally (no deploy)
+
+You can exercise the whole site — including Play Completion — without deploying
+the Worker:
+
+```sh
+node scripts/dev-server.mjs
+# then open http://localhost:8080/play-completion.html
+```
+
+`scripts/dev-server.mjs` is a zero-dependency Node server that serves the static
+files and implements the four BGG endpoints. It tries **live BoardGameGeek
+first**; if BGG blocks the request (its API 401s some IPs), it falls back to the
+sample data in `scripts/fixtures/` so every feature still works. The Top-100
+scrape usually succeeds from a normal network, so that tab is typically real.
+
+`play-completion.js` auto-detects `localhost`/`127.0.0.1` and calls the
+same-origin dev server there; in production it calls the deployed Worker. No code
+changes are needed to switch between the two.
+
+> The fixtures are crafted to demonstrate played vs. unplayed greying, play
+> counts, Top-100 cross-referencing, and expansion-from-comments detection
+> (e.g. Wingspan's European Expansion is flagged from a play comment).
+
 ## Deploying the Worker
 
 The static site (the `.html`/`.js`/`.css` files) deploys automatically when this

@@ -10,7 +10,11 @@
  * All BGG access goes through the Cloudflare Worker proxy (see BGG-API.md).
  */
 document.addEventListener('DOMContentLoaded', function () {
-  const PROXY_BASE = 'https://dfwgv-bgg-proxy.joemsprague.workers.dev';
+  // In local dev (served from localhost) the API is same-origin, handled by
+  // scripts/dev-server.mjs. In production it's the deployed Cloudflare Worker.
+  const PROD_PROXY = 'https://dfwgv-bgg-proxy.joemsprague.workers.dev';
+  const IS_LOCAL = ['localhost', '127.0.0.1'].includes(location.hostname);
+  const PROXY_BASE = IS_LOCAL ? '' : PROD_PROXY;
   const BGG_USERNAME = 'traditz';
 
   // Per-id play data: { id: { plays, comments[] } }. Loaded once, reused by every tab.

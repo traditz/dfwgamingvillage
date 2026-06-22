@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "count": 6,
+  "games": [
+    { "rank": 1, "id": "224517", "name": "Brass: Birmingham", "year": "2018", "image": "https://cf.geekdo-images.com/x3zxjr-Vw5iU4yDPg70Jgw__thumb/img/PpsvEsREYMzCQ7uZB7Zm9wEQ8zM=/fit-in/200x150/filters:strip_icc()/pic3490053.jpg", "geekRating": "8.39", "avgRating": "8.56" },
+    { "rank": 2, "id": "342942", "name": "Ark Nova", "year": "2021", "image": "https://cf.geekdo-images.com/SoU8p28Sk1s8MSvoM4N9Pw__thumb/img/3zCpYO1AJTcrZ-Dr1JhFszJ2hPE=/fit-in/200x150/filters:strip_icc()/pic6293412.jpg", "geekRating": "8.35", "avgRating": "8.54" },
+    { "rank": 3, "id": "174430", "name": "Gloomhaven", "year": "2017", "image": "https://cf.geekdo-images.com/sZYp_3BTDGjh2unaZfZmuA__thumb/img/njx9Pn3Gin9oG5G0sMRbPDxLuM4=/fit-in/200x150/filters:strip_icc()/pic2437871.jpg", "geekRating": "8.29", "avgRating": "8.55" },
+    { "rank": 4, "id": "167791", "name": "Terraforming Mars", "year": "2016", "image": "https://cf.geekdo-images.com/wg9oOLcsKvDesSUdZQ4rxw__thumb/img/o8Gst8U6km_O0wJC6LIBhd8XWqs=/fit-in/200x150/filters:strip_icc()/pic3536616.jpg", "geekRating": "8.18", "avgRating": "8.36" },
+    { "rank": 5, "id": "233078", "name": "Twilight Imperium: Fourth Edition", "year": "2017", "image": "https://cf.geekdo-images.com/_Ppn5lssO5OaildSEpNDpw__thumb/img/X-Xj7365Wn7-CW6P5Vp-Kf0kjUc=/fit-in/200x150/filters:strip_icc()/pic3727516.jpg", "geekRating": "8.15", "avgRating": "8.56" },
+    { "rank": 6, "id": "161936", "name": "Pandemic Legacy: Season 1", "year": "2015", "image": "https://cf.geekdo-images.com/-Qer2BBPG7qGGDu6KcVDIw__thumb/img/i0Wexbi2DCgI_Qm-rl6P6QmEbHU=/fit-in/200x150/filters:strip_icc()/pic2452831.png", "geekRating": "8.10", "avgRating": "8.50" }
+  ]
+}
