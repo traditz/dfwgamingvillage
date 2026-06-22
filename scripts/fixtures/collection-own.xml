@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items totalitems="6" pubdate="Sun, 22 Jun 2026 00:00:00 +0000">
+  <item objecttype="thing" objectid="266192" subtype="boardgame">
+    <name sortindex="1">Wingspan</name>
+    <yearpublished>2019</yearpublished>
+    <image>https://cf.geekdo-images.com/yLZJCVLlIx4c7eJEWUNJ7w__original/img/8eEcBh5Iwg_Hq_NAH-rXhfV2-1c=/0x0/filters:format(jpeg)/pic4458123.jpg</image>
+    <thumbnail>https://cf.geekdo-images.com/yLZJCVLlIx4c7eJEWUNJ7w__thumb/img/yE9-vlR_Gk5dygWmrFEbXLD3eM4=/fit-in/200x150/filters:strip_icc()/pic4458123.jpg</thumbnail>
+    <stats minplayers="1" maxplayers="5" playingtime="70">
+      <rating value="N/A"><average value="8.08"/><bayesaverage value="7.9"/></rating>
+    </stats>
+    <status own="1"/>
+    <numplays>5</numplays>
+  </item>
+  <item objecttype="thing" objectid="167791" subtype="boardgame">
+    <name sortindex="1">Terraforming Mars</name>
+    <yearpublished>2016</yearpublished>
+    <image>https://cf.geekdo-images.com/wg9oOLcsKvDesSUdZQ4rxw__original/img/thIqWDnH9utKuoKVEUqveDixprI=/0x0/filters:format(jpeg)/pic3536616.jpg</image>
+    <thumbnail>https://cf.geekdo-images.com/wg9oOLcsKvDesSUdZQ4rxw__thumb/img/o8Gst8U6km_O0wJC6LIBhd8XWqs=/fit-in/200x150/filters:strip_icc()/pic3536616.jpg</thumbnail>
+    <stats minplayers="1" maxplayers="5" playingtime="120">
+      <rating value="N/A"><average value="8.36"/><bayesaverage value="8.18"/></rating>
+    </stats>
+    <status own="1"/>
+    <numplays>4</numplays>
+  </item>
+  <item objecttype="thing" objectid="230802" subtype="boardgame">
+    <name sortindex="1">Azul</name>
+    <yearpublished>2017</yearpublished>
+    <image>https://cf.geekdo-images.com/tjcVMng-l-Ak2Ks4_44s1A__original/img/pPzWyhSjlBNvVFHX1NbT7Kpr4Yo=/0x0/filters:format(jpeg)/pic6973671.png</image>
+    <thumbnail>https://cf.geekdo-images.com/tjcVMng-l-Ak2Ks4_44s1A__thumb/img/4MQg__qHbnzr1ueEz3IypzqW5y0=/fit-in/200x150/filters:strip_icc()/pic6973671.png</thumbnail>
+    <stats minplayers="2" maxplayers="4" playingtime="45">
+      <rating value="N/A"><average value="7.76"/><bayesaverage value="7.59"/></rating>
+    </stats>
+    <status own="1"/>
+    <numplays>2</numplays>
+  </item>
+  <item objecttype="thing" objectid="174430" subtype="boardgame">
+    <name sortindex="1">Gloomhaven</name>
+    <yearpublished>2017</yearpublished>
+    <image>https://cf.geekdo-images.com/sZYp_3BTDGjh2unaZfZmuA__original/img/7d-lj5Gd1e8Fmpa49rqWnDByG8s=/0x0/filters:format(jpeg)/pic2437871.jpg</image>
+    <thumbnail>https://cf.geekdo-images.com/sZYp_3BTDGjh2unaZfZmuA__thumb/img/njx9Pn3Gin9oG5G0sMRbPDxLuM4=/fit-in/200x150/filters:strip_icc()/pic2437871.jpg</thumbnail>
+    <stats minplayers="1" maxplayers="4" playingtime="120">
+      <rating value="N/A"><average value="8.55"/><bayesaverage value="8.29"/></rating>
+    </stats>
+    <status own="1"/>
+    <numplays>0</numplays>
+  </item>
+  <item objecttype="thing" objectid="13" subtype="boardgame">
+    <name sortindex="1">CATAN</name>
+    <yearpublished>1995</yearpublished>
+    <image>https://cf.geekdo-images.com/W3Bsga_uLP9kO91gZ7H8yw__original/img/xV0Gk9Q5Km-W6Xc4mNvUDzkXuOk=/0x0/filters:format(jpeg)/pic2419375.jpg</image>
+    <thumbnail>https://cf.geekdo-images.com/W3Bsga_uLP9kO91gZ7H8yw__thumb/img/8a9HeqFydO7Uun_le9bXWPnidcA=/fit-in/200x150/filters:strip_icc()/pic2419375.jpg</thumbnail>
+    <stats minplayers="3" maxplayers="4" playingtime="90">
+      <rating value="N/A"><average value="7.06"/><bayesaverage value="6.91"/></rating>
+    </stats>
+    <status own="1"/>
+    <numplays>0</numplays>
+  </item>
+  <item objecttype="thing" objectid="68448" subtype="boardgame">
+    <name sortindex="1">7 Wonders</name>
+    <yearpublished>2010</yearpublished>
+    <image>https://cf.geekdo-images.com/RvFVTEpnbb4NM7k0IF8V7A__original/img/RKlIzGW2bO6mIaQOaPVMtLZqIVE=/0x0/filters:format(jpeg)/pic7149798.jpg</image>
+    <thumbnail>https://cf.geekdo-images.com/RvFVTEpnbb4NM7k0IF8V7A__thumb/img/Y0aRtuWPZJ-vSCG_xQ8FaCAbHEs=/fit-in/200x150/filters:strip_icc()/pic7149798.jpg</thumbnail>
+    <stats minplayers="2" maxplayers="7" playingtime="30">
+      <rating value="N/A"><average value="7.74"/><bayesaverage value="7.61"/></rating>
+    </stats>
+    <status own="1"/>
+    <numplays>0</numplays>
+  </item>
+</items>

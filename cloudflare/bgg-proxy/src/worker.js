@@ -1,4 +1,9 @@
+import TOP100 from "./top100.json";
+
 const BGG_COLLECTION_URL = "https://boardgamegeek.com/xmlapi2/collection";
+const BGG_PLAYS_URL = "https://boardgamegeek.com/xmlapi2/plays";
+const BGG_THING_URL = "https://boardgamegeek.com/xmlapi2/thing";
+const BGG_BROWSE_URL = "https://boardgamegeek.com/browse/boardgame/page/";
 const DEFAULT_USERNAME = "traditz";
 const ALLOWED_ORIGINS = new Set([
   "https://www.dfwgamingvillage.com",
@@ -273,9 +278,17 @@ async function handleBggCollection(request, env, cors, incomingUrl) {
 
   const bggUrl = new URL(BGG_COLLECTION_URL);
   bggUrl.searchParams.set("username", username);
-  bggUrl.searchParams.set("own", "1");
   bggUrl.searchParams.set("stats", "1");
-  bggUrl.searchParams.set("excludesubtype", "boardgameexpansion");
+  // Default is owned games. Pass ?want=1 to request the user's "want to play" list instead.
+  if (incomingUrl.searchParams.get("want") === "1") {
+    bggUrl.searchParams.set("wanttoplay", "1");
+  } else {
+    bggUrl.searchParams.set("own", "1");
+  }
+  // Base games only unless the caller explicitly asks to include expansions.
+  if (incomingUrl.searchParams.get("includeexp") !== "1") {
+    bggUrl.searchParams.set("excludesubtype", "boardgameexpansion");
+  }
 
   const bggResponse = await fetch(bggUrl.toString(), {
     headers: {
@@ -294,6 +307,216 @@ async function handleBggCollection(request, env, cors, incomingUrl) {
       "Cache-Control": bggResponse.status === 200 ? "public, max-age=900" : "no-store"
     }
   });
+}
+
+/**
+ * Aggregates every recorded play for a user into per-game totals plus the
+ * comment text for each play (used client-side to detect which expansions were
+ * played). Walks BGG's paginated plays API server-side so the page only makes
+ * one request. Returns JSON keyed by BGG object id.
+ */
+async function handleBggPlays(request, env, cors, incomingUrl) {
+  if (request.method !== "GET") {
+    return new Response("Method not allowed", {
+      status: 405,
+      headers: { ...cors, "Content-Type": "text/plain; charset=utf-8" }
+    });
+  }
+
+  const username = incomingUrl.searchParams.get("username") || DEFAULT_USERNAME;
+  if (!validateUsername(username)) {
+    return new Response("Invalid username", {
+      status: 400,
+      headers: { ...cors, "Content-Type": "text/plain; charset=utf-8" }
+    });
+  }
+
+  const games = {};
+  const MAX_PAGES = 40; // BGG returns 100 plays/page; 40 pages = 4000 plays cap.
+  let total = 0;
+
+  for (let page = 1; page <= MAX_PAGES; page++) {
+    const playsUrl = new URL(BGG_PLAYS_URL);
+    playsUrl.searchParams.set("username", username);
+    playsUrl.searchParams.set("page", String(page));
+
+    const response = await fetch(playsUrl.toString(), {
+      headers: { Authorization: `Bearer ${env.BGG_TOKEN}` }
+    });
+    if (!response.ok) {
+      if (page === 1) {
+        return new Response(`BGG plays API responded with status: ${response.status}`, {
+          status: 502,
+          headers: { ...cors, "Content-Type": "text/plain; charset=utf-8" }
+        });
+      }
+      break; // Tolerate a mid-walk hiccup; return what we have.
+    }
+
+    const xml = await response.text();
+    if (page === 1) {
+      const totalMatch = xml.match(/<plays[^>]*\btotal="(\d+)"/);
+      total = totalMatch ? parseInt(totalMatch[1], 10) : 0;
+    }
+
+    const playRegex = /<play\b[^>]*>[\s\S]*?<\/play>/g;
+    const playMatches = xml.match(playRegex) || [];
+    if (playMatches.length === 0) break; // No more plays.
+
+    for (const play of playMatches) {
+      const quantity = parseInt((play.match(/\bquantity="(\d+)"/) || [])[1] || "1", 10);
+      const itemMatch = play.match(/<item\b[^>]*\bobjectid="(\d+)"[^>]*>/);
+      if (!itemMatch) continue;
+      const id = itemMatch[1];
+      const nameMatch = play.match(/<item\b[^>]*\bname="([^"]*)"/);
+      const commentMatch = play.match(/<comments>([\s\S]*?)<\/comments>/);
+      const comment = commentMatch ? decodeEntities(commentMatch[1]).trim() : "";
+
+      if (!games[id]) {
+        games[id] = { id, name: nameMatch ? decodeEntities(nameMatch[1]) : "", plays: 0, comments: [] };
+      }
+      games[id].plays += quantity;
+      if (comment) games[id].comments.push(comment);
+    }
+
+    // Last page reached when this page had fewer than a full 100 plays.
+    if (playMatches.length < 100) break;
+  }
+
+  return jsonResponse(
+    { ok: true, username, total, generatedAt: new Date().toISOString(), games },
+    200,
+    { ...cors, "Cache-Control": "public, max-age=900" }
+  );
+}
+
+/**
+ * Pass-through to BGG's thing API (comma-separated ids), used client-side to
+ * hydrate Top-100 entries and to list a base game's expansions on demand.
+ */
+async function handleBggThing(request, env, cors, incomingUrl) {
+  if (request.method !== "GET") {
+    return new Response("Method not allowed", {
+      status: 405,
+      headers: { ...cors, "Content-Type": "text/plain; charset=utf-8" }
+    });
+  }
+
+  const ids = incomingUrl.searchParams.get("id") || "";
+  if (!/^\d+(,\d+)*$/.test(ids) || ids.length > 400) {
+    return new Response("Invalid id list", {
+      status: 400,
+      headers: { ...cors, "Content-Type": "text/plain; charset=utf-8" }
+    });
+  }
+
+  const thingUrl = new URL(BGG_THING_URL);
+  thingUrl.searchParams.set("id", ids);
+  thingUrl.searchParams.set("stats", "1");
+
+  const response = await fetch(thingUrl.toString(), {
+    headers: { Authorization: `Bearer ${env.BGG_TOKEN}` }
+  });
+  const body = await response.text();
+
+  return new Response(body, {
+    status: response.status,
+    headers: {
+      ...cors,
+      "Content-Type": response.headers.get("Content-Type") || "application/xml; charset=utf-8",
+      "Cache-Control": response.status === 200 ? "public, max-age=86400" : "no-store"
+    }
+  });
+}
+
+/**
+ * Returns the all-time Top N games (default 100).
+ *
+ * BGG has no official top-list endpoint. We try to scrape the public "browse
+ * boardgames" ranking page live, but BGG's bot protection blocks requests coming
+ * from Cloudflare's network (403), so in practice we fall back to the bundled
+ * src/top100.json snapshot — refresh it with `node scripts/refresh-top100.mjs`.
+ */
+async function handleBggTop(request, env, cors, incomingUrl) {
+  if (request.method !== "GET") {
+    return new Response("Method not allowed", {
+      status: 405,
+      headers: { ...cors, "Content-Type": "text/plain; charset=utf-8" }
+    });
+  }
+
+  const count = Math.min(parseInt(incomingUrl.searchParams.get("count") || "100", 10) || 100, 200);
+  const scraped = await scrapeBggTop(count);
+
+  if (scraped.length) {
+    return jsonResponse(
+      { ok: true, count: scraped.length, source: "live", generatedAt: new Date().toISOString(), games: scraped },
+      200,
+      { ...cors, "Cache-Control": "public, max-age=21600" } // 6 hours
+    );
+  }
+
+  // Live scrape unavailable (blocked) — serve the bundled snapshot.
+  return jsonResponse(
+    { ok: true, count: Math.min(count, TOP100.games.length), source: "snapshot", generatedAt: TOP100.generatedAt, games: TOP100.games.slice(0, count) },
+    200,
+    { ...cors, "Cache-Control": "public, max-age=21600" }
+  );
+}
+
+/** Attempts the live browse-page scrape; returns [] on any failure. */
+async function scrapeBggTop(count) {
+  const pagesNeeded = Math.ceil(count / 100); // BGG browse shows 100 ranks per page.
+  const games = [];
+  try {
+    for (let page = 1; page <= pagesNeeded; page++) {
+      const response = await fetch(`${BGG_BROWSE_URL}${page}`, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+          Accept: "text/html,application/xhtml+xml"
+        }
+      });
+      if (!response.ok) break;
+
+      const html = await response.text();
+      // Each ranked game is a <tr id='row_'> block (BGG uses single-quoted
+      // attributes). Regexes are quote-agnostic so a future switch won't break.
+      const rows = html.match(/<tr[^>]*id=['"]row_['"][\s\S]*?<\/tr>/g) || [];
+      for (const row of rows) {
+        const linkMatch = row.match(/\/boardgame\/(\d+)\/[^"]*"\s+class=['"]primary['"]\s*>([^<]+)<\/a>/);
+        if (!linkMatch) continue;
+        const rankMatch = row.match(/<a name="(\d+)"><\/a>/);
+        const yearMatch = row.match(/<span[^>]*class=['"]smallerfont dull['"][^>]*>\(([^)]+)\)<\/span>/);
+        const imgMatch = row.match(/<img[^>]+\ssrc="([^"]+)"/);
+        const ratingCells = [...row.matchAll(/<td[^>]*class=['"]collection_bggrating['"][^>]*>\s*([\d.]+|N\/A)/g)];
+        games.push({
+          rank: rankMatch ? parseInt(rankMatch[1], 10) : games.length + 1,
+          id: linkMatch[1],
+          name: decodeEntities(linkMatch[2]).trim(),
+          year: yearMatch ? yearMatch[1] : "N/A",
+          image: imgMatch ? imgMatch[1] : "",
+          geekRating: ratingCells[0] ? ratingCells[0][1] : "N/A",
+          avgRating: ratingCells[1] ? ratingCells[1][1] : "N/A"
+        });
+        if (games.length >= count) break;
+      }
+      if (games.length >= count) break;
+    }
+  } catch {
+    return [];
+  }
+  return games;
+}
+
+/** Minimal XML/HTML entity decoder for the few named entities BGG emits. */
+function decodeEntities(str) {
+  return str
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(parseInt(code, 10)));
 }
 
 export default {
@@ -315,6 +538,18 @@ export default {
 
     if (incomingUrl.pathname === "/api/bgg-collection") {
       return handleBggCollection(request, env, cors, incomingUrl);
+    }
+
+    if (incomingUrl.pathname === "/api/bgg-plays") {
+      return handleBggPlays(request, env, cors, incomingUrl);
+    }
+
+    if (incomingUrl.pathname === "/api/bgg-thing") {
+      return handleBggThing(request, env, cors, incomingUrl);
+    }
+
+    if (incomingUrl.pathname === "/api/bgg-top") {
+      return handleBggTop(request, env, cors, incomingUrl);
     }
 
     return new Response("Not found", {

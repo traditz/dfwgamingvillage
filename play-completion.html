@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:title" content="Play Completion - DFW Gaming Village">
+    <meta property="og:description" content="See which games and expansions have been played across the DFW Gaming Village collection.">
+    <meta property="og:image" content="https://www.dfwgamingvillage.com/banner_cropped.png">
+    <meta property="og:url" content="https://www.dfwgamingvillage.com/play-completion.html">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://www.dfwgamingvillage.com/banner.png">
+    <title>Play Completion - DFW Gaming Village</title>
+    <link rel="stylesheet" href="community.css?v=20260622-play-completion">
+</head>
+<body data-page="utilities">
+    <div class="nav">
+        <a href="index.html">Home</a>
+        <a href="join.html">Join the Community</a>
+        <a href="gallery.html">Gallery</a>
+        <a href="games.html">Game Library</a>
+        <a href="events.html">Events</a>
+        <a href="utilities.html">Utilities</a>
+        <a href="player-aids.html">Player Aids</a>
+        <a href="donate.html">Donate</a>
+        <a href="supporters.html">Supporters</a>
+        <a href="contact.html">Contact</a>
+    </div>
+
+    <div class="banner">
+        <img src="banner.png" alt="DFW Gaming Village Banner">
+    </div>
+
+    <main class="content">
+        <h1>Play Completion</h1>
+        <p>Review which games have been played and which are still waiting for table time.
+        Played games are highlighted with their play count; unplayed games are greyed out.
+        Expand a game to see which of its expansions have been played.</p>
+
+        <form class="pc-user" id="pc-user-form">
+            <label class="pc-field" for="pc-username">BGG username</label>
+            <input type="text" id="pc-username" placeholder="BoardGameGeek username"
+                   autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="32">
+            <button type="submit" id="pc-username-go" class="pc-tab">Load</button>
+        </form>
+
+        <div class="pc-tabs">
+            <button class="pc-tab active" type="button" data-tab="collection">Games in my collection</button>
+            <button class="pc-tab" type="button" data-tab="want">Want to play games</button>
+            <button class="pc-tab" type="button" data-tab="top">Top 100 games of all time</button>
+        </div>
+
+        <div class="pc-controls">
+            <input type="text" id="pc-search" placeholder="Search by game name...">
+            <label class="pc-field">Sort by
+                <select id="pc-sort">
+                    <option value="rank" hidden>BGG rank</option>
+                    <option value="name">Name (A–Z)</option>
+                    <option value="year">Year (newest)</option>
+                    <option value="rating">BGG rating (high)</option>
+                    <option value="plays">Plays (most)</option>
+                    <option value="played">Played first</option>
+                </select>
+            </label>
+            <label class="pc-field">Show
+                <select id="pc-show">
+                    <option value="all">All games</option>
+                    <option value="played">Played only</option>
+                    <option value="unplayed">Unplayed only</option>
+                </select>
+            </label>
+            <span id="pc-summary" class="pc-summary"></span>
+        </div>
+
+        <div id="game-container" class="games-container">Loading…</div>
+
+        <p class="pc-note">Play data, ratings, and box art are pulled live from
+        <a href="https://boardgamegeek.com/" target="_blank" rel="noopener">BoardGameGeek</a>.
+        Expansion play history is inferred from play comments and may be incomplete.</p>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 DFW Gaming Village. All Rights Reserved.</p>
+    </footer>
+
+    <script src="play-completion.js?v=20260622-play-completion"></script>
+    <script src="site-analytics.js?v=20260607-analytics"></script>
+</body>
+</html>
