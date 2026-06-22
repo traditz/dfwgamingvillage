@@ -1,3 +1,5 @@
+import TOP100 from "./top100.json";
+
 const BGG_COLLECTION_URL = "https://boardgamegeek.com/xmlapi2/collection";
 const BGG_PLAYS_URL = "https://boardgamegeek.com/xmlapi2/plays";
 const BGG_THING_URL = "https://boardgamegeek.com/xmlapi2/thing";
@@ -428,9 +430,12 @@ async function handleBggThing(request, env, cors, incomingUrl) {
 }
 
 /**
- * Scrapes BGG's public "browse boardgames" ranking page to build the all-time
- * Top N list (default 100). BGG has no official top-list endpoint, so we parse
- * the HTML rows; each row yields rank, id, name, year, box art and geek rating.
+ * Returns the all-time Top N games (default 100).
+ *
+ * BGG has no official top-list endpoint. We try to scrape the public "browse
+ * boardgames" ranking page live, but BGG's bot protection blocks requests coming
+ * from Cloudflare's network (403), so in practice we fall back to the bundled
+ * src/top100.json snapshot — refresh it with `node scripts/refresh-top100.mjs`.
  */
 async function handleBggTop(request, env, cors, incomingUrl) {
   if (request.method !== "GET") {
@@ -441,68 +446,66 @@ async function handleBggTop(request, env, cors, incomingUrl) {
   }
 
   const count = Math.min(parseInt(incomingUrl.searchParams.get("count") || "100", 10) || 100, 200);
-  const pagesNeeded = Math.ceil(count / 100); // BGG browse shows 100 ranks per page.
-  const games = [];
+  const scraped = await scrapeBggTop(count);
 
-  for (let page = 1; page <= pagesNeeded; page++) {
-    const response = await fetch(`${BGG_BROWSE_URL}${page}`, {
-      headers: {
-        // BGG's browse page returns 403 to non-browser User-Agents, so present a
-        // full desktop browser UA. (The keyless xmlapi2 endpoints don't need this.)
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-        Accept: "text/html,application/xhtml+xml"
-      }
-    });
-    if (!response.ok) {
-      if (page === 1) {
-        return new Response(`BGG browse responded with status: ${response.status}`, {
-          status: 502,
-          headers: { ...cors, "Content-Type": "text/plain; charset=utf-8" }
-        });
-      }
-      break;
-    }
-
-    const html = await response.text();
-    // Each ranked game is a <tr id='row_'> block (BGG uses single-quoted
-    // attributes). Pull the fields out of it. Regexes are quote-agnostic so a
-    // future switch to double quotes won't silently break parsing.
-    const rowRegex = /<tr[^>]*id=['"]row_['"][\s\S]*?<\/tr>/g;
-    const rows = html.match(rowRegex) || [];
-
-    for (const row of rows) {
-      // The primary title anchor carries id + name; thumbnail anchor is skipped.
-      const linkMatch = row.match(/\/boardgame\/(\d+)\/[^"]*"\s+class=['"]primary['"]\s*>([^<]+)<\/a>/);
-      if (!linkMatch) continue;
-      const id = linkMatch[1];
-      const name = decodeEntities(linkMatch[2]).trim();
-      const rankMatch = row.match(/<a name="(\d+)"><\/a>/); // rank cell anchor
-      const yearMatch = row.match(/<span[^>]*class=['"]smallerfont dull['"][^>]*>\(([^)]+)\)<\/span>/);
-      const imgMatch = row.match(/<img[^>]+\ssrc="([^"]+)"/);
-      // Three collection_bggrating cells per row: geek rating, average, # voters.
-      const ratingCells = [...row.matchAll(/<td[^>]*class=['"]collection_bggrating['"][^>]*>\s*([\d.]+|N\/A)/g)];
-      const geekRating = ratingCells[0] ? ratingCells[0][1] : "N/A";
-      const avgRating = ratingCells[1] ? ratingCells[1][1] : "N/A";
-
-      games.push({
-        rank: rankMatch ? parseInt(rankMatch[1], 10) : games.length + 1,
-        id,
-        name,
-        year: yearMatch ? yearMatch[1] : "N/A",
-        image: imgMatch ? imgMatch[1] : "",
-        geekRating,
-        avgRating
-      });
-      if (games.length >= count) break;
-    }
-    if (games.length >= count) break;
+  if (scraped.length) {
+    return jsonResponse(
+      { ok: true, count: scraped.length, source: "live", generatedAt: new Date().toISOString(), games: scraped },
+      200,
+      { ...cors, "Cache-Control": "public, max-age=21600" } // 6 hours
+    );
   }
 
+  // Live scrape unavailable (blocked) — serve the bundled snapshot.
   return jsonResponse(
-    { ok: true, count: games.length, generatedAt: new Date().toISOString(), games },
+    { ok: true, count: Math.min(count, TOP100.games.length), source: "snapshot", generatedAt: TOP100.generatedAt, games: TOP100.games.slice(0, count) },
     200,
-    { ...cors, "Cache-Control": "public, max-age=21600" } // 6 hours
+    { ...cors, "Cache-Control": "public, max-age=21600" }
   );
+}
+
+/** Attempts the live browse-page scrape; returns [] on any failure. */
+async function scrapeBggTop(count) {
+  const pagesNeeded = Math.ceil(count / 100); // BGG browse shows 100 ranks per page.
+  const games = [];
+  try {
+    for (let page = 1; page <= pagesNeeded; page++) {
+      const response = await fetch(`${BGG_BROWSE_URL}${page}`, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+          Accept: "text/html,application/xhtml+xml"
+        }
+      });
+      if (!response.ok) break;
+
+      const html = await response.text();
+      // Each ranked game is a <tr id='row_'> block (BGG uses single-quoted
+      // attributes). Regexes are quote-agnostic so a future switch won't break.
+      const rows = html.match(/<tr[^>]*id=['"]row_['"][\s\S]*?<\/tr>/g) || [];
+      for (const row of rows) {
+        const linkMatch = row.match(/\/boardgame\/(\d+)\/[^"]*"\s+class=['"]primary['"]\s*>([^<]+)<\/a>/);
+        if (!linkMatch) continue;
+        const rankMatch = row.match(/<a name="(\d+)"><\/a>/);
+        const yearMatch = row.match(/<span[^>]*class=['"]smallerfont dull['"][^>]*>\(([^)]+)\)<\/span>/);
+        const imgMatch = row.match(/<img[^>]+\ssrc="([^"]+)"/);
+        const ratingCells = [...row.matchAll(/<td[^>]*class=['"]collection_bggrating['"][^>]*>\s*([\d.]+|N\/A)/g)];
+        games.push({
+          rank: rankMatch ? parseInt(rankMatch[1], 10) : games.length + 1,
+          id: linkMatch[1],
+          name: decodeEntities(linkMatch[2]).trim(),
+          year: yearMatch ? yearMatch[1] : "N/A",
+          image: imgMatch ? imgMatch[1] : "",
+          geekRating: ratingCells[0] ? ratingCells[0][1] : "N/A",
+          avgRating: ratingCells[1] ? ratingCells[1][1] : "N/A"
+        });
+        if (games.length >= count) break;
+      }
+      if (games.length >= count) break;
+    }
+  } catch {
+    return [];
+  }
+  return games;
 }
 
 /** Minimal XML/HTML entity decoder for the few named entities BGG emits. */
