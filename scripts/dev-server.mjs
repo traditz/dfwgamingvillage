@@ -42,21 +42,26 @@ async function fixture(name) {
 
 /* ---- endpoint handlers (mirror cloudflare/bgg-proxy/src/worker.js) ---- */
 
+function username(params) {
+  const u = params.get('username') || 'traditz';
+  return /^[A-Za-z0-9_-]{1,32}$/.test(u) ? u : 'traditz';
+}
+
 async function bggCollection(params) {
   const want = params.get('want') === '1';
   const file = want ? 'collection-want.xml' : 'collection-own.xml';
   try {
-    const url = `https://boardgamegeek.com/xmlapi2/collection?username=traditz&stats=1&excludesubtype=boardgameexpansion&${want ? 'wanttoplay=1' : 'own=1'}`;
+    const url = `https://boardgamegeek.com/xmlapi2/collection?username=${username(params)}&stats=1&excludesubtype=boardgameexpansion&${want ? 'wanttoplay=1' : 'own=1'}`;
     const res = await fetch(url, { headers: { 'User-Agent': BROWSER_UA } });
     if (res.ok) return { type: 'xml', body: await res.text(), live: true };
   } catch { /* fall through to fixture */ }
   return { type: 'xml', body: await fixture(file), live: false };
 }
 
-async function bggPlays() {
+async function bggPlays(params) {
   try {
     // The Worker walks every page; for local dev one page is plenty to prove out.
-    const res = await fetch('https://boardgamegeek.com/xmlapi2/plays?username=traditz&page=1', { headers: { 'User-Agent': BROWSER_UA } });
+    const res = await fetch(`https://boardgamegeek.com/xmlapi2/plays?username=${username(params)}&page=1`, { headers: { 'User-Agent': BROWSER_UA } });
     if (res.ok) {
       const xml = await res.text();
       const games = {};

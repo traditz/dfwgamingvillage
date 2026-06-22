@@ -37,6 +37,13 @@
         Played games are highlighted with their play count; unplayed games are greyed out.
         Expand a game to see which of its expansions have been played.</p>
 
+        <form class="pc-user" id="pc-user-form">
+            <label class="pc-field" for="pc-username">BGG username</label>
+            <input type="text" id="pc-username" placeholder="BoardGameGeek username"
+                   autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="32">
+            <button type="submit" id="pc-username-go" class="pc-tab">Load</button>
+        </form>
+
         <div class="pc-tabs">
             <button class="pc-tab active" type="button" data-tab="collection">Games in my collection</button>
             <button class="pc-tab" type="button" data-tab="want">Want to play games</button>

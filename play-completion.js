@@ -15,7 +15,11 @@ document.addEventListener('DOMContentLoaded', function () {
   const PROD_PROXY = 'https://dfwgv-bgg-proxy.joemsprague.workers.dev';
   const IS_LOCAL = ['localhost', '127.0.0.1'].includes(location.hostname);
   const PROXY_BASE = IS_LOCAL ? '' : PROD_PROXY;
-  const BGG_USERNAME = 'traditz';
+  const DEFAULT_USERNAME = 'traditz';
+  const USERNAME_RE = /^[A-Za-z0-9_-]{1,32}$/;
+
+  // Active BGG account being viewed; changed via the username field.
+  let bggUsername = DEFAULT_USERNAME;
 
   // Per-id play data: { id: { plays, comments[] } }. Loaded once, reused by every tab.
   let playsById = {};
@@ -34,7 +38,9 @@ document.addEventListener('DOMContentLoaded', function () {
     sort: document.getElementById('pc-sort'),
     show: document.getElementById('pc-show'),
     tabs: Array.from(document.querySelectorAll('.pc-tab')),
-    summary: document.getElementById('pc-summary')
+    summary: document.getElementById('pc-summary'),
+    userForm: document.getElementById('pc-user-form'),
+    username: document.getElementById('pc-username')
   };
 
   /* ------------------------------------------------------------------ helpers */
@@ -65,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // Aggregate every recorded play, keyed by BGG id.
   async function loadPlays() {
     if (playsLoaded) return;
-    const url = `${PROXY_BASE}/api/bgg-plays?username=${encodeURIComponent(BGG_USERNAME)}`;
+    const url = `${PROXY_BASE}/api/bgg-plays?username=${encodeURIComponent(bggUsername)}`;
     const response = await fetch(url);
     if (!response.ok) throw new Error(`Plays request failed (${response.status})`);
     const data = await response.json();
@@ -75,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Owned collection (want === true loads the want-to-play list instead).
   async function loadCollection(want) {
-    const url = `${PROXY_BASE}/api/bgg-collection?username=${encodeURIComponent(BGG_USERNAME)}${want ? '&want=1' : ''}`;
+    const url = `${PROXY_BASE}/api/bgg-collection?username=${encodeURIComponent(bggUsername)}${want ? '&want=1' : ''}`;
     const xml = await fetchXml(url);
     return Array.from(xml.querySelectorAll('item')).map((item) => {
       const stats = item.querySelector('stats');
@@ -313,18 +319,56 @@ document.addEventListener('DOMContentLoaded', function () {
     const button = e.target.closest('.pc-expand');
     if (button) toggleExpansions(button);
   });
+  els.userForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    submitUsername();
+  });
+
+  /* ------------------------------------------------------------ user switch */
+
+  // Clear everything that depends on the viewed user. The Top-100 list itself is
+  // global, so it's kept; its played/unplayed state recomputes from new plays.
+  function resetUserData() {
+    playsById = {};
+    playsLoaded = false;
+    tabCache.collection = null;
+    tabCache.want = null;
+    for (const key in expansionCache) delete expansionCache[key];
+  }
+
+  async function loadForUser(name) {
+    bggUsername = name;
+    resetUserData();
+    els.username.value = name;
+
+    // Keep the URL shareable / reload-safe (?user=name).
+    const url = new URL(location.href);
+    url.searchParams.set('user', name);
+    history.replaceState(null, '', url);
+
+    els.container.innerHTML = `<p>Loading play history for “${escapeHtml(name)}” from BoardGameGeek…</p>`;
+    try {
+      await loadPlays(); // Needed before any tab can compute played/unplayed.
+      await switchTab(activeTab);
+    } catch (err) {
+      els.container.innerHTML =
+        `<p style="color:#ff8a8a">Failed to load data for “${escapeHtml(name)}”. ${escapeHtml(err.message)}</p>` +
+        `<p style="color:#ccc;font-size:small">Check the username, or the BGG proxy may need to be redeployed with the new endpoints.</p>`;
+    }
+  }
+
+  function submitUsername() {
+    const name = els.username.value.trim();
+    if (!USERNAME_RE.test(name)) {
+      els.container.innerHTML =
+        '<p style="color:#ff8a8a">Please enter a valid BoardGameGeek username (letters, numbers, underscores or hyphens).</p>';
+      return;
+    }
+    loadForUser(name);
+  }
 
   /* -------------------------------------------------------------- bootstrap */
 
-  (async function init() {
-    els.container.innerHTML = '<p>Loading play history from BoardGameGeek…</p>';
-    try {
-      await loadPlays(); // Needed before any tab can compute played/unplayed.
-      await switchTab('collection');
-    } catch (err) {
-      els.container.innerHTML =
-        `<p style="color:#ff8a8a">Failed to load play data. ${escapeHtml(err.message)}</p>` +
-        `<p style="color:#ccc;font-size:small">If this persists, the BGG proxy may need to be redeployed with the new endpoints.</p>`;
-    }
-  })();
+  const startUser = (new URLSearchParams(location.search).get('user') || '').trim();
+  loadForUser(USERNAME_RE.test(startUser) ? startUser : DEFAULT_USERNAME);
 });

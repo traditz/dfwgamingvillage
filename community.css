@@ -579,12 +579,38 @@ body[data-page="contact"] .nav a[href="contact.html"] {
 
 /* ===================== Play Completion ===================== */
 
+.pc-user {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin: 22px auto 6px;
+  max-width: 800px;
+}
+
+.pc-user input {
+  background: #0f1016;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 1rem;
+  min-height: 42px;
+  padding: 8px 11px;
+  width: min(100%, 260px);
+}
+
+.pc-user input:focus {
+  border-color: var(--gold);
+  outline: 2px solid rgba(245, 197, 66, 0.18);
+}
+
 .pc-tabs {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   justify-content: center;
-  margin: 22px auto 14px;
+  margin: 6px auto 14px;
   max-width: 800px;
 }
 
