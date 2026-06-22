@@ -21,6 +21,11 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 const FIXTURES = join(__dirname, 'fixtures');
 const PORT = 8080;
+// When set, /api/* is forwarded to this deployed Worker (which can reach BGG
+// from Cloudflare's network) instead of being answered locally. This is how you
+// test real BGG usernames locally — see BGG-API.md.
+//   BGG_PROXY_UPSTREAM=https://dfwgv-bgg-proxy-staging.<subdomain>.workers.dev node scripts/dev-server.mjs
+const UPSTREAM = (process.env.BGG_PROXY_UPSTREAM || '').replace(/\/$/, '');
 const BROWSER_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
 
 const MIME = {
@@ -136,6 +141,24 @@ const server = createServer(async (req, res) => {
   const url = new URL(req.url, `http://localhost:${PORT}`);
 
   if (API[url.pathname]) {
+    // Forward to the deployed Worker when an upstream is configured.
+    if (UPSTREAM) {
+      try {
+        const target = UPSTREAM + url.pathname + url.search;
+        const upstreamRes = await fetch(target, { headers: { Origin: `http://localhost:${PORT}` } });
+        const body = Buffer.from(await upstreamRes.arrayBuffer());
+        console.log(`${url.pathname} -> upstream ${upstreamRes.status}`);
+        res.writeHead(upstreamRes.status, {
+          'Content-Type': upstreamRes.headers.get('content-type') || 'application/octet-stream',
+          'Cache-Control': 'no-store'
+        });
+        res.end(body);
+      } catch (err) {
+        res.writeHead(502, { 'Content-Type': 'text/plain' });
+        res.end(`upstream error: ${err.message}`);
+      }
+      return;
+    }
     try {
       const out = await API[url.pathname](url.searchParams);
       console.log(`${url.pathname} -> ${out.live ? 'LIVE BGG' : 'fixture'}`);
@@ -168,6 +191,12 @@ const server = createServer(async (req, res) => {
 
 server.listen(PORT, () => {
   console.log(`\n  DFWGV dev server running:  http://localhost:${PORT}/play-completion.html\n`);
-  console.log('  Top-100 = live BGG when reachable; other tabs fall back to scripts/fixtures/.');
+  if (UPSTREAM) {
+    console.log(`  /api/* -> upstream Worker: ${UPSTREAM}`);
+    console.log('  Real BGG data for any username.');
+  } else {
+    console.log('  Top-100 = live BGG when reachable; other tabs fall back to scripts/fixtures/.');
+    console.log('  Set BGG_PROXY_UPSTREAM=<staging worker url> for real per-user data.');
+  }
   console.log('  Ctrl+C to stop.\n');
 });

@@ -7,16 +7,27 @@ caching, and input validation.
 
 ## Is there an API key?
 
-**BGG's public XML API2 does not require an API key.** It is an open, keyless,
-read-only endpoint (`https://boardgamegeek.com/xmlapi2/...`). You can fetch any
-public user's collection or play history with no credentials.
+**Yes — a real token is required.** Empirically, BGG's API now rejects
+unauthenticated requests with `401 Unauthorized`. The Worker authenticates by
+sending `Authorization: Bearer ${BGG_TOKEN}` on its outbound calls, and that
+token must be valid:
 
-The Worker still sends an `Authorization: Bearer ${BGG_TOKEN}` header on its
-outbound calls. **`BGG_TOKEN` is the Worker's own optional secret, not a BGG
-key** — BGG ignores it. It exists only so the proxy code has a single place to
-hang a credential if BGG ever introduces one, and so the handlers can refuse to
-run if the environment is misconfigured. If you don't want it, you can remove
-the `if (!env.BGG_TOKEN)` guard in `handleBggCollection`.
+- The **production Worker** (`dfwgv-bgg-proxy`) has a valid `BGG_TOKEN` stored as
+  a Cloudflare **secret**, which is why it returns real data.
+- A Worker (or local request) **without** the real token gets `401` from BGG.
+
+Cloudflare secrets are **write-only** — you cannot read `BGG_TOKEN` back out of
+the production Worker. To stand up another environment (e.g. staging) you must
+set the real token again:
+
+```sh
+npx wrangler secret put BGG_TOKEN --config wrangler.staging.toml
+```
+
+> The `wrangler.staging.toml` in this repo ships with a **placeholder** token in
+> `[vars]` purely so the worker boots; it will get `401` from BGG until you
+> replace it with the real token via `wrangler secret put` (a secret overrides
+> the var). Keep the real token out of source control.
 
 ## Where everything lives
 
@@ -67,14 +78,30 @@ node scripts/dev-server.mjs
 ```
 
 `scripts/dev-server.mjs` is a zero-dependency Node server that serves the static
-files and implements the four BGG endpoints. It tries **live BoardGameGeek
-first**; if BGG blocks the request (its API 401s some IPs), it falls back to the
-sample data in `scripts/fixtures/` so every feature still works. The Top-100
-scrape usually succeeds from a normal network, so that tab is typically real.
+files and implements the four BGG endpoints. Because BGG now requires the auth
+token (and blocks unauthenticated IPs with `401`), the dev server falls back to
+the sample data in `scripts/fixtures/` so every feature still works offline.
 
 `play-completion.js` auto-detects `localhost`/`127.0.0.1` and calls the
 same-origin dev server there; in production it calls the deployed Worker. No code
 changes are needed to switch between the two.
+
+### Testing real BGG usernames locally
+
+The fixtures return the same data for any username. To exercise **real** per-user
+data locally, point the dev server at a **deployed Worker** that holds the valid
+`BGG_TOKEN` (the calls then originate from Cloudflare, which is authorized):
+
+```sh
+BGG_PROXY_UPSTREAM=https://dfwgv-bgg-proxy.joemsprague.workers.dev \
+  node scripts/dev-server.mjs
+```
+
+With `BGG_PROXY_UPSTREAM` set, the dev server forwards `/api/*` to that Worker
+instead of using fixtures. Note: the **production** Worker only gains the new
+endpoints (`bgg-plays`, `bgg-top`, `bgg-thing`, `want=1`) once `worker.js` is
+redeployed — until then, point at a staging Worker that has the real token set
+(see "Is there an API key?").
 
 > The fixtures are crafted to demonstrate played vs. unplayed greying, play
 > counts, Top-100 cross-referencing, and expansion-from-comments detection

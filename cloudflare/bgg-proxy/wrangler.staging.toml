@@ -1,0 +1,19 @@
+# Staging deploy of the BGG proxy — used to test real BGG data locally without
+# touching the production worker (dfwgv-bgg-proxy) or the live site.
+#
+#   cd cloudflare/bgg-proxy
+#   npx wrangler deploy --config wrangler.staging.toml
+#
+# It deploys to https://dfwgv-bgg-proxy-staging.<your-subdomain>.workers.dev
+# Then run the dev server pointed at it (see BGG-API.md "Testing real usernames").
+#
+# No D1 binding here (analytics endpoints aren't needed for staging). BGG_TOKEN
+# is a throwaway plaintext var — BGG's API is keyless and ignores it; it only
+# satisfies the worker's "is it configured" guard.
+name = "dfwgv-bgg-proxy-staging"
+main = "src/worker.js"
+compatibility_date = "2025-01-01"
+workers_dev = true
+
+[vars]
+BGG_TOKEN = "staging-placeholder-bgg-api-is-keyless"
