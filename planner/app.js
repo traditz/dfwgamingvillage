@@ -173,6 +173,36 @@ function centralDateKey(date) {
   return `${values.year}-${values.month}-${values.day}`;
 }
 
+// Central-time "HH:MM" for a Date (used as a sensible default within the day).
+function centralTimeHHMM(date) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Chicago",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  }).formatToParts(date);
+  const v = Object.fromEntries(parts.map((p) => [p.type, p.value]));
+  const hh = v.hour === "24" ? "00" : v.hour; // some engines emit 24 at midnight
+  return `${hh}:${v.minute}`;
+}
+
+// datetime-local bounds restricting a table's start to the open event's day.
+// The datetime-local value is treated as Central throughout the app, so the
+// date portion can be compared directly against the event's Central date.
+function eventDayBounds() {
+  const startsAt = currentGameDay ? asDate(currentGameDay.startsAt) : null;
+  if (!startsAt) return null;
+  const day = centralDateKey(startsAt);           // "YYYY-MM-DD" (Central)
+  const [y, m, d] = day.split("-");
+  return {
+    day,
+    label: `${+m}/${+d}/${y}`,
+    min: `${day}T00:00`,
+    max: `${day}T23:59`,
+    default: `${day}T${centralTimeHHMM(startsAt)}`  // default to the event's start time
+  };
+}
+
 function isPastGameDay(gd) {
   const startsAt = asDate(gd?.startsAt);
   if (!startsAt) return false;
@@ -850,7 +880,10 @@ function openGameSearchModal({ title }) {
 // -----------------------------
 function openHostTableFormModal({ gamedayId, thing }) {
   return new Promise((resolve) => {
-    const defaultStart = fmtLocalDatetimeValue(new Date(Date.now() + 60 * 60 * 1000));
+    const bounds = eventDayBounds();
+    const defaultStart = bounds ? bounds.default : fmtLocalDatetimeValue(new Date(Date.now() + 60 * 60 * 1000));
+    const dtAttrs = bounds ? ` min="${bounds.min}" max="${bounds.max}"` : "";
+    const dtHint = bounds ? `<div class="hint muted">Must be on the event day (${esc(bounds.label)}).</div>` : "";
     const defaultCap = thing?.maxPlayers || "";
 
     openModal("Host a Table", `
@@ -871,7 +904,8 @@ function openHostTableFormModal({ gamedayId, thing }) {
         <div class="modalGrid">
           <label class="field">
             <div class="label">Start time</div>
-            <input id="startTime" class="input" type="datetime-local" value="${esc(defaultStart)}" />
+            <input id="startTime" class="input" type="datetime-local" value="${esc(defaultStart)}"${dtAttrs} />
+            ${dtHint}
           </label>
 
           <label class="field">
@@ -931,6 +965,10 @@ function openHostTableFormModal({ gamedayId, thing }) {
         showInlineError("Please choose a valid start time.");
         return;
       }
+      if (bounds && startVal.slice(0, 10) !== bounds.day) {
+        showInlineError(`Tables must start on the event day (${bounds.label}).`);
+        return;
+      }
 
       const capRaw = Number(qs("#capacity").value || 0);
       const capFinal = (Number.isFinite(capRaw) && capRaw > 0)
@@ -984,10 +1022,13 @@ function openHostTableFormModal({ gamedayId, thing }) {
 // Modal: Edit Table (NEW)
 // -----------------------------
 function openEditTableModal(t) {
+    const bounds = eventDayBounds();
+    const dtAttrs = bounds ? ` min="${bounds.min}" max="${bounds.max}"` : "";
+    const dtHint = bounds ? `<div class="hint muted">Must be on the event day (${esc(bounds.label)}).</div>` : "";
     openModal("Edit Table", `
       <div class="modalStack">
         <div class="modalGrid">
-          <label class="field"><div class="label">Start</div><input id="editStart" class="input" type="datetime-local" /></label>
+          <label class="field"><div class="label">Start</div><input id="editStart" class="input" type="datetime-local"${dtAttrs} />${dtHint}</label>
           <label class="field"><div class="label">Seats</div><input id="editCap" class="input" type="number" min="2" max="999" /></label>
           <label class="field fieldSpan2"><div class="label">Notes</div><textarea id="editNotes" class="textarea" rows="3"></textarea></label>
         </div>
@@ -1008,12 +1049,17 @@ function openEditTableModal(t) {
 
     qs("#btnCancel").onclick = closeModal;
     qs("#btnSave").onclick = async () => {
-        const startIso = parseDatetimeLocalToISO(qs("#editStart").value);
+        const startVal = qs("#editStart").value;
+        const startIso = parseDatetimeLocalToISO(startVal);
         const cap = Number(qs("#editCap").value);
         const notes = qs("#editNotes").value;
-        
+
         if (!startIso || cap < 2 || cap > 999) {
             showInlineError("Invalid Start or Seats (must be 2-999).");
+            return;
+        }
+        if (bounds && startVal.slice(0, 10) !== bounds.day) {
+            showInlineError(`Tables must start on the event day (${bounds.label}).`);
             return;
         }
         
