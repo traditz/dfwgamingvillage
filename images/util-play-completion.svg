@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 150" width="200" height="150" role="img" aria-label="Play Completion">
+  <defs>
+    <linearGradient id="pcbg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1d1f2a"/>
+      <stop offset="1" stop-color="#141620"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="150" fill="url(#pcbg)"/>
+  <circle cx="100" cy="34" r="15" fill="none" stroke="#f5c542" stroke-width="2.4"/>
+  <path d="M92 34 l5 6 l11 -13" fill="none" stroke="#f5c542" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="100" y="86" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="26" fill="#ffd45a" letter-spacing="0.4">Play</text>
+  <text x="100" y="112" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="22" fill="#fff6ce" letter-spacing="0.3">Completion</text>
+  <rect x="64" y="122" width="72" height="3" rx="1.5" fill="#f5c542"/>
+</svg>
