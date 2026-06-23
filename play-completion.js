@@ -15,11 +15,10 @@ document.addEventListener('DOMContentLoaded', function () {
   const PROD_PROXY = 'https://dfwgv-bgg-proxy.joemsprague.workers.dev';
   const IS_LOCAL = ['localhost', '127.0.0.1'].includes(location.hostname);
   const PROXY_BASE = IS_LOCAL ? '' : PROD_PROXY;
-  const DEFAULT_USERNAME = 'traditz';
   const USERNAME_RE = /^[A-Za-z0-9_-]{1,32}$/;
 
-  // Active BGG account being viewed; changed via the username field.
-  let bggUsername = DEFAULT_USERNAME;
+  // Active BGG account being viewed; empty until a username is entered.
+  let bggUsername = '';
 
   // Per-id play data: { id: { plays, comments[] } }. Loaded once, reused by every tab.
   let playsById = {};
@@ -181,6 +180,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function render() {
+    if (!bggUsername) { promptForUsername(); return; }
     const games = tabCache[activeTab] || [];
     const query = (els.search.value || '').toLowerCase();
     const show = els.show.value; // all | played | unplayed
@@ -301,6 +301,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (tab === 'top' && els.sort.value === 'name') els.sort.value = 'rank';
     if (tab !== 'top' && els.sort.value === 'rank') els.sort.value = 'name';
 
+    if (!bggUsername) { promptForUsername(); return; }
+
     els.container.innerHTML = '<p>Loading…</p>';
     try {
       await loadTab(tab);
@@ -366,8 +368,29 @@ document.addEventListener('DOMContentLoaded', function () {
     loadForUser(name);
   }
 
+  // Initial state with no username chosen: blank field, nothing loaded.
+  function promptForUsername() {
+    els.summary.textContent = '';
+    els.container.innerHTML = '<p>Enter a BoardGameGeek username above to see which games have been played.</p>';
+  }
+
+  function showEmptyState() {
+    bggUsername = '';
+    els.username.value = '';
+    // Drop ?user= from the URL so a blank start stays blank on reload.
+    const url = new URL(location.href);
+    url.searchParams.delete('user');
+    history.replaceState(null, '', url);
+    promptForUsername();
+    els.username.focus();
+  }
+
   /* -------------------------------------------------------------- bootstrap */
 
   const startUser = (new URLSearchParams(location.search).get('user') || '').trim();
-  loadForUser(USERNAME_RE.test(startUser) ? startUser : DEFAULT_USERNAME);
+  if (USERNAME_RE.test(startUser)) {
+    loadForUser(startUser); // deep link, e.g. ?user=traditz
+  } else {
+    showEmptyState();
+  }
 });
