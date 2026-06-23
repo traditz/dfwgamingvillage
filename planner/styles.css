@@ -908,6 +908,19 @@ textarea:focus {
   color: #f2f2f4;
 }
 
+/* The signed-in user's own name, wherever it appears on a card */
+.rosterChip.is-you {
+  border-color: rgba(245, 197, 66, .55);
+  background: var(--gold-soft);
+  color: #ffe7a3;
+  font-weight: 900;
+}
+
+.hostName.is-you {
+  color: var(--gold);
+  font-weight: 800;
+}
+
 .rosterEmpty {
   border: 1px dashed rgba(255, 255, 255, .12);
   color: var(--muted);

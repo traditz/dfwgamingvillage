@@ -486,10 +486,10 @@ function ensureRosterListener(gamedayId, tableId) {
       if (!name) return;
       
       if (s.status === "waitlist") {
-          waitlist.push(name);
+          waitlist.push({ name, uid });
           waitlistIds.add(uid);
       } else {
-          confirmed.push(name);
+          confirmed.push({ name, uid });
           confirmedIds.add(uid);
       }
     });
@@ -568,9 +568,13 @@ function applyJoinLeaveState(card, t) {
   }
 }
 
-function rosterNamesHtml(names) {
-  if (!names?.length) return `<span class="rosterEmpty">None yet</span>`;
-  return names.map((name) => `<span class="rosterChip">${esc(name)}</span>`).join("");
+function rosterNamesHtml(entries) {
+  if (!entries?.length) return `<span class="rosterEmpty">None yet</span>`;
+  const myUid = currentUser?.uid;
+  return entries.map((e) => {
+    const isYou = !!(myUid && e.uid === myUid);
+    return `<span class="rosterChip${isYou ? " is-you" : ""}">${esc(e.name)}${isYou ? " (you)" : ""}</span>`;
+  }).join("");
 }
 
 // -----------------------------
@@ -1431,7 +1435,7 @@ function renderTablesPage() {
           <div class="time">${timeDisplay}</div>
         </div>
         <div class="row2">
-          <div class="muted">Host: ${esc(t.hostDisplayName || t.hostUid || "Unknown")}</div>
+          <div class="muted">Host: <span class="hostName${isHost ? " is-you" : ""}">${esc(t.hostDisplayName || t.hostUid || "Unknown")}</span>${isHost ? " (you)" : ""}</div>
           <div class="seats" data-seats-root="${esc(t.id)}" data-cap="${cap}">
             <span class="seatsText muted">Seats: ${confirmed}/${cap}${wait ? ` • Waitlist: ${wait}` : ""}</span>
             <span class="seatsBar"><span class="seatsFill" style="width:${cap ? Math.min(100, Math.round((confirmed / cap) * 100)) : 0}%"></span></span>
