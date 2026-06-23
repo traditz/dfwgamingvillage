@@ -140,8 +140,8 @@ const API = {
 const server = createServer(async (req, res) => {
   const url = new URL(req.url, `http://localhost:${PORT}`);
 
-  if (API[url.pathname]) {
-    // Forward to the deployed Worker when an upstream is configured.
+  if (url.pathname.startsWith('/api/')) {
+    // Forward any API path to the deployed Worker when an upstream is configured.
     if (UPSTREAM) {
       try {
         const target = UPSTREAM + url.pathname + url.search;
@@ -159,15 +159,21 @@ const server = createServer(async (req, res) => {
       }
       return;
     }
-    try {
-      const out = await API[url.pathname](url.searchParams);
-      console.log(`${url.pathname} -> ${out.live ? 'LIVE BGG' : 'fixture'}`);
-      res.writeHead(200, { 'Content-Type': out.type === 'json' ? MIME['.json'] : MIME['.xml'], 'Cache-Control': 'no-store' });
-      res.end(out.body);
-    } catch (err) {
-      res.writeHead(500, { 'Content-Type': 'text/plain' });
-      res.end(`dev-server error: ${err.message}`);
+    // No upstream: only the BGG endpoints have local fixture handlers.
+    if (API[url.pathname]) {
+      try {
+        const out = await API[url.pathname](url.searchParams);
+        console.log(`${url.pathname} -> ${out.live ? 'LIVE BGG' : 'fixture'}`);
+        res.writeHead(200, { 'Content-Type': out.type === 'json' ? MIME['.json'] : MIME['.xml'], 'Cache-Control': 'no-store' });
+        res.end(out.body);
+      } catch (err) {
+        res.writeHead(500, { 'Content-Type': 'text/plain' });
+        res.end(`dev-server error: ${err.message}`);
+      }
+      return;
     }
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    res.end(`No local handler for ${url.pathname}. Set BGG_PROXY_UPSTREAM to proxy it.`);
     return;
   }
 

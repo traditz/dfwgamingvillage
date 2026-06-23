@@ -5,6 +5,12 @@ const BGG_PLAYS_URL = "https://boardgamegeek.com/xmlapi2/plays";
 const BGG_THING_URL = "https://boardgamegeek.com/xmlapi2/thing";
 const BGG_BROWSE_URL = "https://boardgamegeek.com/browse/boardgame/page/";
 const DEFAULT_USERNAME = "traditz";
+
+// Gallery: lists images from a public Google Drive folder via the Drive API.
+const GOOGLE_DRIVE_FILES_URL = "https://www.googleapis.com/drive/v3/files";
+const GALLERY_FOLDER_ID = "1ClIRRga46wACqe0yB5lA14ToIneXXBrB";
+// The Google API key is restricted to this HTTP referrer; the worker sends it.
+const GALLERY_REFERER = "https://www.dfwgamingvillage.com/";
 const ALLOWED_ORIGINS = new Set([
   "https://www.dfwgamingvillage.com",
   "https://dfwgamingvillage.com",
@@ -519,6 +525,54 @@ function decodeEntities(str) {
     .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(parseInt(code, 10)));
 }
 
+/**
+ * Lists the images in the public gallery Drive folder (newest first) and returns
+ * their file ids + names as JSON. The page picks a random subset to display.
+ */
+async function handleGallery(request, env, cors) {
+  if (request.method !== "GET") {
+    return new Response("Method not allowed", {
+      status: 405,
+      headers: { ...cors, "Content-Type": "text/plain; charset=utf-8" }
+    });
+  }
+
+  if (!env.GOOGLE_API_KEY) {
+    return new Response("Google API key is not configured.", {
+      status: 500,
+      headers: { ...cors, "Content-Type": "text/plain; charset=utf-8" }
+    });
+  }
+
+  const driveUrl = new URL(GOOGLE_DRIVE_FILES_URL);
+  driveUrl.searchParams.set("q", `'${GALLERY_FOLDER_ID}' in parents and mimeType contains 'image/' and trashed = false`);
+  driveUrl.searchParams.set("key", env.GOOGLE_API_KEY);
+  driveUrl.searchParams.set("fields", "files(id,name)");
+  driveUrl.searchParams.set("pageSize", "1000");
+  driveUrl.searchParams.set("orderBy", "createdTime desc");
+
+  const driveResponse = await fetch(driveUrl.toString(), {
+    headers: { Referer: GALLERY_REFERER }
+  });
+
+  if (!driveResponse.ok) {
+    const detail = await driveResponse.text();
+    return new Response(`Drive API responded with status ${driveResponse.status}: ${detail.slice(0, 200)}`, {
+      status: 502,
+      headers: { ...cors, "Content-Type": "text/plain; charset=utf-8" }
+    });
+  }
+
+  const data = await driveResponse.json();
+  const files = (data.files || []).map((f) => ({ id: f.id, name: f.name }));
+
+  return jsonResponse(
+    { ok: true, count: files.length, files },
+    200,
+    { ...cors, "Cache-Control": "public, max-age=600" } // 10 minutes
+  );
+}
+
 export default {
   async fetch(request, env) {
     const cors = corsHeaders(request);
@@ -550,6 +604,10 @@ export default {
 
     if (incomingUrl.pathname === "/api/bgg-top") {
       return handleBggTop(request, env, cors, incomingUrl);
+    }
+
+    if (incomingUrl.pathname === "/api/gallery") {
+      return handleGallery(request, env, cors);
     }
 
     return new Response("Not found", {
