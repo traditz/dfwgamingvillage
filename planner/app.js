@@ -550,6 +550,10 @@ function applyJoinLeaveState(card, t) {
   const isPast = currentEventIsPast();
   const canJoin = !!currentUser && !isSignedUp && !isPast;
 
+  // Card-level cue: subtly flag tables the signed-in user hosts or has joined.
+  const isHostMine = !!(uid && t.hostUid && uid === t.hostUid);
+  card.classList.toggle("is-mine", isSignedUp || isHostMine);
+
   if (isSignedUp) {
     joinBtn.disabled = true;
     joinBtn.textContent = "✅ Joined";

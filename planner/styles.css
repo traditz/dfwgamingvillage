@@ -727,6 +727,12 @@ textarea:focus {
   background: rgba(255, 255, 255, .06);
 }
 
+/* Slight cue for tables the signed-in user hosts or has joined */
+.tablecard.is-mine {
+  border-color: rgba(245, 197, 66, .4);
+  box-shadow: inset 3px 0 0 var(--gold);
+}
+
 /* Seat capacity bar */
 .seats {
   display: grid;
