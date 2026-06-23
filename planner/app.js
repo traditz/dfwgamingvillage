@@ -136,7 +136,14 @@ function esc(s) {
 function fmtDate(d) {
   try {
     const dt = d instanceof Date ? d : new Date(d);
-    return dt.toLocaleString("en-US", { timeZone: "America/Chicago" });
+    return dt.toLocaleString("en-US", {
+      timeZone: "America/Chicago",
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit"
+    });
   } catch {
     return String(d || "");
   }
