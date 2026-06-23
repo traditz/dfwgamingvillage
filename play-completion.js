@@ -86,14 +86,13 @@ document.addEventListener('DOMContentLoaded', function () {
     return Array.from(xml.querySelectorAll('item')).map((item) => {
       const stats = item.querySelector('stats');
       const rating = stats ? stats.querySelector('rating') : null;
-      const geek = rating ? rating.querySelector('bayesaverage') : null;
       const avg = rating ? rating.querySelector('average') : null;
       return {
         id: item.getAttribute('objectid'),
         name: item.querySelector('name')?.textContent || 'Unknown',
         year: item.querySelector('yearpublished')?.textContent || 'N/A',
         image: item.querySelector('thumbnail')?.textContent || item.querySelector('image')?.textContent || '',
-        rating: geek?.getAttribute('value') || avg?.getAttribute('value') || 'N/A',
+        rating: avg?.getAttribute('value') || 'N/A', // BGG average rating
         rank: null
       };
     });
@@ -109,7 +108,7 @@ document.addEventListener('DOMContentLoaded', function () {
       name: g.name,
       year: g.year,
       image: g.image,
-      rating: g.geekRating,
+      rating: g.avgRating, // BGG average rating
       rank: g.rank
     }));
   }
