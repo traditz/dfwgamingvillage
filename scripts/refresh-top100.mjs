@@ -51,15 +51,16 @@ function parseRows(html) {
 }
 
 async function fetchPage(page) {
-  for (let attempt = 1; attempt <= 4; attempt++) {
+  const MAX_ATTEMPTS = 6;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     const res = await fetch(`https://boardgamegeek.com/browse/boardgame/page/${page}`, {
       headers: { 'User-Agent': UA, 'Accept-Language': 'en-US,en;q=0.9', Accept: 'text/html,application/xhtml+xml' }
     });
     const html = await res.text();
     const games = parseRows(html);
     if (res.ok && games.length >= 100) return games;
-    console.log(`  page ${page} attempt ${attempt}: status ${res.status}, ${games.length} rows — retrying`);
-    await new Promise((r) => setTimeout(r, attempt * 15000));
+    console.log(`  page ${page} attempt ${attempt}/${MAX_ATTEMPTS}: status ${res.status}, ${games.length} rows — retrying`);
+    if (attempt < MAX_ATTEMPTS) await new Promise((r) => setTimeout(r, attempt * 20000)); // 20s,40s,...,100s
   }
   throw new Error(`Could not fetch page ${page} (BGG kept blocking).`);
 }
