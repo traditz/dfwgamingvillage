@@ -14,6 +14,121 @@
     <title>Battlestar Galactica Player Aids - DFW Gaming Village</title>
     <link rel="stylesheet" href="community.css?v=20260622-cleanup">
     <link rel="icon" href="favicon.ico">
+    <style>
+      /* --- Battlestar Galactica hub: custom art buttons --- */
+      .bsg-tools {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 22px;
+        justify-content: center;
+        margin: 30px auto 0;
+        max-width: 760px;
+      }
+      .bsg-tool {
+        position: relative;
+        display: block;
+        width: min(100%, 340px);
+        aspect-ratio: 16 / 11;
+        border-radius: 16px;
+        overflow: hidden;
+        text-decoration: none;
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background-image: url("images/battlestar.png");
+        background-size: cover;
+        background-position: center 22%;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+        transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+        isolation: isolate;
+      }
+      .bsg-tool::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+      }
+      .bsg-tool.drafter::before {
+        background:
+          radial-gradient(130% 90% at 82% 6%, rgba(227, 192, 116, 0.30), transparent 58%),
+          linear-gradient(180deg, rgba(10, 8, 4, 0.10) 0%, rgba(10, 8, 4, 0.55) 46%, rgba(6, 5, 3, 0.94) 100%);
+      }
+      .bsg-tool.setup::before {
+        background:
+          radial-gradient(130% 90% at 82% 6%, rgba(92, 176, 234, 0.32), transparent 58%),
+          linear-gradient(180deg, rgba(4, 9, 16, 0.10) 0%, rgba(4, 9, 16, 0.55) 46%, rgba(3, 6, 12, 0.94) 100%);
+      }
+      .bsg-tool .bt-inner {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: 18px 20px 20px;
+      }
+      .bsg-tool .bt-icon {
+        align-self: flex-start;
+        margin-bottom: auto;
+        width: 46px;
+        height: 46px;
+        display: grid;
+        place-items: center;
+        border-radius: 12px;
+        background: rgba(0, 0, 0, 0.35);
+        border: 1px solid var(--bt-accent);
+        box-shadow: 0 0 18px rgba(0, 0, 0, 0.35);
+      }
+      .bsg-tool .bt-icon svg { width: 26px; height: 26px; stroke: var(--bt-accent); }
+      .bsg-tool .bt-title {
+        margin: 0;
+        font-size: clamp(1.35rem, 3.2vw, 1.65rem);
+        font-weight: 800;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        line-height: 1.04;
+        text-shadow: 0 2px 12px rgba(0, 0, 0, 0.75);
+      }
+      .bsg-tool .bt-accentbar {
+        width: 46px;
+        height: 3px;
+        margin: 9px 0 9px;
+        border-radius: 2px;
+        background: var(--bt-accent);
+        box-shadow: 0 0 12px var(--bt-accent);
+      }
+      .bsg-tool .bt-sub {
+        margin: 0;
+        font-size: 0.86rem;
+        line-height: 1.35;
+        color: #d7dde6;
+        max-width: 30ch;
+      }
+      .bsg-tool .bt-cta {
+        margin-top: 12px;
+        font-size: 0.74rem;
+        font-weight: 800;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--bt-accent);
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .bsg-tool .bt-cta .arrow { transition: transform 0.22s ease; }
+      .bsg-tool:hover, .bsg-tool:focus-visible {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 46px rgba(0, 0, 0, 0.6);
+        border-color: var(--bt-accent);
+        color: #fff;
+      }
+      .bsg-tool:hover .bt-cta .arrow,
+      .bsg-tool:focus-visible .bt-cta .arrow { transform: translateX(5px); }
+      .bsg-tool.drafter { --bt-accent: #e7c87a; }
+      .bsg-tool.setup { --bt-accent: #5cb0ea; }
+      @media (prefers-reduced-motion: reduce) {
+        .bsg-tool, .bsg-tool .bt-cta .arrow { transition: none; }
+      }
+    </style>
 </head>
 <body data-page="player-aids">
     <div class="nav">
@@ -35,16 +150,38 @@
 
     <main class="content">
         <h1>Battlestar Galactica</h1>
-        <p>Player aids for <em>Battlestar Galactica: The Board Game</em>. Draft characters fairly, then get the exact setup and rules reference for whatever expansions, player count, objective and optional modules you are playing.</p>
+        <p>Draft characters correctly, then get the exact setup and rules reference for whatever expansions, player count, objective and optional modules you are playing.</p>
 
-        <div class="button-grid">
-            <a href="bsg-character-drafter.html" class="game-image-button">
-                <img src="images/battlestar.png" alt="Battlestar Galactica Character Drafter">
-                <span>Character Drafter</span>
+        <div class="bsg-tools">
+            <a href="bsg-character-drafter.html" class="bsg-tool drafter">
+                <span class="bt-inner">
+                    <span class="bt-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3.5" y="6" width="10" height="14" rx="1.6" transform="rotate(-9 8.5 13)"></rect>
+                            <rect x="10" y="5" width="10" height="14" rx="1.6" transform="rotate(7 15 12)"></rect>
+                        </svg>
+                    </span>
+                    <span class="bt-title">Character<br>Drafter</span>
+                    <span class="bt-accentbar"></span>
+                    <span class="bt-sub">Deal out characters fairly and pick a balanced crew for your table.</span>
+                    <span class="bt-cta">Open Drafter <span class="arrow">&rarr;</span></span>
+                </span>
             </a>
-            <a href="bsg-setup/index.html" class="game-image-button">
-                <img src="images/battlestar.png" alt="Battlestar Galactica Setup &amp; Reference Utility">
-                <span>Setup &amp; Reference Utility</span>
+
+            <a href="bsg-setup/index.html" class="bsg-tool setup">
+                <span class="bt-inner">
+                    <span class="bt-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 6h11"></path><path d="M4 12h11"></path><path d="M4 18h7"></path>
+                            <path d="M18 5l1.6 1.6L23 3.2"></path>
+                            <circle cx="18.5" cy="16.5" r="3.2"></circle>
+                        </svg>
+                    </span>
+                    <span class="bt-title">Setup &amp;<br>Reference</span>
+                    <span class="bt-accentbar"></span>
+                    <span class="bt-sub">Exact setup steps, loyalty deck and rules for your chosen expansions and modules.</span>
+                    <span class="bt-cta">Open Utility <span class="arrow">&rarr;</span></span>
+                </span>
             </a>
         </div>
     </main>
