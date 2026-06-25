@@ -222,7 +222,7 @@
                     <h1 class="text-4xl font-bold text-red-500 mb-2">BSG DRAFT</h1>
                     <p class="text-gray-400 mb-6">Battlestar Galactica Character Draft</p>
                     <div class="space-y-4">
-                        <input id="playerName" type="text" placeholder="Enter Your Name" value="${appState.playerName}" class="w-full px-4 py-2 rounded-md bg-gray-800 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input id="playerName" type="text" placeholder="Enter Your Name" value="${escapeHtml(appState.playerName)}" class="w-full px-4 py-2 rounded-md bg-gray-800 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <input id="playerCount" type="number" min="3" max="7" placeholder="Number of Players (3-7)" class="w-full px-4 py-2 rounded-md bg-gray-800 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <button id="createGameBtn" class="w-full py-2 px-4 rounded-md font-semibold btn-primary">Create New Game</button>
                     </div>
@@ -280,7 +280,7 @@
                             return `
                                 <div class="flex justify-between items-center p-2 rounded bg-gray-700 text-left">
                                     <div>
-                                        <span>${p.name} <span class="text-gray-400 text-sm">${playerTag}</span></span>
+                                        <span>${escapeHtml(p.name)} <span class="text-gray-400 text-sm">${playerTag}</span></span>
                                         ${rejoinCodeDisplay}
                                     </div>
                                     <div class="space-x-2">
@@ -376,7 +376,7 @@
                                     ` : `<p class="text-sm text-gray-400 italic">Picking...</p>`;
                                     return `
                                         <div class="p-3 rounded-md ${index === currentPlayerIndex ? 'highlight-turn' : 'bg-gray-700'}">
-                                            <p class="font-semibold">${index + 1}. ${player?.name || '...'} ${uid === userId ? '(You)' : ''}</p>
+                                            <p class="font-semibold">${index + 1}. ${escapeHtml(player?.name || '...')} ${uid === userId ? '(You)' : ''}</p>
                                             ${rejoinCodeDisplay}
                                             ${draftedCardHtml}
                                         </div>
@@ -485,7 +485,7 @@
                     <div class="p-4 rounded-lg bg-gray-800 border border-gray-700 text-left flex items-center space-x-4">
                         <img src="${character.imageUrl}" alt="${character.name}" class="w-16 h-auto rounded-md">
                         <div>
-                            <p class="text-lg font-semibold">${player.name}</p>
+                            <p class="text-lg font-semibold">${escapeHtml(player.name)}</p>
                             <h3 class="text-md font-bold ${getCharacterTypeColor(character.type)}">${character.name}</h3>
                             ${status}
                         </div>
@@ -583,7 +583,7 @@
                                       <div class="p-4 rounded-lg bg-gray-800 border border-gray-700 text-left flex items-center space-x-4">
                                            <img src="${character.imageUrl}" alt="${character.name}" class="w-24 h-auto rounded-md">
                                            <div>
-                                                <p class="text-xl font-semibold">${player.name} drafted:</p>
+                                                <p class="text-xl font-semibold">${escapeHtml(player.name)} drafted:</p>
                                                 <h3 class="text-2xl font-bold ${getCharacterTypeColor(character.type)}">${character.name} <span class="text-lg font-normal text-gray-400">(${character.type})</span></h3>
                                                 ${skillsHtml}
                                            </div>
@@ -691,7 +691,11 @@
                     // Check if the skill selection phase is complete to move to the finished screen
                     if (appState.gameData.gameState === 'skillSelection' && oldGameState !== 'finished') {
                         const { draftOrder, skillSelections = {} } = appState.gameData;
-                        const eligiblePlayers = draftOrder.filter(uid => !uid.startsWith('bot-')).length - 1;
+                        // The first drafter draws no starting skills. Only subtract them from the
+                        // eligible count when that first drafter is a human (it can be a bot).
+                        const humanPlayers = draftOrder.filter(uid => !uid.startsWith('bot-')).length;
+                        const firstPlayerIsHuman = draftOrder.length > 0 && !draftOrder[0].startsWith('bot-');
+                        const eligiblePlayers = humanPlayers - (firstPlayerIsHuman ? 1 : 0);
                         const selectedPlayers = Object.keys(skillSelections).filter(uid => !uid.startsWith('bot-')).length;
                         if (selectedPlayers >= eligiblePlayers) {
                             await updateDoc(getGameDocRef(appState.gameId), { gameState: 'finished' });
@@ -1035,6 +1039,15 @@
         }
         
         // --- Helper & Modal Functions ---
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
         function getCharacterTypeColor(type) {
             switch (type) {
                 case 'Military Leader': return 'text-green-400';
