@@ -5,90 +5,167 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BSG Character Draft</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        // Remap Tailwind's palette onto the BSG Setup Utility theme so the
+        // existing utility classes (bg-gray-*, text-blue-*, etc.) render in the
+        // same dark sci-fi tones used across the rest of the site.
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'Segoe UI', 'system-ui', '-apple-system', 'sans-serif'] },
+                    colors: {
+                        gray: {
+                            300: '#c3cdda', 400: '#94a3ba', 500: '#65738d',
+                            600: '#2f3a4f', 700: '#1f2839', 800: '#161d2c', 900: '#0b0e16'
+                        },
+                        blue:   { 400: '#5cb0ea', 500: '#5cb0ea', 600: '#3f7fb0', 700: '#356a93', 800: '#1d3a57' },
+                        red:    { 400: '#ff7a6f', 500: '#ef4a3d', 600: '#cf382c', 700: '#a82a20' },
+                        green:  { 400: '#5fd29a', 500: '#3fb07a', 600: '#2f7d55', 700: '#27684a' },
+                        yellow: { 400: '#e3c074', 500: '#d4a94e' },
+                        purple: { 400: '#b79bf0' },
+                        orange: { 400: '#ffa24d' },
+                        cyan:   { 400: '#5cb0ea' }
+                    }
+                }
+            }
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0a0a0a;
-            color: #e5e5e5;
+        /* ===== BSG theme — shared with the Setup Utility ===================== */
+        :root{
+            --bg:#0b0e16; --bg2:#101623;
+            --panel:rgba(22,29,44,.9); --panel2:rgba(30,39,56,.86); --panel-solid:#161d2c;
+            --line:rgba(150,172,214,.14); --line2:rgba(150,172,214,.24);
+            --text:#e4e9f2; --muted:#94a3ba; --dim:#65738d;
+            --accent:#ef4a3d; --accent-soft:#ff6f62; --accent2:#ffa24d;
+            --gold:#e3c074; --blue:#5cb0ea; --green:#5fd29a;
+            --radius:16px; --radius-sm:10px;
+            --shadow:0 10px 34px rgba(0,0,0,.34);
+            --shadow-lift:0 20px 54px rgba(0,0,0,.5);
+            --ease:cubic-bezier(.2,.7,.2,1);
         }
+        html,body{margin:0}
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: var(--text);
+            background: linear-gradient(180deg, var(--bg), var(--bg2));
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Static ambient depth: soft aurora + starfield (rasterized once, cheap) */
+        body::before{
+            content:""; position:fixed; inset:-12%; z-index:-2; pointer-events:none;
+            background:
+                radial-gradient(38% 40% at 22% 22%, rgba(239,74,61,.20), transparent 70%),
+                radial-gradient(42% 46% at 82% 18%, rgba(92,176,234,.17), transparent 72%),
+                radial-gradient(50% 52% at 66% 96%, rgba(227,192,116,.11), transparent 70%),
+                radial-gradient(30% 34% at 46% 58%, rgba(95,210,154,.08), transparent 70%);
+        }
+        body::after{
+            content:""; position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:.6;
+            background-image:
+                radial-gradient(1.2px 1.2px at 26px 38px, rgba(255,255,255,1), transparent 60%),
+                radial-gradient(1.5px 1.5px at 134px 92px, rgba(192,216,255,.95), transparent 60%),
+                radial-gradient(1px 1px at 82px 172px, rgba(255,255,255,.85), transparent 60%),
+                radial-gradient(1px 1px at 170px 40px, rgba(255,230,225,.8), transparent 60%);
+            background-size:188px 224px, 262px 262px, 206px 244px, 150px 300px;
+        }
+
+        /* Cylon scanner sweep across the top of the viewport */
+        @keyframes cylonScan{0%{transform:translateX(-130%)}100%{transform:translateX(840%)}}
+        body > #app::before{
+            content:""; position:fixed; left:0; top:0; width:13%; height:2px; z-index:40; pointer-events:none;
+            background:linear-gradient(90deg, transparent, var(--accent-soft), #fff, var(--accent-soft), transparent);
+            box-shadow:0 0 16px 3px rgba(239,74,61,.6); border-radius:2px;
+            animation:cylonScan 5.5s ease-in-out infinite alternate;
+        }
+
+        /* Brand title treatment for the home-screen heading */
+        .brand-title{
+            font-weight:800; letter-spacing:.16em;
+            background:linear-gradient(180deg,#fff,#d4dcea);
+            -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+            filter:drop-shadow(0 0 18px rgba(239,74,61,.5));
+        }
+
+        /* Glassy panels (used for screens, lobby, cards) */
         .card {
-            background-color: #1a1a1a;
-            border-width: 3px;
-            border-color: #333;
-            transition: all 0.2s ease-in-out;
+            background: linear-gradient(180deg, var(--panel), rgba(16,22,35,.78));
+            border-width: 1px;
+            border-color: var(--line);
+            box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,.06);
+            transition: transform .24s var(--ease), box-shadow .24s, border-color .24s, filter .24s;
         }
         .card:not(.disabled):hover {
             transform: translateY(-4px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            border-color: rgba(92,176,234,.45);
+            box-shadow: var(--shadow-lift), inset 0 1px 0 rgba(255,255,255,.09);
         }
         .card.disabled {
             filter: grayscale(100%);
             opacity: 0.4;
             pointer-events: none;
         }
+
         .btn-primary {
-            background-color: #007acc;
-            color: white;
+            background: linear-gradient(180deg, var(--accent), #cf382c);
+            color: white; border: 1px solid rgba(239,74,61,.7);
+            box-shadow: 0 6px 18px rgba(239,74,61,.3);
+            transition: transform .18s var(--ease), box-shadow .18s, filter .18s;
         }
-        .btn-primary:hover {
-            background-color: #005fa3;
-        }
+        .btn-primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
+        .btn-primary:active { transform: scale(.98); }
         .btn-primary:disabled {
-            background-color: #004c7a;
-            opacity: 0.6;
-            cursor: not-allowed;
+            background: var(--panel2); color: var(--muted);
+            border-color: var(--line2); box-shadow: none;
+            opacity: 0.7; cursor: not-allowed; transform: none; filter: none;
         }
         .btn-secondary {
-            background-color: #333;
-            color: white;
+            background: var(--panel2); color: var(--text);
+            border: 1px solid var(--line2);
+            transition: transform .18s var(--ease), border-color .18s, background .18s;
         }
-        .btn-secondary:hover {
-            background-color: #444;
-        }
+        .btn-secondary:hover { border-color: var(--blue); transform: translateY(-1px); }
+        .btn-secondary:active { transform: scale(.98); }
+
         .modal {
-            background-color: rgba(10, 10, 10, 0.85);
+            background-color: rgba(5, 7, 11, 0.86);
+            backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
         }
         .modal-content {
-            background-color: #1a1a1a;
+            background: linear-gradient(180deg, var(--panel-solid), #12172250);
+            border: 1px solid var(--line2);
+            box-shadow: 0 24px 70px rgba(0,0,0,.7);
         }
         .highlight-turn {
-            background-color: #007acc;
-            color: white;
+            background: linear-gradient(180deg, rgba(239,74,61,.30), rgba(239,74,61,.14));
+            border: 1px solid rgba(239,74,61,.6);
+            color: #fff; box-shadow: 0 0 0 1px rgba(239,74,61,.35) inset;
         }
         .cylon-leader-text {
-            color: #d1d5db; /* gray-300 */
-            text-shadow: 0 0 4px #ef4444, 0 0 6px #ef4444; /* red-500 glow */
+            color: #d1d5db;
+            text-shadow: 0 0 4px var(--accent), 0 0 6px var(--accent);
         }
-        .skill-checkbox {
-            display: none; /* Hide the default checkbox */
-        }
-        .skill-label {
-            border: 2px solid #4a5568; /* gray-600 */
-            padding: 0.5rem 1rem;
-            border-radius: 0.375rem; /* rounded-md */
-            cursor: pointer;
-            transition: all 0.2s ease-in-out;
-            user-select: none;
-        }
-        .skill-label:hover {
-            background-color: #2d3748; /* gray-700 */
-        }
-        .skill-checkbox:checked + .skill-label {
-            border-color: #3b82f6; /* blue-500 */
-            background-color: #1e40af; /* blue-800 */
-            color: white;
-            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
-        }
-        .skill-checkbox:disabled + .skill-label {
-            opacity: 0.5;
-            cursor: not-allowed;
-            background-color: #1a202c; /* gray-800 */
-            border-color: #2d3748; /* gray-700 */
-        }
+
+        /* +/- skill stepper buttons */
+        .skill-btn { transition: transform .15s var(--ease), filter .15s; }
+        .skill-btn:not(:disabled):hover { filter: brightness(1.15); transform: translateY(-1px); }
+        .skill-btn:not(:disabled):active { transform: scale(.94); }
         .skill-btn:disabled {
             opacity: 0.4;
             cursor: not-allowed;
+        }
+
+        /* Themed scrollbar */
+        *{ scrollbar-width: thin; scrollbar-color: var(--line2) transparent; }
+        *::-webkit-scrollbar{ width:10px; height:10px; }
+        *::-webkit-scrollbar-thumb{ background:var(--line2); border-radius:8px; }
+        *::-webkit-scrollbar-track{ background:transparent; }
+
+        @media (prefers-reduced-motion:reduce){
+            body > #app::before{ animation:none; }
         }
     </style>
     <link rel="icon" href="favicon.ico">
@@ -169,6 +246,10 @@
             playerName: localStorage.getItem('bsgPlayerName') || '',
             gameData: null,
         };
+
+        // Holds the in-progress skill-card counts so they survive re-renders
+        // (e.g. when a bot auto-selects and triggers a Firestore snapshot).
+        let pendingSkillCounts = null;
         
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
          apiKey: "AIzaSyC73JtYpZC-PIiQCQVubVIENAd2brZSES4",
@@ -219,10 +300,10 @@
         function renderHomeScreen() {
             AppContainer.innerHTML = `
                 <div class="text-center p-8 rounded-lg shadow-2xl max-w-md w-full card">
-                    <h1 class="text-4xl font-bold text-red-500 mb-2">BSG DRAFT</h1>
-                    <p class="text-gray-400 mb-6">Battlestar Galactica Character Draft</p>
+                    <h1 class="brand-title text-2xl mb-1">BATTLESTAR GALACTICA</h1>
+                    <p class="text-red-400 tracking-[0.25em] uppercase text-sm font-semibold mb-5">Character Draft</p>
                     <div class="space-y-4">
-                        <input id="playerName" type="text" placeholder="Enter Your Name" value="${appState.playerName}" class="w-full px-4 py-2 rounded-md bg-gray-800 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input id="playerName" type="text" placeholder="Enter Your Name" value="${escapeHtml(appState.playerName)}" class="w-full px-4 py-2 rounded-md bg-gray-800 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <input id="playerCount" type="number" min="3" max="7" placeholder="Number of Players (3-7)" class="w-full px-4 py-2 rounded-md bg-gray-800 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <button id="createGameBtn" class="w-full py-2 px-4 rounded-md font-semibold btn-primary">Create New Game</button>
                     </div>
@@ -280,7 +361,7 @@
                             return `
                                 <div class="flex justify-between items-center p-2 rounded bg-gray-700 text-left">
                                     <div>
-                                        <span>${p.name} <span class="text-gray-400 text-sm">${playerTag}</span></span>
+                                        <span>${escapeHtml(p.name)} <span class="text-gray-400 text-sm">${playerTag}</span></span>
                                         ${rejoinCodeDisplay}
                                     </div>
                                     <div class="space-x-2">
@@ -376,7 +457,7 @@
                                     ` : `<p class="text-sm text-gray-400 italic">Picking...</p>`;
                                     return `
                                         <div class="p-3 rounded-md ${index === currentPlayerIndex ? 'highlight-turn' : 'bg-gray-700'}">
-                                            <p class="font-semibold">${index + 1}. ${player?.name || '...'} ${uid === userId ? '(You)' : ''}</p>
+                                            <p class="font-semibold">${index + 1}. ${escapeHtml(player?.name || '...')} ${uid === userId ? '(You)' : ''}</p>
                                             ${rejoinCodeDisplay}
                                             ${draftedCardHtml}
                                         </div>
@@ -485,7 +566,7 @@
                     <div class="p-4 rounded-lg bg-gray-800 border border-gray-700 text-left flex items-center space-x-4">
                         <img src="${character.imageUrl}" alt="${character.name}" class="w-16 h-auto rounded-md">
                         <div>
-                            <p class="text-lg font-semibold">${player.name}</p>
+                            <p class="text-lg font-semibold">${escapeHtml(player.name)}</p>
                             <h3 class="text-md font-bold ${getCharacterTypeColor(character.type)}">${character.name}</h3>
                             ${status}
                         </div>
@@ -513,8 +594,15 @@
             if (!isFirstPlayer && !hasSelected && myCharacter) {
                 const skillCounts = {};
                 myCharacter.skills.forEach(skill => {
-                    skillCounts[skill] = 0;
+                    // Restore any in-progress selection so a mid-pick re-render
+                    // (e.g. a bot auto-selecting) doesn't reset the player's counts.
+                    const restored = pendingSkillCounts && typeof pendingSkillCounts[skill] === 'number'
+                        ? pendingSkillCounts[skill] : 0;
+                    skillCounts[skill] = restored;
+                    const countEl = document.getElementById(`skill-count-${skill}`);
+                    if (countEl) countEl.textContent = restored;
                 });
+                pendingSkillCounts = skillCounts;
 
                 const confirmBtn = document.getElementById('confirmSkillsBtn');
                 const feedbackEl = document.getElementById('skill-selection-feedback');
@@ -583,7 +671,7 @@
                                       <div class="p-4 rounded-lg bg-gray-800 border border-gray-700 text-left flex items-center space-x-4">
                                            <img src="${character.imageUrl}" alt="${character.name}" class="w-24 h-auto rounded-md">
                                            <div>
-                                                <p class="text-xl font-semibold">${player.name} drafted:</p>
+                                                <p class="text-xl font-semibold">${escapeHtml(player.name)} drafted:</p>
                                                 <h3 class="text-2xl font-bold ${getCharacterTypeColor(character.type)}">${character.name} <span class="text-lg font-normal text-gray-400">(${character.type})</span></h3>
                                                 ${skillsHtml}
                                            </div>
@@ -691,7 +779,11 @@
                     // Check if the skill selection phase is complete to move to the finished screen
                     if (appState.gameData.gameState === 'skillSelection' && oldGameState !== 'finished') {
                         const { draftOrder, skillSelections = {} } = appState.gameData;
-                        const eligiblePlayers = draftOrder.filter(uid => !uid.startsWith('bot-')).length - 1;
+                        // The first drafter draws no starting skills. Only subtract them from the
+                        // eligible count when that first drafter is a human (it can be a bot).
+                        const humanPlayers = draftOrder.filter(uid => !uid.startsWith('bot-')).length;
+                        const firstPlayerIsHuman = draftOrder.length > 0 && !draftOrder[0].startsWith('bot-');
+                        const eligiblePlayers = humanPlayers - (firstPlayerIsHuman ? 1 : 0);
                         const selectedPlayers = Object.keys(skillSelections).filter(uid => !uid.startsWith('bot-')).length;
                         if (selectedPlayers >= eligiblePlayers) {
                             await updateDoc(getGameDocRef(appState.gameId), { gameState: 'finished' });
@@ -962,6 +1054,7 @@
 
             try {
                 await updateDoc(getGameDocRef(appState.gameId), updates);
+                pendingSkillCounts = null;
             } catch (error) {
                 console.error("Error saving skill selection:", error);
                 alert("Could not save your selection. Please try again.");
@@ -1035,6 +1128,15 @@
         }
         
         // --- Helper & Modal Functions ---
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
         function getCharacterTypeColor(type) {
             switch (type) {
                 case 'Military Leader': return 'text-green-400';
