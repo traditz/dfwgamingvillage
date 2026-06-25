@@ -47,15 +47,16 @@
         inset: 0;
         z-index: 1;
       }
+      /* Subtle accent tint + gentle uniform dim to calm the busy cover art. */
       .bsg-tool.drafter::before {
         background:
-          radial-gradient(130% 90% at 82% 6%, rgba(227, 192, 116, 0.30), transparent 58%),
-          linear-gradient(180deg, rgba(10, 8, 4, 0.10) 0%, rgba(10, 8, 4, 0.55) 46%, rgba(6, 5, 3, 0.94) 100%);
+          radial-gradient(120% 75% at 80% 6%, rgba(231, 200, 122, 0.20), transparent 58%),
+          linear-gradient(180deg, rgba(6, 8, 12, 0.32), rgba(6, 8, 12, 0.44));
       }
       .bsg-tool.setup::before {
         background:
-          radial-gradient(130% 90% at 82% 6%, rgba(92, 176, 234, 0.32), transparent 58%),
-          linear-gradient(180deg, rgba(4, 9, 16, 0.10) 0%, rgba(4, 9, 16, 0.55) 46%, rgba(3, 6, 12, 0.94) 100%);
+          radial-gradient(120% 75% at 80% 6%, rgba(92, 176, 234, 0.22), transparent 58%),
+          linear-gradient(180deg, rgba(6, 8, 12, 0.32), rgba(6, 8, 12, 0.44));
       }
       .bsg-tool .bt-inner {
         position: absolute;
@@ -65,6 +66,15 @@
         flex-direction: column;
         justify-content: flex-end;
         padding: 18px 20px 20px;
+        /* Clean dark panel under the text — art shows as a strip up top,
+           text reads on near-solid below the cover logo. */
+        background: linear-gradient(180deg,
+          rgba(7, 9, 14, 0) 0%,
+          rgba(7, 9, 14, 0) 18%,
+          rgba(7, 9, 14, 0.72) 31%,
+          rgba(6, 8, 12, 0.96) 42%,
+          rgba(5, 7, 11, 1) 54%,
+          rgba(4, 6, 10, 1) 100%);
       }
       .bsg-tool .bt-icon {
         align-self: flex-start;
@@ -86,7 +96,7 @@
         letter-spacing: 0.05em;
         text-transform: uppercase;
         line-height: 1.04;
-        text-shadow: 0 2px 12px rgba(0, 0, 0, 0.75);
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
       }
       .bsg-tool .bt-accentbar {
         width: 46px;
@@ -163,7 +173,7 @@
                     </span>
                     <span class="bt-title">Character<br>Drafter</span>
                     <span class="bt-accentbar"></span>
-                    <span class="bt-sub">Deal out characters fairly and pick a balanced crew for your table.</span>
+                    <span class="bt-sub">A fair, balanced character draft for your table.</span>
                     <span class="bt-cta">Open Drafter <span class="arrow">&rarr;</span></span>
                 </span>
             </a>
@@ -179,7 +189,7 @@
                     </span>
                     <span class="bt-title">Setup &amp;<br>Reference</span>
                     <span class="bt-accentbar"></span>
-                    <span class="bt-sub">Exact setup steps, loyalty deck and rules for your chosen expansions and modules.</span>
+                    <span class="bt-sub">Exact setup, loyalty deck &amp; rules for your game.</span>
                     <span class="bt-cta">Open Utility <span class="arrow">&rarr;</span></span>
                 </span>
             </a>
