@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Battlestar Galactica — Setup Utility</title>
+  <link rel="stylesheet" href="css/styles.css?v=38">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-bsg">BATTLESTAR GALACTICA</span>
+      <span class="brand-sub">Setup Utility</span>
+    </div>
+    <p class="tagline">Every setup, every expansion combination — clean instructions &amp; rule diagrams.</p>
+  </header>
+
+  <main>
+    <!-- Configurator -->
+    <section class="config">
+      <div class="cfg-group">
+        <label class="cfg-label">Expansions on the table</label>
+        <div id="expansions" class="chips"></div>
+      </div>
+      <div class="cfg-group">
+        <label class="cfg-label">Players</label>
+        <div id="players" class="pbtns"></div>
+      </div>
+      <div class="cfg-group grow">
+        <label class="cfg-label">Optional modules to include <span class="hint">(only selected modules appear in setups)</span></label>
+        <div id="options" class="chips"></div>
+      </div>
+    </section>
+
+    <!-- Gallery -->
+    <section class="gallery-wrap">
+      <div class="section-head">
+        <h2>Possible Setups</h2>
+        <span id="galleryCount" class="count"></span>
+      </div>
+      <div id="gallery" class="gallery"></div>
+    </section>
+
+    <!-- Detail -->
+    <section id="detail" class="detail"></section>
+  </main>
+
+  <footer class="footer">
+    Setup content grounded in the official Battlestar Galactica rulebooks (Base, Pegasus, Exodus, Daybreak).
+    A fan-made play aid — not affiliated with the publisher.
+  </footer>
+
+  <script src="js/data.js?v=38"></script>
+  <script src="js/app.js?v=38"></script>
+</body>
+</html>
