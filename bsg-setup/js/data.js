@@ -216,17 +216,17 @@ BSG.setup = [
   { ph: 1, exp: "base", t: "Determine First Player", src: "Base p.5 · v4.4 p.3",
     d: "Randomly choose the first player and give them the current player token. They choose a character first and take the first turn." },
 
-  { ph: 1, exp: "base", t: "Choose & Place Characters", src: "Base p.5 · v4.4 p.3",
-    d: "Clockwise from the first player, each chooses a character of the most plentiful type (political leader, military leader, or pilot; support characters are unrestricted). Take the sheet, token and piloting token if any; place the token on the location named on the sheet." },
-
   { ph: 1, exp: "pegasus", t: "Add Pegasus Characters", when: c => c.has("pegasus"), src: "Pegasus p.6 · v4.4 p.7",
-    d: "Add the 7 Pegasus character sheets (including Cylon Leaders) to the available pool." },
+    d: "Before anyone chooses, add the 7 Pegasus character sheets (including Cylon Leaders) to the available pool." },
 
   { ph: 1, exp: "exodus", t: "Add Exodus Characters", when: c => c.has("exodus"), src: "Exodus p.5 · v4.4 p.9",
-    d: "Add the 4 Exodus character sheets and tokens (with piloting token) to the pool." },
+    d: "Before anyone chooses, add the 4 Exodus character sheets and tokens (with piloting token) to the pool." },
 
   { ph: 1, exp: "daybreak", t: "Add Daybreak Characters", when: c => c.has("daybreak"), src: "Daybreak p.4–5 · v4.4 p.12",
-    d: "Add the Daybreak character sheets. These include alternate versions of Lee, Zarek, Helo and Baltar — only one version of each may be in play, but count both versions when judging the most plentiful type." },
+    d: "Before anyone chooses, add the Daybreak character sheets. These include alternate versions of Lee, Zarek, Helo and Baltar — only one version of each may be in play, but count both versions when judging the most plentiful type." },
+
+  { ph: 1, exp: "base", t: "Choose & Place Characters", src: "Base p.5 · v4.4 p.3",
+    d: "With all expansion characters now in the pool, clockwise from the first player each chooses a character of the most plentiful type (political leader, military leader, or pilot; support characters are unrestricted). Take the sheet, token and piloting token if any; place the token on the location named on the sheet." },
 
   { ph: 1, exp: "daybreak", t: "Miracle Tokens", when: c => c.has("daybreak"), src: "Daybreak p.4 · v4.4 p.12",
     d: "Give each player 1 miracle token, placed on their character sheet after they choose. Remaining tokens form a supply pile." },
