@@ -574,13 +574,33 @@ body::after{ animation:none; opacity:.65; }        /* static starfield */
 .rs-hint{ margin:4px 0; font-size:.86rem; color:var(--dim) }
 .rs-count{ font:700 .72rem/1 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--gold); opacity:.85 }
 .rs-item{
-  padding:11px 13px; background:rgba(11,14,22,.55);
+  background:rgba(11,14,22,.55);
   border:1px solid var(--line); border-left:3px solid var(--blue); border-radius:var(--radius-sm);
+  overflow:hidden;
 }
+.rs-sum{
+  list-style:none; cursor:pointer; display:block; padding:11px 13px;
+  transition:background .15s var(--ease);
+}
+.rs-sum::-webkit-details-marker{ display:none }
+.rs-sum:hover{ background:rgba(92,176,234,.07) }
 .rs-meta{ display:flex; align-items:center; gap:8px; margin-bottom:5px }
 .rs-page{ font:700 .74rem var(--mono); color:var(--gold); letter-spacing:.02em }
-.rs-snip{ font-size:.86rem; line-height:1.5; color:var(--text) }
-.rs-snip mark{ background:rgba(227,192,116,.30); color:#fff; padding:0 2px; border-radius:3px }
+.rs-toggle{
+  margin-left:auto; font:700 .68rem var(--sans); letter-spacing:.08em; text-transform:uppercase;
+  color:var(--blue); white-space:nowrap;
+}
+.rs-toggle::after{ content:" ▾"; font-size:.8em }
+.rs-item[open] .rs-toggle::after{ content:" ▴" }
+.rs-snip{ font-size:.86rem; line-height:1.5; color:var(--muted) }
+.rs-item[open] .rs-snip{ display:none }
+.rs-full{
+  padding:4px 14px 14px; border-top:1px solid var(--line);
+  background:rgba(7,10,16,.5); font-size:.87rem; line-height:1.6; color:var(--text);
+}
+.rs-full p{ margin:11px 0 0 }
+.rs-full p:first-child{ margin-top:8px }
+.rs-snip mark, .rs-full mark{ background:rgba(227,192,116,.32); color:#fff; padding:0 2px; border-radius:3px }
 
 /* --- Reckless reference --- */
 .panel.reckless h3{ display:flex; align-items:center; gap:9px; flex-wrap:wrap }

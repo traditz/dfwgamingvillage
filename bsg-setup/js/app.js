@@ -321,23 +321,37 @@ function buildSearchPanel(c) {
 function _escHtml(s) { return s.replace(/[&<>]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[ch])); }
 function _escReg(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
 
-function _snippet(text, words) {
-  const lt = text.toLowerCase();
-  let i = lt.indexOf(words[0]);
+/* Escape a string for HTML, then highlight every occurrence of `phrase`. */
+function _hl(s, phrase) {
+  s = _escHtml(s);
+  if (phrase) s = s.replace(new RegExp("(" + _escReg(phrase) + ")", "gi"), "<mark>$1</mark>");
+  return s;
+}
+
+/* A short preview window centred on the phrase (from the flattened page text). */
+function _snippet(flat, phrase) {
+  const lt = flat.toLowerCase();
+  let i = lt.indexOf(phrase);
   if (i < 0) i = 0;
   const start = Math.max(0, i - 70);
-  const end = Math.min(text.length, i + 200);
-  let s = (start > 0 ? "… " : "") + text.slice(start, end) + (end < text.length ? " …" : "");
-  s = _escHtml(s);
-  words.forEach(w => { s = s.replace(new RegExp("(" + _escReg(w) + ")", "gi"), "<mark>$1</mark>"); });
-  return s;
+  const end = Math.min(flat.length, i + phrase.length + 170);
+  const s = (start > 0 ? "… " : "") + flat.slice(start, end) + (end < flat.length ? " …" : "");
+  return _hl(s, phrase);
+}
+
+/* The full page, rendered as paragraphs with the phrase highlighted. */
+function _fullPassage(text, phrase) {
+  return text.split("\n").map(p => `<p>${_hl(p, phrase)}</p>`).join("");
 }
 
 function bsgSearch(q) {
   const box = document.getElementById("rules-results");
   if (!box) return;
-  q = (q || "").trim().toLowerCase();
-  if (q.length < 2) { box.innerHTML = `<p class="rs-hint">Type at least 2 characters to search.</p>`; return; }
+  // Phrase search: the whole query must appear contiguously (so "cylon leader"
+  // matches only where those words sit together, not pages with "cylon" and
+  // "leadership" far apart).
+  const phrase = (q || "").trim().toLowerCase().replace(/\s+/g, " ");
+  if (phrase.length < 2) { box.innerHTML = `<p class="rs-hint">Type at least 2 characters to search.</p>`; return; }
   if (!BSG.rulesIndex) { box.innerHTML = `<p class="rs-hint">Loading rulebook index…</p>`; return; }
 
   const active = new Set((BSG._searchCtx || { exps: ["base"] }).exps);
@@ -346,21 +360,22 @@ function bsgSearch(q) {
     const inPlay = s.chain.filter(e => active.has(e));
     return inPlay.length ? inPlay[inPlay.length - 1] : null;
   });
-  const words = q.split(/\s+/).filter(Boolean);
   const prec = BSG.precedence;
   const results = [];
 
   for (const e of BSG.rulesIndex) {
     if (!active.has(e.x)) continue;
-    const lt = e.t.toLowerCase();
-    if (!words.every(w => lt.includes(w))) continue;
+    const flat = e.t.replace(/\n/g, " ");
+    const lt = flat.toLowerCase();
+    const pos = lt.indexOf(phrase);
+    if (pos < 0) continue;
     let suppressed = false;
     for (let k = 0; k < BSG.rulesSuppress.length; k++) {
       const s = BSG.rulesSuppress[k], g = gov[k];
       if (g && e.x !== g && s.chain.includes(e.x) && s.kw.some(kw => lt.includes(kw))) { suppressed = true; break; }
     }
     if (suppressed) continue;
-    results.push({ e, pos: lt.indexOf(words[0]) });
+    results.push({ e, flat, pos });
   }
   results.sort((a, b) => (prec[b.e.x] - prec[a.e.x]) || (a.pos - b.pos));
   const top = results.slice(0, 30);
@@ -368,12 +383,15 @@ function bsgSearch(q) {
   if (!top.length) { box.innerHTML = `<p class="rs-hint">No matches in the rulebooks for this setup. Try a different term.</p>`; return; }
   box.innerHTML =
     `<div class="rs-count">${results.length} result${results.length > 1 ? "s" : ""}${results.length > top.length ? ` · showing ${top.length}` : ""}</div>` +
-    top.map(({ e }) => {
+    top.map(({ e, flat }) => {
       const m = BSG.expMeta[e.x];
-      return `<div class="rs-item">
-          <div class="rs-meta"><span class="etag ${m.cls}">${m.name}</span> <span class="rs-page">${e.b} · p.${e.p}</span></div>
-          <div class="rs-snip">${_snippet(e.t, words)}</div>
-        </div>`;
+      return `<details class="rs-item">
+          <summary class="rs-sum">
+            <div class="rs-meta"><span class="etag ${m.cls}">${m.name}</span> <span class="rs-page">${e.b} · p.${e.p}</span><span class="rs-toggle">Full passage</span></div>
+            <div class="rs-snip">${_snippet(flat, phrase)}</div>
+          </summary>
+          <div class="rs-full">${_fullPassage(e.t, phrase)}</div>
+        </details>`;
     }).join("");
 }
 
