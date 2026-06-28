@@ -4,15 +4,40 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Arkham Horror (2nd Edition) — Setup Utility</title>
-  <link rel="stylesheet" href="css/styles.css?v=2">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Special+Elite&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=3">
 </head>
 <body>
   <header class="topbar">
-    <div class="brand">
-      <span class="brand-ah">ARKHAM HORROR</span>
-      <span class="brand-sub">Setup Utility · 2nd Edition</span>
+    <div class="topbar-inner">
+      <span class="sigil" aria-hidden="true">
+        <svg viewBox="0 0 100 100">
+          <defs>
+            <radialGradient id="sg-glow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#9fd45c" stop-opacity="0.55"/>
+              <stop offset="100%" stop-color="#9fd45c" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <circle cx="50" cy="50" r="46" fill="url(#sg-glow)"/>
+          <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.7"/>
+          <circle cx="50" cy="50" r="44" fill="none" stroke="currentColor" stroke-width="0.8" opacity="0.4"/>
+          <!-- elder-sign style five-point star -->
+          <path d="M50 12 L61 41 L92 41 L67 60 L77 90 L50 71 L23 90 L33 60 L8 41 L39 41 Z"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          <!-- watching eye -->
+          <ellipse cx="50" cy="52" rx="14" ry="8" fill="none" stroke="currentColor" stroke-width="1.6"/>
+          <circle cx="50" cy="52" r="4.4" fill="currentColor"/>
+        </svg>
+      </span>
+      <div class="brand">
+        <span class="brand-ah">Arkham Horror</span>
+        <span class="deco-rule"><i></i><b></b><i></i></span>
+        <span class="brand-sub">Setup &amp; Reference Almanac · Second Edition</span>
+      </div>
+      <p class="tagline">Choose your expansions &amp; modules — and receive clean setup rites, rules &amp; location references, and a searchable grimoire of the rulebooks. The FAQ always wins.</p>
     </div>
-    <p class="tagline">Pick your expansions &amp; modules — get clean setup steps, rules &amp; location references, and a searchable rulebook. The FAQ always wins.</p>
   </header>
 
   <main>
