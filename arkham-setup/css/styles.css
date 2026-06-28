@@ -22,16 +22,18 @@
   --shadow:0 14px 40px rgba(0,0,0,.5);
   --shadow-lift:0 22px 60px rgba(0,0,0,.62);
   --ease:cubic-bezier(.2,.7,.2,1);
-  --display:"Cinzel","Trajan Pro",Georgia,serif;
-  --serif:"EB Garamond","Hoefler Text",Georgia,"Times New Roman",serif;
-  --type:"Special Elite","Courier New",ui-monospace,monospace;
-  --mono:var(--type); --sans:var(--serif);
+  --logo:"Cinzel",Georgia,serif;                      /* decorative — logo & main headline only */
+  --display:Georgia,Cambria,"Times New Roman",serif;  /* readable serif — section headings, labels, chips */
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; /* body & dense text */
+  --serif:var(--sans);                                /* legacy alias: body text is now sans */
+  --type:ui-monospace,"SF Mono","Consolas","Liberation Mono",monospace; /* citations & meta */
+  --mono:var(--type);
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth; scroll-padding-top:96px}
 html,body{margin:0}
 body{
-  font-family:var(--serif); color:var(--text); line-height:1.6; font-size:17px;
+  font-family:var(--sans); color:var(--text); line-height:1.6; font-size:16px;
   -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
   background:var(--bg); min-height:100vh; position:relative;
 }
@@ -92,7 +94,7 @@ body::after{
 .sigil svg{width:100%; height:100%}
 .brand{display:flex; flex-direction:column; gap:6px; align-items:flex-start}
 .brand-ah{
-  font-family:var(--display); font-weight:800; font-size:2.05rem; letter-spacing:.1em; line-height:1;
+  font-family:var(--logo); font-weight:800; font-size:2.05rem; letter-spacing:.1em; line-height:1;
   color:var(--gold-bright);
   background:linear-gradient(180deg,#f6eccf 0%,#d8b45c 55%,#a9842f 100%);
   -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
@@ -195,7 +197,7 @@ main{max-width:1180px; margin:0 auto; padding:30px 28px 70px}
   background:linear-gradient(180deg,var(--gold-bright),var(--gold-deep)); box-shadow:0 0 12px rgba(201,164,76,.4);
 }
 .dh-mode{
-  font-family:var(--display); font-size:1.9rem; font-weight:800; letter-spacing:.04em; line-height:1.1;
+  font-family:var(--logo); font-size:1.9rem; font-weight:800; letter-spacing:.04em; line-height:1.1;
   color:var(--gold-bright);
   background:linear-gradient(180deg,#f6eccf,#c9a44c); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
 }
