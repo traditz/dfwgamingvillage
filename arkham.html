@@ -28,19 +28,30 @@
         position: relative;
         display: block;
         width: min(100%, 380px);
-        aspect-ratio: 4 / 3;
+        aspect-ratio: 16 / 11;
         border-radius: 16px;
         overflow: hidden;
         text-decoration: none;
         color: #fff;
         border: 1px solid rgba(255, 255, 255, 0.12);
-        background-image: url("images/arkham-cover.svg");
+        background-image: url("images/arkhamhorror2ndbox.webp");
         background-size: cover;
-        background-position: center 38%;
+        background-position: center top;
         box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
         transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
         isolation: isolate;
         --bt-accent: #7cae3f;
+      }
+      /* Same shading treatment as the BSG "Setup & Reference" button:
+         a subtle accent tint in the top-right + an even dim over the cover art. */
+      .ah-tool::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        background:
+          radial-gradient(120% 75% at 80% 6%, rgba(124, 174, 63, 0.22), transparent 58%),
+          linear-gradient(180deg, rgba(6, 8, 6, 0.32), rgba(6, 8, 6, 0.44));
       }
       .ah-tool .bt-inner {
         position: absolute;
@@ -50,12 +61,15 @@
         flex-direction: column;
         justify-content: flex-end;
         padding: 18px 20px 20px;
+        /* matches the BSG button: art shows as a strip up top, text reads on
+           near-solid dark below the cover logo. */
         background: linear-gradient(180deg,
-          rgba(5, 8, 6, 0) 0%,
-          rgba(5, 8, 6, 0) 40%,
-          rgba(5, 8, 6, 0.72) 62%,
-          rgba(4, 6, 5, 0.96) 80%,
-          rgba(3, 5, 4, 1) 100%);
+          rgba(6, 8, 6, 0) 0%,
+          rgba(6, 8, 6, 0) 18%,
+          rgba(6, 8, 6, 0.72) 31%,
+          rgba(5, 7, 5, 0.96) 42%,
+          rgba(4, 6, 4, 1) 54%,
+          rgba(3, 5, 3, 1) 100%);
       }
       .ah-tool .bt-title {
         margin: 0;
