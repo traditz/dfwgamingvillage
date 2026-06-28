@@ -243,16 +243,26 @@ function buildFaq(c) {
 
 /* ---- Player-count reference table ---------------------------------------- */
 function buildReference(c) {
+  const eff = AH.playerRef.effectivePlayers(state.players, c.boardCount);
+  const dunInn = c.has("dunwich") && c.has("innsmouth");
   const rows = [];
   for (let p = 1; p <= 8; p++) {
-    const cls = p === state.players ? ' class="ref-active"' : "";
-    rows.push(`<tr${cls}><td>${p}</td><td>${AH.playerRef.monsterLimit(p)}</td><td>${AH.playerRef.outskirtsLimit(p)}</td></tr>`);
+    const cls = p === eff ? ' class="ref-active"' : "";
+    const gates = AH.playerRef.gatesToAwaken(p) + (dunInn ? 1 : 0);
+    rows.push(`<tr${cls}><td>${p}</td><td>${AH.playerRef.monsterLimit(p)}</td><td>${AH.playerRef.outskirtsLimit(p)}</td><td>${gates}</td></tr>`);
   }
+  const effNote = c.boardCount >= 2
+    ? `<p class="ref-callout">You have <b>${state.players}</b> investigators across <b>${c.boardCount}</b> expansion boards, so most in-game numbers use an <b>effective ${eff} player${eff === 1 ? "" : "s"}</b> (−1 per board beyond the first). The highlighted row reflects that — when counting successes against the Ancient One, use the full ${state.players}.</p>`
+    : "";
+  const dunInnNote = dunInn
+    ? `<p class="ref-callout">Dunwich + Innsmouth together: the “gates to awaken” column already includes the +1.</p>`
+    : "";
   return `<div class="reference"><h3>Reference Table</h3>
       <div class="legend">Core numbers for your game. ${AH.playerRef.src}.</div>
+      ${effNote}${dunInnNote}
       <div class="ref-grid">
         <table class="ref-table">
-          <thead><tr><th>Investigators</th><th>Monster limit</th><th>Outskirts limit</th></tr></thead>
+          <thead><tr><th>Investigators</th><th>Monster limit</th><th>Outskirts limit</th><th>Gates to awaken</th></tr></thead>
           <tbody>${rows.join("")}</tbody>
         </table>
         <ul class="ref-notes">${AH.playerRef.notes.map(n => `<li>${n}</li>`).join("")}</ul>

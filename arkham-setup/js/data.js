@@ -163,6 +163,10 @@ AH.setup = [
     d: "Place the Innsmouth board above Downtown with the Deep Ones Rising track on the Other Worlds side. Place the 2 Aquatic markers on the Arkham board’s River Docks and Unvisited Isle, and set the uprising tokens beside the Innsmouth board." },
   { ph: 0, exp: "base", t: "Arrange multiple expansion boards", when: c => c.boardCount >= 2, src: "Innsmouth p.5 · Kingsport p.5",
     d: "With more than one expansion board, place them all above the Arkham board, lining up their Other Worlds / track edges along a single edge. It doesn’t matter which board sits closest to Arkham." },
+  { ph: 0, exp: "kingsport", t: "Reduce the effective player count (multiple boards)", when: c => c.boardCount >= 2, src: "Kingsport/Dunwich/Innsmouth ‘Combining Expansions’",
+    d: "For each expansion board beyond the first, count the number of players as <b>one less</b> for all in-game effects — monster limit, Outskirts limit, gates-to-awaken, and clue/monster counts — <b>except</b> when counting successes against the Ancient One. The Reference Table below shows your effective player count." },
+  { ph: 0, exp: "dunwich", t: "Extra gate to awaken (Dunwich + Innsmouth)", when: c => c.has("dunwich") && c.has("innsmouth"), src: "Dunwich/Innsmouth ‘Combining Expansions’",
+    d: "When the Dunwich and Innsmouth boards are used together, increase the number of open gates required to awaken the Ancient One by one." },
 
   { ph: 0, exp: "curse", t: "Place the Ancient Whispers & Patrol markers", when: c => c.has("curse"), src: "Curse p.2",
     d: "Put the Ancient Whispers marker on the Miskatonic University street area and set the Patrol markers beside the board." },
@@ -285,7 +289,7 @@ AH.setup = [
     d: "Each player places their investigator marker on the location named in their sheet’s ‘Home’ area. Remove all unused investigator sheets/markers and unused Ancient One sheets from play." },
 
   { ph: 4, exp: "base", t: "Draw & resolve the first Mythos card", src: "Core p.5 (step 14)",
-    d: "The first player draws the top Mythos card and resolves it as a Mythos Phase: a gate and monster appear at the indicated unstable location, a clue may appear, and monsters move. If a Rumor is drawn, discard it and draw again until you get a non-Rumor." },
+    d: "The first player draws the top Mythos card and resolves it as a Mythos Phase: a gate and monster appear at the indicated unstable location, a clue may appear, and monsters move. If a Rumor — or any Mythos card with no gate — is drawn, discard it and draw again until a gate-opening card comes up." },
   { ph: 4, exp: "dunwich", t: "First Mythos with 5+ players", when: c => (c.has("dunwich") || c.has("kingsport")) && c.p >= 5, src: "Dunwich p.4 · Kingsport p.5 (step 14)",
     d: "With five or more players, place TWO monsters on the gate indicated by the first Mythos card instead of one." },
   { ph: 4, exp: "base", t: "Place the first doom token", src: "Core p.5 (step 14)",
@@ -294,14 +298,19 @@ AH.setup = [
 
 /* ---- Player-count reference: monster limit & Outskirts (Core p.18) -------- */
 AH.playerRef = {
-  src: "Core Rulebook p.18 · Miskatonic Player Reference sheets",
-  monsterLimit: p => p + 3,          // monsters allowed in Arkham at once
+  src: "Core Rulebook p.18, p.20 · Miskatonic Player Reference sheets",
+  monsterLimit: p => p + 3,                 // monsters allowed in Arkham at once
   outskirtsLimit: p => Math.max(0, 8 - p),  // max monsters in the Outskirts
+  gatesToAwaken: p => p <= 2 ? 8 : p <= 4 ? 7 : p <= 6 ? 6 : 5,  // open gates that awaken the Ancient One
+  // Effective player count for in-game effects: −1 per expansion board beyond the first.
+  effectivePlayers: (p, boards) => Math.max(1, p - Math.max(0, boards - 1)),
   notes: [
     "<b>Monster limit</b> = players + 3 (monsters moving in Arkham / the Sky). Reaching it sends new monsters to the Outskirts.",
-    "<b>Outskirts limit</b> = 8 − players. When the Outskirts overflow, they empty and the terror level rises by 1.",
+    "<b>Outskirts limit</b> = 8 − players. When the Outskirts hold more than this, they empty and the terror level rises by 1.",
+    "<b>Gates to awaken</b> the Ancient One: 8 at 1–2 players, 7 at 3–4, 6 at 5–6, 5 at 7–8 (also on the Ancient One sheet). The Ancient One also awakens if the doom track fills, the gate/monster supply runs out, or certain tracks fill.",
+    "<b>Multiple boards:</b> for each expansion board beyond the first, treat the player count as one lower for all of the above (but not when counting successes against the Ancient One).",
+    "<b>Dunwich + Innsmouth together:</b> add 1 to the gates-to-awaken number.",
     "If the <b>terror level reaches 10</b>, Arkham is overrun: the monster limit is removed and the Outskirts are no longer used.",
-    "The <b>number of open gates that awakens the Ancient One</b> depends on player count (and how many expansion boards are in play). It is printed on the Ancient One sheet and the Miskatonic Player Reference sheet — confirm it for your game.",
     "Monsters on an <b>expansion board</b> (Dunwich / Kingsport / Innsmouth) do not count against the monster limit and never go to the Outskirts."
   ]
 };
@@ -348,10 +357,29 @@ AH.howToPlay = {
   core: [
     { h: "The Game Turn", items: [
       "Each turn has five phases, resolved by every player in clockwise order from the first player: <b>I Upkeep</b> · <b>II Movement</b> · <b>III Arkham Encounters</b> · <b>IV Other World Encounters</b> · <b>V Mythos</b>. The First Player marker then passes left.",
-      "<b>I Upkeep:</b> refresh exhausted cards, perform card upkeep actions (Retainer, Bank Loan, Bless/Curse rolls — no roll the first turn you gain them), then adjust skill sliders up to your Focus.",
-      "<b>II Movement:</b> in Arkham, spend movement points (= Speed) along yellow lines; in an Other World, move to the next area or return to Arkham.",
-      "<b>III & IV Encounters:</b> in an Arkham location, draw that location’s encounter; in an Other World, resolve a Gate-card encounter for the world you are in.",
-      "<b>V Mythos:</b> the first player draws one Mythos card — a gate & monster open at an unstable location, a clue may appear, monsters move, and the card’s event resolves."
+      "<b>I Upkeep:</b> refresh exhausted cards, perform card upkeep actions (Retainer, Bank Loan, Bless/Curse rolls — no roll the first turn you gain them), then adjust skill sliders a number of stops up to your Focus.",
+      "<b>II Movement:</b> in Arkham, spend movement points (= Speed) along yellow lines; in an Other World, move from the left area to the right, or from the right area back to a matching gate in Arkham. You must evade or fight monsters when you leave, enter, or stay in their area.",
+      "<b>III & IV Encounters:</b> in an Arkham location, use its special ability or draw that location’s encounter; if you’re on a gate you’ve Explored, you may try to close it. In an Other World, draw Gate cards until the colour matches and resolve that entry.",
+      "<b>V Mythos:</b> the first player draws one Mythos card — a gate & monster open at an unstable location (or a monster surge if it already has a gate), a clue may appear, monsters move, and the card’s event (Headline / Environment / Rumor) resolves."
+    ]},
+
+    { h: "Skill Checks", items: [
+      "Roll a number of dice equal to the relevant <b>skill ± the modifier</b> on the card/effect. Each <b>5 or 6</b> is a success (<b>Blessed</b>: 4–6; <b>Cursed</b>: 6 only). If skill − modifier is 0 or less, the check automatically fails.",
+      "The <b>difficulty</b> is the number of successes needed (default 1). Partial successes only matter where a card says so.",
+      "After any check (pass or fail) you may spend <b>Clue tokens</b> one at a time — each gives one extra die, and you get the die even if modifiers had dropped you below 0 dice."
+    ]},
+
+    { h: "Encounters — Evade & Combat", items: [
+      "<b>Evade</b> a monster with a Sneak check modified by its <b>Awareness</b> (upper-right). Pass → you may move on or stay; fail → lose Stamina equal to the icons and begin combat. Multiple monsters are evaded one at a time.",
+      "<b>Combat</b> is one <b>Horror check</b> first (Will, modified by the monster’s <b>Horror</b> rating, lower-left; fail → lose Sanity), then each round choose <b>Flee</b> (an Evade check) or <b>Fight</b>.",
+      "<b>Fight</b> = a Combat check (Fight, modified by the monster’s <b>Combat</b> rating, lower-right) with difficulty equal to its <b>Toughness</b>. Use weapons/spells up to <b>2 hand icons</b>. Pass → take the monster as a trophy; fail → lose Stamina equal to the icons, then choose Flee/Fight again.",
+      "<b>Cast a spell</b> by paying its Sanity cost and making a Lore check at the spell’s casting modifier; on a fail it has no effect but still uses its hands."
+    ]},
+
+    { h: "Health, Madness & Being Devoured", items: [
+      "If <b>Sanity or Stamina hits 0</b>: discard half your items (round down), half your Clues, and all Retainers, then restore that track to 1. In Arkham you go to Arkham Asylum (Sanity) or St. Mary’s Hospital (Stamina); in an Other World you are Lost in Time and Space. No encounters that turn.",
+      "If <b>both</b> tracks are 0 at once, or either maximum is reduced to 0, the investigator is <b>devoured</b>: discard everything except unspent trophies and draw a new investigator.",
+      { t: "<b>Injuries & Madness</b> (Dunwich): instead of discarding items, you may draw an <b>Injury</b> card (0 Stamina) or <b>Madness</b> card (0 Sanity) and restore that track to full — you keep your items but still move to the hospital/asylum/Lost. With <b>2+</b> Injury/Madness cards you may retire. (Miskatonic Horror: holding an Injury and its matching Madness — or vice-versa — devours you.)", when: c => c.has("dunwich"), tag: c => c.has("miskatonic") ? "miskatonic" : "dunwich" }
     ]},
     { h: "Gates, Closing & Sealing", items: [
       "When a gate opens on you, you are drawn to the matching Other World and <b>delayed</b>. After exploring, return to the gate’s location and make the listed Lore or Fight check to <b>close</b> it (take a Gate trophy).",
@@ -362,12 +390,14 @@ AH.howToPlay = {
       "<b>Monster limit</b> = players + 3. A new monster over the limit goes to the <b>Outskirts</b> instead.",
       "<b>Outskirts limit</b> = 8 − players. When the Outskirts overflow, return those monsters to the cup and raise the terror level by 1.",
       "Raising the <b>terror level</b> closes shops and drives away Allies; at terror 10 Arkham is overrun (no monster limit, Outskirts unused).",
-      { t: "<b>Monster surge:</b> when a Mythos card opens a gate at a location that already has an open gate, a monster appears at every open-gate location instead. Several expansion cards key off surges.", when: c => c.has("dunwich") || c.boardCount >= 1, tag: "dunwich" },
+      { t: "<b>Monster surge:</b> when the Mythos card’s gate location already has an open gate, monsters appear equal to the <b>greater of</b> (open gates, players), divided evenly among all open gates (no gate gets more than the number on the Mythos card). Overflow goes to the Outskirts.", tag: "faq" },
       { t: "Monsters on an <b>expansion board</b> never count against the monster limit and never go to the Outskirts.", when: c => c.boardCount >= 1, tag: "dunwich" }
     ]},
     { h: "Winning & Losing", items: [
-      "<b>Investigators win</b> by sealing enough gates (the number on the Ancient One sheet), by closing every gate while at least one is sealed, or by defeating the Ancient One in the final battle.",
-      "<b>They lose</b> if the doom track fills (the Ancient One awakens) and it then defeats them, or via certain ‘instant loss’ effects.",
+      "<b>Close the Gates:</b> the moment a player closes the <b>last</b> open gate on the board, the investigators win — provided their unspent <b>Gate trophies</b> (including the one just closed) total at least the number of players.",
+      "<b>Seal the Gates:</b> the investigators win immediately when there are <b>6 or more Elder Sign tokens</b> on the board.",
+      "<b>Banish the Ancient One:</b> if it awakens, the investigators can still win by defeating it in the final battle.",
+      "The <b>Ancient One awakens</b> (→ final battle, usually a loss) if the doom track fills, too many gates are open at once (see the Reference Table), the gate or monster supply runs out, or — with some expansions — a track such as Deep Ones Rising fills.",
       { t: "If the Ancient One awakens, the <b>Epic Battle</b> variant replaces the standard final battle with a deck of Epic Battle cards and Ancient One Plot cards (not with Azathoth).", when: c => c.mod("epicBattle"), tag: "kingsport" }
     ]}
   ],

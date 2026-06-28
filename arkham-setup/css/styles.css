@@ -210,6 +210,9 @@ main{max-width:1180px; margin:0 auto; padding:26px 28px 64px}
 .ref-table td{font-variant-numeric:tabular-nums; color:var(--text)}
 .ref-table tr.ref-active td{background:rgba(124,174,63,.14); color:#fff; font-weight:700}
 .ref-table tr.ref-active td:first-child{border-left:3px solid var(--accent)}
+.ref-callout{margin:0 0 12px; padding:10px 14px; font-size:.86rem; line-height:1.5; color:var(--text);
+  background:rgba(216,180,92,.08); border:1px solid rgba(216,180,92,.3); border-radius:var(--radius-sm)}
+.ref-callout b{color:#fff}
 .ref-notes{margin:0; padding-left:18px; display:flex; flex-direction:column; gap:8px; color:var(--muted); font-size:.86rem; line-height:1.5}
 .ref-notes b{color:var(--text)}
 .ref-notes li::marker{color:var(--gold)}
