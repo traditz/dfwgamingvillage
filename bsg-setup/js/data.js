@@ -663,3 +663,20 @@ BSG.locations = [
   { b: "rebel", n: "Datastream", a: "Discard a Miracle Token or a Super Crisis card to search 1 Skill deck and its discard pile and take any 3 cards; then shuffle the discard pile into the deck." },
   { b: "rebel", n: "Raider Bay", a: "Discard a Miracle Token or a Super Crisis card to choose a space area; place either 2 raiders or 4 unmanned vipers in that area and activate them." },
 ];
+
+/* ---- Reckless skill checks (Daybreak) — focused rules reference ---------- */
+/* Source: Daybreak rulebook p.10 (Treachery / Reckless) & p.16. Shown only
+   when Daybreak is in play; its Treachery deck governs Reckless checks. */
+BSG.reckless = {
+  when: c => c.has("daybreak"),
+  src: "Daybreak p.10 · p.16",
+  intro: "Some Daybreak Treachery cards and character abilities can make a skill check <b>Reckless</b>. A Reckless check is resolved as normal, then gets an extra Treachery consequence based on the next card's strength:",
+  outcomes: [
+    { k: "Strength > 0", t: "Discard that Treachery card and continue resolving the check. Do <b>not</b> resolve its skill-check ability, and do <b>not</b> include its strength in the total." },
+    { k: "Strength = 0", t: "Turn the <b>next</b> Treachery card faceup as well. Resolve the skill-check abilities on <b>both</b> cards (even if that ability already resolved during this check), then discard both. Do <b>not</b> include either card's strength in the total." }
+  ],
+  notes: [
+    "<b>‘Restore Order’ timing:</b> if a ‘Restore Order’ card is played before a check, that check cannot then be made Reckless; likewise ‘Restore Order’ cannot be played before a check that has already been made Reckless. If two or more players want to play a card at once, the current player chooses who goes first.",
+    "Reckless only applies while a Treachery deck is in play. With both Pegasus and Daybreak, use the Daybreak Treachery deck (and these Daybreak rulings)."
+  ]
+};

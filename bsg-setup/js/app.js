@@ -157,7 +157,7 @@ function renderDetail() {
   const { tags } = configTitle(config);
 
   // Compose the ordered setup procedure for this configuration.
-  let html = `<div class="detail-head">
+  const headHtml = `<div class="detail-head">
       <button class="share-btn" onclick="copyShareLink(this)" title="Copy a link that reopens this exact setup">🔗 Copy setup link</button>
       <div class="dh-mode">${obj.name}</div>
       <p class="dh-desc">${obj.description}</p>
@@ -178,6 +178,31 @@ function renderDetail() {
     cyl: cylonLeaderInPlay
   };
 
+  // Active rulebooks for this setup (drives the search scope + suppression).
+  BSG._searchCtx = { exps: ["base", "pegasus", "exodus", "daybreak"].filter(expEnabled) };
+
+  // --- Config-aware section list for the jump-nav ---
+  const faqItems = BSG.faq.filter(f => !f.when || f.when(c));
+  const hasReckless = BSG.reckless.when(c);
+  const hasSetupDiag = BSG.diagrams.some(d => d.group === "setup" && d.when(c));
+  const navItems = [
+    ["sec-search", "🔍 Search"],
+    ["sec-setup", "Setup Steps"],
+    ["sec-loyalty", "Loyalty Deck"],
+    ["sec-howto", "How to Play"],
+    hasReckless ? ["sec-reckless", "Reckless"] : null,
+    ["sec-locations", "Locations"],
+    faqItems.length ? ["sec-faq", "FAQ"] : null,
+    hasSetupDiag ? ["sec-setupdiag", "Setup Diagrams"] : null,
+    ["sec-charts", "Reference Charts"]
+  ].filter(Boolean);
+  const navHtml = `<nav class="jump-nav" aria-label="Jump to section">${
+    navItems.map(([id, label]) => `<a href="#${id}" class="jn">${label}</a>`).join("")
+  }</nav>`;
+  const searchHtml = buildSearchPanel(c);
+
+  let html = "";
+
   // Resolve the merged, precedence-aware step list (only applicable rulings).
   const steps = BSG.setup.filter(s => !s.when || s.when(c));
 
@@ -197,7 +222,7 @@ function renderDetail() {
         }).join("")}</ol>
       </section>`;
   });
-  html += `<div class="legend">Each step is tagged with the expansion it comes from and cites its rulebook source (official page · v4.4 reference page). Where a newer expansion supersedes an older rule, only the newest version is shown.</div>`;
+  html += `<div class="legend" id="sec-setup">Each step is tagged with the expansion it comes from and cites its rulebook source (official page · v4.4 reference page). Where a newer expansion supersedes an older rule, only the newest version is shown.</div>`;
   html += `<div class="steps">${blocks}</div>`;
 
   // Loyalty deck panel — exact composition for THIS setup.
@@ -219,7 +244,7 @@ function renderDetail() {
       ? (L.motive ? `Cylon Leader in play: they draw <b>Motive cards</b> (no Agenda, no Sympathizer).`
                   : L.agenda ? `Cylon Leader in play: deal one random <b>${L.agenda} Agenda</b> card (no Sympathizer).` : "")
       : "";
-  html += `<div class="panel loyalty">
+  html += `<div class="panel loyalty" id="sec-loyalty">
       <h3>Loyalty Deck — ${state.players} players${L.cl ? " + Cylon Leader" : ""}
           <span class="etag ${gm.cls}">${gm.name} chart</span></h3>
       ${L.valid ? `<div class="loy-total">Deal a <b>${L.total}-card</b> Loyalty deck:</div>
@@ -238,11 +263,14 @@ function renderDetail() {
     </div>`;
 
   // How to Play — rules reference for this mode + active modules.
-  html += buildHowToPlay(c, obj);
+  html += `<div id="sec-howto">${buildHowToPlay(c, obj)}</div>`;
+
+  // Reckless skill checks (Daybreak) — focused rules reference.
+  if (hasReckless) html += buildReckless(c);
 
   // Location reference (boards in play) + contextual FAQ.
-  html += buildLocations(c);
-  html += buildFaq(c);
+  html += `<div id="sec-locations">${buildLocations(c)}</div>`;
+  if (faqItems.length) html += `<div id="sec-faq">${buildFaq(c)}</div>`;
 
   // Diagrams & charts relevant to THIS setup only.
   const relevant = BSG.diagrams.filter(d => d.when(c));
@@ -251,15 +279,102 @@ function renderDetail() {
   const setupD = relevant.filter(d => d.group === "setup");
   const refD   = relevant.filter(d => d.group === "reference");
   if (setupD.length)
-    html += `<div class="diagrams"><h3>Setup Diagrams</h3><div class="diag-grid">${figHtml(setupD)}</div></div>`;
+    html += `<div class="diagrams" id="sec-setupdiag"><h3>Setup Diagrams</h3><div class="diag-grid">${figHtml(setupD)}</div></div>`;
 
   // Combined combat reference (always) + other reference charts.
-  html += `<div class="diagrams"><h3>Reference Charts</h3>`;
+  html += `<div class="diagrams" id="sec-charts"><h3>Reference Charts</h3>`;
   html += buildCombatChart(c);
   if (refD.length) html += `<div class="diag-grid">${figHtml(refD)}</div>`;
   html += `</div>`;
 
-  wrap.innerHTML = html;
+  wrap.innerHTML = headHtml + navHtml + searchHtml + html;
+  syncTopbarHeight();   // dock the new sticky nav + set section scroll offsets
+}
+
+/* Reckless skill checks (Daybreak) — focused rules reference. */
+function buildReckless(c) {
+  const r = BSG.reckless;
+  return `<section class="panel reckless" id="sec-reckless">
+      <h3>Reckless Skill Checks <span class="etag e-day">Daybreak</span></h3>
+      <p class="rk-intro">${r.intro}</p>
+      <ul class="rk-outcomes">${r.outcomes.map(o =>
+        `<li><span class="rk-k">${o.k}</span><span class="rk-t">${o.t}</span></li>`).join("")}</ul>
+      <ul class="rk-notes">${r.notes.map(n => `<li>${n}</li>`).join("")}</ul>
+      <div class="src">${r.src}</div>
+    </section>`;
+}
+
+/* Rulebook search panel — the input + (initially empty) results area. */
+function buildSearchPanel(c) {
+  const books = ["base", "pegasus", "exodus", "daybreak"].filter(expEnabled).map(e => BSG.expMeta[e].name);
+  return `<section class="rules-search" id="sec-search">
+      <h3>Search the Rulebooks</h3>
+      <p class="rs-sub">Searches the ${books.join(", ")} rulebook${books.length > 1 ? "s" : ""} for this setup — each result cites the rulebook and page, and newer expansions supersede older rules. (The v4.4 combined reference is intentionally excluded.)</p>
+      <input type="search" id="rules-q" class="rs-input" placeholder="Search a rule, keyword or component…" oninput="bsgSearch(this.value)" autocomplete="off" spellcheck="false">
+      <div id="rules-results" class="rs-results"><p class="rs-hint">Type at least 2 characters to search.</p></div>
+    </section>`;
+}
+
+/* ---- Live rulebook search -------------------------------------------------
+   Scopes to the rulebooks in play, suppresses superseded versions of curated
+   conflict topics (newest in-play book governs), cites book + page. --------- */
+function _escHtml(s) { return s.replace(/[&<>]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[ch])); }
+function _escReg(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+
+function _snippet(text, words) {
+  const lt = text.toLowerCase();
+  let i = lt.indexOf(words[0]);
+  if (i < 0) i = 0;
+  const start = Math.max(0, i - 70);
+  const end = Math.min(text.length, i + 200);
+  let s = (start > 0 ? "… " : "") + text.slice(start, end) + (end < text.length ? " …" : "");
+  s = _escHtml(s);
+  words.forEach(w => { s = s.replace(new RegExp("(" + _escReg(w) + ")", "gi"), "<mark>$1</mark>"); });
+  return s;
+}
+
+function bsgSearch(q) {
+  const box = document.getElementById("rules-results");
+  if (!box) return;
+  q = (q || "").trim().toLowerCase();
+  if (q.length < 2) { box.innerHTML = `<p class="rs-hint">Type at least 2 characters to search.</p>`; return; }
+  if (!BSG.rulesIndex) { box.innerHTML = `<p class="rs-hint">Loading rulebook index…</p>`; return; }
+
+  const active = new Set((BSG._searchCtx || { exps: ["base"] }).exps);
+  // Governing expansion per suppression topic (chain is precedence-ascending).
+  const gov = BSG.rulesSuppress.map(s => {
+    const inPlay = s.chain.filter(e => active.has(e));
+    return inPlay.length ? inPlay[inPlay.length - 1] : null;
+  });
+  const words = q.split(/\s+/).filter(Boolean);
+  const prec = BSG.precedence;
+  const results = [];
+
+  for (const e of BSG.rulesIndex) {
+    if (!active.has(e.x)) continue;
+    const lt = e.t.toLowerCase();
+    if (!words.every(w => lt.includes(w))) continue;
+    let suppressed = false;
+    for (let k = 0; k < BSG.rulesSuppress.length; k++) {
+      const s = BSG.rulesSuppress[k], g = gov[k];
+      if (g && e.x !== g && s.chain.includes(e.x) && s.kw.some(kw => lt.includes(kw))) { suppressed = true; break; }
+    }
+    if (suppressed) continue;
+    results.push({ e, pos: lt.indexOf(words[0]) });
+  }
+  results.sort((a, b) => (prec[b.e.x] - prec[a.e.x]) || (a.pos - b.pos));
+  const top = results.slice(0, 30);
+
+  if (!top.length) { box.innerHTML = `<p class="rs-hint">No matches in the rulebooks for this setup. Try a different term.</p>`; return; }
+  box.innerHTML =
+    `<div class="rs-count">${results.length} result${results.length > 1 ? "s" : ""}${results.length > top.length ? ` · showing ${top.length}` : ""}</div>` +
+    top.map(({ e }) => {
+      const m = BSG.expMeta[e.x];
+      return `<div class="rs-item">
+          <div class="rs-meta"><span class="etag ${m.cls}">${m.name}</span> <span class="rs-page">${e.b} · p.${e.p}</span></div>
+          <div class="rs-snip">${_snippet(e.t, words)}</div>
+        </div>`;
+    }).join("");
 }
 
 /* How to Play — mode rules + core loop + active-module rules.
@@ -405,4 +520,22 @@ function copyShareLink(btn) {
 }
 
 function renderAll() { renderConfigurator(); renderGallery(); renderDetail(); syncUrl(); }
-document.addEventListener("DOMContentLoaded", () => { decodeState(); renderAll(); initLightbox(); });
+
+/* Dock the sticky jump-nav just under the (variable-height) topbar, and offset
+   anchored sections so the topbar + nav never cover their heading. Concrete px
+   values are applied directly (more reliable than a CSS var across engines). */
+function syncTopbarHeight() {
+  const bar = document.querySelector(".topbar");
+  if (!bar) return;
+  const h = bar.offsetHeight;
+  document.documentElement.style.setProperty("--topbar-h", h + "px");
+  const nav = document.querySelector(".jump-nav");
+  if (nav) nav.style.top = h + "px";
+  const off = h + (nav ? nav.offsetHeight : 56) + 12;
+  document.querySelectorAll('[id^="sec-"]').forEach(s => { s.style.scrollMarginTop = off + "px"; });
+}
+document.addEventListener("DOMContentLoaded", () => {
+  decodeState(); renderAll(); initLightbox();
+  syncTopbarHeight();
+  window.addEventListener("resize", syncTopbarHeight, { passive: true });
+});

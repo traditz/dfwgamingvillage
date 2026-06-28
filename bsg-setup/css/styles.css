@@ -535,3 +535,74 @@ body::after{ animation:none; opacity:.65; }        /* static starfield */
 
 @media (max-width:760px){ .loc-grid{columns:1} }
 @media (max-width:560px){ .share-btn{float:none; display:inline-block; margin-bottom:10px} }
+
+/* ===================== JUMP NAV / SEARCH / RECKLESS (v40) ================== */
+/* Sticky in-page navigation so players reach a section without scrolling. */
+.jump-nav{
+  position:sticky; top:var(--topbar-h,84px); z-index:25;
+  display:flex; flex-wrap:wrap; gap:8px;
+  margin:0 0 18px; padding:11px 12px;
+  background:var(--panel-solid); border:1px solid var(--line2);
+  border-radius:var(--radius-sm); box-shadow:0 6px 18px rgba(0,0,0,.35);
+}
+.jump-nav .jn{
+  font:600 .82rem/1 var(--sans); color:var(--text); text-decoration:none;
+  padding:7px 11px; border-radius:var(--radius-pill);
+  background:rgba(150,172,214,.08); border:1px solid var(--line);
+  white-space:nowrap; transition:border-color .15s var(--ease), background .15s var(--ease), transform .15s var(--ease);
+}
+.jump-nav .jn:hover,.jump-nav .jn:focus-visible{ border-color:var(--gold); background:rgba(227,192,116,.12); transform:translateY(-1px) }
+/* Offset anchored sections so the sticky topbar + nav don't cover their heading. */
+[id^="sec-"]{ scroll-margin-top:calc(var(--topbar-h,84px) + 64px) }
+
+/* --- Rulebook search --- */
+.rules-search{
+  margin:0 0 22px; padding:18px 18px 20px;
+  background:var(--panel); border:1px solid var(--line2); border-radius:var(--radius);
+}
+.rules-search h3{ margin:0 0 6px; color:var(--gold); letter-spacing:.03em }
+.rs-sub{ margin:0 0 12px; font-size:.84rem; color:var(--muted); line-height:1.45 }
+.rs-input{
+  width:100%; box-sizing:border-box; padding:12px 14px;
+  font:500 .98rem var(--sans); color:var(--text);
+  background:var(--bg); border:1px solid var(--line2); border-radius:var(--radius-sm);
+  outline:none; transition:border-color .15s var(--ease), box-shadow .15s var(--ease);
+}
+.rs-input:focus{ border-color:var(--blue); box-shadow:0 0 0 3px rgba(92,176,234,.18) }
+.rs-input::placeholder{ color:var(--dim) }
+.rs-results{ margin-top:14px; display:flex; flex-direction:column; gap:10px }
+.rs-hint{ margin:4px 0; font-size:.86rem; color:var(--dim) }
+.rs-count{ font:700 .72rem/1 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--gold); opacity:.85 }
+.rs-item{
+  padding:11px 13px; background:rgba(11,14,22,.55);
+  border:1px solid var(--line); border-left:3px solid var(--blue); border-radius:var(--radius-sm);
+}
+.rs-meta{ display:flex; align-items:center; gap:8px; margin-bottom:5px }
+.rs-page{ font:700 .74rem var(--mono); color:var(--gold); letter-spacing:.02em }
+.rs-snip{ font-size:.86rem; line-height:1.5; color:var(--text) }
+.rs-snip mark{ background:rgba(227,192,116,.30); color:#fff; padding:0 2px; border-radius:3px }
+
+/* --- Reckless reference --- */
+.panel.reckless h3{ display:flex; align-items:center; gap:9px; flex-wrap:wrap }
+.rk-intro{ margin:0 0 12px; font-size:.9rem; line-height:1.5; color:var(--text) }
+.rk-outcomes{ list-style:none; margin:0 0 12px; padding:0; display:flex; flex-direction:column; gap:9px }
+.rk-outcomes li{ display:flex; gap:11px; align-items:flex-start; font-size:.86rem; line-height:1.5 }
+.rk-k{
+  flex:0 0 auto; min-width:104px; text-align:center;
+  font:700 .76rem var(--mono); letter-spacing:.02em; color:#16120a;
+  background:linear-gradient(180deg,#ffd45a,var(--gold)); border-radius:var(--radius-pill);
+  padding:5px 10px; margin-top:1px;
+}
+.rk-t{ color:var(--text) }
+.rk-notes{ margin:0; padding-left:18px; display:flex; flex-direction:column; gap:7px; font-size:.84rem; line-height:1.5; color:var(--muted) }
+.rk-notes b{ color:var(--text) }
+
+@media (max-width:600px){
+  .jump-nav{ top:0; padding:9px 10px; gap:6px }
+  .jump-nav .jn{ font-size:.78rem; padding:6px 9px }
+  .rk-outcomes li{ flex-direction:column; gap:4px }
+  .rk-k{ min-width:0; align-self:flex-start }
+}
+@media (prefers-reduced-motion:reduce){
+  .jump-nav .jn{ transition:none }
+}
