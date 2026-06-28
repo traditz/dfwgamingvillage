@@ -309,7 +309,7 @@ function buildSearchPanel(c) {
   const books = ["base", "pegasus", "exodus", "daybreak"].filter(expEnabled).map(e => BSG.expMeta[e].name);
   return `<section class="rules-search" id="sec-search">
       <h3>Search the Rulebooks</h3>
-      <p class="rs-sub">Searches the ${books.join(", ")} rulebook${books.length > 1 ? "s" : ""} for this setup — each result cites the rulebook and page, and newer expansions supersede older rules. (The v4.4 combined reference is intentionally excluded.)</p>
+      <p class="rs-sub">Searches the ${books.join(", ")} rulebook${books.length > 1 ? "s" : ""}, the official FFG <b>FAQ &amp; Errata</b>, and a community <b>Unofficial FAQ</b> — scoped to this setup. Each result cites its source; newer expansions supersede older rules, official sources rank above unofficial, and you can expand any result for the full passage. (The v4.4 combined reference is intentionally excluded.)</p>
       <input type="search" id="rules-q" class="rs-input" placeholder="Search a rule, keyword or component…" oninput="bsgSearch(this.value)" autocomplete="off" spellcheck="false">
       <div id="rules-results" class="rs-results"><p class="rs-hint">Type at least 2 characters to search.</p></div>
     </section>`;
@@ -369,25 +369,35 @@ function bsgSearch(q) {
     const lt = flat.toLowerCase();
     const pos = lt.indexOf(phrase);
     if (pos < 0) continue;
-    let suppressed = false;
-    for (let k = 0; k < BSG.rulesSuppress.length; k++) {
-      const s = BSG.rulesSuppress[k], g = gov[k];
-      if (g && e.x !== g && s.chain.includes(e.x) && s.kw.some(kw => lt.includes(kw))) { suppressed = true; break; }
+    // Suppress superseded rulebook rules only — FAQ / errata are never hidden.
+    if (!e.s) {
+      let suppressed = false;
+      for (let k = 0; k < BSG.rulesSuppress.length; k++) {
+        const s = BSG.rulesSuppress[k], g = gov[k];
+        if (g && e.x !== g && s.chain.includes(e.x) && s.kw.some(kw => lt.includes(kw))) { suppressed = true; break; }
+      }
+      if (suppressed) continue;
     }
-    if (suppressed) continue;
     results.push({ e, flat, pos });
   }
-  results.sort((a, b) => (prec[b.e.x] - prec[a.e.x]) || (a.pos - b.pos));
-  const top = results.slice(0, 30);
+  // Official sources first (rulebooks + FFG FAQ), unofficial BGG last; then newest expansion.
+  results.sort((a, b) => {
+    const ua = a.e.s === "u" ? 1 : 0, ub = b.e.s === "u" ? 1 : 0;
+    return (ua - ub) || (prec[b.e.x] - prec[a.e.x]) || (a.pos - b.pos);
+  });
+  const top = results.slice(0, 40);
 
-  if (!top.length) { box.innerHTML = `<p class="rs-hint">No matches in the rulebooks for this setup. Try a different term.</p>`; return; }
+  if (!top.length) { box.innerHTML = `<p class="rs-hint">No matches in the rulebooks or FAQ for this setup. Try a different term.</p>`; return; }
   box.innerHTML =
     `<div class="rs-count">${results.length} result${results.length > 1 ? "s" : ""}${results.length > top.length ? ` · showing ${top.length}` : ""}</div>` +
     top.map(({ e, flat }) => {
       const m = BSG.expMeta[e.x];
-      return `<details class="rs-item">
+      const loc = e.s === "u" ? e.sec : "p." + e.p;
+      const badge = e.s === "u" ? `<span class="rs-badge rs-unofficial">Unofficial</span>`
+                  : e.s === "f" ? `<span class="rs-badge rs-faq">FAQ · Errata</span>` : "";
+      return `<details class="rs-item${e.s === "u" ? " is-unofficial" : ""}">
           <summary class="rs-sum">
-            <div class="rs-meta"><span class="etag ${m.cls}">${m.name}</span> <span class="rs-page">${e.b} · p.${e.p}</span><span class="rs-toggle">Full passage</span></div>
+            <div class="rs-meta"><span class="etag ${m.cls}">${m.name}</span>${badge} <span class="rs-page">${e.b} · ${loc}</span><span class="rs-toggle">Full passage</span></div>
             <div class="rs-snip">${_snippet(flat, phrase)}</div>
           </summary>
           <div class="rs-full">${_fullPassage(e.t, phrase)}</div>
@@ -451,6 +461,7 @@ function buildFaq(c) {
   const items = BSG.faq.filter(f => !f.when || f.when(c));
   if (!items.length) return "";
   return `<div class="faq"><h3>FAQ — Rulings for This Setup</h3>
+      <p class="faq-note">Key rulings for this configuration are below. The complete official FFG <b>FAQ &amp; Errata</b> (updated 3-5-15) and a community <b>Unofficial FAQ</b> are fully searchable in <a href="#sec-search">Search the Rulebooks</a> above.</p>
       <div class="faq-list">${
         items.map(f => `<details class="faq-item"><summary>${f.q}</summary><div class="faq-a">${f.a}</div></details>`).join("")
       }</div></div>`;

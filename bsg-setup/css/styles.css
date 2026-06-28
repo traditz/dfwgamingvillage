@@ -626,3 +626,18 @@ body::after{ animation:none; opacity:.65; }        /* static starfield */
 @media (prefers-reduced-motion:reduce){
   .jump-nav .jn{ transition:none }
 }
+
+/* ----- Search source badges + FAQ note (v42) ----- */
+.rs-badge{
+  font:700 .6rem var(--mono); letter-spacing:.06em; text-transform:uppercase;
+  padding:2px 7px; border-radius:var(--radius-pill); white-space:nowrap;
+}
+.rs-badge.rs-faq{ color:#16120a; background:linear-gradient(180deg,#ffd45a,var(--gold)) }
+.rs-badge.rs-unofficial{ color:var(--muted); background:rgba(150,172,214,.12); border:1px solid var(--line2) }
+.rs-item.is-unofficial{ border-left-color:var(--dim) }
+.rs-item.is-unofficial .rs-page{ color:var(--muted) }
+.faq-note{
+  margin:0 0 14px; font-size:.84rem; line-height:1.5; color:var(--muted);
+}
+.faq-note a{ color:var(--blue); text-decoration:none; border-bottom:1px dotted rgba(92,176,234,.5) }
+.faq-note a:hover{ border-bottom-style:solid }

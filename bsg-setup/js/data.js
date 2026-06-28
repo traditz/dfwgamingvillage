@@ -237,8 +237,8 @@ BSG.setup = [
   { ph: 1, exp: "pegasus", t: "Cylon Leader (Pegasus rules)", when: c => c.opt("cylonLeaders") && c.has("pegasus") && !c.has("daybreak"), src: "Pegasus p.10–11 · FAQ",
     d: "One player may take a Cylon Leader with a Hostile or Sympathetic Agenda (drawn per player count). A Cylon Leader draws only <b>2</b> Skill cards at the start of the game (from their own skill set), not 3. Never in a 3-player game." },
 
-  { ph: 1, exp: "base", t: "Distribute Title Cards", src: "Base p.5 · v4.4 p.3",
-    d: "President → first available of Roslin, Zarek, Baltar. Admiral → first available of Adama, Tigh, Helo. The Admiral takes the 2 nuke tokens; the President shuffles the Quorum deck and draws 1 Quorum card." },
+  { ph: 1, exp: "base", t: "Distribute Title Cards", src: "Base p.5/p.28 · FAQ errata (3-5-15)",
+    d: "President → first available of <b>Roslin, Baltar, Zarek</b> (corrected by the official FAQ/errata — rulebook p.5 misprinted this order). Admiral → first available of Adama, Tigh, Helo. The Admiral takes the 2 nuke tokens; the President shuffles the Quorum deck and draws 1 Quorum card." },
 
   { ph: 1, exp: "pegasus", t: "New Caprica Title Cards", when: c => c.obj === "newCaprica", src: "Pegasus p.6",
     d: "Use the Pegasus President and Admiral Title cards in place of the core Title cards." },
@@ -532,6 +532,8 @@ BSG.howToPlay = {
 /* ---- Contextual FAQ — official rulings, surfaced for the active setup ---- */
 /* q/a are concise paraphrases of the official BSG FAQ. when: (c)=>bool. */
 BSG.faq = [
+  { q: "What is the President line of succession? (rulebook misprint)",
+    a: "Roslin → Baltar → Zarek. The base rulebook p.5 printed this in the wrong order; the official FAQ/errata corrects it to match p.28: <b>Laura Roslin, Gaius Baltar, Tom Zarek</b>." },
   { q: "Multiple Cylon-ship activation icons on one Crisis card?",
     a: "Resolve each one separately, in left-to-right order." },
   { q: "Can a die roll end up above 8 or below 1?",
