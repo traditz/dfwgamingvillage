@@ -252,8 +252,6 @@ function renderTeams() {
 function teamCard(t) {
   const special = (t.special || []).map(sp =>
     `<div class="sp-rule"><b>${esc(sp.name)}</b> — ${esc(sp.text)}</div>`).join("");
-  const stars = (t.stars && t.stars[0] && t.stars[0] !== "—")
-    ? `<div class="tc-stars"><span class="lbl">Hall of Famers</span> ${t.stars.map(s => `<span class="starname">${esc(s)}</span>`).join("")}</div>` : "";
   return `<article class="team-card">
       <div class="tc-top">
         <div class="tc-icon"><img loading="lazy" src="images/teams/${t.id}.png" alt="${esc(t.name)} emblem"></div>
@@ -264,14 +262,9 @@ function teamCard(t) {
         </div>
       </div>
       <p class="tc-blurb">${esc(t.blurb)}</p>
-      <div class="tc-facts">
-        ${fact("Active since", t.since)}${fact("Location", t.location)}${fact("Stadium", t.stadium)}${fact("Coach", t.coach)}
-      </div>
       ${special ? `<div class="tc-special">${special}</div>` : ""}
-      ${stars}
     </article>`;
 }
-const fact = (k, v) => v && v !== "Unknown" ? `<span class="fact"><span class="fk">${k}</span><span class="fv">${esc(v)}</span></span>` : "";
 
 /* ---- Tabs & boot --------------------------------------------------------- */
 function renderAll() { renderConfig(); renderSetup(); }

@@ -236,17 +236,9 @@ main{max-width:1180px; margin:0 auto; padding:22px clamp(14px,4vw,40px) 64px}
 .tc-sub{font-size:12px; color:var(--ink2); margin:3px 0 6px}
 .tc-sub .race{font-weight:700; color:var(--gold)}
 .tc-blurb{font-size:13px; color:var(--ink2); margin:0}
-.tc-facts{display:flex; flex-wrap:wrap; gap:6px}
-.fact{display:inline-flex; flex-direction:column; background:var(--panel2); border:1px solid var(--line);
-  border-radius:7px; padding:5px 9px; min-width:84px}
-.fk{font-size:9px; letter-spacing:.8px; text-transform:uppercase; color:var(--muted)}
-.fv{font-size:12px; color:var(--ink); font-weight:600}
 .tc-special{display:flex; flex-direction:column; gap:6px; border-top:1px dashed var(--line2); padding-top:9px}
 .sp-rule{font-size:12px; color:var(--ink2)}
 .sp-rule b{color:var(--leg)}
-.tc-stars{font-size:11px; color:var(--muted); border-top:1px dashed var(--line2); padding-top:8px; display:flex; flex-wrap:wrap; gap:5px; align-items:center}
-.tc-stars .lbl{font-size:9px; letter-spacing:.8px; text-transform:uppercase}
-.starname{background:var(--panel2); border:1px solid var(--line); border-radius:5px; padding:2px 7px; color:var(--ink2); font-size:11px}
 
 /* ---- Footer -------------------------------------------------------------- */
 .footer{max-width:1180px; margin:0 auto; padding:22px clamp(14px,4vw,40px) 40px;
