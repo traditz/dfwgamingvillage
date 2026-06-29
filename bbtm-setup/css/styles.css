@@ -169,6 +169,7 @@ main{max-width:1180px; margin:0 auto; padding:22px clamp(14px,4vw,40px) 64px}
   border:1px solid var(--line); border-radius:9px; padding:11px 13px}
 .skill-icon{flex:none; width:48px; height:48px; border-radius:50%; object-fit:cover;
   background:#e8e2d2; border:2px solid var(--gold-d); box-shadow:0 2px 7px rgba(0,0,0,.4)}
+.skill-icon.slash{display:grid; place-items:center; font-size:24px; font-weight:900; color:var(--gold-d); font-style:italic}
 .skill-body{flex:1; min-width:0}
 .skill-body .dt{display:block; margin-top:4px}
 

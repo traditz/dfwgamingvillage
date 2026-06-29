@@ -167,7 +167,12 @@ function renderReference() {
   // Winner & payouts
   h += `<section class="ref-card" id="${R.winner.id}"><h2>${R.winner.title}</h2><p class="ref-intro">${R.winner.intro}</p>
     <ul class="bullet">${R.winner.bullets.map(b => `<li>${esc(b)}</li>`).join("")}</ul>
-    <h4>Payout icons</h4><ul class="def-list">${R.winner.icons.map(i => `<li><span class="dk">${esc(i.k)}</span><span class="dt">${esc(i.t)}</span></li>`).join("")}</ul></section>`;
+    <h4>Payout icons</h4><ul class="skill-list">${R.winner.icons.map(i =>
+      `<li class="skill-row">
+        ${i.icon ? `<img class="skill-icon" loading="lazy" src="images/payouts/${i.icon}.png" alt="${esc(i.k)} payout icon">`
+                 : `<span class="skill-icon slash">/</span>`}
+        <div class="skill-body"><span class="dk">${esc(i.k)}</span> ${i.tag ? srcTag(i.tag) : ""}<div class="dt">${esc(i.t)}</div></div>
+      </li>`).join("")}</ul></section>`;
 
   // Mechanics
   h += `<section class="ref-card" id="${R.mechanics.id}"><h2>${R.mechanics.title}</h2>

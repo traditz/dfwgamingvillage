@@ -486,12 +486,12 @@ BBTM.reference = {
       "Fans are gained immediately; cards go facedown into your improvement pile."
     ],
     icons:[
-      { k:"Fan", t:"Gain one fan per icon (turn the scoreboard dials)." },
-      { k:"Star Player", t:"Draw one from your subdivision per icon, draft one, return the rest to the bottom of the deck." },
-      { k:"Team Upgrade", t:"Draw one per icon, keep one, return the rest to the bottom." },
-      { k:"Staff Upgrade", t:"Draw one per icon, keep one, return the rest to the bottom." },
+      { k:"Fan", icon:"fan", t:"Gain one fan per icon (turn the scoreboard dials)." },
+      { k:"Star Player", icon:"star-player", t:"Draw one from your subdivision per icon, draft one, return the rest to the bottom of the deck." },
+      { k:"Team Upgrade", icon:"team-upgrade", t:"Draw one per icon, keep one, return the rest to the bottom." },
+      { k:"Staff Upgrade", icon:"staff-upgrade", t:"Draw one per icon, keep one, return the rest to the bottom." },
       { k:"Either / Or", t:"A central payout split by a slash — the winner chooses one of the listed rewards." },
-      { k:"Contract", t:"(Sudden Death) Draw a facedown Contract token per icon; reveal and score its fans only at the end of the game." }
+      { k:"Contract", icon:"contract", tag:"sudden", t:"(Sudden Death) Draw a facedown Contract token per icon; reveal and score its fans only at the end of the game." }
     ]
   },
 
