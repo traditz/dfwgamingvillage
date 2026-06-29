@@ -274,75 +274,184 @@ function buildSearchPanel(c) {
   const books = AH.expansions.filter(e => expEnabled(e.id)).map(e => AH.expMeta[e.id].name).concat(["FAQ"]);
   return `<section class="rules-search" id="sec-search">
       <h3>Search the Rulebooks &amp; FAQ</h3>
-      <p class="rs-sub">Searches the ${books.join(", ")} for this setup — each result cites the source and page. The FAQ corrects the rulebooks, so its rulings sort to the top.</p>
-      <input type="search" id="rules-q" class="rs-input" placeholder="Search a rule, keyword or component…" oninput="ahSearch(this.value)" autocomplete="off" spellcheck="false">
-      <div id="rules-results" class="rs-results"><p class="rs-hint">Type at least 2 characters to search.</p></div>
+      <p class="rs-sub">Searches the ${books.join(", ")} for this setup — type keywords <i>or ask a plain question</i> (“how do I seal a gate?”). Results are ranked by relevance; each cites its source and page, and the FAQ &amp; Errata is weighted above the rulebooks it corrects. Expand any result for the full passage.</p>
+      <input type="search" id="rules-q" class="rs-input" placeholder="Ask a question, or search a rule or component…" oninput="ahSearch(this.value)" autocomplete="off" spellcheck="false">
+      <div id="rules-results" class="rs-results"><p class="rs-hint">Type a few words — or ask a question.</p></div>
     </section>`;
 }
 
 function _escHtml(s) { return s.replace(/[&<>]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[ch])); }
 function _escReg(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
-function _hl(s, phrase) {
-  s = _escHtml(s);
-  if (phrase) s = s.replace(new RegExp("(" + _escReg(phrase) + ")", "gi"), "<mark>$1</mark>");
+
+/* ---- Smart search: BM25 relevance + stop-words + light stemming + synonyms.
+   Fully client-side (no API): handles natural-language questions while keeping
+   precise multi-word term matching. ----------------------------------------- */
+const _STOP = new Set(("a an the and or but if then of to in on for from with as at by be is are was were " +
+  "do does did can could should would will may might must have has had this that these those it its it's i you " +
+  "he she they we me my your our their what when where which who whom why how whats hows than into over under " +
+  "about yours during while there here not no yes get got make use using used such per each any all some many much " +
+  "you're i'm we're they're do i").split(" "));
+
+/* Arkham vocabulary map so plain questions hit the right rules. Keys and values
+   are in the (plural-normalised) form the stemmer below produces. */
+const _SYN = {
+  gate: ["portal", "dimensional", "vortex", "rift", "open"], portal: ["gate"], rift: ["gate", "kingsport"], vortex: ["gate", "monster"],
+  seal: ["elder", "sign", "close"], elder: ["sign", "seal"], sign: ["elder", "seal"], close: ["seal", "gate", "trophy"],
+  monster: ["creature", "cup", "spawn"], creature: ["monster"], spawn: ["monster", "riot"],
+  doom: ["track", "awaken", "ancient"], ancient: ["doom", "awaken", "old", "one"], awaken: ["doom", "ancient", "final", "battle"],
+  investigator: ["character", "player"], character: ["investigator"],
+  sanity: ["horror", "mad", "insane", "will"], horror: ["sanity", "will"], mad: ["sanity", "insane", "injury"],
+  stamina: ["health", "combat", "wound"], health: ["stamina"],
+  clue: ["token", "seal"], token: ["clue", "marker"],
+  terror: ["track", "level"], level: ["terror"],
+  mythos: ["card", "phase"], phase: ["turn", "upkeep", "movement", "encounter"],
+  combat: ["fight", "attack", "weapon"], fight: ["combat"], attack: ["combat"],
+  evade: ["sneak", "flee"], sneak: ["evade"], flee: ["evade"],
+  spell: ["cast", "magic", "lore"], cast: ["spell"], weapon: ["item", "hand", "fight"], item: ["weapon", "common", "unique", "exhibit"],
+  ally: ["companion"], herald: ["sheet"], guardian: ["sheet", "nodens", "hypnos", "bast"], institution: ["sheet"],
+  corruption: ["cult", "goat"], cult: ["corruption", "membership"],
+  outskirt: ["monster", "limit"], limit: ["outskirt", "monster"],
+  upkeep: ["phase", "refresh"], movement: ["move", "speed"], focus: ["skill", "slider"],
+  skill: ["check", "slider", "focus"], check: ["skill", "dice", "difficulty"],
+  trophy: ["close", "spend"], devour: ["dead", "eliminate"],
+  arrest: ["jail", "police", "patrol"], patrol: ["arrest", "sneak"],
+  bless: ["blessing"], curse: ["cursed"],
+  deep: ["one", "innsmouth", "rising"], rising: ["deep", "feds", "innsmouth"], feds: ["raid", "innsmouth"],
+  aquatic: ["water", "wave", "river"], exhibit: ["pharaoh", "whisper", "item"], whisper: ["exhibit", "pharaoh"],
+  personal: ["story"], story: ["personal"], epic: ["battle", "plot"], battle: ["final", "epic", "awaken"]
+};
+
+/* Plural-only stemmer: safe normalisation (monsters->monster, checks->check)
+   without the over-stemming that breaks pairs like win / winning. */
+function _stem(w) {
+  if (w.length <= 3) return w;
+  w = w.replace(/('s|s')$/, "");
+  if (/ies$/.test(w) && w.length > 4) return w.slice(0, -3) + "y";
+  if (/(ches|shes|sses|xes|zes)$/.test(w)) return w.slice(0, -2);
+  if (/s$/.test(w) && !/(ss|us|is|as|os)$/.test(w)) return w.slice(0, -1);
+  return w;
+}
+/* Content tokens (lowercased, stop-words removed, stemmed). */
+function _tok(text) {
+  const out = [];
+  (text.toLowerCase().match(/[a-z0-9]+/g) || []).forEach(w => {
+    if (_STOP.has(w) || w.length < 2) return;
+    const s = _stem(w);
+    if (s.length >= 2) out.push(s);
+  });
+  return out;
+}
+
+/* Build the inverted index once (lazily, on first search). */
+function _buildSearchIndex() {
+  if (AH._si) return AH._si;
+  const docs = [], inv = new Map();
+  let total = 0;
+  AH.rulesIndex.forEach((e, idx) => {
+    const flat = e.t.replace(/\n/g, " ");
+    const toks = _tok(flat);
+    const tf = new Map();
+    toks.forEach(t => tf.set(t, (tf.get(t) || 0) + 1));
+    tf.forEach((c, t) => { (inv.get(t) || inv.set(t, []).get(t)).push([idx, c]); });
+    docs.push({ len: toks.length || 1, flatLower: flat.toLowerCase() });
+    total += toks.length;
+  });
+  AH._si = { docs, inv, N: docs.length, avgdl: total / Math.max(1, docs.length) };
+  return AH._si;
+}
+
+/* Highlight every query-term occurrence (prefix match) in an HTML-escaped string. */
+function _hlTerms(text, terms) {
+  let s = _escHtml(text);
+  const alt = terms.filter(t => t.length >= 3).map(t => _escReg(t) + "\\w*");
+  if (alt.length) s = s.replace(new RegExp("\\b(" + alt.join("|") + ")", "gi"), "<mark>$1</mark>");
   return s;
 }
-function _snippet(flat, phrase) {
-  const lt = flat.toLowerCase();
-  let i = lt.indexOf(phrase);
-  if (i < 0) i = 0;
-  const start = Math.max(0, i - 70);
-  const end = Math.min(flat.length, i + phrase.length + 170);
-  const s = (start > 0 ? "… " : "") + flat.slice(start, end) + (end < flat.length ? " …" : "");
-  return _hl(s, phrase);
+function _snip(text, terms, phrase) {
+  const lt = text.toLowerCase();
+  let pos = phrase && phrase.includes(" ") && lt.includes(phrase) ? lt.indexOf(phrase) : -1;
+  if (pos < 0) for (const t of terms) { const m = lt.search(new RegExp("\\b" + _escReg(t))); if (m >= 0 && (pos < 0 || m < pos)) pos = m; }
+  if (pos < 0) pos = 0;
+  const start = Math.max(0, pos - 80), end = Math.min(text.length, pos + 210);
+  const s = (start > 0 ? "… " : "") + text.slice(start, end) + (end < text.length ? " …" : "");
+  return _hlTerms(s, terms);
 }
-function _fullPassage(text, phrase) {
-  return text.split("\n").map(p => `<p>${_hl(p, phrase)}</p>`).join("");
+function _fullPassage(text, terms) {
+  return text.split("\n").map(p => `<p>${_hlTerms(p, terms)}</p>`).join("");
 }
 
 function ahSearch(q) {
   const box = document.getElementById("rules-results");
   if (!box) return;
   const phrase = (q || "").trim().toLowerCase().replace(/\s+/g, " ");
-  if (phrase.length < 2) { box.innerHTML = `<p class="rs-hint">Type at least 2 characters to search.</p>`; return; }
+  if (phrase.length < 2) { box.innerHTML = `<p class="rs-hint">Type a few words — or ask a question.</p>`; return; }
   if (!AH.rulesIndex) { box.innerHTML = `<p class="rs-hint">Loading rulebook index…</p>`; return; }
+  const si = _buildSearchIndex();
+
+  const rawWords = phrase.match(/[a-z0-9]+/g) || [];
+  let qterms = [...new Set(rawWords.filter(w => !_STOP.has(w)).map(_stem).filter(s => s.length >= 2))];
+  if (!qterms.length) qterms = [...new Set(rawWords.map(_stem).filter(s => s.length >= 2))];
+  if (!qterms.length) { box.innerHTML = `<p class="rs-hint">Try a more specific word.</p>`; return; }
+  // Question vs. exact-term mode (the latter requires every term, as before).
+  const isQuestion = /\b(how|what|why|when|where|who|which|can|do|does|should|is|are|will|if)\b/.test(phrase) || phrase.includes("?");
+  const termMode = !isQuestion && qterms.length <= 3;
+  // Synonyms are optional, lower-weighted extra terms.
+  const synTerms = [];
+  qterms.forEach(t => (_SYN[t] || []).forEach(s => { if (!qterms.includes(s) && !synTerms.includes(s)) synTerms.push(s); }));
+  const allTerms = qterms.concat(synTerms);
 
   const active = new Set((AH._searchCtx || { exps: ["base", "faq"] }).exps);
-  const gov = (AH.rulesSuppress || []).map(s => {
-    const inPlay = s.chain.filter(e => active.has(e));
-    return inPlay.length ? inPlay[inPlay.length - 1] : null;
-  });
-  const prec = AH.precedence;
-  const results = [];
+  const gov = (AH.rulesSuppress || []).map(s => { const ip = s.chain.filter(e => active.has(e)); return ip.length ? ip[ip.length - 1] : null; });
+  const prec = AH.precedence, k1 = 1.5, b = 0.75;
 
-  for (const e of AH.rulesIndex) {
+  // BM25 accumulation over candidate docs (union of postings).
+  const acc = new Map();
+  allTerms.forEach((t, ti) => {
+    const post = si.inv.get(t); if (!post) return;
+    const idf = Math.log(1 + (si.N - post.length + 0.5) / (post.length + 0.5));
+    const w = ti < qterms.length ? 1 : 0.45;
+    post.forEach(([idx, tf]) => {
+      const dl = si.docs[idx].len;
+      const s = idf * (tf * (k1 + 1)) / (tf + k1 * (1 - b + b * dl / si.avgdl)) * w;
+      let cur = acc.get(idx); if (!cur) { cur = { score: 0, hits: new Set() }; acc.set(idx, cur); }
+      cur.score += s; if (ti < qterms.length) cur.hits.add(t);
+    });
+  });
+
+  const results = [];
+  for (const [idx, info] of acc) {
+    const e = AH.rulesIndex[idx];
     if (!active.has(e.x)) continue;
-    const flat = e.t.replace(/\n/g, " ");
-    const lt = flat.toLowerCase();
-    const pos = lt.indexOf(phrase);
-    if (pos < 0) continue;
-    let suppressed = false;
+    if (termMode && info.hits.size < qterms.length) continue;          // require all terms in term mode
+    const lt = si.docs[idx].flatLower;
+    // suppress superseded rulebook passages on curated conflict topics
+    let sup = false;
     for (let k = 0; k < (AH.rulesSuppress || []).length; k++) {
       const s = AH.rulesSuppress[k], g = gov[k];
-      if (g && e.x !== g && s.chain.includes(e.x) && s.kw.some(kw => lt.includes(kw))) { suppressed = true; break; }
+      if (g && e.x !== g && s.chain.includes(e.x) && s.kw.some(kw => lt.includes(kw))) { sup = true; break; }
     }
-    if (suppressed) continue;
-    results.push({ e, flat, pos });
+    if (sup) continue;
+    let score = info.score;
+    if (phrase.length >= 3 && lt.includes(phrase)) score *= 2.4;        // exact phrase boost
+    score *= 1 + (info.hits.size - 1) * 0.15;                           // reward covering more query terms
+    if (e.x === "faq") score *= 1.15;                                   // FAQ corrects the rulebooks
+    score += (prec[e.x] || 0) * 0.004;                                 // tiny tiebreak toward newer source
+    results.push({ e, score });
   }
-  results.sort((a, b) => (prec[b.e.x] - prec[a.e.x]) || (a.pos - b.pos));
-  const top = results.slice(0, 30);
+  results.sort((a, b) => b.score - a.score);
+  const top = results.slice(0, 40);
 
-  if (!top.length) { box.innerHTML = `<p class="rs-hint">No matches in the rulebooks for this setup. Try a different term.</p>`; return; }
+  if (!top.length) { box.innerHTML = `<p class="rs-hint">No matches in the rulebooks or FAQ for this setup. Try different words.</p>`; return; }
   box.innerHTML =
     `<div class="rs-count">${results.length} result${results.length > 1 ? "s" : ""}${results.length > top.length ? ` · showing ${top.length}` : ""}</div>` +
-    top.map(({ e, flat }) => {
+    top.map(({ e }) => {
       const m = AH.expMeta[e.x] || { name: e.b, cls: "e-base" };
       return `<details class="rs-item">
           <summary class="rs-sum">
             <div class="rs-meta"><span class="etag ${m.cls}">${m.name}</span> <span class="rs-page">${e.b} · p.${e.p}</span><span class="rs-toggle">Full passage</span></div>
-            <div class="rs-snip">${_snippet(flat, phrase)}</div>
+            <div class="rs-snip">${_snip(e.t.replace(/\n/g, " "), qterms, phrase)}</div>
           </summary>
-          <div class="rs-full">${_fullPassage(e.t, phrase)}</div>
+          <div class="rs-full">${_fullPassage(e.t, qterms)}</div>
         </details>`;
     }).join("");
 }
