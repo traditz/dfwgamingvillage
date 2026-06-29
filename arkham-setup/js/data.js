@@ -85,6 +85,9 @@ AH.modules = [
   { id: "heraldKingsport", name: "Heralds: Kingsport (2 sheets)", type: "herald", requires: "kingsport",
     summary: "Kingsport Horror includes two additional Herald sheets that prepare the way for the Ancient One.",
     description: "Kingsport Horror provides two extra Herald sheets for the Herald/Guardian variant. Place the chosen Herald sheet to the left of the Ancient One and follow its printed rules (Kingsport ‘Herald/Guardian’ variant, p.10)." },
+  { id: "heraldInnsmouth", name: "Heralds: Innsmouth (2 sheets)", type: "herald", requires: "innsmouth",
+    summary: "Innsmouth Horror includes two additional Herald sheets that prepare the way for the Ancient One.",
+    description: "Innsmouth Horror provides two extra Herald sheets for the Herald variant. After the Ancient One is chosen, place the selected Herald sheet to the LEFT of the Ancient One and follow its printed rules (Innsmouth ‘Herald’ variant, p.9)." },
 
   /* --- Guardians (placed RIGHT of the Ancient One; help the investigators) --- */
   { id: "guardianNodens", name: "Guardian: Nodens", type: "guardian", requires: "kingsport", excludes: ["guardianHypnos", "guardianBast"],
@@ -206,6 +209,8 @@ AH.setup = [
     d: "Place the Dunwich Horror Herald sheet to the LEFT of the Ancient One and put 1 Dunwich Horror token on the Dunwich Horror track. (Requires the Dunwich game board.)" },
   { ph: 1, exp: "kingsport", t: "Place a Kingsport Herald", when: c => c.mod("heraldKingsport"), src: "Kingsport p.10",
     d: "Place the chosen Kingsport Herald sheet to the LEFT of the Ancient One and follow its printed setup instructions." },
+  { ph: 1, exp: "innsmouth", t: "Place an Innsmouth Herald", when: c => c.mod("heraldInnsmouth"), src: "Innsmouth p.9 (step 8)",
+    d: "Place the chosen Innsmouth Herald sheet to the LEFT of the Ancient One and follow its printed setup instructions." },
 
   { ph: 1, exp: "kingsport", t: "Place the Guardian sheet", when: c => c.guardian, src: "Kingsport p.10 (step 9)",
     d: "Place the chosen Guardian sheet to the RIGHT of the Ancient One. Set out any tokens it names (e.g. Bast tokens). Guardians help the investigators." },
@@ -218,6 +223,13 @@ AH.setup = [
   /* ===================== Phase 2 — Build the Decks ======================== */
   { ph: 2, exp: "base", t: "Separate the card decks", src: "Core p.5 (step 6)",
     d: "Sort the cards into their decks near the board: Common Item, Unique Item, Spell, Skill, Ally, the nine Arkham Location decks, the Gate deck, the Mythos deck, and the special-card decks (Blessing/Curse, Bank Loan, Retainer, Deputy, etc.)." },
+
+  { ph: 2, exp: "dunwich", t: "Dunwich decks & condition cards", when: c => c.has("dunwich"), src: "Dunwich p.4–6",
+    d: "Place the Dunwich Location decks near the Dunwich board and the Dunwich Horror cards in a deck beside it. Place the Injury and Madness decks near the Investigator cards, and lay the Condition cards facedown in a row near them. Sheldon Gang Membership and Rail Pass cards go with the Special cards. (New Common/Unique/Spell/Skill cards are shuffled into their base decks.)" },
+  { ph: 2, exp: "kingsport", t: "Kingsport location & special decks", when: c => c.has("kingsport"), src: "Kingsport p.5",
+    d: "Place the four Kingsport Location decks near the Kingsport board, and put the new Captain of the White Ship and Changed cards with the Special cards. (New Arkham-neighborhood Location, Mythos and Gate cards are shuffled into their base decks, and the new gate markers mixed in.)" },
+  { ph: 2, exp: "innsmouth", t: "Innsmouth location & Look decks", when: c => c.has("innsmouth"), src: "Innsmouth p.5",
+    d: "Place the three Innsmouth Location decks near the Innsmouth board, and shuffle the Innsmouth Look cards into a deck beside it. (New Arkham-neighborhood Location, Mythos and Gate cards are shuffled into their base decks, and the new gate markers mixed in.)" },
 
   { ph: 2, exp: "dunwich", t: "Build the 11-card Ally deck (Dunwich)", when: c => c.has("dunwich") && !c.has("curse"), src: "Dunwich p.4",
     d: "Shuffle all Allies, deal 11 face up (keep any that are an investigator’s fixed possession), return the rest to the box, then shuffle those 11 face down. All Allies drawn this game come from this 11-card deck." },
@@ -290,8 +302,8 @@ AH.setup = [
 
   { ph: 4, exp: "base", t: "Draw & resolve the first Mythos card", src: "Core p.5 (step 14)",
     d: "The first player draws the top Mythos card and resolves it as a Mythos Phase: a gate and monster appear at the indicated unstable location, a clue may appear, and monsters move. If a Rumor — or any Mythos card with no gate — is drawn, discard it and draw again until a gate-opening card comes up." },
-  { ph: 4, exp: "dunwich", t: "First Mythos with 5+ players", when: c => (c.has("dunwich") || c.has("kingsport")) && c.p >= 5, src: "Dunwich p.4 · Kingsport p.5 (step 14)",
-    d: "With five or more players, place TWO monsters on the gate indicated by the first Mythos card instead of one." },
+  { ph: 4, exp: "base", t: "First Mythos with 5+ investigators", when: c => c.p >= 5, src: "Core p.9 · p.5 (step 14)",
+    d: "With five or more investigators, place TWO monsters on the gate from the first Mythos card instead of one. (This is a core rule — 2 monsters appear every time a gate opens at 5+ investigators.)" },
   { ph: 4, exp: "base", t: "Place the first doom token", src: "Core p.5 (step 14)",
     d: "Remember: after the first gate opens, place a doom token on the Ancient One’s doom track. The game has begun — the first turn starts with the first player." }
 ];
@@ -390,6 +402,7 @@ AH.howToPlay = {
       "<b>Monster limit</b> = players + 3. A new monster over the limit goes to the <b>Outskirts</b> instead.",
       "<b>Outskirts limit</b> = 8 − players. When the Outskirts overflow, return those monsters to the cup and raise the terror level by 1.",
       "Raising the <b>terror level</b> closes shops and drives away Allies; at terror 10 Arkham is overrun (no monster limit, Outskirts unused).",
+      { t: "With <b>5 or more investigators</b>, place <b>2 monsters</b> (not 1) each time a gate opens and a monster appears.", when: c => c.p >= 5 },
       { t: "<b>Monster surge:</b> when the Mythos card’s gate location already has an open gate, monsters appear equal to the <b>greater of</b> (open gates, players), divided evenly among all open gates (no gate gets more than the number on the Mythos card). Overflow goes to the Outskirts.", tag: "faq" },
       { t: "Monsters on an <b>expansion board</b> never count against the monster limit and never go to the Outskirts.", when: c => c.boardCount >= 1, tag: "dunwich" }
     ]},
