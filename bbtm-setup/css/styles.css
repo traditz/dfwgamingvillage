@@ -26,27 +26,27 @@ body{
 body::before{
   content:""; position:fixed; inset:0; z-index:-3; pointer-events:none;
   background:
-    radial-gradient(1100px 420px at 50% -12%, rgba(232,181,74,.10), transparent 62%),
-    radial-gradient(760px 320px at 14% 2%,  rgba(164,36,42,.12),  transparent 66%),
-    radial-gradient(760px 320px at 88% 3%,  rgba(164,36,42,.09),  transparent 66%),
-    radial-gradient(1500px 560px at 50% 118%, rgba(47,125,79,.20), transparent 58%),
-    radial-gradient(130% 120% at 50% 40%, transparent 50%, rgba(0,0,0,.6) 100%),
-    linear-gradient(180deg,#171311,#0f0c0a);
+    radial-gradient(1100px 440px at 50% -12%, rgba(232,181,74,.16), transparent 62%),
+    radial-gradient(820px 360px at 12% 1%,  rgba(176,38,44,.24),  transparent 66%),
+    radial-gradient(820px 360px at 90% 2%,  rgba(176,38,44,.18),  transparent 66%),
+    radial-gradient(1600px 640px at 50% 116%, rgba(47,125,79,.34), transparent 60%),
+    radial-gradient(135% 120% at 50% 38%, transparent 46%, rgba(0,0,0,.62) 100%),
+    linear-gradient(180deg,#1b1613,#0f0c0a);
 }
-/* The pitch: a green turf band with chalk yard-lines anchored to the page foot,
-   washed faint behind everything; its floodlit haze breathes very slowly. */
-@keyframes pitchHaze{0%,100%{opacity:.5}50%{opacity:.92}}
+/* The pitch: a green turf band with chalk yard-lines anchored to the page foot;
+   its floodlit haze breathes very slowly. */
+@keyframes pitchHaze{0%,100%{opacity:.62}50%{opacity:1}}
 html::before{
-  content:""; position:fixed; left:0; right:0; bottom:0; height:230px; z-index:-2; pointer-events:none;
+  content:""; position:fixed; left:0; right:0; bottom:0; height:320px; z-index:-2; pointer-events:none;
   background:
-    repeating-linear-gradient(90deg, transparent 0 76px, rgba(231,236,224,.05) 76px 79px),
-    linear-gradient(0deg, rgba(38,104,64,.34), rgba(38,104,64,.10) 55%, transparent 100%);
+    repeating-linear-gradient(90deg, transparent 0 73px, rgba(235,240,228,.14) 73px 77px),
+    linear-gradient(0deg, rgba(42,116,70,.58), rgba(42,116,70,.22) 52%, transparent 100%);
   -webkit-mask-image:linear-gradient(0deg,#000,transparent); mask-image:linear-gradient(0deg,#000,transparent);
   animation:pitchHaze 11s ease-in-out infinite;
 }
-/* Aged-paper / grime grain pressed over the whole spread (filmic, low opacity). */
+/* Aged-paper / grime grain pressed over the whole spread (filmic). */
 body::after{
-  content:""; position:fixed; inset:0; z-index:40; pointer-events:none; opacity:.05;
+  content:""; position:fixed; inset:0; z-index:40; pointer-events:none; opacity:.075;
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
 }
 h1,h2,h3,h4{margin:0; letter-spacing:.2px}
@@ -78,9 +78,10 @@ a{color:var(--gold)}
 @keyframes brandSheen{0%{background-position:0% 50%}100%{background-position:200% 50%}}
 .brand-bbtm{
   font-family:var(--display); font-weight:400; font-size:clamp(26px,4.8vw,46px); letter-spacing:1px;
-  background:linear-gradient(100deg,#b8312c 0%,#e0473d 30%,#f3c98e 46%,#e0473d 62%,#9c2722 86%) 0/200% 100%;
-  -webkit-background-clip:text; background-clip:text; color:transparent;
-  text-shadow:0 2px 0 #4a1311, 0 3px 1px rgba(0,0,0,.5);
+  background:linear-gradient(100deg,#ff5b46 0%,#ff8d62 24%,#ffeccb 46%,#ff8d62 66%,#fa5239 90%) 0/200% 100%;
+  -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-fill-color:transparent;
+  /* stacked dark drop = beveled extrude that lifts the letters off the steel */
+  text-shadow:0 1px 0 #6a1712, 0 2px 0 #4a0f0c, 0 3px 0 #320a08, 0 5px 7px rgba(0,0,0,.85), 0 0 14px rgba(255,110,70,.25);
   animation:brandSheen 13s linear infinite;
 }
 .brand-tm{font-family:var(--display); font-size:clamp(11px,1.7vw,15px); letter-spacing:1px; margin-top:5px;
