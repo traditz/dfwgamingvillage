@@ -89,11 +89,11 @@ AH.modules = [
     summary: "Kingsport Herald — adds a Cultist to the first gate; its Cultists hunt down and destroy elder signs.",
     description: "Tulzscha, a pillar of green flame at Azathoth’s court, prepares the way for the Ancient One. Place the Herald sheet to the LEFT of the Ancient One and put <b>1 extra Cultist</b> on the first open gate. Its Cultists become Elusive and move toward elder-sign tokens — a Cultist that starts the Mythos Phase on an elder sign destroys that seal and returns to the cup. Follow the printed sheet (Kingsport ‘Herald/Guardian’ variant, p.10)." },
   { id: "heraldDagon", name: "Herald: Father Dagon", type: "herald", requires: "innsmouth",
-    summary: "An Innsmouth Herald — hastens the Ancient One by drawing an additional Mythos card.",
-    description: "Father Dagon, who rules the Deep Ones alongside Mother Hydra, prepares the way for the Ancient One. Place his Herald sheet to the LEFT of the Ancient One. He causes an <b>additional Mythos card</b> to be drawn (if that card is a Rumor, discard it and draw again) — accelerating gates and doom. He may be combined with Mother Hydra (their effects stack). Follow the printed sheet (Innsmouth ‘Herald’ variant, p.9; FAQ)." },
+    summary: "An Innsmouth Herald — an extra Mythos card at the start, plus a Clue tax as terror rises.",
+    description: "Father Dagon, who rules the Deep Ones alongside Mother Hydra, prepares the way for the Ancient One. <b>Requires the Innsmouth board.</b> Place 1 uprising token on the Deep Ones Rising track at the start and after each Feds raid. At game start, draw and resolve an <b>additional Mythos card</b> (redraw Rumors, per FAQ); and whenever the terror level rises, each investigator must spend 1 Clue token or a doom token is added instead. May be combined with Mother Hydra (effects stack). Follow the printed sheet (Innsmouth ‘Herald’ variant, p.9; FAQ)." },
   { id: "heraldHydra", name: "Herald: Mother Hydra", type: "herald", requires: "innsmouth",
-    summary: "An Innsmouth Herald — adds an uprising token at game start and after each Feds raid.",
-    description: "Mother Hydra, who rules the Deep Ones alongside Father Dagon, prepares the way for the Ancient One. <b>Requires the Innsmouth board.</b> Place 1 uprising token on the Deep Ones Rising track at the start of the game, and again after each time the Feds raid Innsmouth. She may be combined with Father Dagon (their effects stack). Follow the printed sheet (Innsmouth ‘Herald’ variant, p.9)." },
+    summary: "An Innsmouth Herald — extra monsters on surges, and a monster to the Outskirts when an investigator falls.",
+    description: "Mother Hydra, who rules the Deep Ones alongside Father Dagon, prepares the way for the Ancient One. <b>Requires the Innsmouth board.</b> Place 1 uprising token on the Deep Ones Rising track at the start and after each Feds raid. An <b>extra monster</b> appears on each monster surge, and whenever an investigator is knocked unconscious, driven insane, lost in time and space, or devoured, a monster is drawn to the Outskirts. May be combined with Father Dagon (effects stack). Follow the printed sheet (Innsmouth ‘Herald’ variant, p.9)." },
 
   /* --- Guardians (placed RIGHT of the Ancient One; help the investigators) --- */
   { id: "guardianNodens", name: "Guardian: Nodens", type: "guardian", requires: "kingsport", excludes: ["guardianHypnos", "guardianBast"],
@@ -216,7 +216,7 @@ AH.setup = [
   { ph: 1, exp: "kingsport", t: "Place the Kingsport Herald (Ghroth / Tulzscha)", when: c => c.mod("heraldGhroth") || c.mod("heraldTulzscha"), src: "Kingsport p.10",
     d: "Place the chosen Kingsport Herald sheet — Ghroth or Tulzscha — to the LEFT of the Ancient One. Ghroth adds 2 doom tokens to the doom track now; Tulzscha puts 1 extra Cultist on the first open gate. Follow the printed sheet." },
   { ph: 1, exp: "innsmouth", t: "Place the Innsmouth Herald (Father Dagon / Mother Hydra)", when: c => c.mod("heraldDagon") || c.mod("heraldHydra"), src: "Innsmouth p.9 (step 8)",
-    d: "Place the chosen Innsmouth Herald sheet — Father Dagon or Mother Hydra — to the LEFT of the Ancient One and follow its printed setup instructions." },
+    d: "Place the chosen Innsmouth Herald sheet — Father Dagon and/or Mother Hydra — to the LEFT of the Ancient One. Each one places 1 uprising token on the Deep Ones Rising track now (both may be used together, stacking their effects). Follow the printed sheet(s)." },
 
   { ph: 1, exp: "kingsport", t: "Place the Guardian sheet", when: c => c.guardian, src: "Kingsport p.10 (step 9)",
     d: "Place the chosen Guardian sheet to the RIGHT of the Ancient One. Set out any tokens it names (e.g. Bast tokens). Guardians help the investigators." },
