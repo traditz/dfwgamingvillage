@@ -221,6 +221,14 @@ main{max-width:1180px; margin:0 auto; padding:22px clamp(14px,4vw,40px) 64px}
 .skill-body{flex:1; min-width:0}
 .skill-body .dt{display:block; margin-top:4px}
 
+/* tackle-die faces — shown as rounded square dice, not coins */
+.dice-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:9px}
+.dice-row{display:flex; align-items:flex-start; gap:13px; background:var(--panel2);
+  border:1px solid var(--line); border-radius:9px; padding:11px 13px}
+.dice-icon{flex:none; width:42px; height:42px; border-radius:10px; object-fit:cover;
+  border:1px solid #0c0a08; box-shadow:0 2px 6px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.15)}
+.h4-note{font-family:var(--sans); font-weight:600; text-transform:none; letter-spacing:0; color:var(--muted); font-size:11px}
+
 .mini-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; margin-bottom:6px}
 .mini{background:var(--panel2); border:1px solid var(--line); border-radius:9px; padding:10px 12px; display:flex; flex-direction:column; gap:3px}
 .mini b{color:var(--ink); font-size:13px}

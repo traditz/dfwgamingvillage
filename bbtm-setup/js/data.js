@@ -468,9 +468,9 @@ BBTM.reference = {
       { c:"Tackler SP < Target SP", d:"Roll 2 dice — the opposing manager picks one result." }
     ],
     results:[
-      { k:"Target Down", t:"The tackle succeeds: a standing target becomes downed; a downed target becomes injured." },
-      { k:"Target Missed", t:"The tackle fails, with no other effect." },
-      { k:"Tackler Down", t:"The target evades: a standing tackler becomes downed; a downed tackler becomes injured. (Not a ‘successful tackle’.)" }
+      { k:"Target Down", icon:"target-down", t:"The tackle succeeds: a standing target becomes downed; a downed target becomes injured." },
+      { k:"Target Missed", icon:"target-missed", t:"The tackle fails, with no other effect." },
+      { k:"Tackler Down", icon:"tackler-down", t:"The target evades: a standing tackler becomes downed; a downed tackler becomes injured. (Not a ‘successful tackle’.)" }
     ],
     states:[
       { k:"Standing", t:"Upright; uses standing Star Power (top-left of the card)." },

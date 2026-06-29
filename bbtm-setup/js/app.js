@@ -161,7 +161,11 @@ function renderReference() {
   h += `<section class="ref-card" id="${R.tackle.id}"><h2>${R.tackle.title}</h2><p class="ref-intro">${R.tackle.intro}</p>
     <div class="mini-grid">${R.tackle.dice.map(d => `<div class="mini"><b>${esc(d.c)}</b><span>${esc(d.d)}</span></div>`).join("")}</div>
     <div class="two-col">
-      <div><h4>Results</h4><ul class="def-list">${R.tackle.results.map(r => `<li><span class="dk">${esc(r.k)}</span><span class="dt">${esc(r.t)}</span></li>`).join("")}</ul></div>
+      <div><h4>Results <span class="h4-note">(tackle die face)</span></h4><ul class="dice-list">${R.tackle.results.map(r =>
+        `<li class="dice-row">
+          <img class="dice-icon" loading="lazy" src="images/dice/${r.icon}.png" alt="${esc(r.k)} die face">
+          <div class="skill-body"><span class="dk">${esc(r.k)}</span><div class="dt">${esc(r.t)}</div></div>
+        </li>`).join("")}</ul></div>
       <div><h4>Player States</h4><ul class="def-list">${R.tackle.states.map(r => `<li><span class="dk">${esc(r.k)}</span><span class="dt">${esc(r.t)}</span></li>`).join("")}</ul></div>
     </div></section>`;
 
