@@ -85,9 +85,12 @@ AH.modules = [
   { id: "heraldKingsport", name: "Heralds: Kingsport (2 sheets)", type: "herald", requires: "kingsport",
     summary: "Kingsport Horror includes two additional Herald sheets that prepare the way for the Ancient One.",
     description: "Kingsport Horror provides two extra Herald sheets for the Herald/Guardian variant. Place the chosen Herald sheet to the left of the Ancient One and follow its printed rules (Kingsport ‘Herald/Guardian’ variant, p.10)." },
-  { id: "heraldInnsmouth", name: "Heralds: Innsmouth (2 sheets)", type: "herald", requires: "innsmouth",
-    summary: "Innsmouth Horror includes two additional Herald sheets that prepare the way for the Ancient One.",
-    description: "Innsmouth Horror provides two extra Herald sheets for the Herald variant. After the Ancient One is chosen, place the selected Herald sheet to the LEFT of the Ancient One and follow its printed rules (Innsmouth ‘Herald’ variant, p.9)." },
+  { id: "heraldDagon", name: "Herald: Father Dagon", type: "herald", requires: "innsmouth",
+    summary: "An Innsmouth Herald — hastens the Ancient One by drawing an additional Mythos card.",
+    description: "Father Dagon prepares the way for the Ancient One. Place his Herald sheet to the LEFT of the Ancient One. He causes an additional Mythos card to be drawn (if that card is a Rumor, discard it and draw again) — accelerating gates and doom. Follow the rules printed on the sheet (Innsmouth ‘Herald’ variant, p.9; FAQ)." },
+  { id: "heraldHydra", name: "Herald: Mother Hydra", type: "herald", requires: "innsmouth",
+    summary: "An Innsmouth Herald tied to the rise of the Deep Ones — raises the difficulty.",
+    description: "Mother Hydra prepares the way for the Ancient One alongside the rise of the Deep Ones. Place her Herald sheet to the LEFT of the Ancient One and follow its printed rules (Innsmouth ‘Herald’ variant, p.9)." },
 
   /* --- Guardians (placed RIGHT of the Ancient One; help the investigators) --- */
   { id: "guardianNodens", name: "Guardian: Nodens", type: "guardian", requires: "kingsport", excludes: ["guardianHypnos", "guardianBast"],
@@ -209,8 +212,8 @@ AH.setup = [
     d: "Place the Dunwich Horror Herald sheet to the LEFT of the Ancient One and put 1 Dunwich Horror token on the Dunwich Horror track. (Requires the Dunwich game board.)" },
   { ph: 1, exp: "kingsport", t: "Place a Kingsport Herald", when: c => c.mod("heraldKingsport"), src: "Kingsport p.10",
     d: "Place the chosen Kingsport Herald sheet to the LEFT of the Ancient One and follow its printed setup instructions." },
-  { ph: 1, exp: "innsmouth", t: "Place an Innsmouth Herald", when: c => c.mod("heraldInnsmouth"), src: "Innsmouth p.9 (step 8)",
-    d: "Place the chosen Innsmouth Herald sheet to the LEFT of the Ancient One and follow its printed setup instructions." },
+  { ph: 1, exp: "innsmouth", t: "Place the Innsmouth Herald (Father Dagon / Mother Hydra)", when: c => c.mod("heraldDagon") || c.mod("heraldHydra"), src: "Innsmouth p.9 (step 8)",
+    d: "Place the chosen Innsmouth Herald sheet — Father Dagon or Mother Hydra — to the LEFT of the Ancient One and follow its printed setup instructions." },
 
   { ph: 1, exp: "kingsport", t: "Place the Guardian sheet", when: c => c.guardian, src: "Kingsport p.10 (step 9)",
     d: "Place the chosen Guardian sheet to the RIGHT of the Ancient One. Set out any tokens it names (e.g. Bast tokens). Guardians help the investigators." },
