@@ -149,8 +149,11 @@ function renderReference() {
 
   // Skills
   h += `<section class="ref-card" id="${R.skills.id}"><h2>${R.skills.title}</h2><p class="ref-intro">${R.skills.intro}</p>
-    <ul class="def-list">${R.skills.items.map(s =>
-      `<li><span class="dk">${esc(s.k)}</span> ${srcTag(s.tag)}<span class="dt">${esc(s.t)}</span></li>`).join("")}</ul>
+    <ul class="skill-list">${R.skills.items.map(s =>
+      `<li class="skill-row">
+        <img class="skill-icon" loading="lazy" src="images/skills/${s.icon}.png" alt="${esc(s.k)} skill icon">
+        <div class="skill-body"><span class="dk">${esc(s.k)}</span> ${srcTag(s.tag)}<div class="dt">${esc(s.t)}</div></div>
+      </li>`).join("")}</ul>
     <p class="ref-foot">${esc(R.skills.downed)}</p></section>`;
 
   // Tackle

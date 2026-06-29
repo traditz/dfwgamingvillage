@@ -443,12 +443,12 @@ BBTM.reference = {
     id:"sec-skills", title:"Skills",
     intro:"Skills are the icons between a player’s art and text box, used left-to-right when the player is committed. Cheating is mandatory; everything else is optional. A skill must be fully resolved before the next.",
     items:[
-      { k:"Cheating", tag:"core", t:"Mandatory. For each icon, draw one random cheating token from the pool and place it facedown (skull-up) on the player. Tokens are revealed and resolved in the Scoreboard phase." },
-      { k:"Passing", tag:"core", t:"Optional. Take the ball if it’s at midfield; if an opponent is the ball carrier, move it to midfield; if a teammate holds it, you may take it. The carrier adds +2 Star Power to their team." },
-      { k:"Sprinting", tag:"core", t:"Optional. For each icon, draw the top card of your Team deck, then discard one card from your hand (it may be the one just drawn)." },
-      { k:"Tackling", tag:"core", t:"Optional. For each icon, attempt one tackle against an opposing player at the matchup (see Tackle Outcomes). Multiple icons resolve separately." },
-      { k:"Regeneration", tag:"sudden", t:"Optional downed skill (Sudden Death). On a downed player, roll 2 dice and choose one; a Target-Down result lets you stand the player. Resolved in sequence with other downed skills." },
-      { k:"Fouling", tag:"foul", t:"Optional (Foul Play). Choose an opposing manager at the matchup and randomly take one card from their hand; secretly look, then either return it or discard it (they then draw one). Needs an opponent at the matchup." }
+      { k:"Cheating", icon:"cheating", tag:"core", t:"Mandatory. For each icon, draw one random cheating token from the pool and place it facedown (skull-up) on the player. Tokens are revealed and resolved in the Scoreboard phase." },
+      { k:"Passing", icon:"passing", tag:"core", t:"Optional. Take the ball if it’s at midfield; if an opponent is the ball carrier, move it to midfield; if a teammate holds it, you may take it. The carrier adds +2 Star Power to their team." },
+      { k:"Sprinting", icon:"sprinting", tag:"core", t:"Optional. For each icon, draw the top card of your Team deck, then discard one card from your hand (it may be the one just drawn)." },
+      { k:"Tackling", icon:"tackling", tag:"core", t:"Optional. For each icon, attempt one tackle against an opposing player at the matchup (see Tackle Outcomes). Multiple icons resolve separately." },
+      { k:"Regeneration", icon:"regeneration", tag:"sudden", t:"Optional downed skill (Sudden Death). On a downed player, roll 2 dice and choose one; a Target-Down result lets you stand the player. Resolved in sequence with other downed skills." },
+      { k:"Fouling", icon:"fouling", tag:"foul", t:"Optional (Foul Play). Choose an opposing manager at the matchup and randomly take one card from their hand; secretly look, then either return it or discard it (they then draw one). Needs an opponent at the matchup." }
     ],
     downed:"Downed skills (Sudden Death / Foul Play): icons printed next to a player’s downed Star Power resolve the instant that player is downed, interrupting the active turn. They use the downed Star Power and are resolved left-to-right; the player still loses all printed abilities."
   },
