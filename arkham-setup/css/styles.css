@@ -89,9 +89,31 @@ body::after{
   display:grid; grid-template-columns:auto 1fr; grid-template-rows:auto auto;
   column-gap:20px; align-items:center;
 }
-.sigil{grid-row:1 / span 2; width:62px; height:62px; color:var(--gold); display:grid; place-items:center;
+.sigil{grid-row:1 / span 2; position:relative; width:62px; height:62px; color:var(--gold); display:grid; place-items:center;
   filter:drop-shadow(0 0 10px rgba(127,177,90,.4))}
-.sigil svg{width:100%; height:100%}
+.sigil svg{position:relative; z-index:1; width:100%; height:100%}
+/* "The Watching Eye" — an eldritch glow that breathes behind the sigil and a
+   slow dread-pulse that radiates from the eye. Pure opacity/transform on a tiny
+   element (GPU-composited, off the main thread); disabled for reduced-motion. */
+.sigil::before{
+  content:""; position:absolute; inset:-16%; z-index:0; border-radius:50%; pointer-events:none;
+  background:radial-gradient(circle, rgba(127,177,90,.5), rgba(127,177,90,0) 66%);
+  animation:eldritchBreath 5.5s ease-in-out infinite;
+}
+.sigil::after{
+  content:""; position:absolute; inset:8%; z-index:0; border-radius:50%; pointer-events:none;
+  border:1px solid rgba(159,212,92,.55);
+  animation:gateRipple 5.5s ease-out infinite;
+}
+@keyframes eldritchBreath{
+  0%,100%{ opacity:.38; transform:scale(.92) }
+  50%    { opacity:.85; transform:scale(1.06) }
+}
+@keyframes gateRipple{
+  0%   { opacity:.55; transform:scale(.65) }
+  70%  { opacity:0;   transform:scale(1.75) }
+  100% { opacity:0;   transform:scale(1.75) }
+}
 .brand{display:flex; flex-direction:column; gap:6px; align-items:flex-start}
 .brand-ah{
   font-family:var(--logo); font-weight:800; font-size:2.05rem; letter-spacing:.1em; line-height:1;
