@@ -82,15 +82,18 @@ AH.modules = [
   { id: "heraldDunwich", name: "Herald: The Dunwich Horror", type: "herald", requiresAll: ["dunwich", "miskatonic"],
     summary: "The Dunwich Horror starts on the board and grows more dangerous as terror rises.",
     description: "The Dunwich Horror begins in play (1 token on its track; +1 at terror 3/6/9) and moves toward awakening the Ancient One. Requires the Dunwich game board. Uses the Dunwich Horror Herald sheet from Miskatonic Horror (Miskatonic ‘Dunwich Horror Herald’ variant)." },
-  { id: "heraldKingsport", name: "Heralds: Kingsport (2 sheets)", type: "herald", requires: "kingsport",
-    summary: "Kingsport Horror includes two additional Herald sheets that prepare the way for the Ancient One.",
-    description: "Kingsport Horror provides two extra Herald sheets for the Herald/Guardian variant. Place the chosen Herald sheet to the left of the Ancient One and follow its printed rules (Kingsport ‘Herald/Guardian’ variant, p.10)." },
+  { id: "heraldGhroth", name: "Herald: Ghroth", type: "herald", requires: "kingsport",
+    summary: "Kingsport Herald — starts the doom track with 2 extra doom tokens; Environment cards bite.",
+    description: "Ghroth, the Harbinger, prepares the way for the Ancient One. Place his Herald sheet to the LEFT of the Ancient One and add <b>2 extra doom tokens</b> to the doom track at the start of the game. His sheet also penalises investigators whenever an Environment (Mystic) Mythos card is drawn. Follow the printed sheet (Kingsport ‘Herald/Guardian’ variant, p.10)." },
+  { id: "heraldTulzscha", name: "Herald: Tulzscha", type: "herald", requires: "kingsport",
+    summary: "Kingsport Herald — adds a Cultist to the first gate; its Cultists hunt down and destroy elder signs.",
+    description: "Tulzscha, a pillar of green flame at Azathoth’s court, prepares the way for the Ancient One. Place the Herald sheet to the LEFT of the Ancient One and put <b>1 extra Cultist</b> on the first open gate. Its Cultists become Elusive and move toward elder-sign tokens — a Cultist that starts the Mythos Phase on an elder sign destroys that seal and returns to the cup. Follow the printed sheet (Kingsport ‘Herald/Guardian’ variant, p.10)." },
   { id: "heraldDagon", name: "Herald: Father Dagon", type: "herald", requires: "innsmouth",
     summary: "An Innsmouth Herald — hastens the Ancient One by drawing an additional Mythos card.",
-    description: "Father Dagon prepares the way for the Ancient One. Place his Herald sheet to the LEFT of the Ancient One. He causes an additional Mythos card to be drawn (if that card is a Rumor, discard it and draw again) — accelerating gates and doom. Follow the rules printed on the sheet (Innsmouth ‘Herald’ variant, p.9; FAQ)." },
+    description: "Father Dagon, who rules the Deep Ones alongside Mother Hydra, prepares the way for the Ancient One. Place his Herald sheet to the LEFT of the Ancient One. He causes an <b>additional Mythos card</b> to be drawn (if that card is a Rumor, discard it and draw again) — accelerating gates and doom. He may be combined with Mother Hydra (their effects stack). Follow the printed sheet (Innsmouth ‘Herald’ variant, p.9; FAQ)." },
   { id: "heraldHydra", name: "Herald: Mother Hydra", type: "herald", requires: "innsmouth",
-    summary: "An Innsmouth Herald tied to the rise of the Deep Ones — raises the difficulty.",
-    description: "Mother Hydra prepares the way for the Ancient One alongside the rise of the Deep Ones. Place her Herald sheet to the LEFT of the Ancient One and follow its printed rules (Innsmouth ‘Herald’ variant, p.9)." },
+    summary: "An Innsmouth Herald — adds an uprising token at game start and after each Feds raid.",
+    description: "Mother Hydra, who rules the Deep Ones alongside Father Dagon, prepares the way for the Ancient One. <b>Requires the Innsmouth board.</b> Place 1 uprising token on the Deep Ones Rising track at the start of the game, and again after each time the Feds raid Innsmouth. She may be combined with Father Dagon (their effects stack). Follow the printed sheet (Innsmouth ‘Herald’ variant, p.9)." },
 
   /* --- Guardians (placed RIGHT of the Ancient One; help the investigators) --- */
   { id: "guardianNodens", name: "Guardian: Nodens", type: "guardian", requires: "kingsport", excludes: ["guardianHypnos", "guardianBast"],
@@ -110,9 +113,9 @@ AH.modules = [
   { id: "instBureau", name: "Institution: Bureau of Investigations", type: "institution", requires: "miskatonic",
     summary: "Agent tokens watch street areas to keep monsters from roaming free.",
     description: "Uses the 38 Agent tokens, placed in street areas to suppress monsters. Place the Institution sheet to the right of the Ancient One / Guardian (Miskatonic ‘Institution’ variant)." },
-  { id: "instOther", name: "Institution: (third sheet)", type: "institution", requires: "miskatonic",
-    summary: "Miskatonic Horror includes a third Institution sheet with its own resource economy.",
-    description: "Miskatonic Horror provides three Institution sheets in total; choose one (randomly or by agreement) and follow its printed rules. Place it to the right of the Ancient One / Guardian (Miskatonic ‘Institution’ variant)." },
+  { id: "instOrgCrime", name: "Institution: Organized Crime", type: "institution", requires: "miskatonic",
+    summary: "Deal with the mob — money and favors at a price. Follow the printed Institution sheet.",
+    description: "Organized Crime lets investigators trade with the criminal underworld for money and favors, at the risk of the mob calling in its debts. Place the Institution sheet to the right of the Ancient One / Guardian and follow its printed rules (Miskatonic ‘Institution’ variant)." },
 
   /* --- Other selectable variants --- */
   { id: "personalStories", name: "Personal Stories", type: "variant", requires: "innsmouth",
@@ -210,8 +213,8 @@ AH.setup = [
     d: "Place the Lurker at the Threshold Herald sheet to the LEFT of the Ancient One and put the Power tokens beside it." },
   { ph: 1, exp: "miskatonic", t: "Place the Dunwich Horror Herald", when: c => c.mod("heraldDunwich"), src: "Miskatonic p.3 (step 5a)",
     d: "Place the Dunwich Horror Herald sheet to the LEFT of the Ancient One and put 1 Dunwich Horror token on the Dunwich Horror track. (Requires the Dunwich game board.)" },
-  { ph: 1, exp: "kingsport", t: "Place a Kingsport Herald", when: c => c.mod("heraldKingsport"), src: "Kingsport p.10",
-    d: "Place the chosen Kingsport Herald sheet to the LEFT of the Ancient One and follow its printed setup instructions." },
+  { ph: 1, exp: "kingsport", t: "Place the Kingsport Herald (Ghroth / Tulzscha)", when: c => c.mod("heraldGhroth") || c.mod("heraldTulzscha"), src: "Kingsport p.10",
+    d: "Place the chosen Kingsport Herald sheet — Ghroth or Tulzscha — to the LEFT of the Ancient One. Ghroth adds 2 doom tokens to the doom track now; Tulzscha puts 1 extra Cultist on the first open gate. Follow the printed sheet." },
   { ph: 1, exp: "innsmouth", t: "Place the Innsmouth Herald (Father Dagon / Mother Hydra)", when: c => c.mod("heraldDagon") || c.mod("heraldHydra"), src: "Innsmouth p.9 (step 8)",
     d: "Place the chosen Innsmouth Herald sheet — Father Dagon or Mother Hydra — to the LEFT of the Ancient One and follow its printed setup instructions." },
 
@@ -220,8 +223,8 @@ AH.setup = [
   { ph: 1, exp: "miskatonic", t: "Place the Institution sheet", when: c => c.institution, src: "Miskatonic p.3 (step 5a)",
     d: "Place the chosen Institution sheet to the RIGHT of the Ancient One (or to the right of the Guardian, if one is in play) and set out its tokens (Agent tokens / Expedition markers as appropriate)." },
 
-  { ph: 1, exp: "base", t: "Watch for ‘one of each’ helper sheets", when: c => c.heraldCount > 1 || (c.guardian && c.institution && false), src: "Kingsport p.10 · Miskatonic p.4",
-    d: "You can mix Heralds, Guardians and Institutions, but the rules recommend at most ONE of each kind. You currently have more than one Herald selected — double-check that is intended." },
+  { ph: 1, exp: "base", t: "Watch for ‘one of each’ helper sheets", when: c => c.heraldCount > 1 && !(c.heraldCount === 2 && c.mod("heraldDagon") && c.mod("heraldHydra")), src: "Kingsport p.10 · Miskatonic p.4",
+    d: "You can mix Heralds, Guardians and Institutions, but the rules recommend at most ONE Herald — the one exception is that <b>Father Dagon and Mother Hydra may be used together</b> (their effects stack). You have more than one Herald selected, so double-check that is intended." },
 
   /* ===================== Phase 2 — Build the Decks ======================== */
   { ph: 2, exp: "base", t: "Separate the card decks", src: "Core p.5 (step 6)",
