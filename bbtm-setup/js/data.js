@@ -392,7 +392,13 @@ BBTM.setup = [
   { order:8.3, ph:2, src:"foul", page:"Foul Play p.3",
     when:c=>c.opt("corruptRef"),
     t:"Prepare the Corrupt Ref (optional)",
-    d:"Each Maintenance phase, during ‘Prepare for Kickoff’, the first manager places the Corrupt Ref at midfield of any matchup. Committing a player there assigns that player a faceup cheating token, then the ref moves toward the Spike! Magazine deck a number of spaces equal to the player’s printed standing Star Power." }
+    d:"Each Maintenance phase, during ‘Prepare for Kickoff’, the first manager places the Corrupt Ref at midfield of any matchup. Committing a player there assigns that player a faceup cheating token, then the ref moves toward the Spike! Magazine deck a number of spaces equal to the player’s printed standing Star Power." },
+
+  { order:8.4, ph:2, src:"foul", page:"Foul Play p.4",
+    when:c=>c.opt("stadiums"),
+    t:"Prepare the Stadiums (optional)",
+    d:c=> "Shuffle the Stadium cards and draw " + (c.p===2 ? "four" : "a number equal to the managers (" + c.p + ")") +
+      "; lay them in a line between the Spike! Magazine and Highlight decks and return the rest to the box. Each round when rolling the Highlights, place each Highlight on top of one Stadium so their team-zone payouts align (one highlight per stadium). Each stadium’s restriction (banned skill / player limit / Star Power requirement) stays active all game." }
 ];
 
 /* Notes shown beneath the steps for the current configuration. */
@@ -502,10 +508,10 @@ BBTM.reference = {
       { src:"sudden", h:"Either/Or skills", t:"Skill icons split by slashes form skill sets. When you commit such a player you must choose one set to use (you may use every icon on that side); the other sets are ignored while the card is in play." },
       { src:"sudden", h:"Blood tokens", t:"Bloodlust (Black Fangs) gains Blood tokens; each adds +1 to standing and downed Star Power until ‘Clear the Pitch’. Limited to the supply." },
       { src:"sudden", h:"Enchanted Balls (optional)", t:"Replace the base balls. Each is placed faceup and benefits its carrier with bonus Star Power, fans, or a skill icon used the moment the player takes the ball." },
-      { src:"foul", h:"Penalties", t:"Penalty icons appear on some cheating tokens and the Goblin Tribal Leeg. Each penalty makes you draw a facedown Penalty card; after ‘Reveal Improvement Pile’, flip and resolve them. They linger faceup until you’re told to discard them." },
+      { src:"foul", h:"Penalties", t:"Penalty icons appear on some cheating tokens and the Goblin Tribal Leeg tournament (and Stadium restrictions, if used). Each penalty makes you draw a facedown Penalty card; after ‘Reveal Improvement Pile’, flip and resolve them. They linger faceup until you’re told to discard them." },
       { src:"foul", h:"Disease tokens", t:"Spread Disease drops tokens at midfield; any player committed/moved there takes them. Each lowers standing and downed Star Power by 1 (min 0) until ‘Clear the Pitch’." },
       { src:"foul", h:"The Corrupt Ref (optional)", t:"Placed at a matchup each Kickoff; committing a player there gives them a faceup cheating token, then the ref moves toward the Spike! deck by the player’s printed standing SP. At Scoreboard, a team with no faceup token there receives a penalty." },
-      { src:"foul", h:"Stadiums", t:"Stadium cards add a fifth player and venue effects that apply to the matchup they’re attached to." }
+      { src:"foul", h:"Stadiums (optional)", t:"Optional venue cards laid in a line between the Spike! Magazine and Highlight decks; each rolled Highlight is placed on a Stadium so their payouts combine (one highlight per stadium). A stadium’s restrictive effect lasts all game — a Banned Skill (using it earns a penalty; a banned Cheating icon instead makes cheating optional there), a Player Limit per team zone (exceeding it earns a penalty), or a Star Power Requirement (committing/moving a player whose printed standing Star Power is outside the range earns a penalty). Stadiums also add extra payouts to the team zone of the highlight on them." }
     ]
   },
 

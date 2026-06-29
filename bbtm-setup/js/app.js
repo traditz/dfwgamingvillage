@@ -25,7 +25,8 @@ const OPTIONS = [
   { id:"noSalary",   name:"No Salary Cap",          req:null,     desc:"Shuffle every Staff Upgrade into the deck, including the premium ones." },
   { id:"scheduling", name:"Scheduling Limitations", req:null,     desc:"Reveal only enough highlights for total matchups to equal the manager count." },
   { id:"enchanted",  name:"Enchanted Balls",        req:"sudden", desc:"Replace base balls with Enchanted Balls (Star Power / fans / skill effects)." },
-  { id:"corruptRef", name:"The Corrupt Ref",        req:"foul",   desc:"A roaming ref that forces faceup cheating tokens and hands out penalties." }
+  { id:"corruptRef", name:"The Corrupt Ref",        req:"foul",   desc:"A roaming ref that forces faceup cheating tokens and hands out penalties." },
+  { id:"stadiums",   name:"Stadiums",               req:"foul",   desc:"Venue cards with banned-skill / player-limit / Star-Power restrictions and extra payouts; each highlight is played on a stadium." }
 ];
 const SEASONS = [
   { id:"abbrev",   name:"Abbreviated", sub:"4 weeks" },
