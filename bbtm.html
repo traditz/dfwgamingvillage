@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:title" content="Blood Bowl: Team Manager Player Aids - DFW Gaming Village">
+    <meta name="description" content="Player aids for Blood Bowl: Team Manager – The Card Game (Legendary Edition) — a Setup Utility, full rules Reference, and every league &amp; team with difficulty ratings.">
+    <meta property="og:description" content="Blood Bowl: Team Manager player aids: Setup Utility, Reference &amp; the league/team browser.">
+    <meta property="og:image" content="https://www.dfwgamingvillage.com/banner_cropped.png">
+    <meta property="og:url" content="https://www.dfwgamingvillage.com/bbtm.html">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://www.dfwgamingvillage.com/banner.png">
+    <title>Blood Bowl: Team Manager Player Aids - DFW Gaming Village</title>
+    <link rel="stylesheet" href="community.css?v=20260622-cleanup">
+    <link rel="icon" href="favicon.ico">
+    <style>
+      /* --- Blood Bowl: Team Manager hub: custom art button --- */
+      .bb-tools {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 22px;
+        justify-content: center;
+        margin: 30px auto 0;
+        max-width: 420px;
+      }
+      .bb-tool {
+        position: relative;
+        display: block;
+        width: min(100%, 380px);
+        aspect-ratio: 16 / 11;
+        border-radius: 16px;
+        overflow: hidden;
+        text-decoration: none;
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background-image: url("images/bbtm-cover.svg");
+        background-size: cover;
+        background-position: center top;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+        transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+        isolation: isolate;
+        --bt-accent: #d24a40;
+      }
+      .bb-tool::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        background:
+          radial-gradient(120% 75% at 80% 6%, rgba(210, 74, 64, 0.22), transparent 58%),
+          linear-gradient(180deg, rgba(8, 6, 6, 0.30), rgba(8, 6, 6, 0.44));
+      }
+      .bb-tool .bt-inner {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: 18px 20px 20px;
+        background: linear-gradient(180deg,
+          rgba(8, 6, 6, 0) 0%,
+          rgba(8, 6, 6, 0) 16%,
+          rgba(8, 6, 6, 0.72) 30%,
+          rgba(7, 5, 5, 0.96) 42%,
+          rgba(5, 4, 4, 1) 54%,
+          rgba(4, 3, 3, 1) 100%);
+      }
+      .bb-tool .bt-title {
+        margin: 0;
+        font-size: clamp(1.35rem, 3.4vw, 1.6rem);
+        font-weight: 800;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        line-height: 1.04;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+      }
+      .bb-tool .bt-accentbar {
+        width: 46px;
+        height: 3px;
+        margin: 9px 0;
+        border-radius: 2px;
+        background: var(--bt-accent);
+        box-shadow: 0 0 12px var(--bt-accent);
+      }
+      .bb-tool .bt-sub {
+        margin: 0;
+        font-size: 0.88rem;
+        line-height: 1.35;
+        color: #e7d6d0;
+        max-width: 34ch;
+      }
+      .bb-tool .bt-cta {
+        margin-top: 12px;
+        font-size: 0.74rem;
+        font-weight: 800;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--bt-accent);
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .bb-tool .bt-cta .arrow { transition: transform 0.22s ease; }
+      .bb-tool:hover, .bb-tool:focus-visible {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 46px rgba(0, 0, 0, 0.6);
+        border-color: var(--bt-accent);
+        color: #fff;
+      }
+      .bb-tool:hover .bt-cta .arrow,
+      .bb-tool:focus-visible .bt-cta .arrow { transform: translateX(5px); }
+      @media (prefers-reduced-motion: reduce) {
+        .bb-tool, .bb-tool .bt-cta .arrow { transition: none; }
+      }
+    </style>
+</head>
+<body data-page="player-aids">
+    <div class="nav">
+        <a href="index.html">Home</a>
+        <a href="join.html">Join the Community</a>
+        <a href="gallery.html">Gallery</a>
+        <a href="games.html">Game Library</a>
+        <a href="events.html">Events</a>
+        <a href="utilities.html">Utilities</a>
+        <a href="player-aids.html">Player Aids</a>
+        <a href="donate.html">Donate</a>
+        <a href="supporters.html">Supporters</a>
+        <a href="contact.html">Contact</a>
+    </div>
+
+    <div class="banner">
+        <img src="banner.png" alt="DFW Gaming Village Banner">
+    </div>
+
+    <main class="content">
+        <h1>Blood Bowl: Team Manager <span style="font-weight:400;font-size:0.55em;opacity:0.8">The Card Game · Legendary Edition</span></h1>
+        <p>Choose the expansions, manager count and season length you are playing with, and get clean, step-by-step setup instructions plus a full rules reference for that exact game — each step tagged with its source and rulebook page. Browse every league and team, with play styles and the difficulty rating exactly as printed in the Legendary rulebook.</p>
+
+        <div class="bb-tools">
+            <a href="bbtm-setup/index.html" class="bb-tool">
+                <span class="bt-inner">
+                    <span class="bt-title">Setup,&nbsp;Reference<br>&amp; Teams</span>
+                    <span class="bt-accentbar"></span>
+                    <span class="bt-sub">Tailored setup steps, a full rules reference &amp; every league and team with difficulty ratings.</span>
+                    <span class="bt-cta">Open Utility <span class="arrow">&rarr;</span></span>
+                </span>
+            </a>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 DFW Gaming Village. All Rights Reserved.</p>
+    </footer>
+    <script src="site-analytics.js?v=20260607-analytics"></script>
+</body>
+</html>

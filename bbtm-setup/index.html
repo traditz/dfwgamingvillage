@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blood Bowl: Team Manager — Setup Utility &amp; Reference</title>
+  <link rel="stylesheet" href="css/styles.css?v=1">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-bbtm">BLOOD BOWL</span>
+      <span class="brand-tm">TEAM MANAGER — THE CARD GAME</span>
+      <span class="brand-sub">Setup Utility &amp; Reference · Legendary Edition</span>
+    </div>
+    <p class="tagline">Tailored setup steps, a full rules reference, and every league &amp; team — with difficulty as printed in the Legendary rulebook.</p>
+    <nav class="tabs" id="tabs">
+      <button class="tab on" data-tab="setup">Setup Utility</button>
+      <button class="tab" data-tab="reference">Game Reference</button>
+      <button class="tab" data-tab="teams">Teams &amp; Leagues</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ============ SETUP UTILITY ============ -->
+    <section class="view on" id="view-setup">
+      <section class="config">
+        <div class="cfg-group grow">
+          <label class="cfg-label">Content on the table <span class="hint">(Core Box is always included)</span></label>
+          <div id="sources" class="chips"></div>
+        </div>
+        <div class="cfg-row">
+          <div class="cfg-group">
+            <label class="cfg-label">Managers</label>
+            <div id="players" class="pbtns"></div>
+          </div>
+          <div class="cfg-group">
+            <label class="cfg-label">Season length</label>
+            <div id="season" class="chips"></div>
+          </div>
+        </div>
+        <div class="cfg-group grow">
+          <label class="cfg-label">Optional rules <span class="hint">(all managers must agree)</span></label>
+          <div id="options" class="chips"></div>
+        </div>
+      </section>
+
+      <section class="setup-out">
+        <div class="section-head">
+          <h2>Setup</h2>
+          <span id="setupMeta" class="count"></span>
+        </div>
+        <p class="legend" id="setupLegend"></p>
+        <div id="setupSteps" class="steps"></div>
+        <div id="setupNotes"></div>
+      </section>
+    </section>
+
+    <!-- ============ REFERENCE ============ -->
+    <section class="view" id="view-reference">
+      <nav class="jump-nav" id="refNav" aria-label="Jump to section"></nav>
+      <div id="refBody"></div>
+    </section>
+
+    <!-- ============ TEAMS & LEAGUES ============ -->
+    <section class="view" id="view-teams">
+      <div class="teams-intro">
+        <h2>Leagues &amp; Teams</h2>
+        <p>Every team is grouped under its league. Each card shows the team’s race, play style and
+           <b>difficulty rating exactly as printed in the Legendary rulebook</b> (★ Low → ★★★★ Very High).</p>
+        <div class="teams-controls">
+          <input type="search" id="teamSearch" class="rs-input" placeholder="Search teams, races, styles or leagues — e.g. “undead”, “stunty”, “very high”" autocomplete="off" spellcheck="false">
+          <div class="filt" id="teamFilters"></div>
+        </div>
+        <div class="diff-legend" id="diffLegend"></div>
+      </div>
+      <div id="leagues" class="leagues"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    A fan-made play aid for <b>Blood Bowl: Team Manager – The Card Game</b> (Fantasy Flight Games / Games Workshop) and the
+    community <b>Legendary Edition</b>. Setup &amp; rules grounded in the official rulebook, the <i>Sudden Death</i> and
+    <i>Foul Play</i> expansions, the official FAQ, and the Legendary Edition rulebook. Not affiliated with the publishers.
+  </footer>
+
+  <script src="js/data.js?v=1"></script>
+  <script src="js/app.js?v=1"></script>
+</body>
+</html>
