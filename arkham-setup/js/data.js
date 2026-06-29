@@ -351,7 +351,7 @@ AH.boards = [
     "<b>Travel between towns:</b> at the Train Station (Arkham) or a depot (train icon) elsewhere, spend $1 and 1 movement point to move to any other town’s station/depot.",
     "<b>‘In Arkham’</b> on cards also applies to Dunwich locations and streets. Dunwich streets are adjacent to the Sky.",
     "<b>Monster limit:</b> monsters in Dunwich don’t count against it and never go to the Outskirts — their numbers are controlled by the <b>vortices</b>.",
-    "<b>The Dunwich Horror:</b> a special monster tracked on the Dunwich Horror track; it can be fought with the Dunwich Horror cards.",
+    "<b>The Dunwich Horror:</b> when 3 Dunwich Horror tokens are on its track, it appears at <b>Sentinel Hill</b>. Fighting it draws from the Dunwich Horror deck for its abilities each combat; defeating it removes the tokens and lets you search a Common/Unique/Skill/Spell/Ally deck for any 1 card to keep.",
     "<b>Tasks & Missions</b> (Common/Unique Item cards) send you to a list of locations in order for a payoff."
   ]},
   { id: "kingsport", name: "Kingsport board", when: c => c.has("kingsport"), items: [
@@ -365,7 +365,7 @@ AH.boards = [
     "<b>Deep Ones Rising track:</b> add an uprising token whenever a gate is prevented from opening, or when a monster enters an Innsmouth <b>vortex</b> (also +1 terror, monster returned to cup). If it ever fills, the Ancient One awakens.",
     "<b>Feds Raid Innsmouth track:</b> spend Clue tokens (matching the Factory District colour) to fill it; filling all 6 spaces empties BOTH tracks.",
     "<b>Aquatic movement</b> (orange-bordered monsters) moves between aquatic locations (wave icon, incl. Arkham’s River Docks & Unvisited Isle).",
-    "<b>The Innsmouth Look:</b> drawn from the Innsmouth Look deck; too many can turn an investigator into a Deep One."
+    "<b>The Innsmouth Look:</b> when instructed, shuffle the Innsmouth Look deck and draw the listed number of cards — if a ‘Look’ card comes up, follow it (one outcome searches the cup for a Deep One, adds an uprising token, and devours you). Then return all the cards to the deck."
   ]}
 ];
 
@@ -428,7 +428,7 @@ AH.howToPlay = {
       "When either condition is met, discard it and put the second card into play (pass or fail side up); its effect then lasts the rest of the game."
     ]},
     { id: "innsmouthLook", when: c => c.has("innsmouth"), h: "The Innsmouth Look & Deep Ones", tag: "innsmouth", items: [
-      "Certain Innsmouth encounters give the <b>Innsmouth Look</b>; accumulating enough can transform an investigator into a Deep One (removed from play).",
+      "Certain Innsmouth encounters make you draw from the <b>Innsmouth Look</b> deck (shuffle, draw the listed number, then return them). If a ‘Look’ card is drawn you follow it — one outcome transforms you into a Deep One (devoured, removed from play).",
       "Prevent the Deep Ones Rising track from filling by feeding the <b>Feds Raid Innsmouth</b> track with Clue tokens — filling it empties both tracks."
     ]},
     { id: "corruption", when: c => c.has("blackgoat"), h: "Cults & Corruption", tag: "blackgoat", items: [
