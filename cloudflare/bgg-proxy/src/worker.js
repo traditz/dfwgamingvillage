@@ -584,7 +584,9 @@ export default {
       return new Response(null, { status: 204, headers: cors });
     }
 
-    if (incomingUrl.pathname === "/api/page-view") {
+    // "/api/v" is the neutral-named endpoint; "/api/page-view" kept for
+    // backward compat with cached pages (the old name matches blocker rules).
+    if (incomingUrl.pathname === "/api/v" || incomingUrl.pathname === "/api/page-view") {
       return handlePageView(request, env, cors);
     }
 

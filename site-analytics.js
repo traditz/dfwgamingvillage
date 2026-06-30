@@ -1,5 +1,5 @@
 (function () {
-  const ENDPOINT = "https://dfwgv-bgg-proxy.joemsprague.workers.dev/api/page-view";
+  const ENDPOINT = "https://dfwgv-bgg-proxy.joemsprague.workers.dev/api/v";
 
   if (navigator.doNotTrack === "1" || window.doNotTrack === "1") {
     return;
