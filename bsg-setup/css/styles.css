@@ -641,3 +641,12 @@ body::after{ animation:none; opacity:.65; }        /* static starfield */
 }
 .faq-note a{ color:var(--blue); text-decoration:none; border-bottom:1px dotted rgba(92,176,234,.5) }
 .faq-note a:hover{ border-bottom-style:solid }
+
+/* ----- Search result group labels (v45) ----- */
+.rs-group{
+  font:700 .66rem var(--mono); letter-spacing:.1em; text-transform:uppercase;
+  color:var(--blue); margin:14px 0 2px; padding-bottom:5px;
+  border-bottom:1px solid var(--line);
+}
+.rs-group:first-child{ margin-top:2px }
+.rs-results > .rs-group + .rs-item{ margin-top:2px }

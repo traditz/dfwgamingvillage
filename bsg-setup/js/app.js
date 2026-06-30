@@ -337,7 +337,7 @@ const _SYN = {
   victory: ["win", "objective"], lose: ["losing", "defeat", "destroyed"], losing: ["lose", "defeat"],
   jump: ["ftl"], ftl: ["jump"], nuke: ["nuclear", "basestar"],
   centurion: ["boarding", "party"], boarding: ["centurion"], cylon: ["raider", "basestar"],
-  reveal: ["sleeper", "revealed"], revealed: ["reveal"], sleeper: ["reveal", "loyalty"],
+  reveal: ["sleeper", "revealed", "revealing"], revealed: ["reveal", "revealing"], revealing: ["reveal", "revealed"], sleeper: ["reveal", "loyalty"],
   loyalty: ["sleeper", "cylon"], morale: ["resource"], food: ["resource"], fuel: ["resource"],
   population: ["resource"], brig: ["detention"], skill: ["check"], check: ["skill"],
   president: ["quorum", "title"], admiral: ["nuke", "title"], mutineer: ["mutiny"], mutiny: ["mutineer"]
@@ -389,17 +389,71 @@ function _hlTerms(text, terms) {
   if (alt.length) s = s.replace(new RegExp("\\b(" + alt.join("|") + ")", "gi"), "<mark>$1</mark>");
   return s;
 }
+/* Char index of the tightest window that covers the most distinct query terms,
+   so the snippet centres on the passage that's actually about the question. */
+function _bestPos(lt, qterms) {
+  const occ = [];
+  qterms.forEach((t, ti) => {
+    if (t.length < 3) return;
+    const re = new RegExp("\\b" + _escReg(t) + "\\w*", "g");
+    let m, n = 0;
+    while ((m = re.exec(lt)) !== null && n < 200) { occ.push([m.index, ti]); n++; }
+  });
+  if (!occ.length) return -1;
+  if (occ.length === 1) return occ[0][0];
+  occ.sort((a, b) => a[0] - b[0]);
+  const count = new Map();
+  let distinct = 0, l = 0, best = 0, bestSpan = 1e9, mid = occ[0][0];
+  for (let r = 0; r < occ.length; r++) {
+    const tr = occ[r][1];
+    count.set(tr, (count.get(tr) || 0) + 1);
+    if (count.get(tr) === 1) distinct++;
+    while (count.get(occ[l][1]) > 1) { count.set(occ[l][1], count.get(occ[l][1]) - 1); l++; }
+    const span = occ[r][0] - occ[l][0];
+    if (distinct > best || (distinct === best && span < bestSpan)) { best = distinct; bestSpan = span; mid = (occ[l][0] + occ[r][0]) >> 1; }
+  }
+  return mid;
+}
 function _snip(text, terms, phrase) {
   const lt = text.toLowerCase();
-  let pos = phrase && phrase.includes(" ") && lt.includes(phrase) ? lt.indexOf(phrase) : -1;
-  if (pos < 0) for (const t of terms) { const m = lt.search(new RegExp("\\b" + _escReg(t))); if (m >= 0 && (pos < 0 || m < pos)) pos = m; }
+  let pos = phrase && phrase.includes(" ") && lt.includes(phrase) ? lt.indexOf(phrase) : _bestPos(lt, terms);
   if (pos < 0) pos = 0;
-  const start = Math.max(0, pos - 80), end = Math.min(text.length, pos + 210);
+  const start = Math.max(0, pos - 115), end = Math.min(text.length, pos + 160);
   const s = (start > 0 ? "… " : "") + text.slice(start, end) + (end < text.length ? " …" : "");
   return _hlTerms(s, terms);
 }
 function _fullPassage(text, terms) {
   return text.split("\n").map(p => `<p>${_hlTerms(p, terms)}</p>`).join("");
+}
+
+/* Proximity score: how tightly the distinct query terms cluster in the passage.
+   Returns ~(#distinct terms in the tightest window) scaled by closeness — a
+   passage that says "reveal … cylon … player" in one sentence scores far higher
+   than one that scatters those words across the page. */
+function _proximity(lt, qterms) {
+  if (qterms.length < 2) return 0;
+  const occ = [];
+  qterms.forEach((t, ti) => {
+    if (t.length < 3) return;
+    const re = new RegExp("\\b" + _escReg(t) + "\\w*", "g");
+    let m, n = 0;
+    while ((m = re.exec(lt)) !== null && n < 200) { occ.push([m.index, ti]); n++; }
+  });
+  if (occ.length < 2) return 0;
+  occ.sort((a, b) => a[0] - b[0]);
+  // Sliding window: most distinct terms within the smallest character span.
+  const count = new Map();
+  let distinct = 0, l = 0, best = 0, bestSpan = 1e9;
+  for (let r = 0; r < occ.length; r++) {
+    const tr = occ[r][1];
+    count.set(tr, (count.get(tr) || 0) + 1);
+    if (count.get(tr) === 1) distinct++;
+    while (count.get(occ[l][1]) > 1) { count.set(occ[l][1], count.get(occ[l][1]) - 1); l++; }
+    const span = occ[r][0] - occ[l][0];
+    if (distinct > best || (distinct === best && span < bestSpan)) { best = distinct; bestSpan = span; }
+  }
+  if (best < 2) return 0;
+  return (best - 1) * (1 / (1 + bestSpan / 140));   // ~140 chars ≈ one sentence
 }
 
 function bsgSearch(q) {
@@ -440,7 +494,10 @@ function bsgSearch(q) {
     });
   });
 
-  const results = [];
+  // Candidate gather: BM25 weighted by how many distinct query terms a passage
+  // covers (so a passage matching ALL of "reveal/cylon/player" beats one with
+  // just a common word).
+  const cand = [];
   for (const [idx, info] of acc) {
     const e = BSG.rulesIndex[idx];
     if (!active.has(e.x)) continue;
@@ -454,32 +511,53 @@ function bsgSearch(q) {
       }
       if (sup) continue;
     }
-    let score = info.score;
-    if (phrase.length >= 3 && lt.includes(phrase)) score *= 2.4;     // exact phrase boost
-    score *= 1 + (info.hits.size - 1) * 0.15;                        // reward covering more query terms
-    if (e.s === "u") score *= 0.88;                                  // unofficial ranks a touch lower
-    score += (prec[e.x] || 0) * 0.004;                              // tiny tiebreak toward newer expansion
-    results.push({ e, score });
+    const coverage = info.hits.size / qterms.length;
+    cand.push({ e, lt, base: info.score * (0.25 + 0.75 * coverage * coverage) });
   }
-  results.sort((a, b) => b.score - a.score);
-  const top = results.slice(0, 40);
+  // Re-rank each source tier's strongest candidates with proximity (query words
+  // near each other) + an exact-phrase boost — this is where the full-question
+  // context pays off — then keep the most relevant of each tier.
+  const tier = e => (e.s === "u" ? 2 : e.s === "f" ? 1 : 0);
+  const byTier = [[], [], []];
+  cand.forEach(r => byTier[tier(r.e)].push(r));
+  const rankTier = (list, cap) => {
+    list.sort((a, b) => b.base - a.base);
+    const sub = list.slice(0, 40);
+    sub.forEach(r => {
+      let s = r.base;
+      if (phrase.length >= 3 && r.lt.includes(phrase)) s *= 2.4;
+      s *= 1 + _proximity(r.lt, qterms) * 0.7;
+      s += (prec[r.e.x] || 0) * 0.003;
+      r.score = s;
+    });
+    sub.sort((a, b) => b.score - a.score);
+    return sub.slice(0, cap);
+  };
+  // Rulebooks for this setup first, then official FAQ, then the unofficial FAQ.
+  const groups = [
+    { label: "From the rulebooks", items: rankTier(byTier[0], 22) },
+    { label: "Official FAQ &amp; Errata", items: rankTier(byTier[1], 12) },
+    { label: "Community Unofficial FAQ", items: rankTier(byTier[2], 8) }
+  ].filter(g => g.items.length);
+  const shown = groups.reduce((n, g) => n + g.items.length, 0);
 
-  if (!top.length) { box.innerHTML = `<p class="rs-hint">No matches in the rulebooks or FAQ for this setup. Try different words.</p>`; return; }
+  if (!shown) { box.innerHTML = `<p class="rs-hint">No matches in the rulebooks or FAQ for this setup. Try different words.</p>`; return; }
+  const item = e => {
+    const m = BSG.expMeta[e.x];
+    const loc = e.s === "u" ? e.sec : "p." + e.p;
+    const badge = e.s === "u" ? `<span class="rs-badge rs-unofficial">Unofficial</span>`
+                : e.s === "f" ? `<span class="rs-badge rs-faq">FAQ · Errata</span>` : "";
+    return `<details class="rs-item${e.s === "u" ? " is-unofficial" : ""}">
+        <summary class="rs-sum">
+          <div class="rs-meta"><span class="etag ${m.cls}">${m.name}</span>${badge} <span class="rs-page">${e.b} · ${loc}</span><span class="rs-toggle">Full passage</span></div>
+          <div class="rs-snip">${_snip(e.t.replace(/\n/g, " "), qterms, phrase)}</div>
+        </summary>
+        <div class="rs-full">${_fullPassage(e.t, qterms)}</div>
+      </details>`;
+  };
   box.innerHTML =
-    `<div class="rs-count">${results.length} result${results.length > 1 ? "s" : ""}${results.length > top.length ? ` · showing ${top.length}` : ""}</div>` +
-    top.map(({ e }) => {
-      const m = BSG.expMeta[e.x];
-      const loc = e.s === "u" ? e.sec : "p." + e.p;
-      const badge = e.s === "u" ? `<span class="rs-badge rs-unofficial">Unofficial</span>`
-                  : e.s === "f" ? `<span class="rs-badge rs-faq">FAQ · Errata</span>` : "";
-      return `<details class="rs-item${e.s === "u" ? " is-unofficial" : ""}">
-          <summary class="rs-sum">
-            <div class="rs-meta"><span class="etag ${m.cls}">${m.name}</span>${badge} <span class="rs-page">${e.b} · ${loc}</span><span class="rs-toggle">Full passage</span></div>
-            <div class="rs-snip">${_snip(e.t.replace(/\n/g, " "), qterms, phrase)}</div>
-          </summary>
-          <div class="rs-full">${_fullPassage(e.t, qterms)}</div>
-        </details>`;
-    }).join("");
+    `<div class="rs-count">${cand.length} result${cand.length > 1 ? "s" : ""}${cand.length > shown ? ` · showing ${shown}` : ""}</div>` +
+    groups.map(g => `<div class="rs-group">${g.label}</div>` + g.items.map(r => item(r.e)).join("")).join("");
 }
 
 /* How to Play — mode rules + core loop + active-module rules.
