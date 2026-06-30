@@ -3,7 +3,7 @@
    Aged-parchment widgets on a dark frame. Cinzel display + EB Garamond body.
    ============================================================================= */
 :root{
-  --frame:#241c14; --frame-2:#1a140d; --band:#2b2117;
+  --frame:#cdbd91; --frame-2:#beac7c; --band:#523f29;
   --parch:#e9dcb9; --parch-2:#e3d4ab; --parch-hi:#f3ead0;
   --ink:#36281a; --ink-soft:#665338; --ink-faint:#8a7755;
   --gold:#9c7b27; --gold-bright:#c39a37; --gold-band:#d8b150;
@@ -29,8 +29,8 @@ html,body{margin:0}
 body{
   font-family:"EB Garamond",Georgia,serif; color:var(--ink); font-size:17px; line-height:1.5;
   background:
-    radial-gradient(1000px 440px at 50% -130px, rgba(150,110,50,.20) 0%, rgba(150,110,50,0) 70%),
-    repeating-linear-gradient(0deg, rgba(0,0,0,.10) 0 2px, transparent 2px 5px),
+    radial-gradient(1100px 480px at 50% -120px, rgba(255,246,214,.45) 0%, rgba(255,246,214,0) 70%),
+    repeating-linear-gradient(94deg, rgba(120,90,50,.035) 0 2px, transparent 2px 6px),
     var(--frame);
   min-height:100vh;
 }
@@ -43,9 +43,9 @@ h1,h2,h3,h4,h5{font-family:"Cinzel",serif; letter-spacing:.02em; color:var(--hea
 
 /* ---- Topbar (dark banner) ------------------------------------------------ */
 .topbar{
-  border-bottom:2px solid var(--gold);
-  background:linear-gradient(180deg, #2e2417 0%, #1a140d 100%);
-  box-shadow:0 3px 16px rgba(0,0,0,.55);
+  border-bottom:2px solid var(--gold-band);
+  background:linear-gradient(180deg, #5c4831 0%, #43331f 100%);
+  box-shadow:0 3px 14px rgba(40,26,8,.4);
 }
 .topbar-inner{max-width:1180px; margin:0 auto; padding:20px 26px 10px; position:relative}
 .sigil{position:absolute; right:26px; top:14px; width:74px; height:74px; color:var(--gold-band); opacity:.92}
@@ -159,14 +159,14 @@ main{max-width:1180px; margin:0 auto; padding:22px 26px 40px}
 /* ---- Setup output -------------------------------------------------------- */
 .section-head{display:flex; align-items:baseline; gap:12px; margin-bottom:6px}
 .section-head h2{font-size:26px}
-.count{font-family:"Cinzel",serif; font-size:13px; color:var(--gold-band); letter-spacing:.05em}
-.legend{color:#d3bf95; font-size:15.5px; margin:0 0 18px; max-width:880px}
-.legend b{color:var(--gold-band)}
+.count{font-family:"Cinzel",serif; font-size:13px; color:var(--gold); letter-spacing:.05em}
+.legend{color:var(--ink-soft); font-size:15.5px; margin:0 0 18px; max-width:880px}
+.legend b{color:var(--crimson-deep)}
 
 .setup-block{margin-bottom:20px}
 .setup-block h3{
-  font-size:16px; letter-spacing:.06em; text-transform:uppercase; color:var(--gold-band);
-  border-bottom:1px solid rgba(216,177,80,.35); padding-bottom:5px; margin-bottom:12px;
+  font-size:16px; letter-spacing:.06em; text-transform:uppercase; color:var(--crimson);
+  border-bottom:1px solid var(--edge-2); padding-bottom:5px; margin-bottom:12px;
 }
 .ustep{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px}
 .ustep li{
@@ -200,11 +200,12 @@ main{max-width:1180px; margin:0 auto; padding:22px 26px 40px}
 /* ---- Reference ----------------------------------------------------------- */
 .jump-nav{
   position:sticky; top:0; z-index:5; display:flex; flex-wrap:wrap; gap:6px;
-  background:rgba(26,20,13,.96); backdrop-filter:blur(4px);
-  padding:11px 12px; margin:-22px -26px 20px; border-bottom:2px solid var(--gold);
+  background:rgba(205,189,145,.97); backdrop-filter:blur(4px);
+  padding:11px 12px; margin:-22px -26px 20px; border-bottom:1px solid var(--edge-2);
 }
-.jn{font-family:"Cinzel",serif; font-size:12px; letter-spacing:.03em; color:#c9b489;
-  text-decoration:none; padding:5px 11px; border:1px solid var(--gold); border-radius:20px; background:#2c2317; transition:.13s}
+.jn{font-family:"Cinzel",serif; font-size:12px; letter-spacing:.03em; color:var(--ink-soft);
+  text-decoration:none; padding:5px 11px; border:1px solid var(--edge-2); border-radius:20px;
+  background-color:#ddcb9f; background-image:var(--paper); transition:.13s}
 .jn:hover{background:var(--crimson); color:#f6e7c2; border-color:var(--crimson-deep)}
 
 .ref-card{border:1px solid var(--edge-2); border-radius:12px;
@@ -247,9 +248,9 @@ main{max-width:1180px; margin:0 auto; padding:22px 26px 40px}
 .faq-a{padding:11px 14px; color:var(--ink-soft); font-size:15.5px; border-top:1px solid var(--card-line)}
 
 /* ---- Footer -------------------------------------------------------------- */
-.footer{max-width:1180px; margin:0 auto; padding:18px 26px 34px; color:#a8946d;
-  font-size:13.5px; font-style:italic; text-align:center; border-top:1px solid rgba(184,160,111,.3)}
-.footer b{font-style:normal; color:var(--gold-band)}
+.footer{max-width:1180px; margin:0 auto; padding:18px 26px 34px; color:var(--ink-soft);
+  font-size:13.5px; font-style:italic; text-align:center; border-top:1px solid var(--edge-2)}
+.footer b{font-style:normal; color:var(--crimson-deep)}
 
 /* ---- Responsive ---------------------------------------------------------- */
 @media (max-width:680px){
