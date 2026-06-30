@@ -1,62 +1,76 @@
 /* =============================================================================
    Talisman (Revised 4th Edition) — Setup Utility & Reference
-   Dark fantasy theme: deep charcoal surfaces, warm gold + crimson accents,
-   parchment-coloured text. Cinzel display + EB Garamond body.
+   Aged-parchment widgets on a dark frame. Cinzel display + EB Garamond body.
    ============================================================================= */
 :root{
-  --bg-0:#100e0a; --bg-1:#1a1510; --panel:#211b13; --panel-2:#2a2217;
-  --ink:#eaddc0; --ink:#e9dcbf; --ink-soft:#b4a585; --ink-faint:#8c7e62;
-  --edge:#3a3022; --edge-2:#4c3f28; --gold:#caa23f; --gold-bright:#e7c45f;
-  --crimson:#cf5246; --crimson-deep:#a8362c; --head:#e6c766;
-  --shadow:rgba(0,0,0,.55); --card:#211b13; --card-2:#2a2217; --card-line:#3b3122;
-  /* source accents (kept vivid so tags pop on the dark ground) */
-  --s-base:#b8423a; --s-dragon:#d4523f; --s-dungeon:#7e5bc0; --s-highland:#36a98e;
-  --s-city:#cf9f2e; --s-woodland:#57a64e; --s-cataclysm:#6f8aa0; --s-reaper:#8c8c8c;
-  --s-frost:#43a0cf; --s-pool:#23c0ac; --s-blood:#c4423f; --s-fire:#ef8c2a;
-  --s-nether:#a64593; --s-harb:#6c7a92; --s-deep:#2f9c9c; --s-lost:#b08a47; --s-var:#7a7ac0;
+  --frame:#241c14; --frame-2:#1a140d; --band:#2b2117;
+  --parch:#e9dcb9; --parch-2:#e3d4ab; --parch-hi:#f3ead0;
+  --ink:#36281a; --ink-soft:#665338; --ink-faint:#8a7755;
+  --gold:#9c7b27; --gold-bright:#c39a37; --gold-band:#d8b150;
+  --crimson:#8a2b2b; --crimson-deep:#6d1f1f; --head:#6d1f1f;
+  --edge:#cdb988; --edge-2:#b8a06f; --card-line:#c7b485;
+  --shadow:rgba(18,10,2,.5);
+  /* aged-paper texture, layered over each surface's own background-color */
+  --paper:
+    radial-gradient(120% 85% at 12% 8%, rgba(255,251,232,.55), rgba(255,251,232,0) 55%),
+    radial-gradient(115% 100% at 88% 92%, rgba(143,112,68,.18), rgba(143,112,68,0) 60%),
+    radial-gradient(70% 60% at 78% 18%, rgba(120,90,50,.10), rgba(120,90,50,0) 70%),
+    radial-gradient(60% 55% at 30% 80%, rgba(120,90,50,.08), rgba(120,90,50,0) 70%),
+    repeating-linear-gradient(94deg, rgba(120,90,50,.028) 0 2px, rgba(120,90,50,0) 2px 6px);
+  --paper-inset:inset 0 0 34px rgba(150,118,70,.18), inset 0 0 1px rgba(90,64,30,.4);
+  /* source accents */
+  --s-base:#8a2b2b; --s-dragon:#bf3a26; --s-dungeon:#5b3a8c; --s-highland:#2a7d6a;
+  --s-city:#b07d12; --s-woodland:#3d7d39; --s-cataclysm:#566b7a; --s-reaper:#6a6a6a;
+  --s-frost:#2f7da6; --s-pool:#1f9d8f; --s-blood:#9b2226; --s-fire:#d9741b;
+  --s-nether:#7a2e6b; --s-harb:#4a5568; --s-deep:#1f6f6f; --s-lost:#876a37; --s-var:#5a5a8c;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
 body{
   font-family:"EB Garamond",Georgia,serif; color:var(--ink); font-size:17px; line-height:1.5;
   background:
-    radial-gradient(1100px 480px at 50% -140px, rgba(120,80,30,.16) 0%, rgba(120,80,30,0) 72%),
-    repeating-linear-gradient(0deg, rgba(255,235,190,.012) 0 2px, transparent 2px 4px),
-    var(--bg-0);
+    radial-gradient(1000px 440px at 50% -130px, rgba(150,110,50,.20) 0%, rgba(150,110,50,0) 70%),
+    repeating-linear-gradient(0deg, rgba(0,0,0,.10) 0 2px, transparent 2px 5px),
+    var(--frame);
   min-height:100vh;
 }
 h1,h2,h3,h4,h5{font-family:"Cinzel",serif; letter-spacing:.02em; color:var(--head); margin:0}
 
-/* ---- Topbar -------------------------------------------------------------- */
+/* parchment surface helper applied across widgets */
+.config,.ustep li,.ref-card,.callouts,.faq-item,.flow-strip,.tab.on{
+  background-color:var(--parch); background-image:var(--paper);
+}
+
+/* ---- Topbar (dark banner) ------------------------------------------------ */
 .topbar{
-  border-bottom:1px solid var(--edge-2);
-  background:linear-gradient(180deg, #241d13 0%, #16120d 100%);
-  box-shadow:0 3px 18px rgba(0,0,0,.6);
+  border-bottom:2px solid var(--gold);
+  background:linear-gradient(180deg, #2e2417 0%, #1a140d 100%);
+  box-shadow:0 3px 16px rgba(0,0,0,.55);
 }
 .topbar-inner{max-width:1180px; margin:0 auto; padding:20px 26px 10px; position:relative}
-.sigil{position:absolute; right:26px; top:14px; width:74px; height:74px; color:var(--gold); opacity:.9}
+.sigil{position:absolute; right:26px; top:14px; width:74px; height:74px; color:var(--gold-band); opacity:.92}
 .sigil svg{width:100%; height:100%}
 .brand{display:flex; flex-direction:column; gap:2px}
 .brand-tal{font-family:"Cinzel",serif; font-weight:800; font-size:40px; line-height:1;
-  color:#f1deb0; text-shadow:0 1px 0 #000, 0 0 18px rgba(202,162,63,.35);}
+  color:#f1deb0; text-shadow:0 1px 0 #000, 0 0 18px rgba(216,177,80,.35);}
 .brand-sub{font-family:"Cinzel",serif; font-weight:600; font-size:14px; letter-spacing:.16em;
-  text-transform:uppercase; color:var(--gold); margin-top:3px}
+  text-transform:uppercase; color:var(--gold-band); margin-top:3px}
 .deco-rule{display:flex; align-items:center; gap:8px; width:230px; margin:5px 0 2px}
-.deco-rule i{height:1px; flex:1; background:linear-gradient(90deg,transparent,var(--edge-2))}
-.deco-rule i:last-child{background:linear-gradient(90deg,var(--edge-2),transparent)}
-.deco-rule b{width:7px; height:7px; transform:rotate(45deg); background:var(--gold); border-radius:1px}
-.tagline{max-width:760px; color:var(--ink-soft); margin:8px 0 12px; font-size:16.5px}
+.deco-rule i{height:1px; flex:1; background:linear-gradient(90deg,transparent,var(--gold))}
+.deco-rule i:last-child{background:linear-gradient(90deg,var(--gold),transparent)}
+.deco-rule b{width:7px; height:7px; transform:rotate(45deg); background:var(--gold-band); border-radius:1px}
+.tagline{max-width:760px; color:#cdb88c; margin:8px 0 12px; font-size:16.5px}
 
 /* Tabs */
 .tabs{display:flex; gap:6px}
 .tab{
   font-family:"Cinzel",serif; font-weight:600; font-size:14px; letter-spacing:.04em;
-  padding:9px 18px; border:1px solid var(--edge-2); border-bottom:none;
-  border-radius:8px 8px 0 0; background:#241d13; color:var(--ink-soft); cursor:pointer;
+  padding:9px 18px; border:1px solid var(--gold); border-bottom:none;
+  border-radius:8px 8px 0 0; background:#2c2317; color:#c9b489; cursor:pointer;
   transition:.15s; position:relative; top:2px;
 }
-.tab:hover{background:#2c2417; color:var(--ink)}
-.tab.on{background:var(--card); color:var(--gold-bright); top:0; padding-bottom:11px; box-shadow:0 -3px 10px rgba(0,0,0,.4)}
+.tab:hover{background:#362b1b; color:#e8d5a8}
+.tab.on{color:var(--crimson-deep); top:0; padding-bottom:11px; box-shadow:0 -2px 10px rgba(0,0,0,.4); border-color:var(--edge-2)}
 
 /* ---- Layout -------------------------------------------------------------- */
 main{max-width:1180px; margin:0 auto; padding:22px 26px 40px}
@@ -65,8 +79,8 @@ main{max-width:1180px; margin:0 auto; padding:22px 26px 40px}
 
 /* ---- Config -------------------------------------------------------------- */
 .config{
-  background:var(--card); border:1px solid var(--card-line); border-radius:12px;
-  padding:18px 20px; box-shadow:0 4px 20px rgba(0,0,0,.45); margin-bottom:22px;
+  border:1px solid var(--edge-2); border-radius:12px;
+  padding:18px 20px; box-shadow:var(--paper-inset), 0 4px 18px var(--shadow); margin-bottom:22px;
 }
 .cfg-group{margin-bottom:16px}
 .cfg-group:last-child{margin-bottom:0}
@@ -74,47 +88,49 @@ main{max-width:1180px; margin:0 auto; padding:22px 26px 40px}
 .cfg-row .cfg-group{margin-bottom:0}
 .cfg-row .grow{flex:1; min-width:280px}
 .cfg-label{display:block; font-family:"Cinzel",serif; font-weight:700; font-size:13px;
-  letter-spacing:.08em; text-transform:uppercase; color:var(--gold); margin-bottom:9px}
+  letter-spacing:.08em; text-transform:uppercase; color:var(--crimson); margin-bottom:9px}
 .hint{font-family:"EB Garamond",serif; font-weight:400; text-transform:none; letter-spacing:0;
   color:var(--ink-faint); font-size:13.5px; font-style:italic}
 .src-block{margin-bottom:14px}
 .src-block:last-child{margin-bottom:0}
 .src-head{font-family:"Cinzel",serif; font-size:11.5px; letter-spacing:.1em; text-transform:uppercase;
-  color:var(--ink-faint); margin-bottom:7px}
+  color:var(--gold); margin-bottom:7px}
 
 /* Chips */
 .chips{display:flex; flex-wrap:wrap; gap:8px}
 .chip{
   display:inline-flex; align-items:center; gap:8px; cursor:pointer;
-  background:#2a2217; border:1px solid var(--edge-2); border-radius:9px;
+  background-color:#ddcb9f; background-image:var(--paper);
+  border:1px solid var(--edge-2); border-radius:9px;
   padding:7px 12px; font-family:"EB Garamond",serif; font-size:15.5px; color:var(--ink-soft);
   transition:.13s; line-height:1.15;
 }
-.chip:hover{background:#332a1b; border-color:var(--gold); color:var(--ink)}
+.chip:hover{background-color:#ecdcb2; border-color:var(--gold); color:var(--ink)}
 .chip .chip-name{font-weight:600}
 .chip .chip-tag{font-family:"Cinzel",serif; font-size:10px; font-weight:700; letter-spacing:.05em;
-  padding:2px 6px; border-radius:5px; color:#1a1510; background:var(--s-base)}
+  padding:2px 6px; border-radius:5px; color:#fff; background:var(--s-base)}
 .chip .chip-sub{font-size:12.5px; font-style:italic; color:var(--ink-faint)}
-.chip.on{background:#39301c; color:var(--ink); border-color:var(--gold);
-  box-shadow:0 0 0 1px var(--gold), 0 0 14px rgba(202,162,63,.25)}
-.chip.on .chip-sub{color:var(--gold-bright)}
-.chip.locked{cursor:default; background:#2a2217; border-style:double; border-width:3px; border-color:var(--edge-2)}
-.chip.locked:hover{border-color:var(--edge-2); background:#2a2217}
+.chip.on{background-color:var(--parch-hi); color:var(--ink); border-color:var(--gold);
+  box-shadow:0 0 0 1px var(--gold), 0 2px 9px var(--shadow)}
+.chip.on .chip-sub{color:var(--crimson)}
+.chip.locked{cursor:default; border-style:double; border-width:3px; border-color:var(--edge-2)}
+.chip.locked:hover{border-color:var(--edge-2); background-color:#ddcb9f}
 .chip.small{padding:6px 11px; font-size:14.5px}
 .chip.ending{padding:8px 14px}
 .chip.ending .chip-name{font-family:"Cinzel",serif; font-size:14px}
-.chip.disabled{opacity:.4; cursor:not-allowed; filter:grayscale(.5)}
-.chip.disabled:hover{background:#2a2217; border-color:var(--edge-2); color:var(--ink-soft)}
+.chip.disabled{opacity:.45; cursor:not-allowed; filter:grayscale(.4)}
+.chip.disabled:hover{background-color:#ddcb9f; border-color:var(--edge-2); color:var(--ink-soft)}
 
 /* Player buttons */
 .pbtns{display:flex; gap:6px}
 .pbtn{
   width:42px; height:42px; border-radius:9px; border:1px solid var(--edge-2);
-  background:#2a2217; color:var(--ink-soft); font-family:"Cinzel",serif; font-weight:700; font-size:18px;
+  background-color:#ddcb9f; background-image:var(--paper);
+  color:var(--ink-soft); font-family:"Cinzel",serif; font-weight:700; font-size:18px;
   cursor:pointer; transition:.13s;
 }
-.pbtn:hover{background:#332a1b; border-color:var(--gold)}
-.pbtn.on{background:var(--crimson-deep); color:#f6e7c2; border-color:var(--crimson); box-shadow:0 0 12px rgba(207,82,70,.3)}
+.pbtn:hover{background-color:#ecdcb2; border-color:var(--gold)}
+.pbtn.on{background:var(--crimson); color:#f6e7c2; border-color:var(--crimson-deep); box-shadow:0 2px 8px var(--shadow)}
 
 /* ---- Source colour tints (chip tag + chip accent) ------------------------ */
 .s-base{background:var(--s-base)} .s-dragon{background:var(--s-dragon)} .s-dungeon{background:var(--s-dungeon)}
@@ -123,44 +139,45 @@ main{max-width:1180px; margin:0 auto; padding:22px 26px 40px}
 .s-pool{background:var(--s-pool)} .s-blood{background:var(--s-blood)} .s-fire{background:var(--s-fire)}
 .s-nether{background:var(--s-nether)} .s-harb{background:var(--s-harb)} .s-deep{background:var(--s-deep)}
 .s-lost{background:var(--s-lost)} .s-var{background:var(--s-var)}
-.s-base-chip.on{box-shadow:0 0 0 1px var(--s-base), 0 0 14px rgba(184,66,58,.4)}
-.s-dragon-chip.on{box-shadow:0 0 0 1px var(--s-dragon),0 0 14px rgba(212,82,63,.4)}
-.s-dungeon-chip.on{box-shadow:0 0 0 1px var(--s-dungeon),0 0 14px rgba(126,91,192,.4)}
-.s-highland-chip.on{box-shadow:0 0 0 1px var(--s-highland),0 0 14px rgba(54,169,142,.4)}
-.s-city-chip.on{box-shadow:0 0 0 1px var(--s-city),0 0 14px rgba(207,159,46,.4)}
-.s-woodland-chip.on{box-shadow:0 0 0 1px var(--s-woodland),0 0 14px rgba(87,166,78,.4)}
-.s-cataclysm-chip.on{box-shadow:0 0 0 1px var(--s-cataclysm),0 0 14px rgba(111,138,160,.4)}
-.s-reaper-chip.on{box-shadow:0 0 0 1px var(--s-reaper),0 0 14px rgba(140,140,140,.4)}
-.s-frost-chip.on{box-shadow:0 0 0 1px var(--s-frost),0 0 14px rgba(67,160,207,.4)}
-.s-pool-chip.on{box-shadow:0 0 0 1px var(--s-pool),0 0 14px rgba(35,192,172,.4)}
-.s-blood-chip.on{box-shadow:0 0 0 1px var(--s-blood),0 0 14px rgba(196,66,63,.4)}
-.s-fire-chip.on{box-shadow:0 0 0 1px var(--s-fire),0 0 14px rgba(239,140,42,.4)}
-.s-nether-chip.on{box-shadow:0 0 0 1px var(--s-nether),0 0 14px rgba(166,69,147,.4)}
-.s-harb-chip.on{box-shadow:0 0 0 1px var(--s-harb),0 0 14px rgba(108,122,146,.4)}
-.s-deep-chip.on{box-shadow:0 0 0 1px var(--s-deep),0 0 14px rgba(47,156,156,.4)}
-.s-lost-chip.on{box-shadow:0 0 0 1px var(--s-lost),0 0 14px rgba(176,138,71,.4)}
+.s-base-chip.on{box-shadow:0 0 0 1px var(--s-base), 0 2px 9px var(--shadow)}
+.s-dragon-chip.on{box-shadow:0 0 0 1px var(--s-dragon),0 2px 9px var(--shadow)}
+.s-dungeon-chip.on{box-shadow:0 0 0 1px var(--s-dungeon),0 2px 9px var(--shadow)}
+.s-highland-chip.on{box-shadow:0 0 0 1px var(--s-highland),0 2px 9px var(--shadow)}
+.s-city-chip.on{box-shadow:0 0 0 1px var(--s-city),0 2px 9px var(--shadow)}
+.s-woodland-chip.on{box-shadow:0 0 0 1px var(--s-woodland),0 2px 9px var(--shadow)}
+.s-cataclysm-chip.on{box-shadow:0 0 0 1px var(--s-cataclysm),0 2px 9px var(--shadow)}
+.s-reaper-chip.on{box-shadow:0 0 0 1px var(--s-reaper),0 2px 9px var(--shadow)}
+.s-frost-chip.on{box-shadow:0 0 0 1px var(--s-frost),0 2px 9px var(--shadow)}
+.s-pool-chip.on{box-shadow:0 0 0 1px var(--s-pool),0 2px 9px var(--shadow)}
+.s-blood-chip.on{box-shadow:0 0 0 1px var(--s-blood),0 2px 9px var(--shadow)}
+.s-fire-chip.on{box-shadow:0 0 0 1px var(--s-fire),0 2px 9px var(--shadow)}
+.s-nether-chip.on{box-shadow:0 0 0 1px var(--s-nether),0 2px 9px var(--shadow)}
+.s-harb-chip.on{box-shadow:0 0 0 1px var(--s-harb),0 2px 9px var(--shadow)}
+.s-deep-chip.on{box-shadow:0 0 0 1px var(--s-deep),0 2px 9px var(--shadow)}
+.s-lost-chip.on{box-shadow:0 0 0 1px var(--s-lost),0 2px 9px var(--shadow)}
 
 /* ---- Setup output -------------------------------------------------------- */
 .section-head{display:flex; align-items:baseline; gap:12px; margin-bottom:6px}
 .section-head h2{font-size:26px}
-.count{font-family:"Cinzel",serif; font-size:13px; color:var(--gold); letter-spacing:.05em}
-.legend{color:var(--ink-soft); font-size:15.5px; margin:0 0 18px; max-width:880px}
-.legend b{color:var(--gold-bright)}
+.count{font-family:"Cinzel",serif; font-size:13px; color:var(--gold-band); letter-spacing:.05em}
+.legend{color:#d3bf95; font-size:15.5px; margin:0 0 18px; max-width:880px}
+.legend b{color:var(--gold-band)}
 
 .setup-block{margin-bottom:20px}
 .setup-block h3{
-  font-size:16px; letter-spacing:.06em; text-transform:uppercase; color:var(--gold);
-  border-bottom:1px solid var(--card-line); padding-bottom:5px; margin-bottom:12px;
+  font-size:16px; letter-spacing:.06em; text-transform:uppercase; color:var(--gold-band);
+  border-bottom:1px solid rgba(216,177,80,.35); padding-bottom:5px; margin-bottom:12px;
 }
 .ustep{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px}
 .ustep li{
-  display:flex; gap:12px; background:var(--card-2); border:1px solid var(--card-line);
-  border-left:4px solid var(--gold); border-radius:9px; padding:11px 14px; box-shadow:0 2px 10px rgba(0,0,0,.35);
+  display:flex; gap:12px; border:1px solid var(--edge-2);
+  border-left:4px solid var(--gold); border-radius:9px; padding:11px 14px;
+  box-shadow:var(--paper-inset), 0 2px 9px var(--shadow);
 }
 .snum{
-  flex:none; width:26px; height:26px; border-radius:50%; background:var(--crimson-deep); color:#f6e7c2;
+  flex:none; width:26px; height:26px; border-radius:50%; background:var(--crimson); color:#f6e7c2;
   font-family:"Cinzel",serif; font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center;
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.16);
 }
 .sbody{flex:1}
 .st{font-family:"Cinzel",serif; font-weight:700; font-size:16px; color:var(--ink)}
@@ -169,12 +186,12 @@ main{max-width:1180px; margin:0 auto; padding:22px 26px 40px}
 
 /* Source tags */
 .etag{display:inline-block; font-family:"Cinzel",serif; font-size:10px; font-weight:700; letter-spacing:.05em;
-  color:#15110b; padding:2px 7px; border-radius:5px; vertical-align:middle; box-shadow:0 1px 3px rgba(0,0,0,.4)}
+  color:#fff; padding:2px 7px; border-radius:5px; vertical-align:middle; box-shadow:0 1px 2px var(--shadow)}
 
 /* Callouts */
-.callouts{margin-top:24px; background:#241d13; border:1px solid var(--card-line);
-  border-radius:12px; padding:16px 18px; box-shadow:0 3px 14px rgba(0,0,0,.4)}
-.callouts h3{font-size:16px; letter-spacing:.05em; text-transform:uppercase; color:var(--gold-bright); margin-bottom:12px}
+.callouts{margin-top:24px; border:1px solid var(--edge-2);
+  border-radius:12px; padding:16px 18px; box-shadow:var(--paper-inset), 0 3px 12px var(--shadow)}
+.callouts h3{font-size:16px; letter-spacing:.05em; text-transform:uppercase; color:var(--crimson); margin-bottom:12px}
 .callout{padding:9px 0; border-top:1px dashed var(--card-line)}
 .callout:first-of-type{border-top:none}
 .callout b{font-family:"Cinzel",serif; font-size:14.5px; color:var(--ink); margin-left:6px}
@@ -183,15 +200,15 @@ main{max-width:1180px; margin:0 auto; padding:22px 26px 40px}
 /* ---- Reference ----------------------------------------------------------- */
 .jump-nav{
   position:sticky; top:0; z-index:5; display:flex; flex-wrap:wrap; gap:6px;
-  background:rgba(22,18,13,.95); backdrop-filter:blur(4px);
-  padding:11px 12px; margin:-22px -26px 20px; border-bottom:1px solid var(--edge-2);
+  background:rgba(26,20,13,.96); backdrop-filter:blur(4px);
+  padding:11px 12px; margin:-22px -26px 20px; border-bottom:2px solid var(--gold);
 }
-.jn{font-family:"Cinzel",serif; font-size:12px; letter-spacing:.03em; color:var(--ink-soft);
-  text-decoration:none; padding:5px 11px; border:1px solid var(--edge-2); border-radius:20px; background:#2a2217; transition:.13s}
-.jn:hover{background:var(--crimson-deep); color:#f6e7c2; border-color:var(--crimson)}
+.jn{font-family:"Cinzel",serif; font-size:12px; letter-spacing:.03em; color:#c9b489;
+  text-decoration:none; padding:5px 11px; border:1px solid var(--gold); border-radius:20px; background:#2c2317; transition:.13s}
+.jn:hover{background:var(--crimson); color:#f6e7c2; border-color:var(--crimson-deep)}
 
-.ref-card{background:var(--card); border:1px solid var(--card-line); border-radius:12px;
-  padding:20px 22px; margin-bottom:18px; box-shadow:0 3px 16px rgba(0,0,0,.4); scroll-margin-top:64px}
+.ref-card{border:1px solid var(--edge-2); border-radius:12px;
+  padding:20px 22px; margin-bottom:18px; box-shadow:var(--paper-inset), 0 3px 14px var(--shadow); scroll-margin-top:64px}
 .ref-card h2{font-size:23px; margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid var(--card-line)}
 .ref-intro{color:var(--ink-soft); font-size:16px; margin:0 0 14px; font-style:italic}
 
@@ -199,8 +216,8 @@ main{max-width:1180px; margin:0 auto; padding:22px 26px 40px}
 .flow-list li{margin-bottom:7px}
 .flow-list b{font-family:"Cinzel",serif; color:var(--crimson)}
 .flow-strip{display:flex; flex-wrap:wrap; align-items:center; gap:4px; margin:12px 0;
-  padding:11px 13px; background:#241d13; border:1px solid var(--card-line); border-radius:9px}
-.flow-strip span{font-family:"Cinzel",serif; font-size:12px; background:#2f2718; border:1px solid var(--edge-2);
+  padding:11px 13px; border:1px solid var(--card-line); border-radius:9px; box-shadow:var(--paper-inset)}
+.flow-strip span{font-family:"Cinzel",serif; font-size:12px; background:#ddcb9f; border:1px solid var(--edge-2);
   border-radius:6px; padding:4px 9px; color:var(--ink)}
 .flow-strip i{color:var(--gold); font-style:normal; font-weight:700}
 
@@ -215,24 +232,24 @@ main{max-width:1180px; margin:0 auto; padding:22px 26px 40px}
 
 .ref-table{border-collapse:collapse; margin:6px 0 14px}
 .ref-table th,.ref-table td{border:1px solid var(--card-line); padding:6px 16px; text-align:center; font-size:15.5px}
-.ref-table th{font-family:"Cinzel",serif; font-size:13px; background:var(--crimson-deep); color:#f6e7c2}
-.ref-table td{background:#241d13; color:var(--ink)}
+.ref-table th{font-family:"Cinzel",serif; font-size:13px; background:var(--crimson); color:#f6e7c2}
+.ref-table td{background:#e1d2a8; color:var(--ink)}
 
 /* FAQ */
 .faq-list{display:flex; flex-direction:column; gap:8px}
-.faq-item{border:1px solid var(--card-line); border-radius:9px; background:#241d13; overflow:hidden}
+.faq-item{border:1px solid var(--card-line); border-radius:9px; overflow:hidden; box-shadow:var(--paper-inset)}
 .faq-item summary{cursor:pointer; padding:11px 14px; font-family:"Cinzel",serif; font-size:15px; color:var(--ink);
   list-style:none; position:relative; padding-right:36px}
 .faq-item summary::-webkit-details-marker{display:none}
 .faq-item summary::after{content:"+"; position:absolute; right:15px; top:9px; font-size:20px; color:var(--gold); font-family:"Cinzel",serif}
 .faq-item[open] summary::after{content:"–"}
-.faq-item[open] summary{background:#2f2718; color:var(--gold-bright)}
+.faq-item[open] summary{background:rgba(150,118,70,.18); color:var(--crimson-deep)}
 .faq-a{padding:11px 14px; color:var(--ink-soft); font-size:15.5px; border-top:1px solid var(--card-line)}
 
 /* ---- Footer -------------------------------------------------------------- */
-.footer{max-width:1180px; margin:0 auto; padding:18px 26px 34px; color:var(--ink-faint);
-  font-size:13.5px; font-style:italic; text-align:center; border-top:1px solid var(--card-line)}
-.footer b{font-style:normal; color:var(--gold)}
+.footer{max-width:1180px; margin:0 auto; padding:18px 26px 34px; color:#a8946d;
+  font-size:13.5px; font-style:italic; text-align:center; border-top:1px solid rgba(184,160,111,.3)}
+.footer b{font-style:normal; color:var(--gold-band)}
 
 /* ---- Responsive ---------------------------------------------------------- */
 @media (max-width:680px){
