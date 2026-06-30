@@ -274,7 +274,7 @@ function buildSearchPanel(c) {
   const books = AH.expansions.filter(e => expEnabled(e.id)).map(e => AH.expMeta[e.id].name).concat(["FAQ"]);
   return `<section class="rules-search" id="sec-search">
       <h3>Search the Rulebooks &amp; FAQ</h3>
-      <p class="rs-sub">Searches the ${books.join(", ")} for this setup — type keywords <i>or ask a plain question</i> (“how do I seal a gate?”). Results are ranked by relevance; each cites its source and page, and the FAQ &amp; Errata is weighted above the rulebooks it corrects. Expand any result for the full passage.</p>
+      <p class="rs-sub">Searches the ${books.join(", ")} for this setup — type keywords <i>or ask a plain question</i> (“how do I seal a gate?”). Results are ranked by relevance, with the in-play <b>rulebooks shown first</b> and <b>FAQ &amp; Errata clarifications after</b>. Each cites its source and page; expand any result for the full passage.</p>
       <input type="search" id="rules-q" class="rs-input" placeholder="Ask a question, or search a rule or component…" oninput="ahSearch(this.value)" autocomplete="off" spellcheck="false">
       <div id="rules-results" class="rs-results"><p class="rs-hint">Type a few words — or ask a question.</p></div>
     </section>`;
@@ -434,19 +434,30 @@ function ahSearch(q) {
     let score = info.score;
     if (phrase.length >= 3 && lt.includes(phrase)) score *= 2.4;        // exact phrase boost
     score *= 1 + (info.hits.size - 1) * 0.15;                           // reward covering more query terms
-    if (e.x === "faq") score *= 1.15;                                   // FAQ corrects the rulebooks
-    score += (prec[e.x] || 0) * 0.004;                                 // tiny tiebreak toward newer source
-    results.push({ e, score });
+    score += (prec[e.x] || 0) * 0.003;                                 // tiny supersession tiebreak among rulebooks
+    results.push({ e, score, faq: e.x === "faq" });
   }
-  results.sort((a, b) => b.score - a.score);
-  const top = results.slice(0, 40);
+  // Each group is relevance-ranked; the in-play rulebooks lead, the FAQ follows
+  // as clarification (so setup rules come first, errata after).
+  const books = results.filter(r => !r.faq).sort((a, b) => b.score - a.score);
+  const faqs  = results.filter(r =>  r.faq).sort((a, b) => b.score - a.score);
+  // Reserve slots per group so the FAQ clarifications always show even when the
+  // rulebooks have many hits — rulebooks still lead, the FAQ follows.
+  const shownBooks = books.slice(0, 28);
+  const shownFaqs  = faqs.slice(0, 12);
+  const top = shownBooks.concat(shownFaqs);
 
   if (!top.length) { box.innerHTML = `<p class="rs-hint">No matches in the rulebooks or FAQ for this setup. Try different words.</p>`; return; }
-  box.innerHTML =
-    `<div class="rs-count">${results.length} result${results.length > 1 ? "s" : ""}${results.length > top.length ? ` · showing ${top.length}` : ""}</div>` +
-    top.map(({ e }) => {
+  const truncated = books.length > shownBooks.length || faqs.length > shownFaqs.length;
+  const countLine = `<div class="rs-count">${books.length} rulebook · ${faqs.length} FAQ${truncated ? ` · showing top ${shownBooks.length} + ${shownFaqs.length}` : ""}</div>`;
+  box.innerHTML = countLine +
+    top.map((r, i) => {
+      const e = r.e;
       const m = AH.expMeta[e.x] || { name: e.b, cls: "e-base" };
-      return `<details class="rs-item">
+      // divider where the rulebook results give way to the FAQ
+      const divider = (r.faq && i > 0 && !top[i - 1].faq)
+        ? `<div class="rs-divider"><span>FAQ &amp; Errata — clarifications</span></div>` : "";
+      return divider + `<details class="rs-item${r.faq ? " is-faq" : ""}">
           <summary class="rs-sum">
             <div class="rs-meta"><span class="etag ${m.cls}">${m.name}</span> <span class="rs-page">${e.b} · p.${e.p}</span><span class="rs-toggle">Full passage</span></div>
             <div class="rs-snip">${_snip(e.t.replace(/\n/g, " "), qterms, phrase)}</div>
