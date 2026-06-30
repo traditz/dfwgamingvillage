@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Talisman (Revised 4th Edition) — Setup Utility &amp; Reference</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=EB+Garamond:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=1">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <span class="sigil" aria-hidden="true">
+        <svg viewBox="0 0 100 100">
+          <defs>
+            <radialGradient id="sg-glow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#e8b44a" stop-opacity="0.55"/>
+              <stop offset="100%" stop-color="#e8b44a" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <circle cx="50" cy="50" r="46" fill="url(#sg-glow)"/>
+          <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.7"/>
+          <!-- triangular crown sigil echoing the Talisman die face -->
+          <path d="M50 16 L82 72 L18 72 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          <circle cx="50" cy="54" r="7" fill="currentColor"/>
+        </svg>
+      </span>
+      <div class="brand">
+        <span class="brand-tal">Talisman</span>
+        <span class="deco-rule"><i></i><b></b><i></i></span>
+        <span class="brand-sub">Setup Utility &amp; Reference · Revised 4th Edition</span>
+      </div>
+      <p class="tagline">Pick the expansions on your table, your players and your endgame — and get a clean, source-tagged setup sequence plus a full rules reference. The FAQ always wins.</p>
+      <nav class="tabs" id="tabs">
+        <button class="tab on" data-tab="setup">Setup Utility</button>
+        <button class="tab" data-tab="reference">Game Reference</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- ============ SETUP UTILITY ============ -->
+    <section class="view on" id="view-setup">
+      <section class="config">
+        <div class="cfg-group grow">
+          <label class="cfg-label">Content on the table <span class="hint">(the base game is always included)</span></label>
+          <div id="sourcesBoards" class="src-block"></div>
+          <div id="sourcesSmall"  class="src-block"></div>
+        </div>
+        <div class="cfg-row">
+          <div class="cfg-group">
+            <label class="cfg-label">Players</label>
+            <div id="players" class="pbtns"></div>
+          </div>
+          <div class="cfg-group grow">
+            <label class="cfg-label">Endgame <span class="hint">(how the game is won)</span></label>
+            <div id="endings" class="chips"></div>
+          </div>
+        </div>
+        <div class="cfg-group grow">
+          <label class="cfg-label">Faster-play variants <span class="hint">(all players must agree)</span></label>
+          <div id="options" class="chips"></div>
+        </div>
+      </section>
+
+      <section class="setup-out">
+        <div class="section-head">
+          <h2>Setup</h2>
+          <span id="setupMeta" class="count"></span>
+        </div>
+        <p class="legend" id="setupLegend"></p>
+        <div id="setupSteps" class="steps"></div>
+        <div id="setupNotes"></div>
+      </section>
+    </section>
+
+    <!-- ============ GAME REFERENCE ============ -->
+    <section class="view" id="view-reference">
+      <nav class="jump-nav" id="refNav" aria-label="Jump to section"></nav>
+      <div id="refBody"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    A fan-made play aid for <b>Talisman: The Magical Quest Game (Revised 4th Edition)</b> (Fantasy Flight Games / Games Workshop).
+    Setup &amp; rules grounded in the official rulebook, the published expansion rulesheets, and the official FAQ &amp; Errata.
+    Not affiliated with the publishers.
+  </footer>
+
+  <script src="js/data.js?v=1"></script>
+  <script src="js/app.js?v=1"></script>
+</body>
+</html>

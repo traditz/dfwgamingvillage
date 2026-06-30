@@ -1,0 +1,241 @@
+/* =============================================================================
+   Talisman (Revised 4th Edition) — Setup Utility & Reference
+   Parchment-and-gold fantasy theme. Cinzel display + EB Garamond body.
+   ============================================================================= */
+:root{
+  --parch:#efe4cb; --parch-2:#e6d8b8; --ink:#2c2118; --ink-soft:#5b4a36;
+  --edge:#c9b48a; --edge-2:#b49d6e; --gold:#a8842c; --gold-bright:#d8ad48;
+  --crimson:#8a2b2b; --crimson-deep:#6d1f1f; --shadow:rgba(50,35,15,.18);
+  --card:#f6eed9; --card-line:#d8c39a;
+  /* source accents */
+  --s-base:#8a2b2b; --s-dragon:#c0392b; --s-dungeon:#5b3a8c; --s-highland:#2e7d6b;
+  --s-city:#b8860b; --s-woodland:#3e7d3a; --s-cataclysm:#566b7a; --s-reaper:#6a6a6a;
+  --s-frost:#2f7da6; --s-pool:#1f9d8f; --s-blood:#9b2226; --s-fire:#df7b1f;
+  --s-nether:#7a2e6b; --s-harb:#4a5568; --s-deep:#1f6f6f; --s-lost:#8a6d3b; --s-var:#5a5a8c;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  font-family:"EB Garamond",Georgia,serif; color:var(--ink); font-size:17px; line-height:1.5;
+  background:
+    radial-gradient(1200px 500px at 50% -120px, #f7eed6 0%, rgba(247,238,214,0) 70%),
+    repeating-linear-gradient(0deg, rgba(120,90,40,.025) 0 2px, transparent 2px 4px),
+    var(--parch);
+  min-height:100vh;
+}
+h1,h2,h3,h4,h5{font-family:"Cinzel",serif; letter-spacing:.02em; color:var(--crimson-deep); margin:0}
+
+/* ---- Topbar -------------------------------------------------------------- */
+.topbar{
+  border-bottom:2px solid var(--edge-2);
+  background:linear-gradient(180deg, #f3e8cd 0%, #ecdfc0 100%);
+  box-shadow:0 2px 12px var(--shadow);
+}
+.topbar-inner{max-width:1180px; margin:0 auto; padding:20px 26px 10px; position:relative}
+.sigil{position:absolute; right:26px; top:14px; width:74px; height:74px; color:var(--gold); opacity:.85}
+.sigil svg{width:100%; height:100%}
+.brand{display:flex; flex-direction:column; gap:2px}
+.brand-tal{font-family:"Cinzel",serif; font-weight:800; font-size:40px; line-height:1;
+  color:var(--crimson-deep); text-shadow:0 1px 0 #fff7e4, 0 2px 5px var(--shadow);}
+.brand-sub{font-family:"Cinzel",serif; font-weight:600; font-size:14px; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--gold); margin-top:3px}
+.deco-rule{display:flex; align-items:center; gap:8px; width:230px; margin:5px 0 2px}
+.deco-rule i{height:1px; flex:1; background:linear-gradient(90deg,transparent,var(--edge-2))}
+.deco-rule i:last-child{background:linear-gradient(90deg,var(--edge-2),transparent)}
+.deco-rule b{width:7px; height:7px; transform:rotate(45deg); background:var(--gold); border-radius:1px}
+.tagline{max-width:760px; color:var(--ink-soft); margin:8px 0 12px; font-size:16.5px}
+
+/* Tabs */
+.tabs{display:flex; gap:6px}
+.tab{
+  font-family:"Cinzel",serif; font-weight:600; font-size:14px; letter-spacing:.04em;
+  padding:9px 18px; border:1.5px solid var(--edge-2); border-bottom:none;
+  border-radius:8px 8px 0 0; background:#e4d4ad; color:var(--ink-soft); cursor:pointer;
+  transition:.15s; position:relative; top:2px;
+}
+.tab:hover{background:#eaddbb; color:var(--ink)}
+.tab.on{background:var(--card); color:var(--crimson-deep); top:0; padding-bottom:11px; box-shadow:0 -2px 8px var(--shadow)}
+
+/* ---- Layout -------------------------------------------------------------- */
+main{max-width:1180px; margin:0 auto; padding:22px 26px 40px}
+.view{display:none}
+.view.on{display:block}
+
+/* ---- Config -------------------------------------------------------------- */
+.config{
+  background:var(--card); border:1.5px solid var(--card-line); border-radius:12px;
+  padding:18px 20px; box-shadow:0 3px 14px var(--shadow); margin-bottom:22px;
+}
+.cfg-group{margin-bottom:16px}
+.cfg-group:last-child{margin-bottom:0}
+.cfg-row{display:flex; gap:26px; flex-wrap:wrap; margin-bottom:16px}
+.cfg-row .cfg-group{margin-bottom:0}
+.cfg-row .grow{flex:1; min-width:280px}
+.cfg-label{display:block; font-family:"Cinzel",serif; font-weight:700; font-size:13px;
+  letter-spacing:.08em; text-transform:uppercase; color:var(--crimson); margin-bottom:9px}
+.hint{font-family:"EB Garamond",serif; font-weight:400; text-transform:none; letter-spacing:0;
+  color:var(--ink-soft); font-size:13.5px; font-style:italic}
+.src-block{margin-bottom:14px}
+.src-block:last-child{margin-bottom:0}
+.src-head{font-family:"Cinzel",serif; font-size:11.5px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--gold); margin-bottom:7px; opacity:.9}
+
+/* Chips */
+.chips{display:flex; flex-wrap:wrap; gap:8px}
+.chip{
+  display:inline-flex; align-items:center; gap:8px; cursor:pointer;
+  background:#ece0c4; border:1.5px solid var(--edge-2); border-radius:9px;
+  padding:7px 12px; font-family:"EB Garamond",serif; font-size:15.5px; color:var(--ink-soft);
+  transition:.13s; line-height:1.15;
+}
+.chip:hover{background:#f1e7ce; border-color:var(--gold); color:var(--ink)}
+.chip .chip-name{font-weight:600}
+.chip .chip-tag{font-family:"Cinzel",serif; font-size:10px; font-weight:700; letter-spacing:.05em;
+  padding:2px 6px; border-radius:5px; color:#fff; background:var(--s-base)}
+.chip .chip-sub{font-size:12.5px; font-style:italic; color:var(--ink-soft)}
+.chip.on{background:#fff8e8; color:var(--ink); border-color:var(--gold); box-shadow:0 0 0 2px rgba(168,132,44,.25), 0 2px 7px var(--shadow)}
+.chip.on .chip-sub{color:var(--crimson)}
+.chip.locked{cursor:default; background:#f3ecd6; border-style:double; border-width:3px}
+.chip.locked:hover{border-color:var(--edge-2)}
+.chip.small{padding:6px 11px; font-size:14.5px}
+.chip.ending{padding:8px 14px}
+.chip.ending .chip-name{font-family:"Cinzel",serif; font-size:14px}
+.chip.disabled{opacity:.45; cursor:not-allowed; filter:grayscale(.4)}
+.chip.disabled:hover{background:#ece0c4; border-color:var(--edge-2); color:var(--ink-soft)}
+
+/* Player buttons */
+.pbtns{display:flex; gap:6px}
+.pbtn{
+  width:42px; height:42px; border-radius:9px; border:1.5px solid var(--edge-2);
+  background:#ece0c4; color:var(--ink-soft); font-family:"Cinzel",serif; font-weight:700; font-size:18px;
+  cursor:pointer; transition:.13s;
+}
+.pbtn:hover{background:#f1e7ce; border-color:var(--gold)}
+.pbtn.on{background:var(--crimson); color:#fff6e2; border-color:var(--crimson-deep); box-shadow:0 2px 7px var(--shadow)}
+
+/* ---- Source colour tints (chip tag + chip accent) ------------------------ */
+.s-base{background:var(--s-base)} .s-dragon{background:var(--s-dragon)} .s-dungeon{background:var(--s-dungeon)}
+.s-highland{background:var(--s-highland)} .s-city{background:var(--s-city)} .s-woodland{background:var(--s-woodland)}
+.s-cataclysm{background:var(--s-cataclysm)} .s-reaper{background:var(--s-reaper)} .s-frost{background:var(--s-frost)}
+.s-pool{background:var(--s-pool)} .s-blood{background:var(--s-blood)} .s-fire{background:var(--s-fire)}
+.s-nether{background:var(--s-nether)} .s-harb{background:var(--s-harb)} .s-deep{background:var(--s-deep)}
+.s-lost{background:var(--s-lost)} .s-var{background:var(--s-var)}
+.s-base-chip.on{box-shadow:0 0 0 2px var(--s-base), 0 2px 7px var(--shadow)}
+.s-dragon-chip.on{box-shadow:0 0 0 2px var(--s-dragon),0 2px 7px var(--shadow)}
+.s-dungeon-chip.on{box-shadow:0 0 0 2px var(--s-dungeon),0 2px 7px var(--shadow)}
+.s-highland-chip.on{box-shadow:0 0 0 2px var(--s-highland),0 2px 7px var(--shadow)}
+.s-city-chip.on{box-shadow:0 0 0 2px var(--s-city),0 2px 7px var(--shadow)}
+.s-woodland-chip.on{box-shadow:0 0 0 2px var(--s-woodland),0 2px 7px var(--shadow)}
+.s-cataclysm-chip.on{box-shadow:0 0 0 2px var(--s-cataclysm),0 2px 7px var(--shadow)}
+.s-reaper-chip.on{box-shadow:0 0 0 2px var(--s-reaper),0 2px 7px var(--shadow)}
+.s-frost-chip.on{box-shadow:0 0 0 2px var(--s-frost),0 2px 7px var(--shadow)}
+.s-pool-chip.on{box-shadow:0 0 0 2px var(--s-pool),0 2px 7px var(--shadow)}
+.s-blood-chip.on{box-shadow:0 0 0 2px var(--s-blood),0 2px 7px var(--shadow)}
+.s-fire-chip.on{box-shadow:0 0 0 2px var(--s-fire),0 2px 7px var(--shadow)}
+.s-nether-chip.on{box-shadow:0 0 0 2px var(--s-nether),0 2px 7px var(--shadow)}
+.s-harb-chip.on{box-shadow:0 0 0 2px var(--s-harb),0 2px 7px var(--shadow)}
+.s-deep-chip.on{box-shadow:0 0 0 2px var(--s-deep),0 2px 7px var(--shadow)}
+.s-lost-chip.on{box-shadow:0 0 0 2px var(--s-lost),0 2px 7px var(--shadow)}
+
+/* ---- Setup output -------------------------------------------------------- */
+.section-head{display:flex; align-items:baseline; gap:12px; margin-bottom:6px}
+.section-head h2{font-size:26px}
+.count{font-family:"Cinzel",serif; font-size:13px; color:var(--gold); letter-spacing:.05em}
+.legend{color:var(--ink-soft); font-size:15.5px; margin:0 0 18px; max-width:880px}
+.legend b{color:var(--crimson)}
+
+.setup-block{margin-bottom:20px}
+.setup-block h3{
+  font-size:16px; letter-spacing:.06em; text-transform:uppercase; color:var(--gold);
+  border-bottom:1.5px solid var(--card-line); padding-bottom:5px; margin-bottom:12px;
+}
+.ustep{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px}
+.ustep li{
+  display:flex; gap:12px; background:var(--card); border:1px solid var(--card-line);
+  border-left:4px solid var(--gold); border-radius:9px; padding:11px 14px; box-shadow:0 1px 6px var(--shadow);
+}
+.snum{
+  flex:none; width:26px; height:26px; border-radius:50%; background:var(--crimson); color:#fff6e2;
+  font-family:"Cinzel",serif; font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center;
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.18);
+}
+.sbody{flex:1}
+.st{font-family:"Cinzel",serif; font-weight:700; font-size:16px; color:var(--ink)}
+.ssrc{font-size:12.5px; font-style:italic; color:var(--gold); margin-left:4px}
+.sd{margin-top:4px; color:var(--ink-soft); font-size:15.5px}
+
+/* Source tags */
+.etag{display:inline-block; font-family:"Cinzel",serif; font-size:10px; font-weight:700; letter-spacing:.05em;
+  color:#fff; padding:2px 7px; border-radius:5px; vertical-align:middle; box-shadow:0 1px 2px var(--shadow)}
+
+/* Callouts */
+.callouts{margin-top:24px; background:#f3ead2; border:1.5px solid var(--card-line);
+  border-radius:12px; padding:16px 18px; box-shadow:0 2px 10px var(--shadow)}
+.callouts h3{font-size:16px; letter-spacing:.05em; text-transform:uppercase; color:var(--crimson); margin-bottom:12px}
+.callout{padding:9px 0; border-top:1px dashed var(--card-line)}
+.callout:first-of-type{border-top:none}
+.callout b{font-family:"Cinzel",serif; font-size:14.5px; color:var(--ink); margin-left:6px}
+.callout p{margin:4px 0 0; color:var(--ink-soft); font-size:15px}
+
+/* ---- Reference ----------------------------------------------------------- */
+.jump-nav{
+  position:sticky; top:0; z-index:5; display:flex; flex-wrap:wrap; gap:6px;
+  background:rgba(243,232,205,.96); backdrop-filter:blur(3px);
+  padding:11px 12px; margin:-22px -26px 20px; border-bottom:1.5px solid var(--edge-2);
+}
+.jn{font-family:"Cinzel",serif; font-size:12px; letter-spacing:.03em; color:var(--ink-soft);
+  text-decoration:none; padding:5px 11px; border:1px solid var(--edge-2); border-radius:20px; background:#ece0c4; transition:.13s}
+.jn:hover{background:var(--crimson); color:#fff6e2; border-color:var(--crimson-deep)}
+
+.ref-card{background:var(--card); border:1.5px solid var(--card-line); border-radius:12px;
+  padding:20px 22px; margin-bottom:18px; box-shadow:0 2px 12px var(--shadow); scroll-margin-top:64px}
+.ref-card h2{font-size:23px; margin-bottom:8px; padding-bottom:8px; border-bottom:2px solid var(--card-line)}
+.ref-intro{color:var(--ink-soft); font-size:16px; margin:0 0 14px; font-style:italic}
+
+.flow-list{margin:0 0 14px; padding-left:20px}
+.flow-list li{margin-bottom:7px}
+.flow-list b{font-family:"Cinzel",serif; color:var(--crimson)}
+.flow-strip{display:flex; flex-wrap:wrap; align-items:center; gap:4px; margin:12px 0;
+  padding:11px 13px; background:#f3ead2; border:1px solid var(--card-line); border-radius:9px}
+.flow-strip span{font-family:"Cinzel",serif; font-size:12px; background:#ece0c4; border:1px solid var(--edge-2);
+  border-radius:6px; padding:4px 9px; color:var(--ink)}
+.flow-strip i{color:var(--gold); font-style:normal; font-weight:700}
+
+.def-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px}
+.def-list li{display:flex; gap:14px; flex-wrap:wrap}
+.def-list .dk{font-family:"Cinzel",serif; font-weight:700; font-size:14.5px; color:var(--crimson);
+  flex:none; width:230px}
+.def-list .dt{flex:1; min-width:280px; color:var(--ink-soft); font-size:15.5px}
+
+.bullet{margin:14px 0 0; padding-left:22px}
+.bullet li{margin-bottom:6px; color:var(--ink-soft); font-size:15.5px}
+
+.ref-table{border-collapse:collapse; margin:6px 0 14px}
+.ref-table th,.ref-table td{border:1px solid var(--card-line); padding:6px 16px; text-align:center; font-size:15.5px}
+.ref-table th{font-family:"Cinzel",serif; font-size:13px; background:var(--crimson); color:#fff6e2}
+.ref-table td{background:#f3ead2; color:var(--ink)}
+
+/* FAQ */
+.faq-list{display:flex; flex-direction:column; gap:8px}
+.faq-item{border:1px solid var(--card-line); border-radius:9px; background:#f3ead2; overflow:hidden}
+.faq-item summary{cursor:pointer; padding:11px 14px; font-family:"Cinzel",serif; font-size:15px; color:var(--ink);
+  list-style:none; position:relative; padding-right:36px}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary::after{content:"+"; position:absolute; right:15px; top:9px; font-size:20px; color:var(--gold); font-family:"Cinzel",serif}
+.faq-item[open] summary::after{content:"–"}
+.faq-item[open] summary{background:#ece0c4; color:var(--crimson-deep)}
+.faq-a{padding:11px 14px; color:var(--ink-soft); font-size:15.5px; border-top:1px solid var(--card-line)}
+
+/* ---- Footer -------------------------------------------------------------- */
+.footer{max-width:1180px; margin:0 auto; padding:18px 26px 34px; color:var(--ink-soft);
+  font-size:13.5px; font-style:italic; text-align:center; border-top:1px solid var(--card-line)}
+.footer b{font-style:normal; color:var(--crimson)}
+
+/* ---- Responsive ---------------------------------------------------------- */
+@media (max-width:680px){
+  .brand-tal{font-size:30px}
+  .sigil{width:54px; height:54px}
+  main{padding:18px 16px 36px}
+  .jump-nav{margin:-18px -16px 18px}
+  .def-list .dk{width:100%}
+}
