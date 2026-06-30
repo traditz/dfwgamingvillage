@@ -433,6 +433,11 @@ main{max-width:1180px; margin:0 auto; padding:30px 28px 70px}
   .chip{padding:9px 13px}
   .pbtn{width:44px; height:44px}
   .share-btn{float:none; display:inline-block; margin-bottom:10px}
+  /* let the reference table shrink to the viewport instead of forcing a wider
+     page (its min-width was the source of horizontal scroll on phones).
+     table-layout:fixed shares the width equally so long headers wrap. */
+  .ref-table{min-width:0; width:100%; table-layout:fixed; font-size:.82rem}
+  .ref-table th, .ref-table td{padding:7px 3px; overflow-wrap:anywhere}
 }
 @media (prefers-reduced-motion:reduce){
   *{animation:none !important; transition-duration:.001ms !important; scroll-behavior:auto !important}
