@@ -181,14 +181,16 @@ async function handleAnalyticsSummary(request, env, cors) {
     `).first(),
     bindSince(`
       SELECT
-        page,
+        CASE WHEN page LIKE '%/index.html'
+             THEN substr(page, 1, length(page) - 10)
+             ELSE page END AS page,
         COUNT(*) AS views,
         COUNT(DISTINCT session_id) AS sessions
       FROM page_views
       WHERE datetime(timestamp) >= datetime('now', ?)
-      GROUP BY page
+      GROUP BY 1
       ORDER BY views DESC
-      LIMIT 25
+      LIMIT 500
     `).all(),
     bindSince(`
       SELECT

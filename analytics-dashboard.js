@@ -9,6 +9,9 @@ const statusEl = document.getElementById("analytics-status");
 const rangeSelect = document.getElementById("range-select");
 const refreshButton = document.getElementById("refresh-button");
 const logoutButton = document.getElementById("logout-button");
+const pageFilter = document.getElementById("page-filter");
+
+let topPagesData = [];
 
 function getToken() {
   return sessionStorage.getItem(TOKEN_KEY) || "";
@@ -81,7 +84,8 @@ function renderDashboard(data) {
   document.getElementById("sessions-value").textContent = formatNumber(data.overview.sessions);
   document.getElementById("pages-value").textContent = formatNumber(data.overview.pages);
 
-  renderBars("top-pages-list", data.topPages, "page", "views");
+  topPagesData = data.topPages || [];
+  renderTopPages();
   renderBars("referrers-list", data.referrers, "referrer", "views");
   renderBars("countries-list", data.countries, "country", "views");
   renderBars("campaigns-list", data.campaigns, (row) => {
@@ -89,6 +93,14 @@ function renderDashboard(data) {
     return parts.join(" / ") || "(none)";
   }, "views");
   renderRecent(data.recent);
+}
+
+function renderTopPages() {
+  const term = (pageFilter ? pageFilter.value : "").trim().toLowerCase();
+  const rows = term
+    ? topPagesData.filter((row) => String(row.page || "").toLowerCase().includes(term))
+    : topPagesData;
+  renderBars("top-pages-list", rows, "page", "views");
 }
 
 function renderBars(id, rows, labelKey, valueKey) {
@@ -157,6 +169,10 @@ loginForm.addEventListener("submit", (event) => {
   tokenInput.value = "";
   fetchSummary();
 });
+
+if (pageFilter) {
+  pageFilter.addEventListener("input", renderTopPages);
+}
 
 rangeSelect.addEventListener("change", fetchSummary);
 refreshButton.addEventListener("click", fetchSummary);
