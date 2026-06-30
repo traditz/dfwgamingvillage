@@ -18,6 +18,12 @@
   <url><loc>https://www.dfwgamingvillage.com/ti4legendaryplanets.html</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>
   <url><loc>https://www.dfwgamingvillage.com/galactic_events.html</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>
   <url><loc>https://www.dfwgamingvillage.com/bsg-character-drafter.html</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://www.dfwgamingvillage.com/bsg.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://www.dfwgamingvillage.com/bsg-setup/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://www.dfwgamingvillage.com/arkham.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://www.dfwgamingvillage.com/arkham-setup/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://www.dfwgamingvillage.com/bbtm.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://www.dfwgamingvillage.com/bbtm-setup/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://www.dfwgamingvillage.com/planner/</loc><changefreq>weekly</changefreq><priority>0.5</priority></url>
   <url><loc>https://www.dfwgamingvillage.com/library-manager/</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>
 </urlset>
