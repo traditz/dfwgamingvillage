@@ -233,7 +233,11 @@ function renderDetail() {
   const notBreakdown = L.extras.length ? ` <span class="loy-math">(${L.notBase}+${L.not - L.notBase})</span>` : "";
   cards.push(`<span class="loy-card not">${L.not}× You Are Not a Cylon${notBreakdown}</span>`);
   if (L.mutineer)    cards.push(`<span class="loy-card mut">1× You Are a Mutineer</span>`);
-  if (L.sympathizer) cards.push(`<span class="loy-card sym">1× You Are a Sympathizer</span>`);
+  const sympVariant = config.options.has("sympatheticCylon");
+  if (L.sympathizer) cards.push(`<span class="loy-card sym">1× You Are a ${sympVariant ? "Sympathetic Cylon" : "Sympathizer"}</span>`);
+  const sympNote = L.sympathizer
+    ? `<b>Timing:</b> the ${sympVariant ? "Sympathetic Cylon" : "Sympathizer"} card is <b>not</b> shuffled in before the starting deal — deal each player their first Loyalty card, <i>then</i> add it to the remaining deck and shuffle (it arrives with the Sleeper-phase deal).`
+    : "";
   const cylNote =
     L.gov === "daybreak"
       ? (L.mutineer
@@ -251,6 +255,7 @@ function renderDetail() {
       <div class="loy-cards">${cards.join("")}</div>` : `<div class="loy-total">No standard composition for this player count.</div>`}
       ${L.extras.length ? `<p class="note2"><b>${L.not}× You Are Not a Cylon</b> = ${L.notBase} from the chart (${state.players} players${L.cl ? " + Cylon Leader" : ""}) + ${L.not - L.notBase} for ${L.extras.join(" & ")}. The chart's asterisk (*) is the Exodus +1.</p>` : ""}
       ${cylNote ? `<p class="note2 ${L.mutineer ? "req" : ""}">${cylNote}</p>` : ""}
+      ${sympNote ? `<p class="note2">${sympNote}</p>` : ""}
       ${leaderNote ? `<p class="note2">${leaderNote}</p>` : ""}
       <ul class="loy-adj">${BSG.loyalty.charNotes(c).map(x => `<li>${x}</li>`).join("")}</ul>
       ${config.options.has("conflictedLoyalties") ? `<p class="note2"><b>Conflicted Loyalties:</b> shuffle the chosen Personal Goal / Final Five cards into the ‘You Are Not a Cylon’ pile before dealing — the counts above don't change; some ‘Not a Cylon’ cards are now secretly those cards.</p>` : ""}

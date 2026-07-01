@@ -301,8 +301,11 @@ BSG.setup = [
 
   /* ---------- Phase 3: Loyalty & Final Steps ---------- */
   /* Loyalty deck — single governing version (precedence baked into when). */
-  { ph: 3, exp: "daybreak", t: "Set Up Loyalty Deck", when: c => c.has("daybreak"), src: "Daybreak p.6–7",
+  { ph: 3, exp: "daybreak", t: "Set Up Loyalty Deck", when: c => c.has("daybreak"), src: "Daybreak p.6–7 · FAQ errata p.17",
     d: "Build the Loyalty deck using Daybreak's 'Creating the Loyalty Deck' Chart (p.6–7) — this governs even when combined with other expansions. The chart decides whether the 'You Are a Mutineer' card is included for this player count / Cylon Leader combination (see the exact composition in the Loyalty Deck panel below). Deal one card facedown to each player." },
+
+  { ph: 3, exp: "daybreak", t: "Keep the 'You Are Not a Cylon' Deck", when: c => c.has("daybreak") && c.has("exodus"), src: "Daybreak errata (FAQ 3-5-15)",
+    d: "Errata: do NOT return the unused 'You Are Not a Cylon' cards to the box. Place that deck next to the Loyalty deck (kept clearly separate) — Exodus effects such as executions draw from it." },
   { ph: 3, exp: "exodus", t: "Set Up Loyalty Deck", when: c => c.has("exodus") && !c.has("daybreak"), src: "Exodus p.6, p.22 · v4.4 p.9",
     d: "Build the Loyalty deck using the Exodus chart. With a Cylon Leader, use the Exodus + Cylon Leader mix (Exodus p.22). With Conflicted Loyalties, add the Personal Goal / Final Five cards. Deal one card facedown to each player." },
   { ph: 3, exp: "pegasus", t: "Set Up Loyalty Deck", when: c => c.has("pegasus") && !c.has("exodus") && !c.has("daybreak"), src: "Base p.6 + Pegasus p.7",
@@ -515,6 +518,7 @@ BSG.howToPlay = {
     { id: "cylonFleet", when: c => c.opt("cylonFleet"), h: "Cylon Fleet", items: [
       "Adds the Cylon Fleet board with the <b>Basestar Bridge</b> (a Cylon location) and a <b>Pursuit track</b>.",
       "Cylon ‘nothing happens’ activations and certain effects advance the Cylon pursuit marker; when it reaches the end, Cylon ships jump from the Cylon Fleet board to the corresponding areas around Galactica.",
+      "<b>When the fleet jumps:</b> move all Cylon ships on the main board to the corresponding Cylon Fleet board areas, and remove <b>all basestar damage tokens</b>, randomly mixing them back into the unused pile (FAQ errata — this reversed an older ruling). Civilian ships are not removed.",
       "The <b>CAG</b> title (its own line of succession) is in play; at Civilian-ship pursuit spaces the CAG places civilian ships, and an Infiltrating Cylon Leader may never become CAG.",
       { t: "With Search for Home also in play: while the basestar allegiance marker shows its Cylon side, Cylon players may discard a Skill card to travel between the <b>Basestar Bridge</b> and any Rebel Basestar location.", when: c => c.obj === "earth", tag: "daybreak" }
     ]},
@@ -565,7 +569,7 @@ BSG.faq = [
     a: "No. They may receive other Quorum cards (e.g. Assign Mission Specialist / Arbitrator), but discard any Quorum cards they were given, without effect, when their Infiltration ends.",
     when: c => c.opt("cylonLeaders"), tag: "pegasus" },
   { q: "Can a character in the Brig or Detention use Movement abilities?",
-    a: "No — movement is restricted in those locations, so Movement abilities can't be used from them.",
+    a: "<b>Yes</b> — per the current official FAQ (this reversed an older ruling). Normal movement is still restricted, but Movement abilities (e.g. on Pegasus Skill cards) may be used.",
     when: c => c.obj === "newCaprica", tag: "pegasus" }
 ];
 
