@@ -325,7 +325,7 @@ AH.playerRef = {
   notes: [
     "<b>Monster limit</b> = players + 3 (monsters moving in Arkham / the Sky). Reaching it sends new monsters to the Outskirts.",
     "<b>Outskirts limit</b> = 8 − players. When the Outskirts hold more than this, they empty and the terror level rises by 1.",
-    "<b>Gates to awaken</b> the Ancient One: 8 at 1–2 players, 7 at 3–4, 6 at 5–6, 5 at 7–8 (also on the Ancient One sheet). The Ancient One also awakens if the doom track fills, the gate/monster supply runs out, or certain tracks fill.",
+    "<b>Gates to awaken</b> the Ancient One: 8 at 1–2 players, 7 at 3–4, 6 at 5–6, 5 at 7–8 (also on the Ancient One sheet). It also awakens if the doom track fills, the gate markers or monster cup run out, or the terror level is 10 with monsters equal to twice the monster limit.",
     "<b>Multiple boards:</b> for each expansion board beyond the first, treat the player count as one lower for all of the above (but not when counting successes against the Ancient One).",
     "<b>Dunwich + Innsmouth together:</b> add 1 to the gates-to-awaken number.",
     "If the <b>terror level reaches 10</b>, Arkham is overrun: the monster limit is removed and the Outskirts are no longer used.",
@@ -357,14 +357,16 @@ AH.boards = [
   { id: "kingsport", name: "Kingsport board", when: c => c.has("kingsport"), items: [
     "Connected to Arkham by train (depot with a train icon); travel costs $1 and 1 movement point.",
     "Kingsport has <b>no unstable locations</b>, so no starting Clues and no gates open here normally.",
-    "<b>Rifts:</b> three Rift Tracks. When a Mythos card’s monster-movement pattern matches a Rift Track, draw a rift-progress marker onto that track. Rifts can spill monsters and other effects — see the rift markers.",
+    "<b>Rifts:</b> each Mythos card whose monster-movement pattern matches a Rift Track adds a rift-progress marker to it. When all <b>4</b> spaces fill, the rift OPENS at the gate location shown on that card (even onto an elder sign). An open rift moves like a monster on its dimension symbol, dropping a monster at each new location (subject to the monster limit) — and adds a doom token if it moved along an arrow matching its own symbol’s colour.",
+    "<b>Closing a rift:</b> each rift-progress marker shows a Kingsport location. After an encounter there, discard one such marker (if its rift is still closed) or flip one face down (if open). When all 4 of an open rift’s markers are face down, the rift closes and returns to its track.",
     "<b>Aquatic markers</b> sit on the Arkham River Docks and Unvisited Isle (shared with Innsmouth’s aquatic rules)."
   ]},
   { id: "innsmouth", name: "Innsmouth board", when: c => c.has("innsmouth"), items: [
     "Connected to Arkham by train; <b>Devil Reef</b> and <b>Y’ha-nthlei</b> are reachable only by special means (e.g. renting a boat at Falcon Point).",
     "<b>Deep Ones Rising track:</b> add an uprising token whenever a gate is prevented from opening, or when a monster enters an Innsmouth <b>vortex</b> (also +1 terror, monster returned to cup). If it ever fills, the Ancient One awakens.",
-    "<b>Feds Raid Innsmouth track:</b> spend Clue tokens (matching the Factory District colour) to fill it; filling all 6 spaces empties BOTH tracks.",
-    "<b>Aquatic movement</b> (orange-bordered monsters) moves between aquatic locations (wave icon, incl. Arkham’s River Docks & Unvisited Isle).",
+    "<b>Feds Raid Innsmouth track:</b> during Upkeep, an investigator in an Innsmouth neighbourhood may spend Clue tokens onto the track spaces <b>matching the colour of the neighbourhood they are in</b>; filling all 6 spaces empties BOTH tracks.",
+    "<b>Martial Law:</b> when HALF the Ancient One’s doom track is full, martial law is declared in Innsmouth for the rest of the game — ending your movement on an Innsmouth location or street with an Awareness modifier requires an Evade check at that modifier or you are arrested (sent to the Innsmouth Jail).",
+    "<b>Aquatic movement</b> (orange border): when its symbol comes up, an aquatic monster at an aquatic location (wave icon, incl. Arkham’s River Docks & Unvisited Isle) moves to any other aquatic location containing an investigator — otherwise it moves normally.",
     "<b>The Innsmouth Look:</b> when instructed, shuffle the Innsmouth Look deck and draw the listed number of cards — if a ‘Look’ card comes up, follow it (one outcome searches the cup for a Deep One, adds an uprising token, and devours you). Then return all the cards to the deck."
   ]}
 ];
@@ -394,30 +396,43 @@ AH.howToPlay = {
       "<b>Cast a spell</b> by paying its Sanity cost and making a Lore check at the spell’s casting modifier; on a fail it has no effect but still uses its hands."
     ]},
 
-    { h: "Health, Madness & Being Devoured", items: [
-      "If <b>Sanity or Stamina hits 0</b>: discard half your items (round down), half your Clues, and all Retainers, then restore that track to 1. In Arkham you go to Arkham Asylum (Sanity) or St. Mary’s Hospital (Stamina); in an Other World you are Lost in Time and Space. No encounters that turn.",
+    { h: "Health, Statuses & Being Devoured", items: [
+      "If <b>Sanity or Stamina hits 0</b>: discard half your items, half your Clues (round down), and all Retainers, then restore that track to 1. In Arkham you go to Arkham Asylum (Sanity) or St. Mary’s Hospital (Stamina); in an Other World you are Lost in Time and Space. No encounters that turn.",
       "If <b>both</b> tracks are 0 at once, or either maximum is reduced to 0, the investigator is <b>devoured</b>: discard everything except unspent trophies and draw a new investigator.",
+      "<b>Arrested:</b> go to the Police Station’s Jail Cell, lose half your money (round down), and skip your next turn (you just stand up into the main Police Station area).",
+      { t: "Arrested in <b>Innsmouth</b>: go to the Innsmouth Jail instead — this delays you even if you are normally immune to being delayed.", when: c => c.has("innsmouth"), tag: "innsmouth" },
+      { t: "<b>Lost in Time and Space:</b> you are delayed; next turn you may only stand up, and the turn after you may return to any location or street in Arkham" + " (never the Kingsport Head locations or Y’ha-nthlei).", when: c => c.has("kingsport") || c.has("innsmouth"), tag: c => c.has("kingsport") ? "kingsport" : "innsmouth" },
+      { t: "<b>Lost in Time and Space:</b> you are delayed; next turn you may only stand up, and the turn after you may return to any location or street area in Arkham.", when: c => !c.has("kingsport") && !c.has("innsmouth") },
+      "<b>Trading:</b> investigators in the same area may trade money, Common & Unique Items and Spells at any time (even mid-movement) — except during combat.",
       { t: "<b>Injuries & Madness</b> (Dunwich): instead of discarding items, you may draw an <b>Injury</b> card (0 Stamina) or <b>Madness</b> card (0 Sanity) and restore that track to full — you keep your items but still move to the hospital/asylum/Lost. With <b>2+</b> Injury/Madness cards you may retire. (Miskatonic Horror: holding an Injury and its matching Madness — or vice-versa — devours you.)", when: c => c.has("dunwich"), tag: c => c.has("miskatonic") ? "miskatonic" : "dunwich" }
     ]},
     { h: "Gates, Closing & Sealing", items: [
       "When a gate opens on you, you are drawn to the matching Other World and <b>delayed</b>. After exploring, return to the gate’s location and make the listed Lore or Fight check to <b>close</b> it (take a Gate trophy).",
-      "<b>Seal</b> a closed gate by spending <b>5 Clue tokens</b> (or using an Elder Sign) — a sealed location can never open a gate again.",
+      "<b>Seal</b> a closed gate by spending <b>5 Clue tokens</b> after closing it — place an unused doom token on the location as an elder sign; a sealed location can’t open new gates.",
+      "The <b>Elder Sign Unique Item</b> closes AND seals with no roll and no Clues: return the card to the box, take the Gate trophy, move a doom token <b>off the Ancient One’s doom track</b> to serve as the seal, and lose 1 Sanity and 1 Stamina.",
       { t: "<b>Gate Bursts</b> (red gate location on a Mythos card): if the location is sealed with an Elder Sign, the seal bursts — the token is removed and a gate/monster appear, but NO doom token is added and it is not a monster surge. All flying monsters also move.", when: c => c.has("blackgoat") || c.has("lurker") || c.has("miskatonic"), tag: c => c.has("miskatonic") ? "miskatonic" : c.has("lurker") ? "lurker" : "blackgoat" }
     ]},
     { h: "Monsters, the Limit & the Outskirts", items: [
       "<b>Monster limit</b> = players + 3. A new monster over the limit goes to the <b>Outskirts</b> instead.",
       "<b>Outskirts limit</b> = 8 − players. When the Outskirts overflow, return those monsters to the cup and raise the terror level by 1.",
-      "Raising the <b>terror level</b> closes shops and drives away Allies; at terror 10 Arkham is overrun (no monster limit, Outskirts unused).",
+      "<b>Terror level:</b> each point it rises, return one random unclaimed Ally to the box. At <b>3</b> the General Store closes (occupants to Rivertown), at <b>6</b> the Curiositie Shoppe (to Northside), at <b>9</b> Ye Olde Magick Shoppe (to Uptown). At <b>10</b> Arkham is overrun — the monster limit is removed and the Outskirts are no longer used. The terror level never goes above 10 and never decreases.",
       { t: "With <b>5 or more investigators</b>, place <b>2 monsters</b> (not 1) each time a gate opens and a monster appears.", when: c => c.p >= 5 },
-      { t: "<b>Monster surge:</b> when the Mythos card’s gate location already has an open gate, monsters appear equal to the <b>greater of</b> (open gates, players), divided evenly among all open gates (no gate gets more than the number on the Mythos card). Overflow goes to the Outskirts.", tag: "faq" },
+      { t: "<b>Monster surge:</b> when the Mythos card’s gate location already has an open gate, monsters appear equal to the <b>greater of</b> (open gates, players), divided as evenly as possible among all open gates — no gate may receive more monsters than the surge gate (the location shown on the Mythos card). Overflow goes to the Outskirts." },
       { t: "Monsters on an <b>expansion board</b> never count against the monster limit and never go to the Outskirts.", when: c => c.boardCount >= 1, tag: "dunwich" }
     ]},
     { h: "Winning & Losing", items: [
       "<b>Close the Gates:</b> the moment a player closes the <b>last</b> open gate on the board, the investigators win — provided their unspent <b>Gate trophies</b> (including the one just closed) total at least the number of players.",
       "<b>Seal the Gates:</b> the investigators win immediately when there are <b>6 or more Elder Sign tokens</b> on the board.",
       "<b>Banish the Ancient One:</b> if it awakens, the investigators can still win by defeating it in the final battle.",
-      "The <b>Ancient One awakens</b> (→ final battle, usually a loss) if the doom track fills, too many gates are open at once (see the Reference Table), the gate or monster supply runs out, or — with some expansions — a track such as Deep Ones Rising fills.",
-      { t: "If the Ancient One awakens, the <b>Epic Battle</b> variant replaces the standard final battle with a deck of Epic Battle cards and Ancient One Plot cards (not with Azathoth).", when: c => c.mod("epicBattle"), tag: "kingsport" }
+      "The <b>Ancient One awakens</b> (→ final battle) if: the doom track fills; too many gates are open at once (see the Reference Table); a gate opens with no gate markers left; a monster should appear with none left in the cup; or the <b>terror level is 10 and monsters in play equal twice the monster limit</b>.",
+      { t: "With some expansions the Ancient One also awakens if the <b>Deep Ones Rising track</b> fills or a required <b>Corruption</b> card can’t be drawn.", when: c => c.has("innsmouth") || c.has("blackgoat"), tag: c => c.has("innsmouth") ? "innsmouth" : "blackgoat" }
+    ]},
+    { h: "The Final Battle", items: [
+      "When the Ancient One awakens: <b>fill its doom track</b> with doom tokens if not already full, devour every investigator Lost in Time and Space, and discard active Environment/Rumor cards. From now on no one collects money, gains Clues, or rolls for Retainers/Bank Loans.",
+      "Each round: <b>1) Refresh</b> — refresh cards, use abilities, adjust sliders (like Upkeep), pass the First Player marker left, and trade equipment freely. <b>2) Investigators attack</b> — each surviving player makes a Combat check against the Ancient One at its combat modifier.",
+      "Successes are <b>cumulative across players and rounds</b>: every time the total reaches the <b>number of players (including eliminated ones)</b>, remove one doom token and reset to zero. Remove the last doom token and the investigators win.",
+      "<b>3) The Ancient One attacks</b> per its sheet. Anyone reduced to 0 Sanity or Stamina is devoured — eliminated for good, with no replacement investigator. If everyone is devoured, the players lose.",
+      { t: "<b>Epic Battle</b> replaces this flow: after each Refresh, draw an Epic Battle card and follow it for the round. ‘Sinister Plot’ cards bring in the Ancient One Plot cards; ‘The End of Everything’ loses the game immediately. (Not used with Azathoth.)", when: c => c.mod("epicBattle"), tag: "kingsport" }
     ]}
   ],
 
@@ -474,7 +489,7 @@ AH.howToPlay = {
 /* Concise paraphrases of the Complete Arkham Horror FAQ & Errata. when:(c)=>bool */
 AH.faq = [
   { q: "How many Clue tokens does it cost to seal a gate?",
-    a: "Five Clue tokens, spent after you close the gate (or use an Elder Sign token, which seals for free). Some Heralds/Blights change this cost." },
+    a: "Five Clue tokens, spent after you close the gate. The Elder Sign Unique Item seals with no roll and no Clues — but you lose 1 Sanity and 1 Stamina, the card is used up, and a doom token is removed from the doom track to form the seal. Some Heralds/Blights change the Clue cost." },
   { q: "Do monsters on the expansion boards count against the monster limit?",
     a: "No. Monsters on the Dunwich, Kingsport or Innsmouth boards never count against the Arkham monster limit and never go to the Outskirts.",
     when: c => c.boardCount >= 1 },
@@ -482,7 +497,7 @@ AH.faq = [
     a: "Only if a sheet tells you to. The Dark Pharaoh Herald, for example, adds the Dark Pharaoh monster regardless of the Ancient One.",
     when: c => c.mod("heraldPharaoh") },
   { q: "We’re using several Heralds/Guardians/Institutions — is that legal?",
-    a: "It’s allowed, but the rules recommend at most one of each kind. More than one Herald in particular can make the game brutally hard.",
+    a: "It’s allowed, but the rules recommend at most one of each kind. The one designed pairing is Father Dagon + Mother Hydra, whose effects stack. Any other multi-Herald combination can make the game brutally hard.",
     when: c => c.heraldCount > 1 || (c.guardian && c.institution) },
   { q: "Do the new Act cards from Miskatonic Horror remove the ‘The Next Act Begins!’ Mythos cards?",
     a: "No. When you use Miskatonic Horror’s Act deck (Overture–Act III), keep the ‘The Next Act Begins!’ Mythos cards in the Mythos deck.",
