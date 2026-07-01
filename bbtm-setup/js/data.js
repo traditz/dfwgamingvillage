@@ -139,7 +139,7 @@ BBTM.teams = [
     difficulty:"High", style:"Level Up", since:"2468", location:"Tor Lithanel",
     stadium:"Laurelorn Stadium", coach:"Perellian Lamecendre",
     blurb:"Even if Elven Union is stereotypical, few know how to counter it: long pass, catch, long pass, touchdown. Simple, efficient. The Eagles’ players can improve their performance during the game.",
-    special:[{name:"Veteran players (Level Up)",text:"Each player has a normal card and a golden “Veteran” upgrade (set the Veterans aside at setup). Each time you win a matchup with a Team Upgrade reward, draw a random Veteran card, replace that player’s normal card with the upgraded version, and reshuffle your Team deck."}],
+    special:[{name:"Veteran players (Level Up)",text:"Each player has a normal card and a golden “Veteran” upgrade (set the Veterans aside at setup). Each time you win a matchup with a Team Upgrade reward, draw a random Veteran card, replace that player’s normal card with the upgraded version, and reshuffle your Team deck. If you won several Team Upgrade rewards, draw that many Veteran cards and choose one."}],
     stars:["Valen Swift","Highelm Lyrpdre","Ibrahim Aubedor","Erewine Ar-Khorigan"] },
   { id:"norsca-rampagers", league:"cabal", name:"Norsca Rampagers", race:"Norse",
     difficulty:"Low", style:"All Around", since:"2442", location:"Vynheim",
@@ -201,7 +201,7 @@ BBTM.teams = [
     difficulty:"High", style:"Synergy / Food Tokens", since:"2465", location:"Greenfield",
     stadium:"Dinner Dome", coach:"Hungry Draco",
     blurb:"The Halflings began to take themselves more seriously, training for the pitch as well as the buffet table. In 2476 they became the first (and only) team to score two touchdowns without the ball touching the ground.",
-    special:[{name:"Food tokens",text:"During Maintenance, 15 Food tokens are mixed face-down into a pool. When an effect assigns a Food token, draw one at random, place it as instructed and reveal it — most change a player’s Star Power (mostly +1/+2, some −2) and some grant fans or draws. The effect lasts until the Scoreboard phase; an injured player returns the token to the pool."}],
+    special:[{name:"Food tokens",text:"During Maintenance, 15 Food tokens are mixed face-down into a pool. When an effect assigns a Food token, draw one at random, place it as instructed and reveal it — 6× give +1 Star Power, 2× give +2, 2× reduce power by 2 (min 0), 3× grant an immediate fan, 2× do nothing. The effect lasts until the Scoreboard phase and works whether the player is standing or downed; an injured player returns the token to the pool (re-mix it face-down)."}],
     stars:["Jingo Merrychap","«Big» Jobo Hairyfeet"] },
 
   /* TCD — Tomb Crushers Division (Legendary) */
@@ -293,8 +293,11 @@ BBTM.setup = [
       if (c.has("sudden")) pools.push("the 3 Dark Sorcery Syndicate teams");
       if (c.has("foul"))   pools.push("the 3 Putrid Players’ Guild teams");
       if (c.has("legendary")) pools.push("the 21 Legendary-Edition teams across 7 unofficial leagues");
+      const tu = (c.has("sudden")||c.has("foul"))
+        ? "its Team Upgrade cards (5 for a base-game team; 6 for a DSS or PPG team)"
+        : "its 5 Team Upgrade cards";
       return "Draw team tokens at random (one manager cups one token from each team), or simply agree who manages which team. Available pools: "+pools.join(", ")+". "+
-             "Each manager takes that team’s scoreboard (set to “00”), its 12 Starting Player cards, its 5 Team Upgrade cards and its 3 team tokens. Return everything belonging to unmanaged teams to the box."; } },
+             "Each manager takes that team’s scoreboard (set to “00”), its 12 Starting Player cards, "+tu+" and its 3 team tokens. Return everything belonging to unmanaged teams to the box."; } },
 
   { order:3, ph:1, src:"core", page:"Rulebook p.4",
     t:"Shuffle Team decks & Team Upgrade decks",
@@ -307,7 +310,8 @@ BBTM.setup = [
       const decks=["OWA","CWC"];
       if (c.has("sudden") && c.teamsFrom("sudden")) decks.push("DSS");
       if (c.has("foul")   && c.teamsFrom("foul"))   decks.push("PPG");
-      return "Separate all Star Player cards (marked with ✪) by their card back and shuffle each subdivision deck separately, placing them facedown near the Highlight deck. Decks in play: "+decks.join(" · ")+". A manager may only draft Star Players from their own subdivision (neutral free agents are available to all)."; } },
+      const extra = decks.length>2 ? " (the DSS/PPG deck is only set out if someone is managing a team from that subdivision)" : "";
+      return "Separate all Star Player cards (marked with ✪) by their card back and shuffle each subdivision deck separately, placing them facedown near the Highlight deck. Decks in play: "+decks.join(" · ")+extra+". A manager may only draft Star Players from their own subdivision’s deck — free agents are neutral players that belong to no team, but they are still drafted from the deck they appear in."; } },
 
   { order:5, ph:0, src:"core", page:"Rulebook p.5 · FAQ",
     t:"Prepare the Staff Upgrade deck",
@@ -320,8 +324,9 @@ BBTM.setup = [
     t:"Prepare the Spike! Magazine deck",
     d:c=>{
       if (c.p===2){
-        if (c.has("sudden")) return "Two managers: shuffle together all Tournament cards from the Sudden Death expansion to form the deck — the game lasts 5 rounds. (Remove all Headlines.)";
-        return "Two managers: remove all Headline cards. Set aside “The Blood Bowl”, shuffle the other three Tournament cards, then place “The Blood Bowl” on the bottom — a 2-manager game lasts 4 rounds.";
+        const gtl = c.has("foul") ? " Include the Goblin Tribal Leeg in the tournaments you shuffle." : "";
+        if (c.has("sudden")) return "Two managers: shuffle together all Tournament cards from the Sudden Death expansion to form the deck — the game lasts 5 rounds. (Remove all Headlines.)"+gtl;
+        return "Two managers: remove all Headline cards. Set aside “The Blood Bowl”, shuffle the other three Tournament cards, then place “The Blood Bowl” on the bottom — a 2-manager game lasts 4 rounds."+gtl;
       }
       if (c.season==="abbrev") return "Abbreviated season (4 weeks): set aside “The Blood Bowl”. Draw 1 Tournament card and 2 Headline cards, shuffle them, place “The Blood Bowl” on the bottom.";
       if (c.season==="extended") return "Extended season (6 weeks): set aside “The Blood Bowl”. Draw 2 Tournament cards and 3 Headline cards, shuffle them, place “The Blood Bowl” on the bottom.";
@@ -356,7 +361,7 @@ BBTM.setup = [
   { order:7.2, ph:0, src:"sudden", page:"Sudden Death p.1",
     when:c=>c.has("sudden") && c.teamPlayed("black-fangs"),
     t:"Set out Blood tokens",
-    d:"The Black Fangs manager gathers all Blood tokens into a supply near their Team deck." },
+    d:"Only if someone is managing the Black Fangs: that manager gathers all Blood tokens into a supply near their Team deck." },
 
   { order:7.3, ph:0, src:"foul", page:"Foul Play p.1",
     when:c=>c.has("foul"),
@@ -392,7 +397,8 @@ BBTM.setup = [
   { order:8.3, ph:2, src:"foul", page:"Foul Play p.3",
     when:c=>c.opt("corruptRef"),
     t:"Prepare the Corrupt Ref (optional)",
-    d:"Each Maintenance phase, during ‘Prepare for Kickoff’, the first manager places the Corrupt Ref at midfield of any matchup. Committing a player there assigns that player a faceup cheating token, then the ref moves toward the Spike! Magazine deck a number of spaces equal to the player’s printed standing Star Power." },
+    d:c=>"Each Maintenance phase, during ‘Prepare for Kickoff’, the first manager places the Corrupt Ref at midfield of any matchup. Committing a player there assigns that player a faceup cheating token, then the ref moves toward the Spike! Magazine deck a number of spaces equal to the player’s printed standing Star Power."
+      + (c.p===2 ? " In a two-manager game, place the ref at any matchup after the two unused highlights are removed." : "") },
 
   { order:8.4, ph:2, src:"foul", page:"Foul Play p.4",
     when:c=>c.opt("stadiums"),
@@ -450,7 +456,7 @@ BBTM.reference = {
     intro:"Skills are the icons between a player’s art and text box, used left-to-right when the player is committed. Cheating is mandatory; everything else is optional. A skill must be fully resolved before the next.",
     items:[
       { k:"Cheating", icon:"cheating", tag:"core", t:"Mandatory. For each icon, draw one random cheating token from the pool and place it facedown (skull-up) on the player. Tokens are revealed and resolved in the Scoreboard phase." },
-      { k:"Passing", icon:"passing", tag:"core", t:"Optional. Take the ball if it’s at midfield; if an opponent is the ball carrier, move it to midfield; if a teammate holds it, you may take it. The carrier adds +2 Star Power to their team." },
+      { k:"Passing", icon:"passing", tag:"core", t:"Optional. Take the ball if it’s at midfield; if an opponent is the ball carrier, move it to midfield; if a teammate holds it, you may take it or leave it. Extra pass icons on a player who already carries the ball are ignored. The carrier adds +2 Star Power to their team." },
       { k:"Sprinting", icon:"sprinting", tag:"core", t:"Optional. For each icon, draw the top card of your Team deck, then discard one card from your hand (it may be the one just drawn)." },
       { k:"Tackling", icon:"tackling", tag:"core", t:"Optional. For each icon, attempt one tackle against an opposing player at the matchup (see Tackle Outcomes). Multiple icons resolve separately." },
       { k:"Regeneration", icon:"regeneration", tag:"sudden", t:"Optional downed skill (Sudden Death). On a downed player, roll 2 dice and choose one; a Target-Down result lets you stand the player. Resolved in sequence with other downed skills." },
@@ -461,7 +467,7 @@ BBTM.reference = {
 
   tackle: {
     id:"sec-tackle", title:"Tackle Outcomes",
-    intro:"Compare the tackler’s Star Power to the target’s, then roll the tackle dice:",
+    intro:"Compare the tackler’s Star Power to the target’s, then roll the tackle dice. (The ball token does not affect a player’s Star Power during tackle attempts unless an ability says so.)",
     dice:[
       { c:"Tackler SP > Target SP", d:"Roll 2 dice — tackler’s manager picks one result." },
       { c:"Tackler SP = Target SP", d:"Roll 1 die — apply that result." },
@@ -485,7 +491,7 @@ BBTM.reference = {
     bullets:[
       "Highest total wins. On a tie, the team with the ball carrier wins.",
       "Highlight tie with the ball at midfield → a draw (no central payout).",
-      "Tournament tie with no ball → the first manager decides which tied team is higher (FAQ).",
+      "Tournament tie (for winner or runner-up) where neither tied team has the ball → the first manager decides which tied team is higher (FAQ errata).",
       "Highlight: each manager collects their team-zone payout; the winner also takes the central payout.",
       "Tournament: winner takes the trophy payout, runner-up the ribbon payout, everyone else with a player there takes the LOSE! payout. (At tournaments both winner and runner-up count as ‘winners’.)",
       "Alone at a matchup → you collect every payout shown on the card.",
@@ -504,12 +510,12 @@ BBTM.reference = {
   mechanics: {
     id:"sec-mech", title:"Expansion Mechanics",
     items:[
-      { src:"sudden", h:"Contracts", t:"Earn facedown Contract tokens from Cabalvision Contract icons on Highlights/Tournaments. They stay hidden until after all ‘End of Game’ abilities, then are revealed and scored as fans. If the supply is empty, gain 1 fan instead. Contracts don’t count as improvements." },
+      { src:"sudden", h:"Contracts", t:"Earn facedown Contract tokens from Cabalvision Contract icons on Highlights/Tournaments. They stay hidden until after all ‘End of Game’ abilities, then are revealed and scored as fans (values: 2×6, 3×4, 4×3, 5×2). If the supply is empty, gain 2 fans instead. Contracts don’t count as improvements." },
       { src:"sudden", h:"Either/Or skills", t:"Skill icons split by slashes form skill sets. When you commit such a player you must choose one set to use (you may use every icon on that side); the other sets are ignored while the card is in play." },
       { src:"sudden", h:"Blood tokens", t:"Bloodlust (Black Fangs) gains Blood tokens; each adds +1 to standing and downed Star Power until ‘Clear the Pitch’. Limited to the supply." },
-      { src:"sudden", h:"Enchanted Balls (optional)", t:"Replace the base balls. Each is placed faceup and benefits its carrier with bonus Star Power, fans, or a skill icon used the moment the player takes the ball." },
+      { src:"sudden", h:"Enchanted Balls (optional)", t:"Replace the base balls. Each is placed faceup and — in addition to breaking ties as normal — benefits its carrier with bonus Star Power (the amount printed on the ball, counted when determining the winner), fans, or a skill icon used the moment the player takes the ball (mandatory icons, like cheating, must be used)." },
       { src:"foul", h:"Penalties", t:"Penalty icons appear on some cheating tokens and the Goblin Tribal Leeg tournament (and Stadium restrictions, if used). Each penalty makes you draw a facedown Penalty card; after ‘Reveal Improvement Pile’, flip and resolve them. They linger faceup until you’re told to discard them." },
-      { src:"foul", h:"Disease tokens", t:"Spread Disease drops tokens at midfield; any player committed/moved there takes them. Each lowers standing and downed Star Power by 1 (min 0) until ‘Clear the Pitch’." },
+      { src:"foul", h:"Disease tokens", t:"Spread Disease drops tokens at midfield; any player committed/moved there takes them all. Each lowers standing and downed Star Power by 1 (min 0) until ‘Clear the Pitch’. Limited to the supply — none can be placed while it’s empty." },
       { src:"foul", h:"The Corrupt Ref (optional)", t:"Placed at a matchup each Kickoff; committing a player there gives them a faceup cheating token, then the ref moves toward the Spike! deck by the player’s printed standing SP. At Scoreboard, a team with no faceup token there receives a penalty." },
       { src:"foul", h:"Stadiums (optional)", t:"Optional venue cards laid in a line between the Spike! Magazine and Highlight decks; each rolled Highlight is placed on a Stadium so their payouts combine (one highlight per stadium). A stadium’s restrictive effect lasts all game — a Banned Skill (using it earns a penalty; a banned Cheating icon instead makes cheating optional there), a Player Limit per team zone (exceeding it earns a penalty), or a Star Power Requirement (committing/moving a player whose printed standing Star Power is outside the range earns a penalty). Stadiums also add extra payouts to the team zone of the highlight on them." }
     ]
@@ -553,7 +559,7 @@ BBTM.reference = {
       { q:"What counts as my ‘roster’?", a:"Every Player card belonging to your team — at matchups, in your Team deck, discard pile and hand. Cards in the improvement pile aren’t part of the roster until added during ‘Reveal Improvement Pile’." },
       { q:"Do I have to commit my whole hand each round?", a:"No. You may pass early, discard players you don’t want, and replenish back up to six next Maintenance." },
       { q:"Only three team tokens — am I limited to three Star Players?", a:"No. Tokens just mark Star Players whose icon differs from your team’s. There’s no limit to how many Star Players you can draft." },
-      { q:"Which Star Players can I draft?", a:"Any from your own subdivision (e.g. the Athelorn Avengers can draft Wood Elf, Dwarf and Human stars), plus neutral free agents. You can never draft from another subdivision." },
+      { q:"Which Star Players can I draft?", a:"Any from your own subdivision’s deck (e.g. the Athelorn Avengers can draft Wood Elf, Dwarf and Human stars). Neutral free agents belong to no team but are drafted from whichever deck they appear in — Morg ’N Thorg has a card in both OWA and CWC (only one copy of him can be at a matchup). You can never draft from another subdivision." },
       { q:"Does a downed ball carrier with Sure Hands keep the ball?", a:"He keeps it on the way down, but Sure Hands (like all abilities) is lost while he’s downed." },
       { q:"Collecting a payout I can’t fulfil?", a:"If no components of that type are available, you earn nothing for that payout." }
     ]
