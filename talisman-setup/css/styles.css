@@ -3,16 +3,16 @@
    Aged-parchment widgets on a dark frame. Cinzel display + EB Garamond body.
    ============================================================================= */
 :root{
-  --frame:#cdbd91; --frame-2:#beac7c; --band:#523f29;
-  --parch:#e9dcb9; --parch-2:#e3d4ab; --parch-hi:#f3ead0;
-  --ink:#36281a; --ink-soft:#665338; --ink-faint:#8a7755;
-  --gold:#9c7b27; --gold-bright:#c39a37; --gold-band:#d8b150;
+  --frame:#2b2013; --frame-2:#1f160c; --band:#443422;
+  --parch:#c1b79a; --parch-2:#bcb08e; --parch-hi:#cac2ad; --panel:#ccc3a9;
+  --ink:#231a0f; --ink-soft:#4a3c27; --ink-faint:#6a5b3f;
+  --gold:#8f701f; --gold-bright:#c39a37; --gold-band:#d8b150;
   --crimson:#8a2b2b; --crimson-deep:#6d1f1f; --head:#6d1f1f;
-  --edge:#cdb988; --edge-2:#b8a06f; --card-line:#c7b485;
+  --edge:#aa9a71; --edge-2:#99855c; --card-line:#a5956e;
   --shadow:rgba(18,10,2,.5);
   /* aged-paper texture, layered over each surface's own background-color */
   --paper:
-    radial-gradient(120% 85% at 12% 8%, rgba(255,251,232,.55), rgba(255,251,232,0) 55%),
+    radial-gradient(120% 85% at 12% 8%, rgba(255,251,232,.4), rgba(255,251,232,0) 55%),
     radial-gradient(115% 100% at 88% 92%, rgba(143,112,68,.18), rgba(143,112,68,0) 60%),
     radial-gradient(70% 60% at 78% 18%, rgba(120,90,50,.10), rgba(120,90,50,0) 70%),
     radial-gradient(60% 55% at 30% 80%, rgba(120,90,50,.08), rgba(120,90,50,0) 70%),
@@ -26,43 +26,53 @@
 }
 *{box-sizing:border-box}
 html,body{margin:0}
+/* dark leather "table" surround, like the rulebook covers & the Dragon book's iron frame */
 body{
   font-family:"EB Garamond",Georgia,serif; color:var(--ink); font-size:17px; line-height:1.5;
   background:
-    radial-gradient(1100px 480px at 50% -120px, rgba(255,246,214,.45) 0%, rgba(255,246,214,0) 70%),
-    repeating-linear-gradient(94deg, rgba(120,90,50,.035) 0 2px, transparent 2px 6px),
-    var(--frame);
+    radial-gradient(1200px 560px at 50% -140px, rgba(216,177,80,.10) 0%, rgba(216,177,80,0) 65%),
+    repeating-linear-gradient(94deg, rgba(0,0,0,.14) 0 2px, rgba(0,0,0,0) 2px 5px),
+    radial-gradient(140% 120% at 50% 40%, var(--frame) 0%, var(--frame-2) 100%);
   min-height:100vh;
 }
 h1,h2,h3,h4,h5{font-family:"Cinzel",serif; letter-spacing:.02em; color:var(--head); margin:0}
+/* Lombardic display face for major headers, like the rulebooks' red section titles */
+.section-head h2,.ref-card h2,.callouts h3{font-family:"Uncial Antiqua","Cinzel",serif; font-weight:400; letter-spacing:.015em}
 
-/* parchment surface helper applied across widgets */
+/* parchment surface helper applied across widgets — a touch lighter than the
+   page itself, like the rulebooks' inset example boxes */
 .config,.ustep li,.ref-card,.callouts,.faq-item,.flow-strip,.tab.on{
-  background-color:var(--parch); background-image:var(--paper);
+  background-color:var(--panel); background-image:var(--paper);
 }
 
-/* ---- Topbar (dark banner) ------------------------------------------------ */
+/* ---- Topbar — book-cover banner: centred sigil & gold beveled wordmark ---- */
 .topbar{
-  border-bottom:2px solid var(--gold-band);
-  background:linear-gradient(180deg, #5c4831 0%, #43331f 100%);
-  box-shadow:0 3px 14px rgba(40,26,8,.4);
+  border-top:3px double rgba(216,177,80,.55);
+  border-bottom:3px double var(--gold-band);
+  background:
+    radial-gradient(900px 300px at 50% 115%, rgba(216,177,80,.14), rgba(216,177,80,0) 70%),
+    linear-gradient(180deg, #33261a 0%, #241a10 100%);
+  box-shadow:0 4px 18px rgba(0,0,0,.55);
 }
-.topbar-inner{max-width:1180px; margin:0 auto; padding:20px 26px 10px; position:relative}
-.sigil{position:absolute; right:26px; top:14px; width:74px; height:74px; color:var(--gold-band); opacity:.92}
+.topbar-inner{max-width:1180px; margin:0 auto; padding:16px 26px 0; position:relative;
+  display:flex; flex-direction:column; align-items:center; text-align:center}
+.sigil{width:64px; height:64px; color:var(--gold-band); opacity:.95; margin-bottom:2px}
 .sigil svg{width:100%; height:100%}
-.brand{display:flex; flex-direction:column; gap:2px}
-.brand-tal{font-family:"Cinzel",serif; font-weight:800; font-size:40px; line-height:1;
-  color:#f1deb0; text-shadow:0 1px 0 #000, 0 0 18px rgba(216,177,80,.35);}
-.brand-sub{font-family:"Cinzel",serif; font-weight:600; font-size:14px; letter-spacing:.16em;
-  text-transform:uppercase; color:var(--gold-band); margin-top:3px}
-.deco-rule{display:flex; align-items:center; gap:8px; width:230px; margin:5px 0 2px}
-.deco-rule i{height:1px; flex:1; background:linear-gradient(90deg,transparent,var(--gold))}
-.deco-rule i:last-child{background:linear-gradient(90deg,var(--gold),transparent)}
+.brand{display:flex; flex-direction:column; gap:2px; align-items:center}
+.brand-tal{font-family:"Cinzel",serif; font-weight:800; font-size:44px; line-height:1;
+  background:linear-gradient(180deg,#f6df9a 0%,#d8b150 45%,#9c7527 78%,#c69c3d 100%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  filter:drop-shadow(0 1px 0 rgba(0,0,0,.85)) drop-shadow(0 0 14px rgba(216,177,80,.3));}
+.brand-sub{font-family:"Cinzel",serif; font-weight:600; font-size:13.5px; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--gold-band); margin-top:4px}
+.deco-rule{display:flex; align-items:center; gap:8px; width:300px; margin:7px auto 2px}
+.deco-rule i{height:1px; flex:1; background:linear-gradient(90deg,transparent,var(--gold-band))}
+.deco-rule i:last-child{background:linear-gradient(90deg,var(--gold-band),transparent)}
 .deco-rule b{width:7px; height:7px; transform:rotate(45deg); background:var(--gold-band); border-radius:1px}
-.tagline{max-width:760px; color:#cdb88c; margin:8px 0 12px; font-size:16.5px}
+.tagline{max-width:760px; color:#cdb88c; margin:8px auto 14px; font-size:16px}
 
 /* Tabs */
-.tabs{display:flex; gap:6px}
+.tabs{display:flex; gap:6px; justify-content:center}
 .tab{
   font-family:"Cinzel",serif; font-weight:600; font-size:14px; letter-spacing:.04em;
   padding:9px 18px; border:1px solid var(--gold); border-bottom:none;
@@ -72,15 +82,30 @@ h1,h2,h3,h4,h5{font-family:"Cinzel",serif; letter-spacing:.02em; color:var(--hea
 .tab:hover{background:#362b1b; color:#e8d5a8}
 .tab.on{color:var(--crimson-deep); top:0; padding-bottom:11px; box-shadow:0 -2px 10px rgba(0,0,0,.4); border-color:var(--edge-2)}
 
-/* ---- Layout -------------------------------------------------------------- */
-main{max-width:1180px; margin:0 auto; padding:22px 26px 40px}
+/* ---- Layout — the content sits on a vignetted parchment "page", framed and
+   riveted like the rulebook pages ------------------------------------------ */
+main{
+  max-width:1180px; margin:26px auto 20px; padding:30px 34px 40px;
+  background-color:var(--parch); background-image:
+    radial-gradient(circle at 13px 13px, rgba(216,177,80,.8) 0 3px, rgba(139,105,48,.9) 3px 4.5px, transparent 6px),
+    radial-gradient(circle at calc(100% - 13px) 13px, rgba(216,177,80,.8) 0 3px, rgba(139,105,48,.9) 3px 4.5px, transparent 6px),
+    radial-gradient(circle at 13px calc(100% - 13px), rgba(216,177,80,.8) 0 3px, rgba(139,105,48,.9) 3px 4.5px, transparent 6px),
+    radial-gradient(circle at calc(100% - 13px) calc(100% - 13px), rgba(216,177,80,.8) 0 3px, rgba(139,105,48,.9) 3px 4.5px, transparent 6px),
+    var(--paper);
+  border:1px solid #8a6d3b; border-radius:4px;
+  outline:1px solid rgba(216,177,80,.35); outline-offset:4px;
+  box-shadow:
+    inset 0 0 90px rgba(88,58,22,.35), inset 0 0 10px rgba(88,58,22,.28),
+    0 12px 44px rgba(0,0,0,.6);
+}
 .view{display:none}
 .view.on{display:block}
 
 /* ---- Config -------------------------------------------------------------- */
 .config{
-  border:1px solid var(--edge-2); border-radius:12px;
-  padding:18px 20px; box-shadow:var(--paper-inset), 0 4px 18px var(--shadow); margin-bottom:22px;
+  border:1px solid var(--edge-2); border-radius:8px;
+  outline:1px solid rgba(122,98,55,.5); outline-offset:3px;
+  padding:18px 20px; box-shadow:var(--paper-inset), 0 4px 18px var(--shadow); margin-bottom:26px;
 }
 .cfg-group{margin-bottom:16px}
 .cfg-group:last-child{margin-bottom:0}
@@ -100,12 +125,12 @@ main{max-width:1180px; margin:0 auto; padding:22px 26px 40px}
 .chips{display:flex; flex-wrap:wrap; gap:8px}
 .chip{
   display:inline-flex; align-items:center; gap:8px; cursor:pointer;
-  background-color:#ddcb9f; background-image:var(--paper);
+  background-color:#b7a884; background-image:var(--paper);
   border:1px solid var(--edge-2); border-radius:9px;
   padding:7px 12px; font-family:"EB Garamond",serif; font-size:15.5px; color:var(--ink-soft);
   transition:.13s; line-height:1.15;
 }
-.chip:hover{background-color:#ecdcb2; border-color:var(--gold); color:var(--ink)}
+.chip:hover{background-color:#c4b794; border-color:var(--gold); color:var(--ink)}
 .chip .chip-name{font-weight:600}
 .chip .chip-tag{font-family:"Cinzel",serif; font-size:10px; font-weight:700; letter-spacing:.05em;
   padding:2px 6px; border-radius:5px; color:#fff; background:var(--s-base)}
@@ -114,22 +139,22 @@ main{max-width:1180px; margin:0 auto; padding:22px 26px 40px}
   box-shadow:0 0 0 1px var(--gold), 0 2px 9px var(--shadow)}
 .chip.on .chip-sub{color:var(--crimson)}
 .chip.locked{cursor:default; border-style:double; border-width:3px; border-color:var(--edge-2)}
-.chip.locked:hover{border-color:var(--edge-2); background-color:#ddcb9f}
+.chip.locked:hover{border-color:var(--edge-2); background-color:#b7a884}
 .chip.small{padding:6px 11px; font-size:14.5px}
 .chip.ending{padding:8px 14px}
 .chip.ending .chip-name{font-family:"Cinzel",serif; font-size:14px}
 .chip.disabled{opacity:.45; cursor:not-allowed; filter:grayscale(.4)}
-.chip.disabled:hover{background-color:#ddcb9f; border-color:var(--edge-2); color:var(--ink-soft)}
+.chip.disabled:hover{background-color:#b7a884; border-color:var(--edge-2); color:var(--ink-soft)}
 
 /* Player buttons */
 .pbtns{display:flex; gap:6px}
 .pbtn{
   width:42px; height:42px; border-radius:9px; border:1px solid var(--edge-2);
-  background-color:#ddcb9f; background-image:var(--paper);
+  background-color:#b7a884; background-image:var(--paper);
   color:var(--ink-soft); font-family:"Cinzel",serif; font-weight:700; font-size:18px;
   cursor:pointer; transition:.13s;
 }
-.pbtn:hover{background-color:#ecdcb2; border-color:var(--gold)}
+.pbtn:hover{background-color:#c4b794; border-color:var(--gold)}
 .pbtn.on{background:var(--crimson); color:#f6e7c2; border-color:var(--crimson-deep); box-shadow:0 2px 8px var(--shadow)}
 
 /* ---- Source colour tints (chip tag + chip accent) ------------------------ */
@@ -165,7 +190,8 @@ main{max-width:1180px; margin:0 auto; padding:22px 26px 40px}
 
 .setup-block{margin-bottom:20px}
 .setup-block h3{
-  font-size:16px; letter-spacing:.06em; text-transform:uppercase; color:var(--crimson);
+  font-family:"Uncial Antiqua","Cinzel",serif; font-weight:400;
+  font-size:17px; letter-spacing:.04em; color:var(--head);
   border-bottom:1px solid var(--edge-2); padding-bottom:5px; margin-bottom:12px;
 }
 .ustep{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px}
@@ -174,10 +200,13 @@ main{max-width:1180px; margin:0 auto; padding:22px 26px 40px}
   border-left:4px solid var(--gold); border-radius:9px; padding:11px 14px;
   box-shadow:var(--paper-inset), 0 2px 9px var(--shadow);
 }
+/* step numbers styled like the rulebooks' circular page-number medallions */
 .snum{
-  flex:none; width:26px; height:26px; border-radius:50%; background:var(--crimson); color:#f6e7c2;
+  flex:none; width:28px; height:28px; border-radius:50%;
+  background:var(--parch-hi); color:var(--crimson-deep);
+  border:1.5px solid #8a6d3b;
   font-family:"Cinzel",serif; font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center;
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.16);
+  box-shadow:inset 0 0 0 2px var(--parch-hi), inset 0 0 0 3px rgba(138,109,59,.75), 0 1px 3px var(--shadow);
 }
 .sbody{flex:1}
 .st{font-family:"Cinzel",serif; font-weight:700; font-size:16px; color:var(--ink)}
@@ -188,10 +217,16 @@ main{max-width:1180px; margin:0 auto; padding:22px 26px 40px}
 .etag{display:inline-block; font-family:"Cinzel",serif; font-size:10px; font-weight:700; letter-spacing:.05em;
   color:#fff; padding:2px 7px; border-radius:5px; vertical-align:middle; box-shadow:0 1px 2px var(--shadow)}
 
-/* Callouts */
+/* Callouts — framed like the rulebooks' bordered example boxes, with a
+   centred red title between flanking rules */
 .callouts{margin-top:24px; border:1px solid var(--edge-2);
-  border-radius:12px; padding:16px 18px; box-shadow:var(--paper-inset), 0 3px 12px var(--shadow)}
-.callouts h3{font-size:16px; letter-spacing:.05em; text-transform:uppercase; color:var(--crimson); margin-bottom:12px}
+  outline:1px solid rgba(122,98,55,.5); outline-offset:3px;
+  border-radius:8px; padding:16px 18px; box-shadow:var(--paper-inset), 0 3px 12px var(--shadow)}
+.callouts h3{font-size:19px; letter-spacing:.02em; text-transform:none; color:var(--head); margin-bottom:12px;
+  display:flex; align-items:center; gap:12px; justify-content:center}
+.callouts h3::before,.callouts h3::after{content:""; height:1px; flex:1; max-width:180px;
+  background:linear-gradient(90deg, rgba(138,109,59,0), rgba(138,109,59,.75))}
+.callouts h3::after{background:linear-gradient(90deg, rgba(138,109,59,.75), rgba(138,109,59,0))}
 .callout{padding:9px 0; border-top:1px dashed var(--card-line)}
 .callout:first-of-type{border-top:none}
 .callout b{font-family:"Cinzel",serif; font-size:14.5px; color:var(--ink); margin-left:6px}
@@ -200,17 +235,19 @@ main{max-width:1180px; margin:0 auto; padding:22px 26px 40px}
 /* ---- Reference ----------------------------------------------------------- */
 .jump-nav{
   position:sticky; top:0; z-index:5; display:flex; flex-wrap:wrap; gap:6px;
-  background:rgba(205,189,145,.97); backdrop-filter:blur(4px);
-  padding:11px 12px; margin:-22px -26px 20px; border-bottom:1px solid var(--edge-2);
+  background:rgba(193,183,154,.97); backdrop-filter:blur(4px);
+  padding:11px 12px; margin:-30px -34px 20px; border-bottom:1px solid var(--edge-2);
+  border-radius:4px 4px 0 0;
 }
 .jn{font-family:"Cinzel",serif; font-size:12px; letter-spacing:.03em; color:var(--ink-soft);
   text-decoration:none; padding:5px 11px; border:1px solid var(--edge-2); border-radius:20px;
-  background-color:#ddcb9f; background-image:var(--paper); transition:.13s}
+  background-color:#b7a884; background-image:var(--paper); transition:.13s}
 .jn:hover{background:var(--crimson); color:#f6e7c2; border-color:var(--crimson-deep)}
 
-.ref-card{border:1px solid var(--edge-2); border-radius:12px;
-  padding:20px 22px; margin-bottom:18px; box-shadow:var(--paper-inset), 0 3px 14px var(--shadow); scroll-margin-top:64px}
-.ref-card h2{font-size:23px; margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid var(--card-line)}
+.ref-card{border:1px solid var(--edge-2); border-radius:8px;
+  outline:1px solid rgba(122,98,55,.5); outline-offset:3px;
+  padding:20px 22px; margin-bottom:22px; box-shadow:var(--paper-inset), 0 3px 14px var(--shadow); scroll-margin-top:64px}
+.ref-card h2{font-size:25px; margin-bottom:8px; padding-bottom:8px; border-bottom:3px double var(--card-line)}
 .ref-intro{color:var(--ink-soft); font-size:16px; margin:0 0 14px; font-style:italic}
 
 .flow-list{margin:0 0 14px; padding-left:20px}
@@ -218,7 +255,7 @@ main{max-width:1180px; margin:0 auto; padding:22px 26px 40px}
 .flow-list b{font-family:"Cinzel",serif; color:var(--crimson)}
 .flow-strip{display:flex; flex-wrap:wrap; align-items:center; gap:4px; margin:12px 0;
   padding:11px 13px; border:1px solid var(--card-line); border-radius:9px; box-shadow:var(--paper-inset)}
-.flow-strip span{font-family:"Cinzel",serif; font-size:12px; background:#ddcb9f; border:1px solid var(--edge-2);
+.flow-strip span{font-family:"Cinzel",serif; font-size:12px; background:#b7a884; border:1px solid var(--edge-2);
   border-radius:6px; padding:4px 9px; color:var(--ink)}
 .flow-strip i{color:var(--gold); font-style:normal; font-weight:700}
 
@@ -234,7 +271,7 @@ main{max-width:1180px; margin:0 auto; padding:22px 26px 40px}
 .ref-table{border-collapse:collapse; margin:6px 0 14px}
 .ref-table th,.ref-table td{border:1px solid var(--card-line); padding:6px 16px; text-align:center; font-size:15.5px}
 .ref-table th{font-family:"Cinzel",serif; font-size:13px; background:var(--crimson); color:#f6e7c2}
-.ref-table td{background:#e1d2a8; color:var(--ink)}
+.ref-table td{background:#bbae8b; color:var(--ink)}
 
 /* FAQ */
 .faq-list{display:flex; flex-direction:column; gap:8px}
@@ -247,16 +284,16 @@ main{max-width:1180px; margin:0 auto; padding:22px 26px 40px}
 .faq-item[open] summary{background:rgba(150,118,70,.18); color:var(--crimson-deep)}
 .faq-a{padding:11px 14px; color:var(--ink-soft); font-size:15.5px; border-top:1px solid var(--card-line)}
 
-/* ---- Footer -------------------------------------------------------------- */
-.footer{max-width:1180px; margin:0 auto; padding:18px 26px 34px; color:var(--ink-soft);
-  font-size:13.5px; font-style:italic; text-align:center; border-top:1px solid var(--edge-2)}
-.footer b{font-style:normal; color:var(--crimson-deep)}
+/* ---- Footer (sits on the dark leather surround) --------------------------- */
+.footer{max-width:1180px; margin:0 auto; padding:6px 26px 30px; color:#a8946a;
+  font-size:13.5px; font-style:italic; text-align:center}
+.footer b{font-style:normal; color:#d3b573}
 
 /* ---- Responsive ---------------------------------------------------------- */
 @media (max-width:680px){
-  .brand-tal{font-size:30px}
-  .sigil{width:54px; height:54px}
-  main{padding:18px 16px 36px}
-  .jump-nav{margin:-18px -16px 18px}
+  .brand-tal{font-size:32px}
+  .sigil{width:48px; height:48px}
+  main{margin:14px 8px 14px; padding:20px 14px 32px}
+  .jump-nav{margin:-20px -14px 18px}
   .def-list .dk{width:100%}
 }
