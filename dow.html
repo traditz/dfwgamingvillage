@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:title" content="Dead of Winter Player Aids - DFW Gaming Village">
+    <meta name="description" content="Player aids for Dead of Winter: A Crossroads Game — the Setup &amp; Reference Utility covering the base game, The Long Night and Warring Colonies.">
+    <meta property="og:description" content="Dead of Winter player aids: the Setup & Reference Utility.">
+    <meta property="og:image" content="https://www.dfwgamingvillage.com/banner_cropped.png">
+    <meta property="og:url" content="https://www.dfwgamingvillage.com/dow.html">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://www.dfwgamingvillage.com/banner.png">
+    <title>Dead of Winter Player Aids - DFW Gaming Village</title>
+    <link rel="stylesheet" href="community.css?v=20260622-cleanup">
+    <link rel="icon" href="favicon.ico">
+    <style>
+      /* --- Dead of Winter hub: custom art buttons --- */
+      .dow-tools {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 22px;
+        justify-content: center;
+        margin: 30px auto 0;
+        max-width: 420px;
+      }
+      .dow-tool {
+        position: relative;
+        display: block;
+        width: min(100%, 380px);
+        aspect-ratio: 16 / 11;
+        border-radius: 16px;
+        overflow: hidden;
+        text-decoration: none;
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background-image: url("images/pic3016500.webp");
+        background-size: cover;
+        background-position: center top;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+        transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+        isolation: isolate;
+        --bt-accent: #8fd0e8;
+      }
+      /* Same shading treatment as the other hub buttons: a subtle accent tint
+         in the top-right + an even dim over the cover art. */
+      .dow-tool::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        background:
+          radial-gradient(120% 75% at 80% 6%, rgba(143, 208, 232, 0.2), transparent 58%),
+          linear-gradient(180deg, rgba(5, 8, 13, 0.3), rgba(5, 8, 13, 0.44));
+      }
+      .dow-tool .bt-inner {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: 18px 20px 20px;
+        /* art shows as a strip up top, text reads on near-solid dark below. */
+        background: linear-gradient(180deg,
+          rgba(5, 8, 13, 0) 0%,
+          rgba(5, 8, 13, 0) 18%,
+          rgba(5, 8, 13, 0.72) 31%,
+          rgba(4, 7, 11, 0.96) 42%,
+          rgba(3, 6, 10, 1) 54%,
+          rgba(3, 5, 8, 1) 100%);
+      }
+      .dow-tool .bt-title {
+        margin: 0;
+        font-size: clamp(1.35rem, 3.4vw, 1.6rem);
+        font-weight: 800;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        line-height: 1.04;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+      }
+      .dow-tool .bt-accentbar {
+        width: 46px;
+        height: 3px;
+        margin: 9px 0;
+        border-radius: 2px;
+        background: var(--bt-accent);
+        box-shadow: 0 0 12px var(--bt-accent);
+      }
+      .dow-tool .bt-sub {
+        margin: 0;
+        font-size: 0.88rem;
+        line-height: 1.35;
+        color: #d3e2ea;
+        max-width: 34ch;
+      }
+      .dow-tool .bt-cta {
+        margin-top: 12px;
+        font-size: 0.74rem;
+        font-weight: 800;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--bt-accent);
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .dow-tool .bt-cta .arrow { transition: transform 0.22s ease; }
+      .dow-tool:hover, .dow-tool:focus-visible {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 46px rgba(0, 0, 0, 0.6);
+        border-color: var(--bt-accent);
+        color: #fff;
+      }
+      .dow-tool:hover .bt-cta .arrow,
+      .dow-tool:focus-visible .bt-cta .arrow { transform: translateX(5px); }
+      @media (prefers-reduced-motion: reduce) {
+        .dow-tool, .dow-tool .bt-cta .arrow { transition: none; }
+      }
+    </style>
+</head>
+<body data-page="player-aids">
+    <div class="nav">
+        <a href="index.html">Home</a>
+        <a href="join.html">Join the Community</a>
+        <a href="gallery.html">Gallery</a>
+        <a href="games.html">Game Library</a>
+        <a href="events.html">Events</a>
+        <a href="utilities.html">Utilities</a>
+        <a href="player-aids.html">Player Aids</a>
+        <a href="donate.html">Donate</a>
+        <a href="supporters.html">Supporters</a>
+        <a href="contact.html">Contact</a>
+    </div>
+
+    <div class="banner">
+        <img src="banner.png" alt="DFW Gaming Village Banner">
+    </div>
+
+    <main class="content">
+        <h1>Dead of Winter <span style="font-weight:400;font-size:0.6em;opacity:0.8">A Crossroads Game</span></h1>
+        <p>Choose your sets, modules and variants — base game, The Long Night, Warring Colonies — and get clean, step-by-step setup instructions plus a rules and location reference for that exact table. Where The Long Night or Warring Colonies rewrites a rule, the utility shows only the ruling that applies to your game.</p>
+
+        <div class="dow-tools">
+            <a href="dow-setup/index.html" class="dow-tool">
+                <span class="bt-inner">
+                    <span class="bt-title">Setup &amp;<br>Reference</span>
+                    <span class="bt-accentbar"></span>
+                    <span class="bt-sub">Exact setup, rules &amp; location references, and a searchable index of all three rulebooks.</span>
+                    <span class="bt-cta">Open Utility <span class="arrow">&rarr;</span></span>
+                </span>
+            </a>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 DFW Gaming Village. All Rights Reserved.</p>
+    </footer>
+    <script src="site-analytics.js?v=20260607-analytics"></script>
+</body>
+</html>
