@@ -1,0 +1,238 @@
+/* =============================================================================
+   Abyss — Setup & Reference Utility
+   Theme: the abyssal court — bioluminescent deep-sea blues, pearl light,
+   and jellyfish violet, in the elegant art-nouveau spirit of the game.
+   ============================================================================= */
+
+:root {
+  --ink:      #06121e;   /* abyssal water */
+  --ink-2:    #0b1d2e;   /* raised panels */
+  --ink-3:    #11283d;   /* cards */
+  --line:     #24435e;   /* hairlines */
+  --pearl:    #eee8d8;   /* pearl text */
+  --pearl-dim:#9aa4a4;   /* secondary text */
+  --biolum:   #52d5e0;   /* bioluminescent cyan */
+  --biolum-dim:#2b7f8a;
+  --jelly:    #b48ae0;   /* jellyfish violet */
+  --nacre:    #d8c690;   /* nacre gold */
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background:
+    radial-gradient(1100px 500px at 50% -120px, rgba(82, 213, 224, 0.09), transparent 70%),
+    radial-gradient(900px 700px at 85% 12%, rgba(180, 138, 224, 0.07), transparent 60%),
+    linear-gradient(180deg, #081827 0%, var(--ink) 40%),
+    var(--ink);
+  color: var(--pearl);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 16.5px;
+  line-height: 1.55;
+  min-height: 100vh;
+}
+
+/* rising bubbles */
+.grain {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.06;
+  background-image:
+    radial-gradient(circle 3px at 12% 88%, #9adfe8 40%, transparent 41%),
+    radial-gradient(circle 2px at 28% 45%, #9adfe8 40%, transparent 41%),
+    radial-gradient(circle 4px at 46% 72%, #9adfe8 40%, transparent 41%),
+    radial-gradient(circle 2px at 63% 30%, #9adfe8 40%, transparent 41%),
+    radial-gradient(circle 3px at 78% 60%, #9adfe8 40%, transparent 41%),
+    radial-gradient(circle 2px at 91% 85%, #9adfe8 40%, transparent 41%);
+}
+
+/* ---- header --------------------------------------------------------------- */
+.topbar {
+  position: relative; z-index: 1;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(17, 40, 61, 0.85), rgba(6, 18, 30, 0.4));
+  padding: 34px 20px 26px;
+  text-align: center;
+}
+.sigil { display: inline-block; width: 88px; height: 88px; color: var(--biolum); filter: drop-shadow(0 0 16px rgba(82, 213, 224, 0.5)); }
+.sigil svg { width: 100%; height: 100%; }
+.sigil .jelly { color: var(--jelly); }
+
+.brand-title {
+  font-family: "Philosopher", Georgia, serif;
+  font-size: clamp(2.2rem, 6vw, 3.4rem);
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: var(--pearl);
+  text-transform: uppercase;
+  text-shadow: 0 0 24px rgba(82, 213, 224, 0.4);
+  margin-top: 8px;
+}
+.brand-sub {
+  font-family: "Philosopher", Georgia, serif;
+  font-size: clamp(0.85rem, 2.3vw, 1.05rem);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--biolum);
+  margin-top: 6px;
+}
+.deco-rule {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  margin: 14px auto 10px; max-width: 460px;
+}
+.deco-rule i { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--biolum-dim)); }
+.deco-rule i:last-child { background: linear-gradient(90deg, var(--biolum-dim), transparent); }
+.deco-rule b { width: 8px; height: 8px; border-radius: 50%; background: var(--pearl); box-shadow: 0 0 10px rgba(238, 232, 216, 0.8); }
+.tagline { max-width: 760px; margin: 0 auto; color: var(--pearl-dim); font-style: italic; }
+
+/* ---- layout ---------------------------------------------------------------- */
+main { position: relative; z-index: 1; max-width: 1060px; margin: 0 auto; padding: 26px 18px 60px; }
+
+section h2 {
+  font-family: "Philosopher", Georgia, serif;
+  font-size: 1.45rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--nacre);
+  margin: 38px 0 4px;
+  display: flex; align-items: center; gap: 14px;
+}
+section h2::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--line), transparent); }
+.sec-note { color: var(--pearl-dim); font-size: 0.92rem; margin-bottom: 14px; font-style: italic; }
+
+/* ---- configurator ---------------------------------------------------------- */
+.cfg { display: flex; flex-direction: column; gap: 18px; }
+.cfg-label {
+  display: block;
+  font-family: "Philosopher", Georgia, serif; font-size: 0.9rem;
+  letter-spacing: 0.22em; text-transform: uppercase; color: var(--biolum);
+  margin-bottom: 8px;
+}
+.cfg-label .hint { color: var(--pearl-dim); text-transform: none; letter-spacing: 0; font-family: Georgia, serif; font-style: italic; }
+
+.chips, .pbtns { display: flex; flex-wrap: wrap; gap: 9px; }
+
+.chip {
+  display: flex; flex-direction: column; align-items: flex-start;
+  background: var(--ink-2); color: var(--pearl-dim);
+  border: 1px solid var(--line); border-radius: 12px;
+  padding: 8px 14px; cursor: pointer; font: inherit;
+  transition: border-color 0.16s, color 0.16s, box-shadow 0.16s;
+}
+.chip b { font-family: "Philosopher", Georgia, serif; font-size: 1rem; letter-spacing: 0.05em; }
+.chip span { font-size: 0.72rem; letter-spacing: 0.14em; opacity: 0.7; }
+.chip:hover { border-color: var(--jelly); }
+.chip.on { color: var(--pearl); border-color: var(--biolum-dim); box-shadow: inset 0 0 0 1px var(--biolum-dim), 0 0 16px rgba(82, 213, 224, 0.15); background: linear-gradient(180deg, rgba(82, 213, 224, 0.09), rgba(17, 40, 61, 0.9)); }
+.chip.lock { cursor: default; }
+
+.pbtn {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: var(--ink-2); color: var(--pearl-dim);
+  border: 1px solid var(--line); cursor: pointer;
+  font-family: "Philosopher", Georgia, serif; font-size: 1.05rem;
+  transition: all 0.16s;
+}
+.pbtn:hover { border-color: var(--jelly); }
+.pbtn.on { color: var(--ink); background: var(--pearl); border-color: var(--pearl); box-shadow: 0 0 18px rgba(238, 232, 216, 0.5); font-weight: 700; }
+.pbtn.off { opacity: 0.35; cursor: not-allowed; }
+
+/* ---- setup steps ----------------------------------------------------------- */
+.phase { margin-top: 22px; }
+.phase-title {
+  font-family: "Philosopher", Georgia, serif; letter-spacing: 0.14em; text-transform: uppercase;
+  font-size: 1.1rem; color: var(--biolum); margin-bottom: 4px;
+}
+
+.step {
+  display: flex; gap: 14px;
+  background: var(--ink-3);
+  border: 1px solid var(--line); border-left: 3px solid var(--jelly);
+  border-radius: 12px; padding: 14px 16px; margin-bottom: 10px;
+}
+.step-num {
+  flex: 0 0 auto; width: 34px; height: 34px; border-radius: 50%;
+  border: 1px solid var(--pearl); color: var(--pearl);
+  background: radial-gradient(circle at 35% 30%, rgba(238, 232, 216, 0.25), transparent 60%);
+  display: flex; align-items: center; justify-content: center;
+  font-family: "Philosopher", Georgia, serif; font-size: 1.05rem; margin-top: 2px;
+}
+.step-body { min-width: 0; }
+.step-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; margin-bottom: 4px; }
+.step-head h4 { font-family: "Philosopher", Georgia, serif; font-size: 1.12rem; letter-spacing: 0.03em; color: var(--pearl); }
+.step-text ul { margin: 6px 0 2px 20px; }
+.step-text li { margin-bottom: 4px; }
+.step-text b { color: var(--biolum); font-weight: 700; }
+.step-text i { color: var(--pearl-dim); }
+
+.tag {
+  display: inline-block; font-family: Verdana, sans-serif;
+  font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase;
+  border-radius: 4px; padding: 2px 7px; white-space: nowrap;
+}
+.e-base   { background: #16324a; color: #8fc7e8; }
+.e-kraken { background: #2a2333; color: #c5a6e8; }
+.e-lev    { background: #33222a; color: #e89aa6; }
+.e-out    { background: #1c3a34; color: #8ce0c2; }
+
+.src-line { margin-top: 7px; font-size: 0.76rem; letter-spacing: 0.04em; color: var(--biolum-dim); font-family: Verdana, sans-serif; }
+.src-line::before { content: "❧ "; color: var(--nacre); }
+
+/* ---- reference ------------------------------------------------------------- */
+.ref {
+  background: var(--ink-3); border: 1px solid var(--line); border-radius: 12px;
+  margin-bottom: 10px; overflow: hidden;
+}
+.ref summary {
+  cursor: pointer; list-style: none;
+  font-family: "Philosopher", Georgia, serif; font-size: 1.08rem; letter-spacing: 0.05em;
+  color: var(--pearl); padding: 13px 18px;
+  display: flex; align-items: center; gap: 10px;
+  transition: color 0.16s;
+}
+.ref summary::-webkit-details-marker { display: none; }
+.ref summary::before { content: "◉"; color: var(--jelly); font-size: 0.8rem; transition: transform 0.2s; }
+.ref[open] summary::before { transform: scale(1.25); color: var(--biolum); }
+.ref summary:hover { color: var(--biolum); }
+.ref[open] summary { border-bottom: 1px solid var(--line); color: var(--biolum); }
+.ref-body { padding: 14px 20px 16px; }
+.ref-body h4 { font-family: "Philosopher", Georgia, serif; color: var(--jelly); font-size: 0.95rem; letter-spacing: 0.1em; text-transform: uppercase; margin: 12px 0 5px; }
+.ref-body p { margin-bottom: 8px; }
+.ref-body ul, .ref-body ol { margin: 4px 0 10px 22px; }
+.ref-body li { margin-bottom: 5px; }
+.ref-body b { color: var(--biolum); }
+.ref-body i { color: var(--pearl); }
+
+/* ---- search ---------------------------------------------------------------- */
+.rsearch-wrap { margin-bottom: 14px; }
+#rsearch {
+  width: 100%; padding: 12px 16px;
+  background: var(--ink-2); border: 1px solid var(--line); border-radius: 12px;
+  color: var(--pearl); font: inherit; font-size: 1rem;
+  transition: border-color 0.16s, box-shadow 0.16s;
+}
+#rsearch:focus { outline: none; border-color: var(--biolum-dim); box-shadow: 0 0 0 1px var(--biolum-dim), 0 0 18px rgba(82, 213, 224, 0.15); }
+#rsearch::placeholder { color: var(--pearl-dim); font-style: italic; }
+
+.rhint { color: var(--pearl-dim); font-style: italic; }
+.rhit { background: var(--ink-3); border: 1px solid var(--line); border-radius: 12px; padding: 11px 15px; margin-bottom: 8px; }
+.rhit-src { font-family: Verdana, sans-serif; font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--nacre); margin-bottom: 4px; }
+.rhit-text { font-size: 0.92rem; color: var(--pearl-dim); }
+.rhit-text mark { background: rgba(82, 213, 224, 0.25); color: var(--biolum); border-radius: 2px; padding: 0 1px; }
+
+/* ---- footer ---------------------------------------------------------------- */
+.footer {
+  position: relative; z-index: 1;
+  border-top: 1px solid var(--line);
+  text-align: center; padding: 22px 18px 30px;
+  color: var(--pearl-dim); font-size: 0.85rem; font-style: italic;
+}
+
+/* ---- responsive ------------------------------------------------------------ */
+@media (max-width: 640px) {
+  body { font-size: 15.5px; }
+  .step { padding: 12px; gap: 10px; }
+  .step-num { width: 28px; height: 28px; font-size: 0.9rem; }
+  .ref-body { padding: 12px 14px 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+  html { scroll-behavior: auto; }
+}

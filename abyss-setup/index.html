@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Abyss — Setup &amp; Reference Utility</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Philosopher:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=1">
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <span class="sigil" aria-hidden="true">
+      <!-- a pearl held in a jellyfish's crown of tendrils -->
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path class="jelly" d="M26 46 a24 24 0 0 1 48 0 q0 6 -6 6 h-36 q-6 0 -6 -6 Z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>
+        <g class="jelly" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round">
+          <path d="M32 54 q-2 12 3 22 q-4 2 -6 8"/>
+          <path d="M43 54 q1 14 -3 26"/>
+          <path d="M57 54 q-1 14 3 26"/>
+          <path d="M68 54 q2 12 -3 22 q4 2 6 8"/>
+        </g>
+        <circle cx="50" cy="40" r="9" fill="none" stroke="currentColor" stroke-width="2"/>
+        <circle cx="47" cy="37" r="2.4" fill="currentColor" opacity="0.9"/>
+        <circle cx="50" cy="92" r="1.6" fill="currentColor" opacity="0.5"/>
+        <circle cx="42" cy="14" r="1.4" fill="currentColor" opacity="0.4"/>
+        <circle cx="60" cy="10" r="1.8" fill="currentColor" opacity="0.5"/>
+      </svg>
+    </span>
+    <div class="brand-title">Abyss</div>
+    <div class="deco-rule" aria-hidden="true"><i></i><b></b><i></i></div>
+    <div class="brand-sub">Setup &amp; Reference Utility</div>
+    <p class="tagline" style="margin-top:14px">
+      Choose your expansions for exact setup steps, a full rules reference — exploration, recruitment,
+      Leviathan battles, Nebulis and the Outcasts — and a searchable index of every rulebook.
+      The throne of the deep awaits.
+    </p>
+  </header>
+
+  <main>
+    <section aria-label="Configuration">
+      <h2>The Kingdom Below</h2>
+      <p class="sec-note">Select the sets on the table. Every step and ruling below adapts to your choices.</p>
+      <div class="cfg">
+        <div>
+          <label class="cfg-label">Sets in play</label>
+          <div id="expansions" class="chips"></div>
+        </div>
+        <div>
+          <label class="cfg-label">Pretenders to the throne <span class="hint">(2–4 players; 5 with Leviathan)</span></label>
+          <div id="players" class="pbtns"></div>
+        </div>
+      </div>
+    </section>
+
+    <section aria-label="Setup">
+      <h2>Setup</h2>
+      <p class="sec-note">Follow the steps in order. Each cites its official source.</p>
+      <div id="setup"></div>
+    </section>
+
+    <section aria-label="Reference">
+      <h2>Rules Reference</h2>
+      <p class="sec-note">Tap a heading to open it. Contents adapt to your sets.</p>
+      <div id="reference"></div>
+    </section>
+
+    <section aria-label="Rulebook search">
+      <h2>Search the Rulebooks</h2>
+      <p class="sec-note">Full-text search across the base rulebook and every selected expansion.</p>
+      <div class="rsearch-wrap">
+        <input id="rsearch" type="search" placeholder="e.g. affiliate, threat track, nebulis, sentinel, leviathan…" aria-label="Search the rulebooks">
+      </div>
+      <div id="rresults"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    Setup and reference content grounded in the official Abyss rulebook and the Kraken, Leviathan and
+    De Profundis rules. A fan-made play aid — not affiliated with Bombyx or Asmodee.
+  </footer>
+
+  <script src="js/data.js?v=1"></script>
+  <script src="js/rules.js?v=1"></script>
+  <script src="js/app.js?v=1"></script>
+  <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
+  <script src="../site-analytics.js?v=20260607-analytics"></script>
+</body>
+</html>
