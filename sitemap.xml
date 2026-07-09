@@ -28,6 +28,8 @@
   <url><loc>https://www.dfwgamingvillage.com/talisman-setup/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://www.dfwgamingvillage.com/dow.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://www.dfwgamingvillage.com/dow-setup/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://www.dfwgamingvillage.com/relic.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://www.dfwgamingvillage.com/relic-setup/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://www.dfwgamingvillage.com/planner/</loc><changefreq>weekly</changefreq><priority>0.5</priority></url>
   <url><loc>https://www.dfwgamingvillage.com/library-manager/</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>
 </urlset>

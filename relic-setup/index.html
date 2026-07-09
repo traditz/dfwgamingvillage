@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relic — Setup Utility</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=7">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <span class="sigil" aria-hidden="true">
+        <svg viewBox="0 0 100 100">
+          <defs>
+            <radialGradient id="sg-glow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#9a6fd0" stop-opacity="0.5"/>
+              <stop offset="100%" stop-color="#9a6fd0" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <circle cx="50" cy="50" r="46" fill="url(#sg-glow)"/>
+          <!-- Mechanicus cog ring (segmented stroke = teeth) -->
+          <circle cx="50" cy="50" r="43" fill="none" stroke="currentColor" stroke-width="7"
+                  stroke-dasharray="7.6 5.9" opacity="0.55"/>
+          <circle cx="50" cy="50" r="37.5" fill="none" stroke="currentColor" stroke-width="1.6" opacity="0.75"/>
+          <circle cx="50" cy="50" r="34.5" fill="none" stroke="currentColor" stroke-width="0.8" opacity="0.4"/>
+          <!-- gothic capital I of the Holy Ordos -->
+          <rect x="45.5" y="30" width="9"  height="40" fill="currentColor"/>
+          <rect x="36"   y="27" width="28" height="7"  fill="currentColor"/>
+          <rect x="36"   y="66" width="28" height="7"  fill="currentColor"/>
+          <rect x="40"   y="46.5" width="20" height="7" fill="currentColor"/>
+        </svg>
+      </span>
+      <div class="brand">
+        <span class="brand-rl">Relic</span>
+        <span class="deco-rule"><i></i><b></b><i></i></span>
+        <span class="brand-sub">Setup &amp; Reference Codex · A Warhammer 40,000 Board Game</span>
+      </div>
+      <p class="tagline">Choose your expansions &amp; game modes — and receive clean setup rites, rules &amp; board references, and a searchable archive of the rulebooks. The Emperor protects.</p>
+    </div>
+  </header>
+
+  <main>
+    <section class="config">
+      <div class="cfg-group grow">
+        <label class="cfg-label">Expansions on the table</label>
+        <div id="expansions" class="chips"></div>
+      </div>
+      <div class="cfg-group">
+        <label class="cfg-label">Players</label>
+        <div id="players" class="pbtns"></div>
+      </div>
+      <div class="cfg-group grow">
+        <label class="cfg-label">Game modes &amp; variants <span class="hint">(only selected ones appear in setup)</span></label>
+        <div id="modules" class="mods"></div>
+      </div>
+    </section>
+
+    <section id="detail" class="detail"></section>
+  </main>
+
+  <footer class="footer">
+    Setup content grounded in the official Relic, Relic: Nemesis and Relic: Halls of Terra rulebooks (Fantasy Flight Games).
+    A fan-made play aid — not affiliated with the publisher or Games Workshop.
+  </footer>
+
+  <script src="js/data.js?v=7"></script>
+  <script src="js/rules.js?v=7"></script>
+  <script src="js/app.js?v=7"></script>
+  <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
+  <script src="../site-analytics.js?v=20260607-analytics"></script>
+</body>
+</html>
