@@ -95,7 +95,7 @@
       const on = state.mods.has(mod.id);
       const b = el("button", "mod" + (on ? " on" : ""));
       b.type = "button";
-      b.innerHTML = "<span class='mod-name'>" + mod.name + "</span><span class='mod-sum'>" + mod.summary + "</span>";
+      b.innerHTML = "<span class='mod-name'>" + mod.name + "</span><span class='mod-sum'>" + mod.summary + "</span>" + (on ? "<span class='mod-desc'>" + mod.description + "<em class='mod-src'>" + mod.src + "</em></span>" : "");
       b.title = mod.description + " (" + mod.src + ")";
       b.addEventListener("click", () => {
         on ? state.mods.delete(mod.id) : state.mods.add(mod.id);

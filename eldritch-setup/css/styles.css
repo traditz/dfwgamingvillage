@@ -153,6 +153,9 @@ section h2::after { content: ""; flex: 1; height: 1px; background: linear-gradie
 .mod-name::before { content: "◇ "; color: var(--parch-dim); }
 .mod.on .mod-name::before { content: "◆ "; color: var(--verd); }
 .mod-sum { display: block; font-size: 0.8rem; line-height: 1.35; }
+.mod-desc { display: block; margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line); font-size: 0.82rem; line-height: 1.45; color: var(--parch); }
+.mod-desc .mod-src { display: block; margin-top: 5px; font-style: normal; font-family: Verdana, sans-serif; font-size: 0.66rem; letter-spacing: 0.08em; color: var(--verd-dim); }
+.mod-desc .mod-src::before { content: "❧ "; color: var(--gold); }
 
 /* ---- setup steps ----------------------------------------------------------- */
 .phase { margin-top: 22px; }
