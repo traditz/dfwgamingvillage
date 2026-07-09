@@ -403,6 +403,26 @@ body[data-page="contact"] .nav a[href="contact.html"] {
   margin: 0 12px 8px;
 }
 
+a.game-card {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.game-card[hidden] {
+  display: none;
+}
+
+.no-results {
+  color: var(--muted);
+  margin-top: 18px;
+}
+
+.aid-count {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin: 10px 0 0;
+}
+
 .gallery {
   justify-content: center;
   display: grid;
@@ -574,6 +594,16 @@ body[data-page="contact"] .nav a[href="contact.html"] {
 
   .calendar-container iframe {
     min-height: 460px;
+  }
+
+  .games-container {
+    gap: 10px;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .game-card h3 {
+    font-size: 0.86rem;
+    margin: 10px 8px 6px;
   }
 }
 

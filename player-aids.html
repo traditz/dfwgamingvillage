@@ -12,7 +12,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content="https://www.dfwgamingvillage.com/banner.png">
     <title>Player Aids - DFW Gaming Village</title>
-    <link rel="stylesheet" href="community.css?v=20260622-cleanup">
+    <link rel="stylesheet" href="community.css?v=20260708-aids">
     <link rel="icon" href="favicon.ico">
 </head>
 <body data-page="player-aids">
@@ -35,39 +35,80 @@
 
     <main class="content">
         <h1>Player Aids</h1>
-        <p>Explore helpful reference sheets and guides for board games in our community library. These player aids streamline play and are perfect for newcomers and veterans alike.</p>
+        <p>Setup guides and reference sheets for board games in our community library. These player aids streamline play and are perfect for newcomers and veterans alike. More games are added regularly!</p>
 
-        <div class="button-grid">
-            <a href="ti.html" class="game-image-button">
-                <img src="images/ti4-cover.png" alt="Twilight Imperium 4th Edition">
+        <div class="search-container">
+            <input type="text" id="aid-search" placeholder="Search by game name..." aria-label="Search player aids by game name">
+        </div>
+        <p class="aid-count" id="aid-count" aria-live="polite"></p>
+
+        <div class="games-container" id="aid-grid">
+            <a href="arkham.html" class="game-card" data-search="arkham horror 2nd edition ah2e">
+                <img src="images/arkhamhorror2ndbox.webp" alt="Arkham Horror 2nd Edition box cover" loading="lazy">
+                <h3>Arkham Horror<br>2nd Edition</h3>
             </a>
-            <a href="bsg.html" class="game-image-button">
-                <img src="images/battlestar.png" alt="Battlestar Galactica The Board Game">
+            <a href="bsg.html" class="game-card" data-search="battlestar galactica the board game bsg">
+                <img src="images/battlestar.png" alt="Battlestar Galactica: The Board Game box cover" loading="lazy">
+                <h3>Battlestar Galactica</h3>
             </a>
-            <a href="arkham.html" class="game-image-button">
-                <img src="images/arkhamhorror2ndbox.webp" alt="Arkham Horror 2nd Edition" style="object-position: center top;">
+            <a href="bbtm.html" class="game-card" data-search="blood bowl team manager card game bbtm">
+                <img src="images/bbtm-box.webp" alt="Blood Bowl: Team Manager – The Card Game box cover" loading="lazy">
+                <h3>Blood Bowl:<br>Team Manager</h3>
             </a>
-            <a href="bbtm.html" class="game-image-button">
-                <img src="images/bbtm-box.webp" alt="Blood Bowl: Team Manager – The Card Game">
+            <a href="dow.html" class="game-card" data-search="dead of winter a crossroads game dow zombies">
+                <img src="images/pic3016500.webp" alt="Dead of Winter: A Crossroads Game box cover" loading="lazy">
+                <h3>Dead of Winter</h3>
             </a>
-            <a href="talisman.html" class="game-image-button">
-                <img src="images/pic332870.webp" alt="Talisman: The Magical Quest Game (Revised 4th Edition)">
+            <a href="relic.html" class="game-card" data-search="relic warhammer 40000 40k board game">
+                <img src="images/pic1405986.webp" alt="Relic: A Warhammer 40,000 Board Game box cover" loading="lazy">
+                <h3>Relic</h3>
             </a>
-            <a href="dow.html" class="game-image-button">
-                <img src="images/pic3016500.webp" alt="Dead of Winter: A Crossroads Game">
+            <a href="talisman.html" class="game-card" data-search="talisman the magical quest game revised 4th edition">
+                <img src="images/pic332870.webp" alt="Talisman: The Magical Quest Game (Revised 4th Edition) box cover" loading="lazy">
+                <h3>Talisman<br>Revised 4th Edition</h3>
             </a>
-            <a href="relic.html" class="game-image-button">
-                <img src="images/pic1405986.webp" alt="Relic: A Warhammer 40,000 Board Game">
-            </a>
-            <a href="#" class="game-image-button">
-                <img src="images/util-coming-soon.svg" alt="Coming Soon">
+            <a href="ti.html" class="game-card" data-search="twilight imperium 4th edition ti4 fourth">
+                <img src="images/ti4-cover.png" alt="Twilight Imperium 4th Edition box cover" loading="lazy">
+                <h3>Twilight Imperium<br>4th Edition</h3>
             </a>
         </div>
+        <p class="no-results" id="aid-no-results" hidden>No games match your search.</p>
     </main>
 
     <footer class="footer">
         <p>&copy; 2026 DFW Gaming Village. All Rights Reserved.</p>
     </footer>
     <script src="site-analytics.js?v=20260607-analytics"></script>
+    <script>
+        (function () {
+            var input = document.getElementById('aid-search');
+            var cards = document.querySelectorAll('#aid-grid .game-card');
+            var noResults = document.getElementById('aid-no-results');
+            var count = document.getElementById('aid-count');
+
+            function updateCount(visible) {
+                if (visible === cards.length) {
+                    count.textContent = cards.length + ' games with player aids';
+                } else {
+                    count.textContent = 'Showing ' + visible + ' of ' + cards.length + ' games';
+                }
+            }
+
+            input.addEventListener('input', function () {
+                var query = input.value.trim().toLowerCase();
+                var visible = 0;
+                cards.forEach(function (card) {
+                    var haystack = card.getAttribute('data-search') + ' ' + card.textContent.toLowerCase();
+                    var match = haystack.indexOf(query) !== -1;
+                    card.hidden = !match;
+                    if (match) visible++;
+                });
+                noResults.hidden = visible > 0;
+                updateCount(visible);
+            });
+
+            updateCount(cards.length);
+        })();
+    </script>
 </body>
 </html>
