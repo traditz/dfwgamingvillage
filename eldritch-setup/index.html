@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eldritch Horror — Setup &amp; Reference Utility</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Marcellus+SC&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=1">
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <span class="sigil" aria-hidden="true">
+      <!-- a doomed globe: meridians, a watching eye, and rising tentacles -->
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="46" r="30" fill="none" stroke="currentColor" stroke-width="2"/>
+        <ellipse cx="50" cy="46" rx="30" ry="11" fill="none" stroke="currentColor" stroke-width="1" opacity="0.6"/>
+        <ellipse cx="50" cy="46" rx="13" ry="30" fill="none" stroke="currentColor" stroke-width="1" opacity="0.6"/>
+        <g class="verd" stroke="currentColor" fill="none" stroke-width="2.2" stroke-linecap="round">
+          <path d="M20 88 q6 -14 -2 -24 q12 4 10 20"/>
+          <path d="M80 88 q-6 -14 2 -24 q-12 4 -10 20"/>
+          <path d="M35 92 q2 -12 -4 -18 q10 2 9 16"/>
+          <path d="M65 92 q-2 -12 4 -18 q-10 2 -9 16"/>
+          <path d="M50 94 q-1 -10 0 -16 q4 6 3 16"/>
+        </g>
+        <ellipse cx="50" cy="46" rx="12" ry="7" fill="none" stroke="currentColor" stroke-width="1.8"/>
+        <circle cx="50" cy="46" r="3" fill="currentColor"/>
+        <circle cx="50" cy="46" r="42" fill="none" stroke="currentColor" stroke-width="0.7" opacity="0.4"/>
+      </svg>
+    </span>
+    <div class="brand-title">Eldritch Horror</div>
+    <div class="deco-rule" aria-hidden="true"><i></i><b></b><i></i></div>
+    <div class="brand-sub">Setup &amp; Reference Utility</div>
+    <p class="tagline" style="margin-top:14px">
+      Pick your expansions and Ancient One below for exact setup steps — side boards, special decks
+      and preludes included — plus a full rules reference with official errata applied, and a
+      searchable index of every rulebook and the Ultimate FAQ. The Doom track is already counting.
+    </p>
+  </header>
+
+  <main>
+    <section aria-label="Configuration">
+      <h2>The Investigation</h2>
+      <p class="sec-note">Select the sets on the table. Every step and ruling below adapts to your choices.</p>
+      <div class="cfg">
+        <div>
+          <label class="cfg-label">Sets in play</label>
+          <div id="expansions" class="chips"></div>
+        </div>
+        <div>
+          <label class="cfg-label">Ancient One <span class="hint">— drives side boards &amp; special decks; hover for notes</span></label>
+          <div id="aos" class="ao-grid"></div>
+        </div>
+        <div>
+          <label class="cfg-label">Investigators <span class="hint">(1–8 players)</span></label>
+          <div id="players" class="pbtns"></div>
+        </div>
+        <div id="modules-group">
+          <label class="cfg-label">Modules &amp; variants <span class="hint">— optional; hover for details</span></label>
+          <div id="modules" class="mods"></div>
+        </div>
+      </div>
+    </section>
+
+    <section aria-label="Setup">
+      <h2>Setup</h2>
+      <p class="sec-note">Follow the steps in order. Each cites its official source; errata and FAQ rulings (Ultimate FAQ 2.0, Jan 2024) take precedence and are already applied.</p>
+      <div id="setup"></div>
+    </section>
+
+    <section aria-label="Reference">
+      <h2>Rules Reference</h2>
+      <p class="sec-note">Tap a heading to open it. Contents adapt to your sets and Ancient One.</p>
+      <div id="reference"></div>
+    </section>
+
+    <section aria-label="Rulebook search">
+      <h2>Search the Rulebooks</h2>
+      <p class="sec-note">Full-text search across the base rulebook, every selected expansion, and the Ultimate FAQ.</p>
+      <div class="rsearch-wrap">
+        <input id="rsearch" type="search" placeholder="e.g. reckoning, epic monster, delayed, devastation, dream portal…" aria-label="Search the rulebooks">
+      </div>
+      <div id="rresults"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    Setup and reference content grounded in the official Eldritch Horror rulebook, the eight expansion
+    rulebooks, and the community-compiled Ultimate FAQ 2.0 (3 Jan 2024) of official FFG rulings.
+    A fan-made play aid — not affiliated with Fantasy Flight Games.
+  </footer>
+
+  <script src="js/data.js?v=1"></script>
+  <script src="js/rules.js?v=1"></script>
+  <script src="js/app.js?v=1"></script>
+  <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
+  <script src="../site-analytics.js?v=20260607-analytics"></script>
+</body>
+</html>

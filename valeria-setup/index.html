@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Valeria: Card Kingdoms — Setup &amp; Reference Utility</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=1">
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <span class="sigil" aria-hidden="true">
+      <!-- a crown above two dice — the kingdom is won on the roll -->
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" fill="none">
+          <path d="M22 40 L26 18 L38 32 L50 12 L62 32 L74 18 L78 40 Z"/>
+          <path d="M24 46 h52" stroke-width="3"/>
+        </g>
+        <circle cx="26" cy="18" r="3" fill="currentColor"/>
+        <circle cx="50" cy="12" r="3" fill="currentColor"/>
+        <circle cx="74" cy="18" r="3" fill="currentColor"/>
+        <g class="red">
+          <rect x="24" y="56" width="24" height="24" rx="4" fill="none" stroke="currentColor" stroke-width="2.4" transform="rotate(-8 36 68)"/>
+          <g fill="currentColor" transform="rotate(-8 36 68)">
+            <circle cx="30" cy="62" r="2.2"/><circle cx="42" cy="74" r="2.2"/><circle cx="36" cy="68" r="2.2"/>
+          </g>
+        </g>
+        <rect x="54" y="56" width="24" height="24" rx="4" fill="none" stroke="currentColor" stroke-width="2.4" transform="rotate(9 66 68)"/>
+        <g fill="currentColor" transform="rotate(9 66 68)">
+          <circle cx="60" cy="62" r="2.2"/><circle cx="72" cy="62" r="2.2"/>
+          <circle cx="60" cy="74" r="2.2"/><circle cx="72" cy="74" r="2.2"/>
+        </g>
+      </svg>
+    </span>
+    <div class="brand-title">Valeria: Card Kingdoms</div>
+    <div class="deco-rule" aria-hidden="true"><i></i><b></b><i></i></div>
+    <div class="brand-sub">Setup &amp; Reference Utility</div>
+    <p class="tagline" style="margin-top:14px">
+      Choose your expansions and way to play — competitive, solo against the Dark Lord, or the
+      cooperative Darksworn saga — for exact setup steps, a full rules reference, and a searchable
+      index of every rulebook. The dice decide who takes the throne.
+    </p>
+  </header>
+
+  <main>
+    <section aria-label="Configuration">
+      <h2>The Kingdom</h2>
+      <p class="sec-note">Select the sets on the table. Every step and ruling below adapts to your choices.</p>
+      <div class="cfg">
+        <div>
+          <label class="cfg-label">Sets in play</label>
+          <div id="expansions" class="chips"></div>
+        </div>
+        <div>
+          <label class="cfg-label">Way to play</label>
+          <div id="modes" class="mode-grid"></div>
+        </div>
+        <div>
+          <label class="cfg-label">Dukes &amp; Duchesses <span class="hint">(player count)</span></label>
+          <div id="players" class="pbtns"></div>
+        </div>
+        <div id="modules-group">
+          <label class="cfg-label">Modules, variants &amp; mini-packs <span class="hint">— optional; hover for details</span></label>
+          <div id="modules" class="mods"></div>
+        </div>
+      </div>
+    </section>
+
+    <section aria-label="Setup">
+      <h2>Setup</h2>
+      <p class="sec-note">Follow the steps in order. Each cites its official source.</p>
+      <div id="setup"></div>
+    </section>
+
+    <section aria-label="Reference">
+      <h2>Rules Reference</h2>
+      <p class="sec-note">Tap a heading to open it. Contents adapt to your sets and way to play.</p>
+      <div id="reference"></div>
+    </section>
+
+    <section aria-label="Rulebook search">
+      <h2>Search the Rulebooks</h2>
+      <p class="sec-note">Full-text search across the base rulebook, every selected expansion, and the combined expansions guide.</p>
+      <div class="rsearch-wrap">
+        <input id="rsearch" type="search" placeholder="e.g. exhausted, doubles, coxswain, warden, blessing…" aria-label="Search the rulebooks">
+      </div>
+      <div id="rresults"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    Setup and reference content grounded in the official Valeria: Card Kingdoms 2nd Edition rulebook,
+    the Flames &amp; Frost, Crimson Seas, Shadowvale and Darksworn rules, and the Combined Expansions
+    Setup Guide v5. A fan-made play aid — not affiliated with Daily Magic Games.
+  </footer>
+
+  <script src="js/data.js?v=1"></script>
+  <script src="js/rules.js?v=1"></script>
+  <script src="js/app.js?v=1"></script>
+  <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
+  <script src="../site-analytics.js?v=20260607-analytics"></script>
+</body>
+</html>

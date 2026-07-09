@@ -1,0 +1,272 @@
+/* =============================================================================
+   Valeria: Card Kingdoms — Setup & Reference Utility
+   Theme: a storybook throne room — royal purple banners, burnished gold,
+   heraldic red, and dice-worn parchment. Bright fantasy, not eldritch gloom.
+   ============================================================================= */
+
+:root {
+  --ink:      #171029;   /* royal midnight */
+  --ink-2:    #201639;   /* raised panels */
+  --ink-3:    #2a1e49;   /* cards */
+  --line:     #453768;   /* hairlines */
+  --parch:    #f0e6cf;   /* parchment text */
+  --parch-dim:#b3a68f;   /* secondary text */
+  --gold:     #e5b84d;   /* crown gold */
+  --gold-hi:  #f4d47f;
+  --banner:   #c9485b;   /* heraldic red */
+  --magic:    #7f9ff0;   /* magic blue */
+  --leaf:     #7fc07a;   /* kingdom green */
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background:
+    radial-gradient(1100px 480px at 50% -100px, rgba(229, 184, 77, 0.1), transparent 70%),
+    radial-gradient(900px 700px at 88% 8%, rgba(201, 72, 91, 0.07), transparent 60%),
+    radial-gradient(800px 600px at 8% 20%, rgba(127, 159, 240, 0.06), transparent 60%),
+    var(--ink);
+  color: var(--parch);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 16.5px;
+  line-height: 1.55;
+  min-height: 100vh;
+}
+
+/* faint banner stripes */
+.grain {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.045;
+  background-image: repeating-linear-gradient(90deg, transparent 0 118px, #f4d47f 118px 120px);
+}
+
+/* ---- header --------------------------------------------------------------- */
+.topbar {
+  position: relative; z-index: 1;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(42, 30, 73, 0.9), rgba(23, 16, 41, 0.4));
+  padding: 34px 20px 26px;
+  text-align: center;
+}
+.sigil { display: inline-block; width: 88px; height: 88px; color: var(--gold); filter: drop-shadow(0 0 14px rgba(229, 184, 77, 0.45)); }
+.sigil svg { width: 100%; height: 100%; }
+.sigil .red { color: var(--banner); }
+
+.brand-title {
+  font-family: "Grenze Gotisch", Georgia, serif;
+  font-size: clamp(2.1rem, 6vw, 3.4rem);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--gold-hi);
+  text-shadow: 0 2px 18px rgba(229, 184, 77, 0.35);
+  margin-top: 8px;
+}
+.brand-sub {
+  font-family: "Grenze Gotisch", Georgia, serif;
+  font-size: clamp(0.9rem, 2.4vw, 1.15rem);
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--banner);
+  margin-top: 4px;
+}
+.deco-rule {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  margin: 14px auto 10px; max-width: 460px;
+}
+.deco-rule i { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--gold)); }
+.deco-rule i:last-child { background: linear-gradient(90deg, var(--gold), transparent); }
+.deco-rule b { width: 8px; height: 8px; transform: rotate(45deg); background: var(--banner); box-shadow: 0 0 8px rgba(201, 72, 91, 0.6); }
+.tagline { max-width: 780px; margin: 0 auto; color: var(--parch-dim); font-style: italic; }
+
+/* ---- layout ---------------------------------------------------------------- */
+main { position: relative; z-index: 1; max-width: 1060px; margin: 0 auto; padding: 26px 18px 60px; }
+
+section h2 {
+  font-family: "Grenze Gotisch", Georgia, serif;
+  font-size: 1.65rem; letter-spacing: 0.06em;
+  color: var(--gold);
+  margin: 38px 0 4px;
+  display: flex; align-items: center; gap: 14px;
+}
+section h2::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--line), transparent); }
+.sec-note { color: var(--parch-dim); font-size: 0.92rem; margin-bottom: 14px; font-style: italic; }
+
+/* ---- configurator ---------------------------------------------------------- */
+.cfg { display: flex; flex-direction: column; gap: 18px; }
+.cfg-label {
+  display: block;
+  font-family: "Grenze Gotisch", Georgia, serif; font-size: 1.05rem;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--magic);
+  margin-bottom: 8px;
+}
+.cfg-label .hint { color: var(--parch-dim); text-transform: none; letter-spacing: 0; font-family: Georgia, serif; font-style: italic; font-size: 0.85rem; }
+
+.chips, .mods, .pbtns, .mode-grid { display: flex; flex-wrap: wrap; gap: 9px; }
+
+.chip {
+  display: flex; flex-direction: column; align-items: flex-start;
+  background: var(--ink-2); color: var(--parch-dim);
+  border: 1px solid var(--line); border-radius: 10px;
+  padding: 8px 14px; cursor: pointer; font: inherit;
+  transition: border-color 0.16s, color 0.16s, box-shadow 0.16s;
+}
+.chip b { font-family: "Grenze Gotisch", Georgia, serif; font-size: 1.05rem; letter-spacing: 0.03em; }
+.chip span { font-size: 0.72rem; letter-spacing: 0.14em; opacity: 0.7; }
+.chip:hover { border-color: var(--gold); }
+.chip.on { color: var(--parch); border-color: var(--gold); box-shadow: inset 0 0 0 1px var(--gold), 0 0 14px rgba(229, 184, 77, 0.15); background: linear-gradient(180deg, rgba(229, 184, 77, 0.1), rgba(42, 30, 73, 0.9)); }
+.chip.lock { cursor: default; }
+
+.mode-btn {
+  flex: 1 1 185px; max-width: 300px; text-align: left;
+  background: var(--ink-2); color: var(--parch-dim);
+  border: 1px solid var(--line); border-radius: 10px;
+  padding: 10px 14px; cursor: pointer; font: inherit;
+  transition: border-color 0.16s, color 0.16s, box-shadow 0.16s;
+}
+.mode-btn b { display: block; font-family: "Grenze Gotisch", Georgia, serif; font-size: 1.15rem; color: var(--parch); margin-bottom: 3px; }
+.mode-btn span { font-size: 0.8rem; line-height: 1.35; display: block; }
+.mode-btn:hover { border-color: var(--banner); }
+.mode-btn.on { border-color: var(--banner); box-shadow: inset 0 0 0 1px var(--banner), 0 0 16px rgba(201, 72, 91, 0.2); background: linear-gradient(180deg, rgba(201, 72, 91, 0.12), rgba(42, 30, 73, 0.9)); color: var(--parch); }
+.mode-btn.on b { color: var(--gold-hi); }
+.mode-btn.off { opacity: 0.42; cursor: not-allowed; }
+
+.pbtn {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: var(--ink-2); color: var(--parch-dim);
+  border: 1px solid var(--line); cursor: pointer;
+  font-family: "Grenze Gotisch", Georgia, serif; font-size: 1.15rem;
+  transition: all 0.16s;
+}
+.pbtn:hover { border-color: var(--gold); }
+.pbtn.on { color: var(--ink); background: var(--gold); border-color: var(--gold); box-shadow: 0 0 16px rgba(229, 184, 77, 0.45); font-weight: 700; }
+.pbtn.off { opacity: 0.35; cursor: not-allowed; }
+
+.mod {
+  flex: 1 1 240px; max-width: 340px; text-align: left;
+  background: var(--ink-2); border: 1px solid var(--line); border-radius: 10px;
+  padding: 10px 14px; cursor: pointer; font: inherit; color: var(--parch-dim);
+  transition: border-color 0.16s, box-shadow 0.16s;
+}
+.mod:hover { border-color: var(--gold); }
+.mod.on { border-color: var(--leaf); box-shadow: inset 0 0 0 1px var(--leaf); color: var(--parch); background: linear-gradient(180deg, rgba(127, 192, 122, 0.08), rgba(42, 30, 73, 0.9)); }
+.mod-name { display: block; font-weight: 700; margin-bottom: 2px; }
+.mod-name::before { content: "◇ "; color: var(--parch-dim); }
+.mod.on .mod-name::before { content: "◆ "; color: var(--leaf); }
+.mod-sum { display: block; font-size: 0.8rem; line-height: 1.35; }
+
+/* ---- setup steps ----------------------------------------------------------- */
+.phase { margin-top: 22px; }
+.phase-title {
+  font-family: "Grenze Gotisch", Georgia, serif; letter-spacing: 0.08em;
+  font-size: 1.3rem; color: var(--magic); margin-bottom: 4px;
+}
+.phase-note { color: var(--parch-dim); font-style: italic; font-size: 0.9rem; margin-bottom: 10px; }
+
+.step {
+  display: flex; gap: 14px;
+  background: var(--ink-3);
+  border: 1px solid var(--line); border-left: 3px solid var(--gold);
+  border-radius: 10px; padding: 14px 16px; margin-bottom: 10px;
+}
+.step-num {
+  flex: 0 0 auto; width: 34px; height: 34px; border-radius: 8px;
+  border: 1px solid var(--banner); color: var(--gold-hi);
+  background: rgba(201, 72, 91, 0.12);
+  display: flex; align-items: center; justify-content: center;
+  font-family: "Grenze Gotisch", Georgia, serif; font-size: 1.15rem; margin-top: 2px;
+}
+.step-body { min-width: 0; }
+.step-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; margin-bottom: 4px; }
+.step-head h4 { font-family: "Grenze Gotisch", Georgia, serif; font-size: 1.22rem; letter-spacing: 0.02em; color: var(--parch); font-weight: 600; }
+.step-text ul { margin: 6px 0 2px 20px; }
+.step-text li { margin-bottom: 4px; }
+.step-text b { color: var(--gold-hi); font-weight: 700; }
+.step-text i { color: var(--parch-dim); }
+
+.tag {
+  display: inline-block; font-family: Verdana, sans-serif;
+  font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase;
+  border-radius: 4px; padding: 2px 7px; white-space: nowrap;
+}
+.e-base  { background: #2c3550; color: #a9bce8; }
+.e-ff    { background: #40222a; color: #eb9f8a; }
+.e-cs    { background: #1c3644; color: #86c9e0; }
+.e-sv    { background: #33203e; color: #cf9ede; }
+.e-ds    { background: #203a2e; color: #8fe0b4; }
+.e-mini  { background: #3d3620; color: #e0c87e; }
+.e-combo { background: #3a2530; color: #de93ad; }
+.e-mode  { background: #2f3a1f; color: #bcd88a; }
+
+.src-line { margin-top: 7px; font-size: 0.76rem; letter-spacing: 0.04em; color: #8a7fb0; font-family: Verdana, sans-serif; }
+.src-line::before { content: "❧ "; color: var(--gold); }
+
+/* ---- reference ------------------------------------------------------------- */
+.ref {
+  background: var(--ink-3); border: 1px solid var(--line); border-radius: 10px;
+  margin-bottom: 10px; overflow: hidden;
+}
+.ref summary {
+  cursor: pointer; list-style: none;
+  font-family: "Grenze Gotisch", Georgia, serif; font-size: 1.2rem; letter-spacing: 0.03em;
+  color: var(--parch); padding: 12px 18px;
+  display: flex; align-items: center; gap: 10px;
+  transition: color 0.16s;
+}
+.ref summary::-webkit-details-marker { display: none; }
+.ref summary::before { content: "❖"; color: var(--banner); font-size: 0.85rem; transition: transform 0.2s; }
+.ref[open] summary::before { transform: rotate(45deg) scale(1.1); }
+.ref summary:hover { color: var(--gold-hi); }
+.ref[open] summary { border-bottom: 1px solid var(--line); color: var(--gold-hi); }
+.ref-body { padding: 14px 20px 16px; }
+.ref-body h4 { font-family: "Grenze Gotisch", Georgia, serif; color: var(--magic); font-size: 1.05rem; letter-spacing: 0.06em; margin: 12px 0 5px; }
+.ref-body p { margin-bottom: 8px; }
+.ref-body ul, .ref-body ol { margin: 4px 0 10px 22px; }
+.ref-body li { margin-bottom: 5px; }
+.ref-body li ul { margin: 4px 0 4px 18px; }
+.ref-body b { color: var(--gold-hi); }
+.ref-body i { color: var(--parch); }
+
+.twrap { overflow-x: auto; margin: 8px 0 10px; }
+.twrap table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+.twrap td { border: 1px solid var(--line); padding: 7px 10px; vertical-align: top; }
+.twrap td:first-child { white-space: nowrap; }
+
+/* ---- search ---------------------------------------------------------------- */
+.rsearch-wrap { margin-bottom: 14px; }
+#rsearch {
+  width: 100%; padding: 12px 16px;
+  background: var(--ink-2); border: 1px solid var(--line); border-radius: 10px;
+  color: var(--parch); font: inherit; font-size: 1rem;
+  transition: border-color 0.16s, box-shadow 0.16s;
+}
+#rsearch:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold), 0 0 18px rgba(229, 184, 77, 0.15); }
+#rsearch::placeholder { color: var(--parch-dim); font-style: italic; }
+
+.rhint { color: var(--parch-dim); font-style: italic; }
+.rhit { background: var(--ink-3); border: 1px solid var(--line); border-radius: 10px; padding: 11px 15px; margin-bottom: 8px; }
+.rhit-src { font-family: Verdana, sans-serif; font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); margin-bottom: 4px; }
+.rhit-text { font-size: 0.92rem; color: var(--parch-dim); }
+.rhit-text mark { background: rgba(229, 184, 77, 0.28); color: var(--gold-hi); border-radius: 2px; padding: 0 1px; }
+
+/* ---- footer ---------------------------------------------------------------- */
+.footer {
+  position: relative; z-index: 1;
+  border-top: 1px solid var(--line);
+  text-align: center; padding: 22px 18px 30px;
+  color: var(--parch-dim); font-size: 0.85rem; font-style: italic;
+}
+
+/* ---- responsive ------------------------------------------------------------ */
+@media (max-width: 640px) {
+  body { font-size: 15.5px; }
+  .step { padding: 12px; gap: 10px; }
+  .step-num { width: 28px; height: 28px; font-size: 1rem; }
+  .mode-btn { max-width: none; }
+  .mod { max-width: none; }
+  .ref-body { padding: 12px 14px 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+  html { scroll-behavior: auto; }
+}
