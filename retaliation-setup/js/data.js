@@ -79,6 +79,12 @@ RT.phases = [
         t: "Corridors & Room stacks",
         d: "<ul><li>Shuffle all Corridor tiles into the <b>Corridor insert</b> and place it near the Round track — draw from it all game without seeing fronts.</li><li>Draw <b>3 random Corridors</b> and connect them face up to the Landing Zone; any Door slot faces the Landing Zone entrance.</li><li>Sort all Room tiles by back into 4 stacks — <b>“A”, “B”, “C” and “?”</b> — shuffle each and place them face down nearby.</li></ul>",
         src: "Retaliation p.8"
+      },
+      {
+        when: function (c) { return c.mod("deadly"); }, exp: "mode",
+        t: "Deadly Mode is on",
+        d: "For the whole game, Corridors are treated as having <b>both</b> of their printed Noise values (the standard one and the second, smaller one), for all effects:<ul><li>Noise rolls hit far more Corridors, so Intruders appear and enter Rooms much more often.</li><li>Secured (Reinforced) Corridors still have only their single “0” value.</li><li>For any tie-breaks, use only the standard (larger) Noise value.</li></ul>",
+        src: "Retaliation p.40"
       }
     ]
   },

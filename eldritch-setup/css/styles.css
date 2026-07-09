@@ -47,16 +47,16 @@ body {
   position: relative; z-index: 1;
   border-bottom: 1px solid var(--line);
   background: linear-gradient(180deg, rgba(24, 39, 52, 0.85), rgba(12, 20, 28, 0.4));
-  padding: 34px 20px 26px;
+  padding: 22px 20px 18px;
   text-align: center;
 }
-.sigil { display: inline-block; width: 88px; height: 88px; color: var(--doom); filter: drop-shadow(0 0 14px rgba(194, 91, 74, 0.4)); }
+.sigil { display: inline-block; width: 60px; height: 60px; color: var(--doom); filter: drop-shadow(0 0 14px rgba(194, 91, 74, 0.4)); }
 .sigil svg { width: 100%; height: 100%; }
 .sigil .verd { color: var(--verd); }
 
 .brand-title {
   font-family: "Marcellus SC", Georgia, serif;
-  font-size: clamp(2rem, 5.5vw, 3.1rem);
+  font-size: clamp(1.4rem, 3.85vw, 2.17rem);
   letter-spacing: 0.1em;
   color: var(--doom-hi);
   text-transform: uppercase;
@@ -65,7 +65,7 @@ body {
 }
 .brand-sub {
   font-family: "Marcellus SC", Georgia, serif;
-  font-size: clamp(0.8rem, 2.2vw, 1rem);
+  font-size: clamp(0.56rem, 1.54vw, 0.7rem);
   letter-spacing: 0.32em;
   text-transform: uppercase;
   color: var(--verd);
@@ -73,7 +73,7 @@ body {
 }
 .deco-rule {
   display: flex; align-items: center; justify-content: center; gap: 12px;
-  margin: 14px auto 10px; max-width: 460px;
+  margin: 10px auto 7px; max-width: 460px;
 }
 .deco-rule i { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--gold)); }
 .deco-rule i:last-child { background: linear-gradient(90deg, var(--gold), transparent); }
@@ -153,9 +153,6 @@ section h2::after { content: ""; flex: 1; height: 1px; background: linear-gradie
 .mod-name::before { content: "◇ "; color: var(--parch-dim); }
 .mod.on .mod-name::before { content: "◆ "; color: var(--verd); }
 .mod-sum { display: block; font-size: 0.8rem; line-height: 1.35; }
-.mod-desc { display: block; margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line); font-size: 0.82rem; line-height: 1.45; color: var(--parch); }
-.mod-desc .mod-src { display: block; margin-top: 5px; font-style: normal; font-family: Verdana, sans-serif; font-size: 0.66rem; letter-spacing: 0.08em; color: var(--verd-dim); }
-.mod-desc .mod-src::before { content: "❧ "; color: var(--gold); }
 
 /* ---- setup steps ----------------------------------------------------------- */
 .phase { margin-top: 22px; }
