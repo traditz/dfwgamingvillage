@@ -715,7 +715,7 @@ BSG.teach = {
       const L = BSG.loyalty.compute(c);
       let out = `<p>In a moment everyone gets a facedown <b>Loyalty card</b>: “You Are Not a Cylon” — or “You Are a Cylon.” You never show it. Halfway through the game comes the <b>Sleeper Agent phase</b>: everyone gets a <b>second</b> Loyalty card. So even if you're loyal now, you might wake up a Cylon later — which means <i>nobody</i> stays above suspicion.</p>`;
       const bits = [];
-      if (L.sympathizer) bits.push("this player count also includes the <b>Sympathizer</b> — dealt in the Sleeper phase, it makes someone a half-Cylon whose fate depends on how the fleet is doing when they draw it");
+      if (L.sympathizer) bits.push("this player count also includes the <b>Sympathizer</b> — dealt in the Sleeper phase and revealed immediately: if any resource is already in the red zone they go to the Brig but stay human; if the fleet is healthy they defect and finish the game as a revealed Cylon");
       if (L.mutineer) bits.push("this player count includes the <b>Mutineer</b> — a human who reveals immediately, works against the fleet's leadership with Mutiny cards, but still wins with the humans");
       if (bits.length) out += `<p>One wrinkle: ${bits.join("; ")}.</p>`;
       return out;
