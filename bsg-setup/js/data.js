@@ -686,3 +686,97 @@ BSG.reckless = {
     "Reckless only applies while a Treachery deck is in play. With both Pegasus and Daybreak, use the Daybreak Treachery deck (and these Daybreak rulings)."
   ]
 };
+
+
+/* ---- TEACHING SCRIPT ------------------------------------------------------
+   A concise, spoken-word teach for the exact selected configuration.
+   Read aloud at the table (~5 minutes core + selected module inserts).
+   Ordered by teaching best practice: hook & win conditions first, then the
+   turn loop, then the heart of the game (skill checks & hidden loyalty),
+   then only the modules actually in play. All claims mirror the audited
+   rules content above (rulebooks + official FAQ).
+   Sections: { h, when?, body(c) } — body returns HTML ("" to skip).       */
+BSG.teach = {
+  intro: "Read this aloud — about five minutes. Deal nothing until the end; just let everyone look at the board.",
+  sections: [
+
+    { h: "The pitch — and how we win", body: (c) => {
+      const dist = { kobol: "travel <b>8 distance</b> and then survive one final jump",
+                     newCaprica: "reach the distance on the New Caprica objective and escape the occupation",
+                     ionianNebula: "travel <b>8 distance</b>, survive the Crossroads, and make the final jump",
+                     earth: "travel <b>10 distance</b> and find Earth" }[c.obj];
+      let out = `<p>We are the last of humanity, running from the Cylons aboard the battlestar Galactica. This is a cooperative game — we survive together by jumping the fleet from crisis to crisis until we ${dist}.</p>
+<p><b>Except it isn't cooperative.</b> Some of us are secretly Cylons. They win by breaking the fleet: if <b>food, fuel, morale or population ever hits zero</b>, if <b>Galactica takes six damage</b>, or if <b>Centurions storm the ship</b>, the Cylons win. Those four resource dials are the clock this whole game runs on — every decision is about spending them slower than the Cylons can drain them.</p>`;
+      if (c.cyl) out += `<p>One more thing: one of us is playing a <b>Cylon Leader</b> — openly a Cylon from the start, sitting right there. Their true agenda is secret; they might even need us to win. I'll explain them in a minute.</p>`;
+      return out;
+    }},
+
+    { h: "Who you really are", body: (c) => {
+      const L = BSG.loyalty.compute(c);
+      let out = `<p>In a moment everyone gets a facedown <b>Loyalty card</b>: “You Are Not a Cylon” — or “You Are a Cylon.” You never show it. Halfway through the game comes the <b>Sleeper Agent phase</b>: everyone gets a <b>second</b> Loyalty card. So even if you're loyal now, you might wake up a Cylon later — which means <i>nobody</i> stays above suspicion.</p>`;
+      const bits = [];
+      if (L.sympathizer) bits.push("this player count also includes the <b>Sympathizer</b> — dealt in the Sleeper phase, it makes someone a half-Cylon whose fate depends on how the fleet is doing when they draw it");
+      if (L.mutineer) bits.push("this player count includes the <b>Mutineer</b> — a human who reveals immediately, works against the fleet's leadership with Mutiny cards, but still wins with the humans");
+      if (bits.length) out += `<p>One wrinkle: ${bits.join("; ")}.</p>`;
+      return out;
+    }},
+
+    { h: "The shape of a turn", body: (c) => `
+<p>On your turn: <b>draw your Skill cards</b>, <b>move</b> somewhere, and take <b>one action</b>. Then — and this is the engine of the game — you <b>draw a Crisis card</b>, which hits the fleet with a Cylon attack, a skill check, or a hard choice. Most Crisis cards also tick the <b>Jump Preparation track</b>; when it fills, the fleet jumps and we bank distance toward winning. So every single turn: one useful thing from you, one bad thing from the game. The fleet stays afloat only if our actions outrun the crises.</p>`
+    },
+
+    { h: "Your action — where the game gives you a choice", body: (c) => {
+      let out = `<p>Your action is your agency, so here's the menu: <b>activate the location you're standing on</b> — repair damage, fire Galactica's guns, launch vipers, treat the sick, throw someone in the Brig; <b>play an action from a Skill card</b> — the best ones let stronger players act twice or peek at what's coming; or if you're a pilot, <b>fly your viper</b> — shooting down raiders and escorting the civilian ships that carry our population.</p>
+<p>Two players hold titles: the <b>President</b> plays Quorum cards (political powers), and the <b>Admiral</b> holds the nukes and picks our destination each jump. Titles make you powerful — and a prime suspect.</p>`;
+      if (c.obj === "earth") out += `<p>In this mode the Demetrius rides alongside: activating its <b>Bridge</b> launches <b>Mission cards</b> — risky scouting checks that can shortcut our distance to Earth.</p>`;
+      return out;
+    }},
+
+    { h: "Skill checks — the heart of the game", body: (c) => {
+      let out = `<p>Most crises are <b>skill checks</b>: the card names a difficulty and which skill colors help. Going around the table, <b>everyone secretly</b> slides any number of cards into the pile — matching colors add, wrong colors <b>subtract</b>. Then two random cards from the <b>Destiny deck</b> go in, the pile is shuffled, and we reveal: beat the difficulty or suffer the consequences.</p>
+<p>Hear what that means: a hidden Cylon can <b>poison a check</b> with wrong-colored cards, and the Destiny deck gives them cover — “that negative card? Destiny, I swear.” Reading who threw a check is how you catch a Cylon; it's the whole game in miniature.</p>`;
+      if (c.has("pegasus") || c.has("daybreak")) out += `<p>There are also <b>Treachery cards</b> in the mix — they're almost always negative in a check, and humans can't use their actions. When you see one revealed, someone put it there on purpose.</p>`;
+      return out;
+    }},
+
+    { h: "Being a Cylon", body: (c) => `
+<p>If your Loyalty card says you're a Cylon: congratulations, play it slow. Sabotage checks, waste actions convincingly, steer the fleet gently toward a cliff. When the humans get close — or the Brig gets close to you — <b>reveal</b>: play your card's one-time sting, then move to the <b>Cylon locations</b> and openly run the attack from there with a Super Crisis card in hand.</p>
+<p>For the humans, the counter-tools are the <b>Brig</b> — a suspected Cylon locked up can barely help checks and can't hurt you when revealed — ${(c.has("pegasus")) ? "the <b>Airlock</b> for permanent solutions, " : ""}and simple table-talk. Accusations are part of the game. Make them.</p>`
+    },
+
+    { h: "Cylon Leaders", when: (c) => c.opt("cylonLeaders") || c.cyl, body: (c) => {
+      if (c.has("daybreak")) return `<p>Our <b>Cylon Leader</b> plays openly as a Cylon but draws secret <b>Motive cards</b> — two now, two at the Sleeper phase — which decide whether they win with us, against us, or either way. They can <b>Infiltrate</b> the fleet to work among us (and be treated as human), or fight from the Cylon locations. Trust them exactly as far as their Motives allow — which you can't see.</p>`;
+      return `<p>Our <b>Cylon Leader</b> plays openly as a Cylon but holds a secret <b>Agenda</b> — Hostile or Sympathetic — with conditions they must hit to win. They may <b>Infiltrate</b> the fleet and work among us, or attack from the Cylon locations. Helpful today, catastrophic tomorrow: their Agenda decides.</p>`;
+    }},
+
+    { h: "Conflicted Loyalties", when: (c) => c.opt("conflictedLoyalties"), body: () => `
+<p>Some “You Are Not a Cylon” cards secretly aren't clean: <b>Personal Goals</b> give loyal humans private conditions — fail yours and it bleeds a resource at game end — and a <b>Final Five</b> card means peeking at someone's loyalty can burn the peeker. Short version: this game, even the humans have secrets.</p>`
+    },
+
+    { h: "The Cylon Fleet board", when: (c) => c.opt("cylonFleet"), body: () => `
+<p>The Cylon fleet is always out there: when a Cylon activation would fizzle, ships build up on the <b>Cylon Fleet board</b> and the <b>Pursuit track</b> ticks up — and when it fills, everything out there <b>jumps in on top of us at once</b>. Space stays dangerous all game, and the <b>CAG</b> title (our lead pilot) decides where the civilian ships fly.</p>`
+    },
+
+    { h: "Sympathetic Cylon", when: (c) => c.opt("sympatheticCylon"), body: () => `
+<p>We're using the <b>Sympathetic Cylon</b> variant: at the Sleeper phase one player may flip openly to a gentler kind of Cylon — with an Agenda that may still need the fleet to survive. Don't shoot them on sight; read their Agenda's incentives instead.</p>`
+    },
+
+    { h: "This mode's twist", when: (c) => c.obj !== "kobol", body: (c) => {
+      if (c.obj === "newCaprica") return `<p>This is the <b>New Caprica</b> game: at some point the fleet settles on a planet — and the Cylons find us. The game moves to the New Caprica board: humans run a resistance under occupation while Galactica returns to orbit for a desperate evacuation. Every civilian ship still on the ground when we leave is gone. It gets darker before it gets better.</p>`;
+      if (c.obj === "ionianNebula") return `<p>This is the <b>Ionian Nebula</b> game: everything you suffer leaves <b>Trauma tokens</b> on your character, and <b>Allies</b> appear around the fleet — helpful or scarring. At 8 distance comes the <b>Crossroads</b>: every character is judged on the trauma they carry, and loyalties can shift at the finish line. Take care of your people; it matters at the end.</p>`;
+      return `<p>This is the <b>Search for Home</b>: distance 10 is a long way, so we scout. <b>Mission cards</b> from the Demetrius are high-stakes checks that award extra distance and unlock the <b>Rebel Basestar</b> — Cylons who might fight beside us. The fastest route to Earth runs through the riskiest missions.</p>`;
+    }},
+
+    { h: "Don't worry about these yet", body: (c) => {
+      const later = ["execution details", "exact Cylon-ship movement (there's a chart)"];
+      if (c.has("daybreak")) later.push("Mutiny cards", "Reckless checks");
+      if (c.has("pegasus") || c.has("daybreak")) later.push("Treachery card actions");
+      if (c.opt("cylonLeaders") || c.cyl) later.push("Infiltration mechanics");
+      if (c.obj === "newCaprica") later.push("the occupation-phase locations");
+      if (c.obj === "ionianNebula") later.push("individual Trauma effects");
+      if (c.obj === "earth") later.push("the Rebel Basestar locations");
+      return `<p>I'll explain ${later.join(", ")} when they first come up — none of them matter until they do.</p>
+<p>Last thing. Statistically, someone at this table is already a Cylon${c.p >= 5 ? " — maybe two" : ""}. They know who they are. Watch the checks, watch who benefits… and good hunting. <i>So say we all.</i></p>`;
+    }}
+  ]
+};

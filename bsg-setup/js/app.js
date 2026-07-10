@@ -159,6 +159,7 @@ function renderDetail() {
   // Compose the ordered setup procedure for this configuration.
   const headHtml = `<div class="detail-head">
       <button class="share-btn" onclick="copyShareLink(this)" title="Copy a link that reopens this exact setup">🔗 Copy setup link</button>
+      <button class="share-btn teach-btn" onclick="toggleTeach()" title="A ~5 minute script to teach this exact setup aloud">📖 Teaching script</button>
       <div class="dh-mode">${obj.name}</div>
       <p class="dh-desc">${obj.description}</p>
       <div class="dh-meta">
@@ -292,7 +293,7 @@ function renderDetail() {
   if (refD.length) html += `<div class="diag-grid">${figHtml(refD)}</div>`;
   html += `</div>`;
 
-  wrap.innerHTML = headHtml + navHtml + searchHtml + html;
+  wrap.innerHTML = headHtml + buildTeachPanel(c) + navHtml + searchHtml + html;
   syncTopbarHeight();   // dock the new sticky nav + set section scroll offsets
 }
 
@@ -704,6 +705,46 @@ function copyShareLink(btn) {
   const txt = btn.textContent;
   navigator.clipboard.writeText(location.href).then(
     () => { btn.textContent = "✓ Link copied"; setTimeout(() => { btn.textContent = txt; }, 1600); },
+    () => { btn.textContent = "Copy failed"; setTimeout(() => { btn.textContent = txt; }, 1600); }
+  );
+}
+
+/* ---- Teaching script ------------------------------------------------------
+   Assembles BSG.teach for the active configuration into a read-aloud panel,
+   and keeps a plain-text rendering for the copy button. */
+function teachSections(c) {
+  return BSG.teach.sections
+    .filter(s => !s.when || s.when(c))
+    .map(s => ({ h: s.h, html: s.body(c) }))
+    .filter(s => s.html);
+}
+function buildTeachPanel(c) {
+  const secs = teachSections(c);
+  // Plain-text version for the clipboard (kept for copyTeachScript).
+  BSG._teachText = secs.map(s =>
+    s.h.toUpperCase() + "\n" +
+    s.html.replace(/<li>/g, "• ").replace(/<\/p>\s*<p>/g, "\n\n")
+          .replace(/<[^>]+>/g, "").replace(/\n{3,}/g, "\n\n").trim()
+  ).join("\n\n");
+  return `<section class="panel teach-panel" id="teachPanel" hidden aria-label="Teaching script">
+      <div class="teach-head">
+        <h3>📖 Teaching Script — this setup</h3>
+        <button class="share-btn" onclick="copyTeachScript(this)" title="Copy the script as plain text">📋 Copy script</button>
+      </div>
+      <p class="teach-note">${BSG.teach.intro}</p>
+      ${secs.map(s => `<h4>${s.h}</h4>${s.html}`).join("")}
+    </section>`;
+}
+function toggleTeach() {
+  const p = $("#teachPanel");
+  if (!p) return;
+  p.hidden = !p.hidden;
+  if (!p.hidden) p.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+function copyTeachScript(btn) {
+  const txt = btn.textContent;
+  navigator.clipboard.writeText(BSG._teachText || "").then(
+    () => { btn.textContent = "✓ Script copied"; setTimeout(() => { btn.textContent = txt; }, 1600); },
     () => { btn.textContent = "Copy failed"; setTimeout(() => { btn.textContent = txt; }, 1600); }
   );
 }
