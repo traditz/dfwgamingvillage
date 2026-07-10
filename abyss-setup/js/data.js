@@ -88,17 +88,17 @@ AB.phases = [
       { exp: (c) => c.has("kraken") ? "kraken" : "base",
         t: "Prepare the Locations",
         d: (c) => "Shuffle the 20 Location tiles" + (c.has("kraken") ? " together with Kraken's 6 new Locations (including the four Sanctuaries)" : "") + " into a facedown stack beside the board, then turn the top tile faceup." + (c.has("kraken") ? " Shuffle the <b>Loot cards</b> into a facedown deck next to the Location stack." : ""),
-        src: (c) => "Base p.2, step 4" + (c.has("kraken") ? " · Kraken p.2, p.6" : ""),
+        src: (c) => "Base p.3, step 4" + (c.has("kraken") ? " · Kraken p.2, p.6" : ""),
         when: () => true },
       { exp: (c) => c.has("leviathan") ? "leviathan" : "base",
         t: "Prepare the Monster tokens" + "",
         d: (c) => "Shuffle the 20 Monster tokens (2×4 IP, 9×3 IP, 9×2 IP) and place them facedown by the board." + (c.has("leviathan") ? " Make a <b>second, separate deck</b> from Leviathan's new Monster tokens next to the first — <b>never mix the two decks</b>. When you earn Monster tokens you choose freely from either (or both) decks." : ""),
-        src: (c) => "Base p.2, step 5" + (c.has("leviathan") ? " · Leviathan p.2" : ""),
+        src: (c) => "Base p.3, step 5" + (c.has("leviathan") ? " · Leviathan p.2" : ""),
         when: () => true },
       { exp: "base",
         t: "Place the Threat token",
         d: "Place the Threat token on the first space of the Threat Track.",
-        src: "Base p.2, step 6",
+        src: "Base p.3, step 6",
         when: (c) => !c.has("leviathan") },
       { exp: "leviathan",
         t: "Assemble the Border",
@@ -114,7 +114,7 @@ AB.phases = [
           return bits.join(" ");
         },
         src: (c) => {
-          const s = ["Base p.2, steps 7–8"];
+          const s = ["Base p.3, steps 7–8"];
           if (c.has("kraken")) s.push("Kraken p.2");
           if (c.has("leviathan") && c.p === 5) s.push("Leviathan p.2");
           return s.join(" · ");
@@ -123,7 +123,7 @@ AB.phases = [
       { exp: "base",
         t: "Choose the starting player",
         d: "Randomly determine the starting player. Play proceeds clockwise.",
-        src: "Base p.2, step 9",
+        src: "Base p.3, step 9",
         when: () => true }
     ] }
 ];
@@ -139,7 +139,7 @@ AB.reference = [
 <li><b>Control a Location</b> (mandatory when triggered) — the moment you hold <b>three Keys</b>, you must take control of a Location.</li>
 </ol>
 ${c.has("leviathan") ? "<p><b>Martial law:</b> at the end of your turn, you may keep at most <b>12 Allies</b> in hand — pay 1 Pearl per extra Ally or discard it" + (c.has("kraken") ? " (kraken Allies can never be discarded this way)" : "") + ".</p>" : ""}
-<p class="src-line">Base p.2–3${c.has("leviathan") ? " · Leviathan p.3" : ""}${c.has("outcasts") ? " · De Profundis" : ""}</p>` },
+<p class="src-line">Base p.4, 9${c.has("leviathan") ? " · Leviathan p.3" : ""}${c.has("outcasts") ? " · De Profundis" : ""}</p>` },
 
   { id: "explore", title: "Explore the Depths",
     when: () => true,
@@ -150,7 +150,7 @@ ${c.has("leviathan") ? "<p><b>Martial law:</b> at the end of your turn, you may 
 ${!c.has("leviathan") ? `<li>If you reveal a <b>Monster</b>: fight it (automatic victory — take the reward shown for the Threat token's space, return the token to the first space, end your turn) or keep exploring (move the Threat token up one space). Threat rewards climb from 1 Pearl / 1 Monster token up to 2 Keys on the sixth space; Monster tokens are kept facedown and are worth 2–4 IP.</li>` : `<li>If you reveal a <b>Monster</b> (Leviathan rules): choose to <b>fight one Leviathan at the Border</b>, or <b>keep exploring</b> — which forces a new Leviathan onto the Border. Roll both dice for its zone: if the zone is free, place it (health token on top), discard the Monster card, continue. If the zone is occupied, the old Leviathan <b>attacks you first</b> (unavoidable): suffer its printed penalty — Wound tokens (−1 IP each at game end), discard 3 Pearls, discard 3 Allies, or discard one free Lord — then replace it with the newcomer and continue exploring.</li>`}
 <li><b>End of exploration:</b> remaining Allies on the Track go facedown onto their Races' <b>Council</b> stacks${c.has("kraken") ? " (the active player chooses which Council stack each leftover kraken joins)" : ""}; Monsters go to the discard. An exhausted Exploration deck is rebuilt by reshuffling the discard.</li>
 </ul>
-<p class="src-line">Base p.3–4${c.has("kraken") ? " · Kraken p.3" : ""}${c.has("leviathan") ? " · Leviathan p.4" : ""}</p>` },
+<p class="src-line">Base p.4–6${c.has("kraken") ? " · Kraken p.3" : ""}${c.has("leviathan") ? " · Leviathan p.4" : ""}</p>` },
 
   { id: "fight", title: "Fighting Leviathans",
     when: (c) => c.has("leviathan"),
@@ -158,7 +158,7 @@ ${!c.has("leviathan") ? `<li>If you reveal a <b>Monster</b>: fight it (automatic
 <ul>
 <li><b>Attack:</b> discard ONE Ally of a Race shown on the Leviathan (a <b>crab always works</b>) and roll ONE die. Attack power = die + Ally value. No Ally of a listed Race? You cannot fight — you must keep exploring and add a Leviathan.</li>
 <li>New Allies add options when used to fight: spend Pearls for +1 each, or roll <b>both dice and keep the higher</b>.</li>
-<li>Power below the Resistance: no effect, gain 1 consolation Pearl. Power ≥ the Resistance: the Leviathan loses 1 Health — or several, if your power meets the <b>sum of consecutive Resistance levels</b>. Each Health lost pays out the printed Monster tokens (choose from either token deck; the new tokens grant 2–4 IP, or Pearls / a Key / a Council stack, and may be kept hidden until you choose to reveal them at the start of a turn).</li>
+<li>Power below the Resistance: no effect, gain 1 consolation Pearl. Power ≥ the Resistance: the Leviathan loses 1 Health — or several, if your power meets the <b>sum of consecutive Resistance levels</b>. Each Health lost pays out the printed Monster tokens, chosen freely from either deck (or a mix): base-game tokens are worth 2–4 IP, while the expansion's tokens grant 2–3 Pearls, a Key, or a Council stack — after looking at a new token you may resolve it immediately or hold it face down and reveal it at the start of a later turn, then discard it.</li>
 <li>You may keep attacking the <b>same</b> Leviathan (one Leviathan per turn) by discarding a fresh Ally each time. Killing it: keep its card faceup in front of you; the kill <b>ends your turn</b>. The <b>Scourge of the Abyss</b> figure sits with whoever has the most kills (ties take it from the holder) and is worth <b>+5 IP</b> at game end.</li>
 <li>The Border is never empty: whoever slays the last Leviathan immediately adds a new one (no attack possible from this placement).</li>
 </ul>
@@ -175,7 +175,7 @@ ${!c.has("leviathan") ? `<li>If you reveal a <b>Monster</b>: fight it (automatic
 <li>Lord Powers: an arrow = once, on recruitment; no arrow = semi-permanent, until that Lord is slid under a Location (its owner picks when during their turn it applies).</li>
 ${c.has("outcasts") ? "<li><b>Outcasts</b> recruit exactly like Lords (some grant a Key on recruitment). Recruiting your <b>2nd Outcast</b> forces a <b>reconquest</b>: take any opponent's Location (never one already held by 2 Outcasts; if none qualifies, the top of the stack) and slide both Outcasts under it. The victim immediately replaces their loss from the top of the stack — Lords under the lost Location slide under the new one. Reconquering a Sanctuary grants a Loot search; the victim discards the Loot they'd gained from it.</li>" : ""}
 </ul>
-<p class="src-line">Base p.5–6${c.has("kraken") ? " · Kraken p.3–5" : ""}${c.has("outcasts") ? " · De Profundis" : ""}</p>` },
+<p class="src-line">Base p.6–8${c.has("kraken") ? " · Kraken p.3–5" : ""}${c.has("outcasts") ? " · De Profundis" : ""}</p>` },
 
   { id: "locations", title: "Keys & Locations",
     when: () => true,
@@ -187,7 +187,7 @@ ${c.has("outcasts") ? "<li><b>Outcasts</b> recruit exactly like Lords (some gran
 ${c.has("kraken") ? `<li><b>Sanctuaries</b> (Cetaceous Cemetery, Abandoned Convoy, Megalodon, Battlefield): on control, draw Loot one card at a time — a 3 grants a Key, 4 grants 2 Pearls, 5 a Monster token, 6 the top Exploration card (redraw Monsters, moving the Threat token up), 7 nothing. Stop anytime and keep it all; draw a <b>duplicate value</b> and the search ends with both duplicates discarded. (Loot deck counts: three 3s, four 4s, five 5s, six 6s, seven 7s.)</li>
 <li><b>Sentinels</b> (from the Watcher, Vigil or Lookout): reserve a Lord at Court${c.has("outcasts") ? " or an Outcast" : ""}, a Council stack, or a faceup Location — only you may take it. One Sentinel per area of the board; the token returns to you when you claim the reserved element.</li>` : ""}
 </ul>
-<p class="src-line">Base p.6–7${c.has("kraken") ? " · Kraken p.6–7" : ""}${c.has("outcasts") ? " · De Profundis" : ""}</p>` },
+<p class="src-line">Base p.9${c.has("kraken") ? " · Kraken p.6–7" : ""}${c.has("outcasts") ? " · De Profundis" : ""}</p>` },
 
   { id: "nebulis", title: "Nebulis & Corruption",
     when: (c) => c.has("kraken"),
@@ -207,7 +207,7 @@ ${c.has("kraken") ? `<li><b>Sanctuaries</b> (Cetaceous Cemetery, Abandoned Convo
 <li><b>Score:</b> Locations + Lords${c.has("outcasts") ? " + Outcasts" : ""} + the strongest affiliated Ally of each Race + Monster tokens${c.has("leviathan") ? " − 1 IP per Wound token + 5 IP for the Scourge of the Abyss" : ""}${c.has("kraken") ? " − 1 IP per Nebulis (−5 more for the most corrupt)" : ""}.</li>
 <li><b>Ties:</b> most Pearls, then highest-value Lord${c.has("outcasts") ? " or Outcast" : ""}.</li>
 </ul>
-<p class="src-line">Base p.7${c.has("kraken") ? " · Kraken p.4" : ""}${c.has("leviathan") ? " · Leviathan p.7" : ""}${c.has("outcasts") ? " · De Profundis" : ""}</p>` },
+<p class="src-line">Base p.10${c.has("kraken") ? " · Kraken p.4" : ""}${c.has("leviathan") ? " · Leviathan p.7" : ""}${c.has("outcasts") ? " · De Profundis" : ""}</p>` },
 
   { id: "clarif", title: "Card Clarifications",
     when: () => true,
@@ -221,5 +221,5 @@ ${c.has("kraken") ? `<li><b>Sanctuaries</b> (Cetaceous Cemetery, Abandoned Convo
 ${c.has("leviathan") ? "<li><b>The Rebel</b>: a chosen Leviathan loses 1 Health as if you'd hit it — rewards included; if it dies, you keep the card. <b>The Border Guard</b>: the targeted opponent must add a Leviathan to the Border, exactly as if they'd explored past a Monster.</li>" : ""}
 ${c.has("outcasts") ? "<li><b>The Conspirator</b> (Outcast): at the start of your turn, secretly peek at the top Lord of the deck — you may recruit them at normal cost.</li>" : ""}
 </ul>
-<p class="src-line">Base p.8${c.has("leviathan") ? " · Leviathan p.7" : ""}${c.has("outcasts") ? " · De Profundis" : ""}</p>` }
+<p class="src-line">Base p.12${c.has("leviathan") ? " · Leviathan p.7" : ""}${c.has("outcasts") ? " · De Profundis" : ""}</p>` }
 ];

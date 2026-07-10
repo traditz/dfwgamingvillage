@@ -165,7 +165,7 @@ ES.phases = [
         when: (c) => c.mode === "streets" },
       { exp: "mode",
         t: "Set up the Clock, Expedition Camp and Track card",
-        d: (c) => "Place the <b>Clock</b> in the center of the table on <b>XII</b> with all dice near it. Replace the entrance sheet with the <b>Expedition Camp</b> entrance card. Place the <b>Track card</b> with the <b>" + (c.mod("winter") ? "Winter" : "Summer") + "</b> side faceup near the play area: put the <b>“+10” supply token on the “5” space</b> of the supply track (top) and the <b>day token on “Day 1”</b> of the day track (bottom). Place the 28 <b>storm markers</b> randomly in a facedown pile.",
+        d: (c) => "Place the <b>Clock</b> in the center of the table on <b>XII</b> with all dice near it. Replace the entrance sheet with the <b>Expedition Camp</b> entrance card. Place the <b>Track card</b> with the <b>" + (c.mod("winter") ? "Winter" : "Summer") + "</b> side faceup near the play area: put the <b>supply token on the “5” space</b> of the supply track (top) and the <b>day token on “Day 1”</b> of the day track (bottom). Place the 28 <b>storm markers</b> randomly in a facedown pile.",
         src: "Omens of Ice p.2, steps 4–6 · Base p.5, step 1",
         when: (c) => c.mode === "alaska" },
       { exp: "mode",
