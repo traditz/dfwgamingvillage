@@ -1,19 +1,19 @@
 /* =============================================================================
-   Dune: Imperium & Uprising — Setup & Reference Utility · app logic
+   Clank! A Deck-Building Adventure — Setup & Reference Utility · app logic
    ============================================================================= */
 (function () {
   "use strict";
 
   const state = {
-    game: "imperium",
     exps: new Set(["base"]),
+    board: "front",
     players: 3,
     mods: new Set()
   };
 
   const ctx = () => ({
-    game: state.game,
     has: (id) => state.exps.has(id),
+    board: state.board,
     p: state.players,
     mod: (id) => state.mods.has(id)
   });
@@ -27,44 +27,26 @@
   };
   const resolve = (v, c) => (typeof v === "function" ? v(c) : v);
 
-  const coreOf = (g) => (g === "uprising" ? "upr" : "base");
-
   function normalize() {
-    // core set for the chosen game is always in play; drop sets not playable with it
-    const core = coreOf(state.game);
-    for (const e of DI.expansions) {
-      if (!e.games.includes(state.game)) state.exps.delete(e.id);
+    state.exps.add("base");
+    // board must belong to a selected set
+    const b = CK.boards.find(x => x.id === state.board);
+    if (!b || !state.exps.has(b.requires)) state.board = "front";
+    // 5-6 players require Adventuring Party
+    if (state.players >= 5 && !state.exps.has("party")) state.players = 4;
+    // modules require their expansion
+    for (const mod of CK.modules) {
+      if (state.mods.has(mod.id) && !state.exps.has(mod.requires)) state.mods.delete(mod.id);
     }
-    state.exps.add(core);
-    // player counts: imperium 1-4; uprising 1,2,3,4,6
-    const allowed = state.game === "uprising" ? [1, 2, 3, 4, 6] : [1, 2, 3, 4];
-    if (!allowed.includes(state.players)) state.players = state.players === 6 ? 4 : 3;
-    // modules require their game + expansion
-    for (const mod of DI.modules) {
-      if (!state.mods.has(mod.id)) continue;
-      if (!mod.games.includes(state.game) || !state.exps.has(mod.requires)) state.mods.delete(mod.id);
-    }
-  }
-
-  function renderGames() {
-    const box = $("#games");
-    box.innerHTML = "";
-    for (const g of DI.games) {
-      const b = el("button", "mode-btn" + (state.game === g.id ? " on" : ""));
-      b.type = "button";
-      b.innerHTML = "<b>" + g.name + "</b><span>" + g.blurb + "</span>";
-      b.addEventListener("click", () => { state.game = g.id; update(); });
-      box.appendChild(b);
-    }
+    // mini-campaign only makes sense on the Ape Lords boards
+    if (state.mods.has("campaign") && state.board !== "jungle" && state.board !== "temple") state.mods.delete("campaign");
   }
 
   function renderExpansions() {
     const box = $("#expansions");
     box.innerHTML = "";
-    const core = coreOf(state.game);
-    for (const e of DI.expansions) {
-      if (!e.games.includes(state.game)) continue;
-      const locked = e.id === core;
+    for (const e of CK.expansions) {
+      const locked = e.id === "base";
       const b = el("button", "chip" + (state.exps.has(e.id) ? " on" : "") + (locked ? " lock" : ""));
       b.type = "button";
       b.innerHTML = "<b>" + e.short + "</b><span>" + e.year + "</span>";
@@ -77,25 +59,44 @@
     }
   }
 
+  function renderBoards() {
+    const box = $("#boards");
+    box.innerHTML = "";
+    for (const b of CK.boards) {
+      if (!state.exps.has(b.requires)) continue;
+      const btn = el("button", "mode-btn" + (state.board === b.id ? " on" : ""));
+      btn.type = "button";
+      btn.innerHTML = "<b>" + b.name + "</b><span>" + b.blurb + "</span>";
+      btn.addEventListener("click", () => { state.board = b.id; update(); });
+      box.appendChild(btn);
+    }
+  }
+
   function renderPlayers() {
     const box = $("#players");
     box.innerHTML = "";
-    for (const i of [1, 2, 3, 4, 6]) {
-      const ok = i !== 6 || state.game === "uprising";
+    for (let i = 2; i <= 6; i++) {
+      const ok = i <= 4 || state.exps.has("party");
       const b = el("button", "pbtn" + (state.players === i ? " on" : "") + (ok ? "" : " off"), String(i));
       b.type = "button";
       if (ok) b.addEventListener("click", () => { state.players = i; update(); });
-      else b.title = "The 6-player team game is an Uprising mode";
+      else b.title = "5–6 players requires Adventuring Party";
       box.appendChild(b);
     }
+  }
+
+  function modAvailable(mod) {
+    if (!state.exps.has(mod.requires)) return false;
+    if (mod.id === "campaign" && state.board !== "jungle" && state.board !== "temple") return false;
+    return true;
   }
 
   function renderModules() {
     const box = $("#modules");
     box.innerHTML = "";
     let shown = 0;
-    for (const mod of DI.modules) {
-      if (!mod.games.includes(state.game) || !state.exps.has(mod.requires)) continue;
+    for (const mod of CK.modules) {
+      if (!modAvailable(mod)) continue;
       shown++;
       const on = state.mods.has(mod.id);
       const b = el("button", "mod" + (on ? " on" : ""));
@@ -115,7 +116,7 @@
     const out = $("#setup");
     out.innerHTML = "";
     let n = 0;
-    for (const phase of DI.phases) {
+    for (const phase of CK.phases) {
       const steps = phase.steps.filter(s => s.when(c));
       if (!steps.length) continue;
       const ph = el("div", "phase");
@@ -123,7 +124,7 @@
       for (const s of steps) {
         n++;
         const exp = resolve(s.exp, c);
-        const meta = DI.expMeta[exp] || DI.expMeta.base;
+        const meta = CK.expMeta[exp] || CK.expMeta.base;
         const step = el("div", "step");
         step.appendChild(el("div", "step-num", String(n)));
         const body = el("div", "step-body");
@@ -143,7 +144,7 @@
   function renderReference(c) {
     const out = $("#reference");
     out.innerHTML = "";
-    for (const sec of DI.reference) {
+    for (const sec of CK.reference) {
       if (!sec.when(c)) continue;
       const d = el("details", "ref");
       d.appendChild(el("summary", null, sec.title));
@@ -154,15 +155,14 @@
     }
   }
 
-  // which documents are searchable for the current configuration
   function docVisible(x, c) {
     switch (x) {
-      case "base": case "aid": return c.game === "imperium";
-      case "ix": return c.has("ix");
-      case "imm": return c.has("imm");
-      case "upr": case "supp": return c.game === "uprising";
-      case "bl": return c.game === "uprising" && c.has("bl");
-      default: return true; // faq covers both games
+      case "sunken": return c.has("sunken");
+      case "mummy": return c.has("mummy");
+      case "goldsilk": return c.has("goldsilk");
+      case "apelords": return c.has("apelords");
+      case "party": return c.has("party");
+      default: return true; // base, faq
     }
   }
 
@@ -176,7 +176,7 @@
     }
     const c = ctx();
     const hits = [];
-    for (const pg of DI.rulesIndex) {
+    for (const pg of CK.rulesIndex) {
       if (!docVisible(pg.x, c)) continue;
       const t = pg.t.toLowerCase();
       const idx = t.indexOf(q);
@@ -185,7 +185,7 @@
       if (hits.length >= 40) break;
     }
     if (!hits.length) {
-      out.innerHTML = "<p class='rhint'>No matches in the selected game's documents.</p>";
+      out.innerHTML = "<p class='rhint'>No matches in the selected sets' documents.</p>";
       return;
     }
     for (const { pg, idx } of hits) {
@@ -204,22 +204,22 @@
 
   function renderTeach(c) {
     const box = $("#teach");
-    if (!box || !DI.teach) return;
-    const secs = DI.teach.sections
+    if (!box || !CK.teach) return;
+    const secs = CK.teach.sections
       .filter(s => !s.when || s.when(c))
       .map(s => ({ h: (typeof s.h === "function" ? s.h(c) : s.h), html: (typeof s.body === "function" ? s.body(c) : s.body) }))
       .filter(s => s.html);
-    DI._teachText = secs.map(s =>
+    CK._teachText = secs.map(s =>
       s.h.toUpperCase() + "\n" +
       s.html.replace(/<li>/g, "• ").replace(/<\/p>\s*<p>/g, "\n\n")
             .replace(/<[^>]+>/g, "").replace(/\n{3,}/g, "\n\n").trim()
     ).join("\n\n");
     box.innerHTML = "<div class='teach-top'><h3>📖 Teaching Script — this setup</h3><button type='button' class='teach-copy' id='teachCopy'>📋 Copy script</button></div>" +
-      "<p class='teach-note'>" + DI.teach.intro + "</p>" +
+      "<p class='teach-note'>" + CK.teach.intro + "</p>" +
       secs.map(s => "<h4>" + s.h + "</h4>" + s.html).join("");
     $("#teachCopy").addEventListener("click", () => {
       const b = $("#teachCopy"), t = b.textContent;
-      navigator.clipboard.writeText(DI._teachText || "").then(
+      navigator.clipboard.writeText(CK._teachText || "").then(
         () => { b.textContent = "✓ Script copied"; setTimeout(() => { b.textContent = t; }, 1600); },
         () => { b.textContent = "Copy failed"; setTimeout(() => { b.textContent = t; }, 1600); });
     });
@@ -228,8 +228,8 @@
   function update() {
     normalize();
     const c = ctx();
-    renderGames();
     renderExpansions();
+    renderBoards();
     renderPlayers();
     renderModules();
     renderSetup(c);

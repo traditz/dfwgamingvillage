@@ -22,21 +22,21 @@ DI.games = [
 ];
 
 DI.expansions = [
-  { id: "base", game: "imperium", short: "Dune: Imperium", year: "2020", blurb: "The core game. Always in play." },
-  { id: "ix",   game: "imperium", short: "Rise of Ix",     year: "2021", blurb: "Ix board, Tech tiles, dreadnoughts, the Shipping track, 6 Leaders, Epic Game Mode." },
-  { id: "imm",  game: "imperium", short: "Immortality",    year: "2022", blurb: "Bene Tleilax board, research track, specimens, Tleilaxu cards and Graft." },
-  { id: "upr",  game: "uprising", short: "Uprising (core)", year: "2023", blurb: "The standalone sequel. Always in play." },
-  { id: "bl",   game: "uprising", short: "Bloodlines",     year: "2024", blurb: "Sardaukar Commanders and Skills, 8 Leaders, new cards, plus the optional Tech Module." }
+  { id: "base", games: ["imperium"], short: "Dune: Imperium", year: "2020", blurb: "The core game. Always in play." },
+  { id: "upr",  games: ["uprising"], short: "Uprising (core)", year: "2023", blurb: "The standalone sequel. Always in play." },
+  { id: "ix",   games: ["imperium", "uprising"], short: "Rise of Ix",  year: "2021", blurb: "Ix board, Tech tiles, dreadnoughts, the Shipping track, 6 Leaders, Epic Game Mode. Compatible with Uprising (Uprising p.18)." },
+  { id: "imm",  games: ["imperium", "uprising"], short: "Immortality", year: "2022", blurb: "Bene Tleilax board, research track, specimens, Tleilaxu cards and Graft. Compatible with Uprising (Uprising p.18)." },
+  { id: "bl",   games: ["uprising"], short: "Bloodlines",    year: "2024", blurb: "Sardaukar Commanders and Skills, 8 Leaders, new cards, plus the optional Tech Module." }
 ];
 
 DI.modules = [
-  { id: "choam", game: "uprising", requires: "upr", name: "CHOAM Module", summary: "Contracts mini-expansion (included in the Uprising box)",
+  { id: "choam", games: ["uprising"], requires: "upr", name: "CHOAM Module", summary: "Contracts mini-expansion (included in the Uprising box)",
     description: "Adds 20 CHOAM contracts, 4 Intrigue and 4 Imperium cards, and the Shaddam Corrino IV Leader. Recommended after your first game.", src: "Uprising p.16" },
-  { id: "tech", game: "uprising", requires: "bl", name: "Tech Module", summary: "Ixian Embassy & 18 Tech tiles (included in the Bloodlines box)",
+  { id: "tech", games: ["uprising"], requires: "bl", name: "Tech Module", summary: "Ixian Embassy & 18 Tech tiles (included in the Bloodlines box)",
     description: "Adds the Ixian Embassy board, 18 Tech tiles, 2 Intrigue and 2 Imperium cards, and the Kota Odax of Ix Leader.", src: "Bloodlines p.6" },
-  { id: "epic", game: "imperium", requires: "ix", name: "Epic Game Mode", summary: "Longer, more intense game — play to 12 VP",
-    description: "Play to 12 Victory Points. No Conflict I cards, Control the Spice starting card, 1 starting Intrigue card, 5 starting troops.", src: "Rise of Ix p.10" },
-  { id: "goto11", game: "imperium", requires: "imm", name: "“Go to 11” variant", summary: "Suggested longer game with Immortality — play to 11 VP",
+  { id: "epic", games: ["imperium", "uprising"], requires: "ix", name: "Epic Game Mode", summary: "Longer, more intense game — play to 12 VP",
+    description: "Play to 12 Victory Points. No Conflict I cards, Control the Spice starting card, 1 starting Intrigue card, 5 starting troops. In Uprising, add Economic Supremacy as the fifth Conflict III card.", src: "Rise of Ix p.10 · Uprising p.18" },
+  { id: "goto11", games: ["imperium"], requires: "imm", name: "“Go to 11” variant", summary: "Suggested longer game with Immortality — play to 11 VP",
     description: "With Immortality's extra deck-building options, veteran groups may play to 11 VP (in a 4-player game, start at 0 and play to 10).", src: "Immortality p.12" }
 ];
 
@@ -63,14 +63,20 @@ DI.phases = [
         d: "<ul><li>Place the four <b>Alliance tokens</b> on the marked areas of the Factions' Influence tracks: Emperor, Spacing Guild, Bene Gesserit, and Fremen." +
            "</li></ul><p class='inline-note'>6-player game: the reverse board uses Great Houses and Fringe Worlds in place of Emperor and Fremen; place Alliance tokens on all four tracks shown.</p>",
         src: "Base p.4 · Uprising p.4" },
-      { when: (c) => c.game === "imperium" && c.has("ix"), exp: "ix",
+      { when: (c) => c.has("ix"), exp: "ix",
         t: "Rise of Ix — CHOAM overlay, Ix board & Tech tiles",
-        d: "<ul><li>Place the <b>CHOAM board overlay</b> on top of the upper-right corner of the game board (covering the original Landsraad and CHOAM sections).</li><li>Place the <b>Ix board</b> next to the game board.</li><li>Shuffle the <b>18 Tech tiles</b> face down, divide them into <b>three stacks of 6</b>, place the stacks on the three spaces of the Ix board, and turn the top tile of each stack face up.</li></ul>",
-        src: "Rise of Ix p.3" },
-      { when: (c) => c.game === "imperium" && c.has("imm"), exp: "imm",
+        d: (c) => c.game === "uprising"
+          ? "<ul><li>Keep the <b>CHOAM board overlay folded in half</b> and cover only the top-right corner of the Uprising board — this creates the CHOAM section and covers the <b>Assembly Hall</b> and <b>Gather Support</b> spaces, leaving the rest of the Landsraad unchanged.</li>" +
+            "<li>Place the <b>Ix board</b> next to the game board.</li>" +
+            "<li>Shuffle the <b>18 Tech tiles</b> face down, divide them into <b>three stacks of 6</b>, place them on the three spaces of the Ix board, and turn the top tile of each stack face up.</li>" +
+            "<li><b>Observation posts:</b> the CHOAM overlay and Ix board predate Uprising — play as if each has one post: one connecting <b>Interstellar Shipping and Smuggling</b>, the other connecting <b>Tech Negotiation and Dreadnought</b>.</li></ul>"
+          : "<ul><li>Place the <b>CHOAM board overlay</b> on top of the upper-right corner of the game board (covering the original Landsraad and CHOAM sections).</li><li>Place the <b>Ix board</b> next to the game board.</li><li>Shuffle the <b>18 Tech tiles</b> face down, divide them into <b>three stacks of 6</b>, place the stacks on the three spaces of the Ix board, and turn the top tile of each stack face up.</li></ul>",
+        src: (c) => c.game === "uprising" ? "Rise of Ix p.3 · Uprising p.18" : "Rise of Ix p.3" },
+      { when: (c) => c.has("imm"), exp: "imm",
         t: "Immortality — Bene Tleilax board & Research Station overlay",
-        d: "<ul><li>Place the <b>Bene Tleilax board</b> above where the Imperium Row will be. (You may position it anywhere convenient — keep the Imperium and Tleilaxu Rows close together.)</li><li>Place <b>2 spice</b> from the bank on the <b>fourth space of the Tleilaxu track</b>.</li><li>Place the <b>Reclaimed Forces</b> card to the left of the Bene Tleilax board.</li><li>Place the <b>Research Station overlay</b> on top of the Research Station space of the game board.</li></ul>",
-        src: "Immortality p.4–5" },
+        d: (c) => "<ul><li>Place the <b>Bene Tleilax board</b> above where the Imperium Row will be. (You may position it anywhere convenient — keep the Imperium and Tleilaxu Rows close together.)</li><li>Place <b>2 spice</b> from the bank on the <b>fourth space of the Tleilaxu track</b>.</li><li>Place the <b>Reclaimed Forces</b> card to the left of the Bene Tleilax board.</li><li>Place the <b>Research Station overlay</b> on top of the Research Station space of the game board." +
+          (c.game === "uprising" ? " (Uprising's Research Station differs from the original, but you should <b>still cover it</b> with the overlay.)" : "") + "</li></ul>",
+        src: (c) => c.game === "uprising" ? "Immortality p.4–5 · Uprising p.18" : "Immortality p.4–5" },
       { when: (c) => c.game === "uprising" && c.mod("choam"), exp: "choam",
         t: "CHOAM Module — contracts",
         d: "<ul><li>Shuffle the <b>20 contracts</b> face down.</li><li>Flip <b>two face up</b> and place them on the marked spaces beneath the Landsraad Council.</li><li>Place the remaining 18 face down in the bank.</li></ul>",
@@ -79,10 +85,12 @@ DI.phases = [
         t: "Bloodlines — Sardaukar Commanders & Skills",
         d: (c) => "<ul><li>Take the <b>7 Sardaukar Commanders</b> you prefer (wood or plastic — not both; they are meant to be limited).</li>" +
            "<li>Place five on the board, one each on: <b>Sardaukar, Dutiful Service, Deliver Supplies, High Council,</b> and <b>Gather Support</b> (leave room for an Agent on each space).</li>" +
-           (c.p === 4 ? "<li><b>4-player game:</b> place a sixth Sardaukar Commander on the <b>Assembly Hall</b> space.</li>" : "<li>Return the sixth Sardaukar Commander to the box (it is used only in 4-player games).</li>") +
+           (c.has("ix")
+            ? "<li><b>With Rise of Ix</b>, the CHOAM overlay covers Gather Support" + (c.p === 4 ? " and Assembly Hall" : "") + ": place that Sardaukar Commander on <b>Dreadnought</b> instead" + (c.p === 4 ? ", and the 4-player game's sixth Commander on <b>Tech Negotiation</b>" : "") + ".</li>"
+            : (c.p === 4 ? "<li><b>4-player game:</b> place a sixth Sardaukar Commander on the <b>Assembly Hall</b> space.</li>" : "<li>Return the sixth Sardaukar Commander to the box (it is used only in 4-player games).</li>")) +
            "<li>Place the final Sardaukar Commander in the <b>bank</b> (used with the Sardaukar Standard Imperium card).</li>" +
            "<li>Shuffle the <b>14 Sardaukar Commander Skills</b> face down, place the stack near the board, and deal <b>four face up</b>.</li></ul>",
-        src: "Bloodlines p.3" },
+        src: (c) => c.has("ix") ? "Bloodlines p.3, p.7" : "Bloodlines p.3" },
       { when: (c) => c.game === "uprising" && c.mod("tech"), exp: "tech",
         t: "Tech Module — Ixian Embassy & Tech tiles",
         d: (c) => "<ul><li>Place the <b>Ixian Embassy board</b> next to the game board.</li>" +
@@ -100,42 +108,47 @@ DI.phases = [
   {
     title: "Conflict, Intrigue & Imperium Decks",
     steps: [
-      { when: (c) => !(c.game === "imperium" && c.mod("epic")), exp: (c) => c.game === "uprising" ? "upr" : "base",
+      { when: (c) => !c.mod("epic"), exp: (c) => c.game === "uprising" ? "upr" : "base",
         t: "Build the 10-card Conflict Deck",
         d: (c) => {
           let extra = "";
           if (c.game === "imperium" && c.has("ix")) extra = "<li><b>Rise of Ix:</b> add the new Conflict cards to the pool before building the deck. You will now have unused Conflict III cards — return all unused Conflict cards to the box without looking at them.</li>";
-          if (c.game === "uprising" && c.has("bl")) extra = "<li><b>Bloodlines:</b> add the new Conflict cards to the pool before building the deck, then build it the same way. Return unused cards to the box without looking at them.</li>";
+          if (c.game === "uprising" && c.has("ix")) extra += "<li><b>Rise of Ix:</b> it is recommended <b>not</b> to add the Ix Conflict cards to Uprising — matching battle icons gets harder. (You may if you wish.)</li>";
+          if (c.game === "uprising" && c.has("bl")) extra += "<li><b>Bloodlines:</b> add the new Conflict cards to the pool before building the deck, then build it the same way. Return unused cards to the box without looking at them.</li>";
           return "<ul><li>Separate the Conflict cards by their backs: <b>Conflict I, II, III</b>.</li>" + extra +
             "<li>Shuffle the <b>Conflict III</b> cards and place <b>four</b> face down in the marked area of the board.</li>" +
             "<li>Shuffle the <b>Conflict II</b> cards and deal <b>five</b> face down on top of them.</li>" +
             "<li>Shuffle the <b>Conflict I</b> cards and deal <b>one</b> face down on top.</li>" +
             "<li>The deck is 10 cards: 1× Conflict I on top, 5× Conflict II, then 4× Conflict III on the bottom. Return unused Conflict cards to the box without looking at them.</li></ul>";
         },
-        src: (c) => c.game === "uprising" ? (c.has("bl") ? "Uprising p.4 · Bloodlines p.3" : "Uprising p.4") : (c.has("ix") ? "Base p.4 · Rise of Ix p.3" : "Base p.4") },
-      { when: (c) => c.game === "imperium" && c.mod("epic"), exp: "epic",
+        src: (c) => {
+          const s = [c.game === "uprising" ? "Uprising p.4" : "Base p.4"];
+          if (c.has("ix")) s.push(c.game === "uprising" ? "Uprising p.18" : "Rise of Ix p.3");
+          if (c.game === "uprising" && c.has("bl")) s.push("Bloodlines p.3");
+          return s.join(" · ");
+        } },
+      { when: (c) => c.mod("epic"), exp: "epic",
         t: "Build the Epic Conflict Deck (no Conflict I)",
-        d: "<ul><li>Do <b>not</b> use any Conflict I cards.</li><li>Shuffle and place <b>5 random Conflict III</b> cards face down, then <b>5 random Conflict II</b> cards on top of them.</li><li>Return unused Conflict cards to the box without looking at them.</li></ul>",
-        src: "Rise of Ix p.10" },
+        d: (c) => "<ul><li>Do <b>not</b> use any Conflict I cards.</li>" +
+          (c.game === "uprising" ? "<li>Uprising has only four Conflict III cards — add <b>Economic Supremacy</b> from Rise of Ix as the fifth.</li>" : "") +
+          "<li>Shuffle and place <b>5 random Conflict III</b> cards face down, then <b>5 random Conflict II</b> cards on top of them.</li><li>Return unused Conflict cards to the box without looking at them.</li></ul>",
+        src: (c) => c.game === "uprising" ? "Rise of Ix p.10 · Uprising p.18" : "Rise of Ix p.10" },
       { when: () => true, exp: (c) => c.game === "uprising" ? "upr" : "base",
         t: "Shuffle the Intrigue Deck",
         d: (c) => {
           const adds = [];
-          if (c.game === "imperium") {
-            if (c.has("ix")) adds.push("<b>17</b> Rise of Ix Intrigue cards");
-            if (c.has("imm")) adds.push("<b>15</b> Immortality Intrigue cards");
-          } else {
-            if (c.mod("choam")) adds.push("<b>4</b> CHOAM Module Intrigue cards");
-            if (c.has("bl")) adds.push("<b>15</b> Bloodlines Intrigue cards");
-            if (c.mod("tech")) adds.push("<b>2</b> Tech Module Intrigue cards");
-          }
+          if (c.has("ix")) adds.push("<b>17</b> Rise of Ix Intrigue cards");
+          if (c.has("imm")) adds.push("<b>15</b> Immortality Intrigue cards");
+          if (c.mod("choam")) adds.push("<b>4</b> CHOAM Module Intrigue cards");
+          if (c.has("bl")) adds.push("<b>15</b> Bloodlines Intrigue cards");
+          if (c.mod("tech")) adds.push("<b>2</b> Tech Module Intrigue cards");
           return "<ul>" + (adds.length ? "<li>Shuffle in the " + adds.join(", the ") + ".</li>" : "") +
             "<li>Shuffle the Intrigue Deck and place it face down along the edge of the game board.</li></ul>";
         },
         src: (c) => {
           const s = [c.game === "uprising" ? "Uprising p.4" : "Base p.4"];
-          if (c.game === "imperium" && c.has("ix")) s.push("Rise of Ix p.3");
-          if (c.game === "imperium" && c.has("imm")) s.push("Immortality p.5");
+          if (c.has("ix")) s.push("Rise of Ix p.3");
+          if (c.has("imm")) s.push("Immortality p.5");
           if (c.game === "uprising" && c.mod("choam")) s.push("Uprising p.16");
           if (c.game === "uprising" && c.has("bl")) s.push("Bloodlines p.3");
           if (c.game === "uprising" && c.mod("tech")) s.push("Bloodlines p.6");
@@ -145,21 +158,18 @@ DI.phases = [
         t: "Shuffle the Imperium Deck & deal the Imperium Row",
         d: (c) => {
           const adds = [];
-          if (c.game === "imperium") {
-            if (c.has("ix")) adds.push("<b>35</b> Rise of Ix Imperium cards");
-            if (c.has("imm")) adds.push("<b>30</b> Immortality Imperium cards");
-          } else {
-            if (c.mod("choam")) adds.push("<b>4</b> CHOAM Module Imperium cards");
-            if (c.has("bl")) adds.push("<b>25</b> Bloodlines Imperium cards");
-            if (c.mod("tech")) adds.push("<b>2</b> Tech Module Imperium cards");
-          }
+          if (c.has("ix")) adds.push("<b>35</b> Rise of Ix Imperium cards");
+          if (c.has("imm")) adds.push("<b>30</b> Immortality Imperium cards");
+          if (c.mod("choam")) adds.push("<b>4</b> CHOAM Module Imperium cards");
+          if (c.has("bl")) adds.push("<b>25</b> Bloodlines Imperium cards");
+          if (c.mod("tech")) adds.push("<b>2</b> Tech Module Imperium cards");
           return "<ul>" + (adds.length ? "<li>Shuffle in the " + adds.join(", the ") + " <b>before</b> forming the Row.</li>" : "") +
             "<li>Shuffle the Imperium Deck and place it face down.</li><li>Deal <b>5 cards face up</b> from it to form the <b>Imperium Row</b>.</li></ul>";
         },
         src: (c) => {
           const s = [c.game === "uprising" ? "Uprising p.4" : "Base p.4"];
-          if (c.game === "imperium" && c.has("ix")) s.push("Rise of Ix p.3");
-          if (c.game === "imperium" && c.has("imm")) s.push("Immortality p.4");
+          if (c.has("ix")) s.push("Rise of Ix p.3");
+          if (c.has("imm")) s.push("Immortality p.4");
           if (c.game === "uprising" && c.mod("choam")) s.push("Uprising p.16");
           if (c.game === "uprising" && c.has("bl")) s.push("Bloodlines p.3");
           if (c.game === "uprising" && c.mod("tech")) s.push("Bloodlines p.6");
@@ -191,11 +201,13 @@ DI.phases = [
         d: (c) => "<ul><li>Each player takes a <b>Leader</b> (choose or select at random).</li>" +
           "<li>Leaders show <b>1–3 icons</b> after their names — more icons means more strategic complexity. For your first game, each player should choose a <b>1-icon</b> Leader.</li>" +
           "<li>Do <b>not</b> use <b>Shaddam Corrino IV</b> unless you are using the CHOAM Module." + (c.mod("choam") ? " (You are — he is available.)" : "") + "</li>" +
+          (c.has("ix") ? "<li><b>Rise of Ix:</b> its <b>6 Leaders</b> may be used — but <b>Ilesa Ecaz</b> requires the Foldspace cards from the original Dune: Imperium (she alone may acquire them).</li>" : "") +
           (c.has("bl") ? "<li><b>Bloodlines:</b> add the <b>8 new Leaders</b>; any combination of new and existing Leaders may be chosen.</li>" : "") +
           (c.mod("tech") ? "<li><b>Tech Module:</b> a player may choose <b>Kota Odax of Ix</b> as their Leader.</li>" : "") +
           "</ul>",
         src: (c) => {
           const s = ["Uprising p.4"];
+          if (c.has("ix")) s.push("Uprising p.18");
           if (c.has("bl")) s.push("Bloodlines p.3");
           if (c.mod("tech")) s.push("Bloodlines p.6");
           return s.join(" · ");
@@ -204,16 +216,16 @@ DI.phases = [
         t: "Starting deck & water",
         d: (c) => {
           let deck = "<li>Each player takes a <b>10-card starting deck</b>, shuffles it, and places it face down to the left of their Leader.</li>";
-          if (c.game === "imperium" && c.has("imm")) deck += "<li><b>Immortality:</b> each player removes the two copies of <b>Dune, the Desert Planet</b> from their starting deck (return them to the box) and replaces them with two copies of <b>Experimentation</b>.</li>";
-          if (c.game === "imperium" && c.mod("epic")) deck += c.has("imm")
+          if (c.has("imm")) deck += "<li><b>Immortality:</b> each player removes the two copies of <b>Dune, the Desert Planet</b> from their starting deck (return them to the box) and replaces them with two copies of <b>Experimentation</b>.</li>";
+          if (c.mod("epic")) deck += c.has("imm")
             ? "<li><b>Epic + Immortality:</b> do <b>not</b> replace a starting card with Control the Spice. Instead, each player places their <b>Control the Spice</b> card in their <b>discard pile</b> at the start of the game.</li>"
             : "<li><b>Epic Game Mode:</b> each player removes one copy of <b>Dune, the Desert Planet</b> and replaces it with one copy of <b>Control the Spice</b>.</li>";
           return "<ul>" + deck + "<li>Each player takes <b>1 water</b> and places it in their supply.</li></ul>";
         },
         src: (c) => {
           const s = [c.game === "uprising" ? "Uprising p.5" : "Base p.5"];
-          if (c.game === "imperium" && c.has("imm")) s.push("Immortality p.5");
-          if (c.game === "imperium" && c.mod("epic")) s.push(c.has("imm") ? "Rise of Ix p.10 · Immortality p.12" : "Rise of Ix p.10");
+          if (c.has("imm")) s.push("Immortality p.5");
+          if (c.mod("epic")) s.push(c.has("imm") ? "Rise of Ix p.10 · Immortality p.12" : "Rise of Ix p.10");
           return s.join(" · ");
         } },
       { when: (c) => c.p !== 6, exp: (c) => c.game === "uprising" ? "upr" : "base",
@@ -224,15 +236,15 @@ DI.phases = [
           "<li>Place <b>four cubes</b>, one each, on the bottom spaces of the four Factions' Influence tracks.</li>" +
           "<li>Your other <b>12 cubes are troops</b>: place <b>" + (c.game === "imperium" && c.mod("epic") ? "5 (Epic Game Mode)" : "3") + "</b> in the circular garrison nearest you, and the rest in your supply.</li>" +
           (c.game === "uprising" ? "<li>Take your <b>3 Spies</b> and place them in your supply.</li>" : "") +
-          (c.game === "imperium" && c.has("ix") ? "<li><b>Rise of Ix:</b> place your <b>two dreadnoughts</b> in your supply and your extra disc as a <b>Freighter</b> on the bottom space of the Shipping track.</li>" : "") +
-          (c.game === "imperium" && c.has("imm") ? "<li><b>Immortality:</b> take your two new discs — place one as a <b>Tleilaxu token</b> on the leftmost space of the Tleilaxu track and one as a <b>research token</b> on the leftmost space of the research track. Take a <b>Family Atomics token</b> into your supply.</li>" : "") +
-          (c.game === "imperium" && c.mod("epic") ? "<li><b>Epic Game Mode:</b> each player draws <b>1 Intrigue card</b>. (A Viscount Hundro Moritani player waits until all players have drawn, then uses the Intelligence ability.)</li>" : "") +
+          (c.has("ix") ? "<li><b>Rise of Ix:</b> place your <b>two dreadnoughts</b> in your supply and your extra disc as a <b>Freighter</b> on the bottom space of the Shipping track.</li>" : "") +
+          (c.has("imm") ? "<li><b>Immortality:</b> take your two new discs — place one as a <b>Tleilaxu token</b> on the leftmost space of the Tleilaxu track and one as a <b>research token</b> on the leftmost space of the research track. Take a <b>Family Atomics token</b> into your supply.</li>" : "") +
+          (c.mod("epic") ? "<li><b>Epic Game Mode:</b> each player draws <b>1 Intrigue card</b>. (A Viscount Hundro Moritani player waits until all players have drawn, then uses the Intelligence ability.)</li>" : "") +
           "</ul>",
         src: (c) => {
           const s = [c.game === "uprising" ? "Uprising p.5" : "Base p.5"];
-          if (c.game === "imperium" && c.has("ix")) s.push("Rise of Ix p.3");
-          if (c.game === "imperium" && c.has("imm")) s.push("Immortality p.4–5");
-          if (c.game === "imperium" && c.mod("epic")) s.push("Rise of Ix p.10");
+          if (c.has("ix")) s.push("Rise of Ix p.3");
+          if (c.has("imm")) s.push("Immortality p.4–5");
+          if (c.mod("epic")) s.push("Rise of Ix p.10");
           return s.join(" · ");
         } },
       { when: (c) => c.p === 6, exp: "upr",
@@ -305,6 +317,7 @@ DI.phases = [
             ? "<li><b>Objectives:</b> you and your Rivals each start with one Objective card, distributed randomly as in a multiplayer game.</li>"
             : "<li><b>Objectives:</b> give the <b>Ornithopter</b> Objective to the Rival and randomly distribute the other two. The Rival never has the First Player marker — it always acts between the two human players.</li>") +
           (c.has("bl") ? "<li><b>Bloodlines:</b> shuffle in the 6 new House Hagal cards — but use the two <b>Tuek's Sietch</b> cards only if a player uses the Esmar Tuek Leader, and the four <b>Acquire Tech</b> cards only in a solo game with the Tech Module. The new Rival cards add more Rival options" + (c.mod("tech") ? " (Kota Odax of Ix: solo + Tech Module only)" : "") + ".</li>" : "") +
+          ((c.has("ix") || c.has("imm")) ? "<li><b>Note:</b> the Rise of Ix and Immortality solo rules were written for the original game's House Hagal deck; the Uprising Rivals supplement doesn't cover combining them. Check <b>duneimperium.com/FAQ</b> for current guidance before mixing them into solo/2-player Uprising.</li>" : "") +
           "</ul>",
         src: (c) => {
           const s = ["Supplements (Rivals) p.3"];
@@ -336,7 +349,7 @@ DI.reference = [
     title: "Objective, Endgame & Tiebreakers",
     when: () => true,
     html: (c) => {
-      const target = c.game === "imperium" && c.mod("epic") ? "12" : (c.game === "imperium" && c.mod("goto11") ? "11 (4P: start at 0 and play to 10)" : "10");
+      const target = c.mod("epic") ? "12" : (c.game === "imperium" && c.mod("goto11") ? "11 (4P: start at 0 and play to 10)" : "10");
       return "<ul><li>Gain <b>Victory Points</b> (VP); track them on the Score track. You can score more than 12 VP even though the track ends at 12 (FAQ).</li>" +
         "<li><b>End of the game:</b> at the end of a round (during the Recall phase), if any player has <b>" + target + "+ VP</b>, or if the <b>Conflict Deck is empty</b>, the Endgame is triggered.</li>" +
         "<li>Players may then play <b>Endgame Intrigue cards</b>. Most VP wins.</li>" +
@@ -384,7 +397,7 @@ DI.reference = [
       "<li>Spend <b>Persuasion</b> to acquire cards from the <b>Imperium Row</b> or the <b>Reserve</b> stacks — pool it from multiple sources, split a single source, buy any number of cards. Unspent Persuasion is lost.</li>" +
       "<li>Acquired cards go to your <b>discard pile</b>. The Row is refilled to 5 immediately, so you may buy the replacement too.</li>" +
       "<li><b>Strength:</b> each troop in the Conflict = <b>2</b>" +
-      (c.game === "uprising" ? ", each sandworm = <b>3</b>" : (c.has("ix") ? ", each dreadnought = <b>3</b>" : "")) +
+      (c.game === "uprising" ? ", each sandworm = <b>3</b>" : "") + (c.has("ix") ? ", each dreadnought = <b>3</b>" : "") +
       ", each sword revealed = <b>1</b>. With no units in the Conflict your strength is 0. Set your Combat marker accordingly" +
       (c.game === "uprising" ? " — at any point while resolving Reveal effects, updating as needed (Uprising change)" : " after revealing, before Clean Up") + ".</li>" +
       "<li>If you <b>draw</b> a card during your Reveal turn, immediately reveal and use it this turn; cards drawn after your Reveal turn are kept for next round (FAQ).</li>" +
@@ -407,8 +420,8 @@ DI.reference = [
         : "<li><b>Control locations:</b> some Conflicts grant control of <b>Arrakeen, Carthag, or Imperial Basin</b> — the controller gains 1 Solari (Arrakeen/Carthag) or 1 spice (Imperial Basin) whenever anyone sends an Agent there, plus one free troop deployed when a Conflict for that space is revealed while they control it.</li>") +
       "<li><b>After rewards:</b> troops return to their owners' <b>supplies</b> (not garrisons); Combat markers reset to 0" +
       (c.game === "uprising" ? "; sandworms return to the bank" : "") +
-      (c.game === "imperium" && c.has("ix") ? "; <b>dreadnoughts survive</b> — a loser's dreadnoughts return to their garrison, and the winner's must take control of a location (see the Rise of Ix section)" : "") + ".</li></ul>",
-    src: (c) => c.game === "uprising" ? "Uprising p.14–15 · FAQ" : (c.has("ix") ? "Base p.10–11 · Rise of Ix p.6 · FAQ" : "Base p.10–11 · FAQ")
+      (c.has("ix") ? "; <b>dreadnoughts survive</b> — a loser's dreadnoughts return to their garrison, and the winner's must take control of a location (see the Rise of Ix section)" : "") + ".</li></ul>",
+    src: (c) => c.game === "uprising" ? (c.has("ix") ? "Uprising p.14–15 · Rise of Ix p.6 · FAQ" : "Uprising p.14–15 · FAQ") : (c.has("ix") ? "Base p.10–11 · Rise of Ix p.6 · FAQ" : "Base p.10–11 · FAQ")
   },
   {
     title: "Factions, Influence & Alliances",
@@ -418,7 +431,7 @@ DI.reference = [
       "<li>Reaching <b>4 Influence</b> = the bonus shown (kept even if you drop back). The <b>first</b> player to 4 also takes the <b>Alliance token</b> (1 VP).</li>" +
       "<li>An opponent who rises <b>higher</b> on that track takes the Alliance token (and its VP) from you. You also lose it if you fall to 3 or lower — it goes to a player at 4+, or back to the board (FAQ).</li>" +
       (c.game === "uprising" ? "<li>Reaching 2 Influence also unlocks Faction perks: new board spaces for the Emperor (Imperial Privilege), Spacing Guild (Shipping), and Fremen (Sietch Tabr); stronger Bene Gesserit cards.</li>" : "") +
-      (c.game === "imperium" && c.has("imm") ? "<li><b>The Bene Tleilax are not a Faction</b> — “gain Influence with any Faction” effects can't advance the Tleilaxu track (FAQ).</li>" : "") +
+      (c.has("imm") ? "<li><b>The Bene Tleilax are not a Faction</b> — “gain Influence with any Faction” effects can't advance the Tleilaxu track (FAQ).</li>" : "") +
       (c.p === 6 ? "<li><b>6-player:</b> Commanders have no cubes on the main tracks — whichever Ally has the most Influence with a Faction gives the Commander that amount. The reverse board replaces Emperor/Fremen with <b>Great Houses</b> and <b>Fringe Worlds</b>; Commanders also have personal-board Influence tracks whose bonuses benefit the whole team.</li>" : "") +
       "</ul>",
     src: (c) => c.game === "uprising" ? (c.p === 6 ? "Uprising p.7 · Supplements (6P) p.9–10 · FAQ" : "Uprising p.7 · FAQ") : "Base p.8 · FAQ"
@@ -459,19 +472,20 @@ DI.reference = [
   },
   {
     title: "Rise of Ix — Tech Tiles, Shipping Track & Dreadnoughts",
-    when: (c) => c.game === "imperium" && c.has("ix"),
-    html: () => "<ul><li><b>Acquire Tech</b> (icon): buy one face-up Tech tile from the top of any Ix-board stack, paying its <b>spice</b> cost; the next tile is revealed. Discount icons reduce the cost by 1–2 spice.</li>" +
+    when: (c) => c.has("ix"),
+    html: (c) => "<ul><li><b>Acquire Tech</b> (icon): buy one face-up Tech tile from the top of any Ix-board stack, paying its <b>spice</b> cost; the next tile is revealed. Discount icons reduce the cost by 1–2 spice.</li>" +
       "<li><b>Tech Negotiation</b> (space): Acquire Tech at a 1-spice discount, <b>or</b> place a troop from your supply on Ix as a <b>Negotiator</b>. When acquiring Tech later, return any number of Negotiators for 1 spice off each. You can't mix Solari and spice for costs (Ix clarifications).</li>" +
       "<li>Tiles with the <b>flip icon</b> work once per round — flip face down to use, face up at Round Start. Errata: they may be used during an Agent <b>or</b> Reveal turn.</li>" +
       "<li><b>Shipping track:</b> the Freighter icon lets you <b>advance</b> your Freighter one space up, or <b>recall</b> it to the bottom and collect the rewards of its space and every space below: tech discount 2 / two troops + 1 Influence with any Faction / choice of 5 Solari with <b>Dividends</b> (each opponent gains 1 Solari) or 2 spice.</li>" +
       "<li><b>Dreadnoughts:</b> commission via the dreadnought icon into your garrison (max 2 at a time; deploy it if commissioned while sending an Agent to a Combat space). Each is a <b>unit</b> worth <b>3 strength</b> and <b>survives combat</b> — if you don't win, it returns to your garrison.</li>" +
-      "<li><b>Dreadnought control:</b> when you <b>win</b> a Conflict with at least one dreadnought in it, you <b>must</b> place one on the flag below <b>Arrakeen, Carthag, or Imperial Basin</b> (a space without a dreadnought), covering any Control marker there. You gain that location's control bonuses until the end of the <b>next</b> Combat phase, when the dreadnought returns to your garrison.</li>" +
-      "<li>A deployed dreadnought lets you count swords and play Combat Intrigue even with no troops in the Conflict (FAQ).</li></ul>",
-    src: () => "Rise of Ix p.4–6, p.10, p.12 · FAQ"
+      "<li><b>Dreadnought control:</b> when you <b>win</b> a Conflict with at least one dreadnought in it, you <b>must</b> place one on the flag below a location where Control markers can be placed — <b>" + (c.game === "uprising" ? "Arrakeen, Spice Refinery, or Imperial Basin" : "Arrakeen, Carthag, or Imperial Basin") + "</b> (a space without a dreadnought), covering any Control marker there. You gain that location's control bonuses until the end of the <b>next</b> Combat phase, when the dreadnought returns to your garrison.</li>" +
+      "<li>A deployed dreadnought lets you count swords and play Combat Intrigue even with no troops in the Conflict (FAQ).</li>" +
+      (c.game === "uprising" ? "<li><b>In Uprising:</b> the Ix and CHOAM boards play as if they have one observation post each (Interstellar Shipping/Smuggling and Tech Negotiation/Dreadnought).</li>" : "") + "</ul>",
+    src: (c) => c.game === "uprising" ? "Rise of Ix p.4–6, p.10, p.12 · Uprising p.18 · FAQ" : "Rise of Ix p.4–6, p.10, p.12 · FAQ"
   },
   {
     title: "Immortality — Research, Specimens, Tleilaxu Cards & Graft",
-    when: (c) => c.game === "imperium" && c.has("imm"),
+    when: (c) => c.has("imm"),
     html: () => "<ul><li><b>Research track:</b> each Research icon advances your research token one space <b>rightward</b> (often choosing up-right or down-right; never straight up/down or left), gaining the space's bonus.</li>" +
       "<li><b>Genetic markers:</b> reaching the first marker's column activates marked card effects and lets you put acquired Tleilaxu cards <b>on top of your deck</b>. After the second (end of track), Research icons instead let you <b>draw a card</b>.</li>" +
       "<li><b>Specimens:</b> the specimen icon moves a troop from your supply into the <b>Axolotl tanks</b>. Spend specimens to buy <b>Tleilaxu cards</b> from the Tleilaxu Row (they go to your discard pile) or to pay card costs. You may return specimens to your supply at any time.</li>" +
@@ -550,7 +564,7 @@ DI.reference = [
     when: () => true,
     html: (c) => "<ul>" +
       "<li><b>Errata — Missionaria Protectiva</b> is a Bene Gesserit card (first English printing omits the Faction); only two copies belong in the Imperium deck.</li>" +
-      (c.game === "imperium" && c.has("ix") ? "<li><b>Errata — Rise of Ix rulebook:</b> flip-icon Tech tiles work during an Agent <b>or</b> Reveal turn (p.4); solo/2P setup removes the two Hall of Oratory and two Rally Troops House Hagal cards (p.8).</li>" : "") +
+      (c.has("ix") ? "<li><b>Errata — Rise of Ix rulebook:</b> flip-icon Tech tiles work during an Agent <b>or</b> Reveal turn (p.4); solo/2P setup removes the two Hall of Oratory and two Rally Troops House Hagal cards (p.8).</li>" : "") +
       "<li><b>Optional vs. mandatory:</b> effects are mandatory unless a card says “you may”, uses an arrow (cost → effect), or is the black-X trash icon. Intrigue card costs must be paid.</li>" +
       "<li><b>Paying costs:</b> an arrow cost can be paid only once per turn for its effect.</li>" +
       "<li><b>Recruiting:</b> troops always come from your <b>supply</b>; on a Combat space, anything recruited that turn (cards, Intrigue, Tech, Shipping) may be deployed, but never more than two from your garrison.</li>" +
@@ -558,7 +572,7 @@ DI.reference = [
       "<li><b>Discard</b> always means from your <b>hand</b> unless stated otherwise.</li>" +
       "<li><b>Intrigue:</b> play Plot cards only on your own turns; an exhausted Intrigue deck is reshuffled from its discards.</li>" +
       (c.game === "imperium" ? "<li><b>Carryall:</b> base harvest is 1 spice (Imperial Basin), 2 (Hagga Basin), 3 (The Great Flat).</li>" : "<li><b>Carryall:</b> base harvest is 1 spice (Imperial Basin), 2 (Hagga Basin / Habbanya Erg), 4 (Deep Desert).</li>") +
-      (c.game === "imperium" && c.has("imm") ? "<li><b>Graft rulings:</b> Ghola copies the entire Agent box of its partner (including “trash this card”); Kwisatz Haderach grafted still sends only one Agent; Usurp may target a card in your hand; Beguiling Pheromones' trash can't double as another effect's trash cost.</li>" : "") +
+      (c.has("imm") ? "<li><b>Graft rulings:</b> Ghola copies the entire Agent box of its partner (including “trash this card”); Kwisatz Haderach grafted still sends only one Agent; Usurp may target a card in your hand; Beguiling Pheromones' trash can't double as another effect's trash cost.</li>" : "") +
       (c.game === "uprising" ? "<li><b>Reaching 2 Influence</b> triggers “when you reach” abilities even when jumping past it, and can trigger again after dropping and re-climbing (upward moves only).</li>" : "") +
       (c.game === "uprising" && c.mod("choam") ? "<li><b>Shaddam Corrino IV:</b> his “Emperor of the Known Universe” restriction applies immediately when his Signet Ring sends an Agent, for that turn only.</li>" : "") +
       "<li>Latest rulings: <b>duneimperium.com/FAQ</b>.</li></ul>",
@@ -577,7 +591,7 @@ DI.teach = {
       body: (c) => "<p>" + (c.game === "uprising"
         ? "We're rival leaders in the Dune universe just after Muad'Dib's rise — fighting over spice, armies, and the favor of the Imperium's great Factions. Uprising mixes deck-building with worker placement: your cards decide where your Agents can go, and where your Agents go shapes what your deck becomes."
         : "We're leaders of the Great Houses of the Landsraad, scheming for control of Arrakis. Dune: Imperium mixes deck-building with worker placement: your cards decide where your Agents can go, and where your Agents go shapes what your deck becomes.") + "</p>" +
-        "<p>First to <b>" + (c.game === "imperium" && c.mod("epic") ? "12" : (c.game === "imperium" && c.mod("goto11") ? "11" : "10")) + " Victory Points</b> at the end of a round wins — or, if the ten-round Conflict deck runs out, whoever has the most. VP come from winning Conflicts, climbing Faction Influence tracks, and a handful of cards" + (c.game === "uprising" ? " and Objectives" : "") + ". Ties break on spice, then Solari, then water, then garrisoned troops.</p>"
+        "<p>First to <b>" + (c.mod("epic") ? "12" : (c.game === "imperium" && c.mod("goto11") ? "11" : "10")) + " Victory Points</b> at the end of a round wins — or, if the ten-round Conflict deck runs out, whoever has the most. VP come from winning Conflicts, climbing Faction Influence tracks, and a handful of cards" + (c.game === "uprising" ? " and Objectives" : "") + ". Ties break on spice, then Solari, then water, then garrisoned troops.</p>"
     },
     {
       h: "The shape of a round",
@@ -605,13 +619,13 @@ DI.teach = {
           ? "<p>Two Uprising wrinkles: the winner keeps the Conflict card, and matching its <b>battle icon</b> with another card you've won (or your Objective) is a quiet extra VP. And <b>sandworms</b>: earn <b>Maker Hooks</b> from the Fremen at Sietch Tabr, then summon a worm straight into the fight — 3 strength and it <b>doubles your rewards</b>. The <b>Shield Wall</b> blocks worms from the three city Conflicts until someone blows it up. Someone always blows it up.</p>"
           : "<p>Some Conflicts award <b>control</b> of Arrakeen, Carthag, or Imperial Basin — a steady drip of Solari or spice every time anyone visits. Small, but it adds up.</p>")
     },
-    { when: (c) => c.game === "imperium" && c.has("ix"),
+    { when: (c) => c.has("ix"),
       h: "Rise of Ix — Tech, shipping & dreadnoughts",
       body: () => "<p>Three additions. <b>Tech tiles</b>: buy them with spice from the Ix board for permanent abilities — Tech Negotiation even lets you park troops as Negotiators for discounts. <b>The Shipping track</b>: nudge your Freighter up, then recall it to cash in every space you've climbed — troops, Influence, and a 5-Solari Dividends payout. <b>Dreadnoughts</b>: 3-strength warships that <b>survive combat</b> and can occupy a city to control it. Max two, and they make your garrison genuinely scary.</p>" },
-    { when: (c) => c.game === "imperium" && c.has("imm"),
+    { when: (c) => c.has("imm"),
       h: "Immortality — the Bene Tleilax",
       body: () => "<p>Two new tracks. <b>Research</b>: research icons walk your token right along a web of bonuses; genetic markers unlock stronger card effects and let you put Tleilaxu buys on top of your deck. <b>The Tleilaxu track</b> pays out as you embrace their darker gifts. New currency: <b>specimens</b> — your own troops sent to the Axolotl tanks — buy <b>Tleilaxu cards</b>, which are bought with bodies instead of Persuasion. And <b>Graft</b> cards let you play <i>two</i> cards on one Agent turn, combining both effects. Once per game your <b>Family Atomics</b> token nukes the whole Imperium Row for a fresh five.</p>" },
-    { when: (c) => c.game === "imperium" && c.mod("epic"),
+    { when: (c) => c.mod("epic"),
       h: "Epic Game Mode",
       body: (c) => "<p>We're playing the long game: <b>12 VP</b> to win, tougher Conflicts from the start (no Conflict I cards), and everyone begins with <b>Control the Spice</b> " + (c.has("imm") ? "in their discard pile" : "in their deck") + ", an Intrigue card, and five garrison troops. Expect bigger armies earlier.</p>" },
     { when: (c) => c.game === "imperium" && c.mod("goto11"),
@@ -646,8 +660,8 @@ DI.teach = {
         items.push("<li><b>Trashing cards</b> — thinning your deck is strong; the icons will tell you when you may.</li>");
         if (c.game === "uprising") items.push("<li><b>The 2-Influence unlock spaces</b> (Imperial Privilege, Shipping, Sietch Tabr) — they'll matter mid-game.</li>");
         if (c.game === "imperium") items.push("<li><b>The Mentat returning</b> and control bonuses — I'll flag them.</li>");
-        if (c.game === "imperium" && c.has("ix")) items.push("<li><b>Freighter reward stacking</b> — when you recall, I'll walk you through the payout.</li>");
-        if (c.game === "imperium" && c.has("imm")) items.push("<li><b>Graft edge cases</b> (Ghola, Kwisatz Haderach) — FAQ has them; ask when you draw one.</li>");
+        if (c.has("ix")) items.push("<li><b>Freighter reward stacking</b> — when you recall, I'll walk you through the payout.</li>");
+        if (c.has("imm")) items.push("<li><b>Graft edge cases</b> (Ghola, Kwisatz Haderach) — FAQ has them; ask when you draw one.</li>");
         if (c.game === "uprising" && c.has("bl")) items.push("<li><b>Command (6+) effects and wild battle icons</b> — they read themselves when they appear.</li>");
         if (c.game === "uprising" && c.mod("choam")) items.push("<li><b>Harvest contracts</b> — the spice count includes every source that turn.</li>");
         if (c.game === "uprising" && c.mod("tech")) items.push("<li><b>Tech discount stacking</b> — Council seat + one discount icon, never two icons.</li>");
