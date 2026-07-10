@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clank! Catacombs — Setup &amp; Reference Utility</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=1">
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <span class="sigil" aria-hidden="true">
+      <!-- a dragon eye over a keyhole arch -->
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 92 v-40 a30 30 0 0 1 60 0 v40" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+        <path d="M32 92 v-36 a18 18 0 0 1 36 0 v36" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.55"/>
+        <path d="M30 40 Q50 24 70 40 Q50 56 30 40 Z" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/>
+        <ellipse cx="50" cy="40" rx="4" ry="7" fill="currentColor"/>
+        <circle cx="50" cy="74" r="6" fill="none" stroke="currentColor" stroke-width="2.6"/>
+        <path d="M50 80 v10" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+      </svg>
+    </span>
+    <div class="brand-title">Clank! Catacombs</div>
+    <div class="deco-rule" aria-hidden="true"><i></i><b></b><i></i></div>
+    <div class="brand-sub">Setup &amp; Reference Utility</div>
+    <p class="tagline" style="margin-top:10px">
+      Choose your expansions and party size — from the base catacombs to the Lairs, the Underworld
+      and a six-thief Adventuring Party — for exact setup steps, a full rules reference, and a
+      searchable index of the expansion rulebooks. Grab an Artifact. Try not to Clank!.
+    </p>
+  </header>
+
+  <main>
+    <section aria-label="Configuration">
+      <h2>The Heist</h2>
+      <p class="sec-note">Select the sets on the table. Every step, ruling and script below adapts to your choices.</p>
+      <div class="cfg">
+        <div>
+          <label class="cfg-label">Sets in play</label>
+          <div id="expansions" class="chips"></div>
+        </div>
+        <div>
+          <label class="cfg-label">Thieves <span class="hint">(player count; 5–6 needs Adventuring Party)</span></label>
+          <div id="players" class="pbtns"></div>
+        </div>
+        <div id="modules-group">
+          <label class="cfg-label">Modules &amp; variants <span class="hint">— optional; full setup details appear when enabled</span></label>
+          <div id="modules" class="mods"></div>
+        </div>
+      </div>
+    </section>
+
+    <section aria-label="Setup">
+      <h2>Setup</h2>
+      <p class="sec-note">Follow the steps in order. Each cites its official source.</p>
+      <div class="teach-bar"><button id="teachBtn" type="button" title="A ~5 minute script to teach this exact setup aloud">📖 Teaching script</button></div>
+      <div id="teach" class="teach-panel" hidden></div>
+      <div id="setup"></div>
+    </section>
+
+    <section aria-label="Reference">
+      <h2>Rules Reference</h2>
+      <p class="sec-note">Tap a heading to open it. Contents adapt to your sets and player count.</p>
+      <div id="reference"></div>
+    </section>
+
+    <section aria-label="Rulebook search">
+      <h2>Search the Rulebooks</h2>
+      <p class="sec-note">Full-text search across the selected expansion rulebooks. (The core Catacombs rulebook is a scanned document — its rules live in the reference sections above.)</p>
+      <div class="rsearch-wrap">
+        <input id="rsearch" type="search" placeholder="e.g. trophy, undercoin, ladder, pit trap, character…" aria-label="Search the rulebooks">
+      </div>
+      <div id="rresults"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    Setup and reference content grounded in the official Clank! Catacombs Rulebook &amp; Token Reference
+    Guide, the Underworld and Lairs &amp; Lost Chambers rulebooks, and the Clank! Adventuring Party rules.
+    A fan-made play aid — not affiliated with Dire Wolf Digital.
+  </footer>
+
+  <script src="js/data.js?v=1"></script>
+  <script src="js/rules.js?v=1"></script>
+  <script src="js/app.js?v=1"></script>
+  <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
+  <script src="../site-analytics.js?v=20260607-analytics"></script>
+</body>
+</html>

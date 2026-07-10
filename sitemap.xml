@@ -44,6 +44,12 @@
   <url><loc>https://www.dfwgamingvillage.com/nemesis-setup/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://www.dfwgamingvillage.com/nemesis-retaliation.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://www.dfwgamingvillage.com/retaliation-setup/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://www.dfwgamingvillage.com/anachrony.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://www.dfwgamingvillage.com/anachrony-setup/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://www.dfwgamingvillage.com/clank-catacombs.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://www.dfwgamingvillage.com/catacombs-setup/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://www.dfwgamingvillage.com/dune.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://www.dfwgamingvillage.com/dune-setup/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://www.dfwgamingvillage.com/planner/</loc><changefreq>weekly</changefreq><priority>0.5</priority></url>
   <url><loc>https://www.dfwgamingvillage.com/library-manager/</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>
 </urlset>
