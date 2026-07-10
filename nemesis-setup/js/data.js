@@ -600,7 +600,6 @@ NM.reference = [
   }
 ];
 
-
 /* ---- TEACHING SCRIPT (read aloud, ~5 min; content per the base rulebook,
    the race/Aftermath rulebooks and FAQ v2.2 — see references) --------------- */
 NM.teach = {
@@ -640,6 +639,18 @@ NM.teach = {
 
     { h: "The ship is a character", body: (c) => `
 <p>Rooms are actions: repair <b>engines</b>, check the <b>cockpit's coordinates</b> — the ship may be aimed somewhere nobody wants — patch fires and malfunctions before they hit their limits (nine of either and the ship is gone), and if it all goes wrong, the <b>generator</b> starts the self-destruct. Watch the <b>critical moments</b>: the first death unlocks the escape pods, the blue time-track spaces open hibernation, and a yellow self-destruct can't be stopped.</p>` },
+
+    { h: "Aftermath on the table", when: (c) => c.has("aftermath") && (c.mode === "standard" || c.mode === "solo" || c.mode === "coop") && (c.mod("traits") || c.mod("aftrooms") || c.mod("turrets") || c.mod("hourglass") || c.mod("altboard") || true), body: (c) => {
+      const bits = ["five new <b>Characters</b> join the draft — each color offers a base-game or Aftermath face (never the Convict and the Soldier together)"];
+      if (c.mod("traits")) bits.push("everyone plays with their <b>Trait card</b> — a permanent personal rule, faceup from the start");
+      if (c.mod("aftrooms")) bits.push("four <b>Aftermath rooms</b> are shuffled into the ship, including the Crafting Room and its exclusive gadgets");
+      if (c.mod("turrets")) bits.push("<b>Turrets</b> hide among the exploration tokens — automated guns that shoot whatever walks in, friend or fang");
+      if (c.mod("hourglass")) bits.push("the <b>hourglass</b> is running: when it empties, anyone may grab it and force a noise roll in any room — real-time dread");
+      return `<p>Aftermath is in play: ${bits.join("; ")}.</p>`;
+    }},
+
+    { h: "The alternative map", when: (c) => c.mod("altboard"), body: () => `
+<p>We're on the <b>alternative side of the board</b> — a harder ship: the red and blue <b>technical corridors are separate networks</b>, and some rooms connect by twin corridors where one closed door doesn't cover the pair. Your mental map from past games will lie to you.</p>` },
 
     { h: "Playing as the Intruder", when: (c) => c.mod("intruderplayer"), body: () => `
 <p>One consolation prize: the <b>first player to die</b> takes over the monsters — one card a turn to move them, attack with them, or spring their tricks. They can't win. They can absolutely make sure you don't.</p>` },

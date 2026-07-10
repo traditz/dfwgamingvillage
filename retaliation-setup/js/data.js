@@ -386,7 +386,6 @@ RT.reference = [
   }
 ];
 
-
 /* ---- TEACHING SCRIPT (read aloud, ~5 min; content per the Retaliation
    rulebook, booster rulebooks and FAQ v1.2 — see references) ---------------- */
 RT.teach = {
@@ -416,6 +415,13 @@ RT.teach = {
 
     { h: "Your body is a resource tracker", body: (c) => `
 <p>Watch three things: <b>Health</b> — serious wounds block whole sections of the track and armor breaks before you do; <b>Oxygen</b> — a dial that only goes down in dead sections, and at zero you get exactly one more turn; and <b>Contamination</b> — dead cards silting up your action deck that decide, at the very end, whether something hatches out of you. The <b>Surgery room</b> fixes most of it. Getting there is the hard part.</p>` },
+
+    { h: "Squad boosters", when: (c) => c.has("contractors") || c.has("ss"), body: (c) => {
+      const bits = [];
+      if (c.has("contractors")) bits.push("a <b>Contractor</b> may be drafted — a veteran of the first Nemesis with their own ten-card action deck and two personal items; they skip the equipment draft, and only one Contractor may exist per game");
+      if (c.has("ss")) bits.push("the <b>Support Squad</b> is draftable: the <b>Sharpshooter</b> rerolls her shots, and the <b>UAV Operator</b> flies a drone that only her cards can move — the intruders ignore it completely");
+      return `<p>In the character pool this game: ${bits.join("; ")}.</p>`;
+    }},
 
     { h: "Sangrevores — infection and gifts", when: (c) => c.race === "sangre", body: () => `
 <p>Their touch leaves <b>Infections</b> — shuffled straight into your deck, treated as infected at the end. Pass and pay a health to purge your hand, or play the card itself away. But they also leave <b>Tainted Blood</b>: a once-a-round vampiric ability. Take the gift. Worry later.</p>` },

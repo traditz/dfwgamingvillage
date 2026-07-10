@@ -566,14 +566,13 @@ BBTM.reference = {
   }
 };
 
-
 /* ---- TEACHING SCRIPT (read aloud, ~5 min; content per the BBTM rulebook and
    expansion rulebooks — see the setup citations above) ----------------------- */
 BBTM.teach = {
   intro: "Read this aloud — about five minutes. No peeking at the Highlight Reel.",
   sections: [
     { h: "The pitch — and how you win", body: (c) => `
-<p>We are Blood Bowl <b>team managers</b>, and nothing on this table matters except <b>fans</b>. The season runs ${c.season === "twoPlayer" ? "its two-manager schedule" : "five weeks"}, capped by the Blood Bowl tournament itself — when the dust settles, the manager with the most fans lifts the trophy. Touchdowns are nice. Ratings are everything.</p>` },
+<p>We are Blood Bowl <b>team managers</b>, and nothing on this table matters except <b>fans</b>. The season runs ${c.season === "twoPlayer" ? "its two-manager schedule" : c.season === "abbrev" ? "an abbreviated four weeks" : "five weeks"}, capped by the Blood Bowl tournament itself — when the dust settles, the manager with the most fans lifts the trophy. Touchdowns are nice. Ratings are everything.</p>` },
 
     { h: "The week — one round of the season", body: (c) => `
 <p>Each week: flip the <b>Highlight Reel</b> — a row of matchup cards, each showing what the winner and loser take home. Then the heart of it, the <b>Matchup phase</b>: we take turns committing <b>one player card at a time</b> from hand to either side of a highlight, resolving that player's abilities as he lands. When everyone's spent their hand, the <b>Scoreboard phase</b> pays out: compare total <b>Star Power</b> at each highlight — winner takes the top payout, loser takes the scraps. Then draw back up and do it again, one week older.</p>` },
@@ -584,11 +583,21 @@ BBTM.teach = {
     { h: "Payouts — how a team gets better", body: (c) => `
 <p>Winning highlights pays <b>fans</b> — but also <b>Star Players</b> (mercenary legends who join your deck), <b>Team Upgrades</b> and <b>Staff Upgrades</b> that thicken your roster and bend the rules. The engine matters more than any single week: early weeks buy the machine, late weeks cash it in. The <b>tournament</b> card each week is the big pot everyone can dogpile onto.</p>` },
 
-    { h: "Sudden Death teams", when: (c) => c.has("sudden"), body: () => `
-<p>The <b>Dark Sorcery Syndicate</b> is in the league: undead and sorcerous teams with <b>Regeneration</b> (their downed players don't stay down), <b>Contracts</b>, and <b>Enchanted Balls</b> that make possession weirder than usual.</p>` },
+    { h: "Sudden Death teams", when: (c) => c.has("sudden"), body: (c) => `
+<p>The <b>Dark Sorcery Syndicate</b> is in the league: undead and sorcerous teams with <b>Regeneration</b> (their downed players don't stay down), <b>Contracts</b>, and Blood tokens.${c.opt && c.opt("enchanted") ? " We're also playing with <b>Enchanted Balls</b> — every ball carries its own magic, so possession is worth even more than usual." : ""}</p>` },
 
-    { h: "Foul Play teams", when: (c) => c.has("foul"), body: () => `
-<p>The <b>Putrid Players' Guild</b> is in the league: Nurgle's own, with <b>Disease</b> tokens that rot opposing rosters, <b>Fouling</b>, <b>Penalties</b>, a <b>Corrupt Ref</b> for hire, and home <b>Stadiums</b>. A fifth manager can also join the season.</p>` },
+    { h: "Foul Play teams", when: (c) => c.has("foul"), body: (c) => `
+<p>The <b>Putrid Players' Guild</b> is in the league: Nurgle's own, with <b>Disease</b> tokens that rot opposing rosters, <b>Fouling</b> and <b>Penalties</b>. A fifth manager can also join the season.${c.opt && c.opt("corruptRef") ? " The <b>Corrupt Ref</b> is roaming — cheating tokens get flipped faceup wherever he lingers, and he hands out penalties." : ""}${c.opt && c.opt("stadiums") ? " And every highlight is played in a <b>Stadium</b> with its own house rules and bonus payouts — read the venue before you commit." : ""}</p>` },
+
+    { h: "Legendary leagues", when: (c) => c.has("legendary"), body: () => `
+<p>We're using the <b>Legendary</b> fan expansion: the teams are reorganised into themed leagues, each league with its own signature mechanic — your team's league card explains yours. Read it with your team.</p>` },
+
+    { h: "Table rules in play", when: (c) => c.opt && (c.opt("noSalary") || c.opt("scheduling")), body: (c) => {
+      const bits = [];
+      if (c.opt("noSalary")) bits.push("<b>No Salary Cap</b> — every Staff Upgrade, premium ones included, is in the deck");
+      if (c.opt("scheduling")) bits.push("<b>Scheduling Limitations</b> — fewer highlights each week, so every matchup is a knife fight");
+      return `<p>Also agreed: ${bits.join("; ")}.</p>`;
+    }},
 
     { h: "Don't worry about these yet", body: (c) => `
 <p>Individual team gimmicks come alive on their own cards — read yours before we start. Opening advice: don't fight every highlight; <b>concede the small pots to dominate the big ones</b>, and remember a cheating token you can't read is exactly as scary as your opponent wants it to be.</p>` }

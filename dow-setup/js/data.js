@@ -595,14 +595,13 @@ DW.wcSeating = {
   10: { teams: "5 vs 5",  lw: false }, 11: { teams: "5 vs 5",  lw: true }
 };
 
-
 /* ---- TEACHING SCRIPT (read aloud, ~5 min; content per the base, Long Night
    and Warring Colonies rulebooks — see the setup citations above) ----------- */
 DW.teach = {
   intro: "Read this aloud — about five minutes. Keep your secret objective facedown.",
   sections: [
     { h: "The pitch — and how you win", body: (c) => `
-<p>We're a colony of survivors in a zombie winter. The colony has a shared <b>main objective</b> on the table — but each of us also has a <b>secret objective</b>, and here's the rule that changes everything: <b>you only win if YOUR secret objective is complete when the game ends</b>. Most secret objectives want the colony to succeed. One of us might be holding a <b>betrayal</b> card that wants it to burn.</p>
+<p>We're a colony of survivors in a zombie winter. The colony has a shared <b>main objective</b> on the table — but each of us also has a <b>secret objective</b>, and here's the rule that changes everything: <b>you only win if YOUR secret objective is complete when the game ends</b>. ${c.mod("coop") ? "We're playing the <b>co-op variant</b>, so nobody is secretly against us — but your personal goal still decides whether <i>you</i> share the win." : "Most secret objectives want the colony to succeed. One of us might be holding a <b>betrayal</b> card that wants it to burn."}</p>
 <p>The game ends three ways: the main objective is completed, <b>morale</b> hits zero, or the <b>round tracker</b> runs out. Then everyone checks their card — it's entirely possible the colony “wins” and half of us still lose.</p>` },
 
     { h: "The shape of a round", body: (c) => `
@@ -616,20 +615,38 @@ DW.teach = {
 <p>Every time a survivor <b>moves between locations</b> or <b>kills a zombie</b>, roll the <b>exposure die</b>. Most faces are fine. Some wound. One gives <b>frostbite</b> — a wound that keeps wounding every turn until treated. And one face is a <b>bite</b>: that survivor dies <i>immediately</i>, and the bite spreads to the next survivor at that location, whose owner must kill them or gamble the die again. Every trip outside the colony is this bet. Travel with fuel cards when you can; they skip the roll.</p>` },
 
     { h: "Crossroads — don't read ahead", body: (c) => `
-<p>At the start of your turn, the player on your right draws a <b>Crossroads card</b> and silently watches you. If you trip its trigger — enter a location, play a card, sometimes just exist — they interrupt and read you a story with a choice. Don't ask, don't peek. It's the best part of the game.</p>` },
+<p>At the start of your turn, the player on your right draws a <b>Crossroads card</b> and silently watches you. If you trip its trigger — enter a location, play a card, sometimes just exist — they interrupt and read you a story with a choice. Don't ask, don't peek. It's the best part of the game.${c.mod("mature") ? " (We've removed the mature-themed Crossroads this game.)" : ""}</p>` },
 
     { h: "Morale, crises & the colony phase", body: (c) => `
-<p>The colony phase is where games are lost: <b>feed everyone</b> or take starvation tokens that bleed morale every round. Ten cards in the <b>waste pile</b> costs morale too — so contributing cards to the crisis isn't charity, it's sanitation. The <b>crisis</b> itself is a blind vote: cards contributed facedown, matching symbols help, wrong symbols <i>sabotage</i> — and nobody knows who threw the wrench. Sound familiar? That's your betrayer-detection kit.</p>` },
+<p>The colony phase is where games are lost: <b>feed everyone</b> or take starvation tokens that bleed morale every round. Ten cards in the <b>waste pile</b> costs morale too — so contributing cards to the crisis isn't charity, it's sanitation. The <b>crisis</b> itself is a blind vote: cards contributed facedown, matching symbols help, wrong symbols <i>sabotage</i> — and nobody knows who threw the wrench. ${c.mod("coop") ? "Even co-op colonies fumble this — count your contributions out loud." : "Sound familiar? That's your betrayer-detection kit."}</p>` },
 
-    { h: "The Long Night", when: (c) => c.has("longnight"), body: () => `
-<p>We're playing with <b>The Long Night</b>: the <b>Raxxon</b> pharmaceutical site spawns horrors best left contained, <b>bandits</b> raid locations and carry off the loot, and colony <b>improvements</b> let us build something that lasts. Zombies can also grow <b>despair</b>-driven upgrades. Same winter, more knives.</p>` },
+    { h: "The Long Night", when: (c) => c.has("longnight"), body: (c) => {
+      const bits = [];
+      if (c.mod("raxxon")) bits.push("the <b>Raxxon</b> pharmaceutical site spawns horrors best left contained — and loot worth the risk");
+      if (c.mod("bandits")) bits.push("<b>bandits</b> raid locations and carry off the items we wanted");
+      if (c.mod("improvements")) bits.push("colony <b>improvements</b> let us build permanent upgrades between crises");
+      const tail = bits.length ? bits.join("; ") : "its survivors, items and crossroads are shuffled through everything, and zombies can grow <b>despair</b> upgrades";
+      return `<p>We're playing with <b>The Long Night</b>: ${tail}. Same winter, more knives.</p>`;
+    }},
 
-    { h: "Warring Colonies", when: (c) => c.wc, body: () => `
-<p>This is <b>Warring Colonies</b>: two colonies, one winter, not enough of anything. Each team runs its own board and races (or raids) the other — with <b>direct conflict</b> rules for when survivors meet${""}. The betrayal paranoia now has a zip code: the other table.</p>` },
+    { h: "Warring Colonies", when: (c) => c.wc, body: (c) => `
+<p>This is <b>Warring Colonies</b>: two colonies, one winter, not enough of anything. Each team runs its own board and races (or raids) the other — with direct-conflict rules for when survivors meet${c.loneWolf ? ", and with our odd player count, a <b>Lone Wolf</b> plays both sides against the middle with a win condition all their own" : ""}. The betrayal paranoia now has a zip code: the other table.</p>` },
+
+    { h: "Table variants in play", when: (c) => c.mod("randomitems") || c.mod("quickplay") || c.mod("hardcore") || c.mod("elimination") || c.mod("betrayer") || c.mod("chimpcode") || c.mod("banditblitz"), body: (c) => {
+      const bits = [];
+      if (c.mod("betrayer")) bits.push("the <b>Betrayer variant</b> guarantees at least one traitor among us");
+      if (c.mod("hardcore")) bits.push("<b>Hardcore</b>: harsher penalties, no safety nets");
+      if (c.mod("elimination")) bits.push("<b>Player Elimination</b>: lose your last survivor and you're out for good");
+      if (c.mod("randomitems")) bits.push("the <b>Random Items module</b> mixes every item deck together — searches are a lottery");
+      if (c.mod("quickplay")) bits.push("<b>Quick Play</b> trims the Warring Colonies setup for speed");
+      if (c.mod("chimpcode")) bits.push("we're playing the <b>Chimp and the Code</b> scenario — its sheet overrides the usual objective");
+      if (c.mod("banditblitz")) bits.push("we're playing the <b>Bandit Blitz</b> scenario — its sheet overrides the usual objective");
+      return `<p>Also true this game: ${bits.join("; ")}.</p>`;
+    }},
 
     { h: "Don't worry about these yet", body: (c) => {
       const later = ["individual location decks", "helpless survivors", "exile details"];
-      if (c.has("longnight")) later.push("Raxxon's experiments");
+      if (c.has("longnight") && c.mod("raxxon")) later.push("Raxxon's experiments");
       return `<p>I'll explain ${later.join(", ")} when they come up. Opening advice: watch what people <i>contribute to the crisis</i> — generosity is loud, sabotage is quiet — and never let the food supply hit zero twice.</p>`;
     }}
   ]

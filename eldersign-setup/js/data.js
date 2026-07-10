@@ -685,7 +685,6 @@ ${c.mode === "museum" ? "<li><b>The Stars Align…Above an Open Door</b> is the 
     } }
 ];
 
-
 /* ---- TEACHING SCRIPT (read aloud, ~5 min; content per the base Rules of Play,
    the expansion rulebooks and FAQ v2.0 — see references for citations) ------- */
 ES.teach = {
@@ -705,25 +704,28 @@ ES.teach = {
 <p>Attempting an Adventure: roll the <b>six green dice</b>${c.has("uf") ? " (plus the white die if you're Blessed — and the black one if you're Cursed)" : ""} and try to complete <b>one task</b> — one row of symbols — per roll. Complete every row and the Adventure is yours. Fail to match a row and you must <b>throw away a die</b> and roll again — the pool shrinks until you triumph or run dry.</p>
 <p>Your tools: <b>Clue tokens</b> reroll dice; <b>Common and Unique Items</b> add the stronger yellow and red dice; <b>Spells</b> freeze a good result for later; <b>focusing</b> (or a friend on the same card assisting) saves one die from a bad roll. Choose Adventures your pool can actually beat — the rewards tell you what's worth the risk.</p>` },
 
+    { h: "Unseen Forces — blessings and curses", when: (c) => c.has("uf") && c.mode === "museum", body: (c) => `
+<p>The museum entrance is now <b>four Entrance cards</b> — heal at one, shop at another, and seek a <b>Blessing</b> at the Chapel: Blessed investigators roll an extra white die every adventure. Get <b>Cursed</b> and the black die rides along instead, eating matching results. Some game effects can even close an entrance for a while.${c.mod("master") ? " And we've shuffled the red-bordered <b>Master Mythos</b> cards into the deck — the midnights will be crueler than usual." : ""}</p>` },
+
     { h: "Rewards, penalties & trophies", body: (c) => `
-<p>Every Adventure card shows its price and its prize: fail and take the red penalties (sanity, stamina, doom…); succeed and take the green — <b>items, allies, Clues, and the Elder Signs we're here for</b>. Resolved Adventures and slain monsters become <b>trophies</b> you spend at the entrance for healing and gear. Monsters that appear squat on Adventure cards as extra tasks — someone has to go be the hero.</p>` },
+<p>Every Adventure card shows its price and its prize: fail and take the red penalties (sanity, stamina, doom…); succeed and take the green — <b>items, allies, Clues, and the Elder Signs we're here for</b>. Resolved Adventures and slain monsters become <b>trophies</b> you spend at the entrance for healing and gear. Monsters that appear squat on Adventure cards as extra tasks — someone has to go be the hero.</p>
+${c.mod("exhibit") ? "<p>This game also has <b>the Exhibit</b>: spend trophies at the entrance for <b>Relic</b> cards — the best gear in the game, able to buy back a die you already lost. The price: the mask monsters and the Dark Pharaoh's adventures are loose in the museum.</p>" : ""}` },
 
     { h: "Doom, midnight & the Ancient One", body: (c) => `
-<p>Mythos cards add doom, spawn monsters, and curse the room. If the Doom track ever fills, the Ancient One <b>awakens</b>: every investigator is dragged into the final battle, rolling against its combat task to strip doom tokens away${c.mod("epicbattle") ? " — with the Epic Battle deck directing each round of the fight" : ""}. It's winnable, barely. Better plan: don't let it wake up.</p>
-<p>If your <b>sanity or stamina</b> hits zero, you're devoured — new investigator, one doom token to the enemy${c.mod("phobia") ? " (with the Phobia deck, a sanity break gives you a permanent Phobia instead — until the fourth one)" : ""}.</p>` },
+<p>Mythos cards add doom, spawn monsters, and curse the room${c.mod("expert") ? " — and with the <b>Expert Mythos</b> variant, resolving a watermarked option costs an extra doom token on top" : ""}. If the Doom track ever fills, the Ancient One <b>awakens</b>: every investigator is dragged into the final battle, rolling against its combat task to strip doom tokens away${c.mod("epicbattle") ? " — with the Epic Battle deck directing each round of the fight" : ""}. It's winnable, barely. Better plan: don't let it wake up.</p>
+<p>If your <b>sanity or stamina</b> hits zero, you're devoured — new investigator, one doom token to the enemy${c.mod("phobia") ? " (with the Phobia deck, a sanity break gives you a permanent Phobia instead — until the fourth one)" : ""}${c.mod("epitaph") ? ". The fallen draw an <b>Epitaph</b> and leave a gravestone beside the board — our little cemetery grows" : ""}.</p>` },
 
     { h: "This mode's twist", when: (c) => c.mode !== "museum", body: (c) => {
       if (c.mode === "streets") return `<p><b>Streets of Arkham:</b> half the Adventures are facedown — walking onto one flips it, for better or worse. Success can open <b>gates</b> to Other Worlds that must be entered and sealed, <b>Events</b> trigger where you stand, and joining the <b>Sheldon Gang or the Lodge</b> auto-completes their tasks. The Streets card itself lets you pay 2 trophies to fix the board.</p>`;
       if (c.mode === "alaska") return `<p><b>Alaska Expedition:</b> we manage <b>supplies</b> (zero at midnight hurts everyone) and a <b>day track</b> — ${c.mod("winter") ? "it's Winter: Day 7 ends and we lose" : "Summer forgives one overtime, at a price"}. <b>Storms</b> pile onto Adventures and punish whoever resolves them; four storms on a card feeds doom. The trek is staged: finish “Into the Wild” to reach Stage II and the endgame.</p>`;
       if (c.mode === "rlyeh") return `<p><b>R'lyeh Rising:</b> Stage I is the voyage — manage the <b>Dark Waters track</b> and the <b>Deep One Legion</b>: four Legions in play <b>sink our ship</b>. Stage II reveals the broken <b>Amulet of R'lyeh</b>: every piece we haven't recovered locks one of our dice for the rest of the game. Collect amulet pieces like your dice depend on it, because they do.</p>`;
-      return `<p><b>Lightless Pyramid:</b> the entrance flips between <b>Cairo</b> (supplies, easier cards) and <b>Dashur</b> (the Elder Signs) — flipping costs clock time. <b>Relics</b> are the best items in the game: they can re-buy a die you already lost. <b>Hidden Chambers</b> demand an unlock roll before you may even enter, and the <b>Dark Pharaoh</b> adventures stack up: if a fifth must appear, the Ancient One wakes instantly.</p>`;
+      return `<p><b>Lightless Pyramid:</b> the entrance flips between <b>Cairo</b> (supplies, easier cards) and <b>Dashur</b> (the Elder Signs) — flipping costs clock time. <b>Relics</b> are the best items in the game: they can re-buy a die you already lost. <b>Hidden Chambers</b> demand an unlock roll before you may even enter, and the <b>Dark Pharaoh</b> adventures stack up: if a fifth must appear, the Ancient One wakes instantly.${c.mod("expert") ? " Expert Mythos is on: watermarked Mythos options cost an extra doom." : ""}</p>`;
     }},
 
     { h: "Don't worry about these yet", body: (c) => {
       const later = ["exact monster placement", "locked dice"];
-      if (c.has("uf")) later.push("Blessed and Cursed dice");
-      if (c.mod("master")) later.push("the red-bordered Master Mythos cards");
-      if (c.mod("exhibit")) later.push("the Exhibit's Relic shop");
+      if (c.has("uf") && c.mode !== "museum") later.push("Blessed and Cursed dice");
+      if (c.mod("master") && c.mode !== "museum") later.push("the red-bordered Master Mythos cards");
       return `<p>I'll explain ${later.join(", ")} when they first appear. Opening advice: spend Clues freely — a Clue saved is usually a turn wasted — and always know what today's midnight is about to do.</p>`;
     }}
   ]

@@ -433,7 +433,6 @@ ${(c.has("mom") || c.has("sr") || c.has("utp") || c.has("soc") || c.has("td") ||
     } }
 ];
 
-
 /* ---- TEACHING SCRIPT (read aloud, ~5 min; content per the base rulebook /
    Reference Guide, expansion rulebooks and Ultimate FAQ — see references) ---- */
 EH.teach = {
@@ -443,21 +442,22 @@ EH.teach = {
       const myst = c.ao && c.ao.id === "elderthings" ? "four Mysteries" : c.ao && c.ao.id === "nyarlathotep" ? "just two Mysteries" : "three Mysteries";
       return `
 <p>An <b>Ancient One</b> is stirring${c.ao ? ` — ours is <b>${c.ao.name}</b>` : ""} — and we are the investigators crossing the globe to stop it. We win by solving <b>${myst}</b>: each Mystery card names what it wants — usually Clues, closed Gates, or dead monsters delivered to the right places.</p>
-<p>We lose when the <b>Doom track hits zero</b> and the Final Mystery beats us${c.ao && c.ao.id === "azathoth" ? " — and against Azathoth there is no Final Mystery: if he wakes, the world simply ends" : ""}, when the Mythos deck runs out, or when every investigator is gone. Fully cooperative: the board is the enemy, so talk everything through.</p>`;
+<p>We lose when the <b>Doom track hits zero</b> and the Final Mystery beats us${c.ao && c.ao.id === "azathoth" ? " — and against Azathoth there is no Final Mystery: if he wakes, the world simply ends" : ""}, when the Mythos deck runs out, or when every investigator is gone. Fully cooperative: the board is the enemy, so talk everything through.</p>
+${(EH.helpers.hasPreludes(c) && !c.mod("noPrelude")) ? "<p>One more thing: a <b>Prelude card</b> has already twisted this particular game during setup — read it out now, because it changes the opening.</p>" : ""}`;
     }},
 
-    { h: "The round — actions, encounters, doom", body: () => `
-<p>Every round has three phases. <b>Actions</b>: each of us takes two — travel, prepare, shop, rest, trade. <b>Encounters</b>: each of us resolves one story where we stand — this is where Clues, items and progress actually come from. <b>Mythos</b>: we flip the card that makes everything worse — doom, gates, monsters, rumors.</p>
-<p>That's the rhythm: two deliberate steps forward, one card dragging us back.</p>` },
+    { h: "The round — actions, encounters, doom", body: (c) => `
+<p>Every round has three phases. <b>Actions</b>: each of us takes two — travel, prepare, shop, rest, trade. <b>Encounters</b>: each of us resolves one story where we stand — this is where Clues, items and progress actually come from. <b>Mythos</b>: we flip the card that makes everything worse — doom, gates, monsters, rumors${c.has("cir") ? ", and with Cities in Ruin on the table, <b>Disasters</b> that can flatten whole cities into devastated ruins (all nine main-board cities devastated and we lose outright)" : ""}.</p>
+<p>That's the rhythm: two deliberate steps forward, one card dragging us back.${(c.mod("staged") || c.mod("insane")) ? ` And fair warning — we've stacked the Mythos deck ${c.mod("insane") ? "entirely from <b>hard</b> cards (Insane difficulty)" : "to escalate: easy, then normal, then <b>hard</b> (Staged difficulty)"}.` : ""}</p>` },
 
     { h: "Your two actions — and why", body: (c) => `
 <p><b>Travel</b> moves you one space — buy train and ship <b>tickets</b> to chain further; being in the right city is half this game. <b>Acquire Assets</b> shops with an Influence test. <b>Rest</b> heals body and mind. <b>Trade</b> hands gear to whoever needs it${(c.has("mom") || c.has("sr") || c.has("td") || c.has("mon")) ? ". <b>Focus</b> banks a reroll token — cheap insurance before a big test" : ""}${c.has("mon") ? ". <b>Gather Resources</b> stocks the currency that boosts Rests and shopping" : ""}. Cards with a bold <b>Action:</b> line add more options.</p>` },
 
     { h: "Tests — the universal dice", body: (c) => `
-<p>Everything risky is a <b>test</b>: roll dice equal to the named skill, and every <b>5 or 6</b> is a success — usually one is enough. Spend a <b>Clue</b> to reroll a die, as often as you can pay${(c.has("mom") || c.has("sr") || c.has("td") || c.has("mon")) ? "; Focus tokens do the same" : ""}. <b>Improvement tokens</b> raise a skill permanently — train your specialty. Low dice? Don't roll there; go where your investigator is strong. That's the whole tactical layer.</p>` },
+<p>Everything risky is a <b>test</b>: roll dice equal to the named skill, and every <b>5 or 6</b> is a success — usually one is enough. Spend a <b>Clue</b> to reroll a die, as often as you can pay${(c.has("mom") || c.has("sr") || c.has("td") || c.has("mon")) ? "; Focus tokens do the same" : ""}. <b>Improvement tokens</b> raise a skill permanently — train your specialty${(c.has("utp") || c.has("soc")) ? " — and their evil twins, <b>Impairment tokens</b>, drag skills down until cancelled" : ""}. Low dice? Don't roll there; go where your investigator is strong. That's the whole tactical layer.</p>` },
 
     { h: "Encounters, gates & combat", body: (c) => `
-<p>On a clear space, read an encounter for your location — or encounter a <b>token</b>: a <b>Clue</b> gives a Research encounter (these feed the Mystery), a <b>Gate</b> pulls you into an Other World (pass, and you <b>close the Gate</b>), an <b>Expedition</b> pays big on faraway continents.</p>
+<p>On a clear space, read an encounter for your location — or encounter a <b>token</b>: a <b>Clue</b> gives a Research encounter (these feed the Mystery), a <b>Gate</b> pulls you into an Other World (pass, and you <b>close the Gate</b>), an <b>Expedition</b> pays big on faraway continents${EH.helpers.mysticRuins(c) ? ", and the <b>Mystic Ruins</b> token offers its own deck of monument encounters" : ""}.</p>
 <p>Monsters block all that: stand with one and you <b>must fight</b> — a Will test (lose Sanity if short), then a Strength test (lose Health, deal your successes as damage). Some monsters are simply not your job today; walking around them is a strategy.</p>` },
 
     { h: "Doom, the Omen & dying", body: (c) => `
@@ -473,7 +473,7 @@ EH.teach = {
     { h: "Don't worry about these yet", body: (c) => {
       const later = ["Conditions' hidden backs", "reckonings", "Rumor cards"];
       if (EH.helpers.sideBoard(c)) later.push("the side board's paths");
-      if (c.has("cir")) later.push("Disasters");
+      if (c.has("cir")) later.push("Devastation Encounters");
       return `<p>I'll explain ${later.join(", ")} when the first one appears. Opening advice: split up — clustered investigators waste encounters — and read your Mystery out loud <i>now</i>, because every turn should serve it.</p>`;
     }}
   ]

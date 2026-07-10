@@ -515,14 +515,13 @@ AH.faq = [
     when: c => c.mod("lurkerGates") }
 ];
 
-
 /* ---- TEACHING SCRIPT (read aloud, ~5 min; content per the AH 2nd Edition
    rulebook and expansion rulebooks — see the setup citations above) ---------- */
 AH.teach = {
   intro: "Read this aloud — about five minutes. Sliders untouched until the end.",
   sections: [
     { h: "The pitch — and how we win", body: (c) => `
-<p>It's 1926, and gates to other worlds are tearing open all over Arkham. Every open gate feeds the <b>doom track</b> of the Ancient One sleeping beneath the town. This is fully cooperative, and there are three ways to win: <b>close every gate</b> on the board while holding enough gate trophies, get <b>six gates sealed</b> at once — the clean win — or, if the doom track fills and the thing <b>awakens</b>… beat it in the final battle. Plan for the seals. Pray you never need plan C.</p>` },
+<p>It's 1926, and gates to other worlds are tearing open all over Arkham. Every open gate feeds the <b>doom track</b> of the Ancient One sleeping beneath the town. This is fully cooperative, and there are three ways to win: <b>close every gate</b> on the board while holding enough gate trophies, get <b>six gates sealed</b> at once — the clean win — or, if the doom track fills and the thing <b>awakens</b>… beat it in the final battle${c.mod("epicBattle") ? " (we're using the <b>Epic Battle</b> deck, so that fight has real structure — and real teeth)" : ""}. Plan for the seals. Pray you never need plan C.</p>` },
 
     { h: "The shape of a turn", body: (c) => `
 <p>Five phases, everyone in order: <b>Upkeep</b> — refresh cards and slide your <b>skill sliders</b>, tuning who your investigator is this turn; <b>Movement</b> — walk the streets, or move along your Other World; <b>Arkham Encounters</b> — draw the story card for your location; <b>Other World Encounters</b> — same, on the far side of a gate; and the <b>Mythos phase</b> — the game's turn: a new gate bursts open, a monster spawns, and the headlines change the rules.</p>` },
@@ -536,19 +535,23 @@ AH.teach = {
     { h: "Doom, terror & going under", body: (c) => `
 <p>Every new gate adds a <b>doom token</b>; the track filling is the loss timer. Monsters flooding the streets raise the <b>terror level</b>, which strips allies and closes shops. Hit zero <b>Sanity or Stamina</b> and you wake up in the Asylum or Hospital, lighter by half your stuff — hit both, or bottom out your maximums, and the investigator is <b>devoured</b>: take a fresh one and keep fighting.</p>` },
 
-    { h: "This table's expansions", when: (c) => c.has("dunwich") || c.has("kingsport") || c.has("innsmouth") || c.has("curse") || c.has("kingyellow") || c.has("blackgoat") || c.has("lurker"), body: (c) => {
+    { h: "This table's expansions", when: (c) => c.has("dunwich") || c.has("kingsport") || c.has("innsmouth") || c.has("curse") || c.has("kingyellow") || c.has("blackgoat") || c.has("lurker") || c.has("miskatonic"), body: (c) => {
       const bits = [];
       if (c.has("dunwich")) bits.push("<b>Dunwich</b> hangs a second town off the map — gates out there too, and the Dunwich Horror itself when doom festers");
       if (c.has("kingsport")) bits.push("<b>Kingsport</b> adds a town where <b>rifts</b> creep open unless someone patrols it — an unglamorous, vital job");
-      if (c.has("innsmouth")) bits.push("<b>Innsmouth</b> adds a hostile town where the Deep Ones rise and the locals notice you noticing them");
+      if (c.has("innsmouth")) bits.push("<b>Innsmouth</b> adds a hostile town where the Deep Ones rise and the locals notice you noticing them" + (c.mod("personalStories") ? " — and everyone carries a <b>Personal Story</b>: your own subplot with a reward for finishing it and a price for failing" : ""));
       if (c.has("curse")) bits.push("<b>Curse of the Dark Pharaoh</b> tours a cursed exhibit through town");
-      if (c.has("kingyellow")) bits.push("<b>The King in Yellow</b> stages a play that should never be performed");
-      if (c.has("blackgoat")) bits.push("<b>The Black Goat</b> offers cult membership and charges corruption");
+      if (c.has("kingyellow")) bits.push("<b>The King in Yellow</b> stages a play that should never be performed" + (c.mod("kiyTouring") ? " (touring — it leaves when the Act deck ends)" : c.mod("kiyPermanent") ? " (a permanent engagement — it never leaves)" : ""));
+      if (c.has("blackgoat")) bits.push("<b>The Black Goat</b> offers cult membership and charges corruption" + (c.mod("difficulty") ? ", and a <b>Difficulty card</b> is tuning this whole game" : ""));
       if (c.has("lurker")) bits.push("<b>The Lurker at the Threshold</b> deals in Dark Pacts — power now, price later");
+      if (c.has("miskatonic")) bits.push("<b>Miskatonic Horror</b> threads extra cards through every other box" + (c.institution ? ", and an <b>Institution</b> is open for membership — read its sheet" : ""));
       return `<p>${bits.join("; ")}.${(c.heraldCount || c.guardian) ? " Heralds sharpen the Ancient One; Guardians blunt it — their sheets are in play and I'll read them out." : ""}</p>`;
     }},
 
-    { h: "Don't worry about these yet", body: (c) => `
-<p>I'll explain monster movement symbols, the shops, and blessing/curse dice when they first matter. Opening advice: <b>clues before heroics</b> — an unsealed gate always reopens, so the team that wins is the one that seals, not the one that sightsees. And keep one eye on the terror level.</p>` }
+    { h: "Don't worry about these yet", body: (c) => {
+      const later = ["monster movement symbols", "the shops", "blessing and curse dice"];
+      if (c.mod("lurkerGates")) later.push("the Lurker's attribute gate markers");
+      return `<p>I'll explain ${later.join(", ")} when they first matter. Opening advice: <b>clues before heroics</b> — an unsealed gate always reopens, so the team that wins is the one that seals, not the one that sightsees. And keep one eye on the terror level.</p>`;
+    }}
   ]
 };

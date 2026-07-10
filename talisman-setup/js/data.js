@@ -466,7 +466,6 @@ TAL.faq = [
     a:"The Light/Dark Fate rules replace the normal fate rules for the whole game. Light Fate rerolls your own die; Dark Fate forces an opponent to reroll one of theirs. You still can't reroll a creature's attack roll." }
 ];
 
-
 /* ---- TEACHING SCRIPT (read aloud, ~5 min; content per the Revised 4th Ed.
    rulebook and expansion rulebooks — see the setup citations above) ---------- */
 TAL.teach = {
@@ -474,8 +473,9 @@ TAL.teach = {
   sections: [
     { h: "The pitch — and how you win", body: (c) => {
       const alt = c.ending && c.ending !== "crown";
+      const cat = c.boardMode === "cataclysm";
       return `
-<p>We are adventurers in the land of Talisman, and the prize is the <b>Crown of Command</b> at the center of the board. The land is three rings: grow strong in the <b>Outer Region</b>, brave the <b>Middle</b>, and — once you've found a <b>Talisman</b> to pass the Portal — fight through the <b>Inner Region</b>${alt ? " to whatever ending fate has dealt us this game (it may stay hidden until someone arrives)" : " to the Crown, where the Command Spell lets you strike down every rival until you alone remain"}.</p>
+<p>We are adventurers in ${cat ? "the shattered, post-Cataclysm land of Talisman — the familiar board is gone, replaced by a wasteland of ruins and scavenged remnants" : "the land of Talisman"}, and the prize is the <b>Crown of Command</b> at the center of the board. The land is three rings: grow strong in the <b>Outer Region</b>, brave the <b>Middle</b>, and — once you've found a <b>Talisman</b> to pass the Portal — fight through the <b>Inner Region</b>${alt ? " to whatever ending fate has dealt us this game (it may stay hidden until someone arrives)" : " to the Crown, where the Command Spell lets you strike down every rival until you alone remain"}.</p>
 <p>This is a race with fangs: last adventurer standing, or first to the ending, wins.</p>`;
     }},
 
@@ -488,17 +488,41 @@ TAL.teach = {
     { h: "The long game", body: (c) => `
 <p>Don't sprint. The Inner Region murders the unprepared — the classic arc is: loot the Outer ring until your stats embarrass the Middle ring, find your <b>Talisman</b> (quests and luck), then commit. Every character breaks the rules their own way; read your sheet aloud when we start.</p>` },
 
+    { h: "The Dragon Realm", when: (c) => c.has("dragon"), body: () => `
+<p>The <b>Dragon expansion</b> has overlaid the Inner Region: three <b>Dragon Kings</b> — Varthrax, Cadorus and Grilipus — contest the center, their decks seeding the land with scales and minions, and the road to the Crown now runs through a dragon's throne. The endgame is a boss fight on top of a race.</p>` },
+
     { h: "This table's boards", when: (c) => c.corners && c.corners.length, body: (c) => {
       const names = { dungeon: "<b>the Dungeon</b> (enter at the Ruins — a treasure-crawl that can drop you shockingly close to the Crown)", highland: "<b>the Highland</b> (enter at the Crags — the Eagle King guards real rewards)", city: "<b>the City</b> (enter at the City — shops, stables, and honest work)", woodland: "<b>the Woodland</b> (enter at the Forest — a path of destiny with fae prices)" };
       return `<p>Corner realms are open this game: ${c.corners.map(x => names[x] || x).join("; ")}. Each is a detour with its own deck — riskier than the main road, and usually worth it.</p>`;
     }},
 
-    { h: "Extra rules in play", when: (c) => c.has("reaper") || c.has("bloodmoon") || c.has("harbinger"), body: (c) => {
+    { h: "The Deep Realms", when: (c) => c.has("deeprealms") || c.has("lostrealms"), body: (c) => `
+<p>Between the City and the Dungeon run the <b>Deep Realms</b> — the Rat Queen's Lair and the Wraith Lord's Domain, joined by bridge and tunnel. Trap-riddled shortcuts with their own decks${c.has("netherrealm") || c.has("lostrealms") ? ", and the brutal <b>Nether Deck</b> is in play wherever its ending demands it" : ""}.</p>` },
+
+    { h: "Extra rules in play", when: (c) => c.has("reaper") || c.has("bloodmoon") || c.has("harbinger") || c.has("firelands"), body: (c) => {
       const bits = [];
       if (c.has("reaper")) bits.push("the <b>Grim Reaper</b> stalks the board — whoever rolls him moves him, and meeting him is a dice game for your life");
       if (c.has("bloodmoon")) bits.push("<b>day and night</b> alternate, lunar events fire, and the <b>Werewolf</b> hunts in the dark");
       if (c.has("harbinger")) bits.push("the <b>Harbinger</b> walks the land reading omens — the end of the world is on a timer");
+      if (c.has("firelands")) bits.push("the <b>Firelands</b> burn: Ifrit hazards scorch spaces, and fireproof gear suddenly matters");
       return `<p>Also: ${bits.join("; ")}.</p>`;
+    }},
+
+    { h: "New cards in the decks", when: (c) => c.has("frostmarch") || c.has("sacredpool") || c.has("firelands") || c.has("netherrealm"), body: (c) => {
+      const bits = [];
+      if (c.has("frostmarch")) bits.push("<b>Frostmarch</b>");
+      if (c.has("sacredpool")) bits.push("<b>Sacred Pool</b> (Warlock Quests now pay Quest Rewards)");
+      if (c.has("firelands")) bits.push("<b>Firelands</b>");
+      if (c.has("netherrealm")) bits.push("<b>Nether Realm</b>");
+      return `<p>The Adventure and Spell decks are thickened with ${bits.join(", ")} cards — expect encounters nobody at this table has seen before.</p>`;
+    }},
+
+    { h: "Faster-play tweaks", when: (c) => c.opt("easyCmd") || c.opt("fastSC") || c.opt("startBonus"), body: (c) => {
+      const bits = [];
+      if (c.opt("easyCmd")) bits.push("the <b>Command Spell</b> triggers on more results — the endgame is faster");
+      if (c.opt("fastSC")) bits.push("trophies convert to <b>Strength and Craft</b> at a cheaper rate");
+      if (c.opt("startBonus")) bits.push("everyone starts with a <b>bonus stat point</b>");
+      return `<p>We've agreed to speed things up: ${bits.join("; ")}.</p>`;
     }},
 
     { h: "Don't worry about these yet", body: (c) => `

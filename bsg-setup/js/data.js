@@ -728,6 +728,7 @@ BSG.teach = {
     { h: "Your action — where the game gives you a choice", body: (c) => {
       let out = `<p>Your action is your agency, so here's the menu: <b>activate the location you're standing on</b> — repair damage, fire Galactica's guns, launch vipers, treat the sick, throw someone in the Brig; <b>play an action from a Skill card</b> — the best ones let stronger players act twice or peek at what's coming; or if you're a pilot, <b>fly your viper</b> — shooting down raiders and escorting the civilian ships that carry our population.</p>
 <p>Two players hold titles: the <b>President</b> plays Quorum cards (political powers), and the <b>Admiral</b> holds the nukes and picks our destination each jump. Titles make you powerful — and a prime suspect.</p>`;
+      if (c.has("daybreak")) out += `<p>Everyone also starts with a <b>miracle token</b> — a once-per-game use of the ability printed on your character sheet. There is a perfect moment for it. Wait for that one.</p>`;
       if (c.obj === "earth") out += `<p>In this mode the Demetrius rides alongside: activating its <b>Bridge</b> launches <b>Mission cards</b> — risky scouting checks that can shortcut our distance to Earth.</p>`;
       return out;
     }},
@@ -736,6 +737,7 @@ BSG.teach = {
       let out = `<p>Most crises are <b>skill checks</b>: the card names a difficulty and which skill colors help. Going around the table, <b>everyone secretly</b> slides any number of cards into the pile — matching colors add, wrong colors <b>subtract</b>. Then two random cards from the <b>Destiny deck</b> go in, the pile is shuffled, and we reveal: beat the difficulty or suffer the consequences.</p>
 <p>Hear what that means: a hidden Cylon can <b>poison a check</b> with wrong-colored cards, and the Destiny deck gives them cover — “that negative card? Destiny, I swear.” Reading who threw a check is how you catch a Cylon; it's the whole game in miniature.</p>`;
       if (c.has("pegasus") || c.has("daybreak")) out += `<p>There are also <b>Treachery cards</b> in the mix — they're almost always negative in a check, and humans can't use their actions. When you see one revealed, someone put it there on purpose.</p>`;
+      if (c.has("exodus") || c.has("daybreak")) out += `<p>And some Skill cards carry <b>skill check abilities</b> — text that fires from inside the pile no matter who played the card. Checks in this set do more than pass or fail.</p>`;
       return out;
     }},
 

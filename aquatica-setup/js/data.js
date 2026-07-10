@@ -258,7 +258,6 @@ ${c.has("cw") ? "<li><b>2-player Matrona</b>: playing her also discards the row'
 <p class="src-line">FAQ #3, 5, 9–20, 24–28, 40–48, 53–54</p>` }
 ];
 
-
 /* ---- TEACHING SCRIPT (read aloud, ~5 min; content per the base, Cold Waters
    and Coral Reefs rulebooks + FAQ — see reference sections for citations) ---- */
 AQ.teach = {
@@ -275,8 +274,11 @@ AQ.teach = {
     { h: "The effects — what cards do and why", body: (c) => `
 <p><b>Recruit</b> buys better Characters from the row — your deck is your engine, upgrade it${c.has("cr") ? " (each Recruit also grabs the Reef tile under that Character — a small permanent upgrade for one of your Location slots)" : ""}. <b>Buy</b> (coins) or <b>Conquer</b> (power) takes Locations onto your board — your income and your points. <b>Raise</b> slides a Location up, spending its remaining depths for tempo; a <b>fully risen</b> Location hands you a <b>Wild Manta</b>. <b>Score</b> banks a fully risen Location into your pile — only scored Locations pay Prosperity. <b>Scout</b> refreshes the market when it's stale.</p>` },
 
-    { h: "Goals — the race inside the race", when: (c) => c.mode === "goals", body: () => `
-<p>Four <b>Goals</b> sit at the top of the board. Meet one — on your turn — and you may park a Manta on its track: <b>earlier claims pay more</b>. Each Goal once per player, and claiming is optional but almost always right. This is the tempo war: rushing Goals ends the game while opponents are still building.</p>` },
+    { h: "Cold Waters — delayed effects", when: (c) => c.has("cw"), body: () => `
+<p>Cold Waters characters carry <b>Delayed Effects</b> — the purple box at the bottom. A delayed effect is armed while that card sits <b>on top of your discard pile</b>, and it fires at the start of your next main action; play another card on top and it switches off unfired. Sequencing your discard pile becomes a real skill — the strongest engines in this expansion are two-turn plays.</p>` },
+
+    { h: "Goals — the race inside the race", when: (c) => c.mode === "goals", body: (c) => `
+<p>Four <b>Goals</b> sit at the top of the board${c.mod("advgoals") ? " — random ones this game, drawn from the Goal tokens, so read them out now" : ""}. Meet one — on your turn — and you may park a Manta on its track: <b>earlier claims pay more</b>. Each Goal once per player, and claiming is optional but almost always right. This is the tempo war: rushing Goals ends the game while opponents are still building.</p>` },
 
     { h: "Tribes — hire your engine's endgame", when: (c) => c.mode === "tribes", body: () => `
 <p>Instead of Goals, we hire <b>Tribes</b>: play a card with a Recruit effect at a Tribe, pay its cost <b>+1 coin for every Manta already on it</b> (you may cash in scored Locations for their Prosperity value — gone forever), and retire one of your Mantas onto it. Dark-blue Tribes give an ongoing once-a-turn power plus flat points; light-blue ones fire instantly and score conditionally. Early hires are cheap; good hires shape your whole game.</p>` },
@@ -287,7 +289,11 @@ AQ.teach = {
     { h: "Coral Reefs — reefs and corals", when: (c) => c.has("cr"), body: () => `
 <p>Two additions: <b>Reefs</b> come free with every Recruit and permanently improve one of your five Location slots (stack a new one to replace the old). <b>Corals</b> are points-on-legs: the <b>seed</b> effect grows them on your Locations, and they only bank — 1 Prosperity each — when the Location scores. The <b>defend</b> effect parks a Manta on a market Location so nobody can buy it out from under you; if it would be discarded, it's yours.</p>` },
 
-    { h: "Don't worry about these yet", body: (c) => `
-<p>Individual card powers explain themselves as they're played${c.mod("kings") || c.mod("kingsdraft") ? "; your King card is just a strong Character that starts in hand" : ""}${c.mod("turnorder") ? "; your numbered Manta acts like a Wild Manta and never claims Goals" : ""}. Starting advice: don't hoard — a Location on your board is worth nothing until you <b>score</b> it.</p>` }
+    { h: "Don't worry about these yet", body: (c) => {
+      const bits = [];
+      if (c.mod("kings") || c.mod("kingsdraft")) bits.push("your King card is just a strong Character that starts in hand");
+      if (c.mod("turnorder")) bits.push("your numbered Manta acts like a Wild Manta, never claims Goals — and at game end we finish the round so everyone gets equal turns");
+      return `<p>Individual card powers explain themselves as they're played${bits.length ? "; " + bits.join("; ") : ""}. Starting advice: don't hoard — a Location on your board is worth nothing until you <b>score</b> it.</p>`;
+    }}
   ]
 };

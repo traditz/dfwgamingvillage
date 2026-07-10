@@ -379,38 +379,66 @@ ${c.has("ff") ? "<li><b>Betrayal of Bonds</b> (F&F): the flipped Citizen is dead
 <p class="src-line">Base Rulebook p.15–16${c.has("sv") ? " · Shadowvale rules" : ""}${c.has("ff") ? " · Flames & Frost rulesheet" : ""}</p>` }
 ];
 
-
 /* ---- TEACHING SCRIPT (read aloud, ~5 min; content per the 2E rulebook, the
    expansion rulesheets and the Combined Guide — see references) -------------- */
 VC.teach = {
   intro: "Read this aloud — about five minutes. Dice down until the end.",
   sections: [
     { h: "The pitch — and how you win", when: (c) => c.mode !== "darksworn", body: (c) => `
-<p>We are dukes defending Valeria — by getting rich doing it. Most <b>Victory Points</b> wins: points come from <b>slain Monsters</b>, <b>built Domains</b>, points banked on your board, and your secret <b>Duke card</b>'s bonus.</p>
-<p>The game ends when all the Monsters are dead, all the Domains built, or enough card stacks run empty — then equal turns and we count.</p>` },
+<p>We are dukes defending Valeria — by getting rich doing it. Most <b>Victory Points</b> wins: points come from <b>slain Monsters</b>, <b>built Domains</b>, points banked on your board${c.mod("noduke") ? ", and a public scoring rubric we all share" : ", and your secret <b>Duke card</b>'s bonus"}${c.has("cs") ? " — plus <b>Goods</b> sets, <b>Tomes</b> and rescued <b>Nobles</b> from the Island" : ""}.</p>
+<p>The game ends when all the Monsters are dead, all the Domains built, or enough card stacks run empty${c.has("cs") ? " — or when the Island can no longer restock its Goods, Tomes or Nobles" : ""} — then equal turns and we count.</p>` },
 
     { h: "The pitch — hold the walls together", when: (c) => c.mode === "darksworn", body: () => `
 <p>This is <b>Darksworn</b> — fully cooperative and story-driven. We play through a <b>Book</b>: complete its Tasks to turn pages, and win by reaching the final page. We lose the moment a Monster attack demands a Citizen we can't give. Walls fall, Shades stalk the row, and the Book itself strikes on every 6.</p>` },
 
     { h: "The dice work for everyone", body: (c) => `
 <p>Here's the engine: the active player rolls two dice, and <b>every player harvests</b> — each die, <i>and their sum</i>, activates Citizens with those numbers in front of you. Active player takes the sun-side bonus, everyone else the moon side; doubles trigger twice. You are never idle in this game — every roll is your roll.</p>
-<p>No Citizen fired? Your consolation card feeds you a resource anyway.</p>` },
+<p>${c.has("cs") && c.mode !== "darksworn" ? "No Citizen fired? Your <b>Coxswain</b> steps in with resources and Maps. And every rolled <b>6</b> — including the sum — drops one of your resources onto <b>Exekratys</b>, piling up an island treasure someone will later sail off with." : "No Citizen fired? Your consolation card feeds you a resource anyway."}</p>` },
 
     { h: "Your two actions — and why", body: (c) => {
       if (c.mode === "darksworn") return `
 <p>On your turn, two actions: <b>Slay a Monster</b> (its points are yours instantly, and it stops attacking that column), <b>Recruit a Citizen</b> (grow everyone's engine — yours most), <b>Gain a Resource</b>, <b>Pray to Aquila</b> (spend hard-won points for fresh Walls or Blessings), <b>Share Resources</b> (half lands with a friend, rounded up), or <b>Engage the Book</b> (pay a Task's full cost to plant your Achievement token — Tasks need one token per player, so everyone pulls).</p>`;
+      let extra = [];
+      if (c.has("cs")) extra.push("<b>Gain a Map</b> — take a Map token, the fuel for sailing");
+      if (c.has("cs")) extra.push("<b>Sail</b> — see the Island, below");
+      if (c.mod("agents")) extra.push("<b>Engage an Agent</b> — use a faceup Agent's one-shot ability from the row above the Monsters");
+      if (c.mod("wardtowers")) extra.push("<b>Build a Banner</b> — with four matching Role icons, pay exactly nine of one resource (no Magic help) toward a shared Ward Tower; finished Towers discount everyone's Monster hunts and pay you 5 points a banner");
       return `
-<p>On your turn, two actions, any mix: <b>Slay a Monster</b> — pay its Strength (Magic tops up), take the card, its rewards, and its points; <b>Recruit a Citizen</b> — pay Gold for a stronger engine (each copy you already own costs +1); <b>Build a Domain</b> — match the Role icons in your tableau, pay Gold, gain powers and points; or <b>Gain a Resource</b> when you're short. Monsters are tempo, Citizens are income, Domains are the payoff.</p>`;
+<p>On your turn, two actions, any mix: <b>Slay a Monster</b> — pay its Strength (Magic tops up), take the card, its rewards, and its points; <b>Recruit a Citizen</b> — pay Gold for a stronger engine (each copy you already own costs +1); <b>Build a Domain</b> — match the Role icons in your tableau, pay Gold, gain powers and points; or <b>Gain a Resource</b> when you're short. Monsters are tempo, Citizens are income, Domains are the payoff.</p>${extra.length ? `<p>Also on the menu this game: ${extra.join("; ")}.</p>` : ""}`;
     }},
 
-    { h: "The secret Duke", when: (c) => c.mode !== "darksworn" && !c.mod("noduke"), body: () => `
+    { h: "Crimson Seas — the Island", when: (c) => c.has("cs") && c.mode !== "darksworn", body: () => `
+<p>The <b>Island board</b> floats above the market, and the <b>Sail</b> action (pay 1 Map) visits one of its four ports: <b>Araby</b> sells <b>Goods</b> — pure endgame points that snowball as sets (one of a kind is 2 points; six of a kind is 25); <b>Nae Aerie</b> sells <b>Tomes</b> — a resource you can spend <i>every turn</i>, flipping facedown and back; <b>Exekratys</b> lets you scoop up <b>everything</b> piled there of one resource; and <b>Amarynth</b> rescues <b>Nobles</b> — expensive, but they carry Role icons for your Domains and Dukes plus their own endgame conditions.</p>
+<p>After each visit the port restocks and everything left gets <i>cheaper</i> — so watch what your rivals leave behind.</p>` },
+
+    { h: "The secret Duke", when: (c) => c.mode !== "darksworn" && !c.mod("noduke"), body: (c) => `
 <p>Your <b>Duke card</b> is hidden and scores at the end — most reward collecting certain Role icons or hoarding a resource. Peek at it whenever you like, build toward it quietly, and don't let your purchases give you away.</p>` },
+
+    { h: "No Duke — everyone chases the same rubric", when: (c) => c.mode !== "darksworn" && c.mod("noduke"), body: () => `
+<p>No secret Dukes this game. Instead everyone scores a shared rubric at the end: points per <b>Role icon</b> across your Citizens and Domains, points for leftover resources, and <b>7-point bonuses</b> for the most Citizens, most Monsters and most Domains. Majorities are the battleground — watch the counts.</p>` },
 
     { h: "Solo — the Dark Lord", when: (c) => c.mode === "solo", body: () => `
 <p>Your rival is the <b>Dark Lord</b>: after your actions, each die activates the Monster stack in that position, and it <b>kidnaps a Citizen</b> from that column for his hoard — empty columns lose Domains, and a bare column loses you the game on the spot. Then you harvest again (moon side). At the end, he scores everything he's captured plus every Monster you left alive. Kill fast; he profits from your patience.</p>` },
 
-    { h: "Events in the stacks", when: (c) => c.mode !== "darksworn" && (c.mod("monsterevents") || c.mod("events") || c.mod("kingsguard") || c.mod("samurai")), body: (c) => `
-<p>Some of the <b>Exhausted cards</b> covering emptied stacks are booby-trapped: <b>Events</b> resolve the moment they're revealed${c.mod("monsterevents") ? ", and <b>Monster Events</b> lurk with an Activation Number — roll it and they act, until someone slays them like any Monster" : ""}. Emptying a stack is still how the game ends, so treat every reveal as a small ceremony.</p>` },
+    { h: "Events in the stacks", when: (c) => c.mode !== "darksworn" && (c.mod("monsterevents") || c.mod("events") || c.mod("kingsguard") || c.mod("samurai")), body: (c) => {
+      const bits = [];
+      if (c.mod("events")) bits.push("<b>Events</b> resolve the moment they're revealed");
+      if (c.mod("monsterevents")) bits.push("<b>Monster Events</b> lurk with an Activation Number — roll it and they act, until someone slays them like any Monster");
+      if (c.mod("kingsguard")) bits.push("the <b>King's Guard</b> Event opens a new recruitable Citizen stack when it flips");
+      if (c.mod("samurai")) bits.push("the <b>Undead Samurai</b> Event floods the stacks with samurai until their Lord is slain");
+      return `<p>Some of the <b>Exhausted cards</b> covering emptied stacks are booby-trapped: ${bits.join("; ")}. Emptying a stack is still how the game ends, so treat every reveal as a small ceremony.</p>`;
+    }},
+
+    { h: "Table variants in play", when: (c) => c.mode !== "darksworn" && (c.mod("mixed") || c.mod("relics") || c.mod("wardens") || c.mod("margrave") || c.has("ff") || c.has("sv")), body: (c) => {
+      const bits = [];
+      if (c.mod("mixed")) bits.push("the <b>Citizen stacks are shuffled mixes</b> — facedown cards stay a mystery until the one above them sells");
+      if (c.mod("relics")) bits.push("everyone starts with a <b>Relic</b> — a personal power card; read yours before we begin");
+      if (c.mod("wardens")) bits.push("each Monster stack hides a <b>Warden</b> just above its Boss — the second-to-last fight is meaner than you expect");
+      if (c.mod("margrave")) bits.push("your third starter is the <b>Margrave</b> — it fires on doubles or whiffed rolls");
+      if (c.has("ff")) bits.push("<b>Flames &amp; Frost</b> monsters, citizens and domains are shuffled through everything");
+      if (c.has("sv")) bits.push("<b>Shadowvale</b>'s night-hunters are in the mix — its stacks come with their own Wardens built in");
+      return `<p>Also true this game: ${bits.join("; ")}.</p>`;
+    }},
 
     { h: "Darksworn — the round's dark half", when: (c) => c.mode === "darksworn", body: () => `
 <p>After your actions come the <b>Monsters</b>: each rolled number attacks its column — a full Wall cracks, a cracked Wall falls, no Wall costs us a Citizen to the oubliette. <b>Shades</b> resolve next, and any 6 wakes <b>the Book</b>. Rescue captured Citizens with Monster rewards and Task rewards; rebuild Walls through Aquila. Guard the weak columns — that's the entire war.</p>` },
@@ -418,7 +446,12 @@ VC.teach = {
     { h: "Don't worry about these yet", body: (c) => {
       const later = [];
       if (c.mode === "darksworn") { later.push("individual Blessing and Shade cards", "the Book's page rules"); }
-      else { later.push("individual card powers"); if (c.mod("wardens")) later.push("Wardens"); if (c.mod("wardtowers")) later.push("Ward Tower banners"); if (c.mod("agents")) later.push("the Agent row"); if (c.p === 5) later.push("the Resting player"); }
+      else {
+        later.push("individual card powers");
+        if (c.has("cs")) later.push("island restock details");
+        if (c.mod("agents")) later.push("specific Agents");
+        if (c.p === 5) later.push("the Resting player");
+      }
       return `<p>I'll explain ${later.join(", ")} as they come up. Opening advice: buy Citizens with numbers the table is missing — 6, 7 and 8 fire constantly, and a number nobody owns is a wasted roll for everyone.</p>`;
     }}
   ]
