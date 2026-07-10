@@ -514,3 +514,41 @@ AH.faq = [
     a: "Yes. A gate may only be sealed on an unstable location; gates in streets or stable locations can be closed but not sealed.",
     when: c => c.mod("lurkerGates") }
 ];
+
+
+/* ---- TEACHING SCRIPT (read aloud, ~5 min; content per the AH 2nd Edition
+   rulebook and expansion rulebooks — see the setup citations above) ---------- */
+AH.teach = {
+  intro: "Read this aloud — about five minutes. Sliders untouched until the end.",
+  sections: [
+    { h: "The pitch — and how we win", body: (c) => `
+<p>It's 1926, and gates to other worlds are tearing open all over Arkham. Every open gate feeds the <b>doom track</b> of the Ancient One sleeping beneath the town. This is fully cooperative, and there are three ways to win: <b>close every gate</b> on the board while holding enough gate trophies, get <b>six gates sealed</b> at once — the clean win — or, if the doom track fills and the thing <b>awakens</b>… beat it in the final battle. Plan for the seals. Pray you never need plan C.</p>` },
+
+    { h: "The shape of a turn", body: (c) => `
+<p>Five phases, everyone in order: <b>Upkeep</b> — refresh cards and slide your <b>skill sliders</b>, tuning who your investigator is this turn; <b>Movement</b> — walk the streets, or move along your Other World; <b>Arkham Encounters</b> — draw the story card for your location; <b>Other World Encounters</b> — same, on the far side of a gate; and the <b>Mythos phase</b> — the game's turn: a new gate bursts open, a monster spawns, and the headlines change the rules.</p>` },
+
+    { h: "Skill checks — sliders and dice", body: (c) => `
+<p>Everything is a <b>skill check</b>: roll dice equal to your skill plus the check's modifier — <b>5s and 6s are successes</b>. Your six skills sit on three <b>sliders</b>, each a trade-off (speed against sneaking, fighting against will…), adjusted a little each Upkeep. <b>Clue tokens</b> are rerolls — burn them at the moments that matter, and they matter most at gates.</p>` },
+
+    { h: "Gates — close them, seal them", body: (c) => `
+<p>A gate opens; a monster comes with it. Step onto the gate and you're <b>pulled through</b> to its Other World; survive two encounters there, come back, and you may <b>close</b> it with a Fight or Lore check — spend <b>five Clue tokens</b> as you do and it's <b>sealed</b> for good. Monsters must be fought or <b>evaded</b> on the way; trophies from both feed shops, allies and the win condition. That's the core loop: gear up in Arkham, dive through a gate, come back, slam it shut.</p>` },
+
+    { h: "Doom, terror & going under", body: (c) => `
+<p>Every new gate adds a <b>doom token</b>; the track filling is the loss timer. Monsters flooding the streets raise the <b>terror level</b>, which strips allies and closes shops. Hit zero <b>Sanity or Stamina</b> and you wake up in the Asylum or Hospital, lighter by half your stuff — hit both, or bottom out your maximums, and the investigator is <b>devoured</b>: take a fresh one and keep fighting.</p>` },
+
+    { h: "This table's expansions", when: (c) => c.has("dunwich") || c.has("kingsport") || c.has("innsmouth") || c.has("curse") || c.has("kingyellow") || c.has("blackgoat") || c.has("lurker"), body: (c) => {
+      const bits = [];
+      if (c.has("dunwich")) bits.push("<b>Dunwich</b> hangs a second town off the map — gates out there too, and the Dunwich Horror itself when doom festers");
+      if (c.has("kingsport")) bits.push("<b>Kingsport</b> adds a town where <b>rifts</b> creep open unless someone patrols it — an unglamorous, vital job");
+      if (c.has("innsmouth")) bits.push("<b>Innsmouth</b> adds a hostile town where the Deep Ones rise and the locals notice you noticing them");
+      if (c.has("curse")) bits.push("<b>Curse of the Dark Pharaoh</b> tours a cursed exhibit through town");
+      if (c.has("kingyellow")) bits.push("<b>The King in Yellow</b> stages a play that should never be performed");
+      if (c.has("blackgoat")) bits.push("<b>The Black Goat</b> offers cult membership and charges corruption");
+      if (c.has("lurker")) bits.push("<b>The Lurker at the Threshold</b> deals in Dark Pacts — power now, price later");
+      return `<p>${bits.join("; ")}.${(c.heraldCount || c.guardian) ? " Heralds sharpen the Ancient One; Guardians blunt it — their sheets are in play and I'll read them out." : ""}</p>`;
+    }},
+
+    { h: "Don't worry about these yet", body: (c) => `
+<p>I'll explain monster movement symbols, the shops, and blessing/curse dice when they first matter. Opening advice: <b>clues before heroics</b> — an unsealed gate always reopens, so the team that wins is the one that seals, not the one that sightsees. And keep one eye on the terror level.</p>` }
+  ]
+};

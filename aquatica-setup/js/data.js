@@ -257,3 +257,37 @@ ${c.has("cw") ? "<li><b>2-player Matrona</b>: playing her also discards the row'
 </ul>
 <p class="src-line">FAQ #3, 5, 9–20, 24–28, 40–48, 53–54</p>` }
 ];
+
+
+/* ---- TEACHING SCRIPT (read aloud, ~5 min; content per the base, Cold Waters
+   and Coral Reefs rulebooks + FAQ — see reference sections for citations) ---- */
+AQ.teach = {
+  intro: "Read this aloud — about five minutes. Keep hands off the cards until the end.",
+  sections: [
+    { h: "The pitch — and how you win", body: (c) => `
+<p>We are ocean kings growing underwater empires. Everything is worth <b>Prosperity</b> at the end: the <b>Locations you've scored</b>, your <b>Goal-track claims</b>, leftover <b>Characters in hand</b>${c.has("cr") ? ", <b>Corals</b> in your reserve" : ""}${c.mode === "tribes" ? ", and your <b>Tribes</b>" : ""} — most Prosperity wins.</p>
+<p>The game ends when ${c.mode === "tribes" ? "a deck runs dry" : "someone claims all four Goals or a deck runs dry"}${c.has("cr") ? " (with Coral Reefs: the Reef deck or the Coral supply can also end it)" : ""} — then everyone gets equal turns, and we count.</p>` },
+
+    { h: "Your turn — one card, then squeeze the engine", body: () => `
+<p>On your turn you <b>must play exactly one Character card</b> — that's your main action, and its effects resolve top to bottom. But around it you may take <b>unlimited extra actions</b>: flip a ready <b>Manta</b> for its bonus, or <b>exploit the top depth</b> of one of your Locations, sliding the card up a notch. The skill of Aquatica is chaining these: a coin depth funds the card, the card conquers a Location, the new Location's depth pays for more.</p>
+<p>One catch: <b>coins and power vanish at end of turn</b>. Generate only what you can spend right now.</p>` },
+
+    { h: "The effects — what cards do and why", body: (c) => `
+<p><b>Recruit</b> buys better Characters from the row — your deck is your engine, upgrade it${c.has("cr") ? " (each Recruit also grabs the Reef tile under that Character — a small permanent upgrade for one of your Location slots)" : ""}. <b>Buy</b> (coins) or <b>Conquer</b> (power) takes Locations onto your board — your income and your points. <b>Raise</b> slides a Location up, spending its remaining depths for tempo; a <b>fully risen</b> Location hands you a <b>Wild Manta</b>. <b>Score</b> banks a fully risen Location into your pile — only scored Locations pay Prosperity. <b>Scout</b> refreshes the market when it's stale.</p>` },
+
+    { h: "Goals — the race inside the race", when: (c) => c.mode === "goals", body: () => `
+<p>Four <b>Goals</b> sit at the top of the board. Meet one — on your turn — and you may park a Manta on its track: <b>earlier claims pay more</b>. Each Goal once per player, and claiming is optional but almost always right. This is the tempo war: rushing Goals ends the game while opponents are still building.</p>` },
+
+    { h: "Tribes — hire your engine's endgame", when: (c) => c.mode === "tribes", body: () => `
+<p>Instead of Goals, we hire <b>Tribes</b>: play a card with a Recruit effect at a Tribe, pay its cost <b>+1 coin for every Manta already on it</b> (you may cash in scored Locations for their Prosperity value — gone forever), and retire one of your Mantas onto it. Dark-blue Tribes give an ongoing once-a-turn power plus flat points; light-blue ones fire instantly and score conditionally. Early hires are cheap; good hires shape your whole game.</p>` },
+
+    { h: "Solo — the Ichthyanders", when: (c) => c.mode === "solo", body: (c) => `
+<p>You race a silent rival: every time you play <b>Matrona</b> or take a <b>Scout</b> action, the Ichthyanders claim a Goal track. When their fourth Manta lands, you get one final turn — then the Ocean Council grades your Prosperity, from Blobfish to Kraken.${AQ.help.tribesAvailable(c) ? " (Tribes Solo instead climbs a six-level difficulty ladder: recruit all eight Tribes before a deck runs out.)" : ""}</p>` },
+
+    { h: "Coral Reefs — reefs and corals", when: (c) => c.has("cr"), body: () => `
+<p>Two additions: <b>Reefs</b> come free with every Recruit and permanently improve one of your five Location slots (stack a new one to replace the old). <b>Corals</b> are points-on-legs: the <b>seed</b> effect grows them on your Locations, and they only bank — 1 Prosperity each — when the Location scores. The <b>defend</b> effect parks a Manta on a market Location so nobody can buy it out from under you; if it would be discarded, it's yours.</p>` },
+
+    { h: "Don't worry about these yet", body: (c) => `
+<p>Individual card powers explain themselves as they're played${c.mod("kings") || c.mod("kingsdraft") ? "; your King card is just a strong Character that starts in hand" : ""}${c.mod("turnorder") ? "; your numbered Manta acts like a Wild Manta and never claims Goals" : ""}. Starting advice: don't hoard — a Location on your board is worth nothing until you <b>score</b> it.</p>` }
+  ]
+};

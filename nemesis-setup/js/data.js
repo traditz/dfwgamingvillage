@@ -599,3 +599,61 @@ NM.reference = [
     src: "Base p.27"
   }
 ];
+
+
+/* ---- TEACHING SCRIPT (read aloud, ~5 min; content per the base rulebook,
+   the race/Aftermath rulebooks and FAQ v2.2 — see references) --------------- */
+NM.teach = {
+  intro: "Read this aloud — about five minutes. Nobody touches the bag.",
+  sections: [
+    { h: "The pitch — and how you win", body: (c) => {
+      const foe = c.race === "carno" ? "Carnomorphs" : c.race === "void" ? "Void Seeders" : "Intruders";
+      if (c.mode === "coop") return `
+<p>We wake from hibernation on a broken ship, and something is aboard: the <b>${foe}</b>. This is the fully co-op game: our objectives are public, <b>all</b> of them must be completed, and at least one of us has to live. Surviving means <b>hibernating</b> while the ship makes its jump, or launching in an <b>escape pod</b> — and then surviving the end-of-game checks: working engines, the right destination, and whatever's incubating in your chest.</p>`;
+      if (c.mode === "solo") return `
+<p>You wake alone on a broken ship, and something is aboard: the <b>${foe}</b>. You hold two objectives; the first time you meet one of them, you keep one and burn the other. Win by completing it and surviving — <b>hibernate</b> while the ship jumps home, or take an <b>escape pod</b> — then pass the end-of-game checks: engines, destination, and whatever's incubating in your chest.</p>`;
+      return `
+<p>We wake from hibernation on a broken ship. The crew is dead, something is aboard — the <b>${foe}</b> — and each of us holds <b>two secret objectives</b>. When the first monster shows itself, everyone silently keeps one objective and burns the other. You win alone: complete <b>your</b> objective and survive. Several of us can win. All of us can die.</p>
+<p>Surviving means <b>hibernating</b> while the ship jumps home or launching in an <b>escape pod</b> — and then passing the end-of-game checks: at least two working <b>engines</b>, the right <b>destination</b>, and a clean <b>contamination scan</b>. Read that again: helping the ship helps everyone, and someone's objective may need you dead.</p>`;
+    }},
+
+    { h: "The shape of a round", body: (c) => `
+<p>Each round, everyone takes turns of <b>two actions</b> — cards from your hand pay for everything — until we've all passed. Then the ship gets its turn, the <b>Event phase</b>: time ticks (and the self-destruct, if someone lit it), monsters attack whoever they're with, fires burn, an Event card moves them through the corridors, and the <b>bag develops</b> — the infestation literally grows while we argue.</p>` },
+
+    { h: "Noise — the heart of the game", body: (c) => {
+      if (c.race === "void") return `
+<p>Movement is the scary part. Enter an empty room and roll the <b>noise die</b>, placing a noise marker in one of the corridors — and if that corridor already had one, it's an <b>encounter</b>: draw from the bag, and what comes out depends on <b>your Insanity</b>. If your hand is thin, it gets a free hit — a contamination card and a <b>Panic card</b>. Move carefully (two cards) to place noise where you choose. Every step is a bet.</p>`;
+      return `
+<p>Movement is the scary part. Enter an empty room and roll the <b>noise die</b>, placing a noise marker in a corridor — and if that corridor already had one, it's an <b>encounter</b>: something crawls out of the bag right on top of you, and if your hand is thin it attacks before you can blink. Move <b>carefully</b> for two cards to place the noise where you choose. The whole game is this: every step is a bet, and a quiet ship is a lie.</p>`;
+    }},
+
+    { h: "Fighting, wounds & what's in your chest", body: (c) => {
+      const race = c.race === "carno"
+        ? "Wounds stack until they kill; <b>Metagorger hits mutate you</b> — four mutation markers and you burst. And they <b>feed</b>: any corpse, egg or carcass left lying around heals them and evolves them into something bigger. Clean up your dead."
+        : c.race === "void"
+        ? "Wounds stack until they kill — but the real track is <b>Insanity</b>: it only ratchets up past 3, and at 5 you're one bad moment from gone. Rest, showers and the canteen calm you; an INFECTED scan maxes you instantly."
+        : "Serious wounds stack until they kill, and <b>contamination cards</b> silently fill your deck. Scan them when you can: an <b>INFECTED</b> result plants a larva in you — the surgery room can cut it out; ignoring it is how you die at the finish line.";
+      return `
+<p>Shooting costs ammo and is loud in spirit; <b>melee is free and desperate</b> — you draw a contamination card just for trying, and a miss costs a serious wound. You never know a monster's exact health: hits raise the odds it dies, never a promise.</p>
+<p>${race}</p>`;
+    }},
+
+    { h: "The ship is a character", body: (c) => `
+<p>Rooms are actions: repair <b>engines</b>, check the <b>cockpit's coordinates</b> — the ship may be aimed somewhere nobody wants — patch fires and malfunctions before they hit their limits (nine of either and the ship is gone), and if it all goes wrong, the <b>generator</b> starts the self-destruct. Watch the <b>critical moments</b>: the first death unlocks the escape pods, the blue time-track spaces open hibernation, and a yellow self-destruct can't be stopped.</p>` },
+
+    { h: "Playing as the Intruder", when: (c) => c.mod("intruderplayer"), body: () => `
+<p>One consolation prize: the <b>first player to die</b> takes over the monsters — one card a turn to move them, attack with them, or spring their tricks. They can't win. They can absolutely make sure you don't.</p>` },
+
+    { h: "This mode's twist", when: (c) => c.mode === "epilogue" || c.mode === "research", body: (c) => c.mode === "epilogue" ? `
+<p>This is the <b>Epilogue</b>: we're the rescue crew boarding the same ship, five turns on the clock. Reveal every Aftermath token on the ship, satisfy your <b>Personal Requirement</b>, be on the Shuttle when it leaves, and pass the scan — or grab the <b>Lucrative Offer</b> and sell everyone out.</p>` : `
+<p>This is a <b>Research Mission</b>: a standalone game with the Shuttle docked alongside, a hotter Intruder bag, and <b>Alerts</b> — timed side-missions from the Event deck with a five-turn fuse. Fail one and everyone dies, so treat Alerts as the priority the moment they appear.</p>` },
+
+    { h: "Don't worry about these yet", body: (c) => {
+      const later = ["the full room list (it's on this page)", "weakness research", "crafting recipes"];
+      if (c.race === "carno") later.push("Adaptation cards");
+      if (c.race === "void") later.push("the Lairs");
+      if (c.mod("turrets")) later.push("turret statuses");
+      return `<p>I'll explain ${later.join(", ")} when they matter. Opening advice: keep your hand fat — your cards are actions, currency <i>and</i> armor against surprise attacks — and never, ever assume the room next door is empty.</p>`;
+    }}
+  ]
+};

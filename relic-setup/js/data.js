@@ -470,3 +470,35 @@ RL.faq = [
     a: "No. Champion cards — and the affiliation tokens matching them — can never be forcibly discarded. If you're removed from the game, your Champion cards leave with you.",
     when: c => c.solBoard }
 ];
+
+
+/* ---- TEACHING SCRIPT (read aloud, ~5 min; content per the Relic rulebook and
+   expansion rulebooks — see the setup citations above) ----------------------- */
+RL.teach = {
+  intro: "Read this aloud — about five minutes. Servo-skulls down until the end.",
+  sections: [
+    { h: "The pitch — and how you win", body: (c) => `
+<p>The Antian Sector is bleeding Chaos from a Warp rift, and each of us is an agent of the Imperium racing to be the one who seals it. The board is three concentric tiers. Grow strong in the <b>Outer</b> tier, prove yourself in the <b>Middle</b>, then breach the <b>Inner</b> tier and complete the <b>Scenario</b> at the center — that wins the game.</p>
+<p>The toll gate: entering the Inner tier takes a <b>Relic</b>, and a Relic costs <b>three completed Missions</b>. Missions are the spine of your whole game — always have one running.</p>` },
+
+    { h: "Your turn — move, fight, grow", body: (c) => `
+<p>Roll a die and spend that many moves along your tier, clockwise or anticlockwise — you're choosing which space to <b>end</b> on, because then you draw <b>Threat cards</b> matching your space's colored icons: enemies, events, and loot.</p>
+<p><b>Battles</b>: every enemy fights in one of three languages — <b>Strength</b>, <b>Willpower</b> or <b>Cunning</b>. Both sides roll a die and add their attribute; high score wins. Win and the enemy becomes a <b>trophy</b> worth points equal to its attribute. Lose and you take wounds. Choose fights your character's numbers can speak.</p>` },
+
+    { h: "Levelling — the engine", body: (c) => `
+<p>At the end of your turn, spend <b>six trophy points</b> to gain a <b>level</b>: levels raise your attributes and unlock your character's ability track. That's the loop — fight what you can beat, cash trophies, get bigger, fight bigger. <b>Wargear</b> and <b>Power cards</b> tilt the odds; <b>influence</b> is the currency that greases everything.</p>
+<p>Two ways to fall: run out of <b>Life</b> and you're vanquished — you lose your gear and restart bruised. Collect too many <b>Corruption cards</b> (usually six) and Chaos takes you entirely: new character, from scratch. Some rewards are worth a little corruption. Some.</p>` },
+
+    { h: "Enemies of the Imperium", when: (c) => c.eoti, body: () => `
+<p>We're playing <b>Enemies of the Imperium</b>: one or more of us are <b>Nemeses</b> — playable villains with their own dark missions, racing the loyalists to the center. Same engine, opposite prayers.</p>` },
+
+    { h: "The Nemesis expansion", when: (c) => c.has("nemesis") && !c.eoti, body: () => `
+<p>With <b>Nemesis</b> in the mix: up to six players, <b>duels</b> when agents collide (apostate wargear changes hands), and nastier scenarios. Watch your back in shared spaces.</p>` },
+
+    { h: "Halls of Terra", when: (c) => c.has("halls"), body: () => `
+<p><b>Halls of Terra</b> adds the Sol board — a politically lethal detour toward the Imperial Palace with its own orange Threat deck, <b>affiliations</b> and Champions. Different dangers: fewer claws, more knives.</p>` },
+
+    { h: "Don't worry about these yet", body: (c) => `
+<p>I'll explain individual Power cards, scenario special rules and Wargear as they surface. Opening advice: never travel without an active <b>Mission</b>, and read the threat icons before you end your move — the board tells you exactly what kind of trouble each space sells.</p>` }
+  ]
+};

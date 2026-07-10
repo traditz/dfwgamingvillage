@@ -297,3 +297,22 @@ main{
   .jump-nav{margin:-20px -14px 18px}
   .def-list .dk{width:100%}
 }
+
+/* ---- teaching script ---- */
+.teach-bar{margin:14px 0 12px}
+#teachBtn,.teach-copy{
+  background:var(--panel2,var(--panel,rgba(127,127,127,.10))); color:inherit;
+  border:1px solid var(--line2,var(--line,rgba(127,127,127,.4))); border-radius:8px;
+  padding:8px 14px; cursor:pointer; font:inherit; font-size:.9rem; transition:border-color .16s, transform .16s;
+}
+#teachBtn:hover,.teach-copy:hover{border-color:currentColor; transform:translateY(-1px)}
+.teach-panel{
+  background:var(--panel,rgba(127,127,127,.06)); border:1px solid var(--line2,var(--line,rgba(127,127,127,.4)));
+  border-radius:10px; padding:16px 20px 18px; margin:0 0 18px;
+}
+.teach-panel[hidden]{display:none}
+.teach-top{display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:4px}
+.teach-top h3{margin:0; font-size:1.05rem}
+.teach-note{font-size:.85rem; font-style:italic; opacity:.75; margin:4px 0 12px; padding-bottom:10px; border-bottom:1px dashed var(--line2,var(--line,rgba(127,127,127,.4)))}
+.teach-panel h4{font-size:.8rem; letter-spacing:.1em; text-transform:uppercase; margin:14px 0 5px; opacity:.95}
+.teach-panel p{margin:0 0 9px; max-width:78ch}

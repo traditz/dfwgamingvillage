@@ -465,3 +465,43 @@ TAL.faq = [
   { q:"With the Woodland out, whose fate rules apply?",
     a:"The Light/Dark Fate rules replace the normal fate rules for the whole game. Light Fate rerolls your own die; Dark Fate forces an opponent to reroll one of theirs. You still can't reroll a creature's attack roll." }
 ];
+
+
+/* ---- TEACHING SCRIPT (read aloud, ~5 min; content per the Revised 4th Ed.
+   rulebook and expansion rulebooks — see the setup citations above) ---------- */
+TAL.teach = {
+  intro: "Read this aloud — about five minutes. Fate untouched until the end.",
+  sections: [
+    { h: "The pitch — and how you win", body: (c) => {
+      const alt = c.ending && c.ending !== "crown";
+      return `
+<p>We are adventurers in the land of Talisman, and the prize is the <b>Crown of Command</b> at the center of the board. The land is three rings: grow strong in the <b>Outer Region</b>, brave the <b>Middle</b>, and — once you've found a <b>Talisman</b> to pass the Portal — fight through the <b>Inner Region</b>${alt ? " to whatever ending fate has dealt us this game (it may stay hidden until someone arrives)" : " to the Crown, where the Command Spell lets you strike down every rival until you alone remain"}.</p>
+<p>This is a race with fangs: last adventurer standing, or first to the ending, wins.</p>`;
+    }},
+
+    { h: "Your turn — roll, land, resolve", body: (c) => `
+<p>Roll a die, move <b>exactly</b> that many spaces, clockwise or anti — your only real decision is which of two landing spots serves you. Then <b>encounter your space</b>: draw Adventure cards if it tells you to, fight what's there, or use the space's own text. Or — if another adventurer stands there — <b>attack them</b> instead and take a prize from the loser.</p>` },
+
+    { h: "Strength, Craft & Lives", body: (c) => `
+<p>Two stats rule everything: <b>Strength</b> for battles against monsters and rivals, <b>Craft</b> for psychic combat against spirits. Combat is simple: both sides roll a die, add their stat, high total wins — the loser drops a <b>Life</b>. Kill enough enemies and their trophies buy stat points; some spaces train you outright. <b>Gold</b> buys gear, <b>Followers</b> tag along with bonuses, <b>Spells</b> come with Craft, and <b>fate tokens</b> reroll your own dice — the 4th Edition's mercy rule. Lives are the only thing that kills you: at zero, your character is gone (grab a new one and rejoin the hunt).</p>` },
+
+    { h: "The long game", body: (c) => `
+<p>Don't sprint. The Inner Region murders the unprepared — the classic arc is: loot the Outer ring until your stats embarrass the Middle ring, find your <b>Talisman</b> (quests and luck), then commit. Every character breaks the rules their own way; read your sheet aloud when we start.</p>` },
+
+    { h: "This table's boards", when: (c) => c.corners && c.corners.length, body: (c) => {
+      const names = { dungeon: "<b>the Dungeon</b> (enter at the Ruins — a treasure-crawl that can drop you shockingly close to the Crown)", highland: "<b>the Highland</b> (enter at the Crags — the Eagle King guards real rewards)", city: "<b>the City</b> (enter at the City — shops, stables, and honest work)", woodland: "<b>the Woodland</b> (enter at the Forest — a path of destiny with fae prices)" };
+      return `<p>Corner realms are open this game: ${c.corners.map(x => names[x] || x).join("; ")}. Each is a detour with its own deck — riskier than the main road, and usually worth it.</p>`;
+    }},
+
+    { h: "Extra rules in play", when: (c) => c.has("reaper") || c.has("bloodmoon") || c.has("harbinger"), body: (c) => {
+      const bits = [];
+      if (c.has("reaper")) bits.push("the <b>Grim Reaper</b> stalks the board — whoever rolls him moves him, and meeting him is a dice game for your life");
+      if (c.has("bloodmoon")) bits.push("<b>day and night</b> alternate, lunar events fire, and the <b>Werewolf</b> hunts in the dark");
+      if (c.has("harbinger")) bits.push("the <b>Harbinger</b> walks the land reading omens — the end of the world is on a timer");
+      return `<p>Also: ${bits.join("; ")}.</p>`;
+    }},
+
+    { h: "Don't worry about these yet", body: (c) => `
+<p>Alignment, individual Spells, and shop inventories explain themselves in play. Opening advice: fight things slightly weaker than you, bank fate for the rolls that matter, and never enter the Middle Region because you're bored — enter it because you're ready.</p>` }
+  ]
+};

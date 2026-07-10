@@ -684,3 +684,47 @@ ${c.mode === "museum" ? "<li><b>The Stars Align…Above an Open Door</b> is the 
 <p class="src-line">Base p.4 · UF p.1 · GoA p.6 · OoI p.6 · OotD p.6 · OotP p.6</p>`;
     } }
 ];
+
+
+/* ---- TEACHING SCRIPT (read aloud, ~5 min; content per the base Rules of Play,
+   the expansion rulebooks and FAQ v2.0 — see references for citations) ------- */
+ES.teach = {
+  intro: "Read this aloud — about five minutes. Dice down until the end.",
+  sections: [
+    { h: "The pitch — and how we win", body: (c) => {
+      const place = { museum: "in a haunted museum at midnight", streets: "across the streets of Arkham", alaska: "on an expedition into the Alaskan wilderness", rlyeh: "aboard the Ultima Thule in the Pacific", pyramid: "between Cairo and the tombs of Dashur" }[c.mode];
+      return `
+<p>We're investigators ${place}, and an <b>Ancient One</b> is clawing its way into our world. We win the moment we collect the number of <b>Elder Signs</b> printed on its sheet. It wins doom tokens through events and our failures — fill its <b>Doom track</b> and it <b>awakens</b>: then we fight it dice-in-hand, or die.</p>
+<p>This is fully cooperative. Talk, plan, and share — the game is the enemy.</p>`;
+    }},
+
+    { h: "The shape of a turn", body: (c) => `
+<p>Your turn is quick: <b>move</b> anywhere — any Adventure card in play or the entrance — then <b>resolve</b> where you are: attempt the Adventure, or use an entrance action to heal and shop. Finally <b>advance the clock 3 hours</b>. Every time the clock strikes <b>midnight</b> — every four turns — a <b>Mythos card</b> hits us and “At Midnight” effects fire. Midnight is the drumbeat; everything we do races it.</p>` },
+
+    { h: "The dice — the heart of the game", body: (c) => `
+<p>Attempting an Adventure: roll the <b>six green dice</b>${c.has("uf") ? " (plus the white die if you're Blessed — and the black one if you're Cursed)" : ""} and try to complete <b>one task</b> — one row of symbols — per roll. Complete every row and the Adventure is yours. Fail to match a row and you must <b>throw away a die</b> and roll again — the pool shrinks until you triumph or run dry.</p>
+<p>Your tools: <b>Clue tokens</b> reroll dice; <b>Common and Unique Items</b> add the stronger yellow and red dice; <b>Spells</b> freeze a good result for later; <b>focusing</b> (or a friend on the same card assisting) saves one die from a bad roll. Choose Adventures your pool can actually beat — the rewards tell you what's worth the risk.</p>` },
+
+    { h: "Rewards, penalties & trophies", body: (c) => `
+<p>Every Adventure card shows its price and its prize: fail and take the red penalties (sanity, stamina, doom…); succeed and take the green — <b>items, allies, Clues, and the Elder Signs we're here for</b>. Resolved Adventures and slain monsters become <b>trophies</b> you spend at the entrance for healing and gear. Monsters that appear squat on Adventure cards as extra tasks — someone has to go be the hero.</p>` },
+
+    { h: "Doom, midnight & the Ancient One", body: (c) => `
+<p>Mythos cards add doom, spawn monsters, and curse the room. If the Doom track ever fills, the Ancient One <b>awakens</b>: every investigator is dragged into the final battle, rolling against its combat task to strip doom tokens away${c.mod("epicbattle") ? " — with the Epic Battle deck directing each round of the fight" : ""}. It's winnable, barely. Better plan: don't let it wake up.</p>
+<p>If your <b>sanity or stamina</b> hits zero, you're devoured — new investigator, one doom token to the enemy${c.mod("phobia") ? " (with the Phobia deck, a sanity break gives you a permanent Phobia instead — until the fourth one)" : ""}.</p>` },
+
+    { h: "This mode's twist", when: (c) => c.mode !== "museum", body: (c) => {
+      if (c.mode === "streets") return `<p><b>Streets of Arkham:</b> half the Adventures are facedown — walking onto one flips it, for better or worse. Success can open <b>gates</b> to Other Worlds that must be entered and sealed, <b>Events</b> trigger where you stand, and joining the <b>Sheldon Gang or the Lodge</b> auto-completes their tasks. The Streets card itself lets you pay 2 trophies to fix the board.</p>`;
+      if (c.mode === "alaska") return `<p><b>Alaska Expedition:</b> we manage <b>supplies</b> (zero at midnight hurts everyone) and a <b>day track</b> — ${c.mod("winter") ? "it's Winter: Day 7 ends and we lose" : "Summer forgives one overtime, at a price"}. <b>Storms</b> pile onto Adventures and punish whoever resolves them; four storms on a card feeds doom. The trek is staged: finish “Into the Wild” to reach Stage II and the endgame.</p>`;
+      if (c.mode === "rlyeh") return `<p><b>R'lyeh Rising:</b> Stage I is the voyage — manage the <b>Dark Waters track</b> and the <b>Deep One Legion</b>: four Legions in play <b>sink our ship</b>. Stage II reveals the broken <b>Amulet of R'lyeh</b>: every piece we haven't recovered locks one of our dice for the rest of the game. Collect amulet pieces like your dice depend on it, because they do.</p>`;
+      return `<p><b>Lightless Pyramid:</b> the entrance flips between <b>Cairo</b> (supplies, easier cards) and <b>Dashur</b> (the Elder Signs) — flipping costs clock time. <b>Relics</b> are the best items in the game: they can re-buy a die you already lost. <b>Hidden Chambers</b> demand an unlock roll before you may even enter, and the <b>Dark Pharaoh</b> adventures stack up: if a fifth must appear, the Ancient One wakes instantly.</p>`;
+    }},
+
+    { h: "Don't worry about these yet", body: (c) => {
+      const later = ["exact monster placement", "locked dice"];
+      if (c.has("uf")) later.push("Blessed and Cursed dice");
+      if (c.mod("master")) later.push("the red-bordered Master Mythos cards");
+      if (c.mod("exhibit")) later.push("the Exhibit's Relic shop");
+      return `<p>I'll explain ${later.join(", ")} when they first appear. Opening advice: spend Clues freely — a Clue saved is usually a turn wasted — and always know what today's midnight is about to do.</p>`;
+    }}
+  ]
+};

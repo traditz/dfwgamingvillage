@@ -208,7 +208,7 @@ function renderReference() {
 }
 
 /* ---- Tabs & boot --------------------------------------------------------- */
-function renderAll() { renderConfig(); renderSetup(); }
+function renderAll() { renderConfig(); renderSetup(); renderTeach(); }
 
 function switchTab(tab) {
   state.tab = tab;
@@ -222,3 +222,37 @@ document.addEventListener("DOMContentLoaded", () => {
   renderAll();
   $("#tabs").addEventListener("click", e => { const b = e.target.closest(".tab"); if (b) switchTab(b.dataset.tab); });
 });
+
+
+/* ---- Teaching script panel ------------------------------------------------ */
+function renderTeach() {
+  const box = document.getElementById("teach");
+  if (!box || !TAL.teach) return;
+  const c = ctx();
+  const secs = TAL.teach.sections
+    .filter(s => !s.when || s.when(c))
+    .map(s => ({ h: (typeof s.h === "function" ? s.h(c) : s.h), html: (typeof s.body === "function" ? s.body(c) : s.body) }))
+    .filter(s => s.html);
+  TAL._teachText = secs.map(s =>
+    s.h.toUpperCase() + "\n" +
+    s.html.replace(/<li>/g, "\u2022 ").replace(/<\/p>\s*<p>/g, "\n\n")
+          .replace(/<[^>]+>/g, "").replace(/\n{3,}/g, "\n\n").trim()
+  ).join("\n\n");
+  box.innerHTML = "<div class='teach-top'><h3>\uD83D\uDCD6 Teaching Script \u2014 this setup</h3><button type='button' class='teach-copy' id='teachCopy'>\uD83D\uDCCB Copy script</button></div>" +
+    "<p class='teach-note'>" + TAL.teach.intro + "</p>" +
+    secs.map(s => "<h4>" + s.h + "</h4>" + s.html).join("");
+  document.getElementById("teachCopy").addEventListener("click", () => {
+    const b = document.getElementById("teachCopy"), t = b.textContent;
+    navigator.clipboard.writeText(TAL._teachText || "").then(
+      () => { b.textContent = "\u2713 Script copied"; setTimeout(() => { b.textContent = t; }, 1600); },
+      () => { b.textContent = "Copy failed"; setTimeout(() => { b.textContent = t; }, 1600); });
+  });
+}
+(function () {
+  const b = document.getElementById("teachBtn");
+  if (b) b.addEventListener("click", () => {
+    const p = document.getElementById("teach");
+    p.hidden = !p.hidden;
+    if (!p.hidden) p.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+})();

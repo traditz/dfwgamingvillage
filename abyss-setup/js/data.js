@@ -223,3 +223,39 @@ ${c.has("outcasts") ? "<li><b>The Conspirator</b> (Outcast): at the start of you
 </ul>
 <p class="src-line">Base p.12${c.has("leviathan") ? " · Leviathan p.7" : ""}${c.has("outcasts") ? " · De Profundis" : ""}</p>` }
 ];
+
+
+/* ---- TEACHING SCRIPT (read aloud, ~5 min; content per Base/Kraken/Leviathan/
+   De Profundis rulebooks — see the reference sections above for citations) --- */
+AB.teach = {
+  intro: "Read this aloud — about five minutes. Deal nothing until the end.",
+  sections: [
+    { h: "The pitch — and how you win", body: (c) => `
+<p>The throne of the deep is empty, and we are the schemers circling it. Whoever has the most <b>Influence Points</b> when the game ends is crowned: points come from the <b>Lords</b> you recruit, the <b>Locations</b> you control, your strongest <b>affiliated Ally of each race</b>, and the <b>Monsters</b> you've slain.</p>
+<p>The end sneaks up: the game ends when someone recruits their <b>seventh Lord${c.has("outcasts") ? " or Outcast" : ""}</b>${c.has("leviathan") ? ", when the Court can't refill — or when the Leviathan deck or either Monster-token deck runs dry" : " or when the Court can't refill"}. Everyone else gets one last turn, so watch your rivals' tableaus.</p>` },
+
+    { h: "Your turn — one action, plus scheming", body: (c) => `
+<p>At the start of your turn you may <b>Plot at Court</b>: pay 1 Pearl apiece to flip new Lords${c.has("outcasts") ? " or Outcasts" : ""} into the Court, as many as you can afford. Then take exactly <b>one action</b>: <b>Explore the Depths</b>, <b>take a Council stack</b>, or <b>Recruit a Lord${c.has("outcasts") ? " or Outcast" : ""}</b>.</p>
+<p>And one forced move: the moment you hold <b>three Keys</b>, you must take control of a <b>Location</b> — ready or not.</p>` },
+
+    { h: "Exploring — everyone plays on your turn", body: (c) => `
+<p>Exploring is the fun one. Flip cards one at a time. Each <b>Ally</b> you reveal is offered to your opponents first — and they pay <b>you</b>: 1 Pearl for the first Ally bought this turn, 2 for the second, 3 for the third (each opponent may buy only once per turn). If nobody bites, take it yourself for free — which <b>ends your turn</b> — or press on.</p>
+<p>Flip a <b>Monster</b> and choose: fight it (automatic win — take the reward shown on the Threat track, which grows the longer everyone ignores monsters) or push past it, raising the Threat for the next fighter. Reach the last space and you must take what's there, with a bonus Pearl for your trouble. Leftover Allies sink to the <b>Council</b> stacks by race — free card piles someone will scoop later.</p>` },
+
+    { h: "Recruiting Lords — the point of it all", body: (c) => `
+<p>Lords cost <b>Allies</b>: the exact number of different races shown, with the big bubble's race mandatory, totalling the printed value — short on value, pay 1 Pearl per missing point. Then <b>affiliate</b> the cheapest Ally you spent: it stays in front of you and scores at the end.</p>
+<p>Why recruit? Lords bring <b>Influence Points, Keys, and Powers</b> — one-shot powers (arrow) or ongoing ones that last until that Lord is spent on a Location. And that's the tension: <b>Locations</b> score well, but claiming one buries your Lords' powers under it, Keys and all.</p>` },
+
+    { h: "Kraken — dirty money", when: (c) => c.has("kraken"), body: () => `
+<p><b>Nebulis</b>, the black pearls, spend almost like Pearls — but every one you're holding at the end costs <b>1 point</b>, and the most corrupt player (the Kraken statue marks them) loses <b>5 more</b>. <b>Kraken Allies</b> are wild — any race — but they pay you Nebulis and are never affiliated. The <b>Sanctuaries</b> are push-your-luck Locations: keep flipping Loot for treasure until you flip a duplicate. And three Smuggler Lords hand out <b>Sentinels</b> — reserve a Lord, Council stack or Location so only you can take it.</p>` },
+
+    { h: "Leviathan — the Border war", when: (c) => c.has("leviathan"), body: () => `
+<p>Monsters now work differently: revealing one while exploring means <b>fight a Leviathan at the Border, or keep exploring and add another Leviathan</b> — and if its zone is full, the old one mauls you on the way in (wounds are −1 point each). Fighting: discard one Ally of a race the Leviathan lists — <b>a crab always works</b> — roll a die, add the Ally's value, and beat its Resistance to knock off Health. Kills pay Monster tokens, the killer keeps the card, and the deadliest hunter holds the <b>Scourge of the Abyss</b>: 5 points at the end. Oh, and martial law: <b>12 Allies max</b> in hand at turn's end — pay a Pearl per extra or discard.</p>` },
+
+    { h: "The Outcasts", when: (c) => c.has("outcasts"), body: () => `
+<p>A second deck of banished nobles sits beside the Lords. <b>Outcasts recruit exactly like Lords</b> — but every time you recruit your second, you immediately <b>reconquer</b>: take a Location from an opponent and slide both Outcasts under it. The Court refills with an Outcast first, so there's always trouble available. They aren't “Lords” for card effects, and they count toward the seven that end the game.</p>` },
+
+    { h: "Don't worry about these yet", body: (c) => `
+<p>I'll explain individual Lord powers as they hit the Court${c.has("kraken") ? ", the Loot odds when someone enters a Sanctuary" : ""}${c.has("leviathan") ? ", and the new battle Allies when they show up" : ""}. One rule of thumb to start: Pearls are tempo, Allies are options, and the Court never stays cheap for long.</p>` }
+  ]
+};

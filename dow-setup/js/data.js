@@ -594,3 +594,43 @@ DW.wcSeating = {
   8:  { teams: "4 vs 4",  lw: false }, 9:  { teams: "4 vs 4",  lw: true },
   10: { teams: "5 vs 5",  lw: false }, 11: { teams: "5 vs 5",  lw: true }
 };
+
+
+/* ---- TEACHING SCRIPT (read aloud, ~5 min; content per the base, Long Night
+   and Warring Colonies rulebooks — see the setup citations above) ----------- */
+DW.teach = {
+  intro: "Read this aloud — about five minutes. Keep your secret objective facedown.",
+  sections: [
+    { h: "The pitch — and how you win", body: (c) => `
+<p>We're a colony of survivors in a zombie winter. The colony has a shared <b>main objective</b> on the table — but each of us also has a <b>secret objective</b>, and here's the rule that changes everything: <b>you only win if YOUR secret objective is complete when the game ends</b>. Most secret objectives want the colony to succeed. One of us might be holding a <b>betrayal</b> card that wants it to burn.</p>
+<p>The game ends three ways: the main objective is completed, <b>morale</b> hits zero, or the <b>round tracker</b> runs out. Then everyone checks their card — it's entirely possible the colony “wins” and half of us still lose.</p>` },
+
+    { h: "The shape of a round", body: (c) => `
+<p>Each round: reveal the <b>crisis</b> — this round's shared tax, paid in item cards. Everyone rolls their <b>action dice</b> — one per survivor you control, plus one. Then turns: on yours, spend dice on actions anywhere on the board. After everyone's gone, the <b>colony phase</b> collects the bills: feed the colony, count the waste, resolve the crisis, and add zombies to every location with survivors in it.</p>` },
+
+    { h: "Your dice — and what they buy", body: (c) => `
+<p>Dice are your action currency, and the roll matters: <b>attack</b> and <b>search</b> need a die equal to or above that survivor's printed value. Attack kills a zombie where a survivor stands; <b>search</b> digs item cards out of a location's deck — the location decides what you find: medicine at the hospital, food at the grocery store, guns at the police station. Any die moves a survivor, barricades a door, cleans waste, or attracts zombies elsewhere.</p>
+<p>Free moves that cost no dice: play cards, hand items off, <b>spend food to pump a die up</b>, request help — and <b>vote to exile</b> someone the table stops trusting.</p>` },
+
+    { h: "Exposure — the coldest rule in the game", body: (c) => `
+<p>Every time a survivor <b>moves between locations</b> or <b>kills a zombie</b>, roll the <b>exposure die</b>. Most faces are fine. Some wound. One gives <b>frostbite</b> — a wound that keeps wounding every turn until treated. And one face is a <b>bite</b>: that survivor dies <i>immediately</i>, and the bite spreads to the next survivor at that location, whose owner must kill them or gamble the die again. Every trip outside the colony is this bet. Travel with fuel cards when you can; they skip the roll.</p>` },
+
+    { h: "Crossroads — don't read ahead", body: (c) => `
+<p>At the start of your turn, the player on your right draws a <b>Crossroads card</b> and silently watches you. If you trip its trigger — enter a location, play a card, sometimes just exist — they interrupt and read you a story with a choice. Don't ask, don't peek. It's the best part of the game.</p>` },
+
+    { h: "Morale, crises & the colony phase", body: (c) => `
+<p>The colony phase is where games are lost: <b>feed everyone</b> or take starvation tokens that bleed morale every round. Ten cards in the <b>waste pile</b> costs morale too — so contributing cards to the crisis isn't charity, it's sanitation. The <b>crisis</b> itself is a blind vote: cards contributed facedown, matching symbols help, wrong symbols <i>sabotage</i> — and nobody knows who threw the wrench. Sound familiar? That's your betrayer-detection kit.</p>` },
+
+    { h: "The Long Night", when: (c) => c.has("longnight"), body: () => `
+<p>We're playing with <b>The Long Night</b>: the <b>Raxxon</b> pharmaceutical site spawns horrors best left contained, <b>bandits</b> raid locations and carry off the loot, and colony <b>improvements</b> let us build something that lasts. Zombies can also grow <b>despair</b>-driven upgrades. Same winter, more knives.</p>` },
+
+    { h: "Warring Colonies", when: (c) => c.wc, body: () => `
+<p>This is <b>Warring Colonies</b>: two colonies, one winter, not enough of anything. Each team runs its own board and races (or raids) the other — with <b>direct conflict</b> rules for when survivors meet${""}. The betrayal paranoia now has a zip code: the other table.</p>` },
+
+    { h: "Don't worry about these yet", body: (c) => {
+      const later = ["individual location decks", "helpless survivors", "exile details"];
+      if (c.has("longnight")) later.push("Raxxon's experiments");
+      return `<p>I'll explain ${later.join(", ")} when they come up. Opening advice: watch what people <i>contribute to the crisis</i> — generosity is loud, sabotage is quiet — and never let the food supply hit zero twice.</p>`;
+    }}
+  ]
+};

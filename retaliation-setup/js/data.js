@@ -385,3 +385,55 @@ RT.reference = [
     src: "FAQ v1.2 p.2-3"
   }
 ];
+
+
+/* ---- TEACHING SCRIPT (read aloud, ~5 min; content per the Retaliation
+   rulebook, booster rulebooks and FAQ v1.2 — see references) ---------------- */
+RT.teach = {
+  intro: "Read this aloud — about five minutes. Weapons cold until the end.",
+  sections: [
+    { h: "The pitch — and how you win", body: (c) => {
+      const foe = c.race === "sangre" ? "Sangrevores" : c.race === "neoflesh" ? "Neoflesh Cult" : "Primebloods";
+      if (c.mode === "solocoop") return `
+<p>We're a marine squad dropping into a dead facility crawling with <b>${foe}</b>. Fully cooperative: we have one shared <b>Mission Task per marine</b> and every one of them must be done, with at least one of us alive at the end. The clock is brutal: <b>fourteen rounds</b>, and our ride — the <b>Lander</b> — only arrives on round ten, if the anti-aircraft guns don't eat it.</p>`;
+      return `
+<p>We're a marine squad dropping into a dead facility crawling with <b>${foe}</b>. Semi-cooperative: each of us holds a <b>Private Objective and a Mission Objective</b>, keeps one during the game, and wins alone by completing it, escaping or hibernating, and passing the infection checks. The shared <b>Mission Task</b> on the table is what most Mission Objectives point at — so the squad has a job even when we don't trust each other.</p>
+<p>The clock is brutal: <b>fourteen rounds</b>. Our ride — the <b>Lander</b> — arrives on round ten <i>if</i> the facility's anti-aircraft guns are off. There's also a one-seat <b>Escape Shuttle</b> deep in Section C, and the <b>Hibernatorium</b>, if someone switches it on. Count the seats. Do the math.</p>`;
+    }},
+
+    { h: "The shape of a round", body: (c) => `
+<p>Your turn is <b>two actions</b>, paid with cards from your hand; then you lose <b>oxygen</b> if your section's life support is down, and burn if your room's on fire. When everyone has passed: the <b>Intruders attack</b>, an <b>Event card</b> marches them down the corridors, the <b>bag develops</b> — the hive literally breeds between rounds — and we all draw back to five cards. The round marker crawls toward whatever tokens are waiting on the track. You can see the whole countdown. That's the horror.</p>` },
+
+    { h: "Exploring — building the map that kills you", body: (c) => {
+      if (c.race === "sangre") return `
+<p>The facility starts undiscovered — moving into the dark draws an <b>Exploration card</b> that builds rooms and corridors as you go. Against the Sangrevores there are <b>no noise rolls</b>: instead your movement drops <b>Shadow markers</b> in the corridors around you, and walking through Shadows later triggers a <b>Shadow card</b> — the more you crossed, the worse it gets. Move cautiously to slip through untouched, or burst-fire to clear them. The dark literally accumulates.</p>`;
+      return `
+<p>The facility starts undiscovered — moving into the dark draws an <b>Exploration card</b> that builds the rooms and corridors as you go. And after <b>every single move</b> you roll the <b>noise die</b>: matching corridors either spawn a noise marker, wake the marker that's already there — drawing monsters straight out of the bag — or shove whatever's lurking there into your room. <b>Secure tokens</b> soak the first attack from anything entering; <b>reinforcing</b> corridors silences them. Map discipline is life.</p>`;
+    }},
+
+    { h: "Fighting — three triggers, know them all", body: (c) => `
+<p><b>Shoot</b> in your room: deal a hit, roll — crosshair kills, a low roll kills if it's already wounded, and only the ammo symbol actually spends ammo. <b>Burst</b> into a corridor: always spends ammo, sprays multiple hits — the crowd-control button. <b>Melee</b>: free, filthy — you gain a contamination card, and if it survives, it swings back. In corridors little ones die to one hit; in rooms wounds accumulate. The <b>Queen</b> is different: her health is a deck, and you'll be at it a while.</p>` },
+
+    { h: "Your body is a resource tracker", body: (c) => `
+<p>Watch three things: <b>Health</b> — serious wounds block whole sections of the track and armor breaks before you do; <b>Oxygen</b> — a dial that only goes down in dead sections, and at zero you get exactly one more turn; and <b>Contamination</b> — dead cards silting up your action deck that decide, at the very end, whether something hatches out of you. The <b>Surgery room</b> fixes most of it. Getting there is the hard part.</p>` },
+
+    { h: "Sangrevores — infection and gifts", when: (c) => c.race === "sangre", body: () => `
+<p>Their touch leaves <b>Infections</b> — shuffled straight into your deck, treated as infected at the end. Pass and pay a health to purge your hand, or play the card itself away. But they also leave <b>Tainted Blood</b>: a once-a-round vampiric ability. Take the gift. Worry later.</p>` },
+
+    { h: "Neoflesh Cult — kill the batteries", when: (c) => c.race === "neoflesh", body: () => `
+<p>Four Adult breeds, each with an active <b>Skill</b> — Slashers double-tap, Ironclads soak, Crawlmines detonate, Firespitters punish bursts. The off-switch is the <b>Cultists</b>: half-alive humans wired into the walls. Kill one, turn off a Skill of your choice. Meanwhile <b>Twitchlings</b> scurry offstage to feed the <b>Motherbrain</b> — every body they deliver makes her bigger, meaner, and closer. Squash the little ones.</p>` },
+
+    { h: "The Xyrians", when: (c) => c.has("xyrians"), body: () => `
+<p>A third player at the table: <b>Xyrians</b> appear from Trace tokens and act on their own cards — hostile to us <i>and</i> the hive. They walk through doors like rumors, hurt whatever's nearest, and hurting them is loud. Kill one twice and it drops <b>alien armor</b>; or one of us can pledge <b>Allegiance</b> and buy a strange kind of peace.</p>` },
+
+    { h: "The Insider", when: (c) => c.has("insider"), body: () => `
+<p>Someone else is alive in here. The <b>Insider</b>'s story unfolds through numbered Story cards as we explore — sometimes she's an ally worth protecting, sometimes a target. Follow the cards; they always tell you what's active. Two of our objectives may hinge on her.</p>` },
+
+    { h: "Don't worry about these yet", body: (c) => {
+      const later = ["the room help sheet (it's on this page)", "the Robot", "item traits"];
+      if (c.mod("deadly")) later.push("(you already know Deadly Mode: every corridor is twice as loud)");
+      if (c.mode === "solocoop") later.push("revival in Surgery");
+      return `<p>I'll explain ${later.join(", ")} when they come up. Opening advice: life support is the quiet killer — keep an eye on your section's oxygen — and when the Lander token hits the round marker, you want to already be standing in the Landing Zone.</p>`;
+    }}
+  ]
+};

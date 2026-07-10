@@ -191,6 +191,30 @@
     }
   }
 
+
+  function renderTeach(c) {
+    const box = $("#teach");
+    if (!box || !VC.teach) return;
+    const secs = VC.teach.sections
+      .filter(s => !s.when || s.when(c))
+      .map(s => ({ h: (typeof s.h === "function" ? s.h(c) : s.h), html: (typeof s.body === "function" ? s.body(c) : s.body) }))
+      .filter(s => s.html);
+    VC._teachText = secs.map(s =>
+      s.h.toUpperCase() + "\n" +
+      s.html.replace(/<li>/g, "\u2022 ").replace(/<\/p>\s*<p>/g, "\n\n")
+            .replace(/<[^>]+>/g, "").replace(/\n{3,}/g, "\n\n").trim()
+    ).join("\n\n");
+    box.innerHTML = "<div class='teach-top'><h3>\uD83D\uDCD6 Teaching Script \u2014 this setup</h3><button type='button' class='teach-copy' id='teachCopy'>\uD83D\uDCCB Copy script</button></div>" +
+      "<p class='teach-note'>" + VC.teach.intro + "</p>" +
+      secs.map(s => "<h4>" + s.h + "</h4>" + s.html).join("");
+    $("#teachCopy").addEventListener("click", () => {
+      const b = $("#teachCopy"), t = b.textContent;
+      navigator.clipboard.writeText(VC._teachText || "").then(
+        () => { b.textContent = "\u2713 Script copied"; setTimeout(() => { b.textContent = t; }, 1600); },
+        () => { b.textContent = "Copy failed"; setTimeout(() => { b.textContent = t; }, 1600); });
+    });
+  }
+
   function update() {
     normalize();
     const c = ctx();
@@ -200,11 +224,17 @@
     renderModules();
     renderSetup(c);
     renderReference(c);
+    renderTeach(c);
     doSearch();
   }
 
   document.addEventListener("DOMContentLoaded", () => {
     $("#rsearch").addEventListener("input", doSearch);
+    $("#teachBtn").addEventListener("click", () => {
+      const p = $("#teach");
+      p.hidden = !p.hidden;
+      if (!p.hidden) p.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
     update();
   });
 })();
