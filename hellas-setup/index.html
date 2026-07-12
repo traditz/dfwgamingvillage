@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lords of Hellas — Setup &amp; Reference Utility</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=1">
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <span class="sigil" aria-hidden="true">
+      <!-- a Corinthian helmet within a meander-broken ring -->
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M50 8 a42 42 0 0 1 0 84 a42 42 0 0 1 0 -84" fill="none" stroke="currentColor" stroke-width="2" opacity="0.45" stroke-dasharray="10 6"/>
+        <path d="M50 22 q-16 0 -18 20 q-1 12 4 22 l6 12 q2 4 6 4 v-14 q-6 -8 -6 -16 h16 q0 8 -6 16 v14 q4 0 6 -4 l6 -12 q5 -10 4 -22 q-2 -20 -18 -20 Z"
+              fill="none" stroke="currentColor" stroke-width="2.8" stroke-linejoin="round"/>
+        <path d="M50 22 q3 -8 0 -12 q-3 4 0 12" fill="currentColor"/>
+        <line x1="50" y1="44" x2="50" y2="56" stroke="currentColor" stroke-width="2.4"/>
+      </svg>
+    </span>
+    <div class="brand-title">Lords of Hellas</div>
+    <div class="deco-rule" aria-hidden="true"><i></i><b></b><i></i></div>
+    <div class="brand-sub">Setup &amp; Reference Utility</div>
+    <p class="tagline" style="margin-top:10px">
+      Choose your gods, expansions and way to play — the standard race for Hellas, the Kronos
+      Rebellion, or the solo Persian Invasion — for exact setup steps, a full rules reference with
+      FAQ rulings applied, and a searchable index of every rulebook. Four roads to victory; take the
+      one your rivals forgot to guard.
+    </p>
+  </header>
+
+  <main>
+    <section aria-label="Configuration">
+      <h2>The Pantheon</h2>
+      <p class="sec-note">Select the sets on the table, the mode, and the player count. Every step, ruling and script below adapts to your choices.</p>
+      <div class="cfg">
+        <div>
+          <label class="cfg-label">Sets in play</label>
+          <div id="expansions" class="chips"></div>
+        </div>
+        <div>
+          <label class="cfg-label">Way to play</label>
+          <div id="modes" class="mode-grid"></div>
+        </div>
+        <div>
+          <label class="cfg-label">Heroes <span class="hint">(player count; 5 needs Atlantis, 6 needs City of Steel, 1 is the Solo Campaign)</span></label>
+          <div id="players" class="pbtns"></div>
+        </div>
+        <div id="modules-group">
+          <label class="cfg-label">Gods, modules &amp; variants <span class="hint">— full god expansions share the board's one free Monument slot, so pick at most one</span></label>
+          <div id="modules" class="mods"></div>
+        </div>
+      </div>
+    </section>
+
+    <section aria-label="Setup">
+      <h2>Setup</h2>
+      <p class="sec-note">Follow the steps in order. Each cites its official source.</p>
+      <div class="teach-bar"><button id="teachBtn" type="button" title="A ~5 minute script to teach this exact setup aloud">📖 Teaching script</button></div>
+      <div id="teach" class="teach-panel" hidden></div>
+      <div id="setup"></div>
+    </section>
+
+    <section aria-label="Reference">
+      <h2>Rules Reference</h2>
+      <p class="sec-note">Tap a heading to open it. Contents adapt to your sets, mode and player count.</p>
+      <div id="reference"></div>
+    </section>
+
+    <section aria-label="Rulebook search">
+      <h2>Search the Rulebooks</h2>
+      <p class="sec-note">Full-text search across the core rulebook, every selected expansion manual, and the official FAQs.</p>
+      <div class="rsearch-wrap">
+        <input id="rsearch" type="search" placeholder="e.g. usurp, monument, hunt, fortify, priest, glory…" aria-label="Search the rulebooks">
+      </div>
+      <div id="rresults"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    Setup and reference content grounded in the official Lords of Hellas core rulebook, the Dark Ages,
+    Kronos, City of Steel, Apollo and Atlas expansion manuals, the Solo Campaign book, and the official
+    FAQ and Solo Campaign FAQ (v1.0, 2018-03-27). A fan-made play aid — not affiliated with Awaken Realms.
+  </footer>
+
+  <script src="js/data.js?v=1"></script>
+  <script src="js/rules.js?v=1"></script>
+  <script src="js/app.js?v=1"></script>
+  <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
+  <script src="../site-analytics.js?v=20260607-analytics"></script>
+</body>
+</html>
