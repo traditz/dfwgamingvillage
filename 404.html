@@ -48,5 +48,15 @@
         <p>&copy; 2026 DFW Gaming Village. All Rights Reserved.</p>
     </footer>
     <script src="/site-analytics.js?v=20260607-analytics"></script>
+    <script id="legacy-setup-redirect">
+        // The player-aid setup pages moved to /player-aids/ (July 2026).
+        // Redirect old bookmarks like /dune-setup/ to the new location.
+        (function () {
+            var m = window.location.pathname.match(/^\/([a-z]+-setup)(\/.*)?$/);
+            if (m) {
+                window.location.replace('/player-aids/' + m[1] + (m[2] || '/') + window.location.search + window.location.hash);
+            }
+        })();
+    </script>
 </body>
 </html>

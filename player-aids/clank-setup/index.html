@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clank! A Deck-Building Adventure — Setup &amp; Reference Utility</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=1">
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <span class="sigil" aria-hidden="true">
+      <!-- a dragon's eye above three noisy clank cubes -->
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18 36 Q50 12 82 36 Q50 60 18 36 Z" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linejoin="round"/>
+        <ellipse cx="50" cy="36" rx="5" ry="9" fill="currentColor"/>
+        <g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round">
+          <rect x="24" y="66" width="15" height="15" rx="2"/>
+          <rect x="43" y="72" width="15" height="15" rx="2" transform="rotate(-8 50 79)"/>
+          <rect x="62" y="65" width="15" height="15" rx="2" transform="rotate(10 69 72)"/>
+        </g>
+        <g stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <line x1="31" y1="60" x2="29" y2="54"/>
+          <line x1="50" y1="63" x2="50" y2="57"/>
+          <line x1="68" y1="59" x2="70" y2="53"/>
+        </g>
+      </svg>
+    </span>
+    <div class="brand-title">Clank!</div>
+    <div class="deco-rule" aria-hidden="true"><i></i><b></b><i></i></div>
+    <div class="brand-sub">A Deck-Building Adventure — Setup &amp; Reference Utility</div>
+    <p class="tagline" style="margin-top:10px">
+      Choose your board — Dragon Keep, the Sunken Treasures, the Mummy's pyramid, or an Expedition —
+      plus expansions and party size, for exact setup steps, a full rules reference with the August 2025
+      rules updates applied, and a searchable index of every rulebook. Sneak in. Grab it. Run.
+    </p>
+  </header>
+
+  <main>
+    <section aria-label="Configuration">
+      <h2>The Heist</h2>
+      <p class="sec-note">Select the sets on the table, the board, and the party size. Every step, ruling and script below adapts to your choices.</p>
+      <div class="cfg">
+        <div>
+          <label class="cfg-label">Sets in play</label>
+          <div id="expansions" class="chips"></div>
+        </div>
+        <div>
+          <label class="cfg-label">Game board</label>
+          <div id="boards" class="mode-grid"></div>
+        </div>
+        <div>
+          <label class="cfg-label">Thieves <span class="hint">(player count; 5–6 needs Adventuring Party)</span></label>
+          <div id="players" class="pbtns"></div>
+        </div>
+        <div id="modules-group">
+          <label class="cfg-label">Modules &amp; variants <span class="hint">— optional; full setup details appear when enabled</span></label>
+          <div id="modules" class="mods"></div>
+        </div>
+      </div>
+    </section>
+
+    <section aria-label="Setup">
+      <h2>Setup</h2>
+      <p class="sec-note">Follow the steps in order. Each cites its official source; the August 2025 rules updates are already applied.</p>
+      <div class="teach-bar"><button id="teachBtn" type="button" title="A ~5 minute script to teach this exact setup aloud">📖 Teaching script</button></div>
+      <div id="teach" class="teach-panel" hidden></div>
+      <div id="setup"></div>
+    </section>
+
+    <section aria-label="Reference">
+      <h2>Rules Reference</h2>
+      <p class="sec-note">Tap a heading to open it. Contents adapt to your sets, board and player count.</p>
+      <div id="reference"></div>
+    </section>
+
+    <section aria-label="Rulebook search">
+      <h2>Search the Rulebooks</h2>
+      <p class="sec-note">Full-text search across the base rulebook, every selected expansion, and the official FAQ &amp; Rules Updates.</p>
+      <div class="rsearch-wrap">
+        <input id="rsearch" type="search" placeholder="e.g. artifact, countdown, mummy, scuba, web, gear, react…" aria-label="Search the rulebooks">
+      </div>
+      <div id="rresults"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    Setup and reference content grounded in the official Clank!, Sunken Treasures, The Mummy's Curse,
+    Expeditions: Gold and Silk, Expeditions: Temple of the Ape Lords and Adventuring Party rulebooks,
+    and the FAQ &amp; Rules Updates (August&nbsp;18, 2025). A fan-made play aid — not affiliated with
+    Dire Wolf Digital or Renegade Game Studios.
+  </footer>
+
+  <script src="js/data.js?v=1"></script>
+  <script src="js/rules.js?v=1"></script>
+  <script src="js/app.js?v=1"></script>
+  <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
+  <script src="/site-analytics.js?v=20260607-analytics"></script>
+</body>
+</html>
