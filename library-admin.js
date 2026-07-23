@@ -209,14 +209,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const thinThemes = [...catCounts.entries()].sort((a, b) => a[1] - b[1]).slice(0, 10)
       .map(([i, n]) => `<span class="adm-chip">${esc(snapshot.categories[i])} · ${n}</span>`).join(' ');
 
-    const byPlays = snapshot.games.slice().sort((a, b) => (playsById[b.id] || 0) - (playsById[a.id] || 0)).slice(0, 12);
-    const expRows = byPlays.map((g) => `
-      <tr data-exp-row="${g.id}">
-        <td>${gameLink(g.id, g.name)}</td>
-        <td class="adm-dim">${playsById[g.id] || 0} plays · owns ${(g.exp || []).length} exp</td>
-        <td><button type="button" class="adm-mini" data-exp-check="${g.id}">Find missing</button></td>
-      </tr>
-      <tr class="adm-exp-result" data-exp-result="${g.id}" hidden><td colspan="3"></td></tr>`).join('');
+    // The missing-expansions panel fills asynchronously — see analyzeExpansions().
 
     $('adm-procure').innerHTML = `
       <div class="adm-panel"><h2>Suggested acquisitions</h2>
@@ -244,9 +237,67 @@ document.addEventListener('DOMContentLoaded', function () {
         <p>${thinThemes}</p>
       </div>
       <div class="adm-panel" id="adm-queues"><h2>Acquisition queues</h2><p class="adm-dim">Loading BGG wishlist and want-to-play lists…</p></div>
-      <div class="adm-panel"><h2>Missing expansions — most-played games</h2>
-        <div class="adm-scroll"><table class="adm-table"><tbody>${expRows}</tbody></table></div>
+      <div class="adm-panel"><h2>Missing expansions</h2>
+        <p class="adm-dim">Library games with expansions on BGG that the library doesn't own, ranked by how much the game gets played. Games with no expansions (or with every expansion owned) are excluded.</p>
+        <div id="adm-exp-out"><p class="adm-dim">Analyzing the most-played games…</p></div>
       </div>`;
+
+    analyzeExpansions().catch((err) => {
+      const el = $('adm-exp-out');
+      if (el) el.innerHTML = `<p class="adm-dim">Expansion analysis failed: ${esc(err.message)}</p>`;
+    });
+  }
+
+  /**
+   * For the top-played library games, pull each game's full expansion list
+   * from BGG and keep only those with expansions the library lacks.
+   */
+  async function analyzeExpansions() {
+    const SCAN = 40; // two batched thing calls
+    const top = snapshot.games.slice()
+      .sort((a, b) => (playsById[b.id] || 0) - (playsById[a.id] || 0) || b.rating - a.rating)
+      .slice(0, SCAN);
+    const results = [];
+    let failedBatches = 0;
+    for (let i = 0; i < top.length; i += 20) {
+      const batch = top.slice(i, i + 20);
+      const res = await fetch(`${WORKER}/api/bgg-thing?id=${batch.map((g) => g.id).join(',')}`);
+      if (!res.ok) { failedBatches++; continue; }
+      const xml = new DOMParser().parseFromString(await res.text(), 'text/xml');
+      for (const item of xml.querySelectorAll('item')) {
+        const game = snapshot.games.find((g) => g.id === item.getAttribute('id'));
+        if (!game) continue;
+        const owned = new Set((game.exp || []).map((x) => x.id));
+        const all = [...item.querySelectorAll('link[type="boardgameexpansion"]:not([inbound])')]
+          .map((l) => ({ id: l.getAttribute('id'), name: l.getAttribute('value') }));
+        const missing = all.filter((x) => !owned.has(x.id));
+        if (all.length && missing.length) {
+          results.push({ game, ownedCount: owned.size, total: all.length, missing });
+        }
+      }
+    }
+
+    const el = $('adm-exp-out');
+    if (!el) return;
+    const warning = failedBatches
+      ? `<p class="adm-dim">BGG did not answer ${failedBatches === 2 ? 'the expansion lookups' : 'part of the expansion lookup'} (likely rate-limiting) — reload the page to retry.${results.length ? ' Partial results below.' : ''}</p>`
+      : '';
+    if (!results.length) {
+      el.innerHTML = warning || '<p class="adm-dim">The most-played games have every available expansion. 🎉</p>';
+      return;
+    }
+    el.innerHTML = `${warning}
+      <div class="adm-scroll"><table class="adm-table">
+        <thead><tr><th>Game</th><th>Owned</th><th>Missing expansions</th></tr></thead>
+        <tbody>${results.map((r) => `
+          <tr>
+            <td>${gameLink(r.game.id, r.game.name)}<br><span class="adm-dim">${playsById[r.game.id] || 0} plays</span></td>
+            <td class="adm-dim">${r.ownedCount} of ${r.total}</td>
+            <td>${r.missing.map((x) => gameLink(x.id, x.name)).join(' · ')}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table></div>
+      <p class="adm-dim" style="margin-top:8px">Scanned the ${SCAN} most-played library games — ${results.length} have unowned expansions. BGG counts promos and small packs as expansions, so totals run high.</p>`;
   }
 
   function renderQueues() {
@@ -419,31 +470,6 @@ document.addEventListener('DOMContentLoaded', function () {
         <a class="adm-dim" href="https://www.google.com/search?q=${encodeURIComponent(`${pub.name} board game publisher contact`)}" target="_blank" rel="noopener" title="Search for contact details">🔎</a>`;
     }
   }
-
-  // Missing-expansion finder (one thing call per click).
-  $('adm-procure').addEventListener('click', async (e) => {
-    const btn = e.target.closest('[data-exp-check]');
-    if (!btn) return;
-    const id = btn.dataset.expCheck;
-    const row = document.querySelector(`[data-exp-result="${id}"]`);
-    const cell = row.querySelector('td');
-    row.hidden = false;
-    cell.textContent = 'Checking BGG…';
-    try {
-      const res = await fetch(`${WORKER}/api/bgg-thing?id=${id}`);
-      const xml = new DOMParser().parseFromString(await res.text(), 'text/xml');
-      const game = snapshot.games.find((g) => g.id === id);
-      const ownedExp = new Set((game?.exp || []).map((x) => x.id));
-      const missing = [...xml.querySelectorAll('link[type="boardgameexpansion"]:not([inbound])')]
-        .map((l) => ({ id: l.getAttribute('id'), name: l.getAttribute('value') }))
-        .filter((x) => !ownedExp.has(x.id));
-      cell.innerHTML = missing.length
-        ? missing.map((x) => gameLink(x.id, x.name)).join(' · ')
-        : 'Every listed expansion is already owned. 🎉';
-    } catch (err) {
-      cell.textContent = `Lookup failed: ${err.message}`;
-    }
-  });
 
   /* ================= curation ================= */
 
