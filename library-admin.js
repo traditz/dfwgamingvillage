@@ -375,20 +375,25 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
-    const usd = listings.filter((l) => l.currency === 'USD' && l.price > 0).map((l) => l.price).sort((a, b) => a - b);
+    // US filter: BGG's feed has no seller location, so USD currency is the
+    // closest available proxy — non-USD listings are hidden entirely.
+    const total = listings.length;
+    const usdListings = listings.filter((l) => l.currency === 'USD' && l.price > 0);
+    const hidden = total - usdListings.length;
+    const usd = usdListings.map((l) => l.price).sort((a, b) => a - b);
     const median = usd.length ? usd[Math.floor(usd.length / 2)] : 0;
     const summary = usd.length
       ? `<div class="adm-price-stats">
-          <div class="gl-stat"><span class="gl-stat-label">USD listings</span><span class="gl-stat-value">${usd.length}</span><span class="gl-stat-sub">of ${listings.length} total</span></div>
+          <div class="gl-stat"><span class="gl-stat-label">USD listings</span><span class="gl-stat-value">${usd.length}</span><span class="gl-stat-sub">${hidden ? `${hidden} non-USD hidden` : 'all listings'}</span></div>
           <div class="gl-stat"><span class="gl-stat-label">Lowest</span><span class="gl-stat-value">$${usd[0].toFixed(0)}</span><span class="gl-stat-sub">USD</span></div>
           <div class="gl-stat"><span class="gl-stat-label">Median</span><span class="gl-stat-value">$${median.toFixed(0)}</span><span class="gl-stat-sub">USD</span></div>
           <div class="gl-stat"><span class="gl-stat-label">Highest</span><span class="gl-stat-value">$${usd[usd.length - 1].toFixed(0)}</span><span class="gl-stat-sub">USD</span></div>
         </div>`
-      : `<p class="adm-dim">No current USD listings on the BGG Marketplace.</p>`;
+      : `<p class="adm-dim">No current USD listings on the BGG Marketplace${hidden ? ` (${hidden} non-USD hidden)` : ''}.</p>`;
 
-    const rows = listings.sort((a, b) => a.price - b.price).slice(0, 25).map((l) => `
+    const rows = usdListings.sort((a, b) => a.price - b.price).slice(0, 25).map((l) => `
       <tr>
-        <td>${l.price ? `${l.price.toFixed(2)} ${esc(l.currency)}` : '–'}</td>
+        <td>$${l.price.toFixed(2)}</td>
         <td>${esc(l.condition)}</td>
         <td class="adm-dim">${esc(l.date)}</td>
         <td>${l.link ? `<a href="${esc(l.link)}" target="_blank" rel="noopener">listing ↗</a>` : ''}</td>
@@ -398,14 +403,23 @@ document.addEventListener('DOMContentLoaded', function () {
     out.innerHTML = `
       <h3 class="adm-sub">${gameLink(id, name)}</h3>
       ${summary}
-      ${listings.length ? `<div class="adm-scroll"><table class="adm-table">
+      ${usdListings.length ? `<div class="adm-scroll"><table class="adm-table">
         <thead><tr><th>Price</th><th>Condition</th><th>Listed</th><th></th></tr></thead>
         <tbody>${rows}</tbody></table></div>` : ''}
-      <p class="adm-dim" style="margin-top:12px">Compare elsewhere:
-        <a href="https://www.ebay.com/sch/i.html?_nkw=${q}&LH_Sold=1&LH_Complete=1" target="_blank" rel="noopener">eBay sold prices ↗</a> ·
-        <a href="https://www.google.com/search?tbm=shop&q=${q}" target="_blank" rel="noopener">Google Shopping ↗</a> ·
-        <a href="https://boardgamegeek.com/boardgame/${id}/marketplace" target="_blank" rel="noopener">full BGG market ↗</a>
-      </p>`;
+      <div class="adm-price-links">
+        <a class="adm-price-link" href="https://www.ebay.com/sch/i.html?_nkw=${q}&LH_Sold=1&LH_Complete=1&LH_PrefLoc=1" target="_blank" rel="noopener">
+          <strong>eBay — sold prices ↗</strong>
+          <span class="adm-dim">Actual US sale prices (best market signal; eBay has no public price API)</span>
+        </a>
+        <a class="adm-price-link" href="https://www.google.com/search?tbm=shop&q=${q}" target="_blank" rel="noopener">
+          <strong>Google Shopping ↗</strong>
+          <span class="adm-dim">Current new-copy retail prices across stores</span>
+        </a>
+        <a class="adm-price-link" href="https://boardgamegeek.com/boardgame/${id}/marketplace" target="_blank" rel="noopener">
+          <strong>Full BGG market ↗</strong>
+          <span class="adm-dim">All listings including non-USD</span>
+        </a>
+      </div>`;
   }
 
   /* ================= letters ================= */

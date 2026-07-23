@@ -1891,6 +1891,33 @@ a.game-card {
   max-width: 640px;
 }
 
+.adm-price-links {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin-top: 14px;
+}
+
+.adm-price-link {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 11px 13px;
+  text-decoration: none;
+}
+
+.adm-price-link:hover {
+  border-color: var(--gold);
+}
+
+.adm-price-link strong {
+  color: var(--gold);
+  font-size: 0.9rem;
+}
+
 .adm-letter-grid {
   display: grid;
   gap: 10px;
