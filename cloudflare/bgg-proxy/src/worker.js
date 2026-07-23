@@ -3,6 +3,8 @@ import TOP100 from "./top100.json";
 const BGG_COLLECTION_URL = "https://boardgamegeek.com/xmlapi2/collection";
 const BGG_PLAYS_URL = "https://boardgamegeek.com/xmlapi2/plays";
 const BGG_THING_URL = "https://boardgamegeek.com/xmlapi2/thing";
+const BGG_HOT_URL = "https://boardgamegeek.com/xmlapi2/hot";
+const BGG_SEARCH_URL = "https://boardgamegeek.com/xmlapi2/search";
 const BGG_BROWSE_URL = "https://boardgamegeek.com/browse/boardgame/page/";
 const DEFAULT_USERNAME = "traditz";
 
@@ -535,6 +537,65 @@ function decodeEntities(str) {
     .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(parseInt(code, 10)));
 }
 
+/** BGG "Hotness" list (trending games) — XML pass-through, cached 1 hour. */
+async function handleBggHot(request, env, cors) {
+  if (request.method !== "GET") {
+    return new Response("Method not allowed", {
+      status: 405,
+      headers: { ...cors, "Content-Type": "text/plain; charset=utf-8" }
+    });
+  }
+
+  const response = await fetch(`${BGG_HOT_URL}?type=boardgame`, {
+    headers: { Authorization: `Bearer ${env.BGG_TOKEN}` }
+  });
+  const body = await response.text();
+
+  return new Response(body, {
+    status: response.status,
+    headers: {
+      ...cors,
+      "Content-Type": response.headers.get("Content-Type") || "application/xml; charset=utf-8",
+      "Cache-Control": response.status === 200 ? "public, max-age=3600" : "no-store"
+    }
+  });
+}
+
+/** BGG game search — XML pass-through, cached 6 hours per query. */
+async function handleBggSearch(request, env, cors, incomingUrl) {
+  if (request.method !== "GET") {
+    return new Response("Method not allowed", {
+      status: 405,
+      headers: { ...cors, "Content-Type": "text/plain; charset=utf-8" }
+    });
+  }
+
+  const query = clampString(incomingUrl.searchParams.get("q"), 80).trim();
+  if (query.length < 2) {
+    return new Response("Query too short", {
+      status: 400,
+      headers: { ...cors, "Content-Type": "text/plain; charset=utf-8" }
+    });
+  }
+
+  const searchUrl = new URL(BGG_SEARCH_URL);
+  searchUrl.searchParams.set("query", query);
+  searchUrl.searchParams.set("type", "boardgame");
+  const response = await fetch(searchUrl.toString(), {
+    headers: { Authorization: `Bearer ${env.BGG_TOKEN}` }
+  });
+  const body = await response.text();
+
+  return new Response(body, {
+    status: response.status,
+    headers: {
+      ...cors,
+      "Content-Type": response.headers.get("Content-Type") || "application/xml; charset=utf-8",
+      "Cache-Control": response.status === 200 ? "public, max-age=21600" : "no-store"
+    }
+  });
+}
+
 /**
  * Retail price aggregate for the admin dashboard, proxied from the
  * BoardGamePrices.com public API (no CORS on their side). eid = BGG id.
@@ -658,6 +719,14 @@ export default {
 
     if (incomingUrl.pathname === "/api/bgg-top") {
       return handleBggTop(request, env, cors, incomingUrl);
+    }
+
+    if (incomingUrl.pathname === "/api/bgg-hot") {
+      return handleBggHot(request, env, cors);
+    }
+
+    if (incomingUrl.pathname === "/api/bgg-search") {
+      return handleBggSearch(request, env, cors, incomingUrl);
     }
 
     if (incomingUrl.pathname === "/api/retail-prices") {

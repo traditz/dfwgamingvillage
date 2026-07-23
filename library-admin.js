@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', function () {
   const WORKER = 'https://dfwgv-bgg-proxy.joemsprague.workers.dev';
   const USERNAME = 'traditz';
   const TOKEN_KEY = 'dfwgvAdminToken';
-  const ORG_KEY = 'dfwgvAdminOrg';
 
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -23,9 +22,11 @@ document.addEventListener('DOMContentLoaded', function () {
   let snapshot = null;   // games-library.json
   let playsById = {};    // id -> total plays
   let top100 = [];       // [{rank,id,name,year,geekRating,...}]
+  let hotList = [];      // BGG Hotness [{rank,id,name,year}]
   let wantList = [];     // want-to-play items
   let wishList = [];     // wishlist items
   let ownedIds = new Set();
+  let publisherByGame = new Map(); // game id -> {id, name} (hydrated on demand)
 
   /* ================= token gate ================= */
 
@@ -93,10 +94,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const status = $('adm-status');
     status.textContent = 'Loading library data…';
     try {
-      const [snapRes, topRes, playsRes] = await Promise.all([
+      const [snapRes, topRes, playsRes, hotRes] = await Promise.all([
         fetch('games-library.json'),
         fetch(`${WORKER}/api/bgg-top?count=100`),
-        fetch(`${WORKER}/api/bgg-plays?username=${USERNAME}`)
+        fetch(`${WORKER}/api/bgg-plays?username=${USERNAME}`),
+        fetch(`${WORKER}/api/bgg-hot`)
       ]);
       snapshot = await snapRes.json();
       ownedIds = new Set(snapshot.games.map((g) => g.id));
@@ -104,6 +106,13 @@ document.addEventListener('DOMContentLoaded', function () {
       top100 = top.games || [];
       const plays = await playsRes.json();
       for (const [id, rec] of Object.entries(plays.games || {})) playsById[id] = rec.plays;
+      const hotXml = new DOMParser().parseFromString(await hotRes.text(), 'text/xml');
+      hotList = [...hotXml.querySelectorAll('item')].map((item) => ({
+        id: item.getAttribute('id'),
+        rank: parseInt(item.getAttribute('rank'), 10) || 0,
+        name: item.querySelector('name')?.getAttribute('value') || 'Unknown',
+        year: item.querySelector('yearpublished')?.getAttribute('value') || ''
+      }));
     } catch (err) {
       status.textContent = `Failed to load data: ${err.message}`;
       return;
@@ -112,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function () {
     renderProcurement();
     renderCuration();
     renderPricing();
-    renderLetters();
+    hydratePublishers().catch(() => {});
 
     // Wishlist / want-to-play load slowly on BGG's side — fill in when ready.
     fetchCollectionXml('&wishlist=1').then((items) => { wishList = items; renderQueues(); });
@@ -134,6 +143,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
   /* ================= procurement ================= */
 
+  const pubCell = (gameId) => `<td class="adm-pub" data-pub-for="${gameId}"><span class="adm-dim">…</span></td>`;
+
   function renderProcurement() {
     const gaps = top100.filter((t) => !ownedIds.has(String(t.id)));
     const gapRows = gaps.map((t) => `
@@ -141,7 +152,17 @@ document.addEventListener('DOMContentLoaded', function () {
         <td>#${t.rank}</td>
         <td>${gameLink(t.id, t.name)} <span class="adm-dim">(${esc(t.year)})</span></td>
         <td>${esc(t.geekRating)}</td>
+        ${pubCell(t.id)}
         <td><button type="button" class="adm-mini" data-price-id="${t.id}" data-price-name="${esc(t.name)}">Price</button></td>
+      </tr>`).join('');
+
+    const hotGaps = hotList.filter((h) => !ownedIds.has(String(h.id)));
+    const hotRows = hotGaps.map((h) => `
+      <tr>
+        <td>#${h.rank}</td>
+        <td>${gameLink(h.id, h.name)} <span class="adm-dim">${h.year ? `(${esc(h.year)})` : ''}</span></td>
+        ${pubCell(h.id)}
+        <td><button type="button" class="adm-mini" data-price-id="${h.id}" data-price-name="${esc(h.name)}">Price</button></td>
       </tr>`).join('');
 
     // Coverage: owned games best at N, by weight band.
@@ -182,9 +203,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
     $('adm-procure').innerHTML = `
       <div class="adm-panel"><h2>BGG Top 100 — not in the library (${gaps.length})</h2>
+        <p class="adm-dim">Publisher links go to the BGG company page, which lists each publisher's website and contact details.</p>
         <div class="adm-scroll"><table class="adm-table">
-          <thead><tr><th>Rank</th><th>Game</th><th>Geek rating</th><th></th></tr></thead>
+          <thead><tr><th>Rank</th><th>Game</th><th>Geek rating</th><th>Publisher</th><th></th></tr></thead>
           <tbody>${gapRows}</tbody>
+        </table></div>
+      </div>
+      <div class="adm-panel"><h2>Trending on BGG — not in the library (${hotGaps.length} of ${hotList.length})</h2>
+        <p class="adm-dim">BGG's live Hotness list — what the community is buzzing about right now. Refreshes hourly.</p>
+        <div class="adm-scroll"><table class="adm-table">
+          <thead><tr><th>Hot</th><th>Game</th><th>Publisher</th><th></th></tr></thead>
+          <tbody>${hotRows}</tbody>
         </table></div>
       </div>
       <div class="adm-panel"><h2>Coverage gaps</h2>
@@ -222,6 +251,44 @@ document.addEventListener('DOMContentLoaded', function () {
       ${listTable(wishList.slice().sort((a, b) => (a.priority || 9) - (b.priority || 9)), true)}
       <h3 class="adm-sub">Want-to-play (${wantList.length})</h3>
       ${listTable(wantList, false)}`;
+  }
+
+  /**
+   * Fill every publisher cell in the procurement tables. BGG's thing data
+   * carries publisher id + name (the primary publisher is listed first);
+   * the BGG company page for that id is where website/contact info lives.
+   */
+  async function hydratePublishers() {
+    const cells = [...document.querySelectorAll('[data-pub-for]')];
+    const need = [...new Set(cells.map((c) => c.dataset.pubFor))].filter((id) => !publisherByGame.has(id));
+    for (let i = 0; i < need.length; i += 20) {
+      try {
+        const res = await fetch(`${WORKER}/api/bgg-thing?id=${need.slice(i, i + 20).join(',')}`);
+        if (!res.ok) continue;
+        const xml = new DOMParser().parseFromString(await res.text(), 'text/xml');
+        for (const item of xml.querySelectorAll('item')) {
+          const link = item.querySelector('link[type="boardgamepublisher"]');
+          if (link) {
+            publisherByGame.set(item.getAttribute('id'), {
+              id: link.getAttribute('id'),
+              name: link.getAttribute('value')
+            });
+          }
+        }
+      } catch { /* leave those cells as-is; retried on next tab render */ }
+      fillPublisherCells();
+    }
+    fillPublisherCells();
+  }
+
+  function fillPublisherCells() {
+    for (const cell of document.querySelectorAll('[data-pub-for]')) {
+      const pub = publisherByGame.get(cell.dataset.pubFor);
+      if (!pub) continue;
+      cell.innerHTML = `
+        <a href="https://boardgamegeek.com/boardgamepublisher/${pub.id}" target="_blank" rel="noopener" title="BGG company page — website and contact info">${esc(pub.name)}</a>
+        <a class="adm-dim" href="https://www.google.com/search?q=${encodeURIComponent(`${pub.name} board game publisher contact`)}" target="_blank" rel="noopener" title="Search for contact details">🔎</a>`;
+    }
   }
 
   // Missing-expansion finder (one thing call per click).
@@ -319,10 +386,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function renderPricing() {
     $('adm-price').innerHTML = `
-      <div class="adm-panel"><h2>Second-hand pricing</h2>
-        <p class="adm-dim">Live listings from the BGG Marketplace, plus quick links to sold-price searches elsewhere. Type a game name (owned, wishlist, or Top 100).</p>
+      <div class="adm-panel"><h2>Game pricing</h2>
+        <p class="adm-dim">Second-hand (BGG Marketplace) and new-retail (US stores) pricing for <strong>any</strong> game — owned or not. Results beyond the library come from a live BGG search.</p>
         <div class="adm-price-search">
-          <input type="text" id="adm-price-input" placeholder="Search a game to price..." autocomplete="off">
+          <input type="text" id="adm-price-input" placeholder="Search any game to price..." autocomplete="off">
           <div id="adm-price-suggest" class="adm-suggest" hidden></div>
         </div>
         <div id="adm-price-result"></div>
@@ -330,17 +397,55 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const input = $('adm-price-input');
     const suggest = $('adm-price-suggest');
+    let searchSeq = 0;
+
+    const showSuggestions = (local, remote) => {
+      const seen = new Set();
+      const merged = [];
+      for (const m of local.concat(remote)) {
+        if (seen.has(m.id)) continue;
+        seen.add(m.id);
+        merged.push(m);
+        if (merged.length >= 10) break;
+      }
+      suggest.innerHTML = merged.map((m) => `
+        <button type="button" data-price-id="${m.id}" data-price-name="${esc(m.name)}">${esc(m.name)}${m.year ? ` <span class="adm-dim">(${esc(m.year)})</span>` : ''} <span class="adm-dim">${m.tag}</span></button>`).join('');
+      suggest.hidden = merged.length === 0;
+    };
+
+    const remoteSearch = debounce(async (q, seq) => {
+      try {
+        const res = await fetch(`${WORKER}/api/bgg-search?q=${encodeURIComponent(q)}`);
+        if (!res.ok || seq !== searchSeq) return;
+        const xml = new DOMParser().parseFromString(await res.text(), 'text/xml');
+        const remote = [...xml.querySelectorAll('item')].map((item) => ({
+          id: item.getAttribute('id'),
+          name: item.querySelector('name')?.getAttribute('value') || 'Unknown',
+          year: item.querySelector('yearpublished')?.getAttribute('value') || '',
+          tag: 'BGG'
+        }));
+        if (seq !== searchSeq || $('adm-price-input').value.trim().toLowerCase() !== q) return;
+        const local = knownGames().filter((g) => g.name.toLowerCase().includes(q)).slice(0, 5);
+        showSuggestions(local, remote);
+      } catch { /* keep whatever suggestions are showing */ }
+    }, 400);
+
     input.addEventListener('input', () => {
       const q = input.value.trim().toLowerCase();
       if (q.length < 2) { suggest.hidden = true; return; }
-      const matches = knownGames().filter((g) => g.name.toLowerCase().includes(q)).slice(0, 8);
-      suggest.innerHTML = matches.map((m) => `
-        <button type="button" data-price-id="${m.id}" data-price-name="${esc(m.name)}">${esc(m.name)} <span class="adm-dim">${m.tag}</span></button>`).join('');
-      suggest.hidden = matches.length === 0;
+      const local = knownGames().filter((g) => g.name.toLowerCase().includes(q)).slice(0, 8);
+      showSuggestions(local, []); // instant local results; BGG results replace shortly
+      searchSeq++;
+      remoteSearch(q, searchSeq);
     });
     document.addEventListener('click', (e) => {
       if (!e.target.closest('.adm-price-search')) suggest.hidden = true;
     });
+  }
+
+  function debounce(fn, ms) {
+    let t;
+    return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
   }
 
   // Any "Price"/"Resale" button anywhere jumps to the pricing tab for that game.
@@ -469,143 +574,4 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  /* ================= letters ================= */
-
-  const TONES = {
-    formal: {
-      label: 'Formal request',
-      build: (f) => `Dear ${f.publisher} team,
-
-My name is ${f.contact}, and I help run ${f.org}, a tabletop gaming community in ${f.region}. We host ${f.cadence} game nights with ${f.attendance} attendees, built around a free lending library of over ${f.libCount} games that members borrow and play at our events.
-
-Your titles are already a meaningful part of our tables: we own ${f.count} ${f.publisher} ${f.count === 1 ? 'game' : 'games'}${f.topLine ? `, and ${f.topLine}` : '.'}
-
-I'm writing to ask whether ${f.publisher} would consider supporting the community with a donation of games or expansions. Review copies, dinged-box stock, or overruns are all gratefully welcomed — donated titles go directly into the lending library, where they are taught, played, and shown to new players week after week. We are glad to credit ${f.publisher} on our website (${f.site}) and at our events.
-
-If this is something you would consider, I would love to connect. Thank you for making games our community loves to play.
-
-Warm regards,
-${f.contact}
-${f.org} — ${f.site}
-${f.email}`
-    },
-    story: {
-      label: 'Community story',
-      build: (f) => `Hi ${f.publisher} folks,
-
-I'm ${f.contact} from ${f.org}, a community game group in ${f.region}. Every ${f.cadence.replace(/ly$/, '')} we pack tables with ${f.attendance} players, and the heart of it is our traveling library — ${f.libCount}+ games that anyone can pull off the shelf and learn on the spot.
-
-${f.topLine ? `Your games do serious work at those tables: ${f.topLine} ` : `We already own ${f.count} of your titles, and they earn their shelf space. `}There's nothing like watching a table of strangers become friends over a game.
-
-Here's the ask: would ${f.publisher} donate a game or two (or a well-loved demo copy) to the library? Every donated game gets taught to new players constantly — it's the best kind of shelf presence — and we happily shout out our supporters on ${f.site} and at events.
-
-Either way, thanks for what you make. It's the reason we all show up.
-
-${f.contact}
-${f.org} — ${f.site}
-${f.email}`
-    },
-    event: {
-      label: 'Event partnership',
-      build: (f) => `Dear ${f.publisher} team,
-
-I'm ${f.contact}, an organizer with ${f.org} in ${f.region}. We run ${f.cadence} game nights (${f.attendance} attendees) plus larger community events, all built around a free lending library of ${f.libCount}+ games.
-
-We'd love to explore a partnership: ${f.publisher} titles featured in scheduled demo sessions, taught by experienced hosts, with your games as event prizes or library additions. We currently own ${f.count} of your ${f.count === 1 ? 'title' : 'titles'}${f.topLine ? ` — ${f.topLine}` : '.'}
-
-A donated copy or prize-support package goes a long way here: library games are taught repeatedly to new players, and prize tables get photographed and shared across our community channels (${f.site}).
-
-If a demo night or prize support sounds interesting, I'd be glad to set it up. Thank you for your time.
-
-Best,
-${f.contact}
-${f.org} — ${f.site}
-${f.email}`
-    }
-  };
-
-  function orgDefaults() {
-    let stored = {};
-    try { stored = JSON.parse(localStorage.getItem(ORG_KEY)) || {}; } catch {}
-    return {
-      org: 'DFW Gaming Village', contact: '', email: '', site: 'dfwgamingvillage.com',
-      region: 'the Dallas–Fort Worth area', cadence: 'weekly', attendance: '20–40', ...stored
-    };
-  }
-
-  function renderLetters() {
-    const pubCounts = new Map();
-    for (const g of snapshot.games) for (const i of g.pub || []) pubCounts.set(i, (pubCounts.get(i) || 0) + 1);
-    const pubs = [...pubCounts.entries()].sort((a, b) => b[1] - a[1]);
-    const org = orgDefaults();
-
-    $('adm-letters').innerHTML = `
-      <div class="adm-panel"><h2>Donation letter drafts</h2>
-        <p class="adm-dim">Pick a publisher — the letter is personalized with which of their games the library owns and how often they hit the table. Edit anything before sending.</p>
-        <div class="adm-letter-grid">
-          <label>Publisher
-            <select id="adm-pub">${pubs.map(([i, n]) => `<option value="${i}">${esc(snapshot.publishers[i])} (${n} owned)</option>`).join('')}</select>
-          </label>
-          <label>Tone
-            <select id="adm-tone">${Object.entries(TONES).map(([k, t]) => `<option value="${k}">${t.label}</option>`).join('')}</select>
-          </label>
-          <label>Your name<input type="text" id="adm-org-contact" value="${esc(org.contact)}" placeholder="Contact name"></label>
-          <label>Your email<input type="text" id="adm-org-email" value="${esc(org.email)}" placeholder="you@example.com"></label>
-          <label>Attendance<input type="text" id="adm-org-attendance" value="${esc(org.attendance)}"></label>
-          <label>Cadence<input type="text" id="adm-org-cadence" value="${esc(org.cadence)}"></label>
-        </div>
-        <div id="adm-pub-games" class="adm-dim"></div>
-        <textarea id="adm-letter" rows="22" spellcheck="false"></textarea>
-        <div class="adm-letter-actions">
-          <button type="button" id="adm-letter-copy">Copy letter</button>
-          <span id="adm-letter-msg" class="adm-dim"></span>
-        </div>
-      </div>`;
-
-    const regen = () => {
-      const o = {
-        ...orgDefaults(),
-        contact: $('adm-org-contact').value.trim() || '[your name]',
-        email: $('adm-org-email').value.trim() || '[your email]',
-        attendance: $('adm-org-attendance').value.trim() || '20–40',
-        cadence: $('adm-org-cadence').value.trim() || 'weekly'
-      };
-      try {
-        localStorage.setItem(ORG_KEY, JSON.stringify({
-          contact: $('adm-org-contact').value.trim(), email: $('adm-org-email').value.trim(),
-          attendance: o.attendance, cadence: o.cadence
-        }));
-      } catch {}
-
-      const pubIdx = parseInt($('adm-pub').value, 10);
-      const theirs = snapshot.games.filter((g) => (g.pub || []).includes(pubIdx));
-      const played = theirs.filter((g) => playsById[g.id] > 0)
-        .sort((a, b) => (playsById[b.id] || 0) - (playsById[a.id] || 0)).slice(0, 3);
-      const topLine = played.length
-        ? `${played.map((g) => `${g.name} has hit our tables ${playsById[g.id]} ${playsById[g.id] === 1 ? 'time' : 'times'}`).join(', ')}.`
-        : '';
-
-      $('adm-pub-games').innerHTML = `Their games in the library: ${theirs.slice(0, 12).map((g) => esc(g.name)).join(' · ')}${theirs.length > 12 ? ` · +${theirs.length - 12} more` : ''}`;
-      $('adm-letter').value = TONES[$('adm-tone').value].build({
-        ...o,
-        publisher: snapshot.publishers[pubIdx],
-        count: theirs.length,
-        libCount: Math.floor(snapshot.games.length / 100) * 100,
-        topLine
-      });
-    };
-
-    ['adm-pub', 'adm-tone', 'adm-org-contact', 'adm-org-email', 'adm-org-attendance', 'adm-org-cadence']
-      .forEach((id) => $(id).addEventListener('input', regen));
-    $('adm-letter-copy').addEventListener('click', async () => {
-      try {
-        await navigator.clipboard.writeText($('adm-letter').value);
-        $('adm-letter-msg').textContent = 'Copied to clipboard.';
-      } catch {
-        $('adm-letter-msg').textContent = 'Copy failed — select the text manually.';
-      }
-      setTimeout(() => { $('adm-letter-msg').textContent = ''; }, 2500);
-    });
-    regen();
-  }
 });
