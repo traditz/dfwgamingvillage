@@ -11,7 +11,7 @@
  * thing endpoint. Ownership is NOT baked in; the dashboard filters against the
  * current library at load time, so this survives collection changes.
  */
-import { writeFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -56,12 +56,20 @@ async function fetchPage(page) {
   throw new Error(`Could not fetch page ${page} (BGG kept blocking).`);
 }
 
-// 1. Ranked id list from the browse pages.
+// 1. Ranked id list — scraped from the browse pages, or (when BGG's bot
+//    protection blocks the plain fetch) supplied as an ordered id array via
+//    CANDIDATES_IDS_FILE, harvested from the pages in a real browser.
 const ranked = [];
-for (let page = 1; page <= PAGES; page++) {
-  ranked.push(...await fetchPage(page));
-  console.log(`  page ${page}/${PAGES}: ${ranked.length} games so far`);
-  await new Promise((r) => setTimeout(r, 2500));
+if (process.env.CANDIDATES_IDS_FILE) {
+  const ids = JSON.parse(await readFile(process.env.CANDIDATES_IDS_FILE, 'utf8'));
+  ranked.push(...ids.map((id, i) => ({ rank: i + 1, id: String(id), name: '' })));
+  console.log(`  using ${ranked.length} pre-harvested ids from ${process.env.CANDIDATES_IDS_FILE}`);
+} else {
+  for (let page = 1; page <= PAGES; page++) {
+    ranked.push(...await fetchPage(page));
+    console.log(`  page ${page}/${PAGES}: ${ranked.length} games so far`);
+    await new Promise((r) => setTimeout(r, 2500));
+  }
 }
 
 // 2. Enrich through the worker's thing endpoint.
@@ -97,6 +105,7 @@ for (let i = 0; i < ids.length; i += 20) {
     const pubTag = item.match(/<link type="boardgamepublisher" id="(\d+)" value="([^"]*)"/);
     games.push({
       ...base,
+      name: base.name || decodeEntities(attr(/<name type="primary"[^>]*value="([^"]*)"/) || 'Unknown'),
       year: parseInt(attr(/<yearpublished value="(-?\d+)"/) || '0', 10) || 0,
       thumb: attr(/<thumbnail>([^<]*)<\/thumbnail>/) || '',
       minP: num(/<minplayers value="(\d+)"/) || 1,

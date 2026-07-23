@@ -28,7 +28,15 @@ document.addEventListener('DOMContentLoaded', function () {
   let wantList = [];     // want-to-play items
   let wishList = [];     // wishlist items
   let ownedIds = new Set();
+  let ownedNames = new Set(); // normalized names — catches other editions of owned games
   let publisherByGame = new Map(); // game id -> {id, name} (hydrated on demand)
+
+  // "7 Wonders (Second Edition)" and "7 Wonders" are the same shelf presence:
+  // strip trailing parentheticals and punctuation before comparing names.
+  const normName = (s) => String(s || '').toLowerCase().replace(/\s*\([^)]*\)\s*$/, '').replace(/[^a-z0-9]+/g, ' ').trim();
+
+  // Owned by id, or owned as a different edition/printing under another BGG id.
+  const isOwnedGame = (id, name) => ownedIds.has(String(id)) || ownedNames.has(normName(name));
 
   /* ================= token gate ================= */
 
@@ -104,6 +112,7 @@ document.addEventListener('DOMContentLoaded', function () {
       ]);
       snapshot = await snapRes.json();
       ownedIds = new Set(snapshot.games.map((g) => g.id));
+      ownedNames = new Set(snapshot.games.map((g) => normName(g.name)));
       const top = await topRes.json();
       top100 = top.games || [];
       const plays = await playsRes.json();
@@ -173,7 +182,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function renderProcurement() {
-    const gaps = top100.filter((t) => !ownedIds.has(String(t.id)));
+    const gaps = top100.filter((t) => !isOwnedGame(t.id, t.name));
     const gapRows = gaps.map((t) => `
       <tr>
         <td>#${t.rank}</td>
@@ -183,7 +192,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <td><button type="button" class="adm-mini" data-price-id="${t.id}" data-price-name="${esc(t.name)}">Price</button></td>
       </tr>`).join('');
 
-    const hotGaps = hotList.filter((h) => !ownedIds.has(String(h.id)));
+    const hotGaps = hotList.filter((h) => !isOwnedGame(h.id, h.name));
     const hotRows = hotGaps.map((h) => `
       <tr>
         <td>#${h.rank}</td>
@@ -362,7 +371,7 @@ document.addEventListener('DOMContentLoaded', function () {
     for (const d of dates) for (const g of hotHistory[d] || []) hotDays.set(String(g.id), (hotDays.get(String(g.id)) || 0) + 1);
 
     const queueIds = new Set(wishList.concat(wantList).map((i) => i.id));
-    const pool = candidates.games.filter((c) => !ownedIds.has(String(c.id)) && c.rating >= 7);
+    const pool = candidates.games.filter((c) => !isOwnedGame(c.id, c.name) && c.rating >= 7);
 
     let maxTaste = 0;
     const scored = pool.map((c) => {
