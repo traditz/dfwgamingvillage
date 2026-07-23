@@ -37,7 +37,7 @@ npx wrangler secret put BGG_TOKEN --config wrangler.staging.toml
 | Worker config | [`cloudflare/bgg-proxy/wrangler.toml`](cloudflare/bgg-proxy/wrangler.toml) |
 | Deployed proxy URL | `https://dfwgv-bgg-proxy.joemsprague.workers.dev` |
 | BGG account read | username `traditz` (constant `DEFAULT_USERNAME` in the Worker, `BGG_USERNAME` in the page scripts) |
-| Game Library page | [`games.html`](games.html) + [`bgg-collection.js`](bgg-collection.js) |
+| Game Library page | [`games.html`](games.html) + [`game-library.js`](game-library.js) + [`games-library.json`](games-library.json) |
 | Play Completion page | [`play-completion.html`](play-completion.html) + [`play-completion.js`](play-completion.js) |
 
 ## Worker endpoints
@@ -50,6 +50,28 @@ All are served from the proxy base URL above.
 | `GET /api/bgg-plays?username=` | All recorded plays aggregated into per‑game totals + comments (JSON) | `xmlapi2/plays` (paginated, walked server‑side) |
 | `GET /api/bgg-thing?id=1,2,3` | Game details / expansion links for hydration (XML pass‑through) | `xmlapi2/thing` |
 | `GET /api/bgg-top?count=100` | All‑time Top N, scraped from the public ranking page (JSON) | `browse/boardgame/page/N` (HTML) |
+
+### The Game Library snapshot (`games-library.json`)
+
+The Game Library dashboard does **not** hit BGG per visitor. It loads a
+pre-built snapshot, `games-library.json`, which enriches every owned game with
+the thing-API data the collection feed lacks (complexity weight, mechanics,
+categories/themes, average rating, community "best with" player count), plus the collection's
+`lastmodified` date (the "recently added" sort) and the owned expansions
+matched to each base game. Owned expansion ids are computed by diffing the
+collection with and without `includeexp=1` — the collection API mislabels
+expansions' `subtype`, so the attribute can't be used. Rebuild with:
+
+```sh
+node scripts/refresh-library.mjs
+```
+
+The script walks the owned collection through the deployed worker and hydrates
+each game via `/api/bgg-thing` in batches of 20 (BGG rejects larger id lists),
+so it takes a couple of minutes for ~1,200 games. Re-run it when the collection
+changes — but staleness is soft: once a day per browser, the page diffs the live
+collection against the snapshot, hydrates only the new games client-side, and
+caches that delta in `localStorage`, so new games appear even between rebuilds.
 
 ### Notes / gotchas
 

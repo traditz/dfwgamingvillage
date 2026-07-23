@@ -20,7 +20,7 @@ import { dirname, join, extname, normalize } from 'node:path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 const FIXTURES = join(__dirname, 'fixtures');
-const PORT = 8080;
+const PORT = Number(process.env.PORT) || 8080;
 // When set, /api/* is forwarded to this deployed Worker (which can reach BGG
 // from Cloudflare's network) instead of being answered locally. This is how you
 // test real BGG usernames locally — see BGG-API.md.

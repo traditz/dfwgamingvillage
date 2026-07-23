@@ -12,7 +12,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content="https://www.dfwgamingvillage.com/banner.png">
     <title>DFW Gaming Village - Game Library</title>
-    <link rel="stylesheet" href="community.css?v=20260622-cleanup">
+    <link rel="stylesheet" href="community.css?v=20260722-library5">
     <link rel="icon" href="favicon.ico">
 </head>
 <body data-page="games">
@@ -35,12 +35,84 @@
 
     <main class="content">
         <h1>Board Game Library</h1>
-        <p>Browse the DFW Gaming Village Library</p>
+        <p>Browse the DFW Gaming Village Library — <span id="gl-updated"></span></p>
 
-        <div class="search-container">
-            <input type="text" id="search-input" placeholder="Search by game name..." oninput="searchGames()">
-            <input type="number" id="player-count" placeholder="Player count" oninput="searchGames()">
+        <section id="gl-stats" class="gl-stats" aria-label="Library statistics"></section>
+
+        <div class="gl-controls">
+            <input type="text" id="gl-search" placeholder="Search by game name..." aria-label="Search by game name">
+            <input type="number" id="gl-players" min="1" max="20" placeholder="Players" aria-label="Player count">
+            <select id="gl-time" aria-label="Playtime">
+                <option value="">Any playtime</option>
+                <option value="1-30">Quick (&le;30 min)</option>
+                <option value="31-60">Short (31&ndash;60 min)</option>
+                <option value="61-90">Medium (61&ndash;90 min)</option>
+                <option value="91-120">Long (91&ndash;120 min)</option>
+                <option value="121-9999">Epic (2 hr+)</option>
+            </select>
+            <select id="gl-weight" aria-label="Complexity">
+                <option value="">Any complexity</option>
+                <option value="0-1.5">Light (&lt;1.5)</option>
+                <option value="1.5-2">Light-medium (1.5&ndash;2)</option>
+                <option value="2-2.5">Medium (2&ndash;2.5)</option>
+                <option value="2.5-3">Medium-heavy (2.5&ndash;3)</option>
+                <option value="3-3.5">Heavy (3&ndash;3.5)</option>
+                <option value="3.5-6">Very heavy (3.5+)</option>
+            </select>
+            <select id="gl-rating" aria-label="BGG rating">
+                <option value="">Any rating</option>
+                <option value="1-6">Under 6</option>
+                <option value="6-7">6&ndash;7</option>
+                <option value="7-7.5">7&ndash;7.5</option>
+                <option value="7.5-8">7.5&ndash;8</option>
+                <option value="8-10">8+</option>
+            </select>
+            <div class="gl-picker">
+                <button type="button" id="gl-mech-btn" aria-haspopup="true">Mechanics</button>
+                <div id="gl-mech-panel" class="gl-picker-panel" hidden>
+                    <div class="gl-picker-head">
+                        <input type="text" id="gl-mech-search" placeholder="Find a mechanic...">
+                        <button type="button" id="gl-mech-clear">Clear</button>
+                    </div>
+                    <p class="gl-picker-hint">Games must use every selected mechanic.</p>
+                    <div id="gl-mech-list" class="gl-picker-list"></div>
+                </div>
+            </div>
+            <div class="gl-picker">
+                <button type="button" id="gl-cat-btn" aria-haspopup="true">Themes</button>
+                <div id="gl-cat-panel" class="gl-picker-panel" hidden>
+                    <div class="gl-picker-head">
+                        <input type="text" id="gl-cat-search" placeholder="Find a theme...">
+                        <button type="button" id="gl-cat-clear">Clear</button>
+                    </div>
+                    <p class="gl-picker-hint">Games must match every selected theme.</p>
+                    <div id="gl-cat-list" class="gl-picker-list"></div>
+                </div>
+            </div>
+            <button type="button" id="gl-exp-toggle" class="gl-toggle" aria-pressed="false">Has expansions</button>
+            <select id="gl-sort" aria-label="Sort by">
+                <option value="name">Sort: Name</option>
+                <option value="added">Sort: Recently added</option>
+                <option value="rating">Sort: BGG rating</option>
+                <option value="weight">Sort: Complexity</option>
+                <option value="time">Sort: Playtime</option>
+                <option value="year">Sort: Year</option>
+            </select>
+            <button type="button" id="gl-dir" aria-label="Toggle sort direction">&#8593;</button>
+            <div class="gl-view" role="group" aria-label="View style">
+                <button type="button" id="gl-view-grid" aria-pressed="true" title="Grid view">&#9638;</button>
+                <button type="button" id="gl-view-list" aria-pressed="false" title="List view">&#9776;</button>
+            </div>
+            <button type="button" id="gl-share">Copy link</button>
+            <button type="button" id="gl-reset">Reset</button>
         </div>
+
+        <div id="gl-chips" class="gl-chips" aria-live="polite"></div>
+
+        <div class="gl-charts-head">
+            <button type="button" id="gl-charts-toggle" aria-expanded="true">Hide charts &#9652;</button>
+        </div>
+        <section id="gl-charts" class="gl-charts" aria-label="Library charts"></section>
 
         <div id="game-container" class="games-container">Loading games...</div>
     </main>
@@ -49,7 +121,7 @@
         <p>&copy; 2026 DFW Gaming Village. All Rights Reserved.</p>
     </footer>
 
-    <script src="bgg-collection.js?v=20260607-worker"></script>
+    <script src="game-library.js?v=20260722-dashboard5"></script>
     <script src="site-analytics.js?v=20260607-analytics"></script>
 </body>
 </html>

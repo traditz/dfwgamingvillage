@@ -884,3 +884,780 @@ a.game-card {
     width: 100%;
   }
 }
+
+/* ===================== Game Library dashboard ===================== */
+
+.gc-meta {
+  border-top: 1px solid var(--line-soft);
+  display: grid;
+  gap: 2px;
+  grid-template-columns: 1.3fr 0.9fr 0.7fr 1fr;
+  margin-top: auto;
+  padding: 9px 6px 10px;
+}
+
+.gc-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.gc-val {
+  color: var(--text);
+  font-size: 0.86rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.gc-key {
+  color: var(--muted);
+  font-size: 0.58rem;
+  letter-spacing: 0.03em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.game-card.gc-expandable {
+  cursor: pointer;
+}
+
+.gc-exp-btn {
+  background: none;
+  border: none;
+  border-top: 1px solid var(--line-soft);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.76rem;
+  padding: 7px 6px;
+  width: 100%;
+}
+
+.gc-exp-btn:hover,
+.game-card.gc-expandable:hover .gc-exp-btn {
+  color: var(--gold);
+}
+
+.gc-exp-chev {
+  display: inline-block;
+  font-size: 0.7rem;
+}
+
+.gc-exp {
+  border-top: 1px solid var(--line-soft);
+  padding: 7px 6px 9px;
+  text-align: left;
+}
+
+/* Expansion links must read as links to BGG, not plain text — the generic
+   .game-card a rule strips link styling, so restore it here deliberately. */
+.game-card .gc-exp a {
+  border-radius: 6px;
+  color: var(--gold);
+  display: block;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  padding: 3px 6px;
+}
+
+.game-card .gc-exp a::after {
+  content: " \2197";
+  font-size: 0.7em;
+  opacity: 0.7;
+}
+
+.game-card .gc-exp a:hover,
+.game-card .gc-exp a:focus-visible {
+  background: rgba(245, 197, 66, 0.12);
+  color: #ffe58a;
+  text-decoration: underline;
+}
+
+.gl-stats {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  margin: 22px auto 0;
+  max-width: 900px;
+}
+
+.gl-stat {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0) 55%), var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 10px 12px;
+}
+
+.gl-stat:hover {
+  border-color: rgba(245, 197, 66, 0.35);
+}
+
+.gl-stat-label {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.gl-stat-value {
+  color: var(--text);
+  font-size: 1.7rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.gl-stat-sub {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.gl-controls {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin: 16px auto 10px;
+  max-width: 980px;
+  padding: 12px;
+}
+
+.gl-controls input,
+.gl-controls select,
+.gl-controls button {
+  background: #0f1016;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 0.95rem;
+  min-height: 42px;
+  padding: 8px 11px;
+}
+
+.gl-controls input:focus,
+.gl-controls select:focus,
+.gl-controls button:focus-visible {
+  border-color: var(--gold);
+  outline: 2px solid rgba(245, 197, 66, 0.18);
+}
+
+.gl-controls button {
+  cursor: pointer;
+}
+
+.gl-controls button:hover {
+  border-color: rgba(245, 197, 66, 0.7);
+}
+
+#gl-search {
+  width: min(100%, 220px);
+}
+
+#gl-players {
+  width: 90px;
+}
+
+#gl-dir {
+  min-width: 42px;
+}
+
+.gl-picker {
+  position: relative;
+}
+
+.gl-picker-panel {
+  background: var(--panel-strong);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  left: 50%;
+  margin-top: 6px;
+  padding: 10px;
+  position: absolute;
+  text-align: left;
+  top: 100%;
+  transform: translateX(-50%);
+  width: min(88vw, 340px);
+  z-index: 30;
+}
+
+.gl-picker-head {
+  display: flex;
+  gap: 8px;
+}
+
+.gl-picker-head input {
+  flex: 1;
+  min-height: 36px;
+  min-width: 0;
+}
+
+.gl-picker-head button {
+  min-height: 36px;
+}
+
+.gl-picker-hint {
+  color: var(--muted);
+  font-size: 0.78rem;
+  margin: 8px 2px 6px;
+}
+
+.gl-picker-list {
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.gl-toggle[aria-pressed="true"] {
+  background: rgba(245, 197, 66, 0.14);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.gl-mech-item {
+  align-items: center;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  gap: 8px;
+  padding: 5px 6px;
+}
+
+.gl-mech-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.gl-mech-item span:first-of-type {
+  flex: 1;
+  font-size: 0.9rem;
+}
+
+.gl-mech-count {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+/* Active-filter chips */
+
+.gl-chips {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin: 10px auto 0;
+  max-width: 980px;
+}
+
+.gl-chip {
+  background: rgba(245, 197, 66, 0.12);
+  border: 1px solid rgba(245, 197, 66, 0.45);
+  border-radius: 999px;
+  color: var(--gold);
+  cursor: pointer;
+  font-size: 0.82rem;
+  padding: 4px 12px;
+}
+
+.gl-chip:hover {
+  background: rgba(245, 197, 66, 0.22);
+  border-color: var(--gold);
+}
+
+.gl-chip-count {
+  color: var(--muted);
+  font-size: 0.82rem;
+  padding: 4px 4px;
+}
+
+/* View toggle (grid / list) */
+
+.gl-view {
+  display: flex;
+}
+
+.gl-view button {
+  border-radius: 8px 0 0 8px;
+  min-width: 42px;
+}
+
+.gl-view button + button {
+  border-left: none;
+  border-radius: 0 8px 8px 0;
+}
+
+.gl-view button[aria-pressed="true"] {
+  background: rgba(245, 197, 66, 0.14);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+/* Charts show/hide */
+
+.gl-charts-head {
+  margin: 10px auto 0;
+  max-width: 1100px;
+  text-align: right;
+}
+
+#gl-charts-toggle {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 4px 8px;
+}
+
+#gl-charts-toggle:hover {
+  color: var(--gold);
+}
+
+.gl-charts {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  margin: 4px auto 6px;
+  max-width: 1100px;
+}
+
+.gl-charts[hidden] {
+  display: none;
+}
+
+.gl-chart {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0) 55%), var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 12px 10px;
+}
+
+.gl-chart:hover {
+  border-color: rgba(245, 197, 66, 0.35);
+}
+
+/* Offscreen cards skip layout/paint entirely — a large win with 1,200+ cards */
+.games-container .game-card {
+  contain-intrinsic-size: auto 330px;
+  content-visibility: auto;
+}
+
+/* Box-art zoom on hover (paired with the existing card lift) */
+@media (prefers-reduced-motion: no-preference) {
+  .game-card img {
+    transition: transform 0.25s ease;
+  }
+
+  .game-card:hover img {
+    transform: scale(1.045);
+  }
+}
+
+/* Community-best at the filtered player count */
+.game-card.gc-best .gc-stat:first-child .gc-key {
+  color: var(--gold);
+  font-weight: 700;
+}
+
+/* Compact list view */
+.games-container.gl-list {
+  display: block;
+  margin: 20px auto 0;
+  max-width: 760px;
+}
+
+.gl-list .game-card {
+  contain-intrinsic-size: auto 62px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  margin-bottom: 6px;
+  text-align: left;
+}
+
+.gl-list .game-card > a {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  min-width: 0;
+}
+
+.gl-list .game-card img {
+  aspect-ratio: 1 / 1;
+  flex: 0 0 44px;
+  padding: 4px;
+  width: 44px;
+}
+
+.gl-list .game-card h3 {
+  font-size: 0.88rem;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gl-list .gc-meta {
+  border-top: none;
+  gap: 10px;
+  margin-top: 0;
+  padding: 4px 10px;
+}
+
+.gl-list .gc-exp-btn {
+  border-top: none;
+  padding: 7px 10px;
+  white-space: nowrap;
+  width: auto;
+}
+
+.gl-list .gc-exp {
+  grid-column: 1 / -1;
+}
+
+/* Empty state */
+
+.gl-empty {
+  margin: 30px auto;
+  text-align: center;
+}
+
+.gl-empty-dice {
+  font-size: 2.2rem;
+  margin: 0 0 4px;
+}
+
+.gl-empty p {
+  color: var(--muted);
+}
+
+#gl-empty-clear {
+  background: rgba(245, 197, 66, 0.12);
+  border: 1px solid var(--gold);
+  border-radius: 8px;
+  color: var(--gold);
+  cursor: pointer;
+  font-size: 0.95rem;
+  margin-top: 10px;
+  padding: 9px 18px;
+}
+
+#gl-empty-clear:hover {
+  background: rgba(245, 197, 66, 0.22);
+}
+
+/* Loading skeletons */
+
+.gl-skel {
+  background: linear-gradient(90deg, var(--panel-strong) 25%, #2b2d38 50%, var(--panel-strong) 75%);
+  background-size: 200% 100%;
+  border-radius: 6px;
+  display: block;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .gl-skel {
+    animation: gl-shimmer 1.3s linear infinite;
+  }
+}
+
+@keyframes gl-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+.gl-skel-sm {
+  height: 12px;
+  margin: 8px auto;
+  width: 60%;
+}
+
+.gl-skel-lg {
+  height: 26px;
+  margin: 4px auto;
+  width: 40%;
+}
+
+.gl-skel-chart {
+  height: 150px;
+  margin: 10px 6px;
+}
+
+.gl-skel-img {
+  aspect-ratio: 1 / 1;
+  border-radius: 6px 6px 0 0;
+  width: 100%;
+}
+
+.gl-skel-card {
+  min-height: 240px;
+}
+
+.gl-chart h3 {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin: 0 0 10px;
+  text-transform: uppercase;
+}
+
+.gl-cols {
+  align-items: flex-end;
+  border-bottom: 1px solid var(--line-soft);
+  display: flex;
+  gap: 2px;
+  height: 150px;
+  justify-content: center;
+  margin-bottom: 22px;
+}
+
+.gl-col {
+  align-items: center;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  font: inherit;
+  height: 100%;
+  justify-content: flex-end;
+  min-width: 0;
+  padding: 0;
+  position: relative;
+}
+
+.gl-col:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid rgba(245, 197, 66, 0.5);
+}
+
+.gl-col-bar {
+  background: var(--gold);
+  border-radius: 4px 4px 0 0;
+  display: block;
+  width: 22px;
+}
+
+.gl-col:hover .gl-col-bar,
+.gl-col.active .gl-col-bar {
+  background: #ffe58a;
+}
+
+.gl-col.active .gl-col-label {
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.gl-col-value {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 3px;
+}
+
+.gl-col-label {
+  bottom: -19px;
+  color: var(--muted);
+  font-size: 0.68rem;
+  left: 50%;
+  position: absolute;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.gl-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.gl-row {
+  align-items: center;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  gap: 8px;
+  padding: 0;
+  width: 100%;
+}
+
+.gl-row:focus-visible {
+  outline: 2px solid rgba(245, 197, 66, 0.5);
+}
+
+.gl-row:hover .gl-row-bar,
+.gl-row.active .gl-row-bar {
+  background: #ffe58a;
+}
+
+.gl-row.active .gl-row-label {
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.gl-row-label {
+  color: var(--muted);
+  flex: 0 0 44%;
+  font-size: 0.78rem;
+  overflow: hidden;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gl-row-track {
+  display: block;
+  flex: 1;
+}
+
+.gl-row-bar {
+  background: var(--gold);
+  border-radius: 0 4px 4px 0;
+  display: block;
+  height: 12px;
+}
+
+.gl-row-value {
+  color: var(--muted);
+  flex: 0 0 30px;
+  font-size: 0.76rem;
+  font-variant-numeric: tabular-nums;
+  text-align: left;
+}
+
+/* Library growth line */
+
+.gl-growth-wrap {
+  height: 150px;
+  position: relative;
+}
+
+.gl-growth {
+  border-bottom: 1px solid var(--line-soft);
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+.gl-growth-line {
+  fill: none;
+  stroke: var(--gold);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.gl-growth-area {
+  fill: var(--gold);
+  opacity: 0.1;
+}
+
+.gl-growth-total {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-variant-numeric: tabular-nums;
+  position: absolute;
+  right: 2px;
+  top: 0;
+}
+
+.gl-growth-tip {
+  background: rgba(12, 12, 17, 0.92);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 0.76rem;
+  padding: 3px 8px;
+  pointer-events: none;
+  position: absolute;
+  top: 8px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  z-index: 5;
+}
+
+.gl-growth-x {
+  color: var(--muted);
+  display: flex;
+  font-size: 0.68rem;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+/* Motion — transform/opacity only, and off entirely for reduced-motion users */
+
+@media (prefers-reduced-motion: no-preference) {
+  .gl-col-bar {
+    animation: gl-grow-y 0.4s cubic-bezier(0.2, 0.7, 0.3, 1);
+    transform-origin: bottom;
+  }
+
+  .gl-row-bar {
+    animation: gl-grow-x 0.4s cubic-bezier(0.2, 0.7, 0.3, 1);
+    transform-origin: left;
+  }
+
+  .gl-growth-line {
+    animation: gl-draw 0.7s ease-out;
+  }
+
+  .gl-growth-area {
+    animation: gl-fade 0.7s ease-out;
+  }
+
+  .gl-stat,
+  .gl-chart {
+    transition: border-color 0.2s ease;
+  }
+}
+
+@keyframes gl-grow-y {
+  from { transform: scaleY(0); }
+}
+
+@keyframes gl-grow-x {
+  from { transform: scaleX(0); }
+}
+
+@keyframes gl-draw {
+  from { stroke-dasharray: 1; stroke-dashoffset: 1; }
+  to { stroke-dasharray: 1; stroke-dashoffset: 0; }
+}
+
+@keyframes gl-fade {
+  from { opacity: 0; }
+  to { opacity: 0.1; }
+}
+
+@media (max-width: 600px) {
+  .gl-controls {
+    align-items: stretch;
+  }
+
+  .gl-controls input,
+  .gl-controls select,
+  .gl-controls > button,
+  .gl-picker,
+  .gl-picker > button,
+  #gl-search,
+  #gl-players {
+    width: 100%;
+  }
+
+  .gl-stat-value {
+    font-size: 1.35rem;
+  }
+}
