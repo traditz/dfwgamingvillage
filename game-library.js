@@ -11,7 +11,7 @@
 document.addEventListener('DOMContentLoaded', function () {
   const WORKER = 'https://dfwgv-bgg-proxy.joemsprague.workers.dev';
   const USERNAME = 'traditz';
-  const DELTA_KEY = 'dfwgvLibraryDelta.v3'; // v3: delta games carry added/exp/cat fields
+  const DELTA_KEY = 'dfwgvLibraryDelta.v4'; // v4: adds expPatches/removedExpIds/ignoredExpIds
   const VIEW_KEY = 'dfwgvLibraryView';     // 'grid' | 'list' — personal pref, not URL state
   const CHARTS_KEY = 'dfwgvLibraryCharts'; // '1' visible | '0' hidden
   const REFRESH_MS = 24 * 60 * 60 * 1000; // re-check the live collection daily
@@ -99,6 +99,20 @@ document.addEventListener('DOMContentLoaded', function () {
       allGames.push(game);
     }
     allGames = allGames.filter((g) => !removed.has(g.id));
+
+    // Patch expansion lists: expansions bought (or sold) since the snapshot.
+    const removedExp = new Set(delta.removedExpIds || []);
+    const patches = delta.expPatches || {};
+    for (const g of allGames) {
+      let exp = g.exp || [];
+      if (removedExp.size) exp = exp.filter((e) => !removedExp.has(e.id));
+      const patch = patches[g.id];
+      if (patch) {
+        const have = new Set(exp.map((e) => e.id));
+        exp = exp.concat(patch.filter((e) => !have.has(e.id)));
+      }
+      g.exp = exp;
+    }
   }
 
   /**
@@ -137,20 +151,72 @@ document.addEventListener('DOMContentLoaded', function () {
     const newIds = [...liveIds].filter((id) => !knownIds.has(id));
     const hydrated = newIds.length ? await hydrateGames(newIds, addedDates, ownedExpIds) : [];
 
+    // Expansion diff: an expansion id we've never attributed to a base game is
+    // hydrated once (cheap — its data names its base games) and stored as a
+    // patch. Ids whose base game isn't owned are remembered so they aren't
+    // re-fetched every day.
+    const knownExp = new Set();
+    for (const g of snapshot.games) for (const e of g.exp || []) knownExp.add(e.id);
+    for (const g of keptAdded.concat(hydrated)) for (const e of g.exp || []) knownExp.add(e.id);
+    const expPatches = {};
+    for (const [baseId, list] of Object.entries(delta.expPatches || {})) {
+      const kept = list.filter((e) => ownedExpIds.has(e.id) && liveIds.has(baseId));
+      if (kept.length) {
+        expPatches[baseId] = kept;
+        kept.forEach((e) => knownExp.add(e.id));
+      }
+    }
+    const ignored = new Set((delta.ignoredExpIds || []).filter((id) => ownedExpIds.has(id)));
+    const newExpIds = [...ownedExpIds].filter((id) => !knownExp.has(id) && !ignored.has(id));
+    for (const ex of newExpIds.length ? await hydrateExpansions(newExpIds) : []) {
+      let attributed = false;
+      for (const baseId of ex.baseIds) {
+        if (!liveIds.has(baseId)) continue;
+        (expPatches[baseId] = expPatches[baseId] || []).push({ id: ex.id, name: ex.name });
+        attributed = true;
+      }
+      if (!attributed) ignored.add(ex.id);
+    }
+
     const next = {
       checkedAt: Date.now(),
       added: keptAdded.concat(hydrated),
-      removedIds: [...snapshotIds].filter((id) => !liveIds.has(id))
+      removedIds: [...snapshotIds].filter((id) => !liveIds.has(id)),
+      expPatches,
+      removedExpIds: [...knownExp].filter((id) => !ownedExpIds.has(id)),
+      ignoredExpIds: [...ignored]
     };
     localStorage.setItem(DELTA_KEY, JSON.stringify(next));
 
-    if (newIds.length || next.removedIds.length) {
+    const changed = newIds.length > 0 || newExpIds.length > 0
+      || JSON.stringify(next.removedIds) !== JSON.stringify(delta.removedIds || [])
+      || JSON.stringify(next.removedExpIds) !== JSON.stringify(delta.removedExpIds || []);
+    if (changed) {
       allGames = snapshot.games.slice();
       applyDelta(next);
       buildAllCards();
       buildPickers();
       update();
     }
+  }
+
+  /** Fetch just-acquired expansions to learn which owned base games they belong to. */
+  async function hydrateExpansions(ids) {
+    const out = [];
+    for (let i = 0; i < ids.length; i += 20) {
+      const res = await fetch(`${WORKER}/api/bgg-thing?id=${ids.slice(i, i + 20).join(',')}`);
+      if (!res.ok) continue;
+      const xml = new DOMParser().parseFromString(await res.text(), 'text/xml');
+      for (const item of xml.querySelectorAll('item')) {
+        out.push({
+          id: item.getAttribute('id'),
+          name: item.querySelector('name[type="primary"]')?.getAttribute('value') || '',
+          // On an expansion, inbound expansion links point at its base game(s).
+          baseIds: [...item.querySelectorAll('link[type="boardgameexpansion"][inbound="true"]')].map((l) => l.getAttribute('id'))
+        });
+      }
+    }
+    return out;
   }
 
   async function hydrateGames(ids, addedDates, ownedExpIds) {

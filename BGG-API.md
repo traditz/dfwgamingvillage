@@ -70,8 +70,11 @@ The script walks the owned collection through the deployed worker and hydrates
 each game via `/api/bgg-thing` in batches of 20 (BGG rejects larger id lists),
 so it takes a couple of minutes for ~1,200 games. Re-run it when the collection
 changes — but staleness is soft: once a day per browser, the page diffs the live
-collection against the snapshot, hydrates only the new games client-side, and
-caches that delta in `localStorage`, so new games appear even between rebuilds.
+collection (bases **and** expansions) against the snapshot, hydrates only the
+new items client-side, and caches that delta in `localStorage`. New base games
+and newly acquired expansions therefore appear without a rebuild; a rebuild is
+only needed to refresh drifting data on existing games (ratings, weights,
+mechanics/themes, best-with).
 
 ### Notes / gotchas
 
