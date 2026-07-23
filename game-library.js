@@ -65,7 +65,6 @@ document.addEventListener('DOMContentLoaded', function () {
     categories = (snapshot.categories || []).slice();
     allGames = snapshot.games.slice();
     applyDelta(readDelta());
-    $('gl-updated').textContent = `updated ${snapshot.generatedAt}`;
 
     readStateFromUrl();
     buildPickers();
