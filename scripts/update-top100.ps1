@@ -27,6 +27,23 @@ try {
   $pull = git pull --ff-only 2>&1 | Out-String
   Log ("git pull: " + $pull.Trim())
 
+  # Refresh the Top-1000 candidates pool for the admin dashboard first (same
+  # residential-IP constraint as the Top-100 scrape). Its failure should not
+  # block the Top-100 flow below, and vice versa.
+  $cand = node scripts\refresh-candidates.mjs 2>&1 | Out-String
+  Log ("refresh-candidates: " + $cand.Trim())
+  if ($LASTEXITCODE -eq 0) {
+    if (git status --porcelain 'candidates.json') {
+      git add 'candidates.json'
+      $commitC = git commit -m ("Monthly candidates refresh ({0})" -f (Get-Date -Format 'yyyy-MM-dd')) 2>&1 | Out-String
+      Log ("git commit candidates: " + $commitC.Trim())
+      $pushC = git push origin main 2>&1 | Out-String
+      Log ("git push candidates: " + $pushC.Trim())
+    } else { Log 'Candidates snapshot unchanged.' }
+  } else {
+    Log 'Candidates refresh failed - keeping last snapshot, will retry next month.'
+  }
+
   # Refresh the snapshot. refresh-top100.mjs only writes the file on success
   # (100 games scraped); if BGG keeps blocking it exits non-zero and we skip.
   $refresh = node scripts\refresh-top100.mjs 2>&1 | Out-String

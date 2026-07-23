@@ -537,6 +537,53 @@ function decodeEntities(str) {
     .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(parseInt(code, 10)));
 }
 
+const HOT_HISTORY_KEY = "hot-history";
+const HOT_HISTORY_DAYS = 60; // keep two months of daily snapshots
+
+/**
+ * Daily cron: snapshot the current Hotness list into KV so the admin
+ * dashboard can distinguish sustained heat from one-day blips. Stored as a
+ * single JSON object { "yyyy-mm-dd": [{id, rank, name}, ...], ... }.
+ */
+async function snapshotHotness(env) {
+  const response = await fetch(`${BGG_HOT_URL}?type=boardgame`, {
+    headers: { Authorization: `Bearer ${env.BGG_TOKEN}` }
+  });
+  if (!response.ok) return;
+  const xml = await response.text();
+  const games = [];
+  for (const m of xml.matchAll(/<item\b[^>]*\bid="(\d+)"[^>]*\brank="(\d+)"[\s\S]*?<name value="([^"]*)"/g)) {
+    games.push({ id: m[1], rank: parseInt(m[2], 10), name: decodeEntities(m[3]) });
+  }
+  if (games.length === 0) return;
+
+  const history = JSON.parse((await env.HOT_HISTORY.get(HOT_HISTORY_KEY)) || "{}");
+  history[new Date().toISOString().slice(0, 10)] = games;
+  const dates = Object.keys(history).sort();
+  for (const date of dates.slice(0, Math.max(0, dates.length - HOT_HISTORY_DAYS))) delete history[date];
+  await env.HOT_HISTORY.put(HOT_HISTORY_KEY, JSON.stringify(history));
+}
+
+/** Serves the accumulated Hotness snapshots (JSON). */
+async function handleHotHistory(request, env, cors) {
+  if (request.method !== "GET") {
+    return new Response("Method not allowed", {
+      status: 405,
+      headers: { ...cors, "Content-Type": "text/plain; charset=utf-8" }
+    });
+  }
+
+  const history = (await env.HOT_HISTORY.get(HOT_HISTORY_KEY)) || "{}";
+  return new Response(history, {
+    status: 200,
+    headers: {
+      ...cors,
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "public, max-age=3600"
+    }
+  });
+}
+
 /** BGG "Hotness" list (trending games) — XML pass-through, cached 1 hour. */
 async function handleBggHot(request, env, cors) {
   if (request.method !== "GET") {
@@ -681,6 +728,10 @@ async function handleGallery(request, env, cors) {
 }
 
 export default {
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(snapshotHotness(env));
+  },
+
   async fetch(request, env) {
     const cors = corsHeaders(request);
     const incomingUrl = new URL(request.url);
@@ -723,6 +774,10 @@ export default {
 
     if (incomingUrl.pathname === "/api/bgg-hot") {
       return handleBggHot(request, env, cors);
+    }
+
+    if (incomingUrl.pathname === "/api/hot-history") {
+      return handleHotHistory(request, env, cors);
     }
 
     if (incomingUrl.pathname === "/api/bgg-search") {

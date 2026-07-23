@@ -7,3 +7,11 @@ workers_dev = true
 binding = "ANALYTICS_DB"
 database_name = "dfwgv-analytics"
 database_id = "36785673-2da0-44ba-bc96-18482a742f95"
+
+# Daily BGG Hotness snapshots (see the scheduled handler in worker.js).
+[[kv_namespaces]]
+binding = "HOT_HISTORY"
+id = "0c0b7bc80e824c35926a8fe63e360bc2"
+
+[triggers]
+crons = ["0 6 * * *"] # 06:00 UTC daily — snapshot the Hotness list into KV

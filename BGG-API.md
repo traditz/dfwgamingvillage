@@ -51,6 +51,15 @@ All are served from the proxy base URL above.
 | `GET /api/bgg-thing?id=1,2,3` | Game details / expansion links for hydration (XML pass‑through) | `xmlapi2/thing` |
 | `GET /api/bgg-top?count=100` | All‑time Top N, scraped from the public ranking page (JSON) | `browse/boardgame/page/N` (HTML) |
 | `GET /api/retail-prices?eid=` | US new-copy retail prices for a BGG id (admin dashboard) | BoardGamePrices.com `/api/info` (not BGG; no store names on the free tier) |
+| `GET /api/bgg-hot` | BGG Hotness list (XML pass-through, 1h cache) | `xmlapi2/hot` |
+| `GET /api/bgg-search?q=` | Game search (XML pass-through, 6h cache) | `xmlapi2/search` |
+| `GET /api/hot-history` | Daily Hotness snapshots, last 60 days (JSON) | Worker KV, filled by a daily cron (`scheduled` handler, 06:00 UTC) |
+
+The admin dashboard's "Suggested acquisitions" engine also reads
+`candidates.json` — BGG's Top 1000 with thing-API enrichment, built by
+`node scripts/refresh-candidates.mjs`. Like the Top-100 scrape it must run from
+a residential IP, so it's part of the same monthly local scheduled task
+(`scripts/update-top100.ps1`).
 
 ### The Game Library snapshot (`games-library.json`)
 

@@ -20,6 +20,8 @@ document.addEventListener('DOMContentLoaded', function () {
   const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
   let snapshot = null;   // games-library.json
+  let candidates = null; // candidates.json (Top 1000, enriched)
+  let hotHistory = {};   // date -> [{id,rank,name}] (worker KV, daily cron)
   let playsById = {};    // id -> total plays
   let top100 = [];       // [{rank,id,name,year,geekRating,...}]
   let hotList = [];      // BGG Hotness [{rank,id,name,year}]
@@ -117,8 +119,18 @@ document.addEventListener('DOMContentLoaded', function () {
       status.textContent = `Failed to load data: ${err.message}`;
       return;
     }
+    // Optional inputs — the dashboard degrades gracefully without them.
+    try {
+      const res = await fetch('candidates.json');
+      if (res.ok) candidates = await res.json();
+    } catch {}
+    try {
+      const res = await fetch(`${WORKER}/api/hot-history`);
+      if (res.ok) hotHistory = await res.json();
+    } catch {}
     status.textContent = '';
     renderProcurement();
+    renderSuggestions();
     renderCuration();
     renderPricing();
     hydratePublishers().catch(() => {});
@@ -145,6 +157,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
   const pubCell = (gameId) => `<td class="adm-pub" data-pub-for="${gameId}"><span class="adm-dim">…</span></td>`;
 
+  function computeCoverage() {
+    const bands = [
+      { label: 'Light (<2)', test: (w) => w > 0 && w < 2 },
+      { label: 'Medium (2–3)', test: (w) => w >= 2 && w < 3 },
+      { label: 'Heavy (3+)', test: (w) => w >= 3 }
+    ];
+    const cols = [1, 2, 3, 4, 5, 6, 7, 8];
+    const cells = bands.map((band) => cols.map((n) => snapshot.games.filter((g) => {
+      if (!band.test(g.weight)) return false;
+      const best = bestNums(g.bestWith);
+      return n === 8 ? [...best].some((b) => b >= 8) : best.has(n);
+    }).length));
+    return { bands, cols, cells };
+  }
+
   function renderProcurement() {
     const gaps = top100.filter((t) => !ownedIds.has(String(t.id)));
     const gapRows = gaps.map((t) => `
@@ -166,17 +193,7 @@ document.addEventListener('DOMContentLoaded', function () {
       </tr>`).join('');
 
     // Coverage: owned games best at N, by weight band.
-    const bands = [
-      { label: 'Light (<2)', test: (w) => w > 0 && w < 2 },
-      { label: 'Medium (2–3)', test: (w) => w >= 2 && w < 3 },
-      { label: 'Heavy (3+)', test: (w) => w >= 3 }
-    ];
-    const cols = [1, 2, 3, 4, 5, 6, 7, 8];
-    const cells = bands.map((band) => cols.map((n) => snapshot.games.filter((g) => {
-      if (!band.test(g.weight)) return false;
-      const best = bestNums(g.bestWith);
-      return n === 8 ? [...best].some((b) => b >= 8) : best.has(n);
-    }).length));
+    const { bands, cols, cells } = computeCoverage();
     const matrix = `
       <table class="adm-table adm-matrix">
         <thead><tr><th>Best at →</th>${cols.map((c) => `<th>${c === 8 ? '8+' : c}</th>`).join('')}</tr></thead>
@@ -202,6 +219,10 @@ document.addEventListener('DOMContentLoaded', function () {
       <tr class="adm-exp-result" data-exp-result="${g.id}" hidden><td colspan="3"></td></tr>`).join('');
 
     $('adm-procure').innerHTML = `
+      <div class="adm-panel"><h2>Suggested acquisitions</h2>
+        <p class="adm-dim">Top-1000 games rated 7.0+, not owned, scored on quality (35%), library gap-fill (25%), your community's taste from play data (25%), and sustained BGG hotness (15%). Reasons shown per game.</p>
+        <div id="adm-suggest-out"></div>
+      </div>
       <div class="adm-panel"><h2>BGG Top 100 — not in the library (${gaps.length})</h2>
         <p class="adm-dim">Publisher links go to the BGG company page, which lists each publisher's website and contact details.</p>
         <div class="adm-scroll"><table class="adm-table">
@@ -251,6 +272,114 @@ document.addEventListener('DOMContentLoaded', function () {
       ${listTable(wishList.slice().sort((a, b) => (a.priority || 9) - (b.priority || 9)), true)}
       <h3 class="adm-sub">Want-to-play (${wantList.length})</h3>
       ${listTable(wantList, false)}`;
+    renderSuggestions(); // refresh "on your BGG lists" chips
+  }
+
+  /**
+   * The acquisition engine: score every unowned Top-1000 candidate rated 7.0+
+   * on four transparent signals and show WHY each game scored what it did.
+   */
+  function renderSuggestions() {
+    const out = $('adm-suggest-out');
+    if (!out) return;
+    if (!candidates) {
+      out.innerHTML = '<p class="adm-dim">Candidate pool not built yet — run <code>node scripts/refresh-candidates.mjs</code> and commit candidates.json.</p>';
+      return;
+    }
+
+    const cov = computeCoverage();
+    const catCounts = new Map();
+    for (const g of snapshot.games) for (const i of g.cat || []) {
+      catCounts.set(snapshot.categories[i], (catCounts.get(snapshot.categories[i]) || 0) + 1);
+    }
+    const thinThemes = new Set([...catCounts.entries()].sort((a, b) => a[1] - b[1]).slice(0, 10).map((e) => e[0]));
+
+    // Taste = what the community actually plays, weighted by play counts.
+    const mechPlays = new Map();
+    const catPlays = new Map();
+    for (const g of snapshot.games) {
+      const p = playsById[g.id] || 0;
+      if (!p) continue;
+      for (const i of g.mech || []) mechPlays.set(snapshot.mechanics[i], (mechPlays.get(snapshot.mechanics[i]) || 0) + p);
+      for (const i of g.cat || []) catPlays.set(snapshot.categories[i], (catPlays.get(snapshot.categories[i]) || 0) + p);
+    }
+
+    // Momentum = days on the Hotness list over the recorded window (≤30 days).
+    const dates = Object.keys(hotHistory).sort().slice(-30);
+    const recordedDays = Math.max(1, dates.length);
+    const hotDays = new Map();
+    for (const d of dates) for (const g of hotHistory[d] || []) hotDays.set(String(g.id), (hotDays.get(String(g.id)) || 0) + 1);
+
+    const queueIds = new Set(wishList.concat(wantList).map((i) => i.id));
+    const pool = candidates.games.filter((c) => !ownedIds.has(String(c.id)) && c.rating >= 7);
+
+    let maxTaste = 0;
+    const scored = pool.map((c) => {
+      const mechNames = (c.mech || []).map((i) => candidates.mechanics[i]);
+      const catNames = (c.cat || []).map((i) => candidates.categories[i]);
+      const quality = Math.min(1, Math.max(0, (c.rating - 7) / 1.5));
+
+      const band = c.weight >= 3 ? 2 : c.weight >= 2 ? 1 : 0;
+      let gap = 0;
+      let gapWhy = '';
+      for (const n of bestNums(c.bestWith)) {
+        const col = Math.min(n, 8);
+        const count = cov.cells[band][col - 1];
+        const s = count < 4 ? 1 : count < 9 ? 0.5 : 0;
+        if (s > gap) { gap = s; gapWhy = `fills best-at-${col === 8 ? '8+' : col} · ${cov.bands[band].label.toLowerCase()}`; }
+      }
+      const thinCat = catNames.find((n) => thinThemes.has(n));
+      if (gap < 0.6 && thinCat) { gap = 0.6; gapWhy = `thin theme: ${thinCat}`; }
+
+      let tasteRaw = 0;
+      const contrib = [];
+      for (const n of mechNames) {
+        const w = mechPlays.get(n) || 0;
+        tasteRaw += w;
+        if (w) contrib.push([n, w]);
+      }
+      for (const n of catNames) tasteRaw += (catPlays.get(n) || 0) * 0.5;
+      maxTaste = Math.max(maxTaste, tasteRaw);
+
+      return {
+        c, quality, gap, gapWhy, tasteRaw,
+        tasteWhy: contrib.sort((a, b) => b[1] - a[1]).slice(0, 2).map((x) => x[0]).join(', '),
+        hotN: hotDays.get(String(c.id)) || 0
+      };
+    });
+
+    const rows = scored.map((s) => {
+      const taste = maxTaste ? s.tasteRaw / maxTaste : 0;
+      const momentum = Math.min(1, s.hotN / Math.min(recordedDays, 30));
+      s.score = Math.round(100 * (0.35 * s.quality + 0.25 * s.gap + 0.25 * taste + 0.15 * momentum));
+      s.taste = taste;
+      s.momentum = momentum;
+      return s;
+    }).sort((a, b) => b.score - a.score).slice(0, 40);
+
+    out.innerHTML = `
+      <div class="adm-scroll"><table class="adm-table">
+        <thead><tr><th>Score</th><th>Game</th><th>Publisher</th><th></th></tr></thead>
+        <tbody>${rows.map((s) => `
+          <tr>
+            <td><strong>${s.score}</strong></td>
+            <td>
+              ${gameLink(s.c.id, s.c.name)} <span class="adm-dim">(${s.c.year || '–'}) · BGG #${s.c.rank}</span><br>
+              <span class="adm-chip">★ ${s.c.rating.toFixed(1)}</span>
+              ${s.gap ? `<span class="adm-chip">${esc(s.gapWhy)}</span>` : ''}
+              ${s.taste > 0.25 && s.tasteWhy ? `<span class="adm-chip">taste: ${esc(s.tasteWhy)}</span>` : ''}
+              ${s.hotN ? `<span class="adm-chip">hot ${s.hotN}/${Math.min(recordedDays, 30)} days</span>` : ''}
+              ${queueIds.has(String(s.c.id)) ? '<span class="adm-chip">on your BGG lists</span>' : ''}
+            </td>
+            <td>${s.c.pubName ? `
+              <a href="https://boardgamegeek.com/boardgamepublisher/${s.c.pubId}" target="_blank" rel="noopener" title="BGG company page — website and contact info">${esc(s.c.pubName)}</a>
+              <a class="adm-dim" href="https://www.google.com/search?q=${encodeURIComponent(`${s.c.pubName} board game publisher contact`)}" target="_blank" rel="noopener" title="Search for contact details">🔎</a>` : '–'}
+            </td>
+            <td><button type="button" class="adm-mini" data-price-id="${s.c.id}" data-price-name="${esc(s.c.name)}">Price</button></td>
+          </tr>`).join('')}
+        </tbody>
+      </table></div>
+      <p class="adm-dim" style="margin-top:8px">${pool.length.toLocaleString()} candidates scored (Top 1000, rating ≥ 7.0, not owned) · candidates refreshed ${esc(candidates.generatedAt)} · hotness history: ${recordedDays} day${recordedDays === 1 ? '' : 's'} recorded</p>`;
   }
 
   /**
