@@ -606,9 +606,10 @@ document.addEventListener('DOMContentLoaded', function () {
       el.innerHTML = `<p class="adm-dim">Couldn't load the watchlist (${esc(watch.error)}).</p>`;
       return;
     }
+    const checkBtn = `<button type="button" class="adm-mini" id="adm-watch-check">Run price check now</button> <span id="adm-watch-check-msg"></span>`;
     const hookLine = watch.webhookConfigured
-      ? `<p class="adm-dim">Discord alerts: configured ✓ · checked daily at 06:00 UTC · alerts fire when a price drops ≥10% below its trailing average (≥15% below today's average while history is young) · <button type="button" class="adm-mini" id="adm-watch-test">Send test alert</button> <span id="adm-watch-test-msg"></span></p>`
-      : `<p class="adm-dim">⚠ Discord webhook not set — prices are recorded daily but no pings are sent. Create a webhook in your Discord (Server Settings → Integrations → Webhooks), then run <code>npx wrangler secret put ALERT_WEBHOOK</code> in <code>cloudflare/bgg-proxy</code> and paste the URL.</p>`;
+      ? `<p class="adm-dim">Discord alerts: configured ✓ · checked every 6 hours (00/06/12/18 UTC) · alerts fire when a price drops ≥10% below its trailing average (≥15% below today's average while history is young) · <button type="button" class="adm-mini" id="adm-watch-test">Send test alert</button> ${checkBtn} <span id="adm-watch-test-msg"></span></p>`
+      : `<p class="adm-dim">⚠ Discord webhook not set — prices are recorded but no pings are sent. Create a webhook in your Discord (Server Settings → Integrations → Webhooks), then run <code>npx wrangler secret put ALERT_WEBHOOK</code> in <code>cloudflare/bgg-proxy</code> and paste the URL. ${checkBtn}</p>`;
 
     if (!(watch.list || []).length) {
       el.innerHTML = `${hookLine}<p class="adm-dim">Nothing watched yet — click <strong>Watch</strong> on any game in Procurement or a pricing result.</p>`;
@@ -646,6 +647,26 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   document.addEventListener('click', async (e) => {
+    if (e.target.id === 'adm-watch-check') {
+      const btn = e.target;
+      const msg = $('adm-watch-check-msg');
+      btn.disabled = true;
+      msg.textContent = `Checking ${(watch.list || []).length} game${(watch.list || []).length === 1 ? '' : 's'}… (~1.5s each)`;
+      try {
+        const res = await fetch(`${WORKER}/api/watchlist?check=1`, { method: 'POST', headers: authHeaders() });
+        const data = await res.json();
+        if (data.ok) {
+          const summary = `Checked ${data.checked} — ${data.alerts.length ? `${data.alerts.length} alert${data.alerts.length === 1 ? '' : 's'} fired${data.webhookConfigured ? ' (sent to Discord)' : ' (webhook not set — not sent)'}` : 'no price drops found'}.`;
+          await loadWatchlist(); // re-renders the panel with fresh history
+          const freshMsg = $('adm-watch-check-msg');
+          if (freshMsg) freshMsg.textContent = summary;
+          return;
+        }
+        msg.textContent = data.error || 'Check failed.';
+      } catch { msg.textContent = 'Check failed.'; }
+      btn.disabled = false;
+      return;
+    }
     if (e.target.id === 'adm-watch-test') {
       const msg = $('adm-watch-test-msg');
       msg.textContent = 'Sending…';

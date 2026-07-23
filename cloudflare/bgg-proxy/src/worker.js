@@ -591,6 +591,12 @@ async function handleWatchlist(request, env, cors, incomingUrl) {
       const sent = await sendPriceAlert(env, [{ id: "13", name: "Test alert — the pipeline works", note: "this is a test from the Library Admin dashboard" }], true);
       return jsonResponse({ ok: true, sent, webhookConfigured: Boolean(env.ALERT_WEBHOOK) }, 200, cors);
     }
+    // Manual price check, same routine the cron runs. Takes ~1.5s per watched
+    // game (polite pacing toward BGG/BGP), so the client should show progress.
+    if (incomingUrl.searchParams.get("check") === "1") {
+      const summary = await checkWatchedPrices(env);
+      return jsonResponse({ ok: true, ...summary, webhookConfigured: Boolean(env.ALERT_WEBHOOK) }, 200, cors);
+    }
     let body;
     try { body = await request.json(); } catch { body = {}; }
     const id = String(body.id || "");
@@ -629,7 +635,7 @@ async function handleWatchlist(request, env, cors, incomingUrl) {
  */
 async function checkWatchedPrices(env) {
   const list = JSON.parse((await env.HOT_HISTORY.get(WATCHLIST_KEY)) || "[]");
-  if (list.length === 0) return;
+  if (list.length === 0) return { checked: 0, alerts: [] };
   const history = JSON.parse((await env.HOT_HISTORY.get(PRICE_HISTORY_KEY)) || "{}");
   const today = new Date().toISOString().slice(0, 10);
   const cooldownDate = new Date(Date.now() - ALERT_COOLDOWN_DAYS * 864e5).toISOString().slice(0, 10);
@@ -697,6 +703,7 @@ async function checkWatchedPrices(env) {
     await env.HOT_HISTORY.put(PRICE_ALERTS_KEY, JSON.stringify(alerts.concat(prev).slice(0, 20)));
     await sendPriceAlert(env, alerts);
   }
+  return { checked: Math.min(list.length, WATCHLIST_CAP), alerts };
 }
 
 /** Posts alerts to the Discord webhook stored as the ALERT_WEBHOOK secret. */

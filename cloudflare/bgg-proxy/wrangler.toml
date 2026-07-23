@@ -14,4 +14,4 @@ binding = "HOT_HISTORY"
 id = "0c0b7bc80e824c35926a8fe63e360bc2"
 
 [triggers]
-crons = ["0 6 * * *"] # 06:00 UTC daily — snapshot the Hotness list into KV
+crons = ["0 */6 * * *"] # every 6h — snapshot Hotness + check watchlist prices
