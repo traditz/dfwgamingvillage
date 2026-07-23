@@ -147,6 +147,25 @@ document.addEventListener('DOMContentLoaded', function () {
     // Wishlist / want-to-play load slowly on BGG's side — fill in when ready.
     fetchCollectionXml('&wishlist=1').then((items) => { wishList = items; renderQueues(); });
     fetchCollectionXml('&want=1').then((items) => { wantList = items; renderQueues(); });
+
+    // The snapshot is rebuilt monthly, so also union in the LIVE owned list —
+    // games marked owned on BGG since the rebuild stop being suggested as
+    // soon as BGG's feed reports them.
+    fetchCollectionXml('').then((items) => {
+      let changed = false;
+      for (const item of items) {
+        if (!ownedIds.has(item.id)) {
+          ownedIds.add(item.id);
+          ownedNames.add(normName(item.name));
+          changed = true;
+        }
+      }
+      if (changed) {
+        renderProcurement();
+        renderQueues(); // re-fills the queues panel and re-runs suggestions
+        hydratePublishers().catch(() => {});
+      }
+    });
   }
 
   const bestNums = (bestWith) => {
