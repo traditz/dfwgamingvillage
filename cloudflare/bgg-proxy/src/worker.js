@@ -654,11 +654,15 @@ async function checkWatchedPrices(env) {
       if (res.ok) {
         const data = await res.json();
         const best = (data.items || [])
-          .map((it) => (it.prices || []).filter((p) => p.country === "US" && p.stock === "Y").map((p) => +p.product || +p.price).filter(Boolean))
-          .sort((a, b) => b.length - a.length)[0];
-        if (best && best.length) {
-          snap.r = Math.min(...best);
-          snap.rAvg = best.reduce((a, b) => a + b, 0) / best.length;
+          .map((it) => ({
+            url: it.url || "",
+            prices: (it.prices || []).filter((p) => p.country === "US" && p.stock === "Y").map((p) => +p.product || +p.price).filter(Boolean)
+          }))
+          .sort((a, b) => b.prices.length - a.prices.length)[0];
+        if (best && best.prices.length) {
+          snap.r = Math.min(...best.prices);
+          snap.rAvg = best.prices.reduce((a, b) => a + b, 0) / best.prices.length;
+          snap.rUrl = best.url; // BoardGamePrices item page — where the offers are listed
         }
       }
     } catch { /* leave channel empty for today */ }
@@ -692,7 +696,12 @@ async function checkWatchedPrices(env) {
         note = `$${cur.toFixed(2)} — ${Math.round((1 - cur / snap[key + "Avg"]) * 100)}% below today's average listing of $${snap[key + "Avg"].toFixed(0)}`;
       }
       if (note && (!gh.lastAlert || gh.lastAlert < cooldownDate)) {
-        alerts.push({ id: g.id, name: g.name, channel: label, note, date: today });
+        // Link straight to where the deal actually is: the BoardGamePrices
+        // page for retail, the game's BGG Marketplace listings for second-hand.
+        const link = key === "r"
+          ? (snap.rUrl || `https://boardgameprices.com/search?search=${encodeURIComponent(g.name)}`)
+          : `https://boardgamegeek.com/boardgame/${g.id}/marketplace`;
+        alerts.push({ id: g.id, name: g.name, channel: label, note, link, date: today });
       }
     }
     gh[today] = { r: snap.r, m: snap.m };
@@ -716,7 +725,7 @@ async function checkWatchedPrices(env) {
 async function sendPriceAlert(env, alerts, isTest) {
   if (!env.ALERT_WEBHOOK) return false;
   const content = (isTest ? "🧪 " : "") + "🎲 **Library price alert**\n" + alerts.map((a) =>
-    `**${a.name}**${a.channel ? ` · ${a.channel}` : ""} — ${a.note}\n<https://boardgamegeek.com/boardgame/${a.id}>`
+    `**${a.name}**${a.channel ? ` · ${a.channel}` : ""} — ${a.note}\n<${a.link || `https://boardgamegeek.com/boardgame/${a.id}`}>`
   ).join("\n");
   try {
     const res = await fetch(env.ALERT_WEBHOOK.trim(), {
