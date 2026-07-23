@@ -1,0 +1,40 @@
+name: Refresh game library snapshot
+
+# Monthly rebuild of games-library.json. New games/expansions already appear
+# automatically via the page's daily client-side check — this refresh exists to
+# pick up drifting data on existing games (ratings, weights, mechanics, themes,
+# best-with). All BGG traffic goes through the deployed worker, so no secrets
+# are needed. Committing the snapshot triggers the normal site deploy.
+
+on:
+  schedule:
+    - cron: '17 9 1 * *' # 09:17 UTC on the 1st of each month
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Rebuild games-library.json
+        run: node scripts/refresh-library.mjs
+
+      - name: Commit and push if changed
+        run: |
+          if git diff --quiet games-library.json; then
+            echo "Snapshot unchanged — nothing to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add games-library.json
+          git commit -m "Game Library: scheduled snapshot refresh"
+          git push
