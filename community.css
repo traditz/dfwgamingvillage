@@ -1661,3 +1661,279 @@ a.game-card {
     font-size: 1.35rem;
   }
 }
+
+/* ===================== Library Admin (unlisted) ===================== */
+
+.adm-gate {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin: 40px auto;
+  max-width: 420px;
+  padding: 24px;
+}
+
+.adm-gate-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.adm-gate input {
+  background: #0f1016;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  flex: 1;
+  min-height: 42px;
+  padding: 8px 11px;
+}
+
+.adm-gate button,
+.adm-letter-actions button {
+  background: rgba(245, 197, 66, 0.12);
+  border: 1px solid var(--gold);
+  border-radius: 8px;
+  color: var(--gold);
+  cursor: pointer;
+  min-height: 42px;
+  padding: 8px 16px;
+}
+
+.adm-gate button:hover,
+.adm-letter-actions button:hover {
+  background: rgba(245, 197, 66, 0.22);
+}
+
+.adm-gate-msg {
+  color: var(--red);
+  font-size: 0.85rem;
+  min-height: 1.2em;
+}
+
+.adm-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin: 18px 0 8px;
+}
+
+.adm-tabs button {
+  background: #0f1016;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  cursor: pointer;
+  min-height: 42px;
+  padding: 8px 18px;
+}
+
+.adm-tabs button.active {
+  background: rgba(245, 197, 66, 0.14);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.adm-status {
+  color: var(--muted);
+  min-height: 1.3em;
+}
+
+.adm-panel {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0) 55%), var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin: 14px auto;
+  max-width: 1100px;
+  padding: 16px 18px;
+  text-align: left;
+}
+
+.adm-panel h2 {
+  color: var(--gold);
+  font-size: 1.05rem;
+  margin: 0 0 8px;
+}
+
+.adm-sub {
+  font-size: 0.95rem;
+  margin: 14px 0 6px;
+}
+
+.adm-dim {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.adm-scroll {
+  max-height: 420px;
+  overflow: auto;
+}
+
+.adm-table {
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  width: 100%;
+}
+
+.adm-table th,
+.adm-table td {
+  border-bottom: 1px solid var(--line-soft);
+  padding: 6px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.adm-table thead th {
+  color: var(--muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  position: sticky;
+  top: 0;
+  background: var(--panel-strong);
+  text-transform: uppercase;
+  z-index: 2;
+}
+
+.adm-matrix td,
+.adm-matrix th {
+  text-align: center;
+}
+
+.adm-cell-low {
+  background: rgba(217, 31, 47, 0.22);
+  color: #ff9aa4;
+  font-weight: 700;
+}
+
+.adm-cell-mid {
+  background: rgba(245, 197, 66, 0.12);
+  color: var(--gold);
+}
+
+.adm-chip {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  display: inline-block;
+  font-size: 0.8rem;
+  margin: 2px;
+  padding: 3px 10px;
+}
+
+.adm-mini {
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.78rem;
+  padding: 3px 10px;
+}
+
+.adm-mini:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.adm-exp-result td {
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 0.84rem;
+}
+
+.adm-price-search {
+  margin: 10px 0;
+  position: relative;
+}
+
+.adm-price-search input {
+  background: #0f1016;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  min-height: 42px;
+  padding: 8px 11px;
+  width: min(100%, 420px);
+}
+
+.adm-suggest {
+  background: var(--panel-strong);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  max-width: 420px;
+  position: absolute;
+  width: 100%;
+  z-index: 20;
+}
+
+.adm-suggest button {
+  background: none;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  display: block;
+  padding: 8px 12px;
+  text-align: left;
+  width: 100%;
+}
+
+.adm-suggest button:hover {
+  background: rgba(245, 197, 66, 0.1);
+}
+
+.adm-price-stats {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  margin: 10px 0;
+  max-width: 640px;
+}
+
+.adm-letter-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin: 12px 0;
+}
+
+.adm-letter-grid label {
+  color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  font-size: 0.8rem;
+  gap: 4px;
+  text-align: left;
+}
+
+.adm-letter-grid input,
+.adm-letter-grid select {
+  background: #0f1016;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  min-height: 40px;
+  padding: 7px 10px;
+}
+
+#adm-letter {
+  background: #0f1016;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  margin-top: 12px;
+  padding: 14px;
+  resize: vertical;
+  width: 100%;
+}
+
+.adm-letter-actions {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}

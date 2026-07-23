@@ -71,6 +71,7 @@ console.log(`  ${ids.length} base games, ${ownedExpansions.size} expansions owne
 // 2. Hydrate every game via the thing API (weight, mechanics, rating, best-with).
 const mechanicsIndex = new Map();  // name -> index into the mechanics dictionary
 const categoriesIndex = new Map(); // name -> index into the categories dictionary
+const publishersIndex = new Map(); // name -> index into the publishers dictionary
 const games = [];
 
 function parseThingItem(itemXml, id) {
@@ -87,6 +88,13 @@ function parseThingItem(itemXml, id) {
     const name = decodeEntities(m[1]);
     if (!categoriesIndex.has(name)) categoriesIndex.set(name, categoriesIndex.size);
     cat.push(categoriesIndex.get(name));
+  }
+  // First three publisher links — BGG lists the primary publisher first.
+  const pub = [];
+  for (const m of [...itemXml.matchAll(/<link type="boardgamepublisher" id="\d+" value="([^"]*)"/g)].slice(0, 3)) {
+    const name = decodeEntities(m[1]);
+    if (!publishersIndex.has(name)) publishersIndex.set(name, publishersIndex.size);
+    pub.push(publishersIndex.get(name));
   }
   // Owned expansions that BGG links to this base game.
   const exp = [];
@@ -113,6 +121,7 @@ function parseThingItem(itemXml, id) {
     added: baseAdded.get(id) || '',
     mech,
     cat,
+    pub,
     exp
   };
 }
@@ -136,13 +145,15 @@ games.sort((a, b) => a.name.localeCompare(b.name));
 // 3. Write the snapshot — one game per line keeps git diffs readable.
 const mechanics = [...mechanicsIndex.keys()];
 const categories = [...categoriesIndex.keys()];
+const publishers = [...publishersIndex.keys()];
 const head = JSON.stringify({
   generatedAt: new Date().toISOString().slice(0, 10),
   username: USERNAME,
   count: games.length,
   mechanics,
-  categories
+  categories,
+  publishers
 });
 const body = games.map((g) => '    ' + JSON.stringify(g)).join(',\n');
 await writeFile(OUT, `${head.slice(0, -1)},\n  "games": [\n${body}\n  ]\n}\n`);
-console.log(`Wrote ${games.length} games (${mechanics.length} mechanics, ${categories.length} categories) to ${OUT}`);
+console.log(`Wrote ${games.length} games (${mechanics.length} mechanics, ${categories.length} categories, ${publishers.length} publishers) to ${OUT}`);

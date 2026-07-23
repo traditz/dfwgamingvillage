@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>DFWGV — Library Admin</title>
+    <link rel="stylesheet" href="community.css?v=20260723-admin1">
+    <link rel="icon" href="favicon.ico">
+</head>
+<body data-page="library-admin">
+    <div class="nav">
+        <a href="index.html">Home</a>
+        <a href="games.html">Game Library</a>
+    </div>
+
+    <main class="content">
+        <h1>Library Admin</h1>
+
+        <div id="adm-gate" class="adm-gate">
+            <p>This dashboard is for DFW Gaming Village library administrators.</p>
+            <div class="adm-gate-row">
+                <input type="password" id="adm-token" placeholder="Admin token" autocomplete="off">
+                <button type="button" id="adm-token-btn">Unlock</button>
+            </div>
+            <p id="adm-gate-msg" class="adm-gate-msg"></p>
+        </div>
+
+        <div id="adm-app" hidden>
+            <div class="adm-tabs" role="tablist">
+                <button type="button" data-tab="procure" class="active" role="tab">Procurement</button>
+                <button type="button" data-tab="curate" role="tab">Curation</button>
+                <button type="button" data-tab="price" role="tab">Pricing</button>
+                <button type="button" data-tab="letters" role="tab">Letters</button>
+            </div>
+            <p id="adm-status" class="adm-status"></p>
+            <section id="adm-procure" class="adm-tab"></section>
+            <section id="adm-curate" class="adm-tab" hidden></section>
+            <section id="adm-price" class="adm-tab" hidden></section>
+            <section id="adm-letters" class="adm-tab" hidden></section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 DFW Gaming Village. All Rights Reserved.</p>
+    </footer>
+
+    <script src="library-admin.js?v=20260723-admin1"></script>
+</body>
+</html>

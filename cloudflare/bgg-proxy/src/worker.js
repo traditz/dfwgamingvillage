@@ -287,9 +287,12 @@ async function handleBggCollection(request, env, cors, incomingUrl) {
   const bggUrl = new URL(BGG_COLLECTION_URL);
   bggUrl.searchParams.set("username", username);
   bggUrl.searchParams.set("stats", "1");
-  // Default is owned games. Pass ?want=1 to request the user's "want to play" list instead.
+  // Default is owned games. ?want=1 requests the "want to play" list;
+  // ?wishlist=1 requests the wishlist (items carry a wishlistpriority attr).
   if (incomingUrl.searchParams.get("want") === "1") {
     bggUrl.searchParams.set("wanttoplay", "1");
+  } else if (incomingUrl.searchParams.get("wishlist") === "1") {
+    bggUrl.searchParams.set("wishlist", "1");
   } else {
     bggUrl.searchParams.set("own", "1");
   }
@@ -421,6 +424,11 @@ async function handleBggThing(request, env, cors, incomingUrl) {
   const thingUrl = new URL(BGG_THING_URL);
   thingUrl.searchParams.set("id", ids);
   thingUrl.searchParams.set("stats", "1");
+  // ?marketplace=1 includes current BGG Marketplace listings (price/condition),
+  // used by the admin dashboard's second-hand pricing tool.
+  if (incomingUrl.searchParams.get("marketplace") === "1") {
+    thingUrl.searchParams.set("marketplace", "1");
+  }
 
   const response = await fetch(thingUrl.toString(), {
     headers: { Authorization: `Bearer ${env.BGG_TOKEN}` }
@@ -592,6 +600,12 @@ export default {
 
     if (incomingUrl.pathname === "/api/analytics-summary") {
       return handleAnalyticsSummary(request, env, cors);
+    }
+
+    // Token check for the unlisted admin dashboard (same token as analytics).
+    if (incomingUrl.pathname === "/api/admin-verify") {
+      const ok = isAuthorized(request, env);
+      return jsonResponse({ ok }, ok ? 200 : 401, cors);
     }
 
     if (incomingUrl.pathname === "/api/bgg-collection") {
