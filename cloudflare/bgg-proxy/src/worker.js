@@ -540,6 +540,16 @@ function decodeEntities(str) {
 const HOT_HISTORY_KEY = "hot-history";
 const HOT_HISTORY_DAYS = 60; // keep two months of daily snapshots
 
+const WATCHLIST_KEY = "watchlist";
+const PRICE_HISTORY_KEY = "price-history";
+const PRICE_ALERTS_KEY = "price-alerts";
+const PRICE_HISTORY_DAYS = 90;
+const WATCHLIST_CAP = 50;
+const DROP_VS_TRAILING = 0.10;  // alert when today's low is 10% under the trailing average
+const OUTLIER_VS_TODAY = 0.15;  // ...or (young history) 15% under today's average listing
+const MIN_TRAILING_POINTS = 3;
+const ALERT_COOLDOWN_DAYS = 7;  // don't re-alert the same game within a week
+
 /**
  * Daily cron: snapshot the current Hotness list into KV so the admin
  * dashboard can distinguish sustained heat from one-day blips. Stored as a
@@ -562,6 +572,149 @@ async function snapshotHotness(env) {
   const dates = Object.keys(history).sort();
   for (const date of dates.slice(0, Math.max(0, dates.length - HOT_HISTORY_DAYS))) delete history[date];
   await env.HOT_HISTORY.put(HOT_HISTORY_KEY, JSON.stringify(history));
+}
+
+/**
+ * Price watchlist for the admin dashboard (token-gated). Games on the list are
+ * price-checked by the daily cron; drops below average ping a Discord webhook
+ * (the ALERT_WEBHOOK secret). GET returns list + price history + recent alerts.
+ */
+async function handleWatchlist(request, env, cors, incomingUrl) {
+  if (!isAuthorized(request, env)) {
+    return jsonResponse({ ok: false, error: "Unauthorized" }, 401, cors);
+  }
+
+  const list = JSON.parse((await env.HOT_HISTORY.get(WATCHLIST_KEY)) || "[]");
+
+  if (request.method === "POST") {
+    if (incomingUrl.searchParams.get("test") === "1") {
+      const sent = await sendPriceAlert(env, [{ id: "13", name: "Test alert — the pipeline works", note: "this is a test from the Library Admin dashboard" }], true);
+      return jsonResponse({ ok: true, sent, webhookConfigured: Boolean(env.ALERT_WEBHOOK) }, 200, cors);
+    }
+    let body;
+    try { body = await request.json(); } catch { body = {}; }
+    const id = String(body.id || "");
+    const name = clampString(body.name, 160);
+    if (!/^\d+$/.test(id) || !name) {
+      return jsonResponse({ ok: false, error: "Invalid game" }, 400, cors);
+    }
+    if (!list.some((g) => g.id === id)) {
+      if (list.length >= WATCHLIST_CAP) {
+        return jsonResponse({ ok: false, error: `Watchlist is capped at ${WATCHLIST_CAP} games` }, 400, cors);
+      }
+      list.push({ id, name, addedAt: new Date().toISOString().slice(0, 10) });
+      await env.HOT_HISTORY.put(WATCHLIST_KEY, JSON.stringify(list));
+    }
+    return jsonResponse({ ok: true, list }, 200, cors);
+  }
+
+  if (request.method === "DELETE") {
+    const id = incomingUrl.searchParams.get("id") || "";
+    const next = list.filter((g) => g.id !== id);
+    await env.HOT_HISTORY.put(WATCHLIST_KEY, JSON.stringify(next));
+    return jsonResponse({ ok: true, list: next }, 200, cors);
+  }
+
+  const history = JSON.parse((await env.HOT_HISTORY.get(PRICE_HISTORY_KEY)) || "{}");
+  const lastAlerts = JSON.parse((await env.HOT_HISTORY.get(PRICE_ALERTS_KEY)) || "[]");
+  return jsonResponse(
+    { ok: true, list, history, lastAlerts, webhookConfigured: Boolean(env.ALERT_WEBHOOK) },
+    200, cors
+  );
+}
+
+/**
+ * Daily cron: check every watched game's lowest US retail price (BoardGamePrices)
+ * and lowest USD BGG Marketplace listing, record both, and alert on drops.
+ */
+async function checkWatchedPrices(env) {
+  const list = JSON.parse((await env.HOT_HISTORY.get(WATCHLIST_KEY)) || "[]");
+  if (list.length === 0) return;
+  const history = JSON.parse((await env.HOT_HISTORY.get(PRICE_HISTORY_KEY)) || "{}");
+  const today = new Date().toISOString().slice(0, 10);
+  const cooldownDate = new Date(Date.now() - ALERT_COOLDOWN_DAYS * 864e5).toISOString().slice(0, 10);
+  const alerts = [];
+
+  for (const g of list.slice(0, WATCHLIST_CAP)) {
+    const snap = {};
+    try { // retail — lowest in-stock US item price + today's average
+      const res = await fetch(`https://boardgameprices.com/api/info?eid=${g.id}&currency=USD&destination=US&sitename=dfwgamingvillage.com`);
+      if (res.ok) {
+        const data = await res.json();
+        const best = (data.items || [])
+          .map((it) => (it.prices || []).filter((p) => p.country === "US" && p.stock === "Y").map((p) => +p.product || +p.price).filter(Boolean))
+          .sort((a, b) => b.length - a.length)[0];
+        if (best && best.length) {
+          snap.r = Math.min(...best);
+          snap.rAvg = best.reduce((a, b) => a + b, 0) / best.length;
+        }
+      }
+    } catch { /* leave channel empty for today */ }
+    try { // second-hand — lowest USD BGG Marketplace listing + today's average
+      const res = await fetch(`${BGG_THING_URL}?id=${g.id}&marketplace=1`, {
+        headers: { Authorization: `Bearer ${env.BGG_TOKEN}` }
+      });
+      if (res.ok) {
+        const xml = await res.text();
+        const prices = [...xml.matchAll(/<price currency="USD" value="([\d.]+)"/g)].map((m) => +m[1]).filter(Boolean);
+        if (prices.length) {
+          snap.m = Math.min(...prices);
+          snap.mAvg = prices.reduce((a, b) => a + b, 0) / prices.length;
+        }
+      }
+    } catch { /* leave channel empty for today */ }
+
+    const gh = history[g.id] = history[g.id] || {};
+    const prevDates = Object.keys(gh).filter((d) => /^\d{4}-/.test(d) && d < today).sort().slice(-30);
+    for (const [key, label] of [["r", "new retail"], ["m", "second-hand"]]) {
+      const cur = snap[key];
+      if (!cur) continue;
+      const prev = prevDates.map((d) => gh[d][key]).filter(Boolean);
+      let note = "";
+      if (prev.length >= MIN_TRAILING_POINTS) {
+        const avg = prev.reduce((a, b) => a + b, 0) / prev.length;
+        if (cur <= avg * (1 - DROP_VS_TRAILING)) {
+          note = `$${cur.toFixed(2)} — ${Math.round((1 - cur / avg) * 100)}% below its ${prev.length}-day average of $${avg.toFixed(0)}`;
+        }
+      } else if (snap[key + "Avg"] && cur <= snap[key + "Avg"] * (1 - OUTLIER_VS_TODAY)) {
+        note = `$${cur.toFixed(2)} — ${Math.round((1 - cur / snap[key + "Avg"]) * 100)}% below today's average listing of $${snap[key + "Avg"].toFixed(0)}`;
+      }
+      if (note && (!gh.lastAlert || gh.lastAlert < cooldownDate)) {
+        alerts.push({ id: g.id, name: g.name, channel: label, note, date: today });
+      }
+    }
+    gh[today] = { r: snap.r, m: snap.m };
+    if (alerts.some((a) => a.id === g.id)) gh.lastAlert = today;
+    const dates = Object.keys(gh).filter((d) => /^\d{4}-/.test(d)).sort();
+    for (const d of dates.slice(0, Math.max(0, dates.length - PRICE_HISTORY_DAYS))) delete gh[d];
+
+    await new Promise((r) => setTimeout(r, 700)); // pace BGG/BGP politely
+  }
+
+  await env.HOT_HISTORY.put(PRICE_HISTORY_KEY, JSON.stringify(history));
+  if (alerts.length) {
+    const prev = JSON.parse((await env.HOT_HISTORY.get(PRICE_ALERTS_KEY)) || "[]");
+    await env.HOT_HISTORY.put(PRICE_ALERTS_KEY, JSON.stringify(alerts.concat(prev).slice(0, 20)));
+    await sendPriceAlert(env, alerts);
+  }
+}
+
+/** Posts alerts to the Discord webhook stored as the ALERT_WEBHOOK secret. */
+async function sendPriceAlert(env, alerts, isTest) {
+  if (!env.ALERT_WEBHOOK) return false;
+  const content = (isTest ? "🧪 " : "") + "🎲 **Library price alert**\n" + alerts.map((a) =>
+    `**${a.name}**${a.channel ? ` · ${a.channel}` : ""} — ${a.note}\n<https://boardgamegeek.com/boardgame/${a.id}>`
+  ).join("\n");
+  try {
+    const res = await fetch(env.ALERT_WEBHOOK, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content })
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
 }
 
 /** Serves the accumulated Hotness snapshots (JSON). */
@@ -730,6 +883,7 @@ async function handleGallery(request, env, cors) {
 export default {
   async scheduled(event, env, ctx) {
     ctx.waitUntil(snapshotHotness(env));
+    ctx.waitUntil(checkWatchedPrices(env));
   },
 
   async fetch(request, env) {
@@ -778,6 +932,10 @@ export default {
 
     if (incomingUrl.pathname === "/api/hot-history") {
       return handleHotHistory(request, env, cors);
+    }
+
+    if (incomingUrl.pathname === "/api/watchlist") {
+      return handleWatchlist(request, env, cors, incomingUrl);
     }
 
     if (incomingUrl.pathname === "/api/bgg-search") {

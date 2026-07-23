@@ -29,6 +29,11 @@ document.addEventListener('DOMContentLoaded', function () {
   let wishList = [];     // wishlist items
   let ownedIds = new Set();
   let ownedNames = new Set(); // normalized names — catches other editions of owned games
+  let watch = { list: [], history: {}, lastAlerts: [], webhookConfigured: false };
+  let watchSet = new Set();
+
+  const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem(TOKEN_KEY) || ''}` });
+  const watchBtn = (id, name) => `<button type="button" class="adm-mini adm-watch" data-watch-id="${id}" data-watch-name="${esc(name)}">Watch</button>`;
   let publisherByGame = new Map(); // game id -> {id, name} (hydrated on demand)
 
   // "7 Wonders (Second Edition)" and "7 Wonders" are the same shelf presence:
@@ -148,6 +153,8 @@ document.addEventListener('DOMContentLoaded', function () {
     fetchCollectionXml('&wishlist=1').then((items) => { wishList = items; renderQueues(); });
     fetchCollectionXml('&want=1').then((items) => { wantList = items; renderQueues(); });
 
+    loadWatchlist();
+
     // The snapshot is rebuilt monthly, so also union in the LIVE owned list —
     // games marked owned on BGG since the rebuild stop being suggested as
     // soon as BGG's feed reports them.
@@ -208,7 +215,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <td>${gameLink(t.id, t.name)} <span class="adm-dim">(${esc(t.year)})</span></td>
         <td>${esc(t.geekRating)}</td>
         ${pubCell(t.id)}
-        <td><button type="button" class="adm-mini" data-price-id="${t.id}" data-price-name="${esc(t.name)}">Price</button></td>
+        <td>${watchBtn(t.id, t.name)} <button type="button" class="adm-mini" data-price-id="${t.id}" data-price-name="${esc(t.name)}">Price</button></td>
       </tr>`).join('');
 
     const hotGaps = hotList.filter((h) => !isOwnedGame(h.id, h.name));
@@ -217,7 +224,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <td>#${h.rank}</td>
         <td>${gameLink(h.id, h.name)} <span class="adm-dim">${h.year ? `(${esc(h.year)})` : ''}</span></td>
         ${pubCell(h.id)}
-        <td><button type="button" class="adm-mini" data-price-id="${h.id}" data-price-name="${esc(h.name)}">Price</button></td>
+        <td>${watchBtn(h.id, h.name)} <button type="button" class="adm-mini" data-price-id="${h.id}" data-price-name="${esc(h.name)}">Price</button></td>
       </tr>`).join('');
 
     // Coverage: owned games best at N, by weight band.
@@ -340,7 +347,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <td>${gameLink(i.id, i.name)} <span class="adm-dim">(${esc(i.year)})</span></td>
             <td>${i.rating ? i.rating.toFixed(1) : '–'}</td>
             ${withPriority ? `<td>${PRIORITY[i.priority] || '–'}</td>` : ''}
-            <td><button type="button" class="adm-mini" data-price-id="${i.id}" data-price-name="${esc(i.name)}">Price</button></td>
+            <td>${watchBtn(i.id, i.name)} <button type="button" class="adm-mini" data-price-id="${i.id}" data-price-name="${esc(i.name)}">Price</button></td>
           </tr>`).join('')}
         </tbody>
       </table></div>` : '<p class="adm-dim">Empty — add games on boardgamegeek.com and they appear here.</p>';
@@ -352,6 +359,7 @@ document.addEventListener('DOMContentLoaded', function () {
       <h3 class="adm-sub">Want-to-play (${wantList.length})</h3>
       ${listTable(wantList, false)}`;
     renderSuggestions(); // refresh "on your BGG lists" chips
+    syncWatchButtons();
   }
 
   /**
@@ -454,11 +462,12 @@ document.addEventListener('DOMContentLoaded', function () {
               <a href="https://boardgamegeek.com/boardgamepublisher/${s.c.pubId}" target="_blank" rel="noopener" title="BGG company page — website and contact info">${esc(s.c.pubName)}</a>
               <a class="adm-dim" href="https://www.google.com/search?q=${encodeURIComponent(`${s.c.pubName} board game publisher contact`)}" target="_blank" rel="noopener" title="Search for contact details">🔎</a>` : '–'}
             </td>
-            <td><button type="button" class="adm-mini" data-price-id="${s.c.id}" data-price-name="${esc(s.c.name)}">Price</button></td>
+            <td>${watchBtn(s.c.id, s.c.name)} <button type="button" class="adm-mini" data-price-id="${s.c.id}" data-price-name="${esc(s.c.name)}">Price</button></td>
           </tr>`).join('')}
         </tbody>
       </table></div>
       <p class="adm-dim" style="margin-top:8px">${pool.length.toLocaleString()} candidates scored (Top 1000, rating ≥ 7.0, not owned) · candidates refreshed ${esc(candidates.generatedAt)} · hotness history: ${recordedDays} day${recordedDays === 1 ? '' : 's'} recorded</p>`;
+    syncWatchButtons();
   }
 
   /**
@@ -567,8 +576,114 @@ document.addEventListener('DOMContentLoaded', function () {
     return [...seen.values()];
   }
 
+  /* ---------------- price watchlist ---------------- */
+
+  async function loadWatchlist() {
+    try {
+      const res = await fetch(`${WORKER}/api/watchlist`, { headers: authHeaders() });
+      if (!res.ok) throw new Error(`status ${res.status}`);
+      watch = await res.json();
+    } catch (err) {
+      watch.error = err.message;
+    }
+    watchSet = new Set((watch.list || []).map((g) => g.id));
+    syncWatchButtons();
+    renderWatchPanel();
+  }
+
+  function syncWatchButtons() {
+    document.querySelectorAll('[data-watch-id]').forEach((btn) => {
+      const watching = watchSet.has(btn.dataset.watchId);
+      btn.textContent = watching ? 'Watching ✓' : 'Watch';
+      btn.classList.toggle('active', watching);
+    });
+  }
+
+  function renderWatchPanel() {
+    const el = $('adm-watch-out');
+    if (!el) return;
+    if (watch.error) {
+      el.innerHTML = `<p class="adm-dim">Couldn't load the watchlist (${esc(watch.error)}).</p>`;
+      return;
+    }
+    const hookLine = watch.webhookConfigured
+      ? `<p class="adm-dim">Discord alerts: configured ✓ · checked daily at 06:00 UTC · alerts fire when a price drops ≥10% below its trailing average (≥15% below today's average while history is young) · <button type="button" class="adm-mini" id="adm-watch-test">Send test alert</button> <span id="adm-watch-test-msg"></span></p>`
+      : `<p class="adm-dim">⚠ Discord webhook not set — prices are recorded daily but no pings are sent. Create a webhook in your Discord (Server Settings → Integrations → Webhooks), then run <code>npx wrangler secret put ALERT_WEBHOOK</code> in <code>cloudflare/bgg-proxy</code> and paste the URL.</p>`;
+
+    if (!(watch.list || []).length) {
+      el.innerHTML = `${hookLine}<p class="adm-dim">Nothing watched yet — click <strong>Watch</strong> on any game in Procurement or a pricing result.</p>`;
+      return;
+    }
+
+    const latest = (id, key) => {
+      const gh = watch.history?.[id] || {};
+      const dates = Object.keys(gh).filter((d) => /^\d{4}-/.test(d)).sort();
+      for (let i = dates.length - 1; i >= 0; i--) if (gh[dates[i]][key]) return gh[dates[i]][key];
+      return null;
+    };
+    const avg = (id, key) => {
+      const gh = watch.history?.[id] || {};
+      const vals = Object.keys(gh).filter((d) => /^\d{4}-/.test(d)).map((d) => gh[d][key]).filter(Boolean);
+      return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+    };
+    const recentAlert = new Set((watch.lastAlerts || []).slice(0, 10).map((a) => a.id));
+    const money = (v) => v ? `$${v.toFixed(0)}` : '–';
+
+    el.innerHTML = `${hookLine}
+      <div class="adm-scroll"><table class="adm-table">
+        <thead><tr><th>Game</th><th>Retail low</th><th>Used low</th><th>Avg (tracked)</th><th></th></tr></thead>
+        <tbody>${watch.list.map((g) => `
+          <tr>
+            <td>${gameLink(g.id, g.name)}${recentAlert.has(g.id) ? ' <span class="adm-chip">🔔 recent alert</span>' : ''}<br><span class="adm-dim">watched since ${esc(g.addedAt)}</span></td>
+            <td>${money(latest(g.id, 'r'))}</td>
+            <td>${money(latest(g.id, 'm'))}</td>
+            <td class="adm-dim">${money(avg(g.id, 'r'))} / ${money(avg(g.id, 'm'))}</td>
+            <td>${watchBtn(g.id, g.name)} <button type="button" class="adm-mini" data-price-id="${g.id}" data-price-name="${esc(g.name)}">Price</button></td>
+          </tr>`).join('')}
+        </tbody>
+      </table></div>
+      <p class="adm-dim" style="margin-top:8px">Prices are sampled once a day, so new additions show "–" until tomorrow's check. Alert cooldown: one ping per game per week.</p>`;
+  }
+
+  document.addEventListener('click', async (e) => {
+    if (e.target.id === 'adm-watch-test') {
+      const msg = $('adm-watch-test-msg');
+      msg.textContent = 'Sending…';
+      try {
+        const res = await fetch(`${WORKER}/api/watchlist?test=1`, { method: 'POST', headers: authHeaders() });
+        const data = await res.json();
+        msg.textContent = data.sent ? 'Sent — check Discord ✓' : 'Webhook did not accept the message.';
+      } catch { msg.textContent = 'Test failed.'; }
+      return;
+    }
+    const btn = e.target.closest('[data-watch-id]');
+    if (!btn) return;
+    btn.disabled = true;
+    try {
+      let res;
+      if (watchSet.has(btn.dataset.watchId)) {
+        res = await fetch(`${WORKER}/api/watchlist?id=${btn.dataset.watchId}`, { method: 'DELETE', headers: authHeaders() });
+      } else {
+        res = await fetch(`${WORKER}/api/watchlist`, {
+          method: 'POST',
+          headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: btn.dataset.watchId, name: btn.dataset.watchName })
+        });
+      }
+      const data = await res.json();
+      if (data.ok) watch.list = data.list;
+    } catch { /* leave state as-is */ }
+    btn.disabled = false;
+    watchSet = new Set((watch.list || []).map((g) => g.id));
+    syncWatchButtons();
+    renderWatchPanel();
+  });
+
   function renderPricing() {
     $('adm-price').innerHTML = `
+      <div class="adm-panel"><h2>Price watchlist</h2>
+        <div id="adm-watch-out"><p class="adm-dim">Loading watchlist…</p></div>
+      </div>
       <div class="adm-panel"><h2>Game pricing</h2>
         <p class="adm-dim">Second-hand (BGG Marketplace) and new-retail (US stores) pricing for <strong>any</strong> game — owned or not. Results beyond the library come from a live BGG search.</p>
         <div class="adm-price-search">
@@ -689,7 +804,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const q = encodeURIComponent(`${name} board game`);
     out.innerHTML = `
-      <h3 class="adm-sub">${gameLink(id, name)} <span class="adm-dim">— second-hand (BGG Marketplace)</span></h3>
+      <h3 class="adm-sub">${gameLink(id, name)} ${watchBtn(id, name)} <span class="adm-dim">— second-hand (BGG Marketplace)</span></h3>
       ${summary}
       ${usdListings.length ? `<div class="adm-scroll"><table class="adm-table">
         <thead><tr><th>Price</th><th>Condition</th><th>Listed</th><th></th></tr></thead>
@@ -710,6 +825,7 @@ document.addEventListener('DOMContentLoaded', function () {
         </a>
       </div>`;
 
+    syncWatchButtons();
     loadRetail(id);
   }
 

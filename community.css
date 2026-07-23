@@ -1837,6 +1837,12 @@ a.game-card {
   color: var(--gold);
 }
 
+.adm-mini.active {
+  background: rgba(245, 197, 66, 0.14);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
 .adm-exp-result td {
   background: rgba(255, 255, 255, 0.03);
   font-size: 0.84rem;
