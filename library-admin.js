@@ -673,7 +673,15 @@ document.addEventListener('DOMContentLoaded', function () {
       try {
         const res = await fetch(`${WORKER}/api/watchlist?test=1`, { method: 'POST', headers: authHeaders() });
         const data = await res.json();
-        msg.textContent = data.sent ? 'Sent — check Discord ✓' : 'Webhook did not accept the message.';
+        if (data.sent) {
+          msg.textContent = 'Sent — check Discord ✓';
+        } else {
+          const why = data.status === 404 ? 'Discord says the webhook does not exist (404) — the stored URL is wrong or the webhook was deleted.'
+            : data.status === 401 ? 'Discord rejected the webhook token (401) — the stored URL is incomplete.'
+            : data.status === 0 ? `The stored secret is not a valid URL (${data.detail || 'invalid URL'}).`
+            : `Discord answered ${data.status || '?'}${data.detail ? ` — ${data.detail}` : ''}.`;
+          msg.textContent = `Not sent: ${why} Re-run "npx wrangler secret put ALERT_WEBHOOK" and paste only the URL, no quotes.`;
+        }
       } catch { msg.textContent = 'Test failed.'; }
       return;
     }

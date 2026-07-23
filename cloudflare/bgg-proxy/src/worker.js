@@ -588,8 +588,14 @@ async function handleWatchlist(request, env, cors, incomingUrl) {
 
   if (request.method === "POST") {
     if (incomingUrl.searchParams.get("test") === "1") {
-      const sent = await sendPriceAlert(env, [{ id: "13", name: "Test alert — the pipeline works", note: "this is a test from the Library Admin dashboard" }], true);
-      return jsonResponse({ ok: true, sent, webhookConfigured: Boolean(env.ALERT_WEBHOOK) }, 200, cors);
+      const result = await sendPriceAlert(env, [{ id: "13", name: "Test alert — the pipeline works", note: "this is a test from the Library Admin dashboard" }], true);
+      const sent = typeof result === "object" ? result.ok : Boolean(result);
+      return jsonResponse({
+        ok: true, sent,
+        status: typeof result === "object" ? result.status : undefined,
+        detail: typeof result === "object" ? result.detail : "",
+        webhookConfigured: Boolean(env.ALERT_WEBHOOK)
+      }, 200, cors);
     }
     // Manual price check, same routine the cron runs. Takes ~1.5s per watched
     // game (polite pacing toward BGG/BGP), so the client should show progress.
@@ -713,14 +719,18 @@ async function sendPriceAlert(env, alerts, isTest) {
     `**${a.name}**${a.channel ? ` · ${a.channel}` : ""} — ${a.note}\n<https://boardgamegeek.com/boardgame/${a.id}>`
   ).join("\n");
   try {
-    const res = await fetch(env.ALERT_WEBHOOK, {
+    const res = await fetch(env.ALERT_WEBHOOK.trim(), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ content })
     });
+    if (isTest) {
+      return { ok: res.ok, status: res.status, detail: res.ok ? "" : (await res.text()).slice(0, 200) };
+    }
     return res.ok;
-  } catch {
-    return false;
+  } catch (err) {
+    // e.g. TypeError: Invalid URL when the stored secret isn't a clean URL
+    return isTest ? { ok: false, status: 0, detail: String(err.message).slice(0, 200) } : false;
   }
 }
 
