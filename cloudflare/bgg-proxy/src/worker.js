@@ -636,6 +636,46 @@ async function handleWatchlist(request, env, cors, incomingUrl) {
 }
 
 /**
+ * Ignore list for the admin dashboard's suggestion surfaces (token-gated).
+ * Games here are hidden from Suggested acquisitions / Top-100 gaps / Trending
+ * until restored.
+ */
+async function handleIgnoreList(request, env, cors, incomingUrl) {
+  if (!isAuthorized(request, env)) {
+    return jsonResponse({ ok: false, error: "Unauthorized" }, 401, cors);
+  }
+
+  const list = JSON.parse((await env.HOT_HISTORY.get("ignore-list")) || "[]");
+
+  if (request.method === "POST") {
+    let body;
+    try { body = await request.json(); } catch { body = {}; }
+    const id = String(body.id || "");
+    const name = clampString(body.name, 160);
+    if (!/^\d+$/.test(id) || !name) {
+      return jsonResponse({ ok: false, error: "Invalid game" }, 400, cors);
+    }
+    if (!list.some((g) => g.id === id)) {
+      if (list.length >= 500) {
+        return jsonResponse({ ok: false, error: "Ignore list is capped at 500 games" }, 400, cors);
+      }
+      list.push({ id, name, addedAt: new Date().toISOString().slice(0, 10) });
+      await env.HOT_HISTORY.put("ignore-list", JSON.stringify(list));
+    }
+    return jsonResponse({ ok: true, list }, 200, cors);
+  }
+
+  if (request.method === "DELETE") {
+    const id = incomingUrl.searchParams.get("id") || "";
+    const next = list.filter((g) => g.id !== id);
+    await env.HOT_HISTORY.put("ignore-list", JSON.stringify(next));
+    return jsonResponse({ ok: true, list: next }, 200, cors);
+  }
+
+  return jsonResponse({ ok: true, list }, 200, cors);
+}
+
+/**
  * Daily cron: check every watched game's lowest US retail price (BoardGamePrices)
  * and lowest USD BGG Marketplace listing, record both, and alert on drops.
  */
@@ -962,6 +1002,10 @@ export default {
 
     if (incomingUrl.pathname === "/api/watchlist") {
       return handleWatchlist(request, env, cors, incomingUrl);
+    }
+
+    if (incomingUrl.pathname === "/api/ignore") {
+      return handleIgnoreList(request, env, cors, incomingUrl);
     }
 
     if (incomingUrl.pathname === "/api/bgg-search") {

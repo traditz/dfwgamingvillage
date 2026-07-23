@@ -31,9 +31,13 @@ document.addEventListener('DOMContentLoaded', function () {
   let ownedNames = new Set(); // normalized names — catches other editions of owned games
   let watch = { list: [], history: {}, lastAlerts: [], webhookConfigured: false };
   let watchSet = new Set();
+  let ignore = { list: [] };
+  let ignoreSet = new Set();
+  let showAllSuggestions = false;
 
   const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem(TOKEN_KEY) || ''}` });
   const watchBtn = (id, name) => `<button type="button" class="adm-mini adm-watch" data-watch-id="${id}" data-watch-name="${esc(name)}">Watch</button>`;
+  const ignoreBtn = (id, name, label) => `<button type="button" class="adm-mini" data-ignore-id="${id}" data-ignore-name="${esc(name)}" title="${label === 'Restore' ? 'Put this game back into the suggestion lists' : 'Hide this game from all suggestion lists'}">${label || 'Ignore'}</button>`;
   let publisherByGame = new Map(); // game id -> {id, name} (hydrated on demand)
 
   // "7 Wonders (Second Edition)" and "7 Wonders" are the same shelf presence:
@@ -154,6 +158,7 @@ document.addEventListener('DOMContentLoaded', function () {
     fetchCollectionXml('&want=1').then((items) => { wantList = items; renderQueues(); });
 
     loadWatchlist();
+    loadIgnoreList();
 
     // The snapshot is rebuilt monthly, so also union in the LIVE owned list —
     // games marked owned on BGG since the rebuild stop being suggested as
@@ -208,23 +213,23 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function renderProcurement() {
-    const gaps = top100.filter((t) => !isOwnedGame(t.id, t.name));
+    const gaps = top100.filter((t) => !isOwnedGame(t.id, t.name) && !ignoreSet.has(String(t.id)));
     const gapRows = gaps.map((t) => `
       <tr>
         <td>#${t.rank}</td>
         <td>${gameLink(t.id, t.name)} <span class="adm-dim">(${esc(t.year)})</span></td>
         <td>${esc(t.geekRating)}</td>
         ${pubCell(t.id)}
-        <td>${watchBtn(t.id, t.name)} <button type="button" class="adm-mini" data-price-id="${t.id}" data-price-name="${esc(t.name)}">Price</button></td>
+        <td>${watchBtn(t.id, t.name)} <button type="button" class="adm-mini" data-price-id="${t.id}" data-price-name="${esc(t.name)}">Price</button> ${ignoreBtn(t.id, t.name)}</td>
       </tr>`).join('');
 
-    const hotGaps = hotList.filter((h) => !isOwnedGame(h.id, h.name));
+    const hotGaps = hotList.filter((h) => !isOwnedGame(h.id, h.name) && !ignoreSet.has(String(h.id)));
     const hotRows = hotGaps.map((h) => `
       <tr>
         <td>#${h.rank}</td>
         <td>${gameLink(h.id, h.name)} <span class="adm-dim">${h.year ? `(${esc(h.year)})` : ''}</span></td>
         ${pubCell(h.id)}
-        <td>${watchBtn(h.id, h.name)} <button type="button" class="adm-mini" data-price-id="${h.id}" data-price-name="${esc(h.name)}">Price</button></td>
+        <td>${watchBtn(h.id, h.name)} <button type="button" class="adm-mini" data-price-id="${h.id}" data-price-name="${esc(h.name)}">Price</button> ${ignoreBtn(h.id, h.name)}</td>
       </tr>`).join('');
 
     // Coverage: owned games best at N, by weight band.
@@ -275,8 +280,12 @@ document.addEventListener('DOMContentLoaded', function () {
       <div class="adm-panel"><h2>Missing expansions</h2>
         <p class="adm-dim">Library games with expansions on BGG that the library doesn't own, ranked by how much the game gets played. Games with no expansions (or with every expansion owned) are excluded.</p>
         <div id="adm-exp-out"><p class="adm-dim">Analyzing the most-played games…</p></div>
+      </div>
+      <div class="adm-panel"><h2>Ignored games${ignore.list?.length ? ` (${ignore.list.length})` : ''}</h2>
+        <div id="adm-ignored-out"></div>
       </div>`;
 
+    renderIgnoredPanel();
     analyzeExpansions().catch((err) => {
       const el = $('adm-exp-out');
       if (el) el.innerHTML = `<p class="adm-dim">Expansion analysis failed: ${esc(err.message)}</p>`;
@@ -287,7 +296,14 @@ document.addEventListener('DOMContentLoaded', function () {
    * For the top-played library games, pull each game's full expansion list
    * from BGG and keep only those with expansions the library lacks.
    */
+  let expAnalysisHtml = null; // renderProcurement re-runs on ignore clicks — don't refetch
+
   async function analyzeExpansions() {
+    if (expAnalysisHtml) {
+      const cachedEl = $('adm-exp-out');
+      if (cachedEl) cachedEl.innerHTML = expAnalysisHtml;
+      return;
+    }
     const SCAN = 40; // two batched thing calls
     const top = snapshot.games.slice()
       .sort((a, b) => (playsById[b.id] || 0) - (playsById[a.id] || 0) || b.rating - a.rating)
@@ -319,6 +335,7 @@ document.addEventListener('DOMContentLoaded', function () {
       : '';
     if (!results.length) {
       el.innerHTML = warning || '<p class="adm-dim">The most-played games have every available expansion. 🎉</p>';
+      if (!failedBatches) expAnalysisHtml = el.innerHTML;
       return;
     }
     el.innerHTML = `${warning}
@@ -333,6 +350,7 @@ document.addEventListener('DOMContentLoaded', function () {
         </tbody>
       </table></div>
       <p class="adm-dim" style="margin-top:8px">Scanned the ${SCAN} most-played library games — ${results.length} have unowned expansions. BGG counts promos and small packs as expansions, so totals run high.</p>`;
+    if (!failedBatches) expAnalysisHtml = el.innerHTML;
   }
 
   function renderQueues() {
@@ -398,7 +416,7 @@ document.addEventListener('DOMContentLoaded', function () {
     for (const d of dates) for (const g of hotHistory[d] || []) hotDays.set(String(g.id), (hotDays.get(String(g.id)) || 0) + 1);
 
     const queueIds = new Set(wishList.concat(wantList).map((i) => i.id));
-    const pool = candidates.games.filter((c) => !isOwnedGame(c.id, c.name) && c.rating >= 7);
+    const pool = candidates.games.filter((c) => !isOwnedGame(c.id, c.name) && !ignoreSet.has(String(c.id)) && c.rating >= 7);
 
     let maxTaste = 0;
     const scored = pool.map((c) => {
@@ -435,14 +453,15 @@ document.addEventListener('DOMContentLoaded', function () {
       };
     });
 
-    const rows = scored.map((s) => {
+    const ranked = scored.map((s) => {
       const taste = maxTaste ? s.tasteRaw / maxTaste : 0;
       const momentum = Math.min(1, s.hotN / Math.min(recordedDays, 30));
       s.score = Math.round(100 * (0.35 * s.quality + 0.25 * s.gap + 0.25 * taste + 0.15 * momentum));
       s.taste = taste;
       s.momentum = momentum;
       return s;
-    }).sort((a, b) => b.score - a.score).slice(0, 40);
+    }).sort((a, b) => b.score - a.score);
+    const rows = showAllSuggestions ? ranked : ranked.slice(0, 40);
 
     out.innerHTML = `
       <div class="adm-scroll"><table class="adm-table">
@@ -462,11 +481,14 @@ document.addEventListener('DOMContentLoaded', function () {
               <a href="https://boardgamegeek.com/boardgamepublisher/${s.c.pubId}" target="_blank" rel="noopener" title="BGG company page — website and contact info">${esc(s.c.pubName)}</a>
               <a class="adm-dim" href="https://www.google.com/search?q=${encodeURIComponent(`${s.c.pubName} board game publisher contact`)}" target="_blank" rel="noopener" title="Search for contact details">🔎</a>` : '–'}
             </td>
-            <td>${watchBtn(s.c.id, s.c.name)} <button type="button" class="adm-mini" data-price-id="${s.c.id}" data-price-name="${esc(s.c.name)}">Price</button></td>
+            <td>${watchBtn(s.c.id, s.c.name)} <button type="button" class="adm-mini" data-price-id="${s.c.id}" data-price-name="${esc(s.c.name)}">Price</button> ${ignoreBtn(s.c.id, s.c.name)}</td>
           </tr>`).join('')}
         </tbody>
       </table></div>
-      <p class="adm-dim" style="margin-top:8px">${pool.length.toLocaleString()} candidates scored (Top 1000, rating ≥ 7.0, not owned) · candidates refreshed ${esc(candidates.generatedAt)} · hotness history: ${recordedDays} day${recordedDays === 1 ? '' : 's'} recorded</p>`;
+      <p class="adm-dim" style="margin-top:8px">
+        Showing ${rows.length.toLocaleString()} of ${ranked.length.toLocaleString()} scored candidates (Top 1000, rating ≥ 7.0, not owned, not ignored) ·
+        <button type="button" class="adm-mini" id="adm-suggest-more">${showAllSuggestions ? 'Show top 40 only' : `Show all ${ranked.length.toLocaleString()}`}</button> ·
+        candidates refreshed ${esc(candidates.generatedAt)} · hotness history: ${recordedDays} day${recordedDays === 1 ? '' : 's'} recorded</p>`;
     syncWatchButtons();
   }
 
@@ -576,6 +598,63 @@ document.addEventListener('DOMContentLoaded', function () {
     return [...seen.values()];
   }
 
+  /* ---------------- ignore list ---------------- */
+
+  async function loadIgnoreList() {
+    try {
+      const res = await fetch(`${WORKER}/api/ignore`, { headers: authHeaders() });
+      if (res.ok) ignore = await res.json();
+    } catch { /* suggestions just show everything */ }
+    ignoreSet = new Set((ignore.list || []).map((g) => g.id));
+    if (ignoreSet.size) {
+      renderProcurement();
+      renderQueues();
+    } else {
+      renderIgnoredPanel();
+    }
+  }
+
+  function renderIgnoredPanel() {
+    const el = $('adm-ignored-out');
+    if (!el) return;
+    if (!(ignore.list || []).length) {
+      el.innerHTML = '<p class="adm-dim">Nothing ignored. Click <strong>Ignore</strong> on any suggestion you have no intention of adding — it disappears from every suggestion list and can be restored here.</p>';
+      return;
+    }
+    el.innerHTML = `
+      <div class="adm-scroll"><table class="adm-table"><tbody>
+        ${ignore.list.map((g) => `
+          <tr>
+            <td>${gameLink(g.id, g.name)} <span class="adm-dim">ignored since ${esc(g.addedAt)}</span></td>
+            <td>${ignoreBtn(g.id, g.name, 'Restore')}</td>
+          </tr>`).join('')}
+      </tbody></table></div>`;
+  }
+
+  document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('[data-ignore-id]');
+    if (!btn) return;
+    btn.disabled = true;
+    try {
+      let res;
+      if (ignoreSet.has(btn.dataset.ignoreId)) {
+        res = await fetch(`${WORKER}/api/ignore?id=${btn.dataset.ignoreId}`, { method: 'DELETE', headers: authHeaders() });
+      } else {
+        res = await fetch(`${WORKER}/api/ignore`, {
+          method: 'POST',
+          headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: btn.dataset.ignoreId, name: btn.dataset.ignoreName })
+        });
+      }
+      const data = await res.json();
+      if (data.ok) ignore.list = data.list;
+    } catch { /* leave state as-is */ }
+    ignoreSet = new Set((ignore.list || []).map((g) => g.id));
+    renderProcurement(); // re-filters suggestions, gaps, trending; re-renders ignored panel
+    renderQueues();
+    hydratePublishers().catch(() => {});
+  });
+
   /* ---------------- price watchlist ---------------- */
 
   async function loadWatchlist() {
@@ -645,6 +724,13 @@ document.addEventListener('DOMContentLoaded', function () {
       </table></div>
       <p class="adm-dim" style="margin-top:8px">Prices are sampled once a day, so new additions show "–" until tomorrow's check. Alert cooldown: one ping per game per week.</p>`;
   }
+
+  document.addEventListener('click', (e) => {
+    if (e.target.id === 'adm-suggest-more') {
+      showAllSuggestions = !showAllSuggestions;
+      renderSuggestions();
+    }
+  });
 
   document.addEventListener('click', async (e) => {
     if (e.target.id === 'adm-watch-check') {
