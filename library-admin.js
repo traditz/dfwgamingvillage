@@ -401,11 +401,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const q = encodeURIComponent(`${name} board game`);
     out.innerHTML = `
-      <h3 class="adm-sub">${gameLink(id, name)}</h3>
+      <h3 class="adm-sub">${gameLink(id, name)} <span class="adm-dim">— second-hand (BGG Marketplace)</span></h3>
       ${summary}
       ${usdListings.length ? `<div class="adm-scroll"><table class="adm-table">
         <thead><tr><th>Price</th><th>Condition</th><th>Listed</th><th></th></tr></thead>
         <tbody>${rows}</tbody></table></div>` : ''}
+      <div id="adm-retail"><p class="adm-dim" style="margin-top:12px">Checking retailer prices…</p></div>
       <div class="adm-price-links">
         <a class="adm-price-link" href="https://www.ebay.com/sch/i.html?_nkw=${q}&LH_Sold=1&LH_Complete=1&LH_PrefLoc=1" target="_blank" rel="noopener">
           <strong>eBay — sold prices ↗</strong>
@@ -420,6 +421,52 @@ document.addEventListener('DOMContentLoaded', function () {
           <span class="adm-dim">All listings including non-USD</span>
         </a>
       </div>`;
+
+    loadRetail(id);
+  }
+
+  /**
+   * New-copy retail aggregate across US stores, via BoardGamePrices.com
+   * (proxied through the worker — their API has no CORS). Their free API
+   * includes prices and stock but not store names; the linked page shows
+   * which retailer each offer is from.
+   */
+  async function loadRetail(eid) {
+    const el = $('adm-retail');
+    if (!el) return;
+    try {
+      const res = await fetch(`${WORKER}/api/retail-prices?eid=${eid}`);
+      const data = await res.json();
+      const items = data.items || [];
+      if (!items.length) {
+        el.innerHTML = '<p class="adm-dim" style="margin-top:12px">No retail listings — BoardGamePrices.com does not index this title.</p>';
+        return;
+      }
+      // eid returns one item per language edition; the English/US one is the
+      // edition with US in-stock offers.
+      const best = items
+        .map((it) => ({ it, us: (it.prices || []).filter((p) => p.country === 'US' && p.stock === 'Y') }))
+        .sort((a, b) => b.us.length - a.us.length)[0];
+      const pageLink = `<a href="${esc(best.it.url)}" target="_blank" rel="noopener">BoardGamePrices.com ↗</a>`;
+      if (!best.us.length) {
+        el.innerHTML = `<p class="adm-dim" style="margin-top:12px">No US retailers have new copies in stock right now — ${pageLink} tracks it.</p>`;
+        return;
+      }
+      const products = best.us.map((p) => +p.product || +p.price).sort((a, b) => a - b);
+      const delivered = best.us.map((p) => +p.price).sort((a, b) => a - b);
+      const avg = products.reduce((a, b) => a + b, 0) / products.length;
+      el.innerHTML = `
+        <h3 class="adm-sub">New retail (US, in stock)</h3>
+        <div class="adm-price-stats">
+          <div class="gl-stat"><span class="gl-stat-label">Retailers</span><span class="gl-stat-value">${best.us.length}</span><span class="gl-stat-sub">with stock</span></div>
+          <div class="gl-stat"><span class="gl-stat-label">Lowest</span><span class="gl-stat-value">$${products[0].toFixed(0)}</span><span class="gl-stat-sub">item price</span></div>
+          <div class="gl-stat"><span class="gl-stat-label">Average</span><span class="gl-stat-value">$${avg.toFixed(0)}</span><span class="gl-stat-sub">item price</span></div>
+          <div class="gl-stat"><span class="gl-stat-label">Lowest delivered</span><span class="gl-stat-value">$${delivered[0].toFixed(0)}</span><span class="gl-stat-sub">incl. shipping</span></div>
+        </div>
+        <p class="adm-dim">Store names for each offer are on ${pageLink} · prices via <a href="https://boardgameprices.com" target="_blank" rel="noopener">BoardGamePrices.com</a></p>`;
+    } catch (err) {
+      el.innerHTML = `<p class="adm-dim" style="margin-top:12px">Retail price lookup failed: ${esc(err.message)}</p>`;
+    }
   }
 
   /* ================= letters ================= */

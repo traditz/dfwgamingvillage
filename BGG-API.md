@@ -50,6 +50,7 @@ All are served from the proxy base URL above.
 | `GET /api/bgg-plays?username=` | All recorded plays aggregated into per‑game totals + comments (JSON) | `xmlapi2/plays` (paginated, walked server‑side) |
 | `GET /api/bgg-thing?id=1,2,3` | Game details / expansion links for hydration (XML pass‑through) | `xmlapi2/thing` |
 | `GET /api/bgg-top?count=100` | All‑time Top N, scraped from the public ranking page (JSON) | `browse/boardgame/page/N` (HTML) |
+| `GET /api/retail-prices?eid=` | US new-copy retail prices for a BGG id (admin dashboard) | BoardGamePrices.com `/api/info` (not BGG; no store names on the free tier) |
 
 ### The Game Library snapshot (`games-library.json`)
 

@@ -536,6 +536,42 @@ function decodeEntities(str) {
 }
 
 /**
+ * Retail price aggregate for the admin dashboard, proxied from the
+ * BoardGamePrices.com public API (no CORS on their side). eid = BGG id.
+ * Their free tier includes prices/stock/links but not store names — the
+ * per-item URL in the response is where users see the actual retailers.
+ */
+async function handleRetailPrices(request, env, cors, incomingUrl) {
+  if (request.method !== "GET") {
+    return new Response("Method not allowed", {
+      status: 405,
+      headers: { ...cors, "Content-Type": "text/plain; charset=utf-8" }
+    });
+  }
+
+  const eid = incomingUrl.searchParams.get("eid") || "";
+  if (!/^\d+$/.test(eid)) {
+    return new Response("Invalid eid", {
+      status: 400,
+      headers: { ...cors, "Content-Type": "text/plain; charset=utf-8" }
+    });
+  }
+
+  const url = `https://boardgameprices.com/api/info?eid=${eid}&currency=USD&destination=US&sitename=dfwgamingvillage.com`;
+  const response = await fetch(url);
+  const body = await response.text();
+
+  return new Response(body, {
+    status: response.status,
+    headers: {
+      ...cors,
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": response.ok ? "public, max-age=21600" : "no-store" // 6 hours
+    }
+  });
+}
+
+/**
  * Lists the images in the public gallery Drive folder (newest first) and returns
  * their file ids + names as JSON. The page picks a random subset to display.
  */
@@ -622,6 +658,10 @@ export default {
 
     if (incomingUrl.pathname === "/api/bgg-top") {
       return handleBggTop(request, env, cors, incomingUrl);
+    }
+
+    if (incomingUrl.pathname === "/api/retail-prices") {
+      return handleRetailPrices(request, env, cors, incomingUrl);
     }
 
     if (incomingUrl.pathname === "/api/gallery") {
