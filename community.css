@@ -1740,6 +1740,15 @@ a.game-card {
   min-height: 1.3em;
 }
 
+.adm-toolbar {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin: 0 0 6px;
+}
+
 .adm-panel {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0) 55%), var(--panel);
   border: 1px solid var(--line);

@@ -635,6 +635,59 @@ async function handleWatchlist(request, env, cors, incomingUrl) {
   );
 }
 
+const GITHUB_REPO = "traditz/dfwgamingvillage";
+const SNAPSHOT_WORKFLOW = "refresh-library.yml";
+
+/**
+ * Manually trigger (POST) or check (GET) the GitHub Action that rebuilds
+ * games-library.json. Token-gated; needs a GITHUB_TOKEN secret (fine-grained
+ * PAT for this repo with Actions read/write).
+ */
+async function handleRefreshSnapshot(request, env, cors) {
+  if (!isAuthorized(request, env)) {
+    return jsonResponse({ ok: false, error: "Unauthorized" }, 401, cors);
+  }
+  if (!env.GITHUB_TOKEN) {
+    return jsonResponse({ ok: false, error: "GITHUB_TOKEN secret not set on the worker" }, 400, cors);
+  }
+  const gh = (path, init) => fetch(`https://api.github.com/repos/${GITHUB_REPO}/actions/${path}`, {
+    ...init,
+    headers: {
+      Authorization: `Bearer ${env.GITHUB_TOKEN}`,
+      "User-Agent": "dfwgv-bgg-proxy",
+      Accept: "application/vnd.github+json",
+      ...(init && init.headers)
+    }
+  });
+
+  if (request.method === "POST") {
+    const res = await gh(`workflows/${SNAPSHOT_WORKFLOW}/dispatches`, {
+      method: "POST",
+      body: JSON.stringify({ ref: "main" })
+    });
+    if (res.status === 204) return jsonResponse({ ok: true }, 200, cors);
+    return jsonResponse({ ok: false, error: `GitHub ${res.status}: ${(await res.text()).slice(0, 150)}` }, 502, cors);
+  }
+
+  if (request.method === "GET") {
+    const res = await gh(`workflows/${SNAPSHOT_WORKFLOW}/runs?per_page=1`);
+    if (!res.ok) {
+      return jsonResponse({ ok: false, error: `GitHub ${res.status}` }, 502, cors);
+    }
+    const data = await res.json();
+    const run = (data.workflow_runs || [])[0];
+    return jsonResponse({
+      ok: true,
+      run: run ? { status: run.status, conclusion: run.conclusion, created_at: run.created_at, html_url: run.html_url } : null
+    }, 200, cors);
+  }
+
+  return new Response("Method not allowed", {
+    status: 405,
+    headers: { ...cors, "Content-Type": "text/plain; charset=utf-8" }
+  });
+}
+
 /** KV reads are eventually consistent, so racing writes can duplicate an id —
  *  dedupe (keep the first occurrence) everywhere a list is read or written. */
 function dedupeById(list) {
@@ -1018,6 +1071,10 @@ export default {
 
     if (incomingUrl.pathname === "/api/ignore") {
       return handleIgnoreList(request, env, cors, incomingUrl);
+    }
+
+    if (incomingUrl.pathname === "/api/refresh-snapshot") {
+      return handleRefreshSnapshot(request, env, cors);
     }
 
     if (incomingUrl.pathname === "/api/bgg-search") {

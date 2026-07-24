@@ -798,6 +798,53 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
+  /* ---------------- manual snapshot rebuild (GitHub Action) ---------------- */
+
+  $('adm-rebuild').addEventListener('click', async () => {
+    const btn = $('adm-rebuild');
+    const msg = $('adm-rebuild-msg');
+    btn.disabled = true;
+    msg.textContent = 'Starting the GitHub Action…';
+    try {
+      const res = await fetch(`${WORKER}/api/refresh-snapshot`, { method: 'POST', headers: authHeaders() });
+      const data = await res.json();
+      if (!data.ok) {
+        msg.textContent = `Couldn't start: ${data.error || res.status}`;
+        btn.disabled = false;
+        return;
+      }
+    } catch (err) {
+      msg.textContent = `Couldn't start: ${err.message}`;
+      btn.disabled = false;
+      return;
+    }
+    // Poll the run: rebuild takes ~2 min, then the site deploy ~1 more.
+    msg.textContent = 'Rebuild started — takes a few minutes…';
+    const startedAt = Date.now();
+    const poll = async () => {
+      if (Date.now() - startedAt > 10 * 60 * 1000) {
+        msg.textContent = 'Still running after 10 minutes — check the Actions tab on GitHub.';
+        btn.disabled = false;
+        return;
+      }
+      try {
+        const res = await fetch(`${WORKER}/api/refresh-snapshot`, { headers: authHeaders() });
+        const data = await res.json();
+        const run = data.run;
+        if (run && run.status === 'completed') {
+          msg.textContent = run.conclusion === 'success'
+            ? 'Rebuild finished ✓ — the site deploy takes about a minute more, then reload this page (and games.html) for fresh data.'
+            : `Rebuild finished with "${run.conclusion}" — see the Actions tab on GitHub.`;
+          btn.disabled = false;
+          return;
+        }
+        msg.textContent = `Rebuild ${run ? run.status.replace('_', ' ') : 'queued'}… (${Math.round((Date.now() - startedAt) / 1000)}s)`;
+      } catch { /* transient — keep polling */ }
+      setTimeout(poll, 15000);
+    };
+    setTimeout(poll, 15000);
+  });
+
   document.addEventListener('click', async (e) => {
     if (e.target.id === 'adm-watch-check') {
       const btn = e.target;
