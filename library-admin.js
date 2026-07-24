@@ -210,8 +210,53 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // A table cell with box art beside the game text.
   const gcell = (thumb, html) => `<td><div class="adm-gcell">${thumb
-    ? `<img class="adm-thumb" src="${esc(thumb)}" alt="" loading="lazy">`
+    ? `<img class="adm-thumb" src="${esc(thumb)}" alt="" loading="lazy" title="Click to enlarge">`
     : '<span class="adm-thumb adm-thumb-none"></span>'}<div class="adm-gcell-b">${html}</div></div></td>`;
+
+  /* ---------------- box-art lightbox ---------------- */
+
+  const lightbox = document.createElement('div');
+  lightbox.id = 'adm-lightbox';
+  lightbox.hidden = true;
+  lightbox.innerHTML = '<figure><img alt=""><figcaption></figcaption></figure>';
+  document.body.appendChild(lightbox);
+  const fullImageCache = new Map(); // game id -> full-res image URL
+
+  function openLightbox(src, name, id) {
+    const img = lightbox.querySelector('img');
+    img.src = src; // show the small art scaled up immediately
+    lightbox.querySelector('figcaption').textContent = name;
+    lightbox.hidden = false;
+    if (!id) return;
+    const swap = (url) => {
+      if (!lightbox.hidden && lightbox.querySelector('figcaption').textContent === name && url) img.src = url;
+    };
+    if (fullImageCache.has(id)) {
+      swap(fullImageCache.get(id));
+      return;
+    }
+    fetch(`${WORKER}/api/bgg-thing?id=${id}`)
+      .then((res) => res.text())
+      .then((text) => {
+        const xml = new DOMParser().parseFromString(text, 'text/xml');
+        const full = xml.querySelector('item image')?.textContent || '';
+        fullImageCache.set(id, full);
+        swap(full);
+      })
+      .catch(() => { /* keep the scaled thumbnail */ });
+  }
+
+  lightbox.addEventListener('click', () => { lightbox.hidden = true; });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') lightbox.hidden = true;
+  });
+  document.addEventListener('click', (e) => {
+    if (!(e.target.tagName === 'IMG' && e.target.classList.contains('adm-thumb'))) return;
+    const cell = e.target.closest('.adm-gcell');
+    const link = cell?.querySelector('a[href*="/boardgame/"]');
+    const id = link ? (link.getAttribute('href').match(/boardgame\/(\d+)/) || [])[1] : '';
+    openLightbox(e.target.src, link ? link.textContent : '', id);
+  });
 
   /* ================= procurement ================= */
 

@@ -1865,6 +1865,45 @@ a.game-card {
   display: inline-block;
 }
 
+img.adm-thumb {
+  cursor: zoom-in;
+}
+
+#adm-lightbox {
+  align-items: center;
+  background: rgba(9, 9, 13, 0.88);
+  cursor: zoom-out;
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  position: fixed;
+  z-index: 100;
+}
+
+#adm-lightbox[hidden] {
+  display: none;
+}
+
+#adm-lightbox figure {
+  margin: 0;
+  text-align: center;
+}
+
+#adm-lightbox img {
+  background: #101116;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  max-height: 80vh;
+  max-width: min(90vw, 900px);
+}
+
+#adm-lightbox figcaption {
+  color: var(--text);
+  font-size: 0.95rem;
+  margin-top: 10px;
+}
+
 .adm-gcell-b {
   min-width: 0;
 }
