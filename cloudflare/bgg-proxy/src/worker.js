@@ -584,7 +584,7 @@ async function handleWatchlist(request, env, cors, incomingUrl) {
     return jsonResponse({ ok: false, error: "Unauthorized" }, 401, cors);
   }
 
-  const list = JSON.parse((await env.HOT_HISTORY.get(WATCHLIST_KEY)) || "[]");
+  const list = dedupeById(JSON.parse((await env.HOT_HISTORY.get(WATCHLIST_KEY)) || "[]"));
 
   if (request.method === "POST") {
     if (incomingUrl.searchParams.get("test") === "1") {
@@ -615,8 +615,8 @@ async function handleWatchlist(request, env, cors, incomingUrl) {
         return jsonResponse({ ok: false, error: `Watchlist is capped at ${WATCHLIST_CAP} games` }, 400, cors);
       }
       list.push({ id, name, addedAt: new Date().toISOString().slice(0, 10) });
-      await env.HOT_HISTORY.put(WATCHLIST_KEY, JSON.stringify(list));
     }
+    await env.HOT_HISTORY.put(WATCHLIST_KEY, JSON.stringify(list));
     return jsonResponse({ ok: true, list }, 200, cors);
   }
 
@@ -635,6 +635,13 @@ async function handleWatchlist(request, env, cors, incomingUrl) {
   );
 }
 
+/** KV reads are eventually consistent, so racing writes can duplicate an id —
+ *  dedupe (keep the first occurrence) everywhere a list is read or written. */
+function dedupeById(list) {
+  const seen = new Set();
+  return list.filter((g) => !seen.has(g.id) && seen.add(g.id));
+}
+
 /**
  * Ignore list for the admin dashboard's suggestion surfaces (token-gated).
  * Games here are hidden from Suggested acquisitions / Top-100 gaps / Trending
@@ -645,7 +652,8 @@ async function handleIgnoreList(request, env, cors, incomingUrl) {
     return jsonResponse({ ok: false, error: "Unauthorized" }, 401, cors);
   }
 
-  const list = JSON.parse((await env.HOT_HISTORY.get("ignore-list")) || "[]");
+  const raw = JSON.parse((await env.HOT_HISTORY.get("ignore-list")) || "[]");
+  const list = dedupeById(raw);
 
   if (request.method === "POST") {
     let body;
@@ -660,8 +668,8 @@ async function handleIgnoreList(request, env, cors, incomingUrl) {
         return jsonResponse({ ok: false, error: "Ignore list is capped at 500 games" }, 400, cors);
       }
       list.push({ id, name, addedAt: new Date().toISOString().slice(0, 10) });
-      await env.HOT_HISTORY.put("ignore-list", JSON.stringify(list));
     }
+    await env.HOT_HISTORY.put("ignore-list", JSON.stringify(list));
     return jsonResponse({ ok: true, list }, 200, cors);
   }
 
@@ -672,6 +680,10 @@ async function handleIgnoreList(request, env, cors, incomingUrl) {
     return jsonResponse({ ok: true, list: next }, 200, cors);
   }
 
+  // Reading found duplicates from an earlier race — persist the cleanup.
+  if (list.length !== raw.length) {
+    await env.HOT_HISTORY.put("ignore-list", JSON.stringify(list));
+  }
   return jsonResponse({ ok: true, list }, 200, cors);
 }
 

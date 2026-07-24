@@ -634,7 +634,9 @@ document.addEventListener('DOMContentLoaded', function () {
   document.addEventListener('click', async (e) => {
     const btn = e.target.closest('[data-ignore-id]');
     if (!btn) return;
-    btn.disabled = true;
+    // The same game can have Ignore buttons in several panels — disable all
+    // of them while the request is in flight so a second click can't race.
+    document.querySelectorAll(`[data-ignore-id="${btn.dataset.ignoreId}"]`).forEach((b) => { b.disabled = true; });
     try {
       let res;
       if (ignoreSet.has(btn.dataset.ignoreId)) {
@@ -773,7 +775,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     const btn = e.target.closest('[data-watch-id]');
     if (!btn) return;
-    btn.disabled = true;
+    document.querySelectorAll(`[data-watch-id="${btn.dataset.watchId}"]`).forEach((b) => { b.disabled = true; });
     try {
       let res;
       if (watchSet.has(btn.dataset.watchId)) {
@@ -788,7 +790,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const data = await res.json();
       if (data.ok) watch.list = data.list;
     } catch { /* leave state as-is */ }
-    btn.disabled = false;
+    document.querySelectorAll(`[data-watch-id="${btn.dataset.watchId}"]`).forEach((b) => { b.disabled = false; });
     watchSet = new Set((watch.list || []).map((g) => g.id));
     syncWatchButtons();
     renderWatchPanel();
