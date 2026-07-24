@@ -610,11 +610,21 @@ async function handleWatchlist(request, env, cors, incomingUrl) {
     if (!/^\d+$/.test(id) || !name) {
       return jsonResponse({ ok: false, error: "Invalid game" }, 400, cors);
     }
-    if (!list.some((g) => g.id === id)) {
+    // Optional per-game target: alert as soon as the lowest genuine price is at
+    // or below this. `target` present but null/0 clears it (back to avg rules);
+    // `target` absent leaves any existing target untouched.
+    const hasTarget = Object.prototype.hasOwnProperty.call(body, "target");
+    const target = hasTarget ? (Number(body.target) > 0 ? Math.round(Number(body.target) * 100) / 100 : null) : undefined;
+
+    const existing = list.find((g) => g.id === id);
+    if (existing) {
+      existing.name = name;
+      if (target !== undefined) existing.target = target;
+    } else {
       if (list.length >= WATCHLIST_CAP) {
         return jsonResponse({ ok: false, error: `Watchlist is capped at ${WATCHLIST_CAP} games` }, 400, cors);
       }
-      list.push({ id, name, addedAt: new Date().toISOString().slice(0, 10) });
+      list.push({ id, name, addedAt: new Date().toISOString().slice(0, 10), target: target || null });
     }
     await env.HOT_HISTORY.put(WATCHLIST_KEY, JSON.stringify(list));
     return jsonResponse({ ok: true, list }, 200, cors);
@@ -814,26 +824,44 @@ async function checkWatchedPrices(env) {
 
     const gh = history[g.id] = history[g.id] || {};
     const prevDates = Object.keys(gh).filter((d) => /^\d{4}-/.test(d) && d < today).sort().slice(-30);
-    for (const [key, label] of [["r", "new retail"], ["m", "second-hand"]]) {
-      const cur = snap[key];
-      if (!cur) continue;
-      const prev = prevDates.map((d) => gh[d][key]).filter(Boolean);
-      let note = "";
-      if (prev.length >= MIN_TRAILING_POINTS) {
-        const avg = prev.reduce((a, b) => a + b, 0) / prev.length;
-        if (cur <= avg * (1 - DROP_VS_TRAILING)) {
-          note = `$${cur.toFixed(2)} — ${Math.round((1 - cur / avg) * 100)}% below its ${prev.length}-day average of $${avg.toFixed(0)}`;
-        }
-      } else if (snap[key + "Avg"] && cur <= snap[key + "Avg"] * (1 - OUTLIER_VS_TODAY)) {
-        note = `$${cur.toFixed(2)} — ${Math.round((1 - cur / snap[key + "Avg"]) * 100)}% below today's average listing of $${snap[key + "Avg"].toFixed(0)}`;
+    const linkFor = (key) => key === "r"
+      ? (snap.rUrl || `https://boardgameprices.com/search?search=${encodeURIComponent(g.name)}`)
+      : (snap.mLink || `https://boardgamegeek.com/boardgame/${g.id}/marketplace`);
+    const canAlert = !gh.lastAlert || gh.lastAlert < cooldownDate;
+
+    if (g.target > 0) {
+      // Manual target: alert the moment the cheapest genuine price (either
+      // channel) is at or below the target. Overrides the average rules.
+      const options = [];
+      if (snap.r) options.push({ key: "r", label: "new retail", price: snap.r });
+      if (snap.m) options.push({ key: "m", label: "second-hand", price: snap.m });
+      const best = options.filter((o) => o.price <= g.target).sort((a, b) => a.price - b.price)[0];
+      if (best && canAlert) {
+        alerts.push({
+          id: g.id, name: g.name, channel: best.label,
+          note: `$${best.price.toFixed(2)} — at or below your $${g.target} target`,
+          link: linkFor(best.key), date: today
+        });
       }
-      if (note && (!gh.lastAlert || gh.lastAlert < cooldownDate)) {
-        // Link straight to where the deal actually is: the BoardGamePrices
-        // page for retail, the cheapest listing itself for second-hand.
-        const link = key === "r"
-          ? (snap.rUrl || `https://boardgameprices.com/search?search=${encodeURIComponent(g.name)}`)
-          : (snap.mLink || `https://boardgamegeek.com/boardgame/${g.id}/marketplace`);
-        alerts.push({ id: g.id, name: g.name, channel: label, note, link, date: today });
+    } else {
+      // No target: the statistical rules — below recent average, or (young
+      // history) a steep discount off today's average listing.
+      for (const [key, label] of [["r", "new retail"], ["m", "second-hand"]]) {
+        const cur = snap[key];
+        if (!cur) continue;
+        const prev = prevDates.map((d) => gh[d][key]).filter(Boolean);
+        let note = "";
+        if (prev.length >= MIN_TRAILING_POINTS) {
+          const avg = prev.reduce((a, b) => a + b, 0) / prev.length;
+          if (cur <= avg * (1 - DROP_VS_TRAILING)) {
+            note = `$${cur.toFixed(2)} — ${Math.round((1 - cur / avg) * 100)}% below its ${prev.length}-day average of $${avg.toFixed(0)}`;
+          }
+        } else if (snap[key + "Avg"] && cur <= snap[key + "Avg"] * (1 - OUTLIER_VS_TODAY)) {
+          note = `$${cur.toFixed(2)} — ${Math.round((1 - cur / snap[key + "Avg"]) * 100)}% below today's average listing of $${snap[key + "Avg"].toFixed(0)}`;
+        }
+        if (note && canAlert) {
+          alerts.push({ id: g.id, name: g.name, channel: label, note, link: linkFor(key), date: today });
+        }
       }
     }
     gh[today] = { r: snap.r, m: snap.m };

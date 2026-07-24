@@ -765,9 +765,10 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
     const checkBtn = `<button type="button" class="adm-mini" id="adm-watch-check">Run price check now</button> <span id="adm-watch-check-msg"></span>`;
+    const rules = 'Set a <strong>target</strong> to be alerted the moment either price (new or used) is at or below it. With no target, a game uses the automatic rules: ≥10% below its trailing average (≥15% below today\'s average while history is young).';
     const hookLine = watch.webhookConfigured
-      ? `<p class="adm-dim">Discord alerts: configured ✓ · checked every 6 hours (00/06/12/18 UTC) · alerts fire when a price drops ≥10% below its trailing average (≥15% below today's average while history is young) · <button type="button" class="adm-mini" id="adm-watch-test">Send test alert</button> ${checkBtn} <span id="adm-watch-test-msg"></span></p>`
-      : `<p class="adm-dim">⚠ Discord webhook not set — prices are recorded but no pings are sent. Create a webhook in your Discord (Server Settings → Integrations → Webhooks), then run <code>npx wrangler secret put ALERT_WEBHOOK</code> in <code>cloudflare/bgg-proxy</code> and paste the URL. ${checkBtn}</p>`;
+      ? `<p class="adm-dim">Discord alerts: configured ✓ · checked every 6 hours. ${rules} <button type="button" class="adm-mini" id="adm-watch-test">Send test alert</button> ${checkBtn} <span id="adm-watch-test-msg"></span></p>`
+      : `<p class="adm-dim">⚠ Discord webhook not set — prices are recorded but no pings are sent. Create a webhook in your Discord (Server Settings → Integrations → Webhooks), then run <code>npx wrangler secret put ALERT_WEBHOOK</code> in <code>cloudflare/bgg-proxy</code> and paste the URL.<br>${rules} ${checkBtn}</p>`;
 
     if (!(watch.list || []).length) {
       el.innerHTML = `${hookLine}<p class="adm-dim">Nothing watched yet — click <strong>Watch</strong> on any game in Procurement or a pricing result.</p>`;
@@ -790,19 +791,38 @@ document.addEventListener('DOMContentLoaded', function () {
 
     el.innerHTML = `${hookLine}
       <div class="adm-scroll"><table class="adm-table">
-        <thead><tr><th>Game</th><th>Retail low</th><th>Used low</th><th>Avg (tracked)</th><th></th></tr></thead>
+        <thead><tr><th>Game</th><th>Retail low</th><th>Used low</th><th>Target</th><th>Avg (tracked)</th><th></th></tr></thead>
         <tbody>${watch.list.map((g) => `
           <tr>
             ${gcell(thumbFor(g.id), `${gameLink(g.id, g.name)}${recentAlert.has(g.id) ? ' <span class="adm-chip">🔔 recent alert</span>' : ''}<br><span class="adm-dim">watched since ${esc(g.addedAt)}</span>`)}
             <td>${money(latest(g.id, 'r'))}</td>
             <td>${money(latest(g.id, 'm'))}</td>
+            <td><span class="adm-target-wrap">$<input type="number" class="adm-target" data-target-id="${g.id}" data-target-name="${esc(g.name)}" min="1" step="1" value="${g.target || ''}" placeholder="auto" title="Alert at or below this price; blank uses the automatic rules"></span></td>
             <td class="adm-dim">${money(avg(g.id, 'r'))} / ${money(avg(g.id, 'm'))}</td>
             <td>${watchBtn(g.id, g.name)} <button type="button" class="adm-mini" data-price-id="${g.id}" data-price-name="${esc(g.name)}">Price</button></td>
           </tr>`).join('')}
         </tbody>
       </table></div>
-      <p class="adm-dim" style="margin-top:8px">Prices are sampled once a day, so new additions show "–" until tomorrow's check. Alert cooldown: one ping per game per week.</p>`;
+      <p class="adm-dim" style="margin-top:8px">Prices are sampled every 6 hours, so new additions show "–" until the next check. Alert cooldown: one ping per game per week.</p>`;
   }
+
+  // Save a target price when its field changes (Enter or blur).
+  document.addEventListener('change', async (e) => {
+    const input = e.target.closest('.adm-target');
+    if (!input) return;
+    const raw = input.value.trim();
+    input.disabled = true;
+    try {
+      await fetch(`${WORKER}/api/watchlist`, {
+        method: 'POST',
+        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: input.dataset.targetId, name: input.dataset.targetName, target: raw === '' ? null : Number(raw) })
+      });
+      const g = (watch.list || []).find((x) => x.id === input.dataset.targetId);
+      if (g) g.target = raw === '' ? null : Number(raw);
+    } catch { /* leave field as typed */ }
+    input.disabled = false;
+  });
 
   document.addEventListener('click', (e) => {
     if (e.target.id === 'adm-suggest-more') {

@@ -1852,6 +1852,27 @@ a.game-card {
   color: var(--gold);
 }
 
+.adm-target-wrap {
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.adm-target {
+  background: #0f1016;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--text);
+  font: inherit;
+  margin-left: 2px;
+  padding: 4px 6px;
+  width: 62px;
+}
+
+.adm-target:focus {
+  border-color: var(--gold);
+  outline: none;
+}
+
 /* Box art beside game names in admin tables */
 
 .adm-gcell {
