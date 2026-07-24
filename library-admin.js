@@ -377,8 +377,14 @@ document.addEventListener('DOMContentLoaded', function () {
     let failedBatches = 0;
     for (let i = 0; i < top.length; i += 20) {
       const batch = top.slice(i, i + 20);
-      const res = await fetch(`${WORKER}/api/bgg-thing?id=${batch.map((g) => g.id).join(',')}`);
-      if (!res.ok) { failedBatches++; continue; }
+      // BGG rate-limits bursts; retry each batch with backoff before giving up.
+      let res = null;
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        res = await fetch(`${WORKER}/api/bgg-thing?id=${batch.map((g) => g.id).join(',')}`);
+        if (res.ok) break;
+        await new Promise((r) => setTimeout(r, attempt * 5000));
+      }
+      if (!res || !res.ok) { failedBatches++; continue; }
       const xml = new DOMParser().parseFromString(await res.text(), 'text/xml');
       for (const item of xml.querySelectorAll('item')) {
         const game = snapshot.games.find((g) => g.id === item.getAttribute('id'));
@@ -396,7 +402,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const el = $('adm-exp-out');
     if (!el) return;
     const warning = failedBatches
-      ? `<p class="adm-dim">BGG did not answer ${failedBatches === 2 ? 'the expansion lookups' : 'part of the expansion lookup'} (likely rate-limiting) — reload the page to retry.${results.length ? ' Partial results below.' : ''}</p>`
+      ? `<p class="adm-dim">BGG did not answer ${failedBatches === 2 ? 'the expansion lookups' : 'part of the expansion lookup'} (rate-limiting) despite retries — <button type="button" class="adm-mini" id="adm-exp-retry">Retry now</button>${results.length ? ' Partial results below.' : ''}</p>`
       : '';
     if (!results.length) {
       el.innerHTML = warning || '<p class="adm-dim">The most-played games have every available expansion. 🎉</p>';
@@ -580,6 +586,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       } catch { /* leave those cells as-is; retried on next tab render */ }
       fillPublisherCells();
+      await new Promise((r) => setTimeout(r, 400)); // pace BGG between batches
     }
     fillPublisherCells();
   }
@@ -795,6 +802,14 @@ document.addEventListener('DOMContentLoaded', function () {
     if (e.target.id === 'adm-suggest-more') {
       showAllSuggestions = !showAllSuggestions;
       renderSuggestions();
+    }
+    if (e.target.id === 'adm-exp-retry') {
+      expAnalysisHtml = null;
+      $('adm-exp-out').innerHTML = '<p class="adm-dim">Retrying the expansion analysis…</p>';
+      analyzeExpansions().catch((err) => {
+        const el = $('adm-exp-out');
+        if (el) el.innerHTML = `<p class="adm-dim">Expansion analysis failed: ${esc(err.message)}</p>`;
+      });
     }
   });
 
