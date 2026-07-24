@@ -1031,13 +1031,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // US filter: BGG's feed has no seller location, so USD currency is the
     // closest available proxy — non-USD listings are hidden entirely. Then drop
-    // accessory/promo listings and sub-40%-of-median outliers (near-certain
+    // accessory/promo listings and sub-60%-of-median outliers (near-certain
     // partial-component listings) so the stats reflect real copies of the game.
     const total = listings.length;
     const usdAll = listings.filter((l) => l.currency === 'USD' && l.price > 0);
     const nonUsd = total - usdAll.length;
     const medianAll = usdAll.length ? usdAll.map((l) => l.price).sort((a, b) => a - b)[Math.floor(usdAll.length / 2)] : 0;
-    const floor = Math.max(medianAll * 0.4, 8);
+    const floor = Math.max(medianAll * 0.6, 8);
     const usdListings = usdAll.filter((l) => !l.junk && l.price >= floor);
     const excluded = usdAll.length - usdListings.length;
     const usd = usdListings.map((l) => l.price).sort((a, b) => a - b);

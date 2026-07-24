@@ -644,7 +644,7 @@ async function handleWatchlist(request, env, cors, incomingUrl) {
 const JUNK_LISTING_NOTES = /\bnot (the|for)( the)?( base)? game\b|\bgame (is )?not includ|\bno game\b|\bgame sold separately\b|\bwithout the (base )?game\b|\bnot offering to sell\b|\bplaceholder\b|\b3d[ -]?print|\bfdm\b|\bresin\b|\bstl\b|laser.?cut|\bi print\b|piece holder|card holder|component holder|dice tray|\bselling (the |my )?(components?|coins?|inserts?|organiz\w+|promos?|stickers?|sleeves?|minis?|miniatures?|upgrades?|tokens?)\b|\b(this|it) is (only )?for (a |an |the |one |1 |my )*(set of |pair of )?[^.]{0,28}\b(coins?|inserts?|organiz\w+|promos?|stickers?|mats?|upgrades?|components?|sleeves?|minis?|tokens?|dashboards?|meeples?|holders?)\b/i;
 
 /** Parses genuine USD marketplace listings, dropping accessory/promo listings
- *  and low-outlier prices (below 40% of the median, floor $8) that are almost
+ *  and low-outlier prices (below 60% of the median, floor $8) that are almost
  *  always partial components. Returns them sorted cheapest-first. */
 function parseCleanUsdListings(xml) {
   const all = [];
@@ -658,7 +658,7 @@ function parseCleanUsdListings(xml) {
   }
   if (all.length === 0) return [];
   const median = all.map((l) => l.price).sort((a, b) => a - b)[Math.floor(all.length / 2)];
-  const floor = Math.max(median * 0.4, 8);
+  const floor = Math.max(median * 0.6, 8);
   return all.filter((l) => !l.junk && l.price >= floor).sort((a, b) => a.price - b.price);
 }
 
