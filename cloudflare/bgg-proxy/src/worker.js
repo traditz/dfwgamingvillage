@@ -635,6 +635,33 @@ async function handleWatchlist(request, env, cors, incomingUrl) {
   );
 }
 
+// Marketplace listings that are NOT the actual base game (organizers, promos,
+// upgrade kits, single components, 3D-printed accessories, price-tracker
+// placeholders) — detected from the seller's notes. Tuned for precision: it
+// triggers on explicit negations and "for the <accessory>" / "selling
+// <accessory>" phrasings, NOT on bare accessory words, so a real copy that
+// merely "includes an organizer" is kept. See scripts validation runs.
+const JUNK_LISTING_NOTES = /\bnot (the|for)( the)?( base)? game\b|\bgame (is )?not includ|\bno game\b|\bgame sold separately\b|\bwithout the (base )?game\b|\bnot offering to sell\b|\bplaceholder\b|\b3d[ -]?print|\bfdm\b|\bresin\b|\bstl\b|laser.?cut|\bi print\b|piece holder|card holder|component holder|dice tray|\bselling (the |my )?(components?|coins?|inserts?|organiz\w+|promos?|stickers?|sleeves?|minis?|miniatures?|upgrades?|tokens?)\b|\b(this|it) is (only )?for (a |an |the |one |1 |my )*(set of |pair of )?[^.]{0,28}\b(coins?|inserts?|organiz\w+|promos?|stickers?|mats?|upgrades?|components?|sleeves?|minis?|tokens?|dashboards?|meeples?|holders?)\b/i;
+
+/** Parses genuine USD marketplace listings, dropping accessory/promo listings
+ *  and low-outlier prices (below 40% of the median, floor $8) that are almost
+ *  always partial components. Returns them sorted cheapest-first. */
+function parseCleanUsdListings(xml) {
+  const all = [];
+  for (const block of xml.match(/<listing>[\s\S]*?<\/listing>/g) || []) {
+    const price = parseFloat((block.match(/<price currency="USD" value="([\d.]+)"/) || [])[1] || "");
+    if (!price) continue;
+    const notes = decodeEntities((block.match(/<notes value="([^"]*)"/) || [])[1] || "")
+      .replace(/\[\/?[a-z=0-9#]+\]/gi, " ");
+    const link = (block.match(/<link\s+href="([^"]+)"/) || [])[1] || "";
+    all.push({ price, link, junk: JUNK_LISTING_NOTES.test(notes) });
+  }
+  if (all.length === 0) return [];
+  const median = all.map((l) => l.price).sort((a, b) => a - b)[Math.floor(all.length / 2)];
+  const floor = Math.max(median * 0.4, 8);
+  return all.filter((l) => !l.junk && l.price >= floor).sort((a, b) => a.price - b.price);
+}
+
 const GITHUB_REPO = "traditz/dfwgamingvillage";
 const SNAPSHOT_WORKFLOW = "refresh-library.yml";
 
@@ -771,16 +798,16 @@ async function checkWatchedPrices(env) {
         }
       }
     } catch { /* leave channel empty for today */ }
-    try { // second-hand — lowest USD BGG Marketplace listing + today's average
+    try { // second-hand — lowest genuine USD BGG Marketplace listing + today's average
       const res = await fetch(`${BGG_THING_URL}?id=${g.id}&marketplace=1`, {
         headers: { Authorization: `Bearer ${env.BGG_TOKEN}` }
       });
       if (res.ok) {
-        const xml = await res.text();
-        const prices = [...xml.matchAll(/<price currency="USD" value="([\d.]+)"/g)].map((m) => +m[1]).filter(Boolean);
-        if (prices.length) {
-          snap.m = Math.min(...prices);
-          snap.mAvg = prices.reduce((a, b) => a + b, 0) / prices.length;
+        const clean = parseCleanUsdListings(await res.text());
+        if (clean.length) {
+          snap.m = clean[0].price;
+          snap.mLink = clean[0].link; // direct link to the cheapest genuine listing
+          snap.mAvg = clean.reduce((a, b) => a + b.price, 0) / clean.length;
         }
       }
     } catch { /* leave channel empty for today */ }
@@ -802,10 +829,10 @@ async function checkWatchedPrices(env) {
       }
       if (note && (!gh.lastAlert || gh.lastAlert < cooldownDate)) {
         // Link straight to where the deal actually is: the BoardGamePrices
-        // page for retail, the game's BGG Marketplace listings for second-hand.
+        // page for retail, the cheapest listing itself for second-hand.
         const link = key === "r"
           ? (snap.rUrl || `https://boardgameprices.com/search?search=${encodeURIComponent(g.name)}`)
-          : `https://boardgamegeek.com/boardgame/${g.id}/marketplace`;
+          : (snap.mLink || `https://boardgamegeek.com/boardgame/${g.id}/marketplace`);
         alerts.push({ id: g.id, name: g.name, channel: label, note, link, date: today });
       }
     }

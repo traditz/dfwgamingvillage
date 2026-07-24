@@ -36,6 +36,12 @@ document.addEventListener('DOMContentLoaded', function () {
   let showAllSuggestions = false;
 
   const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem(TOKEN_KEY) || ''}` });
+
+  // Listings that are NOT the base game (organizers, promos, single components,
+  // 3D-printed accessories, price-tracker placeholders). Precision-tuned to
+  // match the worker's alert filter — keeps a real copy that merely "includes
+  // an organizer", drops one that is "for the organizer only".
+  const JUNK_LISTING = /\bnot (the|for)( the)?( base)? game\b|\bgame (is )?not includ|\bno game\b|\bgame sold separately\b|\bwithout the (base )?game\b|\bnot offering to sell\b|\bplaceholder\b|\b3d[ -]?print|\bfdm\b|\bresin\b|\bstl\b|laser.?cut|\bi print\b|piece holder|card holder|component holder|dice tray|\bselling (the |my )?(components?|coins?|inserts?|organiz\w+|promos?|stickers?|sleeves?|minis?|miniatures?|upgrades?|tokens?)\b|\b(this|it) is (only )?for (a |an |the |one |1 |my )*(set of |pair of )?[^.]{0,28}\b(coins?|inserts?|organiz\w+|promos?|stickers?|mats?|upgrades?|components?|sleeves?|minis?|tokens?|dashboards?|meeples?|holders?)\b/i;
   const watchBtn = (id, name) => `<button type="button" class="adm-mini adm-watch" data-watch-id="${id}" data-watch-name="${esc(name)}">Watch</button>`;
   const ignoreBtn = (id, name, label) => `<button type="button" class="adm-mini" data-ignore-id="${id}" data-ignore-name="${esc(name)}" title="${label === 'Restore' ? 'Put this game back into the suggestion lists' : 'Hide this game from all suggestion lists'}">${label || 'Ignore'}</button>`;
   let publisherByGame = new Map(); // game id -> {id, name} (hydrated on demand)
@@ -1008,12 +1014,14 @@ document.addEventListener('DOMContentLoaded', function () {
       const xml = new DOMParser().parseFromString(await res.text(), 'text/xml');
       listings = [...xml.querySelectorAll('marketplacelistings listing')].map((l) => {
         const val = (sel, attr) => l.querySelector(sel)?.getAttribute(attr || 'value') || '';
+        const notes = (val('notes') || '').replace(/\[\/?[a-z=0-9#]+\]/gi, ' ');
         return {
           date: (val('listdate') || l.querySelector('listdate')?.textContent || '').slice(0, 16),
           price: parseFloat(val('price')) || 0,
           currency: l.querySelector('price')?.getAttribute('currency') || '',
           condition: val('condition') || '–',
-          link: l.querySelector('link')?.getAttribute('href') || ''
+          link: l.querySelector('link')?.getAttribute('href') || '',
+          junk: JUNK_LISTING.test(notes)
         };
       });
     } catch (err) {
@@ -1022,20 +1030,27 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // US filter: BGG's feed has no seller location, so USD currency is the
-    // closest available proxy — non-USD listings are hidden entirely.
+    // closest available proxy — non-USD listings are hidden entirely. Then drop
+    // accessory/promo listings and sub-40%-of-median outliers (near-certain
+    // partial-component listings) so the stats reflect real copies of the game.
     const total = listings.length;
-    const usdListings = listings.filter((l) => l.currency === 'USD' && l.price > 0);
-    const hidden = total - usdListings.length;
+    const usdAll = listings.filter((l) => l.currency === 'USD' && l.price > 0);
+    const nonUsd = total - usdAll.length;
+    const medianAll = usdAll.length ? usdAll.map((l) => l.price).sort((a, b) => a - b)[Math.floor(usdAll.length / 2)] : 0;
+    const floor = Math.max(medianAll * 0.4, 8);
+    const usdListings = usdAll.filter((l) => !l.junk && l.price >= floor);
+    const excluded = usdAll.length - usdListings.length;
     const usd = usdListings.map((l) => l.price).sort((a, b) => a - b);
     const median = usd.length ? usd[Math.floor(usd.length / 2)] : 0;
+    const excludedNote = [nonUsd ? `${nonUsd} non-USD` : '', excluded ? `${excluded} accessory/promo` : ''].filter(Boolean).join(' + ') + ' hidden';
     const summary = usd.length
       ? `<div class="adm-price-stats">
-          <div class="gl-stat"><span class="gl-stat-label">USD listings</span><span class="gl-stat-value">${usd.length}</span><span class="gl-stat-sub">${hidden ? `${hidden} non-USD hidden` : 'all listings'}</span></div>
+          <div class="gl-stat"><span class="gl-stat-label">Real copies</span><span class="gl-stat-value">${usd.length}</span><span class="gl-stat-sub">${nonUsd || excluded ? excludedNote : 'all listings'}</span></div>
           <div class="gl-stat"><span class="gl-stat-label">Lowest</span><span class="gl-stat-value">$${usd[0].toFixed(0)}</span><span class="gl-stat-sub">USD</span></div>
           <div class="gl-stat"><span class="gl-stat-label">Median</span><span class="gl-stat-value">$${median.toFixed(0)}</span><span class="gl-stat-sub">USD</span></div>
           <div class="gl-stat"><span class="gl-stat-label">Highest</span><span class="gl-stat-value">$${usd[usd.length - 1].toFixed(0)}</span><span class="gl-stat-sub">USD</span></div>
         </div>`
-      : `<p class="adm-dim">No current USD listings on the BGG Marketplace${hidden ? ` (${hidden} non-USD hidden)` : ''}.</p>`;
+      : `<p class="adm-dim">No genuine USD copies on the BGG Marketplace right now${nonUsd || excluded ? ` (${excludedNote})` : ''}.</p>`;
 
     const rows = usdListings.sort((a, b) => a.price - b.price).slice(0, 25).map((l) => `
       <tr>
