@@ -131,7 +131,8 @@ document.addEventListener('DOMContentLoaded', function () {
         id: item.getAttribute('id'),
         rank: parseInt(item.getAttribute('rank'), 10) || 0,
         name: item.querySelector('name')?.getAttribute('value') || 'Unknown',
-        year: item.querySelector('yearpublished')?.getAttribute('value') || ''
+        year: item.querySelector('yearpublished')?.getAttribute('value') || '',
+        thumb: item.querySelector('thumbnail')?.getAttribute('value') || ''
       }));
     } catch (err) {
       status.textContent = `Failed to load data: ${err.message}`;
@@ -193,6 +194,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
   const gameLink = (id, name) => `<a href="https://boardgamegeek.com/boardgame/${id}" target="_blank" rel="noopener">${esc(name)}</a>`;
 
+  // Box-art lookup across every data source we already hold.
+  let thumbCache = null;
+  function thumbFor(id) {
+    if (!thumbCache) {
+      thumbCache = new Map();
+      for (const g of snapshot?.games || []) if (g.thumb) thumbCache.set(String(g.id), g.thumb);
+      for (const c of candidates?.games || []) if (c.thumb && !thumbCache.has(String(c.id))) thumbCache.set(String(c.id), c.thumb);
+      for (const t of top100) if (t.image && !thumbCache.has(String(t.id))) thumbCache.set(String(t.id), t.image);
+      for (const h of hotList) if (h.thumb && !thumbCache.has(String(h.id))) thumbCache.set(String(h.id), h.thumb);
+    }
+    for (const i of wishList.concat(wantList)) if (i.thumb && !thumbCache.has(String(i.id))) thumbCache.set(String(i.id), i.thumb);
+    return thumbCache.get(String(id)) || '';
+  }
+
+  // A table cell with box art beside the game text.
+  const gcell = (thumb, html) => `<td><div class="adm-gcell">${thumb
+    ? `<img class="adm-thumb" src="${esc(thumb)}" alt="" loading="lazy">`
+    : '<span class="adm-thumb adm-thumb-none"></span>'}<div class="adm-gcell-b">${html}</div></div></td>`;
+
   /* ================= procurement ================= */
 
   const pubCell = (gameId) => `<td class="adm-pub" data-pub-for="${gameId}"><span class="adm-dim">…</span></td>`;
@@ -217,7 +237,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const gapRows = gaps.map((t) => `
       <tr>
         <td>#${t.rank}</td>
-        <td>${gameLink(t.id, t.name)} <span class="adm-dim">(${esc(t.year)})</span></td>
+        ${gcell(t.image, `${gameLink(t.id, t.name)} <span class="adm-dim">(${esc(t.year)})</span>`)}
         <td>${esc(t.geekRating)}</td>
         ${pubCell(t.id)}
         <td>${watchBtn(t.id, t.name)} <button type="button" class="adm-mini" data-price-id="${t.id}" data-price-name="${esc(t.name)}">Price</button> ${ignoreBtn(t.id, t.name)}</td>
@@ -227,7 +247,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const hotRows = hotGaps.map((h) => `
       <tr>
         <td>#${h.rank}</td>
-        <td>${gameLink(h.id, h.name)} <span class="adm-dim">${h.year ? `(${esc(h.year)})` : ''}</span></td>
+        ${gcell(h.thumb, `${gameLink(h.id, h.name)} <span class="adm-dim">${h.year ? `(${esc(h.year)})` : ''}</span>`)}
         ${pubCell(h.id)}
         <td>${watchBtn(h.id, h.name)} <button type="button" class="adm-mini" data-price-id="${h.id}" data-price-name="${esc(h.name)}">Price</button> ${ignoreBtn(h.id, h.name)}</td>
       </tr>`).join('');
@@ -343,7 +363,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <thead><tr><th>Game</th><th>Owned</th><th>Missing expansions</th></tr></thead>
         <tbody>${results.map((r) => `
           <tr>
-            <td>${gameLink(r.game.id, r.game.name)}<br><span class="adm-dim">${playsById[r.game.id] || 0} plays</span></td>
+            ${gcell(r.game.thumb, `${gameLink(r.game.id, r.game.name)}<br><span class="adm-dim">${playsById[r.game.id] || 0} plays</span>`)}
             <td class="adm-dim">${r.ownedCount} of ${r.total}</td>
             <td>${r.missing.map((x) => gameLink(x.id, x.name)).join(' · ')}</td>
           </tr>`).join('')}
@@ -362,7 +382,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <thead><tr><th>Game</th><th>Rating</th>${withPriority ? '<th>Priority</th>' : ''}<th></th></tr></thead>
         <tbody>${items.map((i) => `
           <tr>
-            <td>${gameLink(i.id, i.name)} <span class="adm-dim">(${esc(i.year)})</span></td>
+            ${gcell(i.thumb, `${gameLink(i.id, i.name)} <span class="adm-dim">(${esc(i.year)})</span>`)}
             <td>${i.rating ? i.rating.toFixed(1) : '–'}</td>
             ${withPriority ? `<td>${PRIORITY[i.priority] || '–'}</td>` : ''}
             <td>${watchBtn(i.id, i.name)} <button type="button" class="adm-mini" data-price-id="${i.id}" data-price-name="${esc(i.name)}">Price</button></td>
@@ -469,14 +489,13 @@ document.addEventListener('DOMContentLoaded', function () {
         <tbody>${rows.map((s) => `
           <tr>
             <td><strong>${s.score}</strong></td>
-            <td>
+            ${gcell(s.c.thumb, `
               ${gameLink(s.c.id, s.c.name)} <span class="adm-dim">(${s.c.year || '–'}) · BGG #${s.c.rank}</span><br>
               <span class="adm-chip">★ ${s.c.rating.toFixed(1)}</span>
               ${s.gap ? `<span class="adm-chip">${esc(s.gapWhy)}</span>` : ''}
               ${s.taste > 0.25 && s.tasteWhy ? `<span class="adm-chip">taste: ${esc(s.tasteWhy)}</span>` : ''}
               ${s.hotN ? `<span class="adm-chip">hot ${s.hotN}/${Math.min(recordedDays, 30)} days</span>` : ''}
-              ${queueIds.has(String(s.c.id)) ? '<span class="adm-chip">on your BGG lists</span>' : ''}
-            </td>
+              ${queueIds.has(String(s.c.id)) ? '<span class="adm-chip">on your BGG lists</span>' : ''}`)}
             <td>${s.c.pubName ? `
               <a href="https://boardgamegeek.com/boardgamepublisher/${s.c.pubId}" target="_blank" rel="noopener" title="BGG company page — website and contact info">${esc(s.c.pubName)}</a>
               <a class="adm-dim" href="https://www.google.com/search?q=${encodeURIComponent(`${s.c.pubName} board game publisher contact`)}" target="_blank" rel="noopener" title="Search for contact details">🔎</a>` : '–'}
@@ -540,7 +559,7 @@ document.addEventListener('DOMContentLoaded', function () {
       .slice(0, 40);
     const cullRows = cull.map((g) => `
       <tr>
-        <td>${gameLink(g.id, g.name)} <span class="adm-dim">(${g.year || '–'})</span></td>
+        ${gcell(g.thumb, `${gameLink(g.id, g.name)} <span class="adm-dim">(${g.year || '–'})</span>`)}
         <td>${g.rating.toFixed(1)}</td>
         <td>${g.weight ? g.weight.toFixed(1) : '–'}</td>
         <td>0</td>
@@ -563,7 +582,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const lowest = snapshot.games.filter((g) => g.rating > 0).sort((a, b) => a.rating - b.rating).slice(0, 20);
     const lowRows = lowest.map((g) => `
       <tr>
-        <td>${gameLink(g.id, g.name)} <span class="adm-dim">(${g.year || '–'})</span></td>
+        ${gcell(g.thumb, `${gameLink(g.id, g.name)} <span class="adm-dim">(${g.year || '–'})</span>`)}
         <td>${g.rating.toFixed(1)}</td>
         <td>${playsById[g.id] || 0}</td>
       </tr>`).join('');
@@ -625,7 +644,7 @@ document.addEventListener('DOMContentLoaded', function () {
       <div class="adm-scroll"><table class="adm-table"><tbody>
         ${ignore.list.map((g) => `
           <tr>
-            <td>${gameLink(g.id, g.name)} <span class="adm-dim">ignored since ${esc(g.addedAt)}</span></td>
+            ${gcell(thumbFor(g.id), `${gameLink(g.id, g.name)} <span class="adm-dim">ignored since ${esc(g.addedAt)}</span>`)}
             <td>${ignoreBtn(g.id, g.name, 'Restore')}</td>
           </tr>`).join('')}
       </tbody></table></div>`;
@@ -716,7 +735,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <thead><tr><th>Game</th><th>Retail low</th><th>Used low</th><th>Avg (tracked)</th><th></th></tr></thead>
         <tbody>${watch.list.map((g) => `
           <tr>
-            <td>${gameLink(g.id, g.name)}${recentAlert.has(g.id) ? ' <span class="adm-chip">🔔 recent alert</span>' : ''}<br><span class="adm-dim">watched since ${esc(g.addedAt)}</span></td>
+            ${gcell(thumbFor(g.id), `${gameLink(g.id, g.name)}${recentAlert.has(g.id) ? ' <span class="adm-chip">🔔 recent alert</span>' : ''}<br><span class="adm-dim">watched since ${esc(g.addedAt)}</span>`)}
             <td>${money(latest(g.id, 'r'))}</td>
             <td>${money(latest(g.id, 'm'))}</td>
             <td class="adm-dim">${money(avg(g.id, 'r'))} / ${money(avg(g.id, 'm'))}</td>
@@ -920,8 +939,9 @@ document.addEventListener('DOMContentLoaded', function () {
       </tr>`).join('');
 
     const q = encodeURIComponent(`${name} board game`);
+    const thumb = thumbFor(id);
     out.innerHTML = `
-      <h3 class="adm-sub">${gameLink(id, name)} ${watchBtn(id, name)} <span class="adm-dim">— second-hand (BGG Marketplace)</span></h3>
+      <h3 class="adm-sub adm-gcell">${thumb ? `<img class="adm-thumb" src="${esc(thumb)}" alt="" loading="lazy">` : ''}<span>${gameLink(id, name)} ${watchBtn(id, name)} <span class="adm-dim">— second-hand (BGG Marketplace)</span></span></h3>
       ${summary}
       ${usdListings.length ? `<div class="adm-scroll"><table class="adm-table">
         <thead><tr><th>Price</th><th>Condition</th><th>Listed</th><th></th></tr></thead>
