@@ -545,13 +545,13 @@ document.addEventListener('DOMContentLoaded', function () {
         <thead><tr><th>Score</th><th>Game</th><th>Publisher</th><th></th></tr></thead>
         <tbody>${rows.map((s) => `
           <tr>
-            <td><strong>${s.score}</strong></td>
+            <td><span class="adm-score ${s.score >= 60 ? 'hi' : s.score >= 45 ? 'md' : 'lo'}">${s.score}</span></td>
             ${gcell(s.c.thumb, `
               ${gameLink(s.c.id, s.c.name)} <span class="adm-dim">(${s.c.year || '–'}) · BGG #${s.c.rank}</span><br>
-              <span class="adm-chip">★ ${s.c.rating.toFixed(1)}</span>
-              ${s.gap ? `<span class="adm-chip">${esc(s.gapWhy)}</span>` : ''}
-              ${s.taste > 0.25 && s.tasteWhy ? `<span class="adm-chip">taste: ${esc(s.tasteWhy)}</span>` : ''}
-              ${s.hotN ? `<span class="adm-chip">hot ${s.hotN}/${Math.min(recordedDays, 30)} days</span>` : ''}
+              <span class="adm-chip adm-chip-gold">★ ${s.c.rating.toFixed(1)}</span>
+              ${s.gap ? `<span class="adm-chip adm-chip-teal">${esc(s.gapWhy)}</span>` : ''}
+              ${s.taste > 0.25 && s.tasteWhy ? `<span class="adm-chip adm-chip-blue">taste: ${esc(s.tasteWhy)}</span>` : ''}
+              ${s.hotN ? `<span class="adm-chip adm-chip-hot">hot ${s.hotN}/${Math.min(recordedDays, 30)} days</span>` : ''}
               ${queueIds.has(String(s.c.id)) ? '<span class="adm-chip">on your BGG lists</span>' : ''}`)}
             <td>${s.c.pubName ? `
               <a href="https://boardgamegeek.com/boardgamepublisher/${s.c.pubId}" target="_blank" rel="noopener" title="BGG company page — website and contact info">${esc(s.c.pubName)}</a>
@@ -764,11 +764,23 @@ document.addEventListener('DOMContentLoaded', function () {
       el.innerHTML = `<p class="adm-dim">Couldn't load the watchlist (${esc(watch.error)}).</p>`;
       return;
     }
-    const checkBtn = `<button type="button" class="adm-mini" id="adm-watch-check">Run price check now</button> <span id="adm-watch-check-msg"></span>`;
     const rules = 'Set a <strong>target</strong> to be alerted the moment either price (new or used) is at or below it. With no target, a game uses the automatic rules: ≥10% below its trailing average (≥15% below today\'s average while history is young).';
-    const hookLine = watch.webhookConfigured
-      ? `<p class="adm-dim">Discord alerts: configured ✓ · checked every 6 hours. ${rules} <button type="button" class="adm-mini" id="adm-watch-test">Send test alert</button> ${checkBtn} <span id="adm-watch-test-msg"></span></p>`
-      : `<p class="adm-dim">⚠ Discord webhook not set — prices are recorded but no pings are sent. Create a webhook in your Discord (Server Settings → Integrations → Webhooks), then run <code>npx wrangler secret put ALERT_WEBHOOK</code> in <code>cloudflare/bgg-proxy</code> and paste the URL.<br>${rules} ${checkBtn}</p>`;
+    const hookLine = `
+      <div class="adm-status-row">
+        ${watch.webhookConfigured
+          ? '<span class="adm-chip adm-chip-gold">Discord ✓</span>'
+          : '<span class="adm-chip adm-chip-hot">webhook not set</span>'}
+        <span class="adm-chip">checks every 6 h</span>
+        <span class="adm-chip">1 alert / game / week</span>
+        <span class="adm-grow"></span>
+        ${watch.webhookConfigured ? '<button type="button" class="adm-mini" id="adm-watch-test">Send test alert</button>' : ''}
+        <button type="button" class="adm-mini" id="adm-watch-check">Run price check now</button>
+      </div>
+      <p class="adm-dim">${rules}</p>
+      ${watch.webhookConfigured
+        ? ''
+        : '<p class="adm-dim">⚠ Prices are recorded but no pings are sent. Create a webhook in your Discord (Server Settings → Integrations → Webhooks), then run <code>npx wrangler secret put ALERT_WEBHOOK</code> in <code>cloudflare/bgg-proxy</code> and paste the URL.</p>'}
+      <p class="adm-dim"><span id="adm-watch-test-msg"></span> <span id="adm-watch-check-msg"></span></p>`;
 
     if (!(watch.list || []).length) {
       el.innerHTML = `${hookLine}<p class="adm-dim">Nothing watched yet — click <strong>Watch</strong> on any game in Procurement or a pricing result.</p>`;
@@ -794,7 +806,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <thead><tr><th>Game</th><th>Retail low</th><th>Used low</th><th>Target</th><th>Avg (tracked)</th><th></th></tr></thead>
         <tbody>${watch.list.map((g) => `
           <tr>
-            ${gcell(thumbFor(g.id), `${gameLink(g.id, g.name)}${recentAlert.has(g.id) ? ' <span class="adm-chip">🔔 recent alert</span>' : ''}<br><span class="adm-dim">watched since ${esc(g.addedAt)}</span>`)}
+            ${gcell(thumbFor(g.id), `${gameLink(g.id, g.name)}${recentAlert.has(g.id) ? ' <span class="adm-chip adm-chip-gold">🔔 recent alert</span>' : ''}<br><span class="adm-dim">watched since ${esc(g.addedAt)}</span>`)}
             <td>${money(latest(g.id, 'r'))}</td>
             <td>${money(latest(g.id, 'm'))}</td>
             <td><span class="adm-target-wrap">$<input type="number" class="adm-target" data-target-id="${g.id}" data-target-name="${esc(g.name)}" min="1" step="1" value="${g.target || ''}" placeholder="auto" title="Alert at or below this price; blank uses the automatic rules"></span></td>
