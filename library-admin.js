@@ -851,6 +851,25 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
+  /* ---------------- AI digest (worker cron, manual trigger) ---------------- */
+
+  $('adm-digest').addEventListener('click', async () => {
+    const btn = $('adm-digest');
+    const msg = $('adm-rebuild-msg');
+    btn.disabled = true;
+    msg.textContent = 'Writing the digest… (~15s)';
+    try {
+      const res = await fetch(`${WORKER}/api/digest`, { method: 'POST', headers: authHeaders() });
+      const data = await res.json();
+      msg.textContent = data.ok
+        ? 'Digest posted to Discord ✓ (also runs automatically Mondays 9am Central)'
+        : `Digest failed: ${data.error || res.status}`;
+    } catch (err) {
+      msg.textContent = `Digest failed: ${err.message}`;
+    }
+    btn.disabled = false;
+  });
+
   /* ---------------- manual snapshot rebuild (GitHub Action) ---------------- */
 
   $('adm-rebuild').addEventListener('click', async () => {

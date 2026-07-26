@@ -675,6 +675,228 @@ function parseCleanUsdListings(xml) {
 const GITHUB_REPO = "traditz/dfwgamingvillage";
 const SNAPSHOT_WORKFLOW = "refresh-library.yml";
 
+/* ===================== AI features ===================== */
+
+const SITE_BASE = "https://www.dfwgamingvillage.com";
+const ANTHROPIC_MODEL = "claude-sonnet-5";
+const DIGEST_CRON = "0 14 * * 1";
+const LAST_DIGEST_KEY = "last-digest";
+
+/** Minimal Anthropic Messages API client. */
+async function askClaude(env, system, user, maxTokens) {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "x-api-key": env.ANTHROPIC_API_KEY,
+      "anthropic-version": "2023-06-01",
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      model: ANTHROPIC_MODEL,
+      max_tokens: maxTokens || 1024,
+      system,
+      messages: [{ role: "user", content: user }]
+    })
+  });
+  if (!res.ok) throw new Error(`Anthropic ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  const data = await res.json();
+  return (data.content || []).filter((b) => b.type === "text").map((b) => b.text).join("");
+}
+
+/**
+ * Weekly AI digest: gathers the library's live signals (unowned high-rated
+ * candidates, hotness streaks, watchlist price movement) and has Claude write
+ * an opinionated procurement brief, posted to the Discord webhook.
+ */
+async function postWeeklyDigest(env) {
+  if (!env.ALERT_WEBHOOK) return { ok: false, error: "ALERT_WEBHOOK secret not set" };
+  if (!env.ANTHROPIC_API_KEY) return { ok: false, error: "ANTHROPIC_API_KEY secret not set" };
+
+  // Owned set (id + normalized name, so other editions count as owned).
+  const norm = (s) => String(s || "").toLowerCase().replace(/\s*\([^)]*\)\s*$/, "").replace(/[^a-z0-9]+/g, " ").trim();
+  const snapshot = await (await fetch(`${SITE_BASE}/games-library.json`)).json();
+  const ownedIds = new Set(snapshot.games.map((g) => String(g.id)));
+  const ownedNames = new Set(snapshot.games.map((g) => norm(g.name)));
+  const isOwned = (id, name) => ownedIds.has(String(id)) || ownedNames.has(norm(name));
+
+  // Top unowned candidates from the Top-1000 pool.
+  let topCandidates = [];
+  try {
+    const cand = await (await fetch(`${SITE_BASE}/candidates.json`)).json();
+    topCandidates = cand.games
+      .filter((c) => c.rating >= 7.3 && !isOwned(c.id, c.name))
+      .slice(0, 25)
+      .map((c) => ({ id: c.id, name: c.name, year: c.year, rank: c.rank, rating: c.rating, weight: c.weight, bestWith: c.bestWith, publisher: c.pubName }));
+  } catch { /* pool optional */ }
+
+  // Hotness streaks over the last 14 recorded days.
+  const hotHistory = JSON.parse((await env.HOT_HISTORY.get(HOT_HISTORY_KEY)) || "{}");
+  const hotDates = Object.keys(hotHistory).sort().slice(-14);
+  const streaks = new Map(); // id -> {name, days}
+  for (const d of hotDates) {
+    for (const g of hotHistory[d] || []) {
+      const cur = streaks.get(g.id) || { name: g.name, days: 0 };
+      cur.days++;
+      streaks.set(g.id, cur);
+    }
+  }
+  const sustainedHot = [...streaks.entries()]
+    .filter(([id, s]) => s.days >= Math.min(4, hotDates.length) && !isOwned(id, s.name))
+    .sort((a, b) => b[1].days - a[1].days)
+    .slice(0, 12)
+    .map(([id, s]) => ({ id, name: s.name, daysOnHotness: s.days, of: hotDates.length }));
+
+  // Watchlist price movement.
+  const watchlist = JSON.parse((await env.HOT_HISTORY.get(WATCHLIST_KEY)) || "[]");
+  const priceHistory = JSON.parse((await env.HOT_HISTORY.get(PRICE_HISTORY_KEY)) || "{}");
+  const watch = watchlist.map((g) => {
+    const gh = priceHistory[g.id] || {};
+    const dates = Object.keys(gh).filter((d) => /^\d{4}-/.test(d)).sort().slice(-14);
+    const series = dates.map((d) => gh[d]).filter(Boolean);
+    const lows = (key) => series.map((s) => s[key]).filter(Boolean);
+    const latest = (key) => { for (let i = series.length - 1; i >= 0; i--) if (series[i][key]) return series[i][key]; return null; };
+    return {
+      name: g.name, target: g.target || null,
+      retailNow: latest("r"), retail14dMin: lows("r").length ? Math.min(...lows("r")) : null,
+      usedNow: latest("m"), used14dMin: lows("m").length ? Math.min(...lows("m")) : null
+    };
+  });
+  const recentAlerts = JSON.parse((await env.HOT_HISTORY.get(PRICE_ALERTS_KEY)) || "[]").slice(0, 6);
+
+  const data = {
+    libraryGames: snapshot.games.length,
+    topUnownedCandidates: topCandidates,
+    sustainedHotnessUnowned: sustainedHot,
+    watchlist: watch,
+    recentPriceAlerts: recentAlerts
+  };
+
+  const system = `You write a short weekly procurement digest for the DFW Gaming Village, a community board-game lending library (~${snapshot.games.length} games). The digest is posted to the admins' Discord channel. Rules:
+- HARD LIMIT 1800 characters. Discord markdown (** bold **, bullet lines, emoji section headers).
+- Sections: "📈 Worth a look" (2-4 unowned games trending or high-rated, one line each on WHY — rating, hotness streak, best-player-count), "💰 Price watch" (only watchlist games with notable movement vs their 14-day range or near their target; say the numbers; if nothing notable, one line saying so), "🎯 Pick of the week" (ONE game to prioritize acquiring, 2 sentences of reasoning).
+- Use only the data provided; never invent prices, streaks, or games. Round prices to whole dollars.
+- Up to 3 links total, formatted <https://boardgamegeek.com/boardgame/ID>.
+- Practical, warm, no filler, no greeting or sign-off.`;
+
+  const content = await askClaude(env, system, JSON.stringify(data), 900);
+  const trimmed = content.length > 1950 ? content.slice(0, 1950) + "…" : content;
+  const res = await fetch(env.ALERT_WEBHOOK.trim(), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ content: "📚 **DFWGV weekly library digest**\n" + trimmed })
+  });
+  await env.HOT_HISTORY.put(LAST_DIGEST_KEY, JSON.stringify({ date: new Date().toISOString(), posted: res.ok, content: trimmed }));
+  return { ok: res.ok, error: res.ok ? "" : `Discord ${res.status}`, preview: trimmed.slice(0, 400) };
+}
+
+/** Token-gated manual digest trigger (POST) / last digest (GET). */
+async function handleDigest(request, env, cors) {
+  if (!isAuthorized(request, env)) {
+    return jsonResponse({ ok: false, error: "Unauthorized" }, 401, cors);
+  }
+  if (request.method === "POST") {
+    try {
+      const result = await postWeeklyDigest(env);
+      return jsonResponse(result, result.ok ? 200 : 400, cors);
+    } catch (err) {
+      return jsonResponse({ ok: false, error: String(err.message).slice(0, 300) }, 500, cors);
+    }
+  }
+  const last = (await env.HOT_HISTORY.get(LAST_DIGEST_KEY)) || "null";
+  return new Response(`{"ok":true,"last":${last}}`, {
+    status: 200,
+    headers: { ...cors, "Content-Type": "application/json; charset=utf-8" }
+  });
+}
+
+/* --- Discord slash-command bot (interactions endpoint) --- */
+
+function hexToBytes(hex) {
+  return new Uint8Array((hex.match(/.{2}/g) || []).map((b) => parseInt(b, 16)));
+}
+
+async function verifyDiscordSignature(request, env, rawBody) {
+  const sig = request.headers.get("X-Signature-Ed25519");
+  const ts = request.headers.get("X-Signature-Timestamp");
+  if (!sig || !ts || !env.DISCORD_PUBLIC_KEY) return false;
+  try {
+    const key = await crypto.subtle.importKey("raw", hexToBytes(env.DISCORD_PUBLIC_KEY.trim()), { name: "Ed25519" }, false, ["verify"]);
+    return await crypto.subtle.verify("Ed25519", key, hexToBytes(sig), new TextEncoder().encode(ts + rawBody));
+  } catch {
+    return false;
+  }
+}
+
+/** Answers /gamenight with 3 tailored picks from the live library snapshot. */
+async function answerGamenight(env, interaction) {
+  const followUp = async (content) => {
+    await fetch(`https://discord.com/api/v10/webhooks/${interaction.application_id}/${interaction.token}/messages/@original`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content })
+    });
+  };
+  try {
+    const opts = {};
+    for (const o of interaction.data.options || []) opts[o.name] = o.value;
+    const players = parseInt(opts.players, 10);
+    const minutes = parseInt(opts.minutes, 10) || 0;
+    const vibe = clampString(opts.vibe || "", 200);
+
+    const snapshot = await (await fetch(`${SITE_BASE}/games-library.json`)).json();
+    const mech = snapshot.mechanics;
+    const cat = snapshot.categories;
+    const fits = snapshot.games.filter((g) =>
+      g.minP <= players && g.maxP >= players && (!minutes || (g.time > 0 && g.time <= minutes * 1.25))
+    );
+    if (fits.length === 0) {
+      await followUp(`Nothing in the library fits ${players} players${minutes ? ` in ~${minutes} minutes` : ""} — try different numbers?`);
+      return;
+    }
+    // Compact catalog for the model: prefer community-best at this count, then rating.
+    const bestAt = (g) => (g.bestWith || "").split(",").some((part) => {
+      const m = part.trim().match(/^(\d+)(?:\s*[–-]\s*(\d+))?$/);
+      return m && players >= +m[1] && players <= +(m[2] || m[1]);
+    });
+    const lines = fits
+      .sort((a, b) => (bestAt(b) - bestAt(a)) || b.rating - a.rating)
+      .slice(0, 130)
+      .map((g) => `${g.id}|${g.name}|${g.time}min|wt${g.weight}|★${g.rating}${bestAt(g) ? "|BEST at " + players : ""}|${(g.cat || []).slice(0, 3).map((i) => cat[i]).join(",")}|${(g.mech || []).slice(0, 3).map((i) => mech[i]).join(",")}`)
+      .join("\n");
+
+    const system = `You are the DFW Gaming Village librarian bot. A member wants a game for ${players} players${minutes ? `, about ${minutes} minutes` : ""}${vibe ? `, vibe: "${vibe}"` : ""}. From the provided library catalog (format: id|name|time|weight|rating|flags|themes|mechanics), recommend EXACTLY 3 games they can borrow tonight. Rules:
+- Only recommend games from the list; never invent.
+- Prefer games flagged BEST at their player count.
+- Respect the vibe if given (weight ≤2 for casual/party/light; ≥3 for heavy; co-op means Cooperative mechanics; etc.).
+- Format, max 1300 chars total: for each pick "**Name** — one tailored sentence (Xmin · weight Y · ★Z)". No preamble, no links.`;
+
+    const answer = await askClaude(env, system, lines, 600);
+    await followUp(answer.slice(0, 1900));
+  } catch (err) {
+    await followUp(`The librarian hit a snag: ${String(err.message).slice(0, 150)}`);
+  }
+}
+
+async function handleDiscord(request, env, ctx) {
+  if (request.method !== "POST") return new Response("Method not allowed", { status: 405 });
+  const rawBody = await request.text();
+  if (!(await verifyDiscordSignature(request, env, rawBody))) {
+    return new Response("Bad signature", { status: 401 });
+  }
+  const interaction = JSON.parse(rawBody);
+  const json = (obj) => new Response(JSON.stringify(obj), { headers: { "Content-Type": "application/json" } });
+
+  if (interaction.type === 1) return json({ type: 1 }); // PING → PONG
+  if (interaction.type === 2 && interaction.data?.name === "gamenight") {
+    if (!env.ANTHROPIC_API_KEY) {
+      return json({ type: 4, data: { content: "The librarian isn't configured yet (missing API key)." } });
+    }
+    ctx.waitUntil(answerGamenight(env, interaction)); // LLM takes >3s — defer
+    return json({ type: 5 }); // deferred channel message
+  }
+  return json({ type: 4, data: { content: "Unknown command." } });
+}
+
 /**
  * Manually trigger (POST) or check (GET) the GitHub Action that rebuilds
  * games-library.json. Token-gated; needs a GITHUB_TOKEN secret (fine-grained
@@ -1068,11 +1290,15 @@ async function handleGallery(request, env, cors) {
 
 export default {
   async scheduled(event, env, ctx) {
+    if (event.cron === DIGEST_CRON) {
+      ctx.waitUntil(postWeeklyDigest(env).catch(() => {}));
+      return;
+    }
     ctx.waitUntil(snapshotHotness(env));
     ctx.waitUntil(checkWatchedPrices(env));
   },
 
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const cors = corsHeaders(request);
     const incomingUrl = new URL(request.url);
 
@@ -1130,6 +1356,14 @@ export default {
 
     if (incomingUrl.pathname === "/api/refresh-snapshot") {
       return handleRefreshSnapshot(request, env, cors);
+    }
+
+    if (incomingUrl.pathname === "/api/digest") {
+      return handleDigest(request, env, cors);
+    }
+
+    if (incomingUrl.pathname === "/api/discord") {
+      return handleDiscord(request, env, ctx);
     }
 
     if (incomingUrl.pathname === "/api/bgg-search") {
