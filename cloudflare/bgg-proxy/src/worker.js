@@ -664,7 +664,8 @@ function parseCleanUsdListings(xml) {
     const notes = decodeEntities((block.match(/<notes value="([^"]*)"/) || [])[1] || "")
       .replace(/\[\/?[a-z=0-9#]+\]/gi, " ");
     const link = (block.match(/<link\s+href="([^"]+)"/) || [])[1] || "";
-    all.push({ price, link, junk: JUNK_LISTING_NOTES.test(notes) });
+    const condition = (block.match(/<condition value="([^"]*)"/) || [])[1] || "";
+    all.push({ price, link, condition, junk: JUNK_LISTING_NOTES.test(notes) });
   }
   if (all.length === 0) return [];
   const median = all.map((l) => l.price).sort((a, b) => a - b)[Math.floor(all.length / 2)];
@@ -755,22 +756,114 @@ async function postWeeklyDigest(env) {
     .slice(0, 12)
     .map(([id, s]) => ({ id, name: s.name, daysOnHotness: s.days, of: hotDates.length }));
 
-  // Watchlist price movement.
-  const watchlist = JSON.parse((await env.HOT_HISTORY.get(WATCHLIST_KEY)) || "[]");
+  // Watchlist: full live market scan (BGG Marketplace + US retail) layered
+  // on top of our tracked history, per watched game.
+  const watchlist = JSON.parse((await env.HOT_HISTORY.get(WATCHLIST_KEY)) || "[]").slice(0, 20);
   const priceHistory = JSON.parse((await env.HOT_HISTORY.get(PRICE_HISTORY_KEY)) || "{}");
+
+  // One batched BGG call covers every watched game's listings AND box art.
+  const liveMarket = {}; // id -> { thumb, used: {...} }
+  if (watchlist.length) {
+    try {
+      const res = await fetch(`${BGG_THING_URL}?id=${watchlist.map((g) => g.id).join(",")}&marketplace=1`, {
+        headers: { Authorization: `Bearer ${env.BGG_TOKEN}` }
+      });
+      if (res.ok) {
+        const xml = await res.text();
+        for (const item of xml.split(/<item\s/).slice(1)) {
+          const id = (item.match(/^[^>]*\bid="(\d+)"/) || [])[1];
+          if (!id) continue;
+          const clean = parseCleanUsdListings(item);
+          const prices = clean.map((l) => l.price);
+          liveMarket[id] = {
+            thumb: decodeEntities((item.match(/<thumbnail>([^<]+)<\/thumbnail>/) || [])[1] || ""),
+            used: clean.length ? {
+              listings: clean.length,
+              low: prices[0],
+              lowCondition: clean[0].condition,
+              lowLink: clean[0].link,
+              median: prices[Math.floor(prices.length / 2)]
+            } : null
+          };
+        }
+      }
+    } catch { /* live scan optional; history still carries the digest */ }
+  }
+
+  // Live US retail offers per game (BoardGamePrices), politely paced.
+  for (const g of watchlist) {
+    try {
+      const res = await fetch(`https://boardgameprices.com/api/info?eid=${g.id}&currency=USD&destination=US&sitename=dfwgamingvillage.com`);
+      if (res.ok) {
+        const d = await res.json();
+        const best = (d.items || [])
+          .map((it) => ({
+            url: it.url || "",
+            offers: (it.prices || []).filter((p) => p.country === "US" && p.stock === "Y")
+              .map((p) => ({ item: +p.product || +p.price, delivered: +p.price })).filter((o) => o.item)
+          }))
+          .sort((a, b) => b.offers.length - a.offers.length)[0];
+        if (best && best.offers.length) {
+          const cheapest = best.offers.sort((a, b) => a.delivered - b.delivered)[0];
+          (liveMarket[g.id] = liveMarket[g.id] || {}).retail = {
+            usInStockOffers: best.offers.length,
+            lowItem: cheapest.item,
+            lowDelivered: cheapest.delivered,
+            storeListUrl: best.url
+          };
+        }
+      }
+    } catch { /* section stays sparse */ }
+    await new Promise((r) => setTimeout(r, 350));
+  }
+
   const watch = watchlist.map((g) => {
     const gh = priceHistory[g.id] || {};
-    const dates = Object.keys(gh).filter((d) => /^\d{4}-/.test(d)).sort().slice(-14);
-    const series = dates.map((d) => gh[d]).filter(Boolean);
-    const lows = (key) => series.map((s) => s[key]).filter(Boolean);
-    const latest = (key) => { for (let i = series.length - 1; i >= 0; i--) if (series[i][key]) return series[i][key]; return null; };
+    const dates = Object.keys(gh).filter((d) => /^\d{4}-/.test(d)).sort();
+    const series = (key) => dates.map((d) => ({ date: d, price: gh[d][key] })).filter((p) => p.price);
+    const hist = (key) => {
+      const s = series(key);
+      if (!s.length) return null;
+      const prices = s.map((p) => p.price);
+      const min = Math.min(...prices);
+      const last14 = prices.slice(-14);
+      const avg14 = last14.reduce((a, b) => a + b, 0) / last14.length;
+      const latest = prices[prices.length - 1];
+      return {
+        historicLow: min,
+        historicLowDate: s.find((p) => p.price === min).date,
+        low14d: Math.min(...last14),
+        avg14d: Math.round(avg14),
+        latest,
+        trend: latest < avg14 * 0.97 ? "falling" : latest > avg14 * 1.03 ? "rising" : "flat",
+        daysTracked: s.length
+      };
+    };
+    const live = liveMarket[g.id] || {};
     return {
-      name: g.name, target: g.target || null,
-      retailNow: latest("r"), retail14dMin: lows("r").length ? Math.min(...lows("r")) : null,
-      usedNow: latest("m"), used14dMin: lows("m").length ? Math.min(...lows("m")) : null
+      id: g.id, name: g.name, target: g.target || null,
+      liveSecondHand: live.used || null,
+      liveRetailUS: live.retail || null,
+      trackedRetail: hist("r"),
+      trackedSecondHand: hist("m"),
+      ebaySoldPricesLink: `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(`${g.name} board game`)}&LH_Sold=1&LH_Complete=1&LH_PrefLoc=1`
     };
   });
-  const recentAlerts = JSON.parse((await env.HOT_HISTORY.get(PRICE_ALERTS_KEY)) || "[]").slice(0, 6);
+  const recentAlerts = JSON.parse((await env.HOT_HISTORY.get(PRICE_ALERTS_KEY)) || "[]").slice(0, 6)
+    .map((a) => ({ id: a.id, name: a.name, channel: a.channel, note: a.note, date: a.date }));
+
+  // Box art for the embed: the most interesting watch game (deepest current
+  // discount vs its 14-day average), else the first with art.
+  let digestThumb = "";
+  let bestRatio = 1;
+  for (const w of watch) {
+    const live = (w.liveSecondHand && w.liveSecondHand.low) || (w.liveRetailUS && w.liveRetailUS.lowItem);
+    const avg = (w.trackedSecondHand && w.trackedSecondHand.avg14d) || (w.trackedRetail && w.trackedRetail.avg14d);
+    const thumb = (liveMarket[w.id] || {}).thumb;
+    if (!thumb) continue;
+    const ratio = live && avg ? live / avg : 1;
+    if (!digestThumb || ratio < bestRatio) { digestThumb = thumb; bestRatio = ratio; }
+  }
 
   const data = {
     libraryGames: snapshot.games.length,
@@ -780,17 +873,18 @@ async function postWeeklyDigest(env) {
     recentPriceAlerts: recentAlerts
   };
 
-  const system = `You write a short DAILY pricing-and-procurement digest for the curator of the DFW Gaming Village board-game lending library (~${snapshot.games.length} games), posted to their Discord. Rules:
-- HARD LIMIT 1500 characters. Discord markdown (** bold **, bullet lines, emoji section headers).
-- Lead with "💰 Watchlist" — for each watched game with anything worth knowing today: current lows vs its 14-day range, distance to its target price, or a new tracked low. Say the numbers. Skip games with no movement; if nothing moved at all, one line: prices steady, nothing actionable.
-- Then "🛒 Opportunities" — at most 3 bullets: unowned games that look like smart buys today (sustained hotness streak + strong rating, or a recent price alert). One line each on why. Omit the section entirely on a quiet day.
-- This posts EVERY day: on quiet days be very short (2-4 lines total) rather than padding. Never repeat yesterday's framing as if it were news.
-- Use only the data provided; never invent prices, streaks, or games. Round to whole dollars.
-- This renders inside a Discord embed: link game names as [Name](https://boardgamegeek.com/boardgame/ID) (up to 5 links). Section headers as bold lines. No greeting or sign-off, no overall title (the embed supplies it).`;
+  const system = `You write the DAILY pricing-and-procurement digest for the curator of the DFW Gaming Village board-game lending library (~${snapshot.games.length} games), posted to their Discord. The data includes a LIVE market scan run minutes ago (BGG Marketplace second-hand listings with condition, plus US retail in-stock offers) layered on our tracked price history. Rules:
+- HARD LIMIT 3200 characters. Discord markdown (** bold **, bullet lines, emoji section headers).
+- Lead with "💰 Watchlist" — one short paragraph-bullet per watched game, covering: today's best genuine second-hand price (with condition) and best US retail (item + delivered), how those compare to the target, the 14-day average/low and historic low (with its date), the trend direction, and a plain-spoken verdict — buy now / wait / keep watching — WITH the reasoning (e.g. "within $3 of its historic low and trending down — wait a week", or "at target and only 4 genuine copies listed — grab it"). Games where nothing meaningful changed get one line, but still state the current best price so the line is informative on its own.
+- When a verdict is close, point at the game's eBay sold-prices link as the sanity check for what copies actually sell for.
+- Then "🛒 Opportunities" — at most 3 bullets: unowned games that look like smart buys today (sustained hotness streak + strong rating, or a recent price alert). Two lines each: the signal, and why it matters for a lending library. Omit the section on a genuinely quiet day.
+- This posts EVERY day: on quiet days shrink naturally (a few lines) rather than padding, but never reduce to a bare "nothing happened" — the current-price snapshot per watched game is always worth stating.
+- Use ONLY the data provided; never invent prices, listings, streaks, or games. Round to whole dollars except sub-$1 differences.
+- This renders inside a Discord embed: link game names as [Name](https://boardgamegeek.com/boardgame/ID); link "eBay sold prices" using the provided ebaySoldPricesLink; link "all retail offers" using storeListUrl when citing retail. Section headers as bold lines. No greeting or sign-off, no overall title (the embed supplies it).`;
 
   let content;
   try {
-    content = await askClaude(env, system, JSON.stringify(data), 1200);
+    content = await askClaude(env, system, JSON.stringify(data), 2000);
   } catch (err) {
     const error = String(err.message).slice(0, 300);
     await env.HOT_HISTORY.put(LAST_DIGEST_KEY, JSON.stringify({ date: new Date().toISOString(), posted: false, error }));
@@ -805,7 +899,8 @@ async function postWeeklyDigest(env) {
         title: "📚 Daily Library Digest",
         description: trimmed,
         color: 0xF5C542,
-        footer: { text: "DFWGV Librarian · watchlist pricing & procurement" },
+        thumbnail: digestThumb ? { url: digestThumb } : undefined,
+        footer: { text: `DFWGV Librarian · live scan of ${watch.length} watched games · BGG Marketplace + US retail` },
         timestamp: new Date().toISOString()
       }]
     })
@@ -1171,6 +1266,7 @@ async function checkWatchedPrices(env) {
           snap.r = Math.min(...best.prices);
           snap.rAvg = best.prices.reduce((a, b) => a + b, 0) / best.prices.length;
           snap.rUrl = best.url; // BoardGamePrices item page — where the offers are listed
+          snap.rCount = best.prices.length;
         }
       }
     } catch { /* leave channel empty for today */ }
@@ -1184,6 +1280,8 @@ async function checkWatchedPrices(env) {
           snap.m = clean[0].price;
           snap.mLink = clean[0].link; // direct link to the cheapest genuine listing
           snap.mAvg = clean.reduce((a, b) => a + b.price, 0) / clean.length;
+          snap.mCount = clean.length;
+          snap.mCond = clean[0].condition;
         }
       }
     } catch { /* leave channel empty for today */ }
@@ -1194,6 +1292,35 @@ async function checkWatchedPrices(env) {
       ? (snap.rUrl || `https://boardgameprices.com/search?search=${encodeURIComponent(g.name)}`)
       : (snap.mLink || `https://boardgamegeek.com/boardgame/${g.id}/marketplace`);
     const canAlert = !gh.lastAlert || gh.lastAlert < cooldownDate;
+
+    // Context stats for the alert embed: trailing avg, 14-day low, historic
+    // low (with date) per channel, drawn from the stored history + today.
+    const ctxFor = (key) => {
+      const allDates = Object.keys(gh).filter((d) => /^\d{4}-/.test(d)).sort();
+      const pts = allDates.map((d) => ({ date: d, price: gh[d][key] })).filter((p) => p.price);
+      if (snap[key]) pts.push({ date: today, price: snap[key] });
+      if (!pts.length) return {};
+      const prices = pts.map((p) => p.price);
+      const histLow = Math.min(...prices);
+      const last14 = pts.slice(-14).map((p) => p.price);
+      return {
+        avg30: Math.round(prices.slice(-30).reduce((a, b) => a + b, 0) / Math.min(prices.length, 30)),
+        low14: Math.min(...last14),
+        histLow,
+        histLowDate: pts.find((p) => p.price === histLow).date,
+        trackedDays: pts.length
+      };
+    };
+    const enrich = (key) => ({
+      price: snap[key],
+      target: g.target || null,
+      cond: key === "m" ? snap.mCond : "",
+      counts: { used: snap.mCount || 0, retail: snap.rCount || 0 },
+      other: key === "r"
+        ? (snap.m ? { label: "second-hand", price: snap.m } : null)
+        : (snap.r ? { label: "new retail", price: snap.r } : null),
+      ...ctxFor(key)
+    });
 
     if (g.target > 0) {
       // Manual target: alert the moment the cheapest genuine price (either
@@ -1206,7 +1333,8 @@ async function checkWatchedPrices(env) {
         alerts.push({
           id: g.id, name: g.name, channel: best.label,
           note: `$${best.price.toFixed(2)} — at or below your $${g.target} target`,
-          link: linkFor(best.key), date: today
+          link: linkFor(best.key), date: today,
+          ...enrich(best.key)
         });
       }
     } else {
@@ -1226,7 +1354,7 @@ async function checkWatchedPrices(env) {
           note = `$${cur.toFixed(2)} — ${Math.round((1 - cur / snap[key + "Avg"]) * 100)}% below today's average listing of $${snap[key + "Avg"].toFixed(0)}`;
         }
         if (note && canAlert) {
-          alerts.push({ id: g.id, name: g.name, channel: label, note, link: linkFor(key), date: today });
+          alerts.push({ id: g.id, name: g.name, channel: label, note, link: linkFor(key), date: today, ...enrich(key) });
         }
       }
     }
@@ -1247,25 +1375,91 @@ async function checkWatchedPrices(env) {
   return { checked: Math.min(list.length, WATCHLIST_CAP), alerts };
 }
 
-/** Posts alerts to the Discord webhook stored as the ALERT_WEBHOOK secret. */
+/** Box art thumbnails for a set of BGG ids — one batched thing call. */
+async function fetchThumbnails(env, ids) {
+  const thumbs = {};
+  if (!ids.length) return thumbs;
+  try {
+    const res = await fetch(`${BGG_THING_URL}?id=${ids.slice(0, 20).join(",")}`, {
+      headers: { Authorization: `Bearer ${env.BGG_TOKEN}` }
+    });
+    if (res.ok) {
+      const xml = await res.text();
+      for (const item of xml.split(/<item\s/).slice(1)) {
+        const id = (item.match(/^[^>]*\bid="(\d+)"/) || [])[1];
+        const thumb = (item.match(/<thumbnail>([^<]+)<\/thumbnail>/) || [])[1];
+        if (id && thumb) thumbs[id] = decodeEntities(thumb);
+      }
+    }
+  } catch { /* thumbnails are decorative */ }
+  return thumbs;
+}
+
+/** Posts alerts to the Discord webhook stored as the ALERT_WEBHOOK secret.
+ *  Real alerts render one rich embed per game: box art, price-context fields
+ *  (target / 14-day low / averages / historic low), and a Claude-written
+ *  one-line assessment of whether the deal is actually good. */
 async function sendPriceAlert(env, alerts, isTest) {
   if (!env.ALERT_WEBHOOK) return false;
-  const description = alerts.map((a) =>
-    `**[${a.name}](https://boardgamegeek.com/boardgame/${a.id})**${a.channel ? ` · ${a.channel}` : ""}\n${a.note} — [view listing](${a.link || `https://boardgamegeek.com/boardgame/${a.id}`})`
-  ).join("\n\n");
   try {
+    let embeds;
+    if (isTest) {
+      embeds = [{
+        title: "🧪 🎲 Library Price Alert",
+        description: alerts.map((a) => `**[${a.name}](https://boardgamegeek.com/boardgame/${a.id})**\n${a.note}`).join("\n\n").slice(0, 3900),
+        color: 0x99AAB5,
+        footer: { text: "DFWGV Librarian · price watch" },
+        timestamp: new Date().toISOString()
+      }];
+    } else {
+      const batch = alerts.slice(0, 10);
+      const thumbs = await fetchThumbnails(env, batch.map((a) => a.id));
+
+      // One Claude call for the whole batch: a one-liner per alert on whether
+      // this is a genuinely good buy given history and the wider market.
+      const takes = {};
+      if (env.ANTHROPIC_API_KEY) {
+        try {
+          const raw = await askClaude(env,
+            `You assess board-game price alerts for a lending-library curator. For EACH alert in the JSON, write ONE sentence (max 30 words) of buying advice: is this genuinely a good price given its historic low, averages, listing condition, and the other channel's price — and act now or wait? Be direct and specific with numbers. Output exactly one line per alert, formatted "id|sentence", nothing else.`,
+            JSON.stringify(batch), 600);
+          for (const line of raw.split("\n")) {
+            const m = line.match(/^\s*(\d+)\s*\|\s*(.+)$/);
+            if (m) takes[m[1]] = m[2].trim();
+          }
+        } catch { /* assessment is optional garnish */ }
+      }
+
+      const money = (v) => (v || v === 0) ? `$${Math.round(v)}` : "—";
+      embeds = batch.map((a) => {
+        const fields = [
+          { name: "Price now", value: `$${(+a.price || 0).toFixed(2)}${a.cond ? ` (${a.cond})` : ""}`, inline: true },
+          { name: "Your target", value: a.target ? `$${a.target}` : "—", inline: true },
+          { name: a.other ? `Cheapest ${a.other.label}` : "​", value: a.other ? money(a.other.price) : "​", inline: true },
+          { name: "14-day low", value: money(a.low14), inline: true },
+          { name: "30-day avg", value: money(a.avg30), inline: true },
+          { name: "Historic low", value: a.histLow ? `${money(a.histLow)} (${a.histLowDate}, ${a.trackedDays}d tracked)` : "—", inline: true }
+        ];
+        if (a.counts && (a.counts.used || a.counts.retail)) {
+          fields.push({ name: "Genuine listings today", value: `${a.counts.used} second-hand · ${a.counts.retail} retail offers`, inline: false });
+        }
+        return {
+          title: `🎲 Price Alert — ${a.name}`,
+          url: `https://boardgamegeek.com/boardgame/${a.id}`,
+          description: `**${a.channel}** · ${a.note}\n${takes[a.id] ? `💡 ${takes[a.id]}\n` : ""}[View listing](${a.link || `https://boardgamegeek.com/boardgame/${a.id}`}) · [eBay sold prices](https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(`${a.name} board game`)}&LH_Sold=1&LH_Complete=1&LH_PrefLoc=1)`,
+          fields,
+          thumbnail: thumbs[a.id] ? { url: thumbs[a.id] } : undefined,
+          color: 0x35B8A6,
+          footer: { text: "DFWGV Librarian · price watch" },
+          timestamp: new Date().toISOString()
+        };
+      });
+    }
+
     const res = await fetch(env.ALERT_WEBHOOK.trim(), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        embeds: [{
-          title: (isTest ? "🧪 " : "") + "🎲 Library Price Alert",
-          description: description.slice(0, 3900),
-          color: isTest ? 0x99AAB5 : 0x35B8A6,
-          footer: { text: "DFWGV Librarian · price watch" },
-          timestamp: new Date().toISOString()
-        }]
-      })
+      body: JSON.stringify({ embeds })
     });
     if (isTest) {
       return { ok: res.ok, status: res.status, detail: res.ok ? "" : (await res.text()).slice(0, 200) };
