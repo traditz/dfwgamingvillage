@@ -63,23 +63,26 @@ a residential IP, so it's part of the same monthly local scheduled task
 
 ## AI features (worker)
 
-Both need the `ANTHROPIC_API_KEY` worker secret (model: `claude-sonnet-5`).
+All need the `ANTHROPIC_API_KEY` worker secret (model: `claude-sonnet-5`);
+all admin endpoints are token-gated with the same admin token as the rest.
 
-- **Weekly Discord digest** — a Monday 14:00 UTC cron gathers unowned
-  high-rated candidates, hotness streaks, and watchlist price movement, has
-  Claude write a ≤1800-char procurement brief, and posts it via
-  `ALERT_WEBHOOK`. Manual trigger: token-gated `POST /api/digest` (the admin
-  dashboard's "Post AI digest now" button); `GET /api/digest` returns the last
-  digest.
-- **/gamenight Discord bot** — `POST /api/discord` is a Discord Interactions
-  endpoint (Ed25519-verified via the `DISCORD_PUBLIC_KEY` secret). The
-  `/gamenight players [minutes] [vibe]` slash command filters the live library
-  snapshot and has Claude pick 3 tailored games (deferred reply, since the
-  model call exceeds Discord's 3-second window). Register/refresh the commands
-  with `scripts/register-discord-commands.mjs` (needs `DISCORD_APP_ID` +
-  `DISCORD_BOT_TOKEN` env vars for that one call; the bot token is never
-  stored). The Interactions Endpoint URL in the Discord developer portal is
-  `https://dfwgv-bgg-proxy.joemsprague.workers.dev/api/discord`.
+- **Daily Discord digest** — a 14:00 UTC cron gathers watchlist price movement
+  (vs 14-day range and targets), hotness streaks, and unowned high-rated
+  candidates, has Claude write a ≤1500-char pricing/procurement brief
+  (deliberately terse on quiet days), and posts it via `ALERT_WEBHOOK`.
+  Manual trigger: `POST /api/digest` (the dashboard's "Post AI digest now"
+  button); `GET /api/digest` returns the last digest.
+- **Publisher donation letters** — `POST /api/draft-letter`: the dashboard
+  sends the game, its publisher, and which of that publisher's titles the
+  library owns (with play counts); Claude drafts a tailored 220–320-word
+  donation request. "Letter" buttons live on every procurement suggestion row;
+  output opens in an editable copy-ready modal.
+- **Deep price analysis** — `POST /api/price-analysis {id, name}`: the worker
+  gathers the full BGG Marketplace picture (genuine-listing filtering
+  included), live US retail offers, our tracked KV price history (historic
+  low + date, averages, target), and reference links (eBay sold search,
+  BoardGamePrices item page); Claude writes a best-buys/market/history/verdict
+  brief. "Analyze" buttons live on watchlist rows and pricing results.
 
 A weekly cloud routine ("DFWGV library pipeline health", Mondays 12:00 UTC,
 managed at claude.ai/code/routines) independently checks snapshot freshness,

@@ -16,5 +16,5 @@ id = "0c0b7bc80e824c35926a8fe63e360bc2"
 [triggers]
 crons = [
   "0 */6 * * *", # every 6h — snapshot Hotness + check watchlist prices
-  "0 14 * * 1"   # Monday 14:00 UTC — AI weekly digest to Discord
+  "0 14 * * *"   # daily 14:00 UTC — AI pricing/procurement digest to Discord
 ]

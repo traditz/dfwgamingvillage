@@ -253,8 +253,107 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   lightbox.addEventListener('click', () => { lightbox.hidden = true; });
+
+  /* ---------------- AI output modal (letters, price analysis) ---------------- */
+
+  const textModal = document.createElement('div');
+  textModal.id = 'adm-modal';
+  textModal.hidden = true;
+  textModal.innerHTML = `
+    <div class="adm-modal-card">
+      <div class="adm-modal-head"><h3 id="adm-modal-title"></h3><button type="button" class="adm-mini" id="adm-modal-close">Close</button></div>
+      <textarea id="adm-modal-text" spellcheck="false"></textarea>
+      <div class="adm-modal-actions"><button type="button" class="adm-mini" id="adm-modal-copy">Copy</button><span class="adm-dim" id="adm-modal-msg"></span></div>
+    </div>`;
+  document.body.appendChild(textModal);
+
+  function openTextModal(title, text) {
+    $('adm-modal-title').textContent = title;
+    $('adm-modal-text').value = text;
+    $('adm-modal-msg').textContent = '';
+    textModal.hidden = false;
+  }
+  function setModalText(text) {
+    if (!textModal.hidden) $('adm-modal-text').value = text;
+  }
+  textModal.addEventListener('click', (e) => { if (e.target === textModal) textModal.hidden = true; });
+  $('adm-modal-close').addEventListener('click', () => { textModal.hidden = true; });
+  $('adm-modal-copy').addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText($('adm-modal-text').value);
+      $('adm-modal-msg').textContent = 'Copied ✓';
+    } catch { $('adm-modal-msg').textContent = 'Copy failed — select the text manually.'; }
+    setTimeout(() => { $('adm-modal-msg').textContent = ''; }, 2200);
+  });
+
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') lightbox.hidden = true;
+    if (e.key === 'Escape') { lightbox.hidden = true; textModal.hidden = true; }
+  });
+
+  const letterBtn = (id, name) => `<button type="button" class="adm-mini" data-letter-id="${id}" data-letter-name="${esc(name)}" title="AI-draft a donation request to this game's publisher">Letter</button>`;
+  const analyzeBtn = (id, name) => `<button type="button" class="adm-mini" data-analyze-id="${id}" data-analyze-name="${esc(name)}" title="Full AI price analysis: live listings, retail offers, tracked history">Analyze</button>`;
+
+  function publisherFor(id) {
+    const c = candidates?.games.find((g) => String(g.id) === String(id));
+    if (c && c.pubName) return { id: c.pubId, name: c.pubName };
+    const p = publisherByGame.get(String(id));
+    return p ? { id: p.id, name: p.name } : null;
+  }
+
+  function ownedByPub(pubName) {
+    const idx = (snapshot.publishers || []).indexOf(pubName);
+    if (idx === -1) return [];
+    return snapshot.games
+      .filter((g) => (g.pub || []).includes(idx))
+      .map((g) => ({ name: g.name, plays: playsById[g.id] || 0 }))
+      .sort((a, b) => b.plays - a.plays)
+      .slice(0, 6);
+  }
+
+  document.addEventListener('click', async (e) => {
+    const lb = e.target.closest('[data-letter-id]');
+    const ab = e.target.closest('[data-analyze-id]');
+    if (!lb && !ab) return;
+    const btn = lb || ab;
+    btn.disabled = true;
+    try {
+      if (lb) {
+        const id = lb.dataset.letterId;
+        const name = lb.dataset.letterName;
+        const pub = publisherFor(id);
+        if (!pub) {
+          openTextModal(`Donation letter — ${name}`, 'Publisher info has not loaded yet — wait for the Publisher column to fill in, then try again.');
+          return;
+        }
+        openTextModal(`Donation letter — ${name} → ${pub.name}`, 'Claude is drafting a tailored letter… (~15s)');
+        const c = candidates?.games.find((g) => String(g.id) === String(id));
+        const res = await fetch(`${WORKER}/api/draft-letter`, {
+          method: 'POST',
+          headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            game: { id, name, year: c?.year, rating: c?.rating, weight: c?.weight, bestWith: c?.bestWith },
+            publisher: pub,
+            ownedByPublisher: ownedByPub(pub.name),
+            libraryCount: snapshot.games.length
+          })
+        });
+        const data = await res.json();
+        setModalText(data.ok ? data.letter : `Failed: ${data.error || res.status}`);
+      } else {
+        openTextModal(`Price analysis — ${ab.dataset.analyzeName}`, 'Claude is analyzing live listings, retail offers, and tracked history… (~20s)');
+        const res = await fetch(`${WORKER}/api/price-analysis`, {
+          method: 'POST',
+          headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: ab.dataset.analyzeId, name: ab.dataset.analyzeName })
+        });
+        const data = await res.json();
+        setModalText(data.ok ? data.analysis : `Failed: ${data.error || res.status}`);
+      }
+    } catch (err) {
+      setModalText(`Failed: ${err.message}`);
+    } finally {
+      btn.disabled = false;
+    }
   });
   document.addEventListener('click', (e) => {
     if (!(e.target.tagName === 'IMG' && e.target.classList.contains('adm-thumb'))) return;
@@ -291,7 +390,7 @@ document.addEventListener('DOMContentLoaded', function () {
         ${gcell(t.image, `${gameLink(t.id, t.name)} <span class="adm-dim">(${esc(t.year)})</span>`)}
         <td>${esc(t.geekRating)}</td>
         ${pubCell(t.id)}
-        <td>${watchBtn(t.id, t.name)} <button type="button" class="adm-mini" data-price-id="${t.id}" data-price-name="${esc(t.name)}">Price</button> ${ignoreBtn(t.id, t.name)}</td>
+        <td>${watchBtn(t.id, t.name)} <button type="button" class="adm-mini" data-price-id="${t.id}" data-price-name="${esc(t.name)}">Price</button> ${letterBtn(t.id, t.name)} ${ignoreBtn(t.id, t.name)}</td>
       </tr>`).join('');
 
     const hotGaps = hotList.filter((h) => !isOwnedGame(h.id, h.name) && !ignoreSet.has(String(h.id)));
@@ -300,7 +399,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <td>#${h.rank}</td>
         ${gcell(h.thumb, `${gameLink(h.id, h.name)} <span class="adm-dim">${h.year ? `(${esc(h.year)})` : ''}</span>`)}
         ${pubCell(h.id)}
-        <td>${watchBtn(h.id, h.name)} <button type="button" class="adm-mini" data-price-id="${h.id}" data-price-name="${esc(h.name)}">Price</button> ${ignoreBtn(h.id, h.name)}</td>
+        <td>${watchBtn(h.id, h.name)} <button type="button" class="adm-mini" data-price-id="${h.id}" data-price-name="${esc(h.name)}">Price</button> ${letterBtn(h.id, h.name)} ${ignoreBtn(h.id, h.name)}</td>
       </tr>`).join('');
 
     // Coverage: owned games best at N, by weight band.
@@ -557,7 +656,7 @@ document.addEventListener('DOMContentLoaded', function () {
               <a href="https://boardgamegeek.com/boardgamepublisher/${s.c.pubId}" target="_blank" rel="noopener" title="BGG company page — website and contact info">${esc(s.c.pubName)}</a>
               <a class="adm-dim" href="https://www.google.com/search?q=${encodeURIComponent(`${s.c.pubName} board game publisher contact`)}" target="_blank" rel="noopener" title="Search for contact details">🔎</a>` : '–'}
             </td>
-            <td>${watchBtn(s.c.id, s.c.name)} <button type="button" class="adm-mini" data-price-id="${s.c.id}" data-price-name="${esc(s.c.name)}">Price</button> ${ignoreBtn(s.c.id, s.c.name)}</td>
+            <td>${watchBtn(s.c.id, s.c.name)} <button type="button" class="adm-mini" data-price-id="${s.c.id}" data-price-name="${esc(s.c.name)}">Price</button> ${letterBtn(s.c.id, s.c.name)} ${ignoreBtn(s.c.id, s.c.name)}</td>
           </tr>`).join('')}
         </tbody>
       </table></div>
@@ -811,7 +910,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <td>${money(latest(g.id, 'm'))}</td>
             <td><span class="adm-target-wrap">$<input type="number" class="adm-target" data-target-id="${g.id}" data-target-name="${esc(g.name)}" min="1" step="1" value="${g.target || ''}" placeholder="auto" title="Alert at or below this price; blank uses the automatic rules"></span></td>
             <td class="adm-dim">${money(avg(g.id, 'r'))} / ${money(avg(g.id, 'm'))}</td>
-            <td>${watchBtn(g.id, g.name)} <button type="button" class="adm-mini" data-price-id="${g.id}" data-price-name="${esc(g.name)}">Price</button></td>
+            <td>${watchBtn(g.id, g.name)} <button type="button" class="adm-mini" data-price-id="${g.id}" data-price-name="${esc(g.name)}">Price</button> ${analyzeBtn(g.id, g.name)}</td>
           </tr>`).join('')}
         </tbody>
       </table></div>
@@ -862,7 +961,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const res = await fetch(`${WORKER}/api/digest`, { method: 'POST', headers: authHeaders() });
       const data = await res.json();
       msg.textContent = data.ok
-        ? 'Digest posted to Discord ✓ (also runs automatically Mondays 9am Central)'
+        ? 'Digest posted to Discord ✓ (also runs automatically every day at 9am Central)'
         : `Digest failed: ${data.error || res.status}`;
     } catch (err) {
       msg.textContent = `Digest failed: ${err.message}`;
@@ -1114,7 +1213,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const q = encodeURIComponent(`${name} board game`);
     const thumb = thumbFor(id);
     out.innerHTML = `
-      <h3 class="adm-sub adm-gcell">${thumb ? `<img class="adm-thumb" src="${esc(thumb)}" alt="" loading="lazy">` : ''}<span>${gameLink(id, name)} ${watchBtn(id, name)} <span class="adm-dim">— second-hand (BGG Marketplace)</span></span></h3>
+      <h3 class="adm-sub adm-gcell">${thumb ? `<img class="adm-thumb" src="${esc(thumb)}" alt="" loading="lazy">` : ''}<span>${gameLink(id, name)} ${watchBtn(id, name)} ${analyzeBtn(id, name)} <span class="adm-dim">— second-hand (BGG Marketplace)</span></span></h3>
       ${summary}
       ${usdListings.length ? `<div class="adm-scroll"><table class="adm-table">
         <thead><tr><th>Price</th><th>Condition</th><th>Listed</th><th></th></tr></thead>

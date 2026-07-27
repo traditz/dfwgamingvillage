@@ -2209,6 +2209,75 @@ img.adm-thumb:hover {
   margin-top: 12px;
 }
 
+/* --- AI output modal --- */
+
+#adm-modal {
+  align-items: center;
+  backdrop-filter: blur(4px);
+  background: rgba(9, 9, 13, 0.82);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 20px;
+  position: fixed;
+  z-index: 110;
+}
+
+#adm-modal[hidden] {
+  display: none;
+}
+
+.adm-modal-card {
+  background: var(--panel-strong);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 18px 20px;
+  text-align: left;
+  width: min(94vw, 680px);
+}
+
+.adm-modal-head {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+#adm-modal-title {
+  color: var(--text);
+  font-size: 1rem;
+  margin: 0;
+  min-width: 0;
+}
+
+#adm-modal-text {
+  background: #0f1016;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.92rem;
+  height: min(52vh, 380px);
+  line-height: 1.55;
+  padding: 14px;
+  resize: vertical;
+  width: 100%;
+}
+
+#adm-modal-text:focus {
+  border-color: var(--gold);
+  outline: none;
+}
+
+.adm-modal-actions {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+
 /* --- responsive --- */
 
 @media (max-width: 640px) {

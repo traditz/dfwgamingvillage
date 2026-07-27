@@ -679,7 +679,7 @@ const SNAPSHOT_WORKFLOW = "refresh-library.yml";
 
 const SITE_BASE = "https://www.dfwgamingvillage.com";
 const ANTHROPIC_MODEL = "claude-sonnet-5";
-const DIGEST_CRON = "0 14 * * 1";
+const DIGEST_CRON = "0 14 * * *"; // daily, 14:00 UTC ≈ 9am Central
 const LAST_DIGEST_KEY = "last-digest";
 
 /** Minimal Anthropic Messages API client. */
@@ -771,19 +771,20 @@ async function postWeeklyDigest(env) {
     recentPriceAlerts: recentAlerts
   };
 
-  const system = `You write a short weekly procurement digest for the DFW Gaming Village, a community board-game lending library (~${snapshot.games.length} games). The digest is posted to the admins' Discord channel. Rules:
-- HARD LIMIT 1800 characters. Discord markdown (** bold **, bullet lines, emoji section headers).
-- Sections: "📈 Worth a look" (2-4 unowned games trending or high-rated, one line each on WHY — rating, hotness streak, best-player-count), "💰 Price watch" (only watchlist games with notable movement vs their 14-day range or near their target; say the numbers; if nothing notable, one line saying so), "🎯 Pick of the week" (ONE game to prioritize acquiring, 2 sentences of reasoning).
-- Use only the data provided; never invent prices, streaks, or games. Round prices to whole dollars.
-- Up to 3 links total, formatted <https://boardgamegeek.com/boardgame/ID>.
-- Practical, warm, no filler, no greeting or sign-off.`;
+  const system = `You write a short DAILY pricing-and-procurement digest for the curator of the DFW Gaming Village board-game lending library (~${snapshot.games.length} games), posted to their Discord. Rules:
+- HARD LIMIT 1500 characters. Discord markdown (** bold **, bullet lines, emoji section headers).
+- Lead with "💰 Watchlist" — for each watched game with anything worth knowing today: current lows vs its 14-day range, distance to its target price, or a new tracked low. Say the numbers. Skip games with no movement; if nothing moved at all, one line: prices steady, nothing actionable.
+- Then "🛒 Opportunities" — at most 3 bullets: unowned games that look like smart buys today (sustained hotness streak + strong rating, or a recent price alert). One line each on why. Omit the section entirely on a quiet day.
+- This posts EVERY day: on quiet days be very short (2-4 lines total) rather than padding. Never repeat yesterday's framing as if it were news.
+- Use only the data provided; never invent prices, streaks, or games. Round to whole dollars.
+- Up to 3 links, formatted <https://boardgamegeek.com/boardgame/ID>. No greeting or sign-off.`;
 
-  const content = await askClaude(env, system, JSON.stringify(data), 900);
+  const content = await askClaude(env, system, JSON.stringify(data), 800);
   const trimmed = content.length > 1950 ? content.slice(0, 1950) + "…" : content;
   const res = await fetch(env.ALERT_WEBHOOK.trim(), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ content: "📚 **DFWGV weekly library digest**\n" + trimmed })
+    body: JSON.stringify({ content: "📚 **DFWGV daily library digest**\n" + trimmed })
   });
   await env.HOT_HISTORY.put(LAST_DIGEST_KEY, JSON.stringify({ date: new Date().toISOString(), posted: res.ok, content: trimmed }));
   return { ok: res.ok, error: res.ok ? "" : `Discord ${res.status}`, preview: trimmed.slice(0, 400) };
@@ -809,93 +810,187 @@ async function handleDigest(request, env, cors) {
   });
 }
 
-/* --- Discord slash-command bot (interactions endpoint) --- */
-
-function hexToBytes(hex) {
-  return new Uint8Array((hex.match(/.{2}/g) || []).map((b) => parseInt(b, 16)));
-}
-
-async function verifyDiscordSignature(request, env, rawBody) {
-  const sig = request.headers.get("X-Signature-Ed25519");
-  const ts = request.headers.get("X-Signature-Timestamp");
-  if (!sig || !ts || !env.DISCORD_PUBLIC_KEY) return false;
-  try {
-    const key = await crypto.subtle.importKey("raw", hexToBytes(env.DISCORD_PUBLIC_KEY.trim()), { name: "Ed25519" }, false, ["verify"]);
-    return await crypto.subtle.verify("Ed25519", key, hexToBytes(sig), new TextEncoder().encode(ts + rawBody));
-  } catch {
-    return false;
+/**
+ * AI-drafted publisher donation-request letter (token-gated). The dashboard
+ * sends the context it already holds — the game, its publisher, and which of
+ * that publisher's titles the library owns with play counts — and Claude
+ * writes a letter tailored to that publisher.
+ */
+async function handleDraftLetter(request, env, cors) {
+  if (!isAuthorized(request, env)) {
+    return jsonResponse({ ok: false, error: "Unauthorized" }, 401, cors);
   }
-}
+  if (request.method !== "POST") {
+    return jsonResponse({ ok: false, error: "POST only" }, 405, cors);
+  }
+  if (!env.ANTHROPIC_API_KEY) {
+    return jsonResponse({ ok: false, error: "ANTHROPIC_API_KEY secret not set" }, 400, cors);
+  }
 
-/** Answers /gamenight with 3 tailored picks from the live library snapshot. */
-async function answerGamenight(env, interaction) {
-  const followUp = async (content) => {
-    await fetch(`https://discord.com/api/v10/webhooks/${interaction.application_id}/${interaction.token}/messages/@original`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content })
-    });
-  };
+  let body;
+  try { body = await request.json(); } catch { body = {}; }
+  const gameName = clampString(body.game && body.game.name, 160);
+  const publisher = clampString(body.publisher && body.publisher.name, 160);
+  if (!gameName || !publisher) {
+    return jsonResponse({ ok: false, error: "game.name and publisher.name are required" }, 400, cors);
+  }
+
+  const system = `You draft donation-request letters for DFW Gaming Village, a community tabletop group in the Dallas–Fort Worth area: weekly game nights with 20–40 attendees, built around a free lending library of ${Number(body.libraryCount) || 1200}+ games that members borrow and learn at events (site: dfwgamingvillage.com).
+
+Write a letter to the publisher ${publisher} asking them to donate "${gameName}" for the lending library. Requirements:
+- Tailor it with the provided facts ONLY: mention 1–3 of their titles the library already owns, with real play counts when notable ("X has hit our tables N times"); mention why this game fits (rating, best player count) if provided. Never invent facts, titles, or numbers.
+- Explain the value to them: donated games get taught to new players week after week, and supporters are credited on the website and at events.
+- 220–320 words. Warm, professional, concrete. Plain text.
+- Use placeholders [Your name] and [Your email] in the sign-off. No date line, no addresses.
+- Honor the user's extra notes if given.`;
+
   try {
-    const opts = {};
-    for (const o of interaction.data.options || []) opts[o.name] = o.value;
-    const players = parseInt(opts.players, 10);
-    const minutes = parseInt(opts.minutes, 10) || 0;
-    const vibe = clampString(opts.vibe || "", 200);
-
-    const snapshot = await (await fetch(`${SITE_BASE}/games-library.json`)).json();
-    const mech = snapshot.mechanics;
-    const cat = snapshot.categories;
-    const fits = snapshot.games.filter((g) =>
-      g.minP <= players && g.maxP >= players && (!minutes || (g.time > 0 && g.time <= minutes * 1.25))
-    );
-    if (fits.length === 0) {
-      await followUp(`Nothing in the library fits ${players} players${minutes ? ` in ~${minutes} minutes` : ""} — try different numbers?`);
-      return;
-    }
-    // Compact catalog for the model: prefer community-best at this count, then rating.
-    const bestAt = (g) => (g.bestWith || "").split(",").some((part) => {
-      const m = part.trim().match(/^(\d+)(?:\s*[–-]\s*(\d+))?$/);
-      return m && players >= +m[1] && players <= +(m[2] || m[1]);
-    });
-    const lines = fits
-      .sort((a, b) => (bestAt(b) - bestAt(a)) || b.rating - a.rating)
-      .slice(0, 130)
-      .map((g) => `${g.id}|${g.name}|${g.time}min|wt${g.weight}|★${g.rating}${bestAt(g) ? "|BEST at " + players : ""}|${(g.cat || []).slice(0, 3).map((i) => cat[i]).join(",")}|${(g.mech || []).slice(0, 3).map((i) => mech[i]).join(",")}`)
-      .join("\n");
-
-    const system = `You are the DFW Gaming Village librarian bot. A member wants a game for ${players} players${minutes ? `, about ${minutes} minutes` : ""}${vibe ? `, vibe: "${vibe}"` : ""}. From the provided library catalog (format: id|name|time|weight|rating|flags|themes|mechanics), recommend EXACTLY 3 games they can borrow tonight. Rules:
-- Only recommend games from the list; never invent.
-- Prefer games flagged BEST at their player count.
-- Respect the vibe if given (weight ≤2 for casual/party/light; ≥3 for heavy; co-op means Cooperative mechanics; etc.).
-- Format, max 1300 chars total: for each pick "**Name** — one tailored sentence (Xmin · weight Y · ★Z)". No preamble, no links.`;
-
-    const answer = await askClaude(env, system, lines, 600);
-    await followUp(answer.slice(0, 1900));
+    const letter = await askClaude(env, system, JSON.stringify({
+      game: body.game || { name: gameName },
+      publisher: body.publisher,
+      ownedByPublisher: (body.ownedByPublisher || []).slice(0, 10),
+      notes: clampString(body.notes, 400)
+    }), 700);
+    return jsonResponse({ ok: true, letter }, 200, cors);
   } catch (err) {
-    await followUp(`The librarian hit a snag: ${String(err.message).slice(0, 150)}`);
+    return jsonResponse({ ok: false, error: String(err.message).slice(0, 300) }, 502, cors);
   }
 }
 
-async function handleDiscord(request, env, ctx) {
-  if (request.method !== "POST") return new Response("Method not allowed", { status: 405 });
-  const rawBody = await request.text();
-  if (!(await verifyDiscordSignature(request, env, rawBody))) {
-    return new Response("Bad signature", { status: 401 });
+/**
+ * Deep AI price analysis for one game (token-gated): live BGG Marketplace
+ * listings, live US retail offers, our tracked price history + alerts, and
+ * reference links, synthesized by Claude into a buy/wait brief.
+ */
+async function handlePriceAnalysis(request, env, cors) {
+  if (!isAuthorized(request, env)) {
+    return jsonResponse({ ok: false, error: "Unauthorized" }, 401, cors);
   }
-  const interaction = JSON.parse(rawBody);
-  const json = (obj) => new Response(JSON.stringify(obj), { headers: { "Content-Type": "application/json" } });
+  if (request.method !== "POST") {
+    return jsonResponse({ ok: false, error: "POST only" }, 405, cors);
+  }
+  if (!env.ANTHROPIC_API_KEY) {
+    return jsonResponse({ ok: false, error: "ANTHROPIC_API_KEY secret not set" }, 400, cors);
+  }
 
-  if (interaction.type === 1) return json({ type: 1 }); // PING → PONG
-  if (interaction.type === 2 && interaction.data?.name === "gamenight") {
-    if (!env.ANTHROPIC_API_KEY) {
-      return json({ type: 4, data: { content: "The librarian isn't configured yet (missing API key)." } });
+  let body;
+  try { body = await request.json(); } catch { body = {}; }
+  const id = String(body.id || "");
+  const name = clampString(body.name, 160) || "this game";
+  if (!/^\d+$/.test(id)) {
+    return jsonResponse({ ok: false, error: "Numeric id required" }, 400, cors);
+  }
+
+  // 1. Second-hand: full BGG Marketplace picture.
+  const market = { totalListings: 0, nonUsd: 0, excludedNonGame: 0, listings: [] };
+  try {
+    const res = await fetch(`${BGG_THING_URL}?id=${id}&marketplace=1`, {
+      headers: { Authorization: `Bearer ${env.BGG_TOKEN}` }
+    });
+    if (res.ok) {
+      const xml = await res.text();
+      const all = [];
+      for (const block of xml.match(/<listing>[\s\S]*?<\/listing>/g) || []) {
+        market.totalListings++;
+        const price = parseFloat((block.match(/<price currency="USD" value="([\d.]+)"/) || [])[1] || "");
+        if (!price) { market.nonUsd++; continue; }
+        const notes = decodeEntities((block.match(/<notes value="([^"]*)"/) || [])[1] || "").replace(/\[\/?[a-z=0-9#]+\]/gi, " ");
+        if (JUNK_LISTING_NOTES.test(notes)) { market.excludedNonGame++; continue; }
+        all.push({
+          price,
+          condition: (block.match(/<condition value="([^"]*)"/) || [])[1] || "",
+          listedOn: ((block.match(/<listdate value="([^"]*)"/) || [])[1] || "").slice(0, 16),
+          link: (block.match(/<link\s+href="([^"]+)"/) || [])[1] || ""
+        });
+      }
+      all.sort((a, b) => a.price - b.price);
+      const prices = all.map((l) => l.price);
+      market.usdGenuine = all.length;
+      market.low = prices[0] || null;
+      market.median = prices.length ? prices[Math.floor(prices.length / 2)] : null;
+      market.high = prices[prices.length - 1] || null;
+      market.listings = all.slice(0, 8);
     }
-    ctx.waitUntil(answerGamenight(env, interaction)); // LLM takes >3s — defer
-    return json({ type: 5 }); // deferred channel message
+  } catch { /* section stays sparse */ }
+
+  // 2. New retail: US in-stock offers via BoardGamePrices.
+  const retail = { offers: [], itemUrl: "" };
+  try {
+    const res = await fetch(`https://boardgameprices.com/api/info?eid=${id}&currency=USD&destination=US&sitename=dfwgamingvillage.com`);
+    if (res.ok) {
+      const data = await res.json();
+      const best = (data.items || [])
+        .map((it) => ({
+          url: it.url || "",
+          offers: (it.prices || []).filter((p) => p.country === "US" && p.stock === "Y")
+            .map((p) => ({ item: +p.product || +p.price, delivered: +p.price }))
+        }))
+        .sort((a, b) => b.offers.length - a.offers.length)[0];
+      if (best) {
+        retail.itemUrl = best.url;
+        retail.offers = best.offers.sort((a, b) => a.delivered - b.delivered).slice(0, 8);
+        retail.usInStock = best.offers.length;
+      }
+    }
+  } catch { /* section stays sparse */ }
+
+  // 3. Our tracked history (only exists for watched games).
+  const priceHistory = JSON.parse((await env.HOT_HISTORY.get(PRICE_HISTORY_KEY)) || "{}");
+  const watchlist = JSON.parse((await env.HOT_HISTORY.get(WATCHLIST_KEY)) || "[]");
+  const gh = priceHistory[id] || null;
+  let tracked = null;
+  if (gh) {
+    const dates = Object.keys(gh).filter((d) => /^\d{4}-/.test(d)).sort();
+    const series = (key) => dates.map((d) => ({ date: d, price: gh[d][key] })).filter((p) => p.price);
+    const summarize = (key) => {
+      const s = series(key);
+      if (!s.length) return null;
+      const lows = s.map((p) => p.price);
+      const min = Math.min(...lows);
+      return {
+        samples: s.length,
+        firstTracked: s[0].date,
+        historicLow: min,
+        historicLowDate: s.find((p) => p.price === min).date,
+        average: Math.round(lows.reduce((a, b) => a + b, 0) / lows.length),
+        latest: s[s.length - 1].price
+      };
+    };
+    tracked = { retail: summarize("r"), secondHand: summarize("m") };
   }
-  return json({ type: 4, data: { content: "Unknown command." } });
+  const watched = watchlist.find((g) => g.id === id);
+  const alerts = JSON.parse((await env.HOT_HISTORY.get(PRICE_ALERTS_KEY)) || "[]").filter((a) => a.id === id).slice(0, 4);
+
+  const q = encodeURIComponent(`${name} board game`);
+  const data = {
+    game: name,
+    secondHandMarket: market,
+    newRetailUS: retail,
+    trackedHistory: tracked || "not on the watchlist — no tracked history yet",
+    watchTarget: watched ? watched.target || null : null,
+    recentAlerts: alerts,
+    referenceLinks: {
+      bggMarketplace: `https://boardgamegeek.com/boardgame/${id}/marketplace`,
+      allRetailOffersWithStoreNames: retail.itemUrl || `https://boardgameprices.com/search?search=${encodeURIComponent(name)}`,
+      ebaySoldPrices: `https://www.ebay.com/sch/i.html?_nkw=${q}&LH_Sold=1&LH_Complete=1&LH_PrefLoc=1`
+    }
+  };
+
+  const system = `You are a board-game price analyst advising a lending-library curator on acquiring "${name}". Using ONLY the JSON data provided, write a concise analysis, max 1700 characters, Discord-style markdown. Sections:
+**Best buys right now** — cheapest genuine second-hand listing (price, condition, its direct link) and cheapest US retail (item + delivered price, link to the store list).
+**Market picture** — listing counts, price spread used vs new, what was filtered out (non-game accessory listings), anything notable.
+**History** — if tracked data exists: historic low with its date, averages, how today compares; otherwise say tracking starts once the game is watched.
+**Verdict** — buy now or wait, a fair target price to set, one sentence of reasoning. Mention the eBay sold-prices link as the check for real sale values.
+Round to whole dollars. Angle-bracket links like <url>. Never invent numbers.`;
+
+  try {
+    const analysis = await askClaude(env, system, JSON.stringify(data), 800);
+    return jsonResponse({ ok: true, analysis }, 200, cors);
+  } catch (err) {
+    return jsonResponse({ ok: false, error: String(err.message).slice(0, 300) }, 502, cors);
+  }
 }
+
 
 /**
  * Manually trigger (POST) or check (GET) the GitHub Action that rebuilds
@@ -1362,8 +1457,12 @@ export default {
       return handleDigest(request, env, cors);
     }
 
-    if (incomingUrl.pathname === "/api/discord") {
-      return handleDiscord(request, env, ctx);
+    if (incomingUrl.pathname === "/api/draft-letter") {
+      return handleDraftLetter(request, env, cors);
+    }
+
+    if (incomingUrl.pathname === "/api/price-analysis") {
+      return handlePriceAnalysis(request, env, cors);
     }
 
     if (incomingUrl.pathname === "/api/bgg-search") {
