@@ -694,13 +694,22 @@ async function askClaude(env, system, user, maxTokens) {
     body: JSON.stringify({
       model: ANTHROPIC_MODEL,
       max_tokens: maxTokens || 1024,
+      // Sonnet 5 thinks by default and max_tokens caps thinking + text
+      // together; a small budget then yields zero text blocks. Thinking off
+      // keeps the whole budget for the reply.
+      thinking: { type: "disabled" },
       system,
       messages: [{ role: "user", content: user }]
     })
   });
   if (!res.ok) throw new Error(`Anthropic ${res.status}: ${(await res.text()).slice(0, 200)}`);
   const data = await res.json();
-  return (data.content || []).filter((b) => b.type === "text").map((b) => b.text).join("");
+  const text = (data.content || []).filter((b) => b.type === "text").map((b) => b.text).join("").trim();
+  if (!text) {
+    const types = (data.content || []).map((b) => b.type).join(",") || "none";
+    throw new Error(`Anthropic returned no text (stop_reason=${data.stop_reason}, blocks=${types})`);
+  }
+  return text;
 }
 
 /**
@@ -779,7 +788,14 @@ async function postWeeklyDigest(env) {
 - Use only the data provided; never invent prices, streaks, or games. Round to whole dollars.
 - This renders inside a Discord embed: link game names as [Name](https://boardgamegeek.com/boardgame/ID) (up to 5 links). Section headers as bold lines. No greeting or sign-off, no overall title (the embed supplies it).`;
 
-  const content = await askClaude(env, system, JSON.stringify(data), 800);
+  let content;
+  try {
+    content = await askClaude(env, system, JSON.stringify(data), 1200);
+  } catch (err) {
+    const error = String(err.message).slice(0, 300);
+    await env.HOT_HISTORY.put(LAST_DIGEST_KEY, JSON.stringify({ date: new Date().toISOString(), posted: false, error }));
+    return { ok: false, error };
+  }
   const trimmed = content.length > 3900 ? content.slice(0, 3900) + "…" : content;
   const res = await fetch(env.ALERT_WEBHOOK.trim(), {
     method: "POST",
@@ -997,8 +1013,28 @@ async function handlePriceAnalysis(request, env, cors) {
 Round to whole dollars. Angle-bracket links like <url>. Never invent numbers.`;
 
   try {
-    const analysis = await askClaude(env, system, JSON.stringify(data), 800);
-    return jsonResponse({ ok: true, analysis }, 200, cors);
+    const analysis = await askClaude(env, system, JSON.stringify(data), 1200);
+    // Also post the brief to Discord so it lives alongside the price alerts.
+    let posted = false;
+    if (env.ALERT_WEBHOOK && analysis) {
+      const desc = analysis.length > 3900 ? analysis.slice(0, 3900) + "…" : analysis;
+      const res = await fetch(env.ALERT_WEBHOOK.trim(), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          embeds: [{
+            title: `📊 Price Analysis — ${name}`,
+            url: `https://boardgamegeek.com/boardgame/${id}`,
+            description: desc,
+            color: 0x6EA8FF,
+            footer: { text: "DFWGV Librarian · on-demand price analysis" },
+            timestamp: new Date().toISOString()
+          }]
+        })
+      });
+      posted = res.ok;
+    }
+    return jsonResponse({ ok: true, analysis, posted }, 200, cors);
   } catch (err) {
     return jsonResponse({ ok: false, error: String(err.message).slice(0, 300) }, 502, cors);
   }
@@ -1225,7 +1261,7 @@ async function sendPriceAlert(env, alerts, isTest) {
         embeds: [{
           title: (isTest ? "🧪 " : "") + "🎲 Library Price Alert",
           description: description.slice(0, 3900),
-          color: isTest ? 0x6EA8FF : 0x35B8A6,
+          color: isTest ? 0x99AAB5 : 0x35B8A6,
           footer: { text: "DFWGV Librarian · price watch" },
           timestamp: new Date().toISOString()
         }]

@@ -355,7 +355,9 @@ document.addEventListener('DOMContentLoaded', function () {
           body: JSON.stringify({ id: ab.dataset.analyzeId, name: ab.dataset.analyzeName })
         });
         const data = await res.json();
-        setModalText(data.ok ? data.analysis : `Failed: ${data.error || res.status}`);
+        setModalText(data.ok
+          ? `${data.analysis}${data.posted ? '\n\n— also posted to Discord ✅' : ''}`
+          : `Failed: ${data.error || res.status}`);
       }
     } catch (err) {
       setModalText(`Failed: ${err.message}`);
