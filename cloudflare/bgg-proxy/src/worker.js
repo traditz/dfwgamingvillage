@@ -777,14 +777,22 @@ async function postWeeklyDigest(env) {
 - Then "🛒 Opportunities" — at most 3 bullets: unowned games that look like smart buys today (sustained hotness streak + strong rating, or a recent price alert). One line each on why. Omit the section entirely on a quiet day.
 - This posts EVERY day: on quiet days be very short (2-4 lines total) rather than padding. Never repeat yesterday's framing as if it were news.
 - Use only the data provided; never invent prices, streaks, or games. Round to whole dollars.
-- Up to 3 links, formatted <https://boardgamegeek.com/boardgame/ID>. No greeting or sign-off.`;
+- This renders inside a Discord embed: link game names as [Name](https://boardgamegeek.com/boardgame/ID) (up to 5 links). Section headers as bold lines. No greeting or sign-off, no overall title (the embed supplies it).`;
 
   const content = await askClaude(env, system, JSON.stringify(data), 800);
-  const trimmed = content.length > 1950 ? content.slice(0, 1950) + "…" : content;
+  const trimmed = content.length > 3900 ? content.slice(0, 3900) + "…" : content;
   const res = await fetch(env.ALERT_WEBHOOK.trim(), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ content: "📚 **DFWGV daily library digest**\n" + trimmed })
+    body: JSON.stringify({
+      embeds: [{
+        title: "📚 Daily Library Digest",
+        description: trimmed,
+        color: 0xF5C542,
+        footer: { text: "DFWGV Librarian · watchlist pricing & procurement" },
+        timestamp: new Date().toISOString()
+      }]
+    })
   });
   await env.HOT_HISTORY.put(LAST_DIGEST_KEY, JSON.stringify({ date: new Date().toISOString(), posted: res.ok, content: trimmed }));
   return { ok: res.ok, error: res.ok ? "" : `Discord ${res.status}`, preview: trimmed.slice(0, 400) };
@@ -1206,14 +1214,22 @@ async function checkWatchedPrices(env) {
 /** Posts alerts to the Discord webhook stored as the ALERT_WEBHOOK secret. */
 async function sendPriceAlert(env, alerts, isTest) {
   if (!env.ALERT_WEBHOOK) return false;
-  const content = (isTest ? "🧪 " : "") + "🎲 **Library price alert**\n" + alerts.map((a) =>
-    `**${a.name}**${a.channel ? ` · ${a.channel}` : ""} — ${a.note}\n<${a.link || `https://boardgamegeek.com/boardgame/${a.id}`}>`
-  ).join("\n");
+  const description = alerts.map((a) =>
+    `**[${a.name}](https://boardgamegeek.com/boardgame/${a.id})**${a.channel ? ` · ${a.channel}` : ""}\n${a.note} — [view listing](${a.link || `https://boardgamegeek.com/boardgame/${a.id}`})`
+  ).join("\n\n");
   try {
     const res = await fetch(env.ALERT_WEBHOOK.trim(), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content })
+      body: JSON.stringify({
+        embeds: [{
+          title: (isTest ? "🧪 " : "") + "🎲 Library Price Alert",
+          description: description.slice(0, 3900),
+          color: isTest ? 0x6EA8FF : 0x35B8A6,
+          footer: { text: "DFWGV Librarian · price watch" },
+          timestamp: new Date().toISOString()
+        }]
+      })
     });
     if (isTest) {
       return { ok: res.ok, status: res.status, detail: res.ok ? "" : (await res.text()).slice(0, 200) };
