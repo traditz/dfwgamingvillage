@@ -837,11 +837,15 @@ async function handleDraftLetter(request, env, cors) {
 
   const system = `You draft donation-request letters for DFW Gaming Village, a community tabletop group in the Dallas–Fort Worth area: weekly game nights with 20–40 attendees, built around a free lending library of ${Number(body.libraryCount) || 1200}+ games that members borrow and learn at events (site: dfwgamingvillage.com).
 
-Write a letter to the publisher ${publisher} asking them to donate "${gameName}" for the lending library. Requirements:
-- Tailor it with the provided facts ONLY: mention 1–3 of their titles the library already owns, with real play counts when notable ("X has hit our tables N times"); mention why this game fits (rating, best player count) if provided. Never invent facts, titles, or numbers.
-- Explain the value to them: donated games get taught to new players week after week, and supporters are credited on the website and at events.
-- 220–320 words. Warm, professional, concrete. Plain text.
-- Use placeholders [Your name] and [Your email] in the sign-off. No date line, no addresses.
+Write a letter to the publisher ${publisher} asking them to donate "${gameName}" for the lending library. The letter must be genuinely compelling regardless of how much data is provided — build it from the STRONGEST available angles, in this order:
+1. If any of their titles have notable play counts, cite 1–2 concretely ("X has hit our tables N times").
+2. If the library owns their titles but play data is thin or zero, lean on shelf presence instead ("N of your titles live in our library, including A and B — members reach for them constantly"). Never mention, imply, or apologize for missing play data.
+3. If the library owns none of their titles, frame the ask as an introduction: this game would be how the community discovers their catalog, taught table by table.
+Angles that are ALWAYS available and should carry weight: the requested game's own reputation when provided (BGG rating, rank, best player count — "consistently rated X", "shines at our N-player tables"); the library's scale; total community plays logged if provided ("our members have logged N plays and counting"); the unusual durability of a lending-library donation — one copy is taught to new players week after week for years, which is repeat product discovery no ad buy matches; supporter credit on the website and at events.
+Rules:
+- Never invent facts, titles, numbers, or play counts — use only what the data provides.
+- 220–320 words. Warm, professional, specific; open with something about THEM or the game, never with boilerplate about us.
+- Plain text. Placeholders [Your name] and [Your email] in the sign-off. No date line, no addresses.
 - Honor the user's extra notes if given.`;
 
   try {
@@ -849,6 +853,7 @@ Write a letter to the publisher ${publisher} asking them to donate "${gameName}"
       game: body.game || { name: gameName },
       publisher: body.publisher,
       ownedByPublisher: (body.ownedByPublisher || []).slice(0, 10),
+      totalCommunityPlaysLogged: Number(body.totalPlays) || undefined,
       notes: clampString(body.notes, 400)
     }), 700);
     return jsonResponse({ ok: true, letter }, 200, cors);

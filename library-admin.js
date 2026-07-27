@@ -327,14 +327,22 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         openTextModal(`Donation letter — ${name} → ${pub.name}`, 'Claude is drafting a tailored letter… (~15s)');
         const c = candidates?.games.find((g) => String(g.id) === String(id));
+        const t = top100.find((g) => String(g.id) === String(id));
+        const totalPlays = Object.values(playsById).reduce((a, b) => a + b, 0);
         const res = await fetch(`${WORKER}/api/draft-letter`, {
           method: 'POST',
           headers: { ...authHeaders(), 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            game: { id, name, year: c?.year, rating: c?.rating, weight: c?.weight, bestWith: c?.bestWith },
+            game: {
+              id, name,
+              year: c?.year, rating: c?.rating || (t ? parseFloat(t.geekRating) || undefined : undefined),
+              weight: c?.weight, bestWith: c?.bestWith,
+              bggRank: c?.rank || t?.rank
+            },
             publisher: pub,
             ownedByPublisher: ownedByPub(pub.name),
-            libraryCount: snapshot.games.length
+            libraryCount: snapshot.games.length,
+            totalPlays
           })
         });
         const data = await res.json();
