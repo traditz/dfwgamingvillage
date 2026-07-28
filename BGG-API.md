@@ -103,8 +103,19 @@ worker gets eBay data two ways:
 - **Live asking prices via the official eBay Browse API** — `fetchEbayLive()`
   activates only when the `EBAY_CLIENT_ID` / `EBAY_CLIENT_SECRET` worker
   secrets are set (free developer account at developer.ebay.com, instant
-  approval; uses the client-credentials OAuth flow, token cached in KV).
-  Until then it silently returns nothing and all features degrade gracefully.
+  approval; uses the client-credentials OAuth flow, tokens cached in KV per
+  scope). Until then it silently returns nothing and all features degrade
+  gracefully. Once keys exist, eBay becomes a **third price channel** (`e`,
+  alongside retail `r` and BGG Marketplace `m`): the 6-hourly check records
+  the cheapest genuine live US ask into the KV price history, eBay prices
+  count toward manual targets and drop alerts, and the digest/analysis get
+  a day-by-day eBay ask series that grows richer over time.
+- **Official 90-day sold history via the Marketplace Insights API** —
+  `fetchEbaySoldOfficial()` is wired but dormant: eBay gates this API behind
+  a limited-release application (developer.ebay.com → Buy APIs production
+  access request). Once approved, set the `EBAY_INSIGHTS` var/secret to `1`
+  and it silently replaces the 130point baseline with fresh official sold
+  data (`source: "ebay-official-90d"`).
 
 A weekly cloud routine ("DFWGV library pipeline health", Mondays 12:00 UTC,
 managed at claude.ai/code/routines) independently checks snapshot freshness,

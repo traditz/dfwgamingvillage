@@ -700,6 +700,14 @@ async function fetchEbaySold(env, id, name, cacheOnly) {
   const hit = cache[id];
   if (hit && (cacheOnly || Date.now() - hit.fetchedAt < EBAY_SOLD_TTL_MS)) return hit;
   if (cacheOnly) return null;
+  // Prefer eBay's official 90-day sold history once the Insights scope is
+  // approved — it's fresh, unlike the frozen 130point feed.
+  const official = await fetchEbaySoldOfficial(env, name);
+  if (official) {
+    cache[id] = official;
+    await env.HOT_HISTORY.put(EBAY_SOLD_KEY, JSON.stringify(cache));
+    return official;
+  }
   try {
     const res = await fetch("https://back.130point.com/sales/", {
       method: "POST",
@@ -726,6 +734,7 @@ async function fetchEbaySold(env, id, name, cacheOnly) {
     const prices = sales.map((s) => s.price).sort((a, b) => a - b);
     const entry = {
       fetchedAt: Date.now(),
+      source: "130point-historical",
       soldCount: sales.length,
       medianSold: prices[Math.floor(prices.length / 2)],
       low: prices[0],
@@ -740,32 +749,38 @@ async function fetchEbaySold(env, id, name, cacheOnly) {
   } catch { return hit || null; }
 }
 
+/** Client-credentials OAuth token for eBay's APIs, cached in KV per scope. */
+async function ebayToken(env, scope) {
+  if (!env.EBAY_CLIENT_ID || !env.EBAY_CLIENT_SECRET) return null;
+  const kvKey = `ebay-oauth:${scope}`;
+  let tok = null;
+  try { tok = JSON.parse((await env.HOT_HISTORY.get(kvKey)) || "null"); } catch { /* refetch */ }
+  if (tok && Date.now() < tok.exp) return tok.token;
+  const res = await fetch("https://api.ebay.com/identity/v1/oauth2/token", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Authorization: `Basic ${btoa(`${env.EBAY_CLIENT_ID}:${env.EBAY_CLIENT_SECRET}`)}`
+    },
+    body: "grant_type=client_credentials&scope=" + encodeURIComponent(scope)
+  });
+  if (!res.ok) return null;
+  const d = await res.json();
+  await env.HOT_HISTORY.put(kvKey, JSON.stringify({ token: d.access_token, exp: Date.now() + (d.expires_in - 300) * 1000 }));
+  return d.access_token;
+}
+
 /** Live eBay asking prices via the official Browse API. Needs the
  *  EBAY_CLIENT_ID / EBAY_CLIENT_SECRET secrets (free developer account);
  *  silently unavailable until they're set. */
 async function fetchEbayLive(env, name) {
-  if (!env.EBAY_CLIENT_ID || !env.EBAY_CLIENT_SECRET) return null;
   try {
-    let tok = null;
-    try { tok = JSON.parse((await env.HOT_HISTORY.get("ebay-oauth")) || "null"); } catch { /* refetch */ }
-    if (!tok || Date.now() > tok.exp) {
-      const res = await fetch("https://api.ebay.com/identity/v1/oauth2/token", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Authorization: `Basic ${btoa(`${env.EBAY_CLIENT_ID}:${env.EBAY_CLIENT_SECRET}`)}`
-        },
-        body: "grant_type=client_credentials&scope=" + encodeURIComponent("https://api.ebay.com/oauth/api_scope")
-      });
-      if (!res.ok) return null;
-      const d = await res.json();
-      tok = { token: d.access_token, exp: Date.now() + (d.expires_in - 300) * 1000 };
-      await env.HOT_HISTORY.put("ebay-oauth", JSON.stringify(tok));
-    }
+    const token = await ebayToken(env, "https://api.ebay.com/oauth/api_scope");
+    if (!token) return null;
     const url = `https://api.ebay.com/buy/browse/v1/item_summary/search?q=${encodeURIComponent(`${name} board game`)}` +
       `&filter=${encodeURIComponent("buyingOptions:{FIXED_PRICE},itemLocationCountry:US,priceCurrency:USD")}&sort=price&limit=25`;
     const res = await fetch(url, {
-      headers: { Authorization: `Bearer ${tok.token}`, "X-EBAY-C-MARKETPLACE-ID": "EBAY_US" }
+      headers: { Authorization: `Bearer ${token}`, "X-EBAY-C-MARKETPLACE-ID": "EBAY_US" }
     });
     if (!res.ok) return null;
     const d = await res.json();
@@ -773,7 +788,55 @@ async function fetchEbayLive(env, name) {
       .filter((it) => it.price && +it.price.value && relevantTitle(it.title || "", name))
       .map((it) => ({ price: +it.price.value, condition: it.condition || "", url: it.itemWebUrl || "" }));
     if (!items.length) return null;
-    return { liveListings: items.length, cheapest: items[0], cheapestFew: items.slice(0, 3) };
+    const prices = items.map((i) => i.price);
+    return {
+      liveListings: items.length,
+      cheapest: items[0],
+      cheapestFew: items.slice(0, 3),
+      avgAsk: Math.round(prices.reduce((a, b) => a + b, 0) / prices.length)
+    };
+  } catch { return null; }
+}
+
+/** OFFICIAL eBay 90-day sold history via the Marketplace Insights API.
+ *  Limited-release: needs the same keyset PLUS eBay's approval of the
+ *  buy.marketplace.insights scope. Set the EBAY_INSIGHTS var/secret to "1"
+ *  once approved; until then this stays dormant and the 130point baseline
+ *  carries the sold picture. */
+async function fetchEbaySoldOfficial(env, name) {
+  if (String(env.EBAY_INSIGHTS || "") !== "1") return null;
+  try {
+    const token = await ebayToken(env, "https://api.ebay.com/oauth/api_scope/buy.marketplace.insights");
+    if (!token) return null;
+    const url = `https://api.ebay.com/buy/marketplace_insights/v1_beta/item_sales/search?q=${encodeURIComponent(`${name} board game`)}` +
+      `&filter=${encodeURIComponent("priceCurrency:USD,itemLocationCountry:US")}&limit=100`;
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}`, "X-EBAY-C-MARKETPLACE-ID": "EBAY_US" }
+    });
+    if (!res.ok) return null;
+    const d = await res.json();
+    const sales = (d.itemSales || [])
+      .filter((it) => it.lastSoldPrice && +it.lastSoldPrice.value && relevantTitle(it.title || "", name))
+      .map((it) => ({
+        price: +it.lastSoldPrice.value,
+        date: String(it.lastSoldDate || "").slice(0, 10),
+        type: "sold"
+      }))
+      .filter((s) => s.price && s.date);
+    if (!sales.length) return null;
+    sales.sort((a, b) => b.date.localeCompare(a.date));
+    const prices = sales.map((s) => s.price).sort((a, b) => a - b);
+    return {
+      fetchedAt: Date.now(),
+      source: "ebay-official-90d",
+      soldCount: sales.length,
+      medianSold: prices[Math.floor(prices.length / 2)],
+      low: prices[0],
+      high: prices[prices.length - 1],
+      dataThrough: sales[0].date,
+      dataFrom: sales[sales.length - 1].date,
+      recentSales: sales.slice(0, 8)
+    };
   } catch { return null; }
 }
 
@@ -961,6 +1024,7 @@ async function postWeeklyDigest(env) {
       ebayLiveNow: live.ebayLive || null,
       trackedRetail: hist("r"),
       trackedSecondHand: hist("m"),
+      trackedEbayAsks: hist("e"),
       ebaySoldPricesLink: `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(`${g.name} board game`)}&LH_Sold=1&LH_Complete=1&LH_PrefLoc=1`
     };
   });
@@ -991,7 +1055,7 @@ async function postWeeklyDigest(env) {
   const system = `You write the DAILY pricing-and-procurement digest for the curator of the DFW Gaming Village board-game lending library (~${snapshot.games.length} games), posted to their Discord. The data includes a LIVE market scan run minutes ago (BGG Marketplace second-hand listings with condition, plus US retail in-stock offers) layered on our tracked price history. Rules:
 - HARD LIMIT 3200 characters. Discord markdown (** bold **, bullet lines, emoji section headers).
 - Lead with "💰 Watchlist" — one short paragraph-bullet per watched game, covering: today's best genuine second-hand price (with condition) and best US retail (item + delivered), how those compare to the target, the 14-day average/low and historic low (with its date), the trend direction, and a plain-spoken verdict — buy now / wait / keep watching — WITH the reasoning (e.g. "within $3 of its historic low and trending down — wait a week", or "at target and only 4 genuine copies listed — grab it"). Games where nothing meaningful changed get one line, but still state the current best price so the line is informative on its own.
-- ebaySoldBaseline is REAL eBay sold-sale history (what copies actually sold for — count, median, range, last sales). Its feed is historical, ending at dataThrough — use it as the ground-truth baseline for value verdicts (e.g. "copies actually sell for ~$34 on eBay, so this $29 listing beats real-world sale value"), and note the through-date when it matters. ebayLiveNow, when present, is today's cheapest live eBay asking price (official API). When a verdict is still close, point at the game's eBay sold-prices link.
+- ebaySoldBaseline is REAL eBay sold-sale history (what copies actually sold for — count, median, range, last sales). Check its source field: "ebay-official-90d" is fresh official data; "130point-historical" ends at dataThrough — still a useful value anchor, but note the through-date when it matters. ebayLiveNow, when present, is today's cheapest live eBay asking price (official API) and trackedEbayAsks is our own day-by-day history of that cheapest ask — treat those as the freshest eBay signal. When a verdict is still close, point at the game's eBay sold-prices link.
 - Then "🛒 Opportunities" — at most 3 bullets: unowned games that look like smart buys today (sustained hotness streak + strong rating, or a recent price alert). Two lines each: the signal, and why it matters for a lending library. Omit the section on a genuinely quiet day.
 - This posts EVERY day: on quiet days shrink naturally (a few lines) rather than padding, but never reduce to a bare "nothing happened" — the current-price snapshot per watched game is always worth stating.
 - Use ONLY the data provided; never invent prices, listings, streaks, or games. Round to whole dollars except sub-$1 differences.
@@ -1195,7 +1259,7 @@ async function handlePriceAnalysis(request, env, cors) {
         latest: s[s.length - 1].price
       };
     };
-    tracked = { retail: summarize("r"), secondHand: summarize("m") };
+    tracked = { retail: summarize("r"), secondHand: summarize("m"), ebayLiveAsks: summarize("e") };
   }
   const watched = watchlist.find((g) => g.id === id);
   const alerts = JSON.parse((await env.HOT_HISTORY.get(PRICE_ALERTS_KEY)) || "[]").filter((a) => a.id === id).slice(0, 4);
@@ -1408,12 +1472,24 @@ async function checkWatchedPrices(env) {
         }
       }
     } catch { /* leave channel empty for today */ }
+    try { // eBay — cheapest genuine live US ask (official Browse API, when keys are set)
+      const live = await fetchEbayLive(env, g.name);
+      if (live) {
+        snap.e = live.cheapest.price;
+        snap.eLink = live.cheapest.url;
+        snap.eCond = live.cheapest.condition;
+        snap.eAvg = live.avgAsk;
+        snap.eCount = live.liveListings;
+      }
+    } catch { /* leave channel empty for today */ }
 
     const gh = history[g.id] = history[g.id] || {};
     const prevDates = Object.keys(gh).filter((d) => /^\d{4}-/.test(d) && d < today).sort().slice(-30);
     const linkFor = (key) => key === "r"
       ? (snap.rUrl || `https://boardgameprices.com/search?search=${encodeURIComponent(g.name)}`)
-      : (snap.mLink || `https://boardgamegeek.com/boardgame/${g.id}/marketplace`);
+      : key === "e"
+        ? (snap.eLink || `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(`${g.name} board game`)}&LH_BIN=1`)
+        : (snap.mLink || `https://boardgamegeek.com/boardgame/${g.id}/marketplace`);
     const canAlert = !gh.lastAlert || gh.lastAlert < cooldownDate;
 
     // Context stats for the alert embed: trailing avg, 14-day low, historic
@@ -1435,14 +1511,16 @@ async function checkWatchedPrices(env) {
       };
     };
     const eb = ebaySoldCache[g.id];
+    const CHANNELS = { r: "new retail", m: "second-hand", e: "eBay live" };
     const enrich = (key) => ({
       price: snap[key],
       target: g.target || null,
-      cond: key === "m" ? snap.mCond : "",
-      counts: { used: snap.mCount || 0, retail: snap.rCount || 0 },
-      other: key === "r"
-        ? (snap.m ? { label: "second-hand", price: snap.m } : null)
-        : (snap.r ? { label: "new retail", price: snap.r } : null),
+      cond: key === "m" ? snap.mCond : key === "e" ? snap.eCond : "",
+      counts: { used: snap.mCount || 0, retail: snap.rCount || 0, ebay: snap.eCount || 0 },
+      other: Object.keys(CHANNELS)
+        .filter((k) => k !== key && snap[k])
+        .map((k) => ({ label: CHANNELS[k], price: snap[k] }))
+        .sort((a, b) => a.price - b.price)[0] || null,
       ebaySold: eb ? { median: eb.medianSold, count: eb.soldCount, through: eb.dataThrough } : null,
       ...ctxFor(key)
     });
@@ -1453,6 +1531,7 @@ async function checkWatchedPrices(env) {
       const options = [];
       if (snap.r) options.push({ key: "r", label: "new retail", price: snap.r });
       if (snap.m) options.push({ key: "m", label: "second-hand", price: snap.m });
+      if (snap.e) options.push({ key: "e", label: "eBay live", price: snap.e });
       const best = options.filter((o) => o.price <= g.target).sort((a, b) => a.price - b.price)[0];
       if (best && canAlert) {
         alerts.push({
@@ -1465,7 +1544,7 @@ async function checkWatchedPrices(env) {
     } else {
       // No target: the statistical rules — below recent average, or (young
       // history) a steep discount off today's average listing.
-      for (const [key, label] of [["r", "new retail"], ["m", "second-hand"]]) {
+      for (const [key, label] of [["r", "new retail"], ["m", "second-hand"], ["e", "eBay live"]]) {
         const cur = snap[key];
         if (!cur) continue;
         const prev = prevDates.map((d) => gh[d][key]).filter(Boolean);
@@ -1483,7 +1562,7 @@ async function checkWatchedPrices(env) {
         }
       }
     }
-    gh[today] = { r: snap.r, m: snap.m };
+    gh[today] = { r: snap.r, m: snap.m, e: snap.e };
     if (alerts.some((a) => a.id === g.id)) gh.lastAlert = today;
     const dates = Object.keys(gh).filter((d) => /^\d{4}-/.test(d)).sort();
     for (const d of dates.slice(0, Math.max(0, dates.length - PRICE_HISTORY_DAYS))) delete gh[d];
@@ -1568,8 +1647,10 @@ async function sendPriceAlert(env, alerts, isTest) {
         if (a.ebaySold) {
           fields.push({ name: "eBay sold (real sales)", value: `${money(a.ebaySold.median)} median · ${a.ebaySold.count} sales thru ${a.ebaySold.through}`, inline: true });
         }
-        if (a.counts && (a.counts.used || a.counts.retail)) {
-          fields.push({ name: "Genuine listings today", value: `${a.counts.used} second-hand · ${a.counts.retail} retail offers`, inline: a.ebaySold ? true : false });
+        if (a.counts && (a.counts.used || a.counts.retail || a.counts.ebay)) {
+          const parts = [`${a.counts.used} second-hand`, `${a.counts.retail} retail offers`];
+          if (a.counts.ebay) parts.push(`${a.counts.ebay} eBay listings`);
+          fields.push({ name: "Genuine listings today", value: parts.join(" · "), inline: a.ebaySold ? true : false });
         }
         return {
           title: `🎲 Price Alert — ${a.name}`,
