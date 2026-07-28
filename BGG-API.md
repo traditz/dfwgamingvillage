@@ -117,6 +117,40 @@ worker gets eBay data two ways:
   and it silently replaces the 130point baseline with fresh official sold
   data (`source: "ebay-official-90d"`).
 
+### Watched-game intelligence
+
+Beyond prices, the crons build market/buzz intelligence per watched game:
+
+- **Sold-copy detection (`bgg-sold` KV)** — the 6-hourly check tracks BGG
+  Marketplace listing links; a tracked listing that vanishes is recorded as
+  a probable sale (price/condition/date, 60 kept per game). Over time this
+  is our own fresh second-hand sold-price history — surfaced in alerts
+  ("BGG sales we detected"), the digest, and analyses.
+- **Supply/demand + popularity (`market-stats` KV)** — the daily digest's
+  batched thing call adds `stats=1`: owned/trading/wanting/wishing/usersrated
+  snapshots (120 days kept) → want-per-trade-copy ratio and 30-day
+  owner/rating growth.
+- **OOP early warning** — daily history now records retail offer counts
+  (`rc`)/marketplace counts (`mc`); the digest sees the 14-day offer-count
+  series and is told to flag shrinking availability + rising used prices.
+- **Expansion/edition radar (`known-links` KV)** — new
+  expansion/implementation links on a watched game = announcement, surfaced
+  in the digest's Signals section.
+- **Forum chatter** — `fetchForumChatter()` reads each watched game's
+  News/General/Crowdfunding forums (forum ids cached 7 days in
+  `forum-cache`) and keyword-filters threads from the last 14 days for
+  reprint/OOP/restock/price talk; fed to the digest and analyses with
+  thread links.
+- **Reddit deal-sniping (`checkRedditDeals`)** — 6-hourly scan of
+  r/boardgamedeals and r/BoardGameExchange for posts naming watched games;
+  new matches post a purple Discord embed and feed the digest. Needs the
+  free `REDDIT_CLIENT_ID`/`REDDIT_CLIENT_SECRET` secrets (script app at
+  reddit.com/prefs/apps). Facebook Marketplace/groups are NOT integrable
+  (no API, login-walled, ToS) — Reddit BST is the accessible analog.
+- **YouTube review radar (`fetchRecentVideos`)** — last-7-days coverage per
+  watched game in the digest. Needs the free `YOUTUBE_API_KEY` secret
+  (Google Cloud console, YouTube Data API v3).
+
 A weekly cloud routine ("DFWGV library pipeline health", Mondays 12:00 UTC,
 managed at claude.ai/code/routines) independently checks snapshot freshness,
 the GitHub Action, worker endpoints, and BGG scrape-blocking, committing safe
