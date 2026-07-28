@@ -79,10 +79,32 @@ all admin endpoints are token-gated with the same admin token as the rest.
   output opens in an editable copy-ready modal.
 - **Deep price analysis** — `POST /api/price-analysis {id, name}`: the worker
   gathers the full BGG Marketplace picture (genuine-listing filtering
-  included), live US retail offers, our tracked KV price history (historic
-  low + date, averages, target), and reference links (eBay sold search,
-  BoardGamePrices item page); Claude writes a best-buys/market/history/verdict
-  brief. "Analyze" buttons live on watchlist rows and pricing results.
+  included), live US retail offers, the eBay sold baseline, our tracked KV
+  price history (historic low + date, averages, target), and reference links
+  (eBay sold search, BoardGamePrices item page); Claude writes a
+  best-buys/market/history/verdict brief, returns it to the dashboard modal,
+  and posts it to the Discord webhook. "Analyze" buttons live on watchlist
+  rows and pricing results.
+
+### eBay price data
+
+eBay blocks direct scraping (Akamai challenges even real browsers), so the
+worker gets eBay data two ways:
+
+- **Sold-sale baseline via 130point.com** — `fetchEbaySold()` queries
+  130point's free sold-listing lookup (which republishes real eBay sale
+  prices, including hidden best-offer amounts) and parses per-sale
+  price/date/type with the same relevance filtering as marketplace listings.
+  Results are cached in the `ebay-sold` KV key for 72h. Note their eBay feed
+  is **historical** (currently ends ~Mar 2026) — it's used as a "what copies
+  actually sell for" baseline in digests, alerts, and analyses, always
+  labeled with its data-through date. Works from Cloudflare's datacenter IPs
+  (verified).
+- **Live asking prices via the official eBay Browse API** — `fetchEbayLive()`
+  activates only when the `EBAY_CLIENT_ID` / `EBAY_CLIENT_SECRET` worker
+  secrets are set (free developer account at developer.ebay.com, instant
+  approval; uses the client-credentials OAuth flow, token cached in KV).
+  Until then it silently returns nothing and all features degrade gracefully.
 
 A weekly cloud routine ("DFWGV library pipeline health", Mondays 12:00 UTC,
 managed at claude.ai/code/routines) independently checks snapshot freshness,

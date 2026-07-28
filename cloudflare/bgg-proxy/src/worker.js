@@ -673,6 +673,110 @@ function parseCleanUsdListings(xml) {
   return all.filter((l) => !l.junk && l.price >= floor).sort((a, b) => a.price - b.price);
 }
 
+/* ===================== eBay data (sold baseline + live) ===================== */
+
+const EBAY_SOLD_KEY = "ebay-sold";
+const EBAY_SOLD_TTL_MS = 72 * 3600 * 1000; // the sold feed is historical; refresh sparingly
+const BROWSER_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
+
+/** Does this listing title plausibly refer to the game itself (not an
+ *  accessory/expansion/parts listing for it)? */
+function relevantTitle(title, name) {
+  const words = name.toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length > 2);
+  const junk = /\b(expansion|promo|sleeve|sleeves|insert|organizer|upgrade kit|replacement|parts|pieces only|no game|empty box|proxy)\b/i;
+  const t = title.toLowerCase();
+  const hits = words.filter((w) => t.includes(w)).length;
+  if (words.length && hits < Math.ceil(words.length * 0.6)) return false;
+  if (!junk.test(name) && junk.test(title)) return false;
+  return true;
+}
+
+/** Real eBay sold-sale history via 130point.com's lookup service. Their eBay
+ *  feed is historical (currently ends ~Mar 2026), so this is a BASELINE of
+ *  what copies actually sold for — not live market data. KV-cached. */
+async function fetchEbaySold(env, id, name, cacheOnly) {
+  let cache = {};
+  try { cache = JSON.parse((await env.HOT_HISTORY.get(EBAY_SOLD_KEY)) || "{}"); } catch { /* rebuild */ }
+  const hit = cache[id];
+  if (hit && (cacheOnly || Date.now() - hit.fetchedAt < EBAY_SOLD_TTL_MS)) return hit;
+  if (cacheOnly) return null;
+  try {
+    const res = await fetch("https://back.130point.com/sales/", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded", "User-Agent": BROWSER_UA },
+      body: `query=${encodeURIComponent(`${name} board game`)}&type=2&subcat=-1`
+    });
+    if (!res.ok) return hit || null;
+    const html = await res.text();
+    const sales = [];
+    for (const seg of html.split(/<span id=['"]titleText['"]>/).slice(1)) {
+      const title = decodeEntities((seg.match(/^<a href=['"][^'"]+['"][^>]*>([^<]+)<\/a>/) || [])[1] || "");
+      const priceM = seg.match(/class=['"]priceSpan['"][^>]*>\s*([\d,.]+)\s*([A-Z]{3})/);
+      const dateM = seg.match(/Date:<\/b>\s*([^<]+)/);
+      const type = (seg.match(/id=['"]auctionLabel['"]>([^<]+)/) || [])[1] || "";
+      if (!title || !priceM || priceM[2] !== "USD" || !dateM) continue;
+      if (!relevantTitle(title, name)) continue;
+      const price = parseFloat(priceM[1].replace(/,/g, ""));
+      const date = new Date(dateM[1].trim());
+      if (!price || isNaN(date)) continue;
+      sales.push({ price, date: date.toISOString().slice(0, 10), type: type.trim() });
+    }
+    if (!sales.length) return hit || null;
+    sales.sort((a, b) => b.date.localeCompare(a.date));
+    const prices = sales.map((s) => s.price).sort((a, b) => a - b);
+    const entry = {
+      fetchedAt: Date.now(),
+      soldCount: sales.length,
+      medianSold: prices[Math.floor(prices.length / 2)],
+      low: prices[0],
+      high: prices[prices.length - 1],
+      dataThrough: sales[0].date,
+      dataFrom: sales[sales.length - 1].date,
+      recentSales: sales.slice(0, 8)
+    };
+    cache[id] = entry;
+    await env.HOT_HISTORY.put(EBAY_SOLD_KEY, JSON.stringify(cache));
+    return entry;
+  } catch { return hit || null; }
+}
+
+/** Live eBay asking prices via the official Browse API. Needs the
+ *  EBAY_CLIENT_ID / EBAY_CLIENT_SECRET secrets (free developer account);
+ *  silently unavailable until they're set. */
+async function fetchEbayLive(env, name) {
+  if (!env.EBAY_CLIENT_ID || !env.EBAY_CLIENT_SECRET) return null;
+  try {
+    let tok = null;
+    try { tok = JSON.parse((await env.HOT_HISTORY.get("ebay-oauth")) || "null"); } catch { /* refetch */ }
+    if (!tok || Date.now() > tok.exp) {
+      const res = await fetch("https://api.ebay.com/identity/v1/oauth2/token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: `Basic ${btoa(`${env.EBAY_CLIENT_ID}:${env.EBAY_CLIENT_SECRET}`)}`
+        },
+        body: "grant_type=client_credentials&scope=" + encodeURIComponent("https://api.ebay.com/oauth/api_scope")
+      });
+      if (!res.ok) return null;
+      const d = await res.json();
+      tok = { token: d.access_token, exp: Date.now() + (d.expires_in - 300) * 1000 };
+      await env.HOT_HISTORY.put("ebay-oauth", JSON.stringify(tok));
+    }
+    const url = `https://api.ebay.com/buy/browse/v1/item_summary/search?q=${encodeURIComponent(`${name} board game`)}` +
+      `&filter=${encodeURIComponent("buyingOptions:{FIXED_PRICE},itemLocationCountry:US,priceCurrency:USD")}&sort=price&limit=25`;
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${tok.token}`, "X-EBAY-C-MARKETPLACE-ID": "EBAY_US" }
+    });
+    if (!res.ok) return null;
+    const d = await res.json();
+    const items = (d.itemSummaries || [])
+      .filter((it) => it.price && +it.price.value && relevantTitle(it.title || "", name))
+      .map((it) => ({ price: +it.price.value, condition: it.condition || "", url: it.itemWebUrl || "" }));
+    if (!items.length) return null;
+    return { liveListings: items.length, cheapest: items[0], cheapestFew: items.slice(0, 3) };
+  } catch { return null; }
+}
+
 const GITHUB_REPO = "traditz/dfwgamingvillage";
 const SNAPSHOT_WORKFLOW = "refresh-library.yml";
 
@@ -814,7 +918,12 @@ async function postWeeklyDigest(env) {
         }
       }
     } catch { /* section stays sparse */ }
-    await new Promise((r) => setTimeout(r, 350));
+    // eBay: real sold-sale baseline + (when configured) live asking prices.
+    const ebaySold = await fetchEbaySold(env, g.id, g.name);
+    if (ebaySold) (liveMarket[g.id] = liveMarket[g.id] || {}).ebaySold = ebaySold;
+    const ebayLive = await fetchEbayLive(env, g.name);
+    if (ebayLive) (liveMarket[g.id] = liveMarket[g.id] || {}).ebayLive = ebayLive;
+    await new Promise((r) => setTimeout(r, 500));
   }
 
   const watch = watchlist.map((g) => {
@@ -840,10 +949,16 @@ async function postWeeklyDigest(env) {
       };
     };
     const live = liveMarket[g.id] || {};
+    const eb = live.ebaySold;
     return {
       id: g.id, name: g.name, target: g.target || null,
       liveSecondHand: live.used || null,
       liveRetailUS: live.retail || null,
+      ebaySoldBaseline: eb ? {
+        soldSales: eb.soldCount, medianSoldPrice: eb.medianSold, low: eb.low, high: eb.high,
+        dataThrough: eb.dataThrough, recentSales: eb.recentSales.slice(0, 3)
+      } : null,
+      ebayLiveNow: live.ebayLive || null,
       trackedRetail: hist("r"),
       trackedSecondHand: hist("m"),
       ebaySoldPricesLink: `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(`${g.name} board game`)}&LH_Sold=1&LH_Complete=1&LH_PrefLoc=1`
@@ -876,7 +991,7 @@ async function postWeeklyDigest(env) {
   const system = `You write the DAILY pricing-and-procurement digest for the curator of the DFW Gaming Village board-game lending library (~${snapshot.games.length} games), posted to their Discord. The data includes a LIVE market scan run minutes ago (BGG Marketplace second-hand listings with condition, plus US retail in-stock offers) layered on our tracked price history. Rules:
 - HARD LIMIT 3200 characters. Discord markdown (** bold **, bullet lines, emoji section headers).
 - Lead with "💰 Watchlist" — one short paragraph-bullet per watched game, covering: today's best genuine second-hand price (with condition) and best US retail (item + delivered), how those compare to the target, the 14-day average/low and historic low (with its date), the trend direction, and a plain-spoken verdict — buy now / wait / keep watching — WITH the reasoning (e.g. "within $3 of its historic low and trending down — wait a week", or "at target and only 4 genuine copies listed — grab it"). Games where nothing meaningful changed get one line, but still state the current best price so the line is informative on its own.
-- When a verdict is close, point at the game's eBay sold-prices link as the sanity check for what copies actually sell for.
+- ebaySoldBaseline is REAL eBay sold-sale history (what copies actually sold for — count, median, range, last sales). Its feed is historical, ending at dataThrough — use it as the ground-truth baseline for value verdicts (e.g. "copies actually sell for ~$34 on eBay, so this $29 listing beats real-world sale value"), and note the through-date when it matters. ebayLiveNow, when present, is today's cheapest live eBay asking price (official API). When a verdict is still close, point at the game's eBay sold-prices link.
 - Then "🛒 Opportunities" — at most 3 bullets: unowned games that look like smart buys today (sustained hotness streak + strong rating, or a recent price alert). Two lines each: the signal, and why it matters for a lending library. Omit the section on a genuinely quiet day.
 - This posts EVERY day: on quiet days shrink naturally (a few lines) rather than padding, but never reduce to a bare "nothing happened" — the current-price snapshot per watched game is always worth stating.
 - Use ONLY the data provided; never invent prices, listings, streaks, or games. Round to whole dollars except sub-$1 differences.
@@ -900,7 +1015,7 @@ async function postWeeklyDigest(env) {
         description: trimmed,
         color: 0xF5C542,
         thumbnail: digestThumb ? { url: digestThumb } : undefined,
-        footer: { text: `DFWGV Librarian · live scan of ${watch.length} watched games · BGG Marketplace + US retail` },
+        footer: { text: `DFWGV Librarian · live scan of ${watch.length} watched games · BGG Marketplace + US retail + eBay sold` },
         timestamp: new Date().toISOString()
       }]
     })
@@ -1085,11 +1200,17 @@ async function handlePriceAnalysis(request, env, cors) {
   const watched = watchlist.find((g) => g.id === id);
   const alerts = JSON.parse((await env.HOT_HISTORY.get(PRICE_ALERTS_KEY)) || "[]").filter((a) => a.id === id).slice(0, 4);
 
+  // 4. eBay: real sold-sale baseline + live asking prices (when configured).
+  const ebaySold = await fetchEbaySold(env, id, name);
+  const ebayLive = await fetchEbayLive(env, name);
+
   const q = encodeURIComponent(`${name} board game`);
   const data = {
     game: name,
     secondHandMarket: market,
     newRetailUS: retail,
+    ebaySoldHistory: ebaySold || "unavailable",
+    ebayLiveNow: ebayLive || "not configured",
     trackedHistory: tracked || "not on the watchlist — no tracked history yet",
     watchTarget: watched ? watched.target || null : null,
     recentAlerts: alerts,
@@ -1102,9 +1223,9 @@ async function handlePriceAnalysis(request, env, cors) {
 
   const system = `You are a board-game price analyst advising a lending-library curator on acquiring "${name}". Using ONLY the JSON data provided, write a concise analysis, max 1700 characters, Discord-style markdown. Sections:
 **Best buys right now** — cheapest genuine second-hand listing (price, condition, its direct link) and cheapest US retail (item + delivered price, link to the store list).
-**Market picture** — listing counts, price spread used vs new, what was filtered out (non-game accessory listings), anything notable.
-**History** — if tracked data exists: historic low with its date, averages, how today compares; otherwise say tracking starts once the game is watched.
-**Verdict** — buy now or wait, a fair target price to set, one sentence of reasoning. Mention the eBay sold-prices link as the check for real sale values.
+**Market picture** — listing counts, price spread used vs new, what was filtered out (non-game accessory listings), anything notable. Include today's cheapest live eBay ask if ebayLiveNow has data.
+**History** — ebaySoldHistory is REAL eBay sold-sale data (median, range, recent sales; historical feed ending at dataThrough) — lead with what copies actually sell for. Then our tracked data if it exists: historic low with its date, averages, how today compares; otherwise say tracking starts once the game is watched.
+**Verdict** — buy now or wait, a fair target price to set (anchor it to the eBay sold median when available), one sentence of reasoning.
 Round to whole dollars. Angle-bracket links like <url>. Never invent numbers.`;
 
   try {
@@ -1246,6 +1367,8 @@ async function checkWatchedPrices(env) {
   const list = JSON.parse((await env.HOT_HISTORY.get(WATCHLIST_KEY)) || "[]");
   if (list.length === 0) return { checked: 0, alerts: [] };
   const history = JSON.parse((await env.HOT_HISTORY.get(PRICE_HISTORY_KEY)) || "{}");
+  let ebaySoldCache = {};
+  try { ebaySoldCache = JSON.parse((await env.HOT_HISTORY.get(EBAY_SOLD_KEY)) || "{}"); } catch { /* optional */ }
   const today = new Date().toISOString().slice(0, 10);
   const cooldownDate = new Date(Date.now() - ALERT_COOLDOWN_DAYS * 864e5).toISOString().slice(0, 10);
   const alerts = [];
@@ -1311,6 +1434,7 @@ async function checkWatchedPrices(env) {
         trackedDays: pts.length
       };
     };
+    const eb = ebaySoldCache[g.id];
     const enrich = (key) => ({
       price: snap[key],
       target: g.target || null,
@@ -1319,6 +1443,7 @@ async function checkWatchedPrices(env) {
       other: key === "r"
         ? (snap.m ? { label: "second-hand", price: snap.m } : null)
         : (snap.r ? { label: "new retail", price: snap.r } : null),
+      ebaySold: eb ? { median: eb.medianSold, count: eb.soldCount, through: eb.dataThrough } : null,
       ...ctxFor(key)
     });
 
@@ -1421,7 +1546,7 @@ async function sendPriceAlert(env, alerts, isTest) {
       if (env.ANTHROPIC_API_KEY) {
         try {
           const raw = await askClaude(env,
-            `You assess board-game price alerts for a lending-library curator. For EACH alert in the JSON, write ONE sentence (max 30 words) of buying advice: is this genuinely a good price given its historic low, averages, listing condition, and the other channel's price — and act now or wait? Be direct and specific with numbers. Output exactly one line per alert, formatted "id|sentence", nothing else.`,
+            `You assess board-game price alerts for a lending-library curator. For EACH alert in the JSON, write ONE sentence (max 30 words) of buying advice: is this genuinely a good price given its historic low, averages, listing condition, the other channel's price, and the ebaySold baseline (median of REAL eBay sale prices — the best value anchor when present) — and act now or wait? Be direct and specific with numbers. Output exactly one line per alert, formatted "id|sentence", nothing else.`,
             JSON.stringify(batch), 600);
           for (const line of raw.split("\n")) {
             const m = line.match(/^\s*(\d+)\s*\|\s*(.+)$/);
@@ -1440,8 +1565,11 @@ async function sendPriceAlert(env, alerts, isTest) {
           { name: "30-day avg", value: money(a.avg30), inline: true },
           { name: "Historic low", value: a.histLow ? `${money(a.histLow)} (${a.histLowDate}, ${a.trackedDays}d tracked)` : "—", inline: true }
         ];
+        if (a.ebaySold) {
+          fields.push({ name: "eBay sold (real sales)", value: `${money(a.ebaySold.median)} median · ${a.ebaySold.count} sales thru ${a.ebaySold.through}`, inline: true });
+        }
         if (a.counts && (a.counts.used || a.counts.retail)) {
-          fields.push({ name: "Genuine listings today", value: `${a.counts.used} second-hand · ${a.counts.retail} retail offers`, inline: false });
+          fields.push({ name: "Genuine listings today", value: `${a.counts.used} second-hand · ${a.counts.retail} retail offers`, inline: a.ebaySold ? true : false });
         }
         return {
           title: `🎲 Price Alert — ${a.name}`,
