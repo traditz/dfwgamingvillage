@@ -842,6 +842,10 @@ async function fetchEbaySoldOfficial(env, name) {
 
 /* ============ Watched-game intelligence (BGG-native + community) ============ */
 
+const WORKER_SELF_URL = "https://dfwgv-bgg-proxy.joemsprague.workers.dev";
+const LIVE_MARKET_KEY = "live-market-cache"; // freshest retail/eBay snapshot per game (staged 6-hourly)
+const GAME_INTEL_KEY = "game-intel";         // forum chatter + videos per game (staged, rotating)
+const INTEL_CURSOR_KEY = "intel-cursor";     // rotation pointer for the intel job
 const MARKET_LISTINGS_KEY = "market-listings"; // listing ids seen per game (sold detection)
 const BGG_SOLD_KEY = "bgg-sold";               // probable sales: listings that disappeared
 const MARKET_STATS_KEY = "market-stats";       // daily BGG supply/demand/popularity stats
@@ -1011,6 +1015,43 @@ async function checkRedditDeals(env) {
   }
 }
 
+/**
+ * Rotating intel gatherer (token-gated; the cron calls it on the worker's own
+ * URL so it runs as a SEPARATE invocation with its own subrequest budget —
+ * the free plan allows 50 per invocation). Each run refreshes forum chatter,
+ * YouTube coverage, and the eBay sold baseline for the next few watched
+ * games, then sweeps Reddit. The digest assembles from this staged data.
+ */
+async function handleCronIntel(request, env, cors) {
+  if (!isAuthorized(request, env)) {
+    return jsonResponse({ ok: false, error: "Unauthorized" }, 401, cors);
+  }
+  const watchlist = JSON.parse((await env.HOT_HISTORY.get(WATCHLIST_KEY)) || "[]").slice(0, WATCHLIST_CAP);
+  const result = { ok: true, refreshed: [] };
+  if (watchlist.length) {
+    let cursor = 0;
+    try { cursor = Number(JSON.parse((await env.HOT_HISTORY.get(INTEL_CURSOR_KEY)) || "0")) || 0; } catch { /* restart */ }
+    let intel = {};
+    try { intel = JSON.parse((await env.HOT_HISTORY.get(GAME_INTEL_KEY)) || "{}"); } catch { /* rebuild */ }
+    const SLICE = 4;
+    for (let i = 0; i < Math.min(SLICE, watchlist.length); i++) {
+      const g = watchlist[(cursor + i) % watchlist.length];
+      const chatter = await fetchForumChatter(env, g.id);
+      const videos = await fetchRecentVideos(env, g.name);
+      await fetchEbaySold(env, g.id, g.name); // refresh the sold baseline within its TTL
+      intel[g.id] = { name: g.name, chatter, videos, fetchedAt: Date.now() };
+      result.refreshed.push(g.name);
+      await new Promise((r) => setTimeout(r, 400));
+    }
+    const ids = new Set(watchlist.map((g) => g.id));
+    for (const id of Object.keys(intel)) if (!ids.has(id)) delete intel[id];
+    await env.HOT_HISTORY.put(GAME_INTEL_KEY, JSON.stringify(intel));
+    await env.HOT_HISTORY.put(INTEL_CURSOR_KEY, JSON.stringify((cursor + SLICE) % watchlist.length));
+  }
+  result.reddit = await checkRedditDeals(env);
+  return jsonResponse(result, 200, cors);
+}
+
 const GITHUB_REPO = "traditz/dfwgamingvillage";
 const SNAPSHOT_WORKFLOW = "refresh-library.yml";
 
@@ -1174,42 +1215,26 @@ async function postWeeklyDigest(env) {
     } catch { /* live scan optional; history still carries the digest */ }
   }
 
-  // Live US retail offers per game (BoardGamePrices), politely paced.
+  // Retail, eBay, forum chatter, and video coverage are STAGED in KV by the
+  // 6-hourly price check and the rotating intel job — each of those runs in
+  // its own invocation with its own subrequest budget (the free plan allows
+  // 50 per invocation, which one all-live digest scan would blow through).
+  // The digest just assembles the staged data.
+  let stagedLive = {};
+  try { stagedLive = JSON.parse((await env.HOT_HISTORY.get(LIVE_MARKET_KEY)) || "{}"); } catch { /* optional */ }
+  let stagedIntel = {};
+  try { stagedIntel = JSON.parse((await env.HOT_HISTORY.get(GAME_INTEL_KEY)) || "{}"); } catch { /* optional */ }
+  let ebaySoldStage = {};
+  try { ebaySoldStage = JSON.parse((await env.HOT_HISTORY.get(EBAY_SOLD_KEY)) || "{}"); } catch { /* optional */ }
   for (const g of watchlist) {
-    try {
-      const res = await fetch(`https://boardgameprices.com/api/info?eid=${g.id}&currency=USD&destination=US&sitename=dfwgamingvillage.com`);
-      if (res.ok) {
-        const d = await res.json();
-        const best = (d.items || [])
-          .map((it) => ({
-            url: it.url || "",
-            offers: (it.prices || []).filter((p) => p.country === "US" && p.stock === "Y")
-              .map((p) => ({ item: +p.product || +p.price, delivered: +p.price })).filter((o) => o.item)
-          }))
-          .sort((a, b) => b.offers.length - a.offers.length)[0];
-        if (best && best.offers.length) {
-          const cheapest = best.offers.sort((a, b) => a.delivered - b.delivered)[0];
-          (liveMarket[g.id] = liveMarket[g.id] || {}).retail = {
-            usInStockOffers: best.offers.length,
-            lowItem: cheapest.item,
-            lowDelivered: cheapest.delivered,
-            storeListUrl: best.url
-          };
-        }
-      }
-    } catch { /* section stays sparse */ }
-    // eBay: real sold-sale baseline + (when configured) live asking prices.
-    const ebaySold = await fetchEbaySold(env, g.id, g.name);
-    if (ebaySold) (liveMarket[g.id] = liveMarket[g.id] || {}).ebaySold = ebaySold;
-    const ebayLive = await fetchEbayLive(env, g.name);
-    if (ebayLive) (liveMarket[g.id] = liveMarket[g.id] || {}).ebayLive = ebayLive;
-    // Community intel: recent pricing/availability/print-status forum threads
-    // and (when configured) fresh YouTube coverage.
-    const chatter = await fetchForumChatter(env, g.id);
-    if (chatter.length) (liveMarket[g.id] = liveMarket[g.id] || {}).chatter = chatter;
-    const videos = await fetchRecentVideos(env, g.name);
-    if (videos) (liveMarket[g.id] = liveMarket[g.id] || {}).videos = videos;
-    await new Promise((r) => setTimeout(r, 500));
+    const lm = liveMarket[g.id] = liveMarket[g.id] || {};
+    const staged = stagedLive[g.id] || {};
+    if (staged.retail) lm.retail = staged.retail;
+    if (staged.ebayLive) lm.ebayLive = staged.ebayLive;
+    if (ebaySoldStage[g.id]) lm.ebaySold = ebaySoldStage[g.id];
+    const gi = stagedIntel[g.id] || {};
+    if (gi.chatter && gi.chatter.length) lm.chatter = gi.chatter;
+    if (gi.videos && gi.videos.length) lm.videos = gi.videos;
   }
   let bggSoldMap = {};
   try { bggSoldMap = JSON.parse((await env.HOT_HISTORY.get(BGG_SOLD_KEY)) || "{}"); } catch { /* optional */ }
@@ -1692,6 +1717,8 @@ async function checkWatchedPrices(env) {
   try { listTrack = JSON.parse((await env.HOT_HISTORY.get(MARKET_LISTINGS_KEY)) || "{}"); } catch { /* rebuild */ }
   let bggSold = {};
   try { bggSold = JSON.parse((await env.HOT_HISTORY.get(BGG_SOLD_KEY)) || "{}"); } catch { /* rebuild */ }
+  let liveCache = {};
+  try { liveCache = JSON.parse((await env.HOT_HISTORY.get(LIVE_MARKET_KEY)) || "{}"); } catch { /* rebuild */ }
   const today = new Date().toISOString().slice(0, 10);
   const cooldownDate = new Date(Date.now() - ALERT_COOLDOWN_DAYS * 864e5).toISOString().slice(0, 10);
   const alerts = [];
@@ -1705,14 +1732,17 @@ async function checkWatchedPrices(env) {
         const best = (data.items || [])
           .map((it) => ({
             url: it.url || "",
-            prices: (it.prices || []).filter((p) => p.country === "US" && p.stock === "Y").map((p) => +p.product || +p.price).filter(Boolean)
+            offers: (it.prices || []).filter((p) => p.country === "US" && p.stock === "Y")
+              .map((p) => ({ item: +p.product || +p.price, delivered: +p.price })).filter((o) => o.item)
           }))
-          .sort((a, b) => b.prices.length - a.prices.length)[0];
-        if (best && best.prices.length) {
-          snap.r = Math.min(...best.prices);
-          snap.rAvg = best.prices.reduce((a, b) => a + b, 0) / best.prices.length;
+          .sort((a, b) => b.offers.length - a.offers.length)[0];
+        if (best && best.offers.length) {
+          const prices = best.offers.map((o) => o.item);
+          snap.r = Math.min(...prices);
+          snap.rAvg = prices.reduce((a, b) => a + b, 0) / prices.length;
           snap.rUrl = best.url; // BoardGamePrices item page — where the offers are listed
-          snap.rCount = best.prices.length;
+          snap.rCount = best.offers.length;
+          snap.rDeliv = Math.min(...best.offers.map((o) => o.delivered).filter(Boolean));
         }
       }
     } catch { /* leave channel empty for today */ }
@@ -1834,6 +1864,13 @@ async function checkWatchedPrices(env) {
       }
     }
     gh[today] = { r: snap.r, m: snap.m, e: snap.e, rc: snap.rCount, mc: snap.mCount };
+    // Stage the fresh market snapshot for the digest (which must stay cheap
+    // in subrequests, so it assembles from KV instead of re-fetching).
+    liveCache[g.id] = {
+      t: Date.now(),
+      retail: snap.r ? { usInStockOffers: snap.rCount, lowItem: snap.r, lowDelivered: snap.rDeliv || null, storeListUrl: snap.rUrl } : null,
+      ebayLive: snap.e ? { liveListings: snap.eCount, avgAsk: snap.eAvg, cheapest: { price: snap.e, condition: snap.eCond, url: snap.eLink } } : null
+    };
     if (alerts.some((a) => a.id === g.id)) gh.lastAlert = today;
     const dates = Object.keys(gh).filter((d) => /^\d{4}-/.test(d)).sort();
     for (const d of dates.slice(0, Math.max(0, dates.length - PRICE_HISTORY_DAYS))) delete gh[d];
@@ -1844,6 +1881,7 @@ async function checkWatchedPrices(env) {
   await env.HOT_HISTORY.put(PRICE_HISTORY_KEY, JSON.stringify(history));
   await env.HOT_HISTORY.put(MARKET_LISTINGS_KEY, JSON.stringify(listTrack));
   await env.HOT_HISTORY.put(BGG_SOLD_KEY, JSON.stringify(bggSold));
+  await env.HOT_HISTORY.put(LIVE_MARKET_KEY, JSON.stringify(liveCache));
   if (alerts.length) {
     const prev = JSON.parse((await env.HOT_HISTORY.get(PRICE_ALERTS_KEY)) || "[]");
     await env.HOT_HISTORY.put(PRICE_ALERTS_KEY, JSON.stringify(alerts.concat(prev).slice(0, 20)));
@@ -2127,7 +2165,12 @@ export default {
     }
     ctx.waitUntil(snapshotHotness(env));
     ctx.waitUntil(checkWatchedPrices(env));
-    ctx.waitUntil(checkRedditDeals(env).catch(() => {}));
+    // Forum/YouTube/eBay-sold/Reddit intel runs as a separate invocation via
+    // the worker's own URL so it gets its own free-plan subrequest budget.
+    ctx.waitUntil(fetch(`${WORKER_SELF_URL}/api/cron-intel`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${env.ANALYTICS_ADMIN_TOKEN}` }
+    }).catch(() => {}));
   },
 
   async fetch(request, env, ctx) {
@@ -2188,6 +2231,10 @@ export default {
 
     if (incomingUrl.pathname === "/api/refresh-snapshot") {
       return handleRefreshSnapshot(request, env, cors);
+    }
+
+    if (incomingUrl.pathname === "/api/cron-intel") {
+      return handleCronIntel(request, env, cors);
     }
 
     if (incomingUrl.pathname === "/api/digest") {
