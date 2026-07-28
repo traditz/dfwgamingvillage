@@ -117,6 +117,21 @@ worker gets eBay data two ways:
   and it silently replaces the 130point baseline with fresh official sold
   data (`source: "ebay-official-90d"`).
 
+### Scaling: the free-plan subrequest budget
+
+Cloudflare's free plan allows ~50 subrequests per invocation, so no single
+invocation is allowed to do unbounded per-game work. The pattern everywhere
+is **slice + self-chain**: an invocation processes a fixed slice, then
+`fetch`es the worker's own URL (token-authorized with the admin secret) to
+continue in a fresh invocation. The price check runs 10 games per hop
+(`/api/cron-prices?start=N`), the intel job 4 games per hop
+(`/api/cron-intel?hops=N`, max 7 hops per cron), and the digest never
+fetches per game at all — it assembles KV-staged data plus chunked (20-id)
+batched BGG calls. The watchlist cap is 150; at that size a 6-hourly sweep
+is ~15 chained price invocations, intel cycles the full list roughly daily,
+and the digest spotlights the ~15 games with real signals while summarizing
+the rest in one "Quiet" line.
+
 ### Watched-game intelligence
 
 Beyond prices, the crons build market/buzz intelligence per watched game:

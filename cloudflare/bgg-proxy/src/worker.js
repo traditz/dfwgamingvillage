@@ -544,7 +544,8 @@ const WATCHLIST_KEY = "watchlist";
 const PRICE_HISTORY_KEY = "price-history";
 const PRICE_ALERTS_KEY = "price-alerts";
 const PRICE_HISTORY_DAYS = 90;
-const WATCHLIST_CAP = 50;
+const WATCHLIST_CAP = 150;
+const PRICE_SLICE = 10; // games per price-check invocation (chained via self-fetch)
 const DROP_VS_TRAILING = 0.10;  // alert when today's low is 10% under the trailing average
 const OUTLIER_VS_TODAY = 0.15;  // ...or (young history) 15% under today's average listing
 const MIN_TRAILING_POINTS = 3;
@@ -579,7 +580,7 @@ async function snapshotHotness(env) {
  * price-checked by the daily cron; drops below average ping a Discord webhook
  * (the ALERT_WEBHOOK secret). GET returns list + price history + recent alerts.
  */
-async function handleWatchlist(request, env, cors, incomingUrl) {
+async function handleWatchlist(request, env, cors, incomingUrl, ctx) {
   if (!isAuthorized(request, env)) {
     return jsonResponse({ ok: false, error: "Unauthorized" }, 401, cors);
   }
@@ -597,10 +598,11 @@ async function handleWatchlist(request, env, cors, incomingUrl) {
         webhookConfigured: Boolean(env.ALERT_WEBHOOK)
       }, 200, cors);
     }
-    // Manual price check, same routine the cron runs. Takes ~1.5s per watched
-    // game (polite pacing toward BGG/BGP), so the client should show progress.
+    // Manual price check, same routine the cron runs. The first slice is
+    // checked inline (so the response is meaningful); any remaining games
+    // continue as chained background invocations.
     if (incomingUrl.searchParams.get("check") === "1") {
-      const summary = await checkWatchedPrices(env);
+      const summary = await checkWatchedPrices(env, ctx, 0);
       return jsonResponse({ ok: true, ...summary, webhookConfigured: Boolean(env.ALERT_WEBHOOK) }, 200, cors);
     }
     let body;
@@ -1022,12 +1024,8 @@ async function checkRedditDeals(env) {
  * YouTube coverage, and the eBay sold baseline for the next few watched
  * games, then sweeps Reddit. The digest assembles from this staged data.
  */
-async function handleCronIntel(request, env, cors) {
-  if (!isAuthorized(request, env)) {
-    return jsonResponse({ ok: false, error: "Unauthorized" }, 401, cors);
-  }
+async function gatherIntelSlice(env, includeReddit) {
   const watchlist = JSON.parse((await env.HOT_HISTORY.get(WATCHLIST_KEY)) || "[]").slice(0, WATCHLIST_CAP);
-  const result = { ok: true, refreshed: [] };
   if (watchlist.length) {
     let cursor = 0;
     try { cursor = Number(JSON.parse((await env.HOT_HISTORY.get(INTEL_CURSOR_KEY)) || "0")) || 0; } catch { /* restart */ }
@@ -1037,10 +1035,17 @@ async function handleCronIntel(request, env, cors) {
     for (let i = 0; i < Math.min(SLICE, watchlist.length); i++) {
       const g = watchlist[(cursor + i) % watchlist.length];
       const chatter = await fetchForumChatter(env, g.id);
-      const videos = await fetchRecentVideos(env, g.name);
+      // YouTube searches are the quota-expensive part (100 units each of a
+      // 10k/day budget) — refresh a game's videos at most every ~40 hours.
+      const prev = intel[g.id] || {};
+      let videos = prev.videos || null;
+      let videosAt = prev.videosAt || 0;
+      if (Date.now() - videosAt > 40 * 3600e3) {
+        videos = await fetchRecentVideos(env, g.name);
+        videosAt = Date.now();
+      }
       await fetchEbaySold(env, g.id, g.name); // refresh the sold baseline within its TTL
-      intel[g.id] = { name: g.name, chatter, videos, fetchedAt: Date.now() };
-      result.refreshed.push(g.name);
+      intel[g.id] = { name: g.name, chatter, videos, videosAt, fetchedAt: Date.now() };
       await new Promise((r) => setTimeout(r, 400));
     }
     const ids = new Set(watchlist.map((g) => g.id));
@@ -1048,8 +1053,27 @@ async function handleCronIntel(request, env, cors) {
     await env.HOT_HISTORY.put(GAME_INTEL_KEY, JSON.stringify(intel));
     await env.HOT_HISTORY.put(INTEL_CURSOR_KEY, JSON.stringify((cursor + SLICE) % watchlist.length));
   }
-  result.reddit = await checkRedditDeals(env);
-  return jsonResponse(result, 200, cors);
+  if (includeReddit) await checkRedditDeals(env);
+  return watchlist.length > 4; // more games than one slice covers?
+}
+
+async function handleCronIntel(request, env, ctx, cors) {
+  if (!isAuthorized(request, env)) {
+    return jsonResponse({ ok: false, error: "Unauthorized" }, 401, cors);
+  }
+  const hops = Math.min(parseInt(new URL(request.url).searchParams.get("hops") || "0", 10) || 0, 12);
+  // Respond immediately; do the slice (and chain the next hop) in the
+  // background so the calling invocation never blocks on us.
+  ctx.waitUntil((async () => {
+    const more = await gatherIntelSlice(env, hops === 0);
+    if (more && hops < 6) {
+      await fetch(`${WORKER_SELF_URL}/api/cron-intel?hops=${hops + 1}`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${env.ANALYTICS_ADMIN_TOKEN}` }
+      }).catch(() => { /* next cron continues the rotation */ });
+    }
+  })());
+  return jsonResponse({ ok: true, hops }, 200, cors);
 }
 
 const GITHUB_REPO = "traditz/dfwgamingvillage";
@@ -1137,25 +1161,27 @@ async function postWeeklyDigest(env) {
 
   // Watchlist: full live market scan (BGG Marketplace + US retail) layered
   // on top of our tracked history, per watched game.
-  const watchlist = JSON.parse((await env.HOT_HISTORY.get(WATCHLIST_KEY)) || "[]").slice(0, 20);
+  const watchlist = JSON.parse((await env.HOT_HISTORY.get(WATCHLIST_KEY)) || "[]").slice(0, WATCHLIST_CAP);
   const priceHistory = JSON.parse((await env.HOT_HISTORY.get(PRICE_HISTORY_KEY)) || "{}");
 
-  // One batched BGG call covers every watched game's listings, box art,
-  // supply/demand stats, and expansion links.
+  // Batched BGG calls (20 ids each — BGG's limit) cover every watched game's
+  // listings, box art, supply/demand stats, and expansion links.
   const liveMarket = {}; // id -> { thumb, used, demand, newExpansions }
   const todayKey = new Date().toISOString().slice(0, 10);
   const newAnnouncements = [];
   if (watchlist.length) {
-    try {
-      const res = await fetch(`${BGG_THING_URL}?id=${watchlist.map((g) => g.id).join(",")}&marketplace=1&stats=1`, {
+    let marketStats = {};
+    let knownLinks = {};
+    try { marketStats = JSON.parse((await env.HOT_HISTORY.get(MARKET_STATS_KEY)) || "{}"); } catch { /* rebuild */ }
+    try { knownLinks = JSON.parse((await env.HOT_HISTORY.get(KNOWN_LINKS_KEY)) || "{}"); } catch { /* rebuild */ }
+    for (let chunkStart = 0; chunkStart < watchlist.length; chunkStart += 20) {
+      try {
+      const chunk = watchlist.slice(chunkStart, chunkStart + 20);
+      const res = await fetch(`${BGG_THING_URL}?id=${chunk.map((g) => g.id).join(",")}&marketplace=1&stats=1`, {
         headers: { Authorization: `Bearer ${env.BGG_TOKEN}` }
       });
       if (res.ok) {
         const xml = await res.text();
-        let marketStats = {};
-        let knownLinks = {};
-        try { marketStats = JSON.parse((await env.HOT_HISTORY.get(MARKET_STATS_KEY)) || "{}"); } catch { /* rebuild */ }
-        try { knownLinks = JSON.parse((await env.HOT_HISTORY.get(KNOWN_LINKS_KEY)) || "{}"); } catch { /* rebuild */ }
         for (const item of xml.split(/<item\s/).slice(1)) {
           const id = (item.match(/^[^>]*\bid="(\d+)"/) || [])[1];
           if (!id) continue;
@@ -1209,10 +1235,12 @@ async function postWeeklyDigest(env) {
             demand
           };
         }
-        await env.HOT_HISTORY.put(MARKET_STATS_KEY, JSON.stringify(marketStats));
-        await env.HOT_HISTORY.put(KNOWN_LINKS_KEY, JSON.stringify(knownLinks));
       }
-    } catch { /* live scan optional; history still carries the digest */ }
+      } catch { /* this chunk stays sparse; history still carries the digest */ }
+      await new Promise((r) => setTimeout(r, 400));
+    }
+    await env.HOT_HISTORY.put(MARKET_STATS_KEY, JSON.stringify(marketStats));
+    await env.HOT_HISTORY.put(KNOWN_LINKS_KEY, JSON.stringify(knownLinks));
   }
 
   // Retail, eBay, forum chatter, and video coverage are STAGED in KV by the
@@ -1288,6 +1316,34 @@ async function postWeeklyDigest(env) {
   const recentAlerts = JSON.parse((await env.HOT_HISTORY.get(PRICE_ALERTS_KEY)) || "[]").slice(0, 6)
     .map((a) => ({ id: a.id, name: a.name, channel: a.channel, note: a.note, date: a.date }));
 
+  // With a large watchlist, only games with real signals today get full
+  // detail in the brief; the rest are summarized compactly.
+  const announcedIds = new Set(newAnnouncements.map((a) => a.gameId));
+  const twoDaysAgo = new Date(Date.now() - 2 * 864e5).toISOString().slice(0, 10);
+  const scored = watch.map((w) => {
+    let score = 0;
+    const candidates = [
+      w.liveSecondHand && w.liveSecondHand.low,
+      w.liveRetailUS && w.liveRetailUS.lowItem,
+      w.ebayLiveNow && w.ebayLiveNow.cheapest && w.ebayLiveNow.cheapest.price,
+      w.trackedSecondHand && w.trackedSecondHand.latest,
+      w.trackedRetail && w.trackedRetail.latest
+    ].filter(Boolean);
+    const bestNow = candidates.length ? Math.min(...candidates) : null;
+    if (w.target && bestNow && bestNow <= w.target) score += 3;
+    for (const t of [w.trackedRetail, w.trackedSecondHand, w.trackedEbayAsks]) {
+      if (t && t.avg14d && Math.abs(t.latest - t.avg14d) / t.avg14d >= 0.08) score += 2;
+    }
+    if (w.forumChatter) score += 1.5;
+    if (w.recentVideos) score += 1;
+    if (announcedIds.has(w.id)) score += 1;
+    if (w.bggSalesWeDetected && w.bggSalesWeDetected.newest >= twoDaysAgo) score += 1;
+    return { w, score, bestNow };
+  });
+  scored.sort((a, b) => b.score - a.score);
+  const spotlight = scored.slice(0, 15).map((s) => s.w);
+  const quiet = scored.slice(15).map((s) => ({ id: s.w.id, name: s.w.name, bestPriceNow: s.bestNow, target: s.w.target }));
+
   // Box art for the embed: the most interesting watch game (deepest current
   // discount vs its 14-day average), else the first with art.
   let digestThumb = "";
@@ -1305,7 +1361,8 @@ async function postWeeklyDigest(env) {
     libraryGames: snapshot.games.length,
     topUnownedCandidates: topCandidates,
     sustainedHotnessUnowned: sustainedHot,
-    watchlist: watch,
+    watchlistSpotlight: spotlight,
+    watchlistQuiet: quiet,
     recentPriceAlerts: recentAlerts,
     newExpansionOrEditionAnnouncements: newAnnouncements.slice(0, 10),
     communityDealsSpotted: redditDeals
@@ -1313,7 +1370,8 @@ async function postWeeklyDigest(env) {
 
   const system = `You write the DAILY pricing-and-procurement digest for the curator of the DFW Gaming Village board-game lending library (~${snapshot.games.length} games), posted to their Discord. The data includes a LIVE market scan run minutes ago (BGG Marketplace second-hand listings with condition, plus US retail in-stock offers) layered on our tracked price history. Rules:
 - HARD LIMIT 3200 characters. Discord markdown (** bold **, bullet lines, emoji section headers).
-- Lead with "💰 Watchlist" — one short paragraph-bullet per watched game, covering: today's best genuine second-hand price (with condition) and best US retail (item + delivered), how those compare to the target, the 14-day average/low and historic low (with its date), the trend direction, and a plain-spoken verdict — buy now / wait / keep watching — WITH the reasoning (e.g. "within $3 of its historic low and trending down — wait a week", or "at target and only 4 genuine copies listed — grab it"). Games where nothing meaningful changed get one line, but still state the current best price so the line is informative on its own.
+- Lead with "💰 Watchlist" — one short paragraph-bullet per game in watchlistSpotlight (pre-selected as the games with real signals today), covering: today's best genuine second-hand price (with condition) and best US retail (item + delivered), how those compare to the target, the 14-day average/low and historic low (with its date), the trend direction, and a plain-spoken verdict — buy now / wait / keep watching — WITH the reasoning (e.g. "within $3 of its historic low and trending down — wait a week", or "at target and only 4 genuine copies listed — grab it").
+- If watchlistQuiet is non-empty, close the section with ONE line: "**Quiet:** N others steady" — naming at most 3 of them with their current best price where it's interesting; never itemize the whole quiet list.
 - ebaySoldBaseline is REAL eBay sold-sale history (what copies actually sold for — count, median, range, last sales). Check its source field: "ebay-official-90d" is fresh official data; "130point-historical" ends at dataThrough — still a useful value anchor, but note the through-date when it matters. ebayLiveNow, when present, is today's cheapest live eBay asking price (official API) and trackedEbayAsks is our own day-by-day history of that cheapest ask — treat those as the freshest eBay signal. When a verdict is still close, point at the game's eBay sold-prices link.
 - bggSalesWeDetected are BGG Marketplace listings we watched disappear — probable real sales at those prices. Fresh, first-party evidence of what copies sell for; weigh it alongside the eBay baseline.
 - demandAndSupply is BGG market pressure: wanting vs forTrade copies (wantPerTradeCopy — above ~5 is a seller's market where drops are unlikely; near or below 1 means soft demand), plus owners/ratings 30-day growth as popularity momentum. Use it to judge whether waiting is realistic.
@@ -1704,12 +1762,18 @@ async function handleIgnoreList(request, env, cors, incomingUrl) {
 }
 
 /**
- * Daily cron: check every watched game's lowest US retail price (BoardGamePrices)
- * and lowest USD BGG Marketplace listing, record both, and alert on drops.
+ * 6-hourly price check: each invocation handles PRICE_SLICE watched games
+ * (lowest US retail via BoardGamePrices, lowest genuine BGG Marketplace
+ * listing, cheapest live eBay ask), records them, and alerts on drops. If
+ * more games remain it chains to the next slice via the worker's own URL,
+ * so each slice gets a fresh free-plan subrequest budget.
  */
-async function checkWatchedPrices(env) {
+async function checkWatchedPrices(env, ctx, start = 0) {
   const list = JSON.parse((await env.HOT_HISTORY.get(WATCHLIST_KEY)) || "[]");
   if (list.length === 0) return { checked: 0, alerts: [] };
+  const total = Math.min(list.length, WATCHLIST_CAP);
+  const slice = list.slice(start, Math.min(start + PRICE_SLICE, total));
+  if (!slice.length) return { checked: 0, alerts: [], totalWatched: total };
   const history = JSON.parse((await env.HOT_HISTORY.get(PRICE_HISTORY_KEY)) || "{}");
   let ebaySoldCache = {};
   try { ebaySoldCache = JSON.parse((await env.HOT_HISTORY.get(EBAY_SOLD_KEY)) || "{}"); } catch { /* optional */ }
@@ -1723,7 +1787,7 @@ async function checkWatchedPrices(env) {
   const cooldownDate = new Date(Date.now() - ALERT_COOLDOWN_DAYS * 864e5).toISOString().slice(0, 10);
   const alerts = [];
 
-  for (const g of list.slice(0, WATCHLIST_CAP)) {
+  for (const g of slice) {
     const snap = {};
     try { // retail — lowest in-stock US item price + today's average
       const res = await fetch(`https://boardgameprices.com/api/info?eid=${g.id}&currency=USD&destination=US&sitename=dfwgamingvillage.com`);
@@ -1875,7 +1939,7 @@ async function checkWatchedPrices(env) {
     const dates = Object.keys(gh).filter((d) => /^\d{4}-/.test(d)).sort();
     for (const d of dates.slice(0, Math.max(0, dates.length - PRICE_HISTORY_DAYS))) delete gh[d];
 
-    await new Promise((r) => setTimeout(r, 700)); // pace BGG/BGP politely
+    await new Promise((r) => setTimeout(r, 500)); // pace BGG/BGP politely
   }
 
   await env.HOT_HISTORY.put(PRICE_HISTORY_KEY, JSON.stringify(history));
@@ -1887,7 +1951,28 @@ async function checkWatchedPrices(env) {
     await env.HOT_HISTORY.put(PRICE_ALERTS_KEY, JSON.stringify(alerts.concat(prev).slice(0, 20)));
     await sendPriceAlert(env, alerts);
   }
-  return { checked: Math.min(list.length, WATCHLIST_CAP), alerts };
+
+  // More games to check → chain the next slice as its own invocation.
+  const nextStart = start + slice.length;
+  if (nextStart < total && ctx) {
+    ctx.waitUntil(fetch(`${WORKER_SELF_URL}/api/cron-prices?start=${nextStart}`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${env.ANALYTICS_ADMIN_TOKEN}` }
+    }).catch(() => { /* the next cron sweep will cover the rest */ }));
+  }
+  return { checked: slice.length, alerts, totalWatched: total, continuing: nextStart < total };
+}
+
+/** Chained price-check slice (token-gated; called by the worker itself).
+ *  Responds immediately and does the slice work via waitUntil so the caller
+ *  never blocks on it. */
+async function handleCronPrices(request, env, ctx, cors) {
+  if (!isAuthorized(request, env)) {
+    return jsonResponse({ ok: false, error: "Unauthorized" }, 401, cors);
+  }
+  const start = parseInt(new URL(request.url).searchParams.get("start") || "0", 10) || 0;
+  ctx.waitUntil(checkWatchedPrices(env, ctx, start).catch(() => { /* next sweep retries */ }));
+  return jsonResponse({ ok: true, started: start }, 200, cors);
 }
 
 /** Box art thumbnails for a set of BGG ids — one batched thing call. */
@@ -2164,7 +2249,7 @@ export default {
       return;
     }
     ctx.waitUntil(snapshotHotness(env));
-    ctx.waitUntil(checkWatchedPrices(env));
+    ctx.waitUntil(checkWatchedPrices(env, ctx, 0));
     // Forum/YouTube/eBay-sold/Reddit intel runs as a separate invocation via
     // the worker's own URL so it gets its own free-plan subrequest budget.
     ctx.waitUntil(fetch(`${WORKER_SELF_URL}/api/cron-intel`, {
@@ -2222,7 +2307,7 @@ export default {
     }
 
     if (incomingUrl.pathname === "/api/watchlist") {
-      return handleWatchlist(request, env, cors, incomingUrl);
+      return handleWatchlist(request, env, cors, incomingUrl, ctx);
     }
 
     if (incomingUrl.pathname === "/api/ignore") {
@@ -2234,7 +2319,11 @@ export default {
     }
 
     if (incomingUrl.pathname === "/api/cron-intel") {
-      return handleCronIntel(request, env, cors);
+      return handleCronIntel(request, env, ctx, cors);
+    }
+
+    if (incomingUrl.pathname === "/api/cron-prices") {
+      return handleCronPrices(request, env, ctx, cors);
     }
 
     if (incomingUrl.pathname === "/api/digest") {
