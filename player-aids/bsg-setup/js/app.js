@@ -636,8 +636,11 @@ function buildCombatChart(c) {
     .map(s => {
       const li = i => typeof i === "string"
         ? `<li>${i}</li>`
-        : `<li class="ic"><img class="li-icon" loading="lazy" src="images/charts/icn/${i.icon}.png" alt=""><span>${i.t}</span></li>`;
-      const body = `<ul>${s.items.map(li).join("")}</ul>`;
+        : i.icon
+          ? `<li class="ic"><img class="li-icon" loading="lazy" src="images/charts/icn/${i.icon}.png" alt=""><span>${i.t}</span></li>`
+          : `<li>${i.t}</li>`;
+      const items = s.items.filter(i => typeof i === "string" || !i.fleet || fleet);  // per-item fleet gating
+      const body = `<ul>${items.map(li).join("")}</ul>`;
       return `<section class="cc-sec${s.fleet ? " fleet" : ""}">
         <h5>${s.h}${s.fleet ? ` <span class="cc-flag">Cylon Fleet</span>` : ""}</h5>
         ${body}

@@ -360,8 +360,8 @@ BSG.combat = {
   sections: [
     { h: "Activating a Viper", items: [
       "When you activate a viper, choose one: <b>Launch a Viper</b>, <b>Move a Viper</b>, or <b>Attack with a Viper</b>.",
-      "Viper Mark VIIs may move <b>2</b> space areas instead of 1.",
-      "Instead of moving or attacking, a viper may <b>escort a civilian ship to safety</b>: choose 1 civilian ship in the viper's space area and shuffle it back into the pile of unused civilian ships."
+      { t: "Viper Mark VIIs may move <b>2</b> space areas instead of 1 (they start the game in the Damaged Vipers box).", fleet: true },
+      { t: "Instead of moving or attacking, a viper may <b>escort a civilian ship to safety</b>: choose 1 civilian ship in the viper's space area and shuffle it back into the pile of unused civilian ships.", fleet: true }
     ]},
     { h: "Cylon Ship Activation", items: [
       { icon: "cs-raider", t: "<b>Activate Raiders:</b> each raider carries out only the first action it can — 1) Attack a Viper (unmanned if able, else a piloted viper); 2) Destroy a Civilian Ship (current player chooses); 3) Move 1 area toward the nearest civilian ship (if tied, clockwise around Galactica); 4) Attack Galactica. If no raiders are in play, 2 raiders launch from each basestar." },
@@ -417,8 +417,9 @@ BSG.howToPlay = {
     { h: "Skill Checks", items: [
       "A check lists a <b>difficulty</b> and one or more required skill <b>colors</b>. Starting left of the current player, each player secretly adds any number of Skill cards to a pile; the current player adds the 2 Destiny-deck cards, shuffles, and splits into matching-color and non-matching piles.",
       "<b>Final strength</b> = matching total − non-matching total. Meet or beat the difficulty to <b>pass</b>; some checks list a partial-pass value between the pass and fail results.",
-      "After the last Destiny card is used, the current player rebuilds it (2 of each skill type, shuffled).",
-      { t: "<b>Treachery</b> cards count as <b>negative</b> strength in a check (they only count positive at the Airlock / Resistance HQ). Human players may not play Treachery card-<i>actions</i>.", when: c => c.has("pegasus") || c.has("daybreak"), tag: c => BSG.howToPlay._treacheryTag(c) },
+      { t: "After the last Destiny card is used, the current player rebuilds it (2 of each skill type — 10 cards, shuffled).", when: c => !c.has("pegasus") && !c.has("daybreak") },
+      { t: "After the last Destiny card is used, the current player rebuilds it with 2 of each skill type <b>including 2 Treachery</b> (12 cards) — this applies during setup and every rebuild.", when: c => c.has("pegasus") || c.has("daybreak"), tag: c => BSG.howToPlay._treacheryTag(c) },
+      { t: "<b>Treachery</b> cards count as <b>negative</b> strength in a check unless the check or location specifically counts Treachery positive (e.g. the Airlock, Resistance HQ). Human players may not play Treachery card-<i>actions</i>.", when: c => c.has("pegasus") || c.has("daybreak"), tag: c => BSG.howToPlay._treacheryTag(c) },
       { t: "<b>Skill Check Abilities</b> — a Skill card with the ability icon resolves its text whenever it’s in a check, no matter who played it; the current player resolves them in any order, never the same ability twice.", when: c => c.has("exodus") || c.has("daybreak"), tag: c => BSG.howToPlay._abilityTag(c) },
       { t: "If a Crisis/Super Crisis lists a <b>‘consequence’</b> result, resolve it whether the check passed or failed.", when: c => c.has("exodus") || c.has("daybreak"), tag: "exodus" },
       { t: "<b>Reckless</b> checks (Daybreak): after abilities resolve, flip the top Treachery card — strength &gt; 0 is discarded; strength 0 flips another and both abilities resolve. A ‘Restore Order’ card can’t make a Reckless check, and vice-versa.", when: c => c.has("daybreak"), tag: "daybreak" }
@@ -432,8 +433,9 @@ BSG.howToPlay = {
     ]},
 
     { h: "Jumping, Distance & Destinations", items: [
-      "The fleet jumps when the Jump-Prep marker reaches the <b>Auto-Jump</b> space, or when a player uses <b>FTL Control</b> (roll a D8; a low roll loses population).",
-      "To jump: remove all ships from the board, draw 2 Destination cards and keep 1 (resolve it), then reset the Jump-Prep track. Distance accumulates on the Destination cards beside the Objective card.",
+      "The fleet jumps when the Jump-Prep marker reaches the <b>Auto-Jump</b> space, or when a player uses <b>FTL Control</b> (roll a die: on <b>1–6</b> lose the population shown on the fleet’s Jump-Prep space; FTL Control can’t be used from the red zone).",
+      "To jump: remove all ships from the board, then the <b>Admiral</b> draws 2 Destination cards and chooses 1 (resolve it); reset the Jump-Prep track. Distance accumulates on the Destination cards beside the Objective card.",
+      { t: "<b>Cylon Fleet exception:</b> when the fleet jumps, civilian ships <b>stay</b> in their space areas, and Cylon ships move to the corresponding Cylon Fleet board areas instead of being removed.", when: c => c.opt("cylonFleet"), tag: "exodus" },
       "The <b>distance to win</b> is set by your Objective card (shown in the mode card above).",
       { t: "Passed <b>Mission</b> cards that show a distance number also count toward your total distance.", when: c => c.obj === "earth", tag: "daybreak" }
     ]},
@@ -450,13 +452,14 @@ BSG.howToPlay = {
       "<b>Human:</b> lose 1 morale, return your character to the box, discard your Loyalty cards, then choose a new available character. If no character is available, the humans lose.",
       "<b>Cylon:</b> move to the Resurrection Ship and follow the revealed-Cylon procedure (but you do not draw a Super Crisis card).",
       { t: "A revealed-Cylon executee gives their remaining facedown Loyalty cards to a human player of their choice.", when: c => c.has("pegasus") || c.has("exodus") || c.has("daybreak"), tag: c => BSG.howToPlay._handoffTag(c) },
-      { t: "Also add 1 ‘You Are Not a Cylon’ card to the Loyalty deck and draw 1 new Loyalty card (kept hidden); several characters (Boomer, Helo, Apollo, Baltar, Anders) have special post-execution effects.", when: c => c.has("exodus") && !c.has("daybreak"), tag: "exodus" },
+      { t: "Also add 1 ‘You Are Not a Cylon’ card to the Loyalty deck and draw 1 new Loyalty card (kept hidden); several characters (Boomer, Helo, Apollo, Baltar, Anders) have special post-execution effects. (A Cylon Leader ignores effects that add-and-draw Loyalty cards.)", when: c => c.has("exodus"), tag: "exodus" },
       { t: "During ‘Discard Cards’ also discard Mutiny cards and miracle tokens; the new character gains no miracle token. If the executee was the Mutineer, the ‘You Are a Mutineer’ card is kept or passed per the reveal; the alternate Tom Zarek draws a Mutiny card.", when: c => c.has("daybreak"), tag: "daybreak" }
     ]},
 
     { h: "Revealed Cylons & Infiltration", items: [
-      "On revealing as a Cylon: discard down to the hand limit, lose any Titles, move to the Resurrection Ship, take a <b>Super Crisis</b> card, and end your turn (you draw no more Crisis cards).",
-      "A revealed Cylon’s turn: draw 2 Skill cards of any type (max 1 per deck), move only among Cylon locations, and use Cylon location actions — skipping the Crisis / Activate-Ships / Prepare-for-Jump steps.",
+      "On revealing as a Cylon: discard down to <b>3 Skill cards</b>, lose any Titles, move to the Resurrection Ship, take a <b>Super Crisis</b> card, and end your turn (you draw no more Crisis cards).",
+      { t: "A revealed Cylon’s turn: draw 2 Skill cards of any type(s), move only among Cylon locations, and use Cylon location actions — skipping the Crisis / Activate-Ships / Prepare-for-Jump steps.", when: c => !c.has("pegasus") && !c.has("exodus") && !c.has("daybreak") },
+      { t: "A revealed Cylon’s turn: draw 2 Skill cards of any type — but <b>max 1 per Skill deck</b> — move only among Cylon locations, and use Cylon location actions, skipping the Crisis / Activate-Ships / Prepare-for-Jump steps. (Prepare-for-Jump is no longer skipped when a Cylon’s action triggers a jump icon.)", when: c => c.has("pegasus") || c.has("exodus") || c.has("daybreak"), tag: c => c.has("daybreak") ? "daybreak" : c.has("exodus") ? "exodus" : "pegasus" },
       { t: "A <b>Cylon Leader</b> is treated as a revealed Cylon EXCEPT while Infiltrating (then they act as a human). They may never hold the President, Admiral, or CAG title.", when: c => c.opt("cylonLeaders"), tag: "pegasus" },
       { t: "<b>Infiltrate</b> by moving to the (revised) Human Fleet location; while infiltrating, draw a Crisis card at the end of your turn. End infiltration by returning to the Resurrection Ship.", when: c => c.opt("cylonLeaders"), tag: "pegasus" }
     ]},
@@ -464,7 +467,7 @@ BSG.howToPlay = {
     { h: "Winning &amp; Losing", items: [
       "<b>Humans win</b> by travelling the distance on the Objective card and then making a final jump with every resource above 0.",
       "<b>Cylons win</b> by reducing any resource (food, fuel, morale, population) to 0, by destroying Galactica (enough damage tokens), or by overrunning it with boarding Centurions.",
-      "<b>Sleeper Agent phase</b> — partway through the game the remaining Loyalty cards are dealt out (the Objective card sets exactly when), so a loyal human can secretly become a Cylon.",
+      "<b>Sleeper Agent phase</b> — partway through the game (the Objective card sets exactly when) each player is dealt <b>1 more Loyalty card</b> from the deck, so a loyal human can secretly become a Cylon.",
       { t: "A <b>Cylon Leader</b> wins or loses by their Agenda / Motive cards — a Motive-driven leader can win alongside either side.", when: c => c.opt("cylonLeaders"), tag: c => c.has("daybreak") ? "daybreak" : "pegasus" },
       { t: "Each unrevealed <b>Personal Goal</b> held by a human at game end reduces a resource.", when: c => c.opt("conflictedLoyalties"), tag: "exodus" }
     ]}
