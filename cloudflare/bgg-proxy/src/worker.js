@@ -1368,46 +1368,121 @@ async function postWeeklyDigest(env) {
     communityDealsSpotted: redditDeals
   };
 
-  const system = `You write the DAILY pricing-and-procurement digest for the curator of the DFW Gaming Village board-game lending library (~${snapshot.games.length} games), posted to their Discord. The data includes a LIVE market scan run minutes ago (BGG Marketplace second-hand listings with condition, plus US retail in-stock offers) layered on our tracked price history. Rules:
-- HARD LIMIT 3200 characters. Discord markdown (** bold **, bullet lines, emoji section headers).
-- Lead with "💰 Watchlist" — one short paragraph-bullet per game in watchlistSpotlight (pre-selected as the games with real signals today), covering: today's best genuine second-hand price (with condition) and best US retail (item + delivered), how those compare to the target, the 14-day average/low and historic low (with its date), the trend direction, and a plain-spoken verdict — buy now / wait / keep watching — WITH the reasoning (e.g. "within $3 of its historic low and trending down — wait a week", or "at target and only 4 genuine copies listed — grab it").
-- If watchlistQuiet is non-empty, close the section with ONE line: "**Quiet:** N others steady" — naming at most 3 of them with their current best price where it's interesting; never itemize the whole quiet list.
+  const system = `You write the DAILY pricing-and-procurement digest for the curator of the DFW Gaming Village board-game lending library (~${snapshot.games.length} games), rendered in Discord as a series of embeds — one per spotlighted game. The data includes a LIVE market scan (BGG Marketplace second-hand listings with condition, plus US retail in-stock offers) layered on our tracked price history.
+
+OUTPUT FORMAT — a machine parses your reply, follow it EXACTLY, no text outside the delimited sections:
+===OVERVIEW===
+2-4 short lines: the day at a glance — biggest movers and best opportunities first. If watchlistQuiet is non-empty, end with one line: "**Quiet:** N others steady" (name at most 3 with their current best price where interesting; never itemize the whole quiet list).
+===GAME:<id>===
+One section per game in watchlistSpotlight, using its id, in the order given. First line EXACTLY "VERDICT: buy" or "VERDICT: wait" or "VERDICT: watch". Then 2-4 punchy lines (max 380 characters total): today's best genuine second-hand price (with condition, linked to the listing) and best US retail (item + delivered) vs the target; 14-day average/low and historic low (with its date); trend direction; then the reasoning behind the verdict (e.g. "within $3 of its historic low and trending down — wait a week", or "at target and only 4 genuine copies listed — grab it"). Don't repeat the game's name — its embed shows it.
+===EXTRA===
+"🛒 Opportunities" — at most 3 bullets: unowned games that look like smart buys today (sustained hotness streak + strong rating, or a recent price alert), two lines each: the signal, and why it matters for a lending library. Then "📣 Signals" if newExpansionOrEditionAnnouncements or communityDealsSpotted have entries (announcements can crater old-edition prices — an opportunity; community deals link to Reddit posts worth acting on fast). If neither has anything, leave this section empty.
+
+Data guidance:
 - ebaySoldBaseline is REAL eBay sold-sale history (what copies actually sold for — count, median, range, last sales). Check its source field: "ebay-official-90d" is fresh official data; "130point-historical" ends at dataThrough — still a useful value anchor, but note the through-date when it matters. ebayLiveNow, when present, is today's cheapest live eBay asking price (official API) and trackedEbayAsks is our own day-by-day history of that cheapest ask — treat those as the freshest eBay signal. When a verdict is still close, point at the game's eBay sold-prices link.
 - bggSalesWeDetected are BGG Marketplace listings we watched disappear — probable real sales at those prices. Fresh, first-party evidence of what copies sell for; weigh it alongside the eBay baseline.
 - demandAndSupply is BGG market pressure: wanting vs forTrade copies (wantPerTradeCopy — above ~5 is a seller's market where drops are unlikely; near or below 1 means soft demand), plus owners/ratings 30-day growth as popularity momentum. Use it to judge whether waiting is realistic.
 - retailOfferCountLast14d is the count of in-stock US retail offers per day — a shrinking series with rising used prices = possibly going out of print: say so and recommend buying before the spike.
 - forumChatter is recent BGG forum threads about pricing/availability/print status — cite anything decisive (reprint confirmed, sold out at publisher) with its thread link. recentVideos is fresh YouTube coverage — big-channel reviews foreshadow demand bumps.
-- If newExpansionOrEditionAnnouncements or communityDealsSpotted have entries, add a "📣 Signals" section (2-4 bullets): announcements can crater old-edition prices (opportunity!), and community deals link to Reddit posts worth acting on fast.
-- Then "🛒 Opportunities" — at most 3 bullets: unowned games that look like smart buys today (sustained hotness streak + strong rating, or a recent price alert). Two lines each: the signal, and why it matters for a lending library. Omit the section on a genuinely quiet day.
-- This posts EVERY day: on quiet days shrink naturally (a few lines) rather than padding, but never reduce to a bare "nothing happened" — the current-price snapshot per watched game is always worth stating.
+- This posts EVERY day: on quiet days the game sections shrink naturally (verdict + two lines) rather than padding, but always state the current best price so each embed stands on its own.
 - Use ONLY the data provided; never invent prices, listings, streaks, or games. Round to whole dollars except sub-$1 differences.
-- This renders inside a Discord embed: link game names as [Name](https://boardgamegeek.com/boardgame/ID); link "eBay sold prices" using the provided ebaySoldPricesLink; link "all retail offers" using storeListUrl when citing retail. Section headers as bold lines. No greeting or sign-off, no overall title (the embed supplies it).`;
+- Discord markdown inside sections: [text](url) links — link listing prices to their listing, "all retail offers" to storeListUrl, "eBay sold prices" to ebaySoldPricesLink, game names in OVERVIEW/EXTRA as [Name](https://boardgamegeek.com/boardgame/ID). No greeting, no sign-off, no overall title.`;
 
   let content;
   try {
-    content = await askClaude(env, system, JSON.stringify(data), 2000);
+    content = await askClaude(env, system, JSON.stringify(data), 2800);
   } catch (err) {
     const error = String(err.message).slice(0, 300);
     await env.HOT_HISTORY.put(LAST_DIGEST_KEY, JSON.stringify({ date: new Date().toISOString(), posted: false, error }));
     return { ok: false, error };
   }
-  const trimmed = content.length > 3900 ? content.slice(0, 3900) + "…" : content;
-  const res = await fetch(env.ALERT_WEBHOOK.trim(), {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      embeds: [{
-        title: "📚 Daily Library Digest",
-        description: trimmed,
-        color: 0xF5C542,
-        thumbnail: digestThumb ? { url: digestThumb } : undefined,
-        footer: { text: `DFWGV Librarian · live scan of ${watch.length} watched games · BGG Marketplace + US retail + eBay sold` },
-        timestamp: new Date().toISOString()
-      }]
-    })
-  });
-  await env.HOT_HISTORY.put(LAST_DIGEST_KEY, JSON.stringify({ date: new Date().toISOString(), posted: res.ok, content: trimmed }));
-  return { ok: res.ok, error: res.ok ? "" : `Discord ${res.status}`, preview: trimmed.slice(0, 400) };
+  // Parse the delimited sections into per-game embeds with box art.
+  const parsed = { overview: "", games: [], extra: "" };
+  {
+    const marks = [];
+    const re = /===\s*(OVERVIEW|GAME:(\d+)|EXTRA)\s*===/g;
+    let m;
+    while ((m = re.exec(content))) marks.push({ key: m[1], id: m[2], at: m.index, end: re.lastIndex });
+    for (let i = 0; i < marks.length; i++) {
+      const body = content.slice(marks[i].end, i + 1 < marks.length ? marks[i + 1].at : undefined).trim();
+      if (marks[i].key === "OVERVIEW") parsed.overview = body;
+      else if (marks[i].key === "EXTRA") parsed.extra = body;
+      else if (marks[i].id) parsed.games.push({ id: marks[i].id, body });
+    }
+  }
+
+  const VERDICT_COLORS = { buy: 0x2ECC71, wait: 0xE67E22, watch: 0xF5C542 };
+  const stamp = new Date().toISOString();
+  const footerText = `DFWGV Librarian · live scan of ${watch.length} watched games · BGG Marketplace + US retail + eBay sold`;
+  const embeds = [];
+  if (parsed.games.length) {
+    embeds.push({
+      title: "📚 Daily Library Digest",
+      description: (parsed.overview || "Today's watchlist briefing:").slice(0, 3900),
+      color: 0xF5C542,
+      footer: { text: footerText },
+      timestamp: stamp
+    });
+    for (const sec of parsed.games) {
+      const w = watch.find((x) => String(x.id) === sec.id);
+      const vm = sec.body.match(/^VERDICT:\s*(buy|wait|watch)\s*\n?/i);
+      const verdict = vm ? vm[1].toLowerCase() : "watch";
+      const body = (vm ? sec.body.slice(vm[0].length) : sec.body).trim();
+      const tag = verdict === "buy" ? "🟢 BUY" : verdict === "wait" ? "🟠 WAIT" : "🟡 WATCH";
+      embeds.push({
+        title: `${tag} — ${(w && w.name) || `Game ${sec.id}`}`,
+        url: `https://boardgamegeek.com/boardgame/${sec.id}`,
+        description: body.slice(0, 1500),
+        color: VERDICT_COLORS[verdict],
+        thumbnail: (liveMarket[sec.id] && liveMarket[sec.id].thumb) ? { url: liveMarket[sec.id].thumb } : undefined
+      });
+    }
+    if (parsed.extra) {
+      embeds.push({ title: "🛒 Opportunities & 📣 Signals", description: parsed.extra.slice(0, 3900), color: 0xF5C542 });
+    }
+  } else {
+    // Claude ignored the format — fall back to the classic single embed.
+    embeds.push({
+      title: "📚 Daily Library Digest",
+      description: content.slice(0, 3900),
+      color: 0xF5C542,
+      thumbnail: digestThumb ? { url: digestThumb } : undefined,
+      footer: { text: footerText },
+      timestamp: stamp
+    });
+  }
+
+  // Discord caps 10 embeds and ~6000 chars per webhook message — batch.
+  let posted = true;
+  let batch = [];
+  let batchChars = 0;
+  const flush = async () => {
+    if (!batch.length) return;
+    const res = await fetch(env.ALERT_WEBHOOK.trim(), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ embeds: batch })
+    });
+    posted = posted && res.ok;
+    batch = [];
+    batchChars = 0;
+    await new Promise((r) => setTimeout(r, 400));
+  };
+  for (const e of embeds) {
+    const size = (e.title || "").length + (e.description || "").length + ((e.footer && e.footer.text) || "").length;
+    if (batch.length >= 10 || batchChars + size > 5200) await flush();
+    batch.push(e);
+    batchChars += size;
+  }
+  await flush();
+
+  const record = parsed.games.length
+    ? [parsed.overview, ...parsed.games.map((g) => g.body), parsed.extra].filter(Boolean).join("\n\n")
+    : content;
+  await env.HOT_HISTORY.put(LAST_DIGEST_KEY, JSON.stringify({
+    date: stamp, posted, embeds: embeds.length, content: record.slice(0, 6000)
+  }));
+  return { ok: posted, error: posted ? "" : "Discord rejected one or more digest messages", preview: record.slice(0, 400) };
 }
 
 /** Token-gated manual digest trigger (POST) / last digest (GET). */
