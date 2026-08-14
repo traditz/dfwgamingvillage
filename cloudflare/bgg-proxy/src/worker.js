@@ -1869,32 +1869,72 @@ async function handlePriceAnalysis(request, env, cors) {
     }
   };
 
-  const system = `You are a board-game price analyst advising a lending-library curator on acquiring "${name}". Using ONLY the JSON data provided, write a concise analysis, max 1700 characters, Discord-style markdown. Sections:
-**Best buys right now** — cheapest genuine second-hand listing (price, condition, its direct link) and cheapest US retail (item + delivered price, link to the store list).
-**Market picture** — listing counts, price spread used vs new, what was filtered out (non-game accessory listings), anything notable. Include today's cheapest live eBay ask if ebayLiveNow has data, BGG market pressure from bggDemandAndSupply (wanting vs for-trade copies) if present, and recentYouTubeCoverage (fresh coverage — especially big channels — foreshadows demand and price bumps; cite channel and link).
-**History** — lead with what copies actually sell for: ebaySoldHistory (REAL eBay sold sales; note dataThrough if the source is historical) and bggSalesWeDetected (BGG listings we watched disappear — probable sales, fresh and first-party). Then our tracked data if it exists: historic low with its date, averages, how today compares; otherwise say tracking starts once the game is watched.
-**Verdict** — buy now or wait, a fair target price to set (anchor it to real sold prices when available), one sentence of reasoning. If forumChatter contains print-status or availability news that changes the calculus (reprint incoming, sold out at publisher), say so and cite the thread link.
-Round to whole dollars. Angle-bracket links like <url>. Never invent numbers.`;
+  const system = `You are a board-game price analyst advising a lending-library curator on acquiring "${name}". Use ONLY the JSON data provided; never invent numbers; round to whole dollars; markdown links as [text](url).
+
+OUTPUT FORMAT — a machine parses your reply, follow it EXACTLY, no text outside the delimited sections:
+===VERDICT===
+First line EXACTLY "VERDICT: buy" or "VERDICT: wait" or "VERDICT: watch". Then 1-3 lines: the fair target price to set (anchored to real sold prices when available) and the core reasoning. If forumChatter contains print-status or availability news that changes the calculus (reprint incoming, sold out at publisher), cite it with its thread link.
+===BEST BUYS===
+Max 900 characters, bullet lines: cheapest genuine second-hand listing (price, condition, [its listing](link)), cheapest US retail (item + delivered, [all retail offers](storeListUrl)), and today's cheapest live eBay ask if ebayLiveNow has data.
+===MARKET===
+Max 900 characters, bullet lines: listing counts and price spread used vs new, what was filtered out (accessory/promo listings), BGG demand pressure from bggDemandAndSupply (wanting vs for-trade copies) if present, and recentYouTubeCoverage (fresh coverage — especially big channels — foreshadows demand and price bumps; cite channel and link).
+===HISTORY===
+Max 900 characters, bullet lines: real sold prices FIRST — ebaySoldHistory (note dataThrough if the source is historical) and bggSalesWeDetected (probable sales from vanished BGG listings, fresh and first-party) — then our tracked history if it exists (historic low with date, averages, how today compares); otherwise note tracking starts once the game is watched.`;
 
   try {
-    const analysis = await askClaude(env, system, JSON.stringify(data), 1200);
-    // Also post the brief to Discord so it lives alongside the price alerts.
+    const content = await askClaude(env, system, JSON.stringify(data), 1400);
+
+    // Parse the delimited sections; fall back to raw text if the model
+    // ignored the format.
+    const sec = {};
+    {
+      const marks = [];
+      const re = /===\s*(VERDICT|BEST BUYS|MARKET|HISTORY)\s*===/g;
+      let m;
+      while ((m = re.exec(content))) marks.push({ key: m[1], at: m.index, end: re.lastIndex });
+      for (let i = 0; i < marks.length; i++) {
+        sec[marks[i].key] = content.slice(marks[i].end, i + 1 < marks.length ? marks[i + 1].at : undefined).trim();
+      }
+    }
+    const structured = Boolean(sec.VERDICT && (sec["BEST BUYS"] || sec.MARKET || sec.HISTORY));
+    let verdict = "watch";
+    let verdictBody = sec.VERDICT || "";
+    const vm = verdictBody.match(/^VERDICT:\s*(buy|wait|watch)\s*\n?/i);
+    if (vm) { verdict = vm[1].toLowerCase(); verdictBody = verdictBody.slice(vm[0].length).trim(); }
+    const tag = verdict === "buy" ? "🟢 BUY" : verdict === "wait" ? "🟠 WAIT" : "🟡 WATCH";
+
+    // Readable version for the dashboard modal.
+    const analysis = structured
+      ? `${tag}\n${verdictBody}\n\n**Best buys right now**\n${sec["BEST BUYS"] || "—"}\n\n**Market picture**\n${sec.MARKET || "—"}\n\n**History & real sales**\n${sec.HISTORY || "—"}`
+      : content;
+
+    // Post to Discord: box art, verdict color, one field per section.
     let posted = false;
-    if (env.ALERT_WEBHOOK && analysis) {
-      const desc = analysis.length > 3900 ? analysis.slice(0, 3900) + "…" : analysis;
+    if (env.ALERT_WEBHOOK) {
+      const thumbs = await fetchThumbnails(env, [id]);
+      const VERDICT_COLORS = { buy: 0x2ECC71, wait: 0xE67E22, watch: 0xF5C542 };
+      const embed = {
+        title: `📊 Price Analysis — ${name}`,
+        url: `https://boardgamegeek.com/boardgame/${id}`,
+        thumbnail: thumbs[id] ? { url: thumbs[id] } : undefined,
+        color: structured ? VERDICT_COLORS[verdict] : 0x6EA8FF,
+        footer: { text: "DFWGV Librarian · on-demand price analysis" },
+        timestamp: new Date().toISOString()
+      };
+      if (structured) {
+        embed.description = `**${tag}** — ${verdictBody}`.slice(0, 3900);
+        embed.fields = [
+          sec["BEST BUYS"] ? { name: "💰 Best buys right now", value: sec["BEST BUYS"].slice(0, 1024), inline: false } : null,
+          sec.MARKET ? { name: "📈 Market picture", value: sec.MARKET.slice(0, 1024), inline: false } : null,
+          sec.HISTORY ? { name: "📜 History & real sales", value: sec.HISTORY.slice(0, 1024), inline: false } : null
+        ].filter(Boolean);
+      } else {
+        embed.description = content.slice(0, 3900);
+      }
       const res = await fetch(env.ALERT_WEBHOOK.trim(), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          embeds: [{
-            title: `📊 Price Analysis — ${name}`,
-            url: `https://boardgamegeek.com/boardgame/${id}`,
-            description: desc,
-            color: 0x6EA8FF,
-            footer: { text: "DFWGV Librarian · on-demand price analysis" },
-            timestamp: new Date().toISOString()
-          }]
-        })
+        body: JSON.stringify({ embeds: [embed] })
       });
       posted = res.ok;
     }
