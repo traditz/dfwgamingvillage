@@ -2122,6 +2122,18 @@ async function checkWatchedPrices(env, ctx, start = 0) {
     };
     const eb = ebaySoldCache[g.id];
     const CHANNELS = { r: "new retail", m: "second-hand", e: "eBay live" };
+    // Full per-channel picture for the alert embed's structured sections.
+    const chanData = (key) => {
+      const ctx = ctxFor(key);
+      if (!snap[key] && !ctx.histLow) return null;
+      return {
+        now: snap[key] || null,
+        cond: key === "m" ? (snap.mCond || "") : key === "e" ? (snap.eCond || "") : "",
+        count: (key === "r" ? snap.rCount : key === "m" ? snap.mCount : snap.eCount) || 0,
+        link: linkFor(key),
+        ...ctx
+      };
+    };
     const enrich = (key) => ({
       price: snap[key],
       target: g.target || null,
@@ -2131,6 +2143,7 @@ async function checkWatchedPrices(env, ctx, start = 0) {
         .filter((k) => k !== key && snap[k])
         .map((k) => ({ label: CHANNELS[k], price: snap[k] }))
         .sort((a, b) => a.price - b.price)[0] || null,
+      channels: { retail: chanData("r"), secondHand: chanData("m"), ebayLive: chanData("e") },
       ebaySold: eb ? { median: eb.medianSold, count: eb.soldCount, through: eb.dataThrough } : null,
       bggProbableSales: probableSaleStats(bggSold[g.id]),
       ...ctxFor(key)
@@ -2277,30 +2290,44 @@ async function sendPriceAlert(env, alerts, isTest) {
       }
 
       const money = (v) => (v || v === 0) ? `$${Math.round(v)}` : "—";
+      // One bulleted section per price channel, so retail / second-hand /
+      // eBay each read as their own block.
+      const channelField = (label, unit, c) => {
+        if (!c) return null;
+        const lines = [
+          c.now
+            ? `• Now **$${(+c.now).toFixed(2)}**${c.cond ? ` (${c.cond})` : ""}${c.count ? ` · ${c.count} ${unit}` : ""}`
+            : "• Nothing listed today",
+          (c.low14 || c.avg30) ? `• 14d low ${money(c.low14)} · 30d avg ${money(c.avg30)}` : null,
+          c.histLow ? `• Hist. low ${money(c.histLow)} (${c.histLowDate})` : null,
+          c.now && c.link ? `• [View listings](${c.link})` : null
+        ].filter(Boolean);
+        return { name: label, value: lines.join("\n"), inline: true };
+      };
       embeds = batch.map((a) => {
+        const ch = a.channels || {};
         const fields = [
-          { name: "Price now", value: `$${(+a.price || 0).toFixed(2)}${a.cond ? ` (${a.cond})` : ""}`, inline: true },
-          { name: "Your target", value: a.target ? `$${a.target}` : "—", inline: true },
-          { name: a.other ? `Cheapest ${a.other.label}` : "​", value: a.other ? money(a.other.price) : "​", inline: true },
-          { name: "14-day low", value: money(a.low14), inline: true },
-          { name: "30-day avg", value: money(a.avg30), inline: true },
-          { name: "Historic low", value: a.histLow ? `${money(a.histLow)} (${a.histLowDate}, ${a.trackedDays}d tracked)` : "—", inline: true }
-        ];
-        if (a.ebaySold) {
-          fields.push({ name: "eBay sold (real sales)", value: `${money(a.ebaySold.median)} median · ${a.ebaySold.count} sales thru ${a.ebaySold.through}`, inline: true });
+          channelField("🏪 New retail", "offers", ch.retail),
+          channelField("🔄 Second-hand (BGG)", "listings", ch.secondHand),
+          channelField("🛒 eBay live", "asks", ch.ebayLive)
+        ].filter(Boolean);
+        const sold = [
+          a.ebaySold ? `• eBay: ${money(a.ebaySold.median)} median · ${a.ebaySold.count} sales thru ${a.ebaySold.through}` : null,
+          a.bggProbableSales ? `• BGG (detected): ${money(a.bggProbableSales.median)} median · ${a.bggProbableSales.detectedSales} copies, latest ${a.bggProbableSales.newest}` : null
+        ].filter(Boolean);
+        if (sold.length) {
+          fields.push({ name: "🧾 Real sale prices", value: sold.join("\n"), inline: false });
         }
-        if (a.bggProbableSales) {
-          fields.push({ name: "BGG sales we detected", value: `${money(a.bggProbableSales.median)} median · ${a.bggProbableSales.detectedSales} copies, latest ${a.bggProbableSales.newest}`, inline: true });
-        }
-        if (a.counts && (a.counts.used || a.counts.retail || a.counts.ebay)) {
-          const parts = [`${a.counts.used} second-hand`, `${a.counts.retail} retail offers`];
-          if (a.counts.ebay) parts.push(`${a.counts.ebay} eBay listings`);
-          fields.push({ name: "Genuine listings today", value: parts.join(" · "), inline: a.ebaySold ? true : false });
-        }
+        const headline = [
+          `**${a.channel}** · ${a.note}`,
+          `🎯 Target: ${a.target ? `$${a.target}` : "none set (automatic rules)"}`,
+          takes[a.id] ? `💡 ${takes[a.id]}` : null,
+          `[View listing](${a.link || `https://boardgamegeek.com/boardgame/${a.id}`}) · [eBay sold prices](https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(`${a.name} board game`)}&LH_Sold=1&LH_Complete=1&LH_PrefLoc=1)`
+        ].filter(Boolean).join("\n");
         return {
           title: `🎲 Price Alert — ${a.name}`,
           url: `https://boardgamegeek.com/boardgame/${a.id}`,
-          description: `**${a.channel}** · ${a.note}\n${takes[a.id] ? `💡 ${takes[a.id]}\n` : ""}[View listing](${a.link || `https://boardgamegeek.com/boardgame/${a.id}`}) · [eBay sold prices](https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(`${a.name} board game`)}&LH_Sold=1&LH_Complete=1&LH_PrefLoc=1)`,
+          description: headline,
           fields,
           thumbnail: thumbs[a.id] ? { url: thumbs[a.id] } : undefined,
           color: 0x35B8A6,
