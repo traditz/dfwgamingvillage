@@ -898,7 +898,8 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function syncWatchButtons() {
-    document.querySelectorAll('[data-watch-id]').forEach((btn) => {
+    // .adm-unwatch buttons keep their explicit "Remove" label.
+    document.querySelectorAll('[data-watch-id]:not(.adm-unwatch)').forEach((btn) => {
       const watching = watchSet.has(btn.dataset.watchId);
       btn.textContent = watching ? 'Watching ✓' : 'Watch';
       btn.classList.toggle('active', watching);
@@ -959,7 +960,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <td>${money(latest(g.id, 'm'))}</td>
             <td><span class="adm-target-wrap">$<input type="number" class="adm-target" data-target-id="${g.id}" data-target-name="${esc(g.name)}" min="1" step="1" value="${g.target || ''}" placeholder="auto" title="Alert at or below this price; blank uses the automatic rules"></span></td>
             <td class="adm-dim">${money(avg(g.id, 'r'))} / ${money(avg(g.id, 'm'))}</td>
-            <td>${watchBtn(g.id, g.name)} <button type="button" class="adm-mini" data-price-id="${g.id}" data-price-name="${esc(g.name)}">Price</button> ${analyzeBtn(g.id, g.name)}</td>
+            <td><button type="button" class="adm-mini" data-price-id="${g.id}" data-price-name="${esc(g.name)}">Price</button> ${analyzeBtn(g.id, g.name)} <button type="button" class="adm-mini adm-unwatch" data-watch-id="${g.id}" data-watch-name="${esc(g.name)}" title="Stop watching this game (alerts and tracking stop)">✕ Remove</button></td>
           </tr>`).join('')}
         </tbody>
       </table></div>
@@ -1110,6 +1111,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     const btn = e.target.closest('[data-watch-id]');
     if (!btn) return;
+    if (btn.classList.contains('adm-unwatch') &&
+        !confirm(`Stop watching "${btn.dataset.watchName}"? Price alerts and tracking for it will stop.`)) {
+      return;
+    }
     document.querySelectorAll(`[data-watch-id="${btn.dataset.watchId}"]`).forEach((b) => { b.disabled = true; });
     try {
       let res;
