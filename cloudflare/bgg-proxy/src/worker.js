@@ -1840,6 +1840,14 @@ async function handlePriceAnalysis(request, env, cors) {
   } catch { /* optional */ }
   const chatter = await fetchForumChatter(env, id);
 
+  // 6. YouTube buzz: staged intel first (watched games), else a live search.
+  let videos = null;
+  try {
+    const gi = JSON.parse((await env.HOT_HISTORY.get(GAME_INTEL_KEY)) || "{}")[id];
+    if (gi && gi.videos && gi.videos.length) videos = gi.videos;
+  } catch { /* optional */ }
+  if (!videos) videos = await fetchRecentVideos(env, name);
+
   const q = encodeURIComponent(`${name} board game`);
   const data = {
     game: name,
@@ -1850,6 +1858,7 @@ async function handlePriceAnalysis(request, env, cors) {
     bggSalesWeDetected: probableSaleStats(bggSoldMap[id]) || "none detected yet",
     bggDemandAndSupply: demandNow || "no snapshot yet (builds daily for watched games)",
     forumChatter: chatter.length ? chatter : "no recent pricing/availability threads",
+    recentYouTubeCoverage: videos || "none found in the last 7 days (or YouTube key not set)",
     trackedHistory: tracked || "not on the watchlist — no tracked history yet",
     watchTarget: watched ? watched.target || null : null,
     recentAlerts: alerts,
@@ -1862,7 +1871,7 @@ async function handlePriceAnalysis(request, env, cors) {
 
   const system = `You are a board-game price analyst advising a lending-library curator on acquiring "${name}". Using ONLY the JSON data provided, write a concise analysis, max 1700 characters, Discord-style markdown. Sections:
 **Best buys right now** — cheapest genuine second-hand listing (price, condition, its direct link) and cheapest US retail (item + delivered price, link to the store list).
-**Market picture** — listing counts, price spread used vs new, what was filtered out (non-game accessory listings), anything notable. Include today's cheapest live eBay ask if ebayLiveNow has data, and BGG market pressure from bggDemandAndSupply (wanting vs for-trade copies) if present.
+**Market picture** — listing counts, price spread used vs new, what was filtered out (non-game accessory listings), anything notable. Include today's cheapest live eBay ask if ebayLiveNow has data, BGG market pressure from bggDemandAndSupply (wanting vs for-trade copies) if present, and recentYouTubeCoverage (fresh coverage — especially big channels — foreshadows demand and price bumps; cite channel and link).
 **History** — lead with what copies actually sell for: ebaySoldHistory (REAL eBay sold sales; note dataThrough if the source is historical) and bggSalesWeDetected (BGG listings we watched disappear — probable sales, fresh and first-party). Then our tracked data if it exists: historic low with its date, averages, how today compares; otherwise say tracking starts once the game is watched.
 **Verdict** — buy now or wait, a fair target price to set (anchor it to real sold prices when available), one sentence of reasoning. If forumChatter contains print-status or availability news that changes the calculus (reprint incoming, sold out at publisher), say so and cite the thread link.
 Round to whole dollars. Angle-bracket links like <url>. Never invent numbers.`;
