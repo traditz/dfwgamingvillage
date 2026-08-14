@@ -158,10 +158,12 @@ Beyond prices, the crons build market/buzz intelligence per watched game:
   thread links.
 - **Reddit deal-sniping (`checkRedditDeals`)** — 6-hourly scan of
   r/boardgamedeals and r/BoardGameExchange for posts naming watched games;
-  new matches post a purple Discord embed and feed the digest. Needs the
-  free `REDDIT_CLIENT_ID`/`REDDIT_CLIENT_SECRET` secrets (script app at
-  reddit.com/prefs/apps). Facebook Marketplace/groups are NOT integrable
-  (no API, login-walled, ToS) — Reddit BST is the accessible analog.
+  new matches post a purple Discord embed and feed the digest. Uses
+  Reddit's public **RSS feeds** (`/r/<sub>/new.rss`) — no API key needed;
+  the `.json` endpoints are 403-blocked but `.rss` answers even from
+  Cloudflare datacenter IPs (verified). ~8 requests/day total. Facebook
+  Marketplace/groups are NOT integrable (no API, login-walled, ToS) —
+  Reddit BST is the accessible analog.
 - **YouTube review radar (`fetchRecentVideos`)** — last-7-days coverage per
   watched game in the digest. Needs the free `YOUTUBE_API_KEY` secret
   (Google Cloud console, YouTube Data API v3).

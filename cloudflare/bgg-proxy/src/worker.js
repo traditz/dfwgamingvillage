@@ -934,32 +934,14 @@ async function fetchRecentVideos(env, name) {
 }
 
 /** Scans r/boardgamedeals and r/BoardGameExchange for fresh posts naming a
- *  watched game (needs free REDDIT_CLIENT_ID/REDDIT_CLIENT_SECRET). Alerts
- *  Discord for new matches and stores them for the digest. */
+ *  watched game, via Reddit's public RSS feeds — no API key needed (the
+ *  .json endpoints are 403-blocked, but .rss answers even from Cloudflare's
+ *  datacenter IPs). Alerts Discord for new matches and stores them for the
+ *  digest. */
 async function checkRedditDeals(env) {
-  if (!env.REDDIT_CLIENT_ID || !env.REDDIT_CLIENT_SECRET) return { ok: false, reason: "not configured" };
   const watchlist = JSON.parse((await env.HOT_HISTORY.get(WATCHLIST_KEY)) || "[]");
   if (!watchlist.length) return { ok: true, matches: 0 };
   try {
-    // App-only OAuth token, cached in KV.
-    let tok = null;
-    try { tok = JSON.parse((await env.HOT_HISTORY.get("reddit-oauth")) || "null"); } catch { /* refetch */ }
-    if (!tok || Date.now() > tok.exp) {
-      const res = await fetch("https://www.reddit.com/api/v1/access_token", {
-        method: "POST",
-        headers: {
-          Authorization: `Basic ${btoa(`${env.REDDIT_CLIENT_ID}:${env.REDDIT_CLIENT_SECRET}`)}`,
-          "Content-Type": "application/x-www-form-urlencoded",
-          "User-Agent": "dfwgv-librarian/1.0 (by /u/dfwgv)"
-        },
-        body: "grant_type=client_credentials"
-      });
-      if (!res.ok) return { ok: false, reason: `reddit token ${res.status}` };
-      const d = await res.json();
-      tok = { token: d.access_token, exp: Date.now() + (d.expires_in - 300) * 1000 };
-      await env.HOT_HISTORY.put("reddit-oauth", JSON.stringify(tok));
-    }
-
     const seen = new Set(JSON.parse((await env.HOT_HISTORY.get(REDDIT_SEEN_KEY)) || "[]"));
     const wl = watchlist.map((g) => ({
       ...g,
@@ -967,26 +949,24 @@ async function checkRedditDeals(env) {
     }));
     const matches = [];
     for (const sub of ["boardgamedeals", "BoardGameExchange"]) {
-      const res = await fetch(`https://oauth.reddit.com/r/${sub}/new?limit=50`, {
-        headers: { Authorization: `Bearer ${tok.token}`, "User-Agent": "dfwgv-librarian/1.0 (by /u/dfwgv)" }
+      const res = await fetch(`https://www.reddit.com/r/${sub}/new.rss?limit=50`, {
+        headers: { "User-Agent": "dfwgv-librarian/1.0 (board game library price watcher)" }
       });
       if (!res.ok) continue;
-      const d = await res.json();
-      for (const post of (d.data && d.data.children) || []) {
-        const p = post.data || {};
-        if (!p.id || seen.has(p.id)) continue;
-        const title = String(p.title || "");
+      const xml = await res.text();
+      for (const entry of xml.split(/<entry>/).slice(1)) {
+        const pid = (entry.match(/<id>([^<]+)<\/id>/) || [])[1] || "";
+        if (!pid || seen.has(pid)) continue;
+        const title = decodeEntities((entry.match(/<title>([^<]*)<\/title>/) || [])[1] || "");
+        const link = decodeEntities((entry.match(/<link[^>]*href="([^"]+)"/) || [])[1] || "");
+        const updated = ((entry.match(/<updated>([^<]+)/) || [])[1] || "").slice(0, 10);
         const t = title.toLowerCase();
         const hit = wl.find((g) => g.words.length && g.words.every((w) => t.includes(w)));
         if (!hit) continue;
-        matches.push({
-          game: hit.name, gameId: hit.id, title, sub,
-          url: `https://www.reddit.com${p.permalink}`,
-          date: new Date((p.created_utc || 0) * 1000).toISOString().slice(0, 10)
-        });
-        seen.add(p.id);
+        matches.push({ game: hit.name, gameId: hit.id, title, sub, url: link, date: updated });
+        seen.add(pid);
       }
-      await new Promise((r) => setTimeout(r, 300));
+      await new Promise((r) => setTimeout(r, 400));
     }
     await env.HOT_HISTORY.put(REDDIT_SEEN_KEY, JSON.stringify([...seen].slice(-500)));
 
