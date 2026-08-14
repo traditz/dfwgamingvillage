@@ -211,7 +211,46 @@ document.addEventListener('DOMContentLoaded', function () {
       for (const h of hotList) if (h.thumb && !thumbCache.has(String(h.id))) thumbCache.set(String(h.id), h.thumb);
     }
     for (const i of wishList.concat(wantList)) if (i.thumb && !thumbCache.has(String(i.id))) thumbCache.set(String(i.id), i.thumb);
+    if (!thumbCache.hydrated) {
+      thumbCache.hydrated = true;
+      try {
+        const stored = JSON.parse(localStorage.getItem('dfwgvAdminThumbs') || '{}');
+        for (const [tid, url] of Object.entries(stored)) if (!thumbCache.has(tid)) thumbCache.set(tid, url);
+      } catch { /* cache optional */ }
+    }
     return thumbCache.get(String(id)) || '';
+  }
+
+  // Games added from the BGG-wide search aren't in any local snapshot, so
+  // their box art is fetched live (batched) and remembered in localStorage.
+  const thumbAttempted = new Set();
+  async function hydrateThumbs(ids) {
+    thumbFor('0'); // ensure the cache is initialized
+    const missing = [...new Set(ids.map(String))]
+      .filter((id) => !thumbCache.get(id) && !thumbAttempted.has(id))
+      .slice(0, 20);
+    if (!missing.length) return 0;
+    missing.forEach((id) => thumbAttempted.add(id));
+    try {
+      const res = await fetch(`${WORKER}/api/bgg-thing?id=${missing.join(',')}`);
+      if (!res.ok) return 0;
+      const xml = new DOMParser().parseFromString(await res.text(), 'text/xml');
+      let added = 0;
+      let stored = {};
+      try { stored = JSON.parse(localStorage.getItem('dfwgvAdminThumbs') || '{}'); } catch { /* rebuild */ }
+      for (const item of xml.querySelectorAll('item')) {
+        const id = item.getAttribute('id');
+        const url = item.querySelector('thumbnail')?.textContent?.trim();
+        if (!id || !url) continue;
+        thumbCache.set(String(id), url);
+        stored[id] = url;
+        added++;
+      }
+      const keys = Object.keys(stored);
+      if (keys.length > 300) for (const k of keys.slice(0, keys.length - 300)) delete stored[k];
+      localStorage.setItem('dfwgvAdminThumbs', JSON.stringify(stored));
+      return added;
+    } catch { return 0; }
   }
 
   // A table cell with box art beside the game text.
@@ -925,6 +964,10 @@ document.addEventListener('DOMContentLoaded', function () {
         </tbody>
       </table></div>
       <p class="adm-dim" style="margin-top:8px">Prices are sampled every 6 hours, so new additions show "–" until the next check. Alert cooldown: one ping per game per week.</p>`;
+
+    // Fetch box art for watched games no local snapshot knows (added via the
+    // BGG-wide search), then re-render once so it appears.
+    hydrateThumbs(watch.list.map((g) => g.id)).then((added) => { if (added) renderWatchPanel(); });
   }
 
   // Save a target price when its field changes (Enter or blur).
@@ -1246,6 +1289,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
     syncWatchButtons();
     loadRetail(id);
+    if (!thumb) {
+      hydrateThumbs([id]).then((added) => {
+        const h3 = out.querySelector('.adm-sub');
+        const t = thumbFor(id);
+        if (added && t && h3 && !h3.querySelector('img')) {
+          h3.insertAdjacentHTML('afterbegin', `<img class="adm-thumb" src="${esc(t)}" alt="" loading="lazy">`);
+        }
+      });
+    }
   }
 
   /**
