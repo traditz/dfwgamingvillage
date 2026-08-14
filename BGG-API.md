@@ -167,6 +167,19 @@ Beyond prices, the crons build market/buzz intelligence per watched game:
 - **YouTube review radar (`fetchRecentVideos`)** — last-7-days coverage per
   watched game in the digest. Needs the free `YOUTUBE_API_KEY` secret
   (Google Cloud console, YouTube Data API v3).
+- **Buzz Score (0–100)** — the digest computes a weighted attention score
+  per watched game from keyless sources gathered by the intel rotation:
+  Reddit r/boardgames mention velocity (public search RSS), Bluesky posts
+  (`api.bsky.app` public search — the `public.api.` host 403s), Google
+  News RSS press coverage, Wikipedia pageviews vs the game's own 3-week
+  baseline (article resolved once and cached), YouTube coverage + view
+  counts, and BGG-native momentum (Hotness streak, 30-day rating/owner
+  growth, forum activity volume, videos posted to the game's BGG page via
+  `videos=1`, live auction presence). Weights sum to 100; scores persist
+  in the `buzz-scores` KV key for trend arrows (±5 = rising/falling). The
+  score renders as a data-driven "📢 Buzz N/100 ↑ — drivers" line on each
+  digest card, boosts spotlight selection, and the digest/Analyze prompts
+  use it in verdicts (rising buzz = prices firm = buy sooner).
 - **BGG community auction tracking (`runAuctionSweep`)** — BGG auctions are
   GeekLists ("Auction & Trade" category; bids happen in item comments).
   Discovery uses the site's internal JSON feed

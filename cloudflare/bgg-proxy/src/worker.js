@@ -892,23 +892,127 @@ async function fetchForumChatter(env, id) {
     }
     const cutoff = Date.now() - 14 * 864e5;
     const chatter = [];
+    const activity = { activeThreads14d: 0, newThreads14d: 0 };
     for (const f of entry.forums) {
       const res = await fetch(`https://boardgamegeek.com/xmlapi2/forum?id=${f.fid}`, {
         headers: { Authorization: `Bearer ${env.BGG_TOKEN}` }
       });
       if (!res.ok) continue;
       const xml = await res.text();
-      for (const t of xml.matchAll(/<thread\s+id="(\d+)"\s+subject="([^"]*)"[^>]*lastpostdate="([^"]*)"/g)) {
+      for (const t of xml.matchAll(/<thread\s+id="(\d+)"\s+subject="([^"]*)"[^>]*?postdate="([^"]*)"[^>]*lastpostdate="([^"]*)"/g)) {
         const subject = decodeEntities(t[2]);
-        const last = new Date(t[3]);
+        const posted = new Date(t[3]);
+        const last = new Date(t[4]);
         if (isNaN(last) || last.getTime() < cutoff) continue;
+        activity.activeThreads14d++;
+        if (!isNaN(posted) && posted.getTime() >= cutoff) activity.newThreads14d++;
         if (!FORUM_KEYWORDS.test(subject)) continue;
         chatter.push({ title: subject, forum: f.title, lastPost: last.toISOString().slice(0, 10), url: `https://boardgamegeek.com/thread/${t[1]}` });
       }
       await new Promise((r) => setTimeout(r, 400));
     }
-    return chatter.sort((a, b) => b.lastPost.localeCompare(a.lastPost)).slice(0, 5);
-  } catch { return []; }
+    return { list: chatter.sort((a, b) => b.lastPost.localeCompare(a.lastPost)).slice(0, 5), activity };
+  } catch { return { list: [], activity: null }; }
+}
+
+/* -------- buzz signals (all keyless; gathered by the intel rotation) -------- */
+
+const BUZZ_WINDOW_MS = 14 * 864e5;
+
+/** Posts in r/boardgames naming the game, last 14 days (public search RSS). */
+async function fetchRedditMentions(name) {
+  try {
+    const res = await fetch(`https://www.reddit.com/r/boardgames/search.rss?q=${encodeURIComponent(`"${name}"`)}&restrict_sr=on&sort=new&limit=25`, {
+      headers: { "User-Agent": "dfwgv-librarian/1.0 (board game library buzz tracker)" }
+    });
+    if (!res.ok) return null;
+    const xml = await res.text();
+    let count = 0;
+    for (const entry of xml.split(/<entry>/).slice(1)) {
+      const updated = new Date((entry.match(/<updated>([^<]+)/) || [])[1] || "");
+      if (!isNaN(updated) && Date.now() - updated.getTime() < BUZZ_WINDOW_MS) count++;
+    }
+    return count;
+  } catch { return null; }
+}
+
+/** Bluesky posts mentioning the game, last 14 days (public search API —
+ *  api.bsky.app; the public.api.bsky.app host 403s). */
+async function fetchBlueskyMentions(name) {
+  try {
+    const res = await fetch(`https://api.bsky.app/xrpc/app.bsky.feed.searchPosts?q=${encodeURIComponent(`${name} board game`)}&limit=25`, {
+      headers: { "User-Agent": BROWSER_UA }
+    });
+    if (!res.ok) return null;
+    const d = await res.json();
+    let count = 0;
+    for (const p of d.posts || []) {
+      const t = new Date(p.indexedAt || (p.record && p.record.createdAt) || "");
+      if (!isNaN(t) && Date.now() - t.getTime() < BUZZ_WINDOW_MS) count++;
+    }
+    return count;
+  } catch { return null; }
+}
+
+/** Mainstream press coverage via Google News RSS: 14-day count + latest. */
+async function fetchNewsBuzz(name) {
+  try {
+    const res = await fetch(`https://news.google.com/rss/search?q=${encodeURIComponent(`"${name}" board game`)}&hl=en-US&gl=US&ceid=US:en`, {
+      headers: { "User-Agent": BROWSER_UA }
+    });
+    if (!res.ok) return null;
+    const items = [];
+    for (const item of (await res.text()).split(/<item>/).slice(1)) {
+      const title = decodeEntities(((item.match(/<title>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/) || [])[1] || "").trim());
+      const link = ((item.match(/<link>([^<]+)<\/link>/) || [])[1] || "").trim();
+      const pub = new Date((item.match(/<pubDate>([^<]+)/) || [])[1] || "");
+      if (!title || isNaN(pub)) continue;
+      if (Date.now() - pub.getTime() < BUZZ_WINDOW_MS) items.push({ title, link, date: pub });
+    }
+    if (!items.length) return { count14d: 0 };
+    items.sort((a, b) => b.date - a.date);
+    return {
+      count14d: items.length,
+      latest: { title: items[0].title.slice(0, 120), url: items[0].link, date: items[0].date.toISOString().slice(0, 10) }
+    };
+  } catch { return null; }
+}
+
+/** General-public interest via Wikipedia pageviews: article resolved once
+ *  (cached on the intel entry), then recent-7-day daily average vs the
+ *  prior three weeks (1.0 = flat). */
+async function fetchWikiInterest(name, cachedArticle) {
+  try {
+    let article = cachedArticle;
+    if (article === undefined) {
+      const res = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(`${name} board game`)}&format=json&srlimit=3`, {
+        headers: { "User-Agent": BROWSER_UA }
+      });
+      if (!res.ok) return null;
+      const d = await res.json();
+      const norm = (s) => String(s).toLowerCase().replace(/\s*\([^)]*\)\s*$/, "").replace(/[^a-z0-9]+/g, " ").trim();
+      const hit = (((d.query || {}).search) || []).find((s) => norm(s.title) === norm(name));
+      article = hit ? hit.title : null;
+    }
+    if (!article) return { article: null };
+    const fmt = (d) => d.toISOString().slice(0, 10).replace(/-/g, "") + "00";
+    const end = new Date(Date.now() - 864e5);
+    const start = new Date(Date.now() - 29 * 864e5);
+    const res2 = await fetch(`https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/${encodeURIComponent(article.replace(/ /g, "_"))}/daily/${fmt(start)}/${fmt(end)}`, {
+      headers: { "User-Agent": BROWSER_UA }
+    });
+    if (!res2.ok) return { article };
+    const views = (((await res2.json()).items) || []).map((i) => i.views);
+    if (views.length < 10) return { article };
+    const avg = (a) => a.reduce((x, y) => x + y, 0) / a.length;
+    const recent = avg(views.slice(-7));
+    const prior = avg(views.slice(0, -7));
+    return {
+      article,
+      dailyViews7d: Math.round(recent),
+      vsPrior3wks: Math.round((recent / Math.max(prior, 1)) * 100) / 100
+    };
+  } catch { return null; }
 }
 
 /** Recent big-channel YouTube coverage of a game (needs YOUTUBE_API_KEY). */
@@ -924,12 +1028,24 @@ async function fetchRecentVideos(env, name) {
     const vids = (d.items || [])
       .filter((v) => v.id && v.id.videoId && relevantTitle(decodeEntities(v.snippet.title), name))
       .map((v) => ({
+        id: v.id.videoId,
         title: decodeEntities(v.snippet.title),
         channel: v.snippet.channelTitle,
         published: String(v.snippet.publishedAt).slice(0, 10),
         url: `https://www.youtube.com/watch?v=${v.id.videoId}`
-      }));
-    return vids.length ? vids.slice(0, 3) : null;
+      }))
+      .slice(0, 3);
+    if (!vids.length) return null;
+    try { // view counts turn "a video exists" into "it has 80k views" (1 quota unit)
+      const r2 = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${vids.map((v) => v.id).join(",")}&key=${env.YOUTUBE_API_KEY}`);
+      if (r2.ok) {
+        const stats = {};
+        for (const it of ((await r2.json()).items) || []) stats[it.id] = +((it.statistics || {}).viewCount || 0);
+        for (const v of vids) if (stats[v.id]) v.views = stats[v.id];
+      }
+    } catch { /* views are optional */ }
+    for (const v of vids) delete v.id;
+    return vids;
   } catch { return null; }
 }
 
@@ -1011,10 +1127,10 @@ async function gatherIntelSlice(env, includeReddit) {
     try { cursor = Number(JSON.parse((await env.HOT_HISTORY.get(INTEL_CURSOR_KEY)) || "0")) || 0; } catch { /* restart */ }
     let intel = {};
     try { intel = JSON.parse((await env.HOT_HISTORY.get(GAME_INTEL_KEY)) || "{}"); } catch { /* rebuild */ }
-    const SLICE = 4;
+    const SLICE = 3; // smaller slices: buzz gathering costs ~11 subrequests/game
     for (let i = 0; i < Math.min(SLICE, watchlist.length); i++) {
       const g = watchlist[(cursor + i) % watchlist.length];
-      const chatter = await fetchForumChatter(env, g.id);
+      const forum = await fetchForumChatter(env, g.id);
       // YouTube searches are the quota-expensive part (100 units each of a
       // 10k/day budget) — refresh a game's videos at most every ~40 hours.
       const prev = intel[g.id] || {};
@@ -1025,7 +1141,19 @@ async function gatherIntelSlice(env, includeReddit) {
         videosAt = Date.now();
       }
       await fetchEbaySold(env, g.id, g.name); // refresh the sold baseline within its TTL
-      intel[g.id] = { name: g.name, chatter, videos, videosAt, fetchedAt: Date.now() };
+      // Community buzz signals (all keyless).
+      const prevWiki = prev.buzz && prev.buzz.wiki ? prev.buzz.wiki.article : undefined;
+      const buzz = {
+        redditMentions14d: await fetchRedditMentions(g.name),
+        bluesky14d: await fetchBlueskyMentions(g.name),
+        news: await fetchNewsBuzz(g.name),
+        wiki: await fetchWikiInterest(g.name, prevWiki),
+        fetchedAt: Date.now()
+      };
+      intel[g.id] = {
+        name: g.name, chatter: forum.list, forumActivity: forum.activity,
+        videos, videosAt, buzz, fetchedAt: Date.now()
+      };
       await new Promise((r) => setTimeout(r, 400));
     }
     const ids = new Set(watchlist.map((g) => g.id));
@@ -1034,7 +1162,7 @@ async function gatherIntelSlice(env, includeReddit) {
     await env.HOT_HISTORY.put(INTEL_CURSOR_KEY, JSON.stringify((cursor + SLICE) % watchlist.length));
   }
   if (includeReddit) await checkRedditDeals(env);
-  return watchlist.length > 4; // more games than one slice covers?
+  return watchlist.length > 3; // more games than one slice covers?
 }
 
 /* ---------------- BGG community auctions (geeklist-based) ---------------- */
@@ -1193,7 +1321,7 @@ async function handleCronIntel(request, env, ctx, cors) {
   // background so the calling invocation never blocks on us.
   ctx.waitUntil((async () => {
     const more = await gatherIntelSlice(env, hops === 0);
-    if (more && hops < 6) {
+    if (more && hops < 8) {
       await fetch(`${WORKER_SELF_URL}/api/cron-intel?hops=${hops + 1}`, {
         method: "POST",
         headers: { Authorization: `Bearer ${env.ANALYTICS_ADMIN_TOKEN}` }
@@ -1304,7 +1432,7 @@ async function postWeeklyDigest(env) {
     for (let chunkStart = 0; chunkStart < watchlist.length; chunkStart += 20) {
       try {
       const chunk = watchlist.slice(chunkStart, chunkStart + 20);
-      const res = await fetch(`${BGG_THING_URL}?id=${chunk.map((g) => g.id).join(",")}&marketplace=1&stats=1`, {
+      const res = await fetch(`${BGG_THING_URL}?id=${chunk.map((g) => g.id).join(",")}&marketplace=1&stats=1&videos=1`, {
         headers: { Authorization: `Bearer ${env.BGG_TOKEN}` }
       });
       if (res.ok) {
@@ -1350,6 +1478,15 @@ async function postWeeklyDigest(env) {
           }
           knownLinks[id] = links.map((l) => l.lid);
 
+          // Community content velocity: videos posted to the game's BGG page
+          // in the last 14 days.
+          let videos14dOnBgg = 0;
+          const vidCutoff = Date.now() - 14 * 864e5;
+          for (const v of item.matchAll(/<video\s[^>]*postdate="([^"]+)"/g)) {
+            const pd = new Date(v[1]);
+            if (!isNaN(pd) && pd.getTime() >= vidCutoff) videos14dOnBgg++;
+          }
+
           liveMarket[id] = {
             thumb: decodeEntities((item.match(/<thumbnail>([^<]+)<\/thumbnail>/) || [])[1] || ""),
             used: clean.length ? {
@@ -1359,7 +1496,8 @@ async function postWeeklyDigest(env) {
               lowLink: clean[0].link,
               median: prices[Math.floor(prices.length / 2)]
             } : null,
-            demand
+            demand,
+            videos14dOnBgg
           };
         }
       }
@@ -1392,6 +1530,8 @@ async function postWeeklyDigest(env) {
     const gi = stagedIntel[g.id] || {};
     if (gi.chatter && gi.chatter.length) lm.chatter = gi.chatter;
     if (gi.videos && gi.videos.length) lm.videos = gi.videos;
+    if (gi.forumActivity) lm.forumActivity = gi.forumActivity;
+    if (gi.buzz) lm.buzz = gi.buzz;
     const auctions = Object.values(auctionStage).filter((a) =>
       a.gameId === String(g.id) && !a.recorded && Date.now() - a.updated < 5 * 864e5);
     if (auctions.length) {
@@ -1450,6 +1590,57 @@ async function postWeeklyDigest(env) {
       ebaySoldPricesLink: `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(`${g.name} board game`)}&LH_Sold=1&LH_Complete=1&LH_PrefLoc=1`
     };
   });
+  // Composite 0–100 Buzz Score per watched game: weighted attention across
+  // social chatter, press, video coverage, and BGG-native momentum, with a
+  // trend vs the last digest and the top contributing drivers.
+  let buzzHistory = {};
+  try { buzzHistory = JSON.parse((await env.HOT_HISTORY.get("buzz-scores")) || "{}"); } catch { /* rebuild */ }
+  for (const w of watch) {
+    const lm = liveMarket[w.id] || {};
+    const b = lm.buzz || {};
+    const parts = [];
+    let s = 0;
+    const add = (label, frac, weight) => {
+      const v = Math.max(0, Math.min(1, frac || 0)) * weight;
+      if (v > 0.5) parts.push({ label, v });
+      s += v;
+    };
+    add("Reddit chatter", (b.redditMentions14d || 0) / 5, 15);
+    add("Bluesky chatter", (b.bluesky14d || 0) / 10, 10);
+    add("press coverage", ((b.news && b.news.count14d) || 0) / 3, 10);
+    const vids = w.recentVideos || [];
+    add("YouTube coverage", vids.length / 3, 8);
+    add("YouTube views", Math.log10(1 + vids.reduce((a, v) => a + (v.views || 0), 0)) / 5, 7);
+    const hotDays = (streaks.get(String(w.id)) || {}).days || 0;
+    add("BGG Hotness", hotDays ? 0.5 + hotDays / 14 : 0, 15);
+    const dm = w.demandAndSupply || {};
+    add("new ratings", (dm.ratings30dChange || 0) / 300, 8);
+    add("new owners", (dm.owners30dChange || 0) / 500, 7);
+    add("forum activity", ((lm.forumActivity || {}).activeThreads14d || 0) / 6, 8);
+    add("new BGG videos", (lm.videos14dOnBgg || 0) / 4, 5);
+    add("Wikipedia interest", (b.wiki && b.wiki.vsPrior3wks) ? (b.wiki.vsPrior3wks - 1) : 0, 4);
+    add("live auction", w.liveBggAuctions ? 1 : 0, 3);
+    const score = Math.round(Math.min(100, s));
+    const prev = buzzHistory[w.id];
+    const trend = prev ? (score - prev.score >= 5 ? "rising" : score - prev.score <= -5 ? "falling" : "steady") : "new";
+    w.communityBuzz = {
+      score, trend,
+      drivers: parts.sort((a, b2) => b2.v - a.v).slice(0, 2).map((p) => p.label),
+      redditMentions14d: b.redditMentions14d ?? null,
+      blueskyMentions14d: b.bluesky14d ?? null,
+      pressItems14d: (b.news && b.news.count14d) ?? null,
+      latestPress: (b.news && b.news.latest) || null,
+      wikipediaDailyViews7d: (b.wiki && b.wiki.dailyViews7d) || null,
+      wikipediaVsBaseline: (b.wiki && b.wiki.vsPrior3wks) || null,
+      hotnessDaysOf14: hotDays || 0
+    };
+    buzzHistory[w.id] = { score, date: todayKey };
+  }
+  for (const id of Object.keys(buzzHistory)) {
+    if (!watch.some((w) => String(w.id) === id)) delete buzzHistory[id];
+  }
+  await env.HOT_HISTORY.put("buzz-scores", JSON.stringify(buzzHistory));
+
   const recentAlerts = JSON.parse((await env.HOT_HISTORY.get(PRICE_ALERTS_KEY)) || "[]").slice(0, 6)
     .map((a) => ({ id: a.id, name: a.name, channel: a.channel, note: a.note, date: a.date }));
 
@@ -1474,6 +1665,8 @@ async function postWeeklyDigest(env) {
     if (w.forumChatter) score += 1.5;
     if (w.liveBggAuctions) score += 2.5;
     if (w.recentVideos) score += 1;
+    score += ((w.communityBuzz && w.communityBuzz.score) || 0) / 25;
+    if (w.communityBuzz && w.communityBuzz.trend === "rising") score += 1;
     if (announcedIds.has(w.id)) score += 1;
     if (w.bggSalesWeDetected && w.bggSalesWeDetected.newest >= twoDaysAgo) score += 1;
     return { w, score, bestNow };
@@ -1526,6 +1719,7 @@ Data guidance:
 - retailOfferCountLast14d is the count of in-stock US retail offers per day — a shrinking series with rising used prices = possibly going out of print: say so and recommend buying before the spike.
 - forumChatter is recent BGG forum threads about pricing/availability/print status — cite anything decisive (reprint confirmed, sold out at publisher) with its thread link. recentVideos is fresh YouTube coverage — big-channel reviews foreshadow demand bumps.
 - liveBggAuctions means the game is up for auction in the BGG community RIGHT NOW (current high bid, bid count, BIN price, link). Community auctions often close below market — compare the current high bid to the other prices and flag genuine opportunities prominently in the verdict.
+- communityBuzz is a computed 0-100 attention score (Reddit + Bluesky chatter, press coverage with the latest headline, Wikipedia interest vs baseline, YouTube reach, BGG hotness/forum/video momentum), with trend and top drivers. The score line renders automatically under each game — do NOT restate the number; USE it in verdicts: rising buzz firms prices and argues for buying sooner, falling buzz supports waiting. Cite specific drivers (e.g. a linked press headline) when they change the calculus.
 - This posts EVERY day: on quiet days the game sections shrink naturally (verdict + two lines) rather than padding, but always state the current best price so each embed stands on its own.
 - Use ONLY the data provided; never invent prices, listings, streaks, or games. Round to whole dollars except sub-$1 differences.
 - Discord markdown inside sections: [text](url) links — link listing prices to their listing, "all retail offers" to storeListUrl, "eBay sold prices" to ebaySoldPricesLink, game names in OVERVIEW/EXTRA as [Name](https://boardgamegeek.com/boardgame/ID). No greeting, no sign-off, no overall title.`;
@@ -1571,10 +1765,15 @@ Data guidance:
       const verdict = vm ? vm[1].toLowerCase() : "watch";
       const body = (vm ? sec.body.slice(vm[0].length) : sec.body).trim();
       const tag = verdict === "buy" ? "🟢 BUY" : verdict === "wait" ? "🟠 WAIT" : "🟡 WATCH";
+      // Data-driven buzz line — appended by code so it's always accurate.
+      const cb = w && w.communityBuzz;
+      const buzzLine = cb
+        ? `\n\n📢 Buzz **${cb.score}/100** ${cb.trend === "rising" ? "↑" : cb.trend === "falling" ? "↓" : "→"}${cb.drivers.length ? ` — ${cb.drivers.join(", ")}` : ""}`
+        : "";
       embeds.push({
         title: `${tag} — ${(w && w.name) || `Game ${sec.id}`}`,
         url: `https://boardgamegeek.com/boardgame/${sec.id}`,
-        description: body.slice(0, 1500),
+        description: `${body}${buzzLine}`.slice(0, 1500),
         color: VERDICT_COLORS[verdict],
         thumbnail: (liveMarket[sec.id] && liveMarket[sec.id].thumb) ? { url: liveMarket[sec.id].thumb } : undefined
       });
@@ -1818,15 +2017,15 @@ async function handlePriceAnalysis(request, env, cors) {
       demandNow = latest ? { wanting: latest.wa, wishing: latest.wi, forTradeCopies: latest.tr, owners: latest.ow } : null;
     }
   } catch { /* optional */ }
-  const chatter = await fetchForumChatter(env, id);
+  const forum = await fetchForumChatter(env, id);
+  const chatter = forum.list;
 
-  // 6. YouTube buzz: staged intel first (watched games), else a live search.
-  let videos = null;
-  try {
-    const gi = JSON.parse((await env.HOT_HISTORY.get(GAME_INTEL_KEY)) || "{}")[id];
-    if (gi && gi.videos && gi.videos.length) videos = gi.videos;
-  } catch { /* optional */ }
+  // 6. Buzz: staged intel first (watched games), else live lookups.
+  let giEntry = null;
+  try { giEntry = JSON.parse((await env.HOT_HISTORY.get(GAME_INTEL_KEY)) || "{}")[id] || null; } catch { /* optional */ }
+  let videos = (giEntry && giEntry.videos && giEntry.videos.length) ? giEntry.videos : null;
   if (!videos) videos = await fetchRecentVideos(env, name);
+  const buzzRaw = (giEntry && giEntry.buzz) || null;
 
   const q = encodeURIComponent(`${name} board game`);
   const data = {
@@ -1838,7 +2037,9 @@ async function handlePriceAnalysis(request, env, cors) {
     bggSalesWeDetected: probableSaleStats(bggSoldMap[id]) || "none detected yet",
     bggDemandAndSupply: demandNow || "no snapshot yet (builds daily for watched games)",
     forumChatter: chatter.length ? chatter : "no recent pricing/availability threads",
+    forumActivity: forum.activity || undefined,
     recentYouTubeCoverage: videos || "none found in the last 7 days (or YouTube key not set)",
+    communityBuzz: buzzRaw || "not yet gathered (builds via the intel rotation for watched games)",
     trackedHistory: tracked || "not on the watchlist — no tracked history yet",
     watchTarget: watched ? watched.target || null : null,
     recentAlerts: alerts,
@@ -1857,7 +2058,7 @@ First line EXACTLY "VERDICT: buy" or "VERDICT: wait" or "VERDICT: watch". Then 1
 ===BEST BUYS===
 Max 900 characters, bullet lines: cheapest genuine second-hand listing (price, condition, [its listing](link)), cheapest US retail (item + delivered, [all retail offers](storeListUrl)), and today's cheapest live eBay ask if ebayLiveNow has data.
 ===MARKET===
-Max 900 characters, bullet lines: listing counts and price spread used vs new, what was filtered out (accessory/promo listings), BGG demand pressure from bggDemandAndSupply (wanting vs for-trade copies) if present, and recentYouTubeCoverage (fresh coverage — especially big channels — foreshadows demand and price bumps; cite channel and link).
+Max 900 characters, bullet lines: listing counts and price spread used vs new, what was filtered out (accessory/promo listings), BGG demand pressure from bggDemandAndSupply (wanting vs for-trade copies) if present, and community buzz: recentYouTubeCoverage (cite channel, views, link), communityBuzz (Reddit/Bluesky mention counts, press items with the latest headline linked, Wikipedia interest vs its baseline), and forumActivity. Rising buzz firms prices — say so when it shifts the verdict.
 ===HISTORY===
 Max 900 characters, bullet lines: real sold prices FIRST — ebaySoldHistory (note dataThrough if the source is historical) and bggSalesWeDetected (probable sales from vanished BGG listings, fresh and first-party) — then our tracked history if it exists (historic low with date, averages, how today compares); otherwise note tracking starts once the game is watched.`;
 
