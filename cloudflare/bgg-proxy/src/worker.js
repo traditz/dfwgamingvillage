@@ -1057,6 +1057,153 @@ async function gatherIntelSlice(env, includeReddit) {
   return watchlist.length > 4; // more games than one slice covers?
 }
 
+/* ---------------- BGG community auctions (geeklist-based) ---------------- */
+
+const AUCTION_LISTS_KEY = "auction-lists"; // auction geeklists we're tracking
+const AUCTION_WATCH_KEY = "auction-watch"; // watched games found inside them
+
+/**
+ * Sweeps BGG's community auctions: discovers auction geeklists from the
+ * recent-geeklists JSON feed (title keyword match — the category param is
+ * ignored by that API), then checks a rotating handful for items matching
+ * watched games. Bids live in item comments; the current high bid is the
+ * largest plausible dollar figure. New finds alert Discord; a list that
+ * closes (title says so, or it goes quiet for 4+ days) records its final
+ * high bid as a real community sale in the bgg-sold history.
+ */
+async function runAuctionSweep(env) {
+  const watchlist = JSON.parse((await env.HOT_HISTORY.get(WATCHLIST_KEY)) || "[]").slice(0, WATCHLIST_CAP);
+  if (!watchlist.length) return { ok: true, matches: 0 };
+  const wlIds = new Set(watchlist.map((g) => String(g.id)));
+
+  let tracked = {};
+  try { tracked = JSON.parse((await env.HOT_HISTORY.get(AUCTION_LISTS_KEY)) || "{}"); } catch { /* rebuild */ }
+
+  // 1. Discovery: two pages of recent geeklists, auction-titled only.
+  for (const page of [1, 2]) {
+    try {
+      const res = await fetch(`https://boardgamegeek.com/api/geeklists?page=${page}`, {
+        headers: { Authorization: `Bearer ${env.BGG_TOKEN}`, Accept: "application/json" }
+      });
+      if (!res.ok) continue;
+      const d = await res.json();
+      for (const l of d.lists || []) {
+        const title = String(l.title || l.name || "");
+        if (!/auction/i.test(title)) continue;
+        const prev = tracked[l.id] || {};
+        tracked[l.id] = {
+          ...prev,
+          title: title.slice(0, 140),
+          lastSeen: Date.now(),
+          closed: /closed|ended/i.test(title) || prev.closed || false
+        };
+      }
+    } catch { /* discovery is best-effort */ }
+  }
+  for (const [id, t] of Object.entries(tracked)) {
+    if (Date.now() - (t.lastSeen || 0) > 30 * 864e5) delete tracked[id];
+  }
+
+  // 2. Check the least-recently-checked open lists (a few per sweep).
+  let auctionWatch = {};
+  try { auctionWatch = JSON.parse((await env.HOT_HISTORY.get(AUCTION_WATCH_KEY)) || "{}"); } catch { /* rebuild */ }
+  let bggSold = {};
+  try { bggSold = JSON.parse((await env.HOT_HISTORY.get(BGG_SOLD_KEY)) || "{}"); } catch { /* rebuild */ }
+  const newFinds = [];
+  const listIds = Object.keys(tracked).filter((id) => !tracked[id].done)
+    .sort((a, b) => (tracked[a].lastChecked || 0) - (tracked[b].lastChecked || 0))
+    .slice(0, 6);
+
+  for (const id of listIds) {
+    const t = tracked[id];
+    try {
+      const res = await fetch(`https://boardgamegeek.com/xmlapi/geeklist/${id}?comments=1`, {
+        headers: { Authorization: `Bearer ${env.BGG_TOKEN}` }
+      });
+      t.lastChecked = Date.now();
+      if (res.status === 202) continue; // queued at BGG; next sweep collects it
+      if (!res.ok) continue;
+      const xml = await res.text();
+      const editTs = +((xml.match(/<editdate_timestamp>(\d+)/) || [])[1] || 0);
+      const isFinal = t.closed || (editTs && Date.now() / 1000 - editTs > 4 * 86400);
+
+      for (const item of xml.split(/<item\s/).slice(1)) {
+        const objectid = (item.match(/objectid="(\d+)"/) || [])[1];
+        if (!objectid || !wlIds.has(objectid)) continue;
+        const itemId = (item.match(/^[^>]*\bid="(\d+)"/) || [])[1] || "";
+        const name = decodeEntities((item.match(/objectname="([^"]*)"/) || [])[1] || "");
+        const body = decodeEntities((item.match(/<body>([\s\S]*?)<\/body>/) || [])[1] || "");
+        const comments = [...item.matchAll(/<comment[^>]*>([\s\S]*?)<\/comment>/g)].map((m) => decodeEntities(m[1]));
+        const bids = [];
+        for (const c of comments) {
+          for (const m of c.matchAll(/\$\s?(\d{1,4}(?:\.\d\d)?)\b|(?:^|\s)(\d{2,4})(?:\s|$)/g)) {
+            const v = +(m[1] || m[2]);
+            if (v >= 2 && v <= 1500) bids.push(v);
+          }
+        }
+        const high = bids.length ? Math.max(...bids) : null;
+        const bin = +((body.match(/\bbin\b[^\d$]{0,12}\$?\s?(\d{1,4})/i) || [])[1] || 0) || null;
+
+        const key = `${id}:${objectid}`;
+        const prev = auctionWatch[key];
+        const rec = {
+          listId: id, listTitle: t.title, gameId: objectid, name,
+          currentHigh: high, bidCount: bids.length, bin,
+          url: `https://boardgamegeek.com/geeklist/${id}${itemId ? `?itemid=${itemId}` : ""}`,
+          firstSeen: prev ? prev.firstSeen : Date.now(),
+          updated: Date.now(),
+          recorded: prev ? prev.recorded : false
+        };
+        if (isFinal && high && !rec.recorded) {
+          (bggSold[objectid] = bggSold[objectid] || []).unshift({ p: high, c: "auction final bid", date: new Date().toISOString().slice(0, 10) });
+          bggSold[objectid] = bggSold[objectid].slice(0, 60);
+          rec.recorded = true;
+        }
+        auctionWatch[key] = rec;
+        if (!prev) newFinds.push(rec);
+      }
+      if (t.closed) t.done = true;
+    } catch { /* this list retries next sweep */ }
+    await new Promise((r) => setTimeout(r, 600));
+  }
+  for (const [key, rec] of Object.entries(auctionWatch)) {
+    if (Date.now() - (rec.updated || 0) > 30 * 864e5) delete auctionWatch[key];
+  }
+
+  await env.HOT_HISTORY.put(AUCTION_LISTS_KEY, JSON.stringify(tracked));
+  await env.HOT_HISTORY.put(AUCTION_WATCH_KEY, JSON.stringify(auctionWatch));
+  await env.HOT_HISTORY.put(BGG_SOLD_KEY, JSON.stringify(bggSold));
+
+  // 3. Alert on newly spotted watched games in auctions.
+  if (newFinds.length && env.ALERT_WEBHOOK) {
+    await fetch(env.ALERT_WEBHOOK.trim(), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        embeds: [{
+          title: "🔨 Watched game up for auction on BGG",
+          description: newFinds.slice(0, 10).map((f) =>
+            `**[${f.name}](https://boardgamegeek.com/boardgame/${f.gameId})** — [${f.listTitle.slice(0, 80)}](${f.url})\n` +
+            `${f.currentHigh ? `current high $${f.currentHigh} (${f.bidCount} bids)` : "no bids yet"}${f.bin ? ` · BIN $${f.bin}` : ""}`
+          ).join("\n\n").slice(0, 3900),
+          color: 0xE67E22,
+          footer: { text: "DFWGV Librarian · BGG community auctions" },
+          timestamp: new Date().toISOString()
+        }]
+      })
+    });
+  }
+  return { ok: true, trackedLists: Object.keys(tracked).length, matches: newFinds.length };
+}
+
+async function handleCronAuctions(request, env, ctx, cors) {
+  if (!isAuthorized(request, env)) {
+    return jsonResponse({ ok: false, error: "Unauthorized" }, 401, cors);
+  }
+  ctx.waitUntil(runAuctionSweep(env).catch(() => { /* next sweep retries */ }));
+  return jsonResponse({ ok: true }, 200, cors);
+}
+
 async function handleCronIntel(request, env, ctx, cors) {
   if (!isAuthorized(request, env)) {
     return jsonResponse({ ok: false, error: "Unauthorized" }, 401, cors);
@@ -1254,6 +1401,8 @@ async function postWeeklyDigest(env) {
   try { stagedIntel = JSON.parse((await env.HOT_HISTORY.get(GAME_INTEL_KEY)) || "{}"); } catch { /* optional */ }
   let ebaySoldStage = {};
   try { ebaySoldStage = JSON.parse((await env.HOT_HISTORY.get(EBAY_SOLD_KEY)) || "{}"); } catch { /* optional */ }
+  let auctionStage = {};
+  try { auctionStage = JSON.parse((await env.HOT_HISTORY.get(AUCTION_WATCH_KEY)) || "{}"); } catch { /* optional */ }
   for (const g of watchlist) {
     const lm = liveMarket[g.id] = liveMarket[g.id] || {};
     const staged = stagedLive[g.id] || {};
@@ -1263,6 +1412,13 @@ async function postWeeklyDigest(env) {
     const gi = stagedIntel[g.id] || {};
     if (gi.chatter && gi.chatter.length) lm.chatter = gi.chatter;
     if (gi.videos && gi.videos.length) lm.videos = gi.videos;
+    const auctions = Object.values(auctionStage).filter((a) =>
+      a.gameId === String(g.id) && !a.recorded && Date.now() - a.updated < 5 * 864e5);
+    if (auctions.length) {
+      lm.auctions = auctions.slice(0, 3).map((a) => ({
+        listTitle: a.listTitle, currentHighBid: a.currentHigh, bidCount: a.bidCount, buyItNow: a.bin, url: a.url
+      }));
+    }
   }
   let bggSoldMap = {};
   try { bggSoldMap = JSON.parse((await env.HOT_HISTORY.get(BGG_SOLD_KEY)) || "{}"); } catch { /* optional */ }
@@ -1310,6 +1466,7 @@ async function postWeeklyDigest(env) {
       trackedEbayAsks: hist("e"),
       forumChatter: live.chatter || null,
       recentVideos: live.videos || null,
+      liveBggAuctions: live.auctions || null,
       ebaySoldPricesLink: `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(`${g.name} board game`)}&LH_Sold=1&LH_Complete=1&LH_PrefLoc=1`
     };
   });
@@ -1335,6 +1492,7 @@ async function postWeeklyDigest(env) {
       if (t && t.avg14d && Math.abs(t.latest - t.avg14d) / t.avg14d >= 0.08) score += 2;
     }
     if (w.forumChatter) score += 1.5;
+    if (w.liveBggAuctions) score += 2.5;
     if (w.recentVideos) score += 1;
     if (announcedIds.has(w.id)) score += 1;
     if (w.bggSalesWeDetected && w.bggSalesWeDetected.newest >= twoDaysAgo) score += 1;
@@ -1387,6 +1545,7 @@ Data guidance:
 - demandAndSupply is BGG market pressure: wanting vs forTrade copies (wantPerTradeCopy — above ~5 is a seller's market where drops are unlikely; near or below 1 means soft demand), plus owners/ratings 30-day growth as popularity momentum. Use it to judge whether waiting is realistic.
 - retailOfferCountLast14d is the count of in-stock US retail offers per day — a shrinking series with rising used prices = possibly going out of print: say so and recommend buying before the spike.
 - forumChatter is recent BGG forum threads about pricing/availability/print status — cite anything decisive (reprint confirmed, sold out at publisher) with its thread link. recentVideos is fresh YouTube coverage — big-channel reviews foreshadow demand bumps.
+- liveBggAuctions means the game is up for auction in the BGG community RIGHT NOW (current high bid, bid count, BIN price, link). Community auctions often close below market — compare the current high bid to the other prices and flag genuine opportunities prominently in the verdict.
 - This posts EVERY day: on quiet days the game sections shrink naturally (verdict + two lines) rather than padding, but always state the current best price so each embed stands on its own.
 - Use ONLY the data provided; never invent prices, listings, streaks, or games. Round to whole dollars except sub-$1 differences.
 - Discord markdown inside sections: [text](url) links — link listing prices to their listing, "all retail offers" to storeListUrl, "eBay sold prices" to ebaySoldPricesLink, game names in OVERVIEW/EXTRA as [Name](https://boardgamegeek.com/boardgame/ID). No greeting, no sign-off, no overall title.`;
@@ -2334,6 +2493,10 @@ export default {
       method: "POST",
       headers: { Authorization: `Bearer ${env.ANALYTICS_ADMIN_TOKEN}` }
     }).catch(() => {}));
+    ctx.waitUntil(fetch(`${WORKER_SELF_URL}/api/cron-auctions`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${env.ANALYTICS_ADMIN_TOKEN}` }
+    }).catch(() => {}));
   },
 
   async fetch(request, env, ctx) {
@@ -2394,6 +2557,10 @@ export default {
 
     if (incomingUrl.pathname === "/api/refresh-snapshot") {
       return handleRefreshSnapshot(request, env, cors);
+    }
+
+    if (incomingUrl.pathname === "/api/cron-auctions") {
+      return handleCronAuctions(request, env, ctx, cors);
     }
 
     if (incomingUrl.pathname === "/api/cron-intel") {

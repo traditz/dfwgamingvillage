@@ -165,6 +165,18 @@ Beyond prices, the crons build market/buzz intelligence per watched game:
 - **YouTube review radar (`fetchRecentVideos`)** — last-7-days coverage per
   watched game in the digest. Needs the free `YOUTUBE_API_KEY` secret
   (Google Cloud console, YouTube Data API v3).
+- **BGG community auction tracking (`runAuctionSweep`)** — BGG auctions are
+  GeekLists ("Auction & Trade" category; bids happen in item comments).
+  Discovery uses the site's internal JSON feed
+  (`/api/geeklists?page=N` — reachable from the worker with the BGG token,
+  unlike the 403-blocked HTML browse pages; its `category` param is
+  ignored, so lists are filtered by /auction/i in the title). Each 6-hourly
+  sweep checks up to 6 tracked lists via `xmlapi/geeklist/{id}?comments=1`
+  (202 = queued, retried next sweep), extracts the current high bid and any
+  BIN for watched games, alerts Discord (orange 🔨 embed) on new finds, and
+  feeds live auctions into the digest. When a list closes (title says
+  CLOSED/ENDED, or no edits for 4+ days) the final high bid is recorded
+  into `bgg-sold` as a real community sale ("auction final bid").
 
 A weekly cloud routine ("DFWGV library pipeline health", Mondays 12:00 UTC,
 managed at claude.ai/code/routines) independently checks snapshot freshness,
