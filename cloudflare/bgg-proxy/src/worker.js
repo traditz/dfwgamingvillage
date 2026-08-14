@@ -919,10 +919,11 @@ async function fetchForumChatter(env, id) {
 
 const BUZZ_WINDOW_MS = 14 * 864e5;
 
-/** Posts in r/boardgames naming the game, last 14 days (public search RSS). */
+/** Posts naming the game across r/boardgames, r/boardgamedeals, and
+ *  r/BoardGameExchange, last 14 days (one multireddit public search RSS). */
 async function fetchRedditMentions(name) {
   try {
-    const res = await fetch(`https://www.reddit.com/r/boardgames/search.rss?q=${encodeURIComponent(`"${name}"`)}&restrict_sr=on&sort=new&limit=25`, {
+    const res = await fetch(`https://www.reddit.com/r/boardgames+Boardgamedeals+BoardGameExchange/search.rss?q=${encodeURIComponent(`"${name}"`)}&restrict_sr=on&sort=new&limit=25`, {
       headers: { "User-Agent": "dfwgv-librarian/1.0 (board game library buzz tracker)" }
     });
     if (!res.ok) return null;
@@ -1079,7 +1080,9 @@ async function checkRedditDeals(env) {
         const t = title.toLowerCase();
         const hit = wl.find((g) => g.words.length && g.words.every((w) => t.includes(w)));
         if (!hit) continue;
-        matches.push({ game: hit.name, gameId: hit.id, title, sub, url: link, date: updated });
+        // Deal/BST convention puts the asking price in the title.
+        const priceInTitle = parseFloat((title.match(/\$\s?(\d{1,4}(?:\.\d\d)?)/) || [])[1] || "") || null;
+        matches.push({ game: hit.name, gameId: hit.id, title, sub, url: link, date: updated, priceInTitle });
         seen.add(pid);
       }
       await new Promise((r) => setTimeout(r, 400));
@@ -1542,7 +1545,8 @@ async function postWeeklyDigest(env) {
   }
   let bggSoldMap = {};
   try { bggSoldMap = JSON.parse((await env.HOT_HISTORY.get(BGG_SOLD_KEY)) || "{}"); } catch { /* optional */ }
-  const redditDeals = JSON.parse((await env.HOT_HISTORY.get(REDDIT_DEALS_KEY)) || "[]").slice(0, 8);
+  const redditDealsAll = JSON.parse((await env.HOT_HISTORY.get(REDDIT_DEALS_KEY)) || "[]");
+  const redditDeals = redditDealsAll.slice(0, 8);
 
   const watch = watchlist.map((g) => {
     const gh = priceHistory[g.id] || {};
@@ -1605,8 +1609,8 @@ async function postWeeklyDigest(env) {
       if (v > 0.5) parts.push({ label, v });
       s += v;
     };
-    add("Reddit chatter", (b.redditMentions14d || 0) / 5, 15);
-    add("Bluesky chatter", (b.bluesky14d || 0) / 10, 10);
+    add("Reddit chatter", (b.redditMentions14d || 0) / 5, 12);
+    add("Bluesky chatter", (b.bluesky14d || 0) / 10, 8);
     add("press coverage", ((b.news && b.news.count14d) || 0) / 3, 10);
     const vids = w.recentVideos || [];
     add("YouTube coverage", vids.length / 3, 8);
@@ -1615,11 +1619,14 @@ async function postWeeklyDigest(env) {
     add("BGG Hotness", hotDays ? 0.5 + hotDays / 14 : 0, 15);
     const dm = w.demandAndSupply || {};
     add("new ratings", (dm.ratings30dChange || 0) / 300, 8);
-    add("new owners", (dm.owners30dChange || 0) / 500, 7);
+    add("new owners", (dm.owners30dChange || 0) / 500, 6);
     add("forum activity", ((lm.forumActivity || {}).activeThreads14d || 0) / 6, 8);
-    add("new BGG videos", (lm.videos14dOnBgg || 0) / 4, 5);
+    add("new BGG videos", (lm.videos14dOnBgg || 0) / 4, 4);
     add("Wikipedia interest", (b.wiki && b.wiki.vsPrior3wks) ? (b.wiki.vsPrior3wks - 1) : 0, 4);
-    add("live auction", w.liveBggAuctions ? 1 : 0, 3);
+    add("live auction", w.liveBggAuctions ? 1 : 0, 2);
+    const dealCutoff = new Date(Date.now() - 14 * 864e5).toISOString().slice(0, 10);
+    const dealPosts = redditDealsAll.filter((d) => d.gameId === String(w.id) && d.date >= dealCutoff).length;
+    add("deal/BST posts", dealPosts / 2, 8);
     const score = Math.round(Math.min(100, s));
     const prev = buzzHistory[w.id];
     const trend = prev ? (score - prev.score >= 5 ? "rising" : score - prev.score <= -5 ? "falling" : "steady") : "new";
@@ -1627,6 +1634,7 @@ async function postWeeklyDigest(env) {
       score, trend,
       drivers: parts.sort((a, b2) => b2.v - a.v).slice(0, 2).map((p) => p.label),
       redditMentions14d: b.redditMentions14d ?? null,
+      dealOrBstPosts14d: dealPosts,
       blueskyMentions14d: b.bluesky14d ?? null,
       pressItems14d: (b.news && b.news.count14d) ?? null,
       latestPress: (b.news && b.news.latest) || null,
@@ -1709,7 +1717,7 @@ One section per game in watchlistSpotlight, using its id, in the order given. Fi
 ===EXTRA===
 Two INDEPENDENT subsections — evaluate each on its own:
 "🛒 Opportunities" — ALWAYS write this when topUnownedCandidates or sustainedHotnessUnowned has entries (they almost always do): the 3 strongest unowned pickups today, two lines each — the signal (rating/rank, hotness streak, or a recent price alert), and why it matters for a lending library. Omit only if BOTH lists are truly empty.
-"📣 Signals" — only when newExpansionOrEditionAnnouncements or communityDealsSpotted has entries (announcements can crater old-edition prices — an opportunity; community deals link to Reddit posts worth acting on fast). Omitting Signals must NOT stop you writing Opportunities.
+"📣 Signals" — only when newExpansionOrEditionAnnouncements or communityDealsSpotted has entries (announcements can crater old-edition prices — an opportunity; community deals link to Reddit posts worth acting on fast — include the asking price when priceInTitle is present and compare it to our tracked prices). Omitting Signals must NOT stop you writing Opportunities.
 Leave EXTRA empty only in the rare case that both subsections have nothing.
 
 Data guidance:
