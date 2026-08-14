@@ -1093,10 +1093,10 @@ document.addEventListener('DOMContentLoaded', function () {
       <div class="adm-panel"><h2>Price watchlist</h2>
         <div id="adm-watch-out"><p class="adm-dim">Loading watchlist…</p></div>
       </div>
-      <div class="adm-panel"><h2>Game pricing</h2>
-        <p class="adm-dim">Second-hand (BGG Marketplace) and new-retail (US stores) pricing for <strong>any</strong> game — owned or not. Results beyond the library come from a live BGG search.</p>
+      <div class="adm-panel"><h2>Find any game — price, watch, or analyze</h2>
+        <p class="adm-dim">Search <strong>any</strong> game on BGG — owned or not. Picking a result shows its second-hand and US-retail pricing with <strong>Watch</strong> (add to the price watchlist) and <strong>Analyze</strong> (full AI price analysis) buttons next to its name.</p>
         <div class="adm-price-search">
-          <input type="text" id="adm-price-input" placeholder="Search any game to price..." autocomplete="off">
+          <input type="text" id="adm-price-input" placeholder="Search any game to price, watch, or analyze..." autocomplete="off">
           <div id="adm-price-suggest" class="adm-suggest" hidden></div>
         </div>
         <div id="adm-price-result"></div>
