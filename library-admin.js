@@ -1142,9 +1142,9 @@ document.addEventListener('DOMContentLoaded', function () {
         <div id="adm-watch-out"><p class="adm-dim">Loading watchlist…</p></div>
       </div>
       <div class="adm-panel"><h2>Find any game — price, watch, or analyze</h2>
-        <p class="adm-dim">Search <strong>any</strong> game on BGG — owned or not. Picking a result shows its second-hand and US-retail pricing with <strong>Watch</strong> (add to the price watchlist) and <strong>Analyze</strong> (full AI price analysis) buttons next to its name.</p>
+        <p class="adm-dim">Search <strong>any</strong> game on BGG — owned or not — or <strong>paste a BGG game page link</strong> to jump straight to the exact game (also works with <code>#id</code>, e.g. <code>#266192</code>). Picking a result shows its second-hand and US-retail pricing with <strong>Watch</strong> (add to the price watchlist) and <strong>Analyze</strong> (full AI price analysis) buttons next to its name.</p>
         <div class="adm-price-search">
-          <input type="text" id="adm-price-input" placeholder="Search any game to price, watch, or analyze..." autocomplete="off">
+          <input type="text" id="adm-price-input" placeholder="Search any game, or paste a BGG link..." autocomplete="off">
           <div id="adm-price-suggest" class="adm-suggest" hidden></div>
         </div>
         <div id="adm-price-result"></div>
@@ -1185,8 +1185,35 @@ document.addEventListener('DOMContentLoaded', function () {
       } catch { /* keep whatever suggestions are showing */ }
     }, 400);
 
+    // A pasted BGG page URL (or #id) resolves the EXACT game — no search
+    // ambiguity. Works for /boardgame/, /boardgameexpansion/, and /thing/.
+    const resolveBggId = async (id) => {
+      suggest.innerHTML = `<button type="button" disabled>Looking up BGG game #${esc(id)}…</button>`;
+      suggest.hidden = false;
+      try {
+        const res = await fetch(`${WORKER}/api/bgg-thing?id=${id}`);
+        const xml = new DOMParser().parseFromString(await res.text(), 'text/xml');
+        const item = xml.querySelector('item');
+        const name = item?.querySelector('name[type="primary"]')?.getAttribute('value')
+          || item?.querySelector('name')?.getAttribute('value');
+        if (!name) {
+          suggest.innerHTML = `<button type="button" disabled>No game found for BGG id #${esc(id)}</button>`;
+          return;
+        }
+        input.value = name;
+        suggest.hidden = true;
+        priceGame(id, name);
+      } catch {
+        suggest.innerHTML = '<button type="button" disabled>BGG lookup failed — try again</button>';
+      }
+    };
+
     input.addEventListener('input', () => {
-      const q = input.value.trim().toLowerCase();
+      const raw = input.value.trim();
+      const urlMatch = raw.match(/boardgamegeek\.com\/(?:boardgame|boardgameexpansion|thing)\/(\d+)/i)
+        || raw.match(/^#(\d{1,8})$/);
+      if (urlMatch) { resolveBggId(urlMatch[1]); return; }
+      const q = raw.toLowerCase();
       if (q.length < 2) { suggest.hidden = true; return; }
       const local = knownGames().filter((g) => g.name.toLowerCase().includes(q)).slice(0, 8);
       showSuggestions(local, []); // instant local results; BGG results replace shortly
