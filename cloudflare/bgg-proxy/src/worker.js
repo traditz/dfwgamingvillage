@@ -1071,6 +1071,38 @@ async function fetchWikiInterest(name, cachedArticle) {
   } catch { return null; }
 }
 
+/** Noble Knight Games — the biggest US used/OOP board-game retailer, with
+ *  condition-graded prices (MINT down to Fair). A second-hand retail channel
+ *  BoardGamePrices doesn't cover; verified reachable from the datacenter. */
+async function fetchNobleKnight(name) {
+  try {
+    const res = await fetch(`https://www.nobleknight.com/Products/Search?term=${encodeURIComponent(name)}`, {
+      headers: { "User-Agent": BROWSER_UA }
+    });
+    if (!res.ok) return null;
+    const html = await res.text();
+    const items = [];
+    for (const seg of html.split(/aria-level="2">/).slice(1)) {
+      const title = decodeEntities((seg.match(/^([^<]+)</) || [])[1] || "").trim();
+      if (!title || !relevantTitle(title, name)) continue;
+      const cond = ((seg.match(/class="condition">([^<]+)</) || [])[1] || "").trim();
+      const price = parseFloat(((seg.match(/class="price">\$?([\d,.]+)</) || [])[1] || "").replace(/,/g, ""));
+      if (!price || price > 2000) continue;
+      items.push({ title, condition: cond, price });
+    }
+    if (!items.length) return null;
+    const isNewish = (c) => /mint|new/i.test(c);
+    const used = items.filter((i) => i.condition && !isNewish(i.condition)).sort((a, b) => a.price - b.price);
+    const fresh = items.filter((i) => isNewish(i.condition)).sort((a, b) => a.price - b.price);
+    return {
+      listings: items.length,
+      newLow: fresh[0] ? { price: fresh[0].price, condition: fresh[0].condition } : null,
+      usedLow: used[0] ? { price: used[0].price, condition: used[0].condition } : null,
+      searchUrl: `https://www.nobleknight.com/Products/Search?term=${encodeURIComponent(name)}`
+    };
+  } catch { return null; }
+}
+
 /** Recent big-channel YouTube coverage of a game (needs YOUTUBE_API_KEY). */
 async function fetchRecentVideos(env, name) {
   if (!env.YOUTUBE_API_KEY) return null;
@@ -1276,6 +1308,13 @@ async function gatherIntelSlice(env, includeReddit) {
         podcasts = await fetchPodcastMentions(g.name);
         podcastsAt = Date.now();
       }
+      // Noble Knight used/OOP prices, refreshed at most every ~40 hours.
+      let nk = prev.nk || null;
+      let nkAt = prev.nkAt || 0;
+      if (Date.now() - nkAt > 40 * 3600e3) {
+        nk = await fetchNobleKnight(g.name);
+        nkAt = Date.now();
+      }
       const buzz = {
         redditMentions14d: reddit ? reddit.count : null,
         redditTitles: reddit ? reddit.titles : [],
@@ -1290,6 +1329,7 @@ async function gatherIntelSlice(env, includeReddit) {
         videos, videosAt,
         playsTotal, playsAt, playsPrevTotal, playsPrevAt,
         honorIds, honorsAt, recentHonors,
+        nk, nkAt,
         buzz, fetchedAt: Date.now()
       };
       await new Promise((r) => setTimeout(r, 400));
@@ -1335,11 +1375,15 @@ async function runAuctionSweep(env) {
       const d = await res.json();
       for (const l of d.lists || []) {
         const title = String(l.title || l.name || "");
-        if (!/auction/i.test(title)) continue;
+        // Auctions AND fixed-price sale lists (virtual flea markets, BST
+        // lists) — but not math trades, which carry no prices.
+        if (!/auction|flea|for ?sale|selling|sale list|\bbst\b/i.test(title)) continue;
+        if (/math ?trade/i.test(title)) continue;
         const prev = tracked[l.id] || {};
         tracked[l.id] = {
           ...prev,
           title: title.slice(0, 140),
+          kind: /auction/i.test(title) ? "auction" : "sale",
           lastSeen: Date.now(),
           closed: /closed|ended/i.test(title) || prev.closed || false
         };
@@ -1389,18 +1433,23 @@ async function runAuctionSweep(env) {
         }
         const high = bids.length ? Math.max(...bids) : null;
         const bin = +((body.match(/\bbin\b[^\d$]{0,12}\$?\s?(\d{1,4})/i) || [])[1] || 0) || null;
+        // Fixed-price sale lists carry the asking price in the item body.
+        const asking = t.kind === "sale"
+          ? (+((body.match(/\$\s?(\d{1,4}(?:\.\d\d)?)/) || [])[1] || 0) || null)
+          : null;
 
         const key = `${id}:${objectid}`;
         const prev = auctionWatch[key];
         const rec = {
           listId: id, listTitle: t.title, gameId: objectid, name,
-          currentHigh: high, bidCount: bids.length, bin,
+          kind: t.kind || "auction",
+          currentHigh: high, bidCount: bids.length, bin, asking,
           url: `https://boardgamegeek.com/geeklist/${id}${itemId ? `?itemid=${itemId}` : ""}`,
           firstSeen: prev ? prev.firstSeen : Date.now(),
           updated: Date.now(),
           recorded: prev ? prev.recorded : false
         };
-        if (isFinal && high && !rec.recorded) {
+        if (isFinal && high && !rec.recorded && rec.kind === "auction") {
           (bggSold[objectid] = bggSold[objectid] || []).unshift({ p: high, c: "auction final bid", date: new Date().toISOString().slice(0, 10) });
           bggSold[objectid] = bggSold[objectid].slice(0, 60);
           rec.recorded = true;
@@ -1427,10 +1476,12 @@ async function runAuctionSweep(env) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         embeds: [{
-          title: "🔨 Watched game up for auction on BGG",
+          title: "🔨 Watched game in a BGG auction / sale list",
           description: newFinds.slice(0, 10).map((f) =>
             `**[${f.name}](https://boardgamegeek.com/boardgame/${f.gameId})** — [${f.listTitle.slice(0, 80)}](${f.url})\n` +
-            `${f.currentHigh ? `current high $${f.currentHigh} (${f.bidCount} bids)` : "no bids yet"}${f.bin ? ` · BIN $${f.bin}` : ""}`
+            (f.kind === "sale"
+              ? (f.asking ? `listed for sale — asking $${f.asking}` : "listed for sale (price in listing)")
+              : `${f.currentHigh ? `current high $${f.currentHigh} (${f.bidCount} bids)` : "no bids yet"}${f.bin ? ` · BIN $${f.bin}` : ""}`)
           ).join("\n\n").slice(0, 3900),
           color: 0xE67E22,
           footer: { text: "DFWGV Librarian · BGG community auctions" },
@@ -1671,6 +1722,7 @@ async function postWeeklyDigest(env) {
     if (gi.forumActivity) lm.forumActivity = gi.forumActivity;
     if (gi.buzz) lm.buzz = gi.buzz;
     if (gi.recentHonors && gi.recentHonors.length) lm.honors = gi.recentHonors;
+    if (gi.nk) lm.nobleKnight = gi.nk;
     if (gi.playsTotal && gi.playsPrevTotal && gi.playsAt > gi.playsPrevAt) {
       const weeks = (gi.playsAt - gi.playsPrevAt) / (7 * 864e5);
       if (weeks > 0.5) lm.playsPerWeek = Math.max(0, Math.round((gi.playsTotal - gi.playsPrevTotal) / weeks));
@@ -1679,7 +1731,9 @@ async function postWeeklyDigest(env) {
       a.gameId === String(g.id) && !a.recorded && Date.now() - a.updated < 5 * 864e5);
     if (auctions.length) {
       lm.auctions = auctions.slice(0, 3).map((a) => ({
-        listTitle: a.listTitle, currentHighBid: a.currentHigh, bidCount: a.bidCount, buyItNow: a.bin, url: a.url
+        kind: a.kind || "auction", listTitle: a.listTitle,
+        currentHighBid: a.currentHigh, bidCount: a.bidCount, buyItNow: a.bin,
+        askingPrice: a.asking || null, url: a.url
       }));
     }
   }
@@ -1718,6 +1772,7 @@ async function postWeeklyDigest(env) {
       id: g.id, name: g.name, target: g.target || null,
       liveSecondHand: live.used || null,
       liveRetailUS: live.retail || null,
+      nobleKnightUsedRetail: live.nobleKnight || null,
       retailOfferCountLast14d: series14((d) => gh[d].rc),
       ebayListingCountLast14d: series14((d) => gh[d].ec),
       retailSpreadLast14d: series14((d) => (gh[d].r && gh[d].ra) ? Math.round((gh[d].r / gh[d].ra) * 100) / 100 : null),
@@ -1994,6 +2049,7 @@ Data guidance:
 - demandAndSupply is BGG market pressure: wanting vs forTrade copies (wantPerTradeCopy — above ~5 is a seller's market where drops are unlikely; near or below 1 means soft demand), plus owners/ratings 30-day growth as popularity momentum. Use it to judge whether waiting is realistic.
 - retailOfferCountLast14d is the count of in-stock US retail offers per day, and ebayListingCountLast14d the same for eBay — BOTH series shrinking while used prices rise = probably going out of print: say so and recommend buying before the spike. retailSpreadLast14d is the daily cheapest-offer/average-offer ratio: a falling ratio means broad clearance across stores (a real market move), a lone low with a flat ratio means one aggressive seller.
 - trackedRetailDelivered is the shipped-total price series — quote delivered totals when they differ meaningfully from sticker prices; the library pays delivered.
+- nobleKnightUsedRetail is Noble Knight's inventory (the biggest US used/OOP game store): condition-graded used prices plus their new-copy price, with a link. For OOP games their used copy is often the easiest reliable purchase — compare it against the BGG Marketplace low and say which is the better buy.
 - saleCalendar tells you where today sits vs the big sale windows (Black Friday/Cyber, post-holiday clearance, etc). Within ~6 weeks of a major event, lean WAIT unless the current price is already near the tracked/sold low, and say so ("BF is N days out"). During an event window, treat drops as expected and judge them against event-grade lows.
 - reprintCampaignLive means a crowdfunding/preorder campaign for this game is LIVE (platform, end date, link): recommend against paying second-hand premiums — supply refills at fulfillment; for unowned candidates, campaign pricing usually beats post-campaign retail.
 - recentAwards lists fresh BGG honors (nominations/wins) — award recognition firms prices fast; it flips WAIT toward BUY.
@@ -2001,7 +2057,7 @@ Data guidance:
 - communityBuzz.chatterTitles and pressHeadlines are the actual recent post titles/headlines: infer the TONE (hype vs sell-off wave vs price complaints vs rules chat) and let it shape the verdict — a sell-off wave softens prices even when the buzz score is high; hype firms them.
 - yourVerdictTrackRecord grades your own past BUY/WAIT calls against what prices actually did. Calibrate: if WAIT has been mostly wrong lately, demand stronger evidence before another WAIT, and vice versa.
 - forumChatter is recent BGG forum threads about pricing/availability/print status — cite anything decisive (reprint confirmed, sold out at publisher) with its thread link. recentVideos is fresh YouTube coverage — big-channel reviews foreshadow demand bumps.
-- liveBggAuctions means the game is up for auction in the BGG community RIGHT NOW (current high bid, bid count, BIN price, link). Community auctions often close below market — compare the current high bid to the other prices and flag genuine opportunities prominently in the verdict.
+- liveBggAuctions means the game is listed in the BGG community RIGHT NOW — kind "auction" (current high bid, bid count, BIN) or kind "sale" (fixed askingPrice from a flea-market/BST list). Community listings often price below market — compare the bid/asking price to the other channels and flag genuine opportunities prominently in the verdict, with the link.
 - communityBuzz is a computed 0-100 attention score (Reddit + Bluesky chatter, press coverage with the latest headline, Wikipedia interest vs baseline, YouTube reach, BGG hotness/forum/video momentum), with trend and top drivers. The score line renders automatically under each game — do NOT restate the number; USE it in verdicts: rising buzz firms prices and argues for buying sooner, falling buzz supports waiting. Cite specific drivers (e.g. a linked press headline) when they change the calculus.
 - This posts EVERY day: on quiet days the game sections shrink naturally (verdict + two lines) rather than padding, but always state the current best price so each embed stands on its own.
 - Use ONLY the data provided; never invent prices, listings, streaks, or games. Round to whole dollars except sub-$1 differences.
@@ -2356,6 +2412,7 @@ async function handlePriceAnalysis(request, env, cors) {
     saleCalendar: saleEventContext(),
     reprintCampaignLive: reprint || "none active",
     recentAwards: (giEntry && giEntry.recentHonors && giEntry.recentHonors.length) ? giEntry.recentHonors : "none recently",
+    nobleKnightUsedRetail: (giEntry && giEntry.nk) || (await fetchNobleKnight(name)) || "no listings",
     trackedHistory: tracked || "not on the watchlist — no tracked history yet",
     watchTarget: watched ? watched.target || null : null,
     recentAlerts: alerts,
@@ -2372,7 +2429,7 @@ OUTPUT FORMAT — a machine parses your reply, follow it EXACTLY, no text outsid
 ===VERDICT===
 First line EXACTLY "VERDICT: buy" or "VERDICT: wait" or "VERDICT: watch". Then 1-3 lines: the fair target price to set (anchored to real sold prices when available) and the core reasoning. Factor in: reprintCampaignLive (a live campaign means WAIT on second-hand premiums — supply refills at fulfillment), saleCalendar (within ~6 weeks of a major sale event, lean WAIT unless already near the floor; say so), recentAwards (award news firms prices — flips WAIT toward BUY), and forumChatter print-status/availability news (cite the thread link).
 ===BEST BUYS===
-Max 900 characters, bullet lines: cheapest genuine second-hand listing (price, condition, [its listing](link)), cheapest US retail (item + delivered, [all retail offers](storeListUrl)), and today's cheapest live eBay ask if ebayLiveNow has data.
+Max 900 characters, bullet lines: cheapest genuine second-hand listing (price, condition, [its listing](link)), cheapest US retail (item + delivered, [all retail offers](storeListUrl)), Noble Knight's used copy (condition-graded — often the easiest OOP purchase; link it) when nobleKnightUsedRetail has data, and today's cheapest live eBay ask if ebayLiveNow has data.
 ===MARKET===
 Max 900 characters, bullet lines: listing counts and price spread used vs new, what was filtered out (accessory/promo listings), BGG demand pressure from bggDemandAndSupply (wanting vs for-trade copies) if present, and community buzz: recentYouTubeCoverage (cite channel, views, link), communityBuzz (Reddit/Bluesky mention counts, press items with the latest headline linked, Wikipedia interest vs its baseline), and forumActivity. Rising buzz firms prices — say so when it shifts the verdict.
 ===HISTORY===
