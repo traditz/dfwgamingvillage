@@ -915,9 +915,57 @@ async function fetchForumChatter(env, id) {
   } catch { return { list: [], activity: null }; }
 }
 
+/* ---------------- sale-event calendar (US board-game retail) ---------------- */
+
+const SALE_EVENTS = [
+  { name: "Black Friday / Cyber week", from: "11-24", to: "12-02" },
+  { name: "post-holiday clearance", from: "12-26", to: "01-06" },
+  { name: "summer sale week (Prime-adjacent)", from: "07-08", to: "07-16" },
+  { name: "Gen Con promo window", from: "07-31", to: "08-04" },
+  { name: "Essen SPIEL promo window", from: "10-22", to: "10-27" }
+];
+
+/** Where today sits relative to the big sale windows. */
+function saleEventContext(now = new Date()) {
+  const y = now.getUTCFullYear();
+  const mk = (md, yy) => new Date(`${yy}-${md}T00:00:00Z`);
+  let current = null;
+  let next = null;
+  for (const ev of SALE_EVENTS) {
+    for (const yy of [y - 1, y, y + 1]) {
+      const wraps = ev.to < ev.from;
+      const from = mk(ev.from, yy);
+      const to = mk(ev.to, wraps ? yy + 1 : yy);
+      if (now >= from && now <= to) current = ev.name;
+      else if (from > now && (!next || from < next.from)) next = { name: ev.name, from };
+    }
+  }
+  return {
+    current,
+    next: next ? { name: next.name, inDays: Math.round((next.from - now) / 864e5) } : null
+  };
+}
+
 /* -------- buzz signals (all keyless; gathered by the intel rotation) -------- */
 
 const BUZZ_WINDOW_MS = 14 * 864e5;
+
+/** Podcast episodes mentioning the game, last 14 days, via Apple's keyless
+ *  iTunes search (verified reachable from the datacenter). */
+async function fetchPodcastMentions(name) {
+  try {
+    const res = await fetch(`https://itunes.apple.com/search?media=podcast&entity=podcastEpisode&term=${encodeURIComponent(`${name} board game`)}&limit=25`, {
+      headers: { "User-Agent": BROWSER_UA }
+    });
+    if (!res.ok) return null;
+    const d = await res.json();
+    const eps = (d.results || [])
+      .filter((e) => e.trackName && relevantTitle(e.trackName, name))
+      .map((e) => ({ title: String(e.trackName).slice(0, 100), show: String(e.collectionName || "").slice(0, 60), date: String(e.releaseDate || "").slice(0, 10) }))
+      .filter((e) => e.date && Date.now() - new Date(e.date).getTime() < BUZZ_WINDOW_MS);
+    return { count14d: eps.length, latest: eps.sort((a, b) => b.date.localeCompare(a.date))[0] || null };
+  } catch { return null; }
+}
 
 /** Posts naming the game across r/boardgames, r/boardgamedeals, and
  *  r/BoardGameExchange, last 14 days (one multireddit public search RSS). */
@@ -929,11 +977,17 @@ async function fetchRedditMentions(name) {
     if (!res.ok) return null;
     const xml = await res.text();
     let count = 0;
+    const titles = [];
     for (const entry of xml.split(/<entry>/).slice(1)) {
       const updated = new Date((entry.match(/<updated>([^<]+)/) || [])[1] || "");
-      if (!isNaN(updated) && Date.now() - updated.getTime() < BUZZ_WINDOW_MS) count++;
+      if (isNaN(updated) || Date.now() - updated.getTime() >= BUZZ_WINDOW_MS) continue;
+      count++;
+      if (titles.length < 6) {
+        const t = decodeEntities((entry.match(/<title>([^<]*)<\/title>/) || [])[1] || "");
+        if (t) titles.push(t.slice(0, 110));
+      }
     }
-    return count;
+    return { count, titles };
   } catch { return null; }
 }
 
@@ -974,7 +1028,8 @@ async function fetchNewsBuzz(name) {
     items.sort((a, b) => b.date - a.date);
     return {
       count14d: items.length,
-      latest: { title: items[0].title.slice(0, 120), url: items[0].link, date: items[0].date.toISOString().slice(0, 10) }
+      latest: { title: items[0].title.slice(0, 120), url: items[0].link, date: items[0].date.toISOString().slice(0, 10) },
+      headlines: items.slice(0, 3).map((i) => i.title.slice(0, 110))
     };
   } catch { return null; }
 }
@@ -1130,7 +1185,7 @@ async function gatherIntelSlice(env, includeReddit) {
     try { cursor = Number(JSON.parse((await env.HOT_HISTORY.get(INTEL_CURSOR_KEY)) || "0")) || 0; } catch { /* restart */ }
     let intel = {};
     try { intel = JSON.parse((await env.HOT_HISTORY.get(GAME_INTEL_KEY)) || "{}"); } catch { /* rebuild */ }
-    const SLICE = 3; // smaller slices: buzz gathering costs ~11 subrequests/game
+    const SLICE = 2; // small slices: full intel costs up to ~13 subrequests/game
     for (let i = 0; i < Math.min(SLICE, watchlist.length); i++) {
       const g = watchlist[(cursor + i) % watchlist.length];
       const forum = await fetchForumChatter(env, g.id);
@@ -1144,18 +1199,98 @@ async function gatherIntelSlice(env, includeReddit) {
         videosAt = Date.now();
       }
       await fetchEbaySold(env, g.id, g.name); // refresh the sold baseline within its TTL
+
+      // Play-logging velocity: BGG's fastest engagement counter — playing
+      // precedes rating and buying.
+      let playsTotal = prev.playsTotal || null;
+      let playsAt = prev.playsAt || 0;
+      let playsPrevTotal = prev.playsPrevTotal || null;
+      let playsPrevAt = prev.playsPrevAt || 0;
+      try {
+        const pr = await fetch(`https://boardgamegeek.com/xmlapi2/plays?id=${g.id}&page=1`, {
+          headers: { Authorization: `Bearer ${env.BGG_TOKEN}` }
+        });
+        if (pr.ok) {
+          const total = +((await pr.text()).match(/<plays[^>]*\btotal="(\d+)"/) || [])[1];
+          if (total) {
+            if (playsTotal && playsAt && total !== playsTotal) {
+              playsPrevTotal = playsTotal;
+              playsPrevAt = playsAt;
+            }
+            playsTotal = total;
+            playsAt = Date.now();
+          }
+        }
+      } catch { /* velocity builds when reachable */ }
+
+      // Award radar: diff the game's BGG honors (weekly per game) — a new
+      // nomination/win is the hobby's biggest predictable demand shock.
+      let honorIds = prev.honorIds || null;
+      let honorsAt = prev.honorsAt || 0;
+      let recentHonors = prev.recentHonors || [];
+      if (Date.now() - honorsAt > 7 * 864e5) {
+        try {
+          const hr = await fetch(`https://api.geekdo.com/api/geekitem/linkeditems?ajax=1&linkdata_index=boardgamehonor&objectid=${g.id}&objecttype=thing&showcount=20&nosession=1&pageid=1&sort=yearsubmitted`, {
+            headers: { Authorization: `Bearer ${env.BGG_TOKEN}`, Accept: "application/json" }
+          });
+          if (hr.ok) {
+            const items = ((await hr.json()).items) || [];
+            const ids = items.map((it) => String(it.linkid));
+            if (honorIds) {
+              const known = new Set(honorIds);
+              const fresh = items.filter((it) => !known.has(String(it.linkid)));
+              if (fresh.length) {
+                recentHonors = fresh.map((it) => ({ name: String(it.name).slice(0, 120), seenAt: new Date().toISOString().slice(0, 10) }))
+                  .concat(recentHonors).slice(0, 5);
+                if (env.ALERT_WEBHOOK) {
+                  await fetch(env.ALERT_WEBHOOK.trim(), {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      embeds: [{
+                        title: `🏆 Award news — ${g.name}`,
+                        url: `https://boardgamegeek.com/boardgame/${g.id}`,
+                        description: fresh.map((it) => `• ${it.name}`).join("\n").slice(0, 3900) +
+                          "\n\nAward recognition firms prices fast — if this is on the buy list, sooner beats later.",
+                        color: 0xF1C40F,
+                        footer: { text: "DFWGV Librarian · BGG honors radar" },
+                        timestamp: new Date().toISOString()
+                      }]
+                    })
+                  });
+                }
+              }
+            }
+            honorIds = ids;
+            honorsAt = Date.now();
+          }
+        } catch { /* retries next visit */ }
+      }
+
       // Community buzz signals (all keyless).
       const prevWiki = prev.buzz && prev.buzz.wiki ? prev.buzz.wiki.article : undefined;
+      const reddit = await fetchRedditMentions(g.name);
+      let podcasts = prev.buzz && prev.buzz.podcasts ? prev.buzz.podcasts : null;
+      let podcastsAt = (prev.buzz && prev.buzz.podcastsAt) || 0;
+      if (Date.now() - podcastsAt > 40 * 3600e3) {
+        podcasts = await fetchPodcastMentions(g.name);
+        podcastsAt = Date.now();
+      }
       const buzz = {
-        redditMentions14d: await fetchRedditMentions(g.name),
+        redditMentions14d: reddit ? reddit.count : null,
+        redditTitles: reddit ? reddit.titles : [],
         bluesky14d: await fetchBlueskyMentions(g.name),
         news: await fetchNewsBuzz(g.name),
         wiki: await fetchWikiInterest(g.name, prevWiki),
+        podcasts, podcastsAt,
         fetchedAt: Date.now()
       };
       intel[g.id] = {
         name: g.name, chatter: forum.list, forumActivity: forum.activity,
-        videos, videosAt, buzz, fetchedAt: Date.now()
+        videos, videosAt,
+        playsTotal, playsAt, playsPrevTotal, playsPrevAt,
+        honorIds, honorsAt, recentHonors,
+        buzz, fetchedAt: Date.now()
       };
       await new Promise((r) => setTimeout(r, 400));
     }
@@ -1165,7 +1300,7 @@ async function gatherIntelSlice(env, includeReddit) {
     await env.HOT_HISTORY.put(INTEL_CURSOR_KEY, JSON.stringify((cursor + SLICE) % watchlist.length));
   }
   if (includeReddit) await checkRedditDeals(env);
-  return watchlist.length > 3; // more games than one slice covers?
+  return watchlist.length > 2; // more games than one slice covers?
 }
 
 /* ---------------- BGG community auctions (geeklist-based) ---------------- */
@@ -1324,7 +1459,7 @@ async function handleCronIntel(request, env, ctx, cors) {
   // background so the calling invocation never blocks on us.
   ctx.waitUntil((async () => {
     const more = await gatherIntelSlice(env, hops === 0);
-    if (more && hops < 8) {
+    if (more && hops < 10) {
       await fetch(`${WORKER_SELF_URL}/api/cron-intel?hops=${hops + 1}`, {
         method: "POST",
         headers: { Authorization: `Bearer ${env.ANALYTICS_ADMIN_TOKEN}` }
@@ -1535,6 +1670,11 @@ async function postWeeklyDigest(env) {
     if (gi.videos && gi.videos.length) lm.videos = gi.videos;
     if (gi.forumActivity) lm.forumActivity = gi.forumActivity;
     if (gi.buzz) lm.buzz = gi.buzz;
+    if (gi.recentHonors && gi.recentHonors.length) lm.honors = gi.recentHonors;
+    if (gi.playsTotal && gi.playsPrevTotal && gi.playsAt > gi.playsPrevAt) {
+      const weeks = (gi.playsAt - gi.playsPrevAt) / (7 * 864e5);
+      if (weeks > 0.5) lm.playsPerWeek = Math.max(0, Math.round((gi.playsTotal - gi.playsPrevTotal) / weeks));
+    }
     const auctions = Object.values(auctionStage).filter((a) =>
       a.gameId === String(g.id) && !a.recorded && Date.now() - a.updated < 5 * 864e5);
     if (auctions.length) {
@@ -1572,12 +1712,16 @@ async function postWeeklyDigest(env) {
     };
     const live = liveMarket[g.id] || {};
     const eb = live.ebaySold;
-    const offerCounts = dates.slice(-14).map((d) => gh[d].rc).filter((x) => x !== null && x !== undefined);
+    const last14 = dates.slice(-14);
+    const series14 = (fn) => { const s = last14.map(fn).filter((x) => x !== null && x !== undefined && !Number.isNaN(x)); return s.length ? s : null; };
     return {
       id: g.id, name: g.name, target: g.target || null,
       liveSecondHand: live.used || null,
       liveRetailUS: live.retail || null,
-      retailOfferCountLast14d: offerCounts.length ? offerCounts : null,
+      retailOfferCountLast14d: series14((d) => gh[d].rc),
+      ebayListingCountLast14d: series14((d) => gh[d].ec),
+      retailSpreadLast14d: series14((d) => (gh[d].r && gh[d].ra) ? Math.round((gh[d].r / gh[d].ra) * 100) / 100 : null),
+      trackedRetailDelivered: hist("rd"),
       demandAndSupply: live.demand || null,
       bggSalesWeDetected: probableSaleStats(bggSoldMap[g.id]),
       ebaySoldBaseline: eb ? {
@@ -1591,9 +1735,72 @@ async function postWeeklyDigest(env) {
       forumChatter: live.chatter || null,
       recentVideos: live.videos || null,
       liveBggAuctions: live.auctions || null,
+      recentAwards: live.honors || null,
+      playsLoggedPerWeek: live.playsPerWeek ?? null,
       ebaySoldPricesLink: `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(`${g.name} board game`)}&LH_Sold=1&LH_Complete=1&LH_PrefLoc=1`
     };
   });
+  // Reprint/crowdfunding radar: BGG's crowdfunding-countdown feed lists every
+  // active campaign with its linked BGG game id — one request covers all
+  // platforms (Gamefound, Kickstarter, preorders).
+  const crowdfunding = [];
+  try {
+    const res = await fetch("https://api.geekdo.com/api/ending_preorders", {
+      headers: { Authorization: `Bearer ${env.BGG_TOKEN}`, Accept: "application/json" }
+    });
+    if (res.ok) {
+      const campaigns = await res.json();
+      const nameOf = new Map(watchlist.map((g) => [String(g.id), g.name]));
+      for (const c of Array.isArray(campaigns) ? campaigns : []) {
+        const tid = c.item && c.item.id ? String(c.item.id) : null;
+        if (!tid) continue;
+        const watched = nameOf.has(tid);
+        const candHit = topCandidates.find((x) => String(x.id) === tid);
+        if (!watched && !candHit) continue;
+        crowdfunding.push({
+          gameId: tid,
+          name: (c.item && c.item.name) || nameOf.get(tid) || (candHit && candHit.name) || "",
+          watched,
+          platform: c.orderType || "",
+          endDate: String(c.endDate || "").slice(0, 10),
+          backers: c.backersCount || null,
+          fundedPercent: c.progress || null,
+          url: c.orderUrl || ""
+        });
+      }
+      // Alert each campaign match once — a live reprint of a watched game is
+      // the strongest possible WAIT-on-secondhand signal.
+      if (crowdfunding.length && env.ALERT_WEBHOOK) {
+        let cfSeen = [];
+        try { cfSeen = JSON.parse((await env.HOT_HISTORY.get("cf-seen")) || "[]"); } catch { /* rebuild */ }
+        const seenSet = new Set(cfSeen);
+        const fresh = crowdfunding.filter((c) => !seenSet.has(`${c.gameId}:${c.url}`));
+        if (fresh.length) {
+          await fetch(env.ALERT_WEBHOOK.trim(), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              embeds: [{
+                title: "🚀 Campaign live for a tracked game",
+                description: fresh.slice(0, 10).map((c) =>
+                  `**[${c.name}](https://boardgamegeek.com/boardgame/${c.gameId})** — [${c.platform || "campaign"}](${c.url}) ends ${c.endDate}${c.backers ? ` · ${c.backers} backers` : ""}${c.fundedPercent ? ` · ${c.fundedPercent}% funded` : ""}\n${c.watched ? "⚠ Watched game: hold off on second-hand premiums — supply refills at fulfillment." : "Candidate: campaign pricing usually beats post-campaign retail."}`
+                ).join("\n\n").slice(0, 3900),
+                color: 0x1ABC9C,
+                footer: { text: "DFWGV Librarian · BGG crowdfunding radar" },
+                timestamp: new Date().toISOString()
+              }]
+            })
+          });
+          await env.HOT_HISTORY.put("cf-seen", JSON.stringify(cfSeen.concat(fresh.map((c) => `${c.gameId}:${c.url}`)).slice(-200)));
+        }
+      }
+    }
+  } catch { /* radar optional */ }
+  for (const w of watch) {
+    const cf = crowdfunding.find((c) => c.gameId === String(w.id));
+    if (cf) w.reprintCampaignLive = cf;
+  }
+
   // Composite 0–100 Buzz Score per watched game: weighted attention across
   // social chatter, press, video coverage, and BGG-native momentum, with a
   // trend vs the last digest and the top contributing drivers.
@@ -1609,27 +1816,45 @@ async function postWeeklyDigest(env) {
       if (v > 0.5) parts.push({ label, v });
       s += v;
     };
-    add("Reddit chatter", (b.redditMentions14d || 0) / 5, 12);
-    add("Bluesky chatter", (b.bluesky14d || 0) / 10, 8);
-    add("press coverage", ((b.news && b.news.count14d) || 0) / 3, 10);
+    // Level + surge blend for the chattery channels: normalize against the
+    // game's OWN recent baseline so a quiet game tripling its mentions
+    // registers as loudly as an evergreen hit sitting at its usual level.
+    const prevEntry = buzzHistory[w.id] || {};
+    const compHist = Array.isArray(prevEntry.h) ? prevEntry.h : [];
+    const median = (arr) => { if (!arr.length) return 0; const s = [...arr].sort((x, y) => x - y); return s[Math.floor(s.length / 2)]; };
+    const surged = (cur, key, levelFrac) => {
+      const base = median(compHist.map((x) => x[key]).filter((x) => x !== null && x !== undefined));
+      const surge = base > 0 ? cur / base : (cur > 0 ? 2 : 0);
+      return 0.65 * Math.min(1, levelFrac) + 0.35 * Math.min(1, surge / 3);
+    };
+    const reCur = b.redditMentions14d || 0;
+    const bsCur = b.bluesky14d || 0;
+    const prCur = (b.news && b.news.count14d) || 0;
+    const faCur = (lm.forumActivity || {}).activeThreads14d || 0;
+    add("Reddit chatter", surged(reCur, "re", reCur / 5), 11);
+    add("Bluesky chatter", surged(bsCur, "bs", bsCur / 10), 7);
+    add("press coverage", surged(prCur, "pr", prCur / 3), 9);
     const vids = w.recentVideos || [];
     add("YouTube coverage", vids.length / 3, 8);
-    add("YouTube views", Math.log10(1 + vids.reduce((a, v) => a + (v.views || 0), 0)) / 5, 7);
+    add("YouTube views", Math.log10(1 + vids.reduce((a, v) => a + (v.views || 0), 0)) / 5, 6);
     const hotDays = (streaks.get(String(w.id)) || {}).days || 0;
-    add("BGG Hotness", hotDays ? 0.5 + hotDays / 14 : 0, 15);
+    add("BGG Hotness", hotDays ? 0.5 + hotDays / 14 : 0, 13);
     const dm = w.demandAndSupply || {};
     add("new ratings", (dm.ratings30dChange || 0) / 300, 8);
-    add("new owners", (dm.owners30dChange || 0) / 500, 6);
-    add("forum activity", ((lm.forumActivity || {}).activeThreads14d || 0) / 6, 8);
+    add("new owners", (dm.owners30dChange || 0) / 500, 5);
+    add("forum activity", surged(faCur, "fa", faCur / 6), 7);
     add("new BGG videos", (lm.videos14dOnBgg || 0) / 4, 4);
     add("Wikipedia interest", (b.wiki && b.wiki.vsPrior3wks) ? (b.wiki.vsPrior3wks - 1) : 0, 4);
     add("live auction", w.liveBggAuctions ? 1 : 0, 2);
     const dealCutoff = new Date(Date.now() - 14 * 864e5).toISOString().slice(0, 10);
     const dealPosts = redditDealsAll.filter((d) => d.gameId === String(w.id) && d.date >= dealCutoff).length;
-    add("deal/BST posts", dealPosts / 2, 8);
+    add("deal/BST posts", dealPosts / 2, 7);
+    add("podcast coverage", ((b.podcasts && b.podcasts.count14d) || 0) / 2, 4);
+    add("play-logging velocity", (lm.playsPerWeek || 0) / 100, 5);
     const score = Math.round(Math.min(100, s));
-    const prev = buzzHistory[w.id];
-    const trend = prev ? (score - prev.score >= 5 ? "rising" : score - prev.score <= -5 ? "falling" : "steady") : "new";
+    const trend = prevEntry.score !== undefined
+      ? (score - prevEntry.score >= 5 ? "rising" : score - prevEntry.score <= -5 ? "falling" : "steady")
+      : "new";
     w.communityBuzz = {
       score, trend,
       drivers: parts.sort((a, b2) => b2.v - a.v).slice(0, 2).map((p) => p.label),
@@ -1638,11 +1863,19 @@ async function postWeeklyDigest(env) {
       blueskyMentions14d: b.bluesky14d ?? null,
       pressItems14d: (b.news && b.news.count14d) ?? null,
       latestPress: (b.news && b.news.latest) || null,
+      pressHeadlines: (b.news && b.news.headlines) || null,
+      chatterTitles: (b.redditTitles || []).slice(0, 5),
+      podcastEpisodes14d: (b.podcasts && b.podcasts.count14d) ?? null,
+      latestPodcast: (b.podcasts && b.podcasts.latest) || null,
+      playsLoggedPerWeek: lm.playsPerWeek ?? null,
       wikipediaDailyViews7d: (b.wiki && b.wiki.dailyViews7d) || null,
       wikipediaVsBaseline: (b.wiki && b.wiki.vsPrior3wks) || null,
       hotnessDaysOf14: hotDays || 0
     };
-    buzzHistory[w.id] = { score, date: todayKey };
+    buzzHistory[w.id] = {
+      score, date: todayKey,
+      h: compHist.filter((x) => x.d !== todayKey).concat([{ d: todayKey, re: reCur, bs: bsCur, pr: prCur, fa: faCur }]).slice(-15)
+    };
   }
   for (const id of Object.keys(buzzHistory)) {
     if (!watch.some((w) => String(w.id) === id)) delete buzzHistory[id];
@@ -1696,22 +1929,57 @@ async function postWeeklyDigest(env) {
     if (!digestThumb || ratio < bestRatio) { digestThumb = thumb; bestRatio = ratio; }
   }
 
+  // Verdict backtesting: score past BUY/WAIT calls (14–35 days old) against
+  // what prices actually did, so the model sees its own track record.
+  let vlog = [];
+  try { vlog = JSON.parse((await env.HOT_HISTORY.get("verdict-log")) || "[]"); } catch { /* rebuild */ }
+  let vstats = { buyRight: 0, buyTotal: 0, waitRight: 0, waitTotal: 0 };
+  try { vstats = { ...vstats, ...JSON.parse((await env.HOT_HISTORY.get("verdict-stats")) || "{}") }; } catch { /* rebuild */ }
+  {
+    const newCut = new Date(Date.now() - 14 * 864e5).toISOString().slice(0, 10);
+    const oldCut = new Date(Date.now() - 40 * 864e5).toISOString().slice(0, 10);
+    for (const v of vlog) {
+      if (v.done || !v.price) continue;
+      if (v.date > newCut) continue;              // too fresh to judge
+      if (v.date < oldCut) { v.done = true; continue; }
+      const gh = priceHistory[v.id];
+      if (!gh) continue;
+      const laterMins = Object.keys(gh)
+        .filter((d) => /^\d{4}-/.test(d) && d > v.date)
+        .map((d) => { const c = [gh[d].r, gh[d].m, gh[d].e].filter(Boolean); return c.length ? Math.min(...c) : null; })
+        .filter((x) => x !== null);
+      if (laterMins.length < 7) continue;         // not enough follow-up data yet
+      const dropped = Math.min(...laterMins) <= v.price * 0.95;
+      if (v.verdict === "buy") { vstats.buyTotal++; if (!dropped) vstats.buyRight++; }
+      else if (v.verdict === "wait") { vstats.waitTotal++; if (dropped) vstats.waitRight++; }
+      v.done = true;
+    }
+  }
+  const trackRecord = (vstats.buyTotal + vstats.waitTotal) >= 3 ? {
+    buyVerdictsCorrect: `${vstats.buyRight}/${vstats.buyTotal}`,
+    waitVerdictsCorrect: `${vstats.waitRight}/${vstats.waitTotal}`,
+    scoring: "a BUY was correct if no ≥5% cheaper price appeared in the following 2-5 weeks; a WAIT was correct if one did"
+  } : null;
+
   const data = {
     libraryGames: snapshot.games.length,
+    saleCalendar: saleEventContext(),
     topUnownedCandidates: topCandidates,
     sustainedHotnessUnowned: sustainedHot,
     watchlistSpotlight: spotlight,
     watchlistQuiet: quiet,
     recentPriceAlerts: recentAlerts,
     newExpansionOrEditionAnnouncements: newAnnouncements.slice(0, 10),
-    communityDealsSpotted: redditDeals
+    communityDealsSpotted: redditDeals,
+    crowdfundingCampaigns: crowdfunding,
+    yourVerdictTrackRecord: trackRecord || "not enough graded verdicts yet"
   };
 
   const system = `You write the DAILY pricing-and-procurement digest for the curator of the DFW Gaming Village board-game lending library (~${snapshot.games.length} games), rendered in Discord as a series of embeds — one per spotlighted game. The data includes a LIVE market scan (BGG Marketplace second-hand listings with condition, plus US retail in-stock offers) layered on our tracked price history.
 
 OUTPUT FORMAT — a machine parses your reply, follow it EXACTLY, no text outside the delimited sections:
 ===OVERVIEW===
-2-4 short lines: the day at a glance — biggest movers and best opportunities first. If watchlistQuiet is non-empty, end with one line: "**Quiet:** N others steady" (name at most 3 with their current best price where interesting; never itemize the whole quiet list).
+2-5 short lines: the day at a glance — biggest movers and best opportunities first. Include one line "💸 **Best money this week:**" naming the single best purchase across everything today (with price and why in a few words) — or "hold your cash" when nothing clears the bar. If watchlistQuiet is non-empty, end with one line: "**Quiet:** N others steady" (name at most 3 with their current best price where interesting; never itemize the whole quiet list).
 ===GAME:<id>===
 One section per game in watchlistSpotlight, using its id, in the order given. First line EXACTLY "VERDICT: buy" or "VERDICT: wait" or "VERDICT: watch". Then 2-4 punchy lines (max 380 characters total): today's best genuine second-hand price (with condition, linked to the listing) and best US retail (item + delivered) vs the target; 14-day average/low and historic low (with its date); trend direction; then the reasoning behind the verdict (e.g. "within $3 of its historic low and trending down — wait a week", or "at target and only 4 genuine copies listed — grab it"). Don't repeat the game's name — its embed shows it.
 ===EXTRA===
@@ -1724,7 +1992,14 @@ Data guidance:
 - ebaySoldBaseline is REAL eBay sold-sale history (what copies actually sold for — count, median, range, last sales). Check its source field: "ebay-official-90d" is fresh official data; "130point-historical" ends at dataThrough — still a useful value anchor, but note the through-date when it matters. ebayLiveNow, when present, is today's cheapest live eBay asking price (official API) and trackedEbayAsks is our own day-by-day history of that cheapest ask — treat those as the freshest eBay signal. When a verdict is still close, point at the game's eBay sold-prices link.
 - bggSalesWeDetected are BGG Marketplace listings we watched disappear — probable real sales at those prices. Fresh, first-party evidence of what copies sell for; weigh it alongside the eBay baseline.
 - demandAndSupply is BGG market pressure: wanting vs forTrade copies (wantPerTradeCopy — above ~5 is a seller's market where drops are unlikely; near or below 1 means soft demand), plus owners/ratings 30-day growth as popularity momentum. Use it to judge whether waiting is realistic.
-- retailOfferCountLast14d is the count of in-stock US retail offers per day — a shrinking series with rising used prices = possibly going out of print: say so and recommend buying before the spike.
+- retailOfferCountLast14d is the count of in-stock US retail offers per day, and ebayListingCountLast14d the same for eBay — BOTH series shrinking while used prices rise = probably going out of print: say so and recommend buying before the spike. retailSpreadLast14d is the daily cheapest-offer/average-offer ratio: a falling ratio means broad clearance across stores (a real market move), a lone low with a flat ratio means one aggressive seller.
+- trackedRetailDelivered is the shipped-total price series — quote delivered totals when they differ meaningfully from sticker prices; the library pays delivered.
+- saleCalendar tells you where today sits vs the big sale windows (Black Friday/Cyber, post-holiday clearance, etc). Within ~6 weeks of a major event, lean WAIT unless the current price is already near the tracked/sold low, and say so ("BF is N days out"). During an event window, treat drops as expected and judge them against event-grade lows.
+- reprintCampaignLive means a crowdfunding/preorder campaign for this game is LIVE (platform, end date, link): recommend against paying second-hand premiums — supply refills at fulfillment; for unowned candidates, campaign pricing usually beats post-campaign retail.
+- recentAwards lists fresh BGG honors (nominations/wins) — award recognition firms prices fast; it flips WAIT toward BUY.
+- playsLoggedPerWeek is BGG play-logging velocity — playing precedes rating and buying, so a jump is early demand.
+- communityBuzz.chatterTitles and pressHeadlines are the actual recent post titles/headlines: infer the TONE (hype vs sell-off wave vs price complaints vs rules chat) and let it shape the verdict — a sell-off wave softens prices even when the buzz score is high; hype firms them.
+- yourVerdictTrackRecord grades your own past BUY/WAIT calls against what prices actually did. Calibrate: if WAIT has been mostly wrong lately, demand stronger evidence before another WAIT, and vice versa.
 - forumChatter is recent BGG forum threads about pricing/availability/print status — cite anything decisive (reprint confirmed, sold out at publisher) with its thread link. recentVideos is fresh YouTube coverage — big-channel reviews foreshadow demand bumps.
 - liveBggAuctions means the game is up for auction in the BGG community RIGHT NOW (current high bid, bid count, BIN price, link). Community auctions often close below market — compare the current high bid to the other prices and flag genuine opportunities prominently in the verdict.
 - communityBuzz is a computed 0-100 attention score (Reddit + Bluesky chatter, press coverage with the latest headline, Wikipedia interest vs baseline, YouTube reach, BGG hotness/forum/video momentum), with trend and top drivers. The score line renders automatically under each game — do NOT restate the number; USE it in verdicts: rising buzz firms prices and argues for buying sooner, falling buzz supports waiting. Cite specific drivers (e.g. a linked press headline) when they change the calculus.
@@ -1824,6 +2099,23 @@ Data guidance:
     batchChars += size;
   }
   await flush();
+
+  // Log today's verdicts (with the best price at verdict time) for future
+  // backtesting; keep the log bounded.
+  if (parsed.games.length) {
+    const bestNowById = {};
+    for (const sc of scored) bestNowById[String(sc.w.id)] = sc.bestNow;
+    const todays = [];
+    for (const sec of parsed.games) {
+      const vm2 = sec.body.match(/^VERDICT:\s*(buy|wait|watch)/i);
+      if (!vm2) continue;
+      if (vlog.some((v) => v.id === sec.id && v.date === todayKey)) continue; // manual re-run
+      todays.push({ id: sec.id, verdict: vm2[1].toLowerCase(), price: bestNowById[sec.id] || null, date: todayKey });
+    }
+    vlog = todays.concat(vlog).slice(0, 300);
+  }
+  await env.HOT_HISTORY.put("verdict-log", JSON.stringify(vlog));
+  await env.HOT_HISTORY.put("verdict-stats", JSON.stringify(vstats));
 
   const record = parsed.games.length
     ? [parsed.overview, ...parsed.games.map((g) => g.body), parsed.extra].filter(Boolean).join("\n\n")
@@ -2035,6 +2327,19 @@ async function handlePriceAnalysis(request, env, cors) {
   if (!videos) videos = await fetchRecentVideos(env, name);
   const buzzRaw = (giEntry && giEntry.buzz) || null;
 
+  // 7. Live reprint/preorder campaign for this game?
+  let reprint = null;
+  try {
+    const res = await fetch("https://api.geekdo.com/api/ending_preorders", {
+      headers: { Authorization: `Bearer ${env.BGG_TOKEN}`, Accept: "application/json" }
+    });
+    if (res.ok) {
+      const campaigns = await res.json();
+      const c = (Array.isArray(campaigns) ? campaigns : []).find((x) => x.item && String(x.item.id) === id);
+      if (c) reprint = { platform: c.orderType || "", endDate: String(c.endDate || "").slice(0, 10), backers: c.backersCount || null, url: c.orderUrl || "" };
+    }
+  } catch { /* optional */ }
+
   const q = encodeURIComponent(`${name} board game`);
   const data = {
     game: name,
@@ -2048,6 +2353,9 @@ async function handlePriceAnalysis(request, env, cors) {
     forumActivity: forum.activity || undefined,
     recentYouTubeCoverage: videos || "none found in the last 7 days (or YouTube key not set)",
     communityBuzz: buzzRaw || "not yet gathered (builds via the intel rotation for watched games)",
+    saleCalendar: saleEventContext(),
+    reprintCampaignLive: reprint || "none active",
+    recentAwards: (giEntry && giEntry.recentHonors && giEntry.recentHonors.length) ? giEntry.recentHonors : "none recently",
     trackedHistory: tracked || "not on the watchlist — no tracked history yet",
     watchTarget: watched ? watched.target || null : null,
     recentAlerts: alerts,
@@ -2062,7 +2370,7 @@ async function handlePriceAnalysis(request, env, cors) {
 
 OUTPUT FORMAT — a machine parses your reply, follow it EXACTLY, no text outside the delimited sections:
 ===VERDICT===
-First line EXACTLY "VERDICT: buy" or "VERDICT: wait" or "VERDICT: watch". Then 1-3 lines: the fair target price to set (anchored to real sold prices when available) and the core reasoning. If forumChatter contains print-status or availability news that changes the calculus (reprint incoming, sold out at publisher), cite it with its thread link.
+First line EXACTLY "VERDICT: buy" or "VERDICT: wait" or "VERDICT: watch". Then 1-3 lines: the fair target price to set (anchored to real sold prices when available) and the core reasoning. Factor in: reprintCampaignLive (a live campaign means WAIT on second-hand premiums — supply refills at fulfillment), saleCalendar (within ~6 weeks of a major sale event, lean WAIT unless already near the floor; say so), recentAwards (award news firms prices — flips WAIT toward BUY), and forumChatter print-status/availability news (cite the thread link).
 ===BEST BUYS===
 Max 900 characters, bullet lines: cheapest genuine second-hand listing (price, condition, [its listing](link)), cheapest US retail (item + delivered, [all retail offers](storeListUrl)), and today's cheapest live eBay ask if ebayLiveNow has data.
 ===MARKET===
@@ -2260,6 +2568,7 @@ async function checkWatchedPrices(env, ctx, start = 0) {
   try { liveCache = JSON.parse((await env.HOT_HISTORY.get(LIVE_MARKET_KEY)) || "{}"); } catch { /* rebuild */ }
   const today = new Date().toISOString().slice(0, 10);
   const cooldownDate = new Date(Date.now() - ALERT_COOLDOWN_DAYS * 864e5).toISOString().slice(0, 10);
+  const saleEventNow = saleEventContext().current;
   const alerts = [];
 
   for (const g of slice) {
@@ -2329,7 +2638,14 @@ async function checkWatchedPrices(env, ctx, start = 0) {
       : key === "e"
         ? (snap.eLink || `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(`${g.name} board game`)}&LH_BIN=1`)
         : (snap.mLink || `https://boardgamegeek.com/boardgame/${g.id}/marketplace`);
-    const canAlert = !gh.lastAlert || gh.lastAlert < cooldownDate;
+    // Per-channel cooldowns: a retail alert must not mute a deeper
+    // second-hand or eBay drop (and vice versa) for a week.
+    const COOLDOWN_KEY = { r: "lastAlertR", m: "lastAlertM", e: "lastAlertE" };
+    const canAlert = (key) => {
+      const last = gh[COOLDOWN_KEY[key]] || gh.lastAlert; // legacy field honored once
+      return !last || last < cooldownDate;
+    };
+    const markAlerted = (key) => { gh[COOLDOWN_KEY[key]] = today; };
 
     // Context stats for the alert embed: trailing avg, 14-day low, historic
     // low (with date) per channel, drawn from the stored history + today.
@@ -2357,6 +2673,7 @@ async function checkWatchedPrices(env, ctx, start = 0) {
       if (!snap[key] && !ctx.histLow) return null;
       return {
         now: snap[key] || null,
+        deliv: key === "r" ? (snap.rDeliv || null) : null,
         cond: key === "m" ? (snap.mCond || "") : key === "e" ? (snap.eCond || "") : "",
         count: (key === "r" ? snap.rCount : key === "m" ? snap.mCount : snap.eCount) || 0,
         link: linkFor(key),
@@ -2381,18 +2698,21 @@ async function checkWatchedPrices(env, ctx, start = 0) {
     if (g.target > 0) {
       // Manual target: alert the moment the cheapest genuine price (either
       // channel) is at or below the target. Overrides the average rules.
+      // Retail is judged on the DELIVERED total when we have it — a $39
+      // game with $12 shipping should not beat your $45 target.
       const options = [];
-      if (snap.r) options.push({ key: "r", label: "new retail", price: snap.r });
+      if (snap.r) options.push({ key: "r", label: "new retail", price: snap.rDeliv || snap.r, delivered: Boolean(snap.rDeliv) });
       if (snap.m) options.push({ key: "m", label: "second-hand", price: snap.m });
       if (snap.e) options.push({ key: "e", label: "eBay live", price: snap.e });
-      const best = options.filter((o) => o.price <= g.target).sort((a, b) => a.price - b.price)[0];
-      if (best && canAlert) {
+      const best = options.filter((o) => o.price <= g.target && canAlert(o.key)).sort((a, b) => a.price - b.price)[0];
+      if (best) {
         alerts.push({
           id: g.id, name: g.name, channel: best.label,
-          note: `$${best.price.toFixed(2)} — at or below your $${g.target} target`,
+          note: `$${best.price.toFixed(2)}${best.delivered ? " delivered" : ""} — at or below your $${g.target} target`,
           link: linkFor(best.key), date: today,
           ...enrich(best.key)
         });
+        markAlerted(best.key);
       }
     } else {
       // No target: the statistical rules — below recent average, or (young
@@ -2404,18 +2724,48 @@ async function checkWatchedPrices(env, ctx, start = 0) {
         let note = "";
         if (prev.length >= MIN_TRAILING_POINTS) {
           const avg = prev.reduce((a, b) => a + b, 0) / prev.length;
-          if (cur <= avg * (1 - DROP_VS_TRAILING)) {
+          // Volatility-aware threshold: noisy channels (second-hand mins
+          // jump with every cheap listing) need a deeper drop than stable
+          // retail before it means anything.
+          const sd = Math.sqrt(prev.reduce((a, b) => a + (b - avg) ** 2, 0) / prev.length);
+          const threshold = Math.max(DROP_VS_TRAILING, avg ? (1.5 * sd) / avg : DROP_VS_TRAILING);
+          if (cur <= avg * (1 - threshold)) {
             note = `$${cur.toFixed(2)} — ${Math.round((1 - cur / avg) * 100)}% below its ${prev.length}-day average of $${avg.toFixed(0)}`;
+          }
+          // New-low trigger: the slow slide to a floor never trips the
+          // percent rule — but a fresh low on a mature history is exactly
+          // when WAIT should flip to BUY.
+          const prevLow = Math.min(...prev);
+          if (!note && prev.length >= 21 && cur < prevLow) {
+            note = `$${cur.toFixed(2)} — NEW ${prev.length}-day low (previous low $${prevLow.toFixed(0)})`;
           }
         } else if (snap[key + "Avg"] && cur <= snap[key + "Avg"] * (1 - OUTLIER_VS_TODAY)) {
           note = `$${cur.toFixed(2)} — ${Math.round((1 - cur / snap[key + "Avg"]) * 100)}% below today's average listing of $${snap[key + "Avg"].toFixed(0)}`;
         }
-        if (note && canAlert) {
+        if (note && canAlert(key)) {
           alerts.push({ id: g.id, name: g.name, channel: label, note, link: linkFor(key), date: today, ...enrich(key) });
+          markAlerted(key);
         }
       }
     }
-    gh[today] = { r: snap.r, m: snap.m, e: snap.e, rc: snap.rCount, mc: snap.mCount };
+    // MERGE the day's record instead of overwriting: keep the day's true
+    // minimums (a morning flash sale must survive the evening run), don't
+    // let a failed fetch null out data an earlier run captured, and
+    // persist the market-shape aggregates that were previously discarded.
+    {
+      const prevDay = gh[today] || {};
+      const lo = (a, b) => (a == null ? (b == null ? undefined : b) : b == null ? a : Math.min(a, b));
+      const keep = (a, b) => (b == null ? a : b);
+      gh[today] = {
+        r: lo(prevDay.r, snap.r), m: lo(prevDay.m, snap.m), e: lo(prevDay.e, snap.e),
+        rd: lo(prevDay.rd, snap.rDeliv),
+        ra: keep(prevDay.ra, snap.rAvg ? Math.round(snap.rAvg) : null),
+        ma: keep(prevDay.ma, snap.mAvg ? Math.round(snap.mAvg) : null),
+        ea: keep(prevDay.ea, snap.eAvg ? Math.round(snap.eAvg) : null),
+        rc: keep(prevDay.rc, snap.rCount), mc: keep(prevDay.mc, snap.mCount), ec: keep(prevDay.ec, snap.eCount),
+        ...(saleEventNow ? { ev: 1 } : {})
+      };
+    }
     // Stage the fresh market snapshot for the digest (which must stay cheap
     // in subrequests, so it assembles from KV instead of re-fetching).
     liveCache[g.id] = {
@@ -2423,7 +2773,6 @@ async function checkWatchedPrices(env, ctx, start = 0) {
       retail: snap.r ? { usInStockOffers: snap.rCount, lowItem: snap.r, lowDelivered: snap.rDeliv || null, storeListUrl: snap.rUrl } : null,
       ebayLive: snap.e ? { liveListings: snap.eCount, avgAsk: snap.eAvg, cheapest: { price: snap.e, condition: snap.eCond, url: snap.eLink } } : null
     };
-    if (alerts.some((a) => a.id === g.id)) gh.lastAlert = today;
     const dates = Object.keys(gh).filter((d) => /^\d{4}-/.test(d)).sort();
     for (const d of dates.slice(0, Math.max(0, dates.length - PRICE_HISTORY_DAYS))) delete gh[d];
 
@@ -2527,6 +2876,7 @@ async function sendPriceAlert(env, alerts, isTest) {
           c.now
             ? `• Now **$${(+c.now).toFixed(2)}**${c.cond ? ` (${c.cond})` : ""}${c.count ? ` · ${c.count} ${unit}` : ""}`
             : "• Nothing listed today",
+          c.deliv ? `• Delivered from ${money(c.deliv)}` : null,
           (c.low14 || c.avg30) ? `• 14d low ${money(c.low14)} · 30d avg ${money(c.avg30)}` : null,
           c.histLow ? `• Hist. low ${money(c.histLow)} (${c.histLowDate})` : null,
           c.now && c.link ? `• [View listings](${c.link})` : null
