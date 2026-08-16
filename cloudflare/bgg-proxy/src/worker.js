@@ -1968,8 +1968,9 @@ async function postWeeklyDigest(env) {
     return { w, score, bestNow };
   });
   scored.sort((a, b) => b.score - a.score);
-  const spotlight = scored.slice(0, 15).map((s) => s.w);
-  const quiet = scored.slice(15).map((s) => ({ id: s.w.id, name: s.w.name, bestPriceNow: s.bestNow, target: s.w.target }));
+  const SPOTLIGHT_CAP = 25; // every game gets a card until the list outgrows this
+  const spotlight = scored.slice(0, SPOTLIGHT_CAP).map((s) => s.w);
+  const quiet = scored.slice(SPOTLIGHT_CAP).map((s) => ({ id: s.w.id, name: s.w.name, bestPriceNow: s.bestNow, target: s.w.target }));
 
   // Box art for the embed: the most interesting watch game (deepest current
   // discount vs its 14-day average), else the first with art.
@@ -2036,7 +2037,7 @@ OUTPUT FORMAT — a machine parses your reply, follow it EXACTLY, no text outsid
 ===OVERVIEW===
 2-5 short lines: the day at a glance — biggest movers and best opportunities first. Include one line "💸 **Best money this week:**" naming the single best purchase across everything today (with price and why in a few words) — or "hold your cash" when nothing clears the bar. If watchlistQuiet is non-empty, end with one line: "**Quiet:** N others steady" (name at most 3 with their current best price where interesting; never itemize the whole quiet list).
 ===GAME:<id>===
-One section per game in watchlistSpotlight, using its id, in the order given. First line EXACTLY "VERDICT: buy" or "VERDICT: wait" or "VERDICT: watch". Then 2-4 punchy lines (max 380 characters total): today's best genuine second-hand price (with condition, linked to the listing) and best US retail (item + delivered) vs the target; 14-day average/low and historic low (with its date); trend direction; then the reasoning behind the verdict (e.g. "within $3 of its historic low and trending down — wait a week", or "at target and only 4 genuine copies listed — grab it"). Don't repeat the game's name — its embed shows it.
+One section for EVERY game in watchlistSpotlight, using its id, in the order given — NEVER omit a game; if one is quiet, its section is just the verdict line plus 1-2 short lines with its current best price. First line EXACTLY "VERDICT: buy" or "VERDICT: wait" or "VERDICT: watch". Then 2-4 punchy lines (max 380 characters total): today's best genuine second-hand price (with condition, linked to the listing) and best US retail (item + delivered) vs the target; 14-day average/low and historic low (with its date); trend direction; then the reasoning behind the verdict (e.g. "within $3 of its historic low and trending down — wait a week", or "at target and only 4 genuine copies listed — grab it"). Don't repeat the game's name — its embed shows it.
 ===EXTRA===
 Two INDEPENDENT subsections — evaluate each on its own:
 "🛒 Opportunities" — ALWAYS write this when topUnownedCandidates or sustainedHotnessUnowned has entries (they almost always do): the 3 strongest unowned pickups today, two lines each — the signal (rating/rank, hotness streak, or a recent price alert), and why it matters for a lending library. Omit only if BOTH lists are truly empty.
@@ -2065,7 +2066,7 @@ Data guidance:
 
   let content;
   try {
-    content = await askClaude(env, system, JSON.stringify(data), 2800);
+    content = await askClaude(env, system, JSON.stringify(data), 5000);
   } catch (err) {
     const error = String(err.message).slice(0, 300);
     await env.HOT_HISTORY.put(LAST_DIGEST_KEY, JSON.stringify({ date: new Date().toISOString(), posted: false, error }));
@@ -2115,6 +2116,37 @@ Data guidance:
         description: `${body}${buzzLine}`.slice(0, 1500),
         color: VERDICT_COLORS[verdict],
         thumbnail: (liveMarket[sec.id] && liveMarket[sec.id].thumb) ? { url: liveMarket[sec.id].thumb } : undefined
+      });
+    }
+    // GUARANTEE: every spotlighted game gets a card. If the model omitted
+    // one, build a data-driven fallback so it can't silently vanish.
+    const covered = new Set(parsed.games.map((g) => String(g.id)));
+    for (const w of spotlight) {
+      if (covered.has(String(w.id))) continue;
+      const lm2 = liveMarket[w.id] || {};
+      const bits = [];
+      if (w.liveSecondHand && w.liveSecondHand.low) {
+        bits.push(`used [$${w.liveSecondHand.low}${w.liveSecondHand.lowCondition ? ` (${w.liveSecondHand.lowCondition})` : ""}](${w.liveSecondHand.lowLink || `https://boardgamegeek.com/boardgame/${w.id}/marketplace`})`);
+      }
+      if (w.liveRetailUS && w.liveRetailUS.lowItem) {
+        bits.push(`retail $${w.liveRetailUS.lowItem}${w.liveRetailUS.lowDelivered ? ` ($${w.liveRetailUS.lowDelivered} delivered)` : ""}`);
+      }
+      if (w.nobleKnightUsedRetail && w.nobleKnightUsedRetail.usedLow) {
+        bits.push(`Noble Knight $${w.nobleKnightUsedRetail.usedLow.price} (${w.nobleKnightUsedRetail.usedLow.condition})`);
+      }
+      const t = w.trackedSecondHand || w.trackedRetail;
+      const cb2 = w.communityBuzz;
+      embeds.push({
+        title: `🟡 WATCH — ${w.name}`,
+        url: `https://boardgamegeek.com/boardgame/${w.id}`,
+        description: [
+          bits.length ? `Today: ${bits.join(" · ")}` : "No live listings captured today",
+          w.target ? `🎯 Target $${w.target}` : null,
+          t && t.historicLow ? `Hist. low $${t.historicLow} (${t.historicLowDate})` : null,
+          cb2 ? `📢 Buzz **${cb2.score}/100** ${cb2.trend === "rising" ? "↑" : cb2.trend === "falling" ? "↓" : "→"}` : null
+        ].filter(Boolean).join("\n").slice(0, 1500),
+        color: VERDICT_COLORS.watch,
+        thumbnail: lm2.thumb ? { url: lm2.thumb } : undefined
       });
     }
     if (parsed.extra) {
