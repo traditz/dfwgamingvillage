@@ -20,6 +20,8 @@ const functions = getFunctions(app, appConfig.FUNCTIONS_REGION);
 const fnCreateGameDay = httpsCallable(functions, "createGameDay");
 const fnUpdateGameDay = httpsCallable(functions, "updateGameDay");
 const fnDeleteGameDay = httpsCallable(functions, "deleteGameDay");
+const fnListHostAdmin = httpsCallable(functions, "listHostAdmin");
+const fnManageHost = httpsCallable(functions, "manageHost");
 
 const authStatus = document.querySelector("#authStatus");
 const adminLinks = document.querySelectorAll("[data-admin-link]");
@@ -333,4 +335,165 @@ onAuthStateChanged(auth, async (user) => {
   blockedState.style.display = "none";
   adminApp.style.display = "";
   subscribeEvents();
+  loadHosts();
+});
+
+// ----------------------------
+// Hosts panel
+// ----------------------------
+const hostRequestRows = document.querySelector("#hostRequestRows");
+const hostSearch = document.querySelector("#hostSearch");
+const hostSearchRows = document.querySelector("#hostSearchRows");
+const hostInviteEmail = document.querySelector("#hostInviteEmail");
+const btnInviteHost = document.querySelector("#btnInviteHost");
+const hostInviteRows = document.querySelector("#hostInviteRows");
+const hostRows = document.querySelector("#hostRows");
+const hostStatusBox = document.querySelector("#hostStatusBox");
+const hostErrorBox = document.querySelector("#hostErrorBox");
+
+let hostData = { hosts: [], requests: [], users: [], invites: [] };
+
+function showHostStatus(msg) {
+  hostStatusBox.textContent = msg || "";
+  hostStatusBox.style.display = msg ? "" : "none";
+  if (msg) showHostError("");
+}
+
+function showHostError(msg) {
+  hostErrorBox.textContent = msg || "";
+  hostErrorBox.style.display = msg ? "" : "none";
+}
+
+async function loadHosts() {
+  if (!hostRequestRows) return;
+  try {
+    hostData = (await fnListHostAdmin({})).data || { hosts: [], requests: [], users: [], invites: [] };
+    renderHostsPanel();
+  } catch (e) {
+    showHostError(e?.message || String(e));
+  }
+}
+
+function userLabel(u) {
+  const name = u.nickname || u.displayName || u.authDisplayName || u.uid;
+  const provider = String(u.uid || "").startsWith("discord:") ? "Discord" : "Google";
+  const email = u.email ? ` · ${u.email}` : "";
+  return { name, meta: `${provider}${email}` };
+}
+
+function hostActionRow(title, meta, buttons) {
+  const row = document.createElement("div");
+  row.className = "adminRow";
+  row.innerHTML = `
+    <div style="flex:1; min-width:0;">
+      <div class="rowTitle">${esc(title)}</div>
+      <div class="rowMeta">${esc(meta)}</div>
+    </div>
+  `;
+  for (const b of buttons) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = `btn ${b.danger ? "btn-danger" : b.primary ? "btn-primary" : ""}`;
+    btn.textContent = b.label;
+    btn.addEventListener("click", async () => {
+      btn.disabled = true;
+      try {
+        await fnManageHost(b.payload);
+        showHostStatus(b.done);
+        await loadHosts();
+      } catch (e) {
+        btn.disabled = false;
+        showHostError(e?.message || String(e));
+      }
+    });
+    row.appendChild(btn);
+  }
+  return row;
+}
+
+function renderHostsPanel() {
+  const hostUids = new Set((hostData.hosts || []).map((h) => h.uid));
+
+  hostRequestRows.innerHTML = "";
+  const requests = hostData.requests || [];
+  if (!requests.length) {
+    hostRequestRows.innerHTML = `<div class="muted">No pending requests.</div>`;
+  } else {
+    for (const r of requests) {
+      const { name, meta } = userLabel(r);
+      hostRequestRows.appendChild(hostActionRow(name, meta, [
+        { label: "Approve", primary: true, payload: { uid: r.uid, action: "approve" }, done: "Host approved." },
+        { label: "Deny", payload: { uid: r.uid, action: "deny" }, done: "Request denied." },
+      ]));
+    }
+  }
+
+  hostRows.innerHTML = "";
+  const hosts = hostData.hosts || [];
+  if (!hosts.length) {
+    hostRows.innerHTML = `<div class="muted">No approved hosts yet.</div>`;
+  } else {
+    for (const h of hosts) {
+      const { name, meta } = userLabel(h);
+      hostRows.appendChild(hostActionRow(name, meta, [
+        { label: "Remove", danger: true, payload: { uid: h.uid, action: "remove" }, done: "Host removed." },
+      ]));
+    }
+  }
+
+  hostInviteRows.innerHTML = "";
+  for (const inv of hostData.invites || []) {
+    hostInviteRows.appendChild(hostActionRow(inv.email, "Pending email invite — becomes a host on first sign-in", [
+      { label: "Cancel", payload: { email: inv.email, action: "uninvite" }, done: "Invite cancelled." },
+    ]));
+  }
+
+  renderHostSearch(hostUids);
+}
+
+function renderHostSearch(hostUids) {
+  const q = String(hostSearch?.value || "").trim().toLowerCase();
+  hostSearchRows.innerHTML = "";
+  if (!q) {
+    hostSearchRows.innerHTML = `<div class="muted">Type to search everyone who has signed in to the planner.</div>`;
+    return;
+  }
+
+  const matches = (hostData.users || []).filter((u) => {
+    if (hostUids.has(u.uid)) return false;
+    const hay = `${u.nickname || ""} ${u.authDisplayName || ""} ${u.email || ""} ${u.uid}`.toLowerCase();
+    return hay.includes(q);
+  }).slice(0, 12);
+
+  if (!matches.length) {
+    hostSearchRows.innerHTML = `<div class="muted">No matches. They may need to sign in to the planner once first — or use an email invite below.</div>`;
+    return;
+  }
+
+  for (const u of matches) {
+    const { name, meta } = userLabel(u);
+    hostSearchRows.appendChild(hostActionRow(name, meta, [
+      { label: "Make Host", primary: true, payload: { uid: u.uid, action: "approve", displayName: u.nickname || u.authDisplayName || "" }, done: "Host added." },
+    ]));
+  }
+}
+
+hostSearch?.addEventListener("input", () => {
+  renderHostsPanel();
+});
+
+btnInviteHost?.addEventListener("click", async () => {
+  const email = String(hostInviteEmail?.value || "").trim().toLowerCase();
+  if (!email || !email.includes("@")) return showHostError("Enter a valid email address.");
+  btnInviteHost.disabled = true;
+  try {
+    await fnManageHost({ email, action: "invite" });
+    hostInviteEmail.value = "";
+    showHostStatus(`Invited ${email} — they become a host when they sign in with that email.`);
+    await loadHosts();
+  } catch (e) {
+    showHostError(e?.message || String(e));
+  } finally {
+    btnInviteHost.disabled = false;
+  }
 });

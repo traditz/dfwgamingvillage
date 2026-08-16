@@ -111,6 +111,32 @@
 
       <section class="card">
         <div class="cardhead">
+          <h2>Hosts</h2>
+        </div>
+        <div class="muted">Approved hosts can create Game Days here or in Discord, and fully manage their own events. You keep admin over everything.</div>
+
+        <div class="label" style="font-weight:700; margin:14px 0 6px;">Pending requests</div>
+        <div id="hostRequestRows" class="adminRows"></div>
+
+        <div class="label" style="font-weight:700; margin:14px 0 6px;">Add a host</div>
+        <input id="hostSearch" type="text" placeholder="Search everyone who has signed in — Discord name or email…" />
+        <div id="hostSearchRows" class="adminRows" style="margin-top:8px;"></div>
+
+        <div class="formGrid" style="margin-top:10px;">
+          <input id="hostInviteEmail" type="email" placeholder="Or pre-approve by email (Google sign-in)" />
+          <button class="btn" type="button" id="btnInviteHost">Invite by Email</button>
+        </div>
+        <div id="hostInviteRows" class="adminRows" style="margin-top:8px;"></div>
+
+        <div class="label" style="font-weight:700; margin:14px 0 6px;">Approved hosts</div>
+        <div id="hostRows" class="adminRows"></div>
+
+        <div class="modalStatus" id="hostStatusBox" style="display:none;"></div>
+        <div class="modalError" id="hostErrorBox" style="display:none;"></div>
+      </section>
+
+      <section class="card">
+        <div class="cardhead">
           <h2>Readiness</h2>
         </div>
         <div class="healthGrid">
@@ -142,6 +168,6 @@
     </section>
   </main>
 
-  <script type="module" src="./admin.js?v=20260612-v2"></script>
+  <script type="module" src="./admin.js?v=20260816-v3"></script>
 </body>
 </html>

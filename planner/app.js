@@ -76,6 +76,13 @@ const btnGoogle = document.querySelector("#btnGoogle");
 const btnBecomeHost = document.querySelector("#btnBecomeHost");
 const btnManageHosts = document.querySelector("#btnManageHosts");
 const btnNickname = document.querySelector("#btnNickname");
+const btnHostGuide = document.querySelector("#btnHostGuide");
+
+// Discord bot invite: same application as OAuth. Permissions = View Channels,
+// Send Messages, Manage Messages (pinning), Embed Links, Read Message History.
+const BOT_INVITE_URL =
+  `https://discord.com/oauth2/authorize?client_id=${encodeURIComponent(DISCORD_CLIENT_ID)}` +
+  `&scope=bot%20applications.commands&permissions=93184`;
 
 const gamedayList = document.querySelector("#gamedayList");
 const pastEventsPanel = document.querySelector("#pastEventsPanel");
@@ -347,6 +354,9 @@ function applyRoleUI() {
     btnBecomeHost.style.display = show ? "" : "none";
     btnBecomeHost.disabled = myRole.requested;
     btnBecomeHost.textContent = myRole.requested ? "Host request pending" : "Become a Host";
+  }
+  if (btnHostGuide) {
+    btnHostGuide.style.display = signedIn && (myRole.owner || myRole.host) ? "" : "none";
   }
   // Organizer-only controls live inside rendered lists — refresh them.
   if (lastGameDaysRaw.length) renderGameDays(lastGameDaysRaw);
@@ -1828,6 +1838,43 @@ function openCreateGameDayModal() {
 // REMOVED: doEmailSignIn, doEmailSignUp
 
 // -----------------------------
+// Host Guide (bring the planner bot to your own Discord)
+// -----------------------------
+function openHostGuideModal() {
+  openModal("Host Guide", `
+    <div class="modalStack">
+      <div class="muted">As an approved host you can run Game Days here on the website — and optionally bring the live planner board into <b>your own Discord server</b>.</div>
+
+      <div>
+        <div class="label" style="font-weight:800; margin-bottom:6px;">1 · Create your Game Day</div>
+        <div class="muted">Use <b>Create Game Day</b> on this page (or <code>/gameday_create_and_bind</code> in Discord, step 3). You fully manage the events you create — edit, delete, and moderate tables and requests.</div>
+      </div>
+
+      <div>
+        <div class="label" style="font-weight:800; margin-bottom:6px;">2 · Add the planner bot to your server</div>
+        <div class="muted" style="margin-bottom:10px;">You need the <b>Manage Server</b> permission in that Discord. The bot posts a pinned, live-updating board — it can't read your messages.</div>
+        <a class="btn btn-primary" href="${BOT_INVITE_URL}" target="_blank" rel="noopener">➕ Add DFWGV Planner Bot to your server</a>
+      </div>
+
+      <div>
+        <div class="label" style="font-weight:800; margin-bottom:6px;">3 · Bind your event to a channel</div>
+        <div class="muted">In the channel that should show the board, run <code>/planner_bind</code> and pick your Game Day from the list (only your events appear). Or create + bind in one step with <code>/gameday_create_and_bind</code>.</div>
+      </div>
+
+      <div>
+        <div class="label" style="font-weight:800; margin-bottom:6px;">4 · It stays in sync</div>
+        <div class="muted">The board updates live as people join from Discord or the web. Useful commands: <code>/planner_event</code> (what's bound here), <code>/planner_refresh</code>, <code>/planner_unbind</code>.</div>
+      </div>
+
+      <div class="modalActions">
+        <button class="btn" id="btnCloseGuide">Close</button>
+      </div>
+    </div>
+  `);
+  qs("#btnCloseGuide")?.addEventListener("click", closeModal);
+}
+
+// -----------------------------
 // Nickname
 // -----------------------------
 function openNicknameModal() {
@@ -2000,6 +2047,8 @@ if (btnBecomeHost) btnBecomeHost.addEventListener("click", async () => {
 });
 
 if (btnManageHosts) btnManageHosts.addEventListener("click", openManageHostsModal);
+
+if (btnHostGuide) btnHostGuide.addEventListener("click", openHostGuideModal);
 
 if (btnNickname) btnNickname.addEventListener("click", () => {
   if (!currentUser) return toast("Please sign in first.", "info");
