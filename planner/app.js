@@ -58,6 +58,7 @@ const fnGetMyPlannerRole = httpsCallable(functions, "getMyPlannerRole");
 const fnRequestHostAccess = httpsCallable(functions, "requestHostAccess");
 const fnListHostAdmin = httpsCallable(functions, "listHostAdmin");
 const fnManageHost = httpsCallable(functions, "manageHost");
+const fnSetNickname = httpsCallable(functions, "setNickname");
 
 // -----------------------------
 // UI bindings
@@ -74,6 +75,7 @@ const btnPastEvents = document.querySelector("#btnPastEvents");
 const btnGoogle = document.querySelector("#btnGoogle");
 const btnBecomeHost = document.querySelector("#btnBecomeHost");
 const btnManageHosts = document.querySelector("#btnManageHosts");
+const btnNickname = document.querySelector("#btnNickname");
 
 const gamedayList = document.querySelector("#gamedayList");
 const pastEventsPanel = document.querySelector("#pastEventsPanel");
@@ -323,6 +325,7 @@ async function refreshMyRole() {
   try {
     const r = await fnGetMyPlannerRole({});
     myRole = { owner: false, host: false, requested: false, ...(r.data || {}) };
+    if (myRole.nickname) setAuthStatus(`Signed in as: ${myRole.nickname}`);
   } catch {
     // Callable unavailable (e.g. mid-deploy): fall back to the client owner check.
     const owner = isAdminUser(currentUser);
@@ -710,10 +713,12 @@ function setButtonsForAuth(user) {
     btnDiscord.style.display = "none";
     if (btnGoogle) btnGoogle.style.display = "none";
     btnSignOut.style.display = "";
+    if (btnNickname) btnNickname.style.display = "";
   } else {
     btnDiscord.style.display = "";
     if (btnGoogle) btnGoogle.style.display = "";
     btnSignOut.style.display = "none";
+    if (btnNickname) btnNickname.style.display = "none";
   }
   // Create Game Day / Become a Host / Manage Hosts are role-driven.
   applyRoleUI();
@@ -1823,6 +1828,59 @@ function openCreateGameDayModal() {
 // REMOVED: doEmailSignIn, doEmailSignUp
 
 // -----------------------------
+// Nickname
+// -----------------------------
+function openNicknameModal() {
+  openModal("Set Nickname", `
+    <div class="modalStack">
+      <label class="field">
+        <div class="label">Display name</div>
+        <input id="nickInput" class="input" type="text" maxlength="32" placeholder="How your name appears on game days" />
+        <div class="hint muted">2–32 characters. Updates everywhere your name appears — including the Discord board.</div>
+      </label>
+      <div class="modalStatus" id="modalStatus" style="display:none;"></div>
+      <div class="modalError" id="modalError" style="display:none;"></div>
+      <div class="modalActions">
+        <button class="btn" id="btnCancel">Cancel</button>
+        <button class="btn btn-primary" id="btnSaveNick">Save</button>
+      </div>
+    </div>
+  `);
+
+  qs("#nickInput").value = myRole.nickname || "";
+  qs("#btnCancel").addEventListener("click", closeModal);
+  setTimeout(() => qs("#nickInput")?.focus(), 50);
+
+  const save = async () => {
+    const nick = String(qs("#nickInput").value || "").trim();
+    if (nick.length < 2 || nick.length > 32) {
+      showInlineError("Nickname must be 2–32 characters.");
+      return;
+    }
+    const btn = qs("#btnSaveNick");
+    btn.disabled = true;
+    showInlineError("");
+    showInlineStatus("Saving everywhere…");
+    try {
+      await fnSetNickname({ nickname: nick });
+      myRole.nickname = nick;
+      setAuthStatus(`Signed in as: ${nick}`);
+      closeModal();
+      toast("Nickname updated everywhere.", "success");
+    } catch (e) {
+      btn.disabled = false;
+      showInlineStatus("");
+      showInlineError(unwrapCallableError(e));
+    }
+  };
+
+  qs("#btnSaveNick").addEventListener("click", save);
+  qs("#nickInput").addEventListener("keydown", (ev) => {
+    if (ev.key === "Enter") save();
+  });
+}
+
+// -----------------------------
 // Host management (owner panel)
 // -----------------------------
 async function openManageHostsModal() {
@@ -1942,6 +2000,11 @@ if (btnBecomeHost) btnBecomeHost.addEventListener("click", async () => {
 });
 
 if (btnManageHosts) btnManageHosts.addEventListener("click", openManageHostsModal);
+
+if (btnNickname) btnNickname.addEventListener("click", () => {
+  if (!currentUser) return toast("Please sign in first.", "info");
+  openNicknameModal();
+});
 
 // REMOVED: btnEmail, btnEmailCancel, btnEmailSignIn, btnEmailSignUp listeners
 
