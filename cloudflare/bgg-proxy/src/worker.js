@@ -2037,7 +2037,7 @@ OUTPUT FORMAT — a machine parses your reply, follow it EXACTLY, no text outsid
 ===OVERVIEW===
 2-5 short lines: the day at a glance — biggest movers and best opportunities first. Include one line "💸 **Best money this week:**" naming the single best purchase across everything today (with price and why in a few words) — or "hold your cash" when nothing clears the bar. If watchlistQuiet is non-empty, end with one line: "**Quiet:** N others steady" (name at most 3 with their current best price where interesting; never itemize the whole quiet list).
 ===GAME:<id>===
-One section for EVERY game in watchlistSpotlight, using its id, in the order given — NEVER omit a game; if one is quiet, its section is just the verdict line plus 1-2 short lines with its current best price. First line EXACTLY "VERDICT: buy" or "VERDICT: wait" or "VERDICT: watch". Then 2-4 punchy lines (max 380 characters total): today's best genuine second-hand price (with condition, linked to the listing) and best US retail (item + delivered) vs the target; 14-day average/low and historic low (with its date); trend direction; then the reasoning behind the verdict (e.g. "within $3 of its historic low and trending down — wait a week", or "at target and only 4 genuine copies listed — grab it"). Don't repeat the game's name — its embed shows it.
+One section for EVERY game in watchlistSpotlight, using its id, in the order given — NEVER omit a game. First line EXACTLY "VERDICT: buy" or "VERDICT: wait" or "VERDICT: watch". Then 1-3 lines (max 260 characters total) of PURE REASONING — the full price tables (current prices, averages, lows, sold anchors, signals) render automatically as structured sections under your text, so do NOT recite numbers the reader will see there. Say WHY: what the prices mean together, what changed, what to do (e.g. "second-hand is at the floor while the whole retail market slides — this is clearance, not one seller; grab it", or "rallying off its low with rising buzz — the cheap window closed, wait for the next dip"). Reference at most ONE decisive number. Quiet game = one line ("holding its range; nothing new"). Don't repeat the game's name — its embed shows it.
 ===EXTRA===
 Two INDEPENDENT subsections — evaluate each on its own:
 "🛒 Opportunities" — ALWAYS write this when topUnownedCandidates or sustainedHotnessUnowned has entries (they almost always do): the 3 strongest unowned pickups today, two lines each — the signal (rating/rank, hotness streak, or a recent price alert), and why it matters for a lending library. Omit only if BOTH lists are truly empty.
@@ -2090,6 +2090,61 @@ Data guidance:
   const VERDICT_COLORS = { buy: 0x2ECC71, wait: 0xE67E22, watch: 0xF5C542 };
   const stamp = new Date().toISOString();
   const footerText = `DFWGV Librarian · live scan of ${watch.length} watched games · BGG Marketplace + US retail + eBay sold`;
+
+  // Structured, data-built bullet sections for each game card — the numbers
+  // come from code so they can't be misquoted; Claude supplies only the
+  // verdict reasoning in the description.
+  const moneyR = (v) => (v || v === 0) ? `$${Math.round(v)}` : "—";
+  const tArrow = (t) => t === "falling" ? "↓" : t === "rising" ? "↑" : "→";
+  const gameCardFields = (w) => {
+    const fields = [];
+    const sh = w.liveSecondHand;
+    const tsh = w.trackedSecondHand;
+    const shLines = [
+      sh && sh.low
+        ? `• Now **$${sh.low}**${sh.lowCondition ? ` (${sh.lowCondition})` : ""}${sh.listings ? ` · ${sh.listings} listed` : ""}${sh.lowLink ? ` · [view](${sh.lowLink})` : ""}`
+        : "• None listed today",
+      sh && sh.median ? `• Median ask ${moneyR(sh.median)}` : null,
+      tsh ? `• 14d avg ${moneyR(tsh.avg14d)} · low ${moneyR(tsh.low14d)} ${tArrow(tsh.trend)}` : null,
+      tsh && tsh.historicLow ? `• Hist. low ${moneyR(tsh.historicLow)} (${tsh.historicLowDate})` : null
+    ].filter(Boolean);
+    fields.push({ name: "🔄 Second-hand (BGG)", value: shLines.join("\n"), inline: true });
+
+    const rt = w.liveRetailUS;
+    const trt = w.trackedRetail;
+    const rtLines = [
+      rt && rt.lowItem
+        ? `• Now **$${rt.lowItem}**${rt.lowDelivered ? ` · $${rt.lowDelivered} delivered` : ""}${rt.usInStockOffers ? ` · ${rt.usInStockOffers} offers` : ""}${rt.storeListUrl ? ` · [stores](${rt.storeListUrl})` : ""}`
+        : "• Not in stock today",
+      trt ? `• 14d avg ${moneyR(trt.avg14d)} · low ${moneyR(trt.low14d)} ${tArrow(trt.trend)}` : null,
+      trt && trt.historicLow ? `• Hist. low ${moneyR(trt.historicLow)} (${trt.historicLowDate})` : null
+    ].filter(Boolean);
+    fields.push({ name: "🏪 New retail (US)", value: rtLines.join("\n"), inline: true });
+
+    const anchors = [];
+    if (w.ebaySoldBaseline) anchors.push(`• eBay sold: ${moneyR(w.ebaySoldBaseline.medianSoldPrice)} median (${w.ebaySoldBaseline.soldSales} thru ${w.ebaySoldBaseline.dataThrough})`);
+    if (w.bggSalesWeDetected) anchors.push(`• BGG sales detected: ${moneyR(w.bggSalesWeDetected.median)} median · ${w.bggSalesWeDetected.detectedSales} copies`);
+    if (w.nobleKnightUsedRetail && w.nobleKnightUsedRetail.usedLow) anchors.push(`• [Noble Knight](${w.nobleKnightUsedRetail.searchUrl}) used: $${w.nobleKnightUsedRetail.usedLow.price} (${w.nobleKnightUsedRetail.usedLow.condition})`);
+    if (w.ebayLiveNow && w.ebayLiveNow.cheapest) anchors.push(`• eBay live ask: ${moneyR(w.ebayLiveNow.cheapest.price)}${w.ebayLiveNow.cheapest.condition ? ` (${w.ebayLiveNow.cheapest.condition})` : ""}`);
+    if (anchors.length) fields.push({ name: "🧾 Real value anchors", value: anchors.join("\n"), inline: true });
+
+    const sig = [];
+    if (w.target) sig.push(`• 🎯 Target $${w.target}`);
+    if (w.liveBggAuctions) {
+      for (const a of w.liveBggAuctions.slice(0, 2)) {
+        sig.push(a.kind === "sale"
+          ? `• 🔨 [For sale on BGG${a.askingPrice ? ` — asking $${a.askingPrice}` : ""}](${a.url})`
+          : `• 🔨 [BGG auction${a.currentHighBid ? ` — high bid $${a.currentHighBid}` : " — no bids yet"}](${a.url})${a.buyItNow ? ` · BIN $${a.buyItNow}` : ""}`);
+      }
+    }
+    if (w.reprintCampaignLive) sig.push(`• 🚀 [Reprint campaign live](${w.reprintCampaignLive.url}) — ends ${w.reprintCampaignLive.endDate}`);
+    if (w.recentAwards && w.recentAwards.length) sig.push(`• 🏆 ${w.recentAwards[0].name.slice(0, 70)}`);
+    if (w.forumChatter && w.forumChatter.length) sig.push(`• 💬 [${w.forumChatter[0].title.slice(0, 55)}](${w.forumChatter[0].url})`);
+    if (w.recentVideos && w.recentVideos.length) sig.push(`• ▶ ${w.recentVideos[0].channel}${w.recentVideos[0].views ? ` — ${Math.round(w.recentVideos[0].views / 1000)}k views` : ""}`);
+    if (sig.length) fields.push({ name: "📣 Signals & status", value: sig.slice(0, 6).join("\n"), inline: false });
+    return fields.map((f) => ({ ...f, value: f.value.slice(0, 1024) }));
+  };
+
   const embeds = [];
   if (parsed.games.length) {
     embeds.push({
@@ -2113,7 +2168,8 @@ Data guidance:
       embeds.push({
         title: `${tag} — ${(w && w.name) || `Game ${sec.id}`}`,
         url: `https://boardgamegeek.com/boardgame/${sec.id}`,
-        description: `${body}${buzzLine}`.slice(0, 1500),
+        description: `${body}${buzzLine}`.slice(0, 1000),
+        fields: w ? gameCardFields(w) : [],
         color: VERDICT_COLORS[verdict],
         thumbnail: (liveMarket[sec.id] && liveMarket[sec.id].thumb) ? { url: liveMarket[sec.id].thumb } : undefined
       });
@@ -2124,27 +2180,14 @@ Data guidance:
     for (const w of spotlight) {
       if (covered.has(String(w.id))) continue;
       const lm2 = liveMarket[w.id] || {};
-      const bits = [];
-      if (w.liveSecondHand && w.liveSecondHand.low) {
-        bits.push(`used [$${w.liveSecondHand.low}${w.liveSecondHand.lowCondition ? ` (${w.liveSecondHand.lowCondition})` : ""}](${w.liveSecondHand.lowLink || `https://boardgamegeek.com/boardgame/${w.id}/marketplace`})`);
-      }
-      if (w.liveRetailUS && w.liveRetailUS.lowItem) {
-        bits.push(`retail $${w.liveRetailUS.lowItem}${w.liveRetailUS.lowDelivered ? ` ($${w.liveRetailUS.lowDelivered} delivered)` : ""}`);
-      }
-      if (w.nobleKnightUsedRetail && w.nobleKnightUsedRetail.usedLow) {
-        bits.push(`Noble Knight $${w.nobleKnightUsedRetail.usedLow.price} (${w.nobleKnightUsedRetail.usedLow.condition})`);
-      }
-      const t = w.trackedSecondHand || w.trackedRetail;
       const cb2 = w.communityBuzz;
       embeds.push({
         title: `🟡 WATCH — ${w.name}`,
         url: `https://boardgamegeek.com/boardgame/${w.id}`,
-        description: [
-          bits.length ? `Today: ${bits.join(" · ")}` : "No live listings captured today",
-          w.target ? `🎯 Target $${w.target}` : null,
-          t && t.historicLow ? `Hist. low $${t.historicLow} (${t.historicLowDate})` : null,
-          cb2 ? `📢 Buzz **${cb2.score}/100** ${cb2.trend === "rising" ? "↑" : cb2.trend === "falling" ? "↓" : "→"}` : null
-        ].filter(Boolean).join("\n").slice(0, 1500),
+        description: cb2
+          ? `📢 Buzz **${cb2.score}/100** ${cb2.trend === "rising" ? "↑" : cb2.trend === "falling" ? "↓" : "→"}${cb2.drivers.length ? ` — ${cb2.drivers.join(", ")}` : ""}`
+          : "Today's market snapshot:",
+        fields: gameCardFields(w),
         color: VERDICT_COLORS.watch,
         thumbnail: lm2.thumb ? { url: lm2.thumb } : undefined
       });
@@ -2181,7 +2224,8 @@ Data guidance:
     await new Promise((r) => setTimeout(r, 400));
   };
   for (const e of embeds) {
-    const size = (e.title || "").length + (e.description || "").length + ((e.footer && e.footer.text) || "").length;
+    const size = (e.title || "").length + (e.description || "").length + ((e.footer && e.footer.text) || "").length +
+      (e.fields || []).reduce((a, f) => a + (f.name || "").length + (f.value || "").length, 0);
     if (batch.length >= 10 || batchChars + size > 5200) await flush();
     batch.push(e);
     batchChars += size;
