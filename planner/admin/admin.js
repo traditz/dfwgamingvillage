@@ -22,6 +22,7 @@ const fnUpdateGameDay = httpsCallable(functions, "updateGameDay");
 const fnDeleteGameDay = httpsCallable(functions, "deleteGameDay");
 const fnListHostAdmin = httpsCallable(functions, "listHostAdmin");
 const fnManageHost = httpsCallable(functions, "manageHost");
+const fnGetMyPlannerRole = httpsCallable(functions, "getMyPlannerRole");
 
 const authStatus = document.querySelector("#authStatus");
 const adminLinks = document.querySelectorAll("[data-admin-link]");
@@ -50,6 +51,8 @@ let events = [];
 let selectedId = "";
 let unsubEvents = null;
 let unsubTables = null;
+// Role resolved server-side: owner sees everything; hosts see their own events.
+let myRole = { owner: false, host: false };
 
 function esc(s) {
   return String(s ?? "").replace(/[&<>"']/g, (m) => ({
@@ -252,7 +255,9 @@ function subscribeEvents() {
   if (unsubEvents) unsubEvents();
   const q = query(collection(db, "gamedays"), orderBy("startsAt", "desc"));
   unsubEvents = onSnapshot(q, (snap) => {
-    events = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    const all = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    // Hosts only see (and manage) the events they created; owner sees all.
+    events = myRole.owner ? all : all.filter((gd) => currentUser && gd.createdBy === currentUser.uid);
     renderEvents();
     if (!selectedId && events.length) selectEvent(events[0].id);
   }, (err) => showError(err.message || String(err)));
@@ -323,19 +328,45 @@ btnCopyBindCommand?.addEventListener("click", async () => {
 
 onAuthStateChanged(auth, async (user) => {
   currentUser = user || null;
-  setAdminNavVisibility(currentUser);
-  if (!isAdmin(currentUser)) {
-    authStatus.textContent = currentUser ? "Signed in, not admin." : "Not signed in.";
+
+  // Resolve role server-side (owner/host); fall back to the client owner check.
+  myRole = { owner: false, host: false };
+  if (currentUser) {
+    try {
+      const r = await fnGetMyPlannerRole({});
+      myRole = { owner: false, host: false, ...(r.data || {}) };
+    } catch {
+      const owner = isAdmin(currentUser);
+      myRole = { owner, host: owner };
+    }
+  }
+
+  const access = myRole.owner || myRole.host;
+  adminLinks.forEach((link) => {
+    link.hidden = !access;
+    if (access) link.textContent = myRole.owner ? "Admin" : "My Events";
+  });
+
+  if (!access) {
+    authStatus.textContent = currentUser ? "Signed in — host access required." : "Not signed in.";
     blockedState.style.display = "";
     adminApp.style.display = "none";
     return;
   }
 
-  authStatus.textContent = `Admin: ${await displayNameForUser(currentUser)}`;
+  const name = myRole.nickname || await displayNameForUser(currentUser);
+  authStatus.textContent = `${myRole.owner ? "Admin" : "Host"}: ${name}`;
+
+  // Owner-only panels
+  const hostsCard = document.querySelector("#hostsCard");
+  const readinessCard = document.querySelector("#readinessCard");
+  if (hostsCard) hostsCard.style.display = myRole.owner ? "" : "none";
+  if (readinessCard) readinessCard.style.display = myRole.owner ? "" : "none";
+
   blockedState.style.display = "none";
   adminApp.style.display = "";
   subscribeEvents();
-  loadHosts();
+  if (myRole.owner) loadHosts();
 });
 
 // ----------------------------

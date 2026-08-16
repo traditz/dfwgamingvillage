@@ -45,7 +45,7 @@
       <div class="cardhead">
         <h2>Admin Access</h2>
       </div>
-      <div class="muted">Sign in from the planner with the configured owner account to use the admin dashboard.</div>
+      <div class="muted">Sign in from the planner with the owner account or an approved host account to use this dashboard. Hosts see and manage the events they created.</div>
     </section>
 
     <section id="adminApp" class="adminGrid" style="display:none;">
@@ -109,7 +109,7 @@
         </div>
       </section>
 
-      <section class="card">
+      <section class="card" id="hostsCard">
         <div class="cardhead">
           <h2>Hosts</h2>
         </div>
@@ -135,7 +135,7 @@
         <div class="modalError" id="hostErrorBox" style="display:none;"></div>
       </section>
 
-      <section class="card">
+      <section class="card" id="readinessCard">
         <div class="cardhead">
           <h2>Readiness</h2>
         </div>
@@ -168,6 +168,6 @@
     </section>
   </main>
 
-  <script type="module" src="./admin.js?v=20260816-v3"></script>
+  <script type="module" src="./admin.js?v=20260816-v4"></script>
 </body>
 </html>

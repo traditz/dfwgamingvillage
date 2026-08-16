@@ -358,6 +358,12 @@ function applyRoleUI() {
   if (btnHostGuide) {
     btnHostGuide.style.display = signedIn && (myRole.owner || myRole.host) ? "" : "none";
   }
+  // Dashboard nav link: owner sees "Admin", hosts see "My Events".
+  adminLinks.forEach((link) => {
+    const show = signedIn && (myRole.owner || myRole.host);
+    link.hidden = !show;
+    if (show) link.textContent = myRole.owner ? "Admin" : "My Events";
+  });
   // Organizer-only controls live inside rendered lists — refresh them.
   if (lastGameDaysRaw.length) renderGameDays(lastGameDaysRaw);
   if (currentGameDayId) {
@@ -1859,6 +1865,11 @@ function openHostGuideModal() {
       <div>
         <div class="label" style="font-weight:800; margin-bottom:6px;">3 · Bind your event to a channel</div>
         <div class="muted">In the channel that should show the board, run <code>/planner_bind</code> and pick your Game Day from the list (only your events appear). Or create + bind in one step with <code>/gameday_create_and_bind</code>.</div>
+      </div>
+
+      <div>
+        <div class="label" style="font-weight:800; margin-bottom:6px;">Your dashboard</div>
+        <div class="muted">Open <a href="./admin/">My Events</a> (also in the top nav) to edit your event's details, watch table signups, see its Discord link status, and copy the exact bind command for your event.</div>
       </div>
 
       <div>
