@@ -56,8 +56,6 @@ const fnJoinTable = httpsCallable(functions, "joinTable");
 const fnLeaveTable = httpsCallable(functions, "leaveTable");
 const fnGetMyPlannerRole = httpsCallable(functions, "getMyPlannerRole");
 const fnRequestHostAccess = httpsCallable(functions, "requestHostAccess");
-const fnListHostAdmin = httpsCallable(functions, "listHostAdmin");
-const fnManageHost = httpsCallable(functions, "manageHost");
 const fnSetNickname = httpsCallable(functions, "setNickname");
 
 // -----------------------------
@@ -74,7 +72,6 @@ const btnCreateGameDay = document.querySelector("#btnCreateGameDay");
 const btnPastEvents = document.querySelector("#btnPastEvents");
 const btnGoogle = document.querySelector("#btnGoogle");
 const btnBecomeHost = document.querySelector("#btnBecomeHost");
-const btnManageHosts = document.querySelector("#btnManageHosts");
 const btnNickname = document.querySelector("#btnNickname");
 const btnHostGuide = document.querySelector("#btnHostGuide");
 
@@ -158,6 +155,7 @@ function fmtDate(d) {
     const dt = d instanceof Date ? d : new Date(d);
     return dt.toLocaleString("en-US", {
       timeZone: "America/Chicago",
+      weekday: "short",
       year: "numeric",
       month: "numeric",
       day: "numeric",
@@ -345,9 +343,6 @@ function applyRoleUI() {
   const signedIn = !!currentUser;
   if (btnCreateGameDay) {
     btnCreateGameDay.style.display = signedIn && (myRole.owner || myRole.host) ? "" : "none";
-  }
-  if (btnManageHosts) {
-    btnManageHosts.style.display = signedIn && myRole.owner ? "" : "none";
   }
   if (btnBecomeHost) {
     const show = signedIn && !myRole.owner && !myRole.host;
@@ -1939,85 +1934,6 @@ function openNicknameModal() {
 }
 
 // -----------------------------
-// Host management (owner panel)
-// -----------------------------
-async function openManageHostsModal() {
-  openModal("Manage Hosts", `<div class="modalStack"><div class="muted">Loading…</div></div>`);
-  await renderManageHosts();
-}
-
-async function renderManageHosts() {
-  let data;
-  try {
-    data = (await fnListHostAdmin({})).data || {};
-  } catch (e) {
-    modalBody.innerHTML = `<div class="modalError" style="display:block;">${esc(unwrapCallableError(e))}</div>`;
-    return;
-  }
-
-  const requests = data.requests || [];
-  const hosts = data.hosts || [];
-
-  const requestRows = requests.length
-    ? requests.map((r) => `
-        <div class="listitem" style="cursor:default;">
-          <div style="flex:1; min-width:0;">
-            <div class="title">${esc(r.displayName || r.uid)}</div>
-            <div class="meta muted">${esc(r.email || r.uid)}</div>
-          </div>
-          <button class="btn btn-small btn-primary" data-host-action="approve" data-uid="${esc(r.uid)}">Approve</button>
-          <button class="btn btn-small" data-host-action="deny" data-uid="${esc(r.uid)}">Deny</button>
-        </div>
-      `).join("")
-    : `<div class="muted">No pending requests.</div>`;
-
-  const hostRows = hosts.length
-    ? hosts.map((h) => `
-        <div class="listitem" style="cursor:default;">
-          <div style="flex:1; min-width:0;">
-            <div class="title">${esc(h.displayName || h.uid)}</div>
-            <div class="meta muted">${esc(h.email || h.uid)}</div>
-          </div>
-          <button class="btn btn-small btn-danger" data-host-action="remove" data-uid="${esc(h.uid)}">Remove</button>
-        </div>
-      `).join("")
-    : `<div class="muted">No approved hosts yet.</div>`;
-
-  modalBody.innerHTML = `
-    <div class="modalStack">
-      <div>
-        <div class="label" style="font-weight:700; margin-bottom:8px;">Pending requests</div>
-        <div class="list">${requestRows}</div>
-      </div>
-      <div>
-        <div class="label" style="font-weight:700; margin-bottom:8px;">Approved hosts</div>
-        <div class="list">${hostRows}</div>
-      </div>
-      <div class="modalHint muted">Hosts can create Game Days and fully manage the ones they create. You keep admin over everything.</div>
-    </div>
-  `;
-
-  modalBody.querySelectorAll("[data-host-action]").forEach((btn) => {
-    btn.addEventListener("click", async () => {
-      const action = btn.getAttribute("data-host-action");
-      const uid = btn.getAttribute("data-uid");
-      btn.disabled = true;
-      try {
-        await fnManageHost({ uid, action });
-        toast(
-          action === "approve" ? "Host approved." : action === "deny" ? "Request denied." : "Host removed.",
-          "success"
-        );
-        await renderManageHosts();
-      } catch (e) {
-        btn.disabled = false;
-        toast(unwrapCallableError(e), "error");
-      }
-    });
-  });
-}
-
-// -----------------------------
 // Event wiring
 // -----------------------------
 if (btnModalClose) btnModalClose.addEventListener("click", closeModal);
@@ -2056,8 +1972,6 @@ if (btnBecomeHost) btnBecomeHost.addEventListener("click", async () => {
     toast(unwrapCallableError(e), "error");
   }
 });
-
-if (btnManageHosts) btnManageHosts.addEventListener("click", openManageHostsModal);
 
 if (btnHostGuide) btnHostGuide.addEventListener("click", openHostGuideModal);
 
