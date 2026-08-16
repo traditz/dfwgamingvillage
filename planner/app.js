@@ -54,6 +54,10 @@ const fnCreateWantToPlay = httpsCallable(functions, "createWantToPlay");
 const fnDeleteWantToPlay = httpsCallable(functions, "deleteWantToPlay");
 const fnJoinTable = httpsCallable(functions, "joinTable");
 const fnLeaveTable = httpsCallable(functions, "leaveTable");
+const fnGetMyPlannerRole = httpsCallable(functions, "getMyPlannerRole");
+const fnRequestHostAccess = httpsCallable(functions, "requestHostAccess");
+const fnListHostAdmin = httpsCallable(functions, "listHostAdmin");
+const fnManageHost = httpsCallable(functions, "manageHost");
 
 // -----------------------------
 // UI bindings
@@ -67,6 +71,9 @@ const adminLinks = document.querySelectorAll("[data-admin-link]");
 
 const btnCreateGameDay = document.querySelector("#btnCreateGameDay");
 const btnPastEvents = document.querySelector("#btnPastEvents");
+const btnGoogle = document.querySelector("#btnGoogle");
+const btnBecomeHost = document.querySelector("#btnBecomeHost");
+const btnManageHosts = document.querySelector("#btnManageHosts");
 
 const gamedayList = document.querySelector("#gamedayList");
 const pastEventsPanel = document.querySelector("#pastEventsPanel");
@@ -101,6 +108,10 @@ let currentGameDayId = null;
 let currentGameDay = null;
 let currentGameDays = [];
 let currentPastGameDays = [];
+let lastGameDaysRaw = [];
+// Platform role, resolved server-side after sign-in (owner = site admin,
+// host = approved to create Game Days, requested = pending host request).
+let myRole = { owner: false, host: false, requested: false };
 let initialEventId = new URLSearchParams(window.location.search).get("event") || "";
 
 // tables pagination
@@ -295,7 +306,51 @@ function isAdminUser(user) {
 }
 
 function isAdmin() {
-  return isAdminUser(currentUser);
+  return myRole.owner || isAdminUser(currentUser);
+}
+
+// Did the signed-in user create this Game Day? (Per-event organizer admin.)
+function isOrganizerOf(gd) {
+  return !!(currentUser && gd && gd.createdBy && gd.createdBy === currentUser.uid);
+}
+
+async function refreshMyRole() {
+  if (!currentUser) {
+    myRole = { owner: false, host: false, requested: false };
+    applyRoleUI();
+    return;
+  }
+  try {
+    const r = await fnGetMyPlannerRole({});
+    myRole = { owner: false, host: false, requested: false, ...(r.data || {}) };
+  } catch {
+    // Callable unavailable (e.g. mid-deploy): fall back to the client owner check.
+    const owner = isAdminUser(currentUser);
+    myRole = { owner, host: owner, requested: false };
+  }
+  applyRoleUI();
+}
+
+function applyRoleUI() {
+  const signedIn = !!currentUser;
+  if (btnCreateGameDay) {
+    btnCreateGameDay.style.display = signedIn && (myRole.owner || myRole.host) ? "" : "none";
+  }
+  if (btnManageHosts) {
+    btnManageHosts.style.display = signedIn && myRole.owner ? "" : "none";
+  }
+  if (btnBecomeHost) {
+    const show = signedIn && !myRole.owner && !myRole.host;
+    btnBecomeHost.style.display = show ? "" : "none";
+    btnBecomeHost.disabled = myRole.requested;
+    btnBecomeHost.textContent = myRole.requested ? "Host request pending" : "Become a Host";
+  }
+  // Organizer-only controls live inside rendered lists — refresh them.
+  if (lastGameDaysRaw.length) renderGameDays(lastGameDaysRaw);
+  if (currentGameDayId) {
+    renderTablesPage();
+    renderWants(currentPosts);
+  }
 }
 
 function setAdminNavVisibility(user) {
@@ -649,19 +704,19 @@ function setAuthStatus(text) {
 // REMOVED: showEmailCard() function
 
 function setButtonsForAuth(user) {
-  if (!btnDiscord || !btnSignOut || !btnCreateGameDay) return;
+  if (!btnDiscord || !btnSignOut) return;
 
   if (user) {
     btnDiscord.style.display = "none";
-    // REMOVED: btnEmail logic
+    if (btnGoogle) btnGoogle.style.display = "none";
     btnSignOut.style.display = "";
-    btnCreateGameDay.style.display = isAdminUser(user) ? "" : "none";
   } else {
     btnDiscord.style.display = "";
-    // REMOVED: btnEmail logic
+    if (btnGoogle) btnGoogle.style.display = "";
     btnSignOut.style.display = "none";
-    btnCreateGameDay.style.display = "none";
   }
+  // Create Game Day / Become a Host / Manage Hosts are role-driven.
+  applyRoleUI();
 }
 
 // -----------------------------
@@ -1169,6 +1224,7 @@ function subscribeGameDays() {
   const q = query(collection(db, "gamedays"), where("status", "==", "published"), orderBy("startsAt", "asc"));
   unsubGameDays = onSnapshot(q, (snap) => {
     const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    lastGameDaysRaw = list;
     renderGameDays(list);
   });
 }
@@ -1224,7 +1280,7 @@ function renderGameDays(list) {
       el.innerHTML = `
         <div>
           <div class="title">${esc(gd.title || "Game Day")}</div>
-          <div class="meta">${esc(fmtDate(startsAt))}${gd.location ? ` • ${esc(gd.location)}` : ""}</div>
+          <div class="meta">${esc(fmtDate(startsAt))}${gd.location ? ` • ${esc(gd.location)}` : ""}${gd.createdByDisplayName ? ` • Hosted by ${esc(gd.createdByDisplayName)}` : ""}</div>
         </div>
       `;
 
@@ -1238,8 +1294,8 @@ function renderGameDays(list) {
       publicLink.addEventListener("click", (e) => e.stopPropagation());
       actions.appendChild(publicLink);
 
-      // NEW: Delete button for admin
-      if (isAdmin()) {
+      // Delete: site owner, or this Game Day's organizer
+      if (isAdmin() || isOrganizerOf(gd)) {
         const delBtn = document.createElement("button");
         delBtn.className = "btn btn-danger eventCardAction";
         delBtn.textContent = "Delete";
@@ -1398,11 +1454,12 @@ function renderTablesPage() {
     const isSignedUp = roster && (roster.confirmedIds.has(currentUser?.uid) || roster.waitlistIds.has(currentUser?.uid));
 
     const canJoin = !!currentUser && !isSignedUp && !isPast;
-    
-    // NEW: Check permissions for deletion
+
+    // Permissions: table host, event organizer, or site owner
     const isHost = currentUser && (currentUser.uid === t.hostUid);
-    const canDelete = !isPast && (isHost || isAdmin());
-    const canEdit = !isPast && isHost;
+    const canManageEvent = isAdmin() || isOrganizerOf(currentGameDay);
+    const canDelete = !isPast && (isHost || canManageEvent);
+    const canEdit = !isPast && (isHost || canManageEvent);
 
     const bggUrl = t.bggId ? `https://boardgamegeek.com/boardgame/${encodeURIComponent(t.bggId)}` : null;
 
@@ -1605,7 +1662,7 @@ function renderWants(items) {
 
   for (const p of items) {
     const isCreator = currentUser && (currentUser.uid === p.createdByUid);
-    const canDelete = !isPast && (isCreator || isAdmin());
+    const canDelete = !isPast && (isCreator || isAdmin() || isOrganizerOf(currentGameDay));
 
     const bggUrl = p.bggId ? `https://boardgamegeek.com/boardgame/${encodeURIComponent(p.bggId)}` : null;
     const el = document.createElement("div");
@@ -1671,7 +1728,7 @@ function openGameDay(gd, { push = true } = {}) {
   gamedayMeta.innerHTML = `
     <div class="muted">
       ${isPast ? `<span class="eventPill is-history">Past Event</span> ` : ""}
-      ${esc(fmtDate(startsAt))}${gd.location ? ` • ${esc(gd.location)}` : ""}
+      ${esc(fmtDate(startsAt))}${gd.location ? ` • ${esc(gd.location)}` : ""}${gd.createdByDisplayName ? ` • Hosted by ${esc(gd.createdByDisplayName)}` : ""}
     </div>
   `;
   setPastEventActions(isPast);
@@ -1766,6 +1823,85 @@ function openCreateGameDayModal() {
 // REMOVED: doEmailSignIn, doEmailSignUp
 
 // -----------------------------
+// Host management (owner panel)
+// -----------------------------
+async function openManageHostsModal() {
+  openModal("Manage Hosts", `<div class="modalStack"><div class="muted">Loading…</div></div>`);
+  await renderManageHosts();
+}
+
+async function renderManageHosts() {
+  let data;
+  try {
+    data = (await fnListHostAdmin({})).data || {};
+  } catch (e) {
+    modalBody.innerHTML = `<div class="modalError" style="display:block;">${esc(unwrapCallableError(e))}</div>`;
+    return;
+  }
+
+  const requests = data.requests || [];
+  const hosts = data.hosts || [];
+
+  const requestRows = requests.length
+    ? requests.map((r) => `
+        <div class="listitem" style="cursor:default;">
+          <div style="flex:1; min-width:0;">
+            <div class="title">${esc(r.displayName || r.uid)}</div>
+            <div class="meta muted">${esc(r.email || r.uid)}</div>
+          </div>
+          <button class="btn btn-small btn-primary" data-host-action="approve" data-uid="${esc(r.uid)}">Approve</button>
+          <button class="btn btn-small" data-host-action="deny" data-uid="${esc(r.uid)}">Deny</button>
+        </div>
+      `).join("")
+    : `<div class="muted">No pending requests.</div>`;
+
+  const hostRows = hosts.length
+    ? hosts.map((h) => `
+        <div class="listitem" style="cursor:default;">
+          <div style="flex:1; min-width:0;">
+            <div class="title">${esc(h.displayName || h.uid)}</div>
+            <div class="meta muted">${esc(h.email || h.uid)}</div>
+          </div>
+          <button class="btn btn-small btn-danger" data-host-action="remove" data-uid="${esc(h.uid)}">Remove</button>
+        </div>
+      `).join("")
+    : `<div class="muted">No approved hosts yet.</div>`;
+
+  modalBody.innerHTML = `
+    <div class="modalStack">
+      <div>
+        <div class="label" style="font-weight:700; margin-bottom:8px;">Pending requests</div>
+        <div class="list">${requestRows}</div>
+      </div>
+      <div>
+        <div class="label" style="font-weight:700; margin-bottom:8px;">Approved hosts</div>
+        <div class="list">${hostRows}</div>
+      </div>
+      <div class="modalHint muted">Hosts can create Game Days and fully manage the ones they create. You keep admin over everything.</div>
+    </div>
+  `;
+
+  modalBody.querySelectorAll("[data-host-action]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const action = btn.getAttribute("data-host-action");
+      const uid = btn.getAttribute("data-uid");
+      btn.disabled = true;
+      try {
+        await fnManageHost({ uid, action });
+        toast(
+          action === "approve" ? "Host approved." : action === "deny" ? "Request denied." : "Host removed.",
+          "success"
+        );
+        await renderManageHosts();
+      } catch (e) {
+        btn.disabled = false;
+        toast(unwrapCallableError(e), "error");
+      }
+    });
+  });
+}
+
+// -----------------------------
 // Event wiring
 // -----------------------------
 if (btnModalClose) btnModalClose.addEventListener("click", closeModal);
@@ -1774,6 +1910,38 @@ if (btnDiscord) btnDiscord.addEventListener("click", async () => {
   const url = await buildDiscordAuthUrl();
   window.location.href = url;
 });
+
+if (btnGoogle) btnGoogle.addEventListener("click", async () => {
+  try {
+    const { GoogleAuthProvider, signInWithPopup } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js");
+    await signInWithPopup(auth, new GoogleAuthProvider());
+  } catch (e) {
+    // User closing the popup isn't an error worth surfacing.
+    if (e?.code !== "auth/popup-closed-by-user" && e?.code !== "auth/cancelled-popup-request") {
+      toast(`Google sign-in failed: ${e?.message || e}`, "error");
+    }
+  }
+});
+
+if (btnBecomeHost) btnBecomeHost.addEventListener("click", async () => {
+  if (!currentUser) return toast("Please sign in first.", "info");
+  const ok = await confirmDialog({
+    title: "Request host access?",
+    message: "This asks the site owner for permission to create and manage your own Game Days.",
+    confirmLabel: "Send request"
+  });
+  if (!ok) return;
+  try {
+    await fnRequestHostAccess({});
+    myRole.requested = true;
+    applyRoleUI();
+    toast("Request sent! You'll be able to host once it's approved.", "success");
+  } catch (e) {
+    toast(unwrapCallableError(e), "error");
+  }
+});
+
+if (btnManageHosts) btnManageHosts.addEventListener("click", openManageHostsModal);
 
 // REMOVED: btnEmail, btnEmailCancel, btnEmailSignIn, btnEmailSignUp listeners
 
@@ -1865,6 +2033,9 @@ onAuthStateChanged(auth, async (user) => {
     renderTablesPage();
     renderWants(currentPosts);
   }
+
+  // Resolve platform role (owner/host) server-side; re-applies role UI when done.
+  refreshMyRole();
 });
 
 // start

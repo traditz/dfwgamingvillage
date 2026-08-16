@@ -51,6 +51,7 @@
     <div class="authbar" id="authbar">
       <div class="auth-status" id="authStatus">Loading auth...</div>
       <button class="btn" id="btnDiscord">Sign in with Discord</button>
+      <button class="btn" id="btnGoogle">Sign in with Google</button>
       <button class="btn btn-danger" id="btnSignOut">Sign out</button>
     </div>
   </header>
@@ -71,7 +72,9 @@
           <h2>Upcoming Game Days</h2>
           <div class="cardActions">
             <button class="btn" id="btnPastEvents">Past Events</button>
-            <button class="btn btn-primary" id="btnCreateGameDay">Create Game Day (Admin)</button>
+            <button class="btn" id="btnBecomeHost" style="display:none;">Become a Host</button>
+            <button class="btn" id="btnManageHosts" style="display:none;">Manage Hosts</button>
+            <button class="btn btn-primary" id="btnCreateGameDay" style="display:none;">Create Game Day</button>
           </div>
         </div>
         <div class="muted">Click a Game Day to open its planner.</div>
@@ -125,7 +128,7 @@
     </div>
   </div>
 
-  <script type="module" src="./app.js?v=20260623-v10"></script>
+  <script type="module" src="./app.js?v=20260816-v11"></script>
   <script src="../site-analytics.js?v=20260611-planner"></script>
 </body>
 </html>
