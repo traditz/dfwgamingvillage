@@ -38,7 +38,7 @@ import {
   showInlineStatus,
   confirmDialog,
   toast
-} from "./shared.js?v=20260816-p8";
+} from "./shared.js?v=20260816-p9";
 
 // -----------------------------
 // Config
@@ -82,6 +82,7 @@ const fnRedeemInvite = httpsCallable(functions, "redeemInvite");
 const fnRotateInviteToken = httpsCallable(functions, "rotateInviteToken");
 const fnListInvites = httpsCallable(functions, "listInvites");
 const fnRemoveInvite = httpsCallable(functions, "removeInvite");
+const fnReviewInvite = httpsCallable(functions, "reviewInvite");
 
 // -----------------------------
 // UI bindings
@@ -1884,35 +1885,57 @@ async function openInvitesModal(gd) {
     }
     const body = document.querySelector("#modalBody");
     if (!body) return;
+    const pending = invites.filter((i) => i.status === "pending");
+    const approved = invites.filter((i) => i.status !== "pending");
+    const row = (i, buttons) => `
+      <div class="listitem" style="cursor:default;">
+        <div style="flex:1; min-width:0;">
+          <div class="title">${esc(i.displayName || i.uid)}</div>
+          <div class="meta muted">${esc(i.addedVia === "channel-sync" ? "From Discord channel" : "Invite link")}</div>
+        </div>
+        ${buttons}
+      </div>`;
     body.innerHTML = `
       <div class="modalStack">
-        <div class="muted">${invites.length} invited. Anyone here can view and join this private event.</div>
-        <div class="list">
-          ${invites.length ? invites.map((i) => `
-            <div class="listitem" style="cursor:default;">
-              <div style="flex:1; min-width:0;">
-                <div class="title">${esc(i.displayName || i.uid)}</div>
-                <div class="meta muted">${esc(i.addedVia === "channel-sync" ? "From Discord channel" : "Invite link")}</div>
-              </div>
+        ${pending.length ? `
+        <div>
+          <div class="label" style="font-weight:700; margin-bottom:8px;">Waiting for approval (${pending.length})</div>
+          <div class="list">
+            ${pending.map((i) => row(i, `
+              <button class="btn btn-small btn-primary" data-approve="${esc(i.uid)}">Approve</button>
+              <button class="btn btn-small" data-deny="${esc(i.uid)}">Deny</button>
+            `)).join("")}
+          </div>
+        </div>` : ""}
+        <div>
+          <div class="label" style="font-weight:700; margin-bottom:8px;">Invited (${approved.length})</div>
+          <div class="muted" style="margin-bottom:8px;">Everyone here can view and join this private event.</div>
+          <div class="list">
+            ${approved.length ? approved.map((i) => row(i, `
               <button class="btn btn-small btn-danger" data-uninvite="${esc(i.uid)}">Remove</button>
-            </div>
-          `).join("") : `<div class="muted">Nobody yet — copy the invite link and share it.</div>`}
+            `)).join("") : `<div class="muted">Nobody yet — copy the invite link and share it.</div>`}
+          </div>
         </div>
       </div>
     `;
-    body.querySelectorAll("[data-uninvite]").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        btn.disabled = true;
-        try {
-          await fnRemoveInvite({ gamedayId: gd.id, uid: btn.getAttribute("data-uninvite") });
-          toast("Removed from the invite list.", "success");
-          await render();
-        } catch (e) {
-          btn.disabled = false;
-          toast(unwrapCallableError(e), "error");
-        }
+    const wire = (attr, fn, done) => {
+      body.querySelectorAll(`[${attr}]`).forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          btn.disabled = true;
+          try {
+            await fn(btn.getAttribute(attr));
+            toast(done, "success");
+            await render();
+          } catch (e) {
+            btn.disabled = false;
+            toast(unwrapCallableError(e), "error");
+          }
+        });
       });
-    });
+    };
+    wire("data-approve", (uid) => fnReviewInvite({ gamedayId: gd.id, uid, approve: true }), "Approved — they're in.");
+    wire("data-deny", (uid) => fnReviewInvite({ gamedayId: gd.id, uid, approve: false }), "Request denied.");
+    wire("data-uninvite", (uid) => fnRemoveInvite({ gamedayId: gd.id, uid }), "Removed from the invite list.");
   };
   await render();
 }
@@ -1929,7 +1952,16 @@ async function refreshMyActivitySummary() {
     const items = (r.data && r.data.items) || [];
     myActivity = items;
     const seen = new Map();
+    // Group roles per gameday so pending-only events stay un-openable.
+    const rolesByGd = new Map();
     for (const it of items) {
+      const arr = rolesByGd.get(it.gamedayId) || [];
+      arr.push(it.role);
+      rolesByGd.set(it.gamedayId, arr);
+    }
+    for (const it of items) {
+      const roles = rolesByGd.get(it.gamedayId) || [];
+      if (roles.length && roles.every((r) => r === "requested")) continue;
       if (it.visibility === "private" && !seen.has(it.gamedayId)) {
         seen.set(it.gamedayId, {
           id: it.gamedayId,
@@ -1955,6 +1987,12 @@ async function tryRedeemPendingInvite() {
   pendingInvite = null;
   try {
     const r = await fnRedeemInvite({ gamedayId: inv.gamedayId, token: inv.token });
+    if (r.data?.pending) {
+      toast(`Request sent for “${r.data?.title || "the event"}” — the organizer will approve you soon.`, "success", 8000);
+      history.replaceState({}, "", gameDayUrl(null));
+      await refreshMyActivitySummary();
+      return;
+    }
     toast(`Invite accepted — welcome to “${r.data?.title || "the event"}”!`, "success", 6000);
     await refreshMyActivitySummary();
     initialEventId = inv.gamedayId;
@@ -2022,6 +2060,11 @@ function openCreateGameDayModal() {
           </select>
           <div class="hint muted">Private events are hidden from the public lists; you'll get an invite link to share.</div>
         </label>
+
+        <label class="field fieldSpan2 check" id="gdApprovalRow" style="display:none;">
+          <input id="gdInviteApproval" type="checkbox" />
+          <span>Require approval — people who use the invite link wait for your OK before they can see or join. Stops forwarded links.</span>
+        </label>
       </div>
 
       <div class="modalStatus" id="modalStatus" style="display:none;"></div>
@@ -2035,6 +2078,11 @@ function openCreateGameDayModal() {
   `);
 
   qs("#btnCancel").addEventListener("click", closeModal);
+
+  qs("#gdVisibility")?.addEventListener("change", () => {
+    const row = qs("#gdApprovalRow");
+    if (row) row.style.display = qs("#gdVisibility").value === "private" ? "" : "none";
+  });
 
   qs("#btnCreate").addEventListener("click", async () => {
     showInlineError("");
@@ -2061,7 +2109,8 @@ function openCreateGameDayModal() {
       btnCancel.disabled = true;
       showInlineStatus("Creating…");
       const visibility = qs("#gdVisibility")?.value === "private" ? "private" : "public";
-      await fnCreateGameDay({ title, location, startsAt: startIso, visibility });
+      const inviteApproval = visibility === "private" && !!qs("#gdInviteApproval")?.checked;
+      await fnCreateGameDay({ title, location, startsAt: startIso, visibility, inviteApproval });
       closeModal();
       if (visibility === "private") {
         toast("Private event created — open it and tap 🔗 Copy Invite Link to invite people.", "success", 8000);
@@ -2132,11 +2181,13 @@ function activityBadge(item) {
     : item.role === "hosting" ? `Hosting: ${item.gameName}`
     : item.role === "waitlist" ? `Waitlist: ${item.gameName}`
     : item.role === "invited" ? "Invited"
+    : item.role === "requested" ? "Waiting for approval"
     : `Playing: ${item.gameName}`;
   const cls = item.role === "organizing" ? "is-organizing"
     : item.role === "hosting" ? "is-hosting"
     : item.role === "waitlist" ? "is-waitlist"
     : item.role === "invited" ? "is-invited"
+    : item.role === "requested" ? "is-requested"
     : "is-playing";
   return `<span class="activityBadge ${cls}">${esc(label)}</span>`;
 }
@@ -2188,7 +2239,10 @@ function renderMyActivity(tab) {
     el.addEventListener("click", () => {
       const id = el.getAttribute("data-open-gd");
       const gd = [...currentGameDays, ...currentPastGameDays, ...myPrivateGamedays].find((x) => x.id === id);
-      if (gd) {
+      const group = (myActivity || []).filter((x) => x.gamedayId === id);
+      if (group.length && group.every((x) => x.role === "requested")) {
+        toast("Your request is waiting for the organizer's approval.", "info");
+      } else if (gd) {
         closeModal();
         openGameDay(gd);
       } else {

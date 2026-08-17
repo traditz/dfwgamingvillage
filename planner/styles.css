@@ -1578,3 +1578,9 @@ textarea:focus {
 .inviteControls {
   margin-top: 10px;
 }
+
+.activityBadge.is-requested {
+  border-color: rgba(245, 158, 11, .45);
+  background: rgba(245, 158, 11, .12);
+  color: #fed7aa;
+}
