@@ -127,3 +127,189 @@ export function parseDatetimeLocalToISO(v) {
 export function unwrapCallableError(e) {
   return e?.message || String(e);
 }
+
+// ============================================================================
+// Modal controller
+// ----------------------------------------------------------------------------
+// One #modal element per page (planner + admin markup; events has none — the
+// confirm falls back to window.confirm there). Every user-initiated dismissal
+// path (Close button, Escape, backdrop click) runs the opener's onDismiss so
+// promise-returning modals always settle; programmatic closeModal() does not.
+// ============================================================================
+
+let modalEl = null;
+let modalTitleEl = null;
+let modalBodyEl = null;
+let modalCloseBtn = null;
+let modalWired = false;
+let onDismiss = null;
+let lastFocus = null;
+
+function bindModal() {
+  if (modalWired) return !!modalEl;
+  modalWired = true;
+  modalEl = document.querySelector("#modal");
+  modalTitleEl = document.querySelector("#modalTitle");
+  modalBodyEl = document.querySelector("#modalBody");
+  modalCloseBtn = document.querySelector("#btnModalClose");
+  if (!modalEl || !modalTitleEl || !modalBodyEl) {
+    modalEl = null;
+    return false;
+  }
+  modalCloseBtn?.addEventListener("click", dismissModal);
+  modalEl.addEventListener("click", (e) => {
+    if (e.target === modalEl) dismissModal();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && modalEl && modalEl.style.display !== "none") {
+      dismissModal();
+    }
+  });
+  return true;
+}
+
+export function qs(sel) {
+  return modalBodyEl ? modalBodyEl.querySelector(sel) : null;
+}
+
+export function openModal(title, html, opts = {}) {
+  if (!bindModal()) return;
+  // Opening over an existing modal settles the old flow as cancelled first.
+  if (onDismiss) {
+    const fn = onDismiss;
+    onDismiss = null;
+    try { fn(); } catch {}
+  }
+  onDismiss = opts.onDismiss || null;
+  lastFocus = document.activeElement;
+  modalTitleEl.textContent = title;
+  modalBodyEl.innerHTML = html;
+  modalEl.style.display = "";
+  document.body.style.overflow = "hidden";
+  if (modalCloseBtn) modalCloseBtn.focus();
+}
+
+// Programmatic close (success paths) — does NOT fire onDismiss.
+export function closeModal() {
+  if (!modalEl || modalEl.style.display === "none") return;
+  onDismiss = null;
+  modalEl.style.display = "none";
+  modalTitleEl.textContent = "Modal";
+  modalBodyEl.innerHTML = "";
+  document.body.style.overflow = "";
+  if (lastFocus && lastFocus.isConnected) {
+    try { lastFocus.focus(); } catch {}
+  }
+  lastFocus = null;
+}
+
+// User-initiated dismissal — settles the opener's pending flow.
+export function dismissModal() {
+  if (!modalEl || modalEl.style.display === "none") return;
+  const fn = onDismiss;
+  onDismiss = null;
+  closeModal();
+  if (fn) {
+    try { fn(); } catch {}
+  }
+}
+
+export function showInlineError(msg) {
+  const el = qs("#modalError");
+  if (!el) return;
+  el.setAttribute("role", "alert");
+  el.textContent = msg ? String(msg) : "";
+  el.style.display = msg ? "" : "none";
+}
+
+export function showInlineStatus(msg) {
+  const el = qs("#modalStatus");
+  if (!el) return;
+  el.setAttribute("role", "status");
+  el.textContent = msg ? String(msg) : "";
+  el.style.display = msg ? "" : "none";
+}
+
+export function confirmDialog({ title = "Please confirm", message = "", confirmLabel = "Confirm", danger = false } = {}) {
+  if (!bindModal()) {
+    // Page without #modal markup: degrade to the native dialog.
+    return Promise.resolve(window.confirm(message || title));
+  }
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (val) => {
+      if (settled) return;
+      settled = true;
+      closeModal();
+      resolve(val);
+    };
+    openModal(title, `
+      <div class="modalStack">
+        <div class="muted" style="white-space:pre-wrap;">${esc(message)}</div>
+        <div class="modalActions">
+          <button class="btn" id="btnConfirmCancel">Cancel</button>
+          <button class="btn ${danger ? "btn-danger" : "btn-primary"}" id="btnConfirmOk">${esc(confirmLabel)}</button>
+        </div>
+      </div>
+    `, { onDismiss: () => finish(false) });
+    qs("#btnConfirmCancel")?.addEventListener("click", () => finish(false));
+    qs("#btnConfirmOk")?.addEventListener("click", () => finish(true));
+  });
+}
+
+// ============================================================================
+// Toasts — capped, deduped, announced
+// ============================================================================
+
+let toastHost = null;
+const MAX_TOASTS = 3;
+
+function ensureToastHost() {
+  if (toastHost) return toastHost;
+  toastHost = document.createElement("div");
+  toastHost.className = "toastHost";
+  // The live region must exist BEFORE content lands in it to announce reliably.
+  toastHost.setAttribute("aria-live", "polite");
+  document.body.appendChild(toastHost);
+  return toastHost;
+}
+
+function removeToast(el) {
+  el.classList.remove("is-shown");
+  setTimeout(() => el.remove(), 200);
+}
+
+export function toast(message, kind = "info", timeout = 4000) {
+  const host = ensureToastHost();
+  const text = String(message ?? "");
+
+  // Dedupe: an identical visible toast just restarts its timer.
+  for (const existing of host.children) {
+    if (existing.dataset.kind === kind && existing.textContent === text) {
+      clearTimeout(existing._timer);
+      if (timeout > 0) existing._timer = setTimeout(() => removeToast(existing), timeout);
+      return () => removeToast(existing);
+    }
+  }
+
+  // Cap the stack so errors can't bury the page on a phone.
+  while (host.children.length >= MAX_TOASTS) {
+    host.firstElementChild.remove();
+  }
+
+  const el = document.createElement("div");
+  el.className = `toast toast-${kind}`;
+  el.dataset.kind = kind;
+  el.setAttribute("role", kind === "error" ? "alert" : "status");
+  el.textContent = text;
+  host.appendChild(el);
+  requestAnimationFrame(() => el.classList.add("is-shown"));
+  if (timeout > 0) el._timer = setTimeout(() => removeToast(el), timeout);
+  el.addEventListener("click", () => removeToast(el));
+  return () => removeToast(el);
+}
+
+// Create the live region at load so even the first toast announces.
+if (typeof document !== "undefined" && document.body) {
+  ensureToastHost();
+}

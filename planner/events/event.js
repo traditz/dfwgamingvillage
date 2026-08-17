@@ -18,7 +18,7 @@ import {
   where
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
-import { esc, asDate, fmtDate, centralDateKey } from "../shared.js?v=20260816-p1";
+import { esc, asDate, fmtDate, centralDateKey, toast } from "../shared.js?v=20260816-p2";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -374,7 +374,7 @@ btnShare?.addEventListener("click", async () => {
     btnShare.textContent = "Copied";
     setTimeout(() => { btnShare.textContent = "Share"; }, 1400);
   } catch {
-    window.prompt("Copy event link:", window.location.href);
+    toast("Couldn't copy automatically — copy this page's address from the address bar.", "info", 6000);
   }
 });
 

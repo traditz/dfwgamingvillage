@@ -28,8 +28,15 @@ import {
   centralTimeHHMM,
   fmtCentralDatetimeValue,
   parseDatetimeLocalToISO,
-  unwrapCallableError
-} from "./shared.js?v=20260816-p1";
+  unwrapCallableError,
+  qs,
+  openModal,
+  closeModal,
+  showInlineError,
+  showInlineStatus,
+  confirmDialog,
+  toast
+} from "./shared.js?v=20260816-p2";
 
 // -----------------------------
 // Config
@@ -113,10 +120,7 @@ const btnPrev = document.querySelector("#btnPrev");
 const btnNext = document.querySelector("#btnNext");
 const pageInfo = document.querySelector("#pageInfo");
 
-const modal = document.querySelector("#modal");
-const modalTitle = document.querySelector("#modalTitle");
-const modalBody = document.querySelector("#modalBody");
-const btnModalClose = document.querySelector("#btnModalClose");
+// Modal element wiring lives in shared.js (single controller for all pages).
 
 // -----------------------------
 // State
@@ -336,95 +340,6 @@ async function displayNameForUser(user) {
   } catch {
     return user.displayName || user.email || (user.uid?.startsWith("discord:") ? "Discord user" : user.uid);
   }
-}
-
-function openModal(title, html) {
-  if (!modal || !modalTitle || !modalBody) return;
-  modalTitle.textContent = title;
-  modalBody.innerHTML = html;
-  modal.style.display = "";
-}
-
-function closeModal() {
-  if (!modal || !modalTitle || !modalBody) return;
-  modal.style.display = "none";
-  modalTitle.textContent = "Modal";
-  modalBody.innerHTML = "";
-}
-
-function qs(sel) {
-  return modalBody.querySelector(sel);
-}
-
-// -----------------------------
-// Toasts (replaces alert() for non-blocking feedback)
-// -----------------------------
-let toastHost = null;
-function ensureToastHost() {
-  if (toastHost) return toastHost;
-  toastHost = document.createElement("div");
-  toastHost.className = "toastHost";
-  document.body.appendChild(toastHost);
-  return toastHost;
-}
-
-function toast(message, kind = "info", timeout = 4000) {
-  const host = ensureToastHost();
-  const el = document.createElement("div");
-  el.className = `toast toast-${kind}`;
-  el.setAttribute("role", "status");
-  el.textContent = String(message ?? "");
-  host.appendChild(el);
-  // animate in
-  requestAnimationFrame(() => el.classList.add("is-shown"));
-  const remove = () => {
-    el.classList.remove("is-shown");
-    setTimeout(() => el.remove(), 200);
-  };
-  if (timeout > 0) setTimeout(remove, timeout);
-  el.addEventListener("click", remove);
-  return remove;
-}
-
-// -----------------------------
-// Confirm dialog (replaces blocking confirm() with the in-app modal)
-// -----------------------------
-function confirmDialog({ title = "Please confirm", message = "", confirmLabel = "Confirm", danger = false } = {}) {
-  return new Promise((resolve) => {
-    openModal(title, `
-      <div class="modalStack">
-        <div class="muted" style="white-space:pre-wrap;">${esc(message)}</div>
-        <div class="modalActions">
-          <button class="btn" id="btnConfirmCancel">Cancel</button>
-          <button class="btn ${danger ? "btn-danger" : "btn-primary"}" id="btnConfirmOk">${esc(confirmLabel)}</button>
-        </div>
-      </div>
-    `);
-    let settled = false;
-    const finish = (val) => {
-      if (settled) return;
-      settled = true;
-      closeModal();
-      resolve(val);
-    };
-    qs("#btnConfirmCancel")?.addEventListener("click", () => finish(false));
-    qs("#btnConfirmOk")?.addEventListener("click", () => finish(true));
-  });
-}
-
-
-function showInlineError(msg) {
-  const el = qs("#modalError");
-  if (!el) return;
-  el.textContent = msg ? String(msg) : "";
-  el.style.display = msg ? "" : "none";
-}
-
-function showInlineStatus(msg) {
-  const el = qs("#modalStatus");
-  if (!el) return;
-  el.textContent = msg ? String(msg) : "";
-  el.style.display = msg ? "" : "none";
 }
 
 
@@ -745,7 +660,7 @@ function openGameSearchModal({ title }) {
           <button class="btn" id="btnCancel">Cancel</button>
         </div>
       </div>
-    `);
+    `, { onDismiss: () => done(null) });
 
     const input = qs("#bggQuery");
     const btnSearch = qs("#btnDoSearch");
@@ -926,12 +841,15 @@ function openHostTableFormModal({ gamedayId, thing }) {
           <button class="btn btn-primary" id="btnCreate">Create table</button>
         </div>
       </div>
-    `);
+    `, { onDismiss: () => done(null) });
 
     const btnCancel = qs("#btnCancel");
     const btnCreate = qs("#btnCreate");
 
+    let settled = false;
     const done = (val) => {
+      if (settled) return;
+      settled = true;
       closeModal();
       resolve(val);
     };
@@ -1101,12 +1019,15 @@ function openWantToPlayFormModal({ gamedayId, thing }) {
           <button class="btn btn-primary" id="btnPost">Post</button>
         </div>
       </div>
-    `);
+    `, { onDismiss: () => done(null) });
 
     const btnCancel = qs("#btnCancel");
     const btnPost = qs("#btnPost");
 
+    let settled = false;
     const done = (val) => {
+      if (settled) return;
+      settled = true;
       closeModal();
       resolve(val);
     };
@@ -1849,8 +1770,6 @@ function openNicknameModal() {
 // -----------------------------
 // Event wiring
 // -----------------------------
-if (btnModalClose) btnModalClose.addEventListener("click", closeModal);
-
 if (btnDiscord) btnDiscord.addEventListener("click", async () => {
   const url = await buildDiscordAuthUrl();
   window.location.href = url;

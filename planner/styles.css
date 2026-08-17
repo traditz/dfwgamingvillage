@@ -1277,7 +1277,7 @@ textarea:focus {
 .toastHost {
   position: fixed;
   right: 16px;
-  bottom: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   z-index: 80;
   display: flex;
   flex-direction: column;
@@ -1325,7 +1325,7 @@ textarea:focus {
   .toastHost {
     left: 12px;
     right: 12px;
-    bottom: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
     max-width: none;
   }
 }

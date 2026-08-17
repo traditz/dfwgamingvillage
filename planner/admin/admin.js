@@ -12,7 +12,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js";
 
-import { esc, asDate, fmtDate, fmtCentralDatetimeValue, parseDatetimeLocalToISO } from "../shared.js?v=20260816-p1";
+import { esc, asDate, fmtDate, fmtCentralDatetimeValue, parseDatetimeLocalToISO, confirmDialog, toast } from "../shared.js?v=20260816-p2";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -285,13 +285,20 @@ eventForm?.addEventListener("submit", async (ev) => {
 
 btnDeleteEvent?.addEventListener("click", async () => {
   if (!eventId.value) return;
-  if (!confirm("Delete this event and all planner data under it?")) return;
+  const ok = await confirmDialog({
+    title: "Delete this event?",
+    message: "This deletes the event and ALL of its tables and signups. This cannot be undone.",
+    confirmLabel: "Delete Event",
+    danger: true
+  });
+  if (!ok) return;
   showStatus("Deleting...");
   showError("");
   try {
     await fnDeleteGameDay({ gamedayId: eventId.value });
     newEvent();
-    showStatus("Event deleted.");
+    showStatus("");
+    toast("Event deleted.", "success");
   } catch (e) {
     showStatus("");
     showError(e?.message || String(e));
