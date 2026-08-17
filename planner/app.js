@@ -38,7 +38,7 @@ import {
   showInlineStatus,
   confirmDialog,
   toast
-} from "./shared.js?v=20260816-p13";
+} from "./shared.js?v=20260816-p14";
 
 // -----------------------------
 // Config
@@ -883,7 +883,11 @@ function openHostTableFormModal({ gamedayId, thing }) {
       <div class="modalStack">
         <div class="gameHeader">
           <div class="gameHeaderThumb">
-            ${thing.thumbUrl ? `<img src="${esc(thing.thumbUrl)}" alt="" loading="lazy" />` : `<div class="thumbph">${isCustom ? "📋" : "🎲"}</div>`}
+            ${thing.thumbUrl
+              ? `<img src="${esc(thing.thumbUrl)}" alt="" loading="lazy" />`
+              : (isCustom
+                  ? `<img src="./signup-sheet.png" alt="" loading="lazy" />`
+                  : `<div class="thumbph">🎲</div>`)}
           </div>
           <div class="gameHeaderBody">
             <div class="gameHeaderTitle">${esc(thing.name)}</div>
@@ -1560,7 +1564,11 @@ function buildTableCard(t, isPast, sig) {
   el.dataset.sig = sig;
   el.innerHTML = `
     <div class="thumb">
-      ${t.thumbUrl ? `<img src="${esc(t.thumbUrl)}" alt="" loading="lazy" />` : `<div class="thumbph">${isCustomEntry ? "📋" : "🎲"}</div>`}
+      ${t.thumbUrl
+        ? `<img src="${esc(t.thumbUrl)}" alt="" loading="lazy" />`
+        : (isCustomEntry
+            ? `<img src="./signup-sheet.png" alt="" loading="lazy" />`
+            : `<div class="thumbph">🎲</div>`)}
     </div>
     <div class="body">
       <div class="row1">
@@ -1581,7 +1589,7 @@ function buildTableCard(t, isPast, sig) {
       ${t.notes ? `<div class="notes notesClamp"><span style="font-weight:600;">Notes:</span> ${esc(t.notes)}</div>` : ""}
       ${expansionsHtml}
       <div class="roster" data-roster-for="${esc(t.id)}">
-        <div class="rosterTopline">Players</div>
+        <div class="rosterTopline">${isCustomEntry ? "Sign-ups" : "Players"}</div>
         <div class="rosterGrid">
           <div class="rosterGroup">
             <div class="rosterGroupHead">
