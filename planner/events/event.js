@@ -19,7 +19,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js";
 
-import { esc, asDate, fmtDate, centralDateKey, toast } from "../shared.js?v=20260816-p14";
+import { esc, asDate, fmtDate, centralDateKey, toast } from "../shared.js?v=20260816-p15";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -225,12 +225,18 @@ function renderTables() {
     const wait = Number(t.waitlistCount || 0);
     const openSeats = Math.max(0, cap - confirmed);
     const bggUrl = t.bggId ? `https://boardgamegeek.com/boardgame/${encodeURIComponent(t.bggId)}` : "";
+    // Custom sign-up sheets (food run, setup crew) have no box art to show.
+    const isCustomEntry = t.isCustom === true || !t.bggId;
 
     const el = document.createElement("article");
     el.className = "publicTable";
     el.innerHTML = `
       <div class="publicThumb">
-        ${t.thumbUrl ? `<img src="${esc(t.thumbUrl)}" alt="" loading="lazy" />` : `<div class="thumbph">Game</div>`}
+        ${t.thumbUrl
+          ? `<img src="${esc(t.thumbUrl)}" alt="" loading="lazy" />`
+          : (isCustomEntry
+              ? `<img src="../signup-sheet.png" alt="" loading="lazy" />`
+              : `<div class="thumbph">Game</div>`)}
       </div>
       <div>
         <div class="publicTableTitle">
@@ -238,7 +244,9 @@ function renderTables() {
           <div class="gameMeta" data-game-meta ${gameMetaText(t) ? "" : "style=\"display:none;\""}>${esc(gameMetaText(t))}</div>
         </div>
         <div class="seatBadge ${openSeats ? "is-open" : ""}">
-          ${openSeats ? `${openSeats} open seat${openSeats === 1 ? "" : "s"}` : `Waitlist ${wait}`}
+          ${openSeats
+            ? `${openSeats} open ${isCustomEntry ? "spot" : "seat"}${openSeats === 1 ? "" : "s"}`
+            : `Waitlist ${wait}`}
         </div>
         <div class="publicTableMeta">Host: ${esc(t.hostDisplayName || "Unknown")}</div>
         <div class="publicTableMeta">Starts: ${esc(fmtDate(t.startTime))}</div>
