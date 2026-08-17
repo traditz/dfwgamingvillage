@@ -161,11 +161,37 @@ function bindModal() {
     if (e.target === modalEl) dismissModal();
   });
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && modalEl && modalEl.style.display !== "none") {
+    if (!modalEl || modalEl.style.display === "none") return;
+    if (e.key === "Escape") {
       dismissModal();
+      return;
+    }
+    // Focus trap: Tab cycles within the dialog.
+    if (e.key === "Tab") {
+      const focusables = Array.from(
+        modalEl.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
+      ).filter((f) => !f.disabled && f.offsetParent !== null);
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     }
   });
   return true;
+}
+
+// While a dialog is open, the page behind it is inert for keyboard and
+// assistive tech. (No-op on engines without `inert`.)
+function setBackgroundInert(on) {
+  document.querySelectorAll("body > main, body > header").forEach((el) => {
+    try { el.inert = on; } catch {}
+  });
 }
 
 export function qs(sel) {
@@ -186,7 +212,11 @@ export function openModal(title, html, opts = {}) {
   modalBodyEl.innerHTML = html;
   modalEl.style.display = "";
   document.body.style.overflow = "hidden";
-  if (modalCloseBtn) modalCloseBtn.focus();
+  setBackgroundInert(true);
+  // Initial focus: explicit [data-autofocus], else the first input, else Close.
+  const auto = modalBodyEl.querySelector("[data-autofocus]")
+    || modalBodyEl.querySelector("input, select, textarea");
+  (auto || modalCloseBtn)?.focus();
 }
 
 // Programmatic close (success paths) — does NOT fire onDismiss.
@@ -197,6 +227,7 @@ export function closeModal() {
   modalTitleEl.textContent = "Modal";
   modalBodyEl.innerHTML = "";
   document.body.style.overflow = "";
+  setBackgroundInert(false);
   if (lastFocus && lastFocus.isConnected) {
     try { lastFocus.focus(); } catch {}
   }
@@ -301,11 +332,18 @@ export function toast(message, kind = "info", timeout = 4000) {
   el.className = `toast toast-${kind}`;
   el.dataset.kind = kind;
   el.setAttribute("role", kind === "error" ? "alert" : "status");
+  el.tabIndex = 0;
   el.textContent = text;
   host.appendChild(el);
   requestAnimationFrame(() => el.classList.add("is-shown"));
   if (timeout > 0) el._timer = setTimeout(() => removeToast(el), timeout);
   el.addEventListener("click", () => removeToast(el));
+  el.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " " || e.key === "Escape") {
+      e.preventDefault();
+      removeToast(el);
+    }
+  });
   return () => removeToast(el);
 }
 

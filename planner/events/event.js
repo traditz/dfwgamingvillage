@@ -19,7 +19,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js";
 
-import { esc, asDate, fmtDate, centralDateKey, toast } from "../shared.js?v=20260816-p4";
+import { esc, asDate, fmtDate, centralDateKey, toast } from "../shared.js?v=20260816-p5";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -154,11 +154,10 @@ function renderEventCollection(host, items, emptyText) {
 
   for (const gd of items) {
     const isPast = isPastEvent(gd);
+    // The inner "Open Event" link is the single accessible action — the card
+    // itself is a mouse convenience, not a second tab stop.
     const el = document.createElement("article");
     el.className = "eventTile eventCard";
-    el.tabIndex = 0;
-    el.setAttribute("role", "link");
-    el.setAttribute("aria-label", `Open ${gd.title || "DFWGV Game Day"}`);
     el.innerHTML = `
       <div class="eventCardMain">
         <div class="eventCardKicker">${isPast ? "Past Event" : "Upcoming Event"}</div>
@@ -171,17 +170,9 @@ function renderEventCollection(host, items, emptyText) {
         <a class="btn btn-primary eventCardAction" href="${eventUrl(gd.id)}">${isPast ? "Open History" : "Open Event"}</a>
       </div>
     `;
-    const openEvent = () => { window.location.href = eventUrl(gd.id); };
     el.addEventListener("click", (ev) => {
       if (ev.target.closest("a, button")) return;
-      openEvent();
-    });
-    el.addEventListener("keydown", (ev) => {
-      if (ev.target.closest("a, button")) return;
-      if (ev.key === "Enter" || ev.key === " ") {
-        ev.preventDefault();
-        openEvent();
-      }
+      window.location.href = eventUrl(gd.id);
     });
     host.appendChild(el);
   }
@@ -203,8 +194,8 @@ function renderEventList(items) {
   if (btnPastEventsToggle) {
     btnPastEventsToggle.disabled = past.length === 0;
     btnPastEventsToggle.setAttribute("aria-label", past.length
-      ? `View ${past.length} past event${past.length === 1 ? "" : "s"}`
-      : "No past events yet");
+      ? `Past Events — ${past.length} available`
+      : "Past Events — none yet");
   }
   if (pastEventsPanel) {
     pastEventsPanel.hidden = true;

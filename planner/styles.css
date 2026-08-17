@@ -1425,3 +1425,64 @@ textarea:focus {
 
   .row3 [data-action="delete"] { margin-left: 0; }
 }
+
+/* =======================  Accessibility pass  ======================= */
+
+/* Skip link: first tab stop, visible only on focus */
+.skipLink {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+}
+
+.skipLink:focus {
+  left: 12px;
+  top: 12px;
+}
+
+/* Restore a visible focus ring on the logo (was outline: none) */
+.logo:focus-visible {
+  outline: 2px solid rgba(248, 113, 113, .7);
+  outline-offset: 2px;
+}
+
+/* Game-day card title button: looks like text, focuses like a control */
+.cardOpenBtn {
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cardOpenBtn:focus-visible {
+  outline: 2px solid rgba(248, 113, 113, .7);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* "My table" border meets the 3:1 non-text contrast minimum */
+.tablecard.is-mine {
+  border-color: rgba(245, 197, 66, .62);
+}
+
+/* Honor reduced-motion everywhere (transitions, hover lifts, skeleton pulse,
+   toast slide) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

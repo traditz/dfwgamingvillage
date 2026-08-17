@@ -36,7 +36,7 @@ import {
   showInlineStatus,
   confirmDialog,
   toast
-} from "./shared.js?v=20260816-p4";
+} from "./shared.js?v=20260816-p5";
 
 // -----------------------------
 // Config
@@ -688,7 +688,7 @@ function openGameSearchModal({ title }) {
     openModal(title, `
       <div class="modalStack">
         <div class="modalRow">
-          <input id="bggQuery" class="input" type="text" placeholder="Search BoardGameGeek (e.g. Catan, Twilight Imperium)..." />
+          <input id="bggQuery" class="input" type="text" data-autofocus placeholder="Search BoardGameGeek (e.g. Catan, Twilight Imperium)..." />
           <button class="btn btn-primary" id="btnDoSearch">Search</button>
         </div>
 
@@ -810,7 +810,6 @@ function openGameSearchModal({ title }) {
       if (ev.key === "Enter") runSearch();
     });
 
-    setTimeout(() => input.focus(), 50);
   });
 }
 
@@ -1192,8 +1191,8 @@ function renderGameDays(list) {
     }
     btnPastEvents.setAttribute("aria-expanded", pastEventsPanel?.style.display !== "none" ? "true" : "false");
     btnPastEvents.setAttribute("aria-label", currentPastGameDays.length
-      ? `View ${currentPastGameDays.length} past event${currentPastGameDays.length === 1 ? "" : "s"}`
-      : "No past events yet");
+      ? `Past Events — ${currentPastGameDays.length} available`
+      : "Past Events — none yet");
   }
   renderPastGameDays();
 
@@ -1205,10 +1204,9 @@ function renderGameDays(list) {
       const startsAt = asDate(gd.startsAt);
       const el = document.createElement("div");
       el.className = "listitem eventCard";
-      el.tabIndex = 0;
       el.innerHTML = `
         <div>
-          <div class="title">${esc(gd.title || "Game Day")}</div>
+          <button type="button" class="cardOpenBtn"><span class="title">${esc(gd.title || "Game Day")}</span></button>
           <div class="meta">${esc(fmtDate(startsAt))}${gd.location ? ` • ${esc(gd.location)}` : ""}${gd.createdByDisplayName ? ` • Hosted by ${esc(gd.createdByDisplayName)}` : ""}</div>
         </div>
       `;
@@ -1248,13 +1246,15 @@ function renderGameDays(list) {
       }
 
       el.appendChild(actions);
-      el.addEventListener("click", () => openGameDay(gd));
-      el.addEventListener("keydown", (e) => {
+      // The title button is the keyboard/SR action; whole-card click stays as
+      // a mouse convenience.
+      el.querySelector(".cardOpenBtn")?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        openGameDay(gd);
+      });
+      el.addEventListener("click", (e) => {
         if (e.target.closest("a, button")) return;
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          openGameDay(gd);
-        }
+        openGameDay(gd);
       });
       gamedayList.appendChild(el);
     }
@@ -1273,10 +1273,9 @@ function renderPastGameDays() {
   for (const gd of currentPastGameDays) {
     const el = document.createElement("div");
     el.className = "listitem eventCard pastEventItem";
-    el.tabIndex = 0;
     el.innerHTML = `
       <div>
-        <div class="title">${esc(gd.title || "Game Day")}</div>
+        <button type="button" class="cardOpenBtn"><span class="title">${esc(gd.title || "Game Day")}</span></button>
         <div class="meta">${esc(fmtDate(asDate(gd.startsAt)))}${gd.location ? ` • ${esc(gd.location)}` : ""}</div>
       </div>
     `;
@@ -1292,13 +1291,13 @@ function renderPastGameDays() {
     actions.appendChild(publicLink);
 
     el.appendChild(actions);
-    el.addEventListener("click", () => openGameDay(gd));
-    el.addEventListener("keydown", (e) => {
+    el.querySelector(".cardOpenBtn")?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      openGameDay(gd);
+    });
+    el.addEventListener("click", (e) => {
       if (e.target.closest("a, button")) return;
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        openGameDay(gd);
-      }
+      openGameDay(gd);
     });
     pastGamedayList.appendChild(el);
   }
@@ -1447,7 +1446,7 @@ function buildTableCard(t, isPast, sig) {
         <div class="muted">Host: <span class="hostName${isHost ? " is-you" : ""}">${esc(t.hostDisplayName || t.hostUid || "Unknown")}</span>${isHost ? " (you)" : ""}</div>
         <div class="seats" data-seats-root="${esc(t.id)}" data-cap="${cap}">
           <span class="seatsText muted">Seats: ${confirmed}/${cap}${wait ? ` • Waitlist: ${wait}` : ""}</span>
-          <span class="seatsBar"><span class="seatsFill" style="width:${cap ? Math.min(100, Math.round((confirmed / cap) * 100)) : 0}%"></span></span>
+          <span class="seatsBar" aria-hidden="true"><span class="seatsFill" style="width:${cap ? Math.min(100, Math.round((confirmed / cap) * 100)) : 0}%"></span></span>
         </div>
       </div>
       ${t.notes ? `<div class="notes notesClamp"><span style="font-weight:600;">Notes:</span> ${esc(t.notes)}</div>` : ""}
@@ -1786,7 +1785,7 @@ function openCreateGameDayModal() {
     <div class="modalStack">
       <label class="field">
         <div class="label">Title</div>
-        <input id="gdTitle" class="input" type="text" placeholder="e.g. Saturday Board Game Day" />
+        <input id="gdTitle" class="input" type="text" data-autofocus placeholder="e.g. Saturday Board Game Day" />
       </label>
 
       <div class="modalGrid">
@@ -1813,7 +1812,6 @@ function openCreateGameDayModal() {
   `);
 
   qs("#btnCancel").addEventListener("click", closeModal);
-  setTimeout(() => qs("#gdTitle")?.focus(), 50);
 
   qs("#btnCreate").addEventListener("click", async () => {
     showInlineError("");
@@ -1903,7 +1901,7 @@ function openNicknameModal() {
     <div class="modalStack">
       <label class="field">
         <div class="label">Display name</div>
-        <input id="nickInput" class="input" type="text" maxlength="32" placeholder="How your name appears on game days" />
+        <input id="nickInput" class="input" type="text" data-autofocus maxlength="32" placeholder="How your name appears on game days" />
         <div class="hint muted">2–32 characters. Updates everywhere your name appears — including the Discord board.</div>
       </label>
       <div class="modalStatus" id="modalStatus" style="display:none;"></div>
@@ -1917,7 +1915,6 @@ function openNicknameModal() {
 
   qs("#nickInput").value = myRole.nickname || "";
   qs("#btnCancel").addEventListener("click", closeModal);
-  setTimeout(() => qs("#nickInput")?.focus(), 50);
 
   const save = async () => {
     const nick = String(qs("#nickInput").value || "").trim();
