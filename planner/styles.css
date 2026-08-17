@@ -121,6 +121,13 @@ a:hover {
   line-height: 1.05;
 }
 
+/* The planner's page <h1> lives in the topbar — the big in-page title block
+   repeated the same words a third time and pushed content below the fold. */
+.topbar h1.title {
+  margin: 0;
+  font-size: 16px;
+}
+
 .subtitle {
   margin-top: 3px;
   color: var(--muted);
@@ -247,8 +254,10 @@ a:hover {
 .plannerBanner img {
   position: static;
   display: block;
-  width: min(100%, 760px);
-  max-width: 100%;
+  width: auto;
+  max-width: min(100%, 640px);
+  /* Capped so the banner sets the mood without owning the first screen. */
+  max-height: 116px;
   height: auto;
   object-fit: contain;
   opacity: 1;
@@ -274,7 +283,7 @@ a:hover {
   max-width: 920px;
   margin: 0;
   color: var(--text);
-  font-size: clamp(32px, 5vw, 58px);
+  font-size: clamp(26px, 3.4vw, 38px);
   font-weight: 900;
   line-height: 1.12;
   letter-spacing: 0;
@@ -310,13 +319,15 @@ a:hover {
   border-bottom: 1px solid var(--line);
 }
 
+/* Sentence case at a readable size: all-caps 900 is slower to read and made
+   every label compete with the content it introduces. */
 .cardhead h2 {
   margin: 0;
   color: var(--text);
-  font-size: 14px;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: .08em;
+  font-size: 16px;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 .cardActions {
@@ -330,10 +341,10 @@ a:hover {
 h3 {
   margin: 14px 0 8px;
   color: var(--text);
-  font-size: 14px;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: .08em;
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 .muted {
@@ -846,10 +857,9 @@ textarea:focus {
 .rosterTopline {
   margin-bottom: 8px;
   color: var(--text);
-  font-size: 12px;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: .08em;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0;
 }
 
 .rosterGrid {
@@ -1410,9 +1420,6 @@ textarea:focus {
   .authbar { align-items: stretch; flex-direction: column; }
   .authbar .btn { width: 100%; }
 
-  /* The in-page "DFWGV Planner" heading repeats the brand — drop on phones
-     (planner page only; the events page header carries event context) */
-  .plannerOnlyHeader { display: none; }
 
   /* Bottom sheet: correct scroll height, safe area, and thumb-friendly
      button order (Cancel lands nearest the thumb, primary above it) */
