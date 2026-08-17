@@ -38,7 +38,7 @@ import {
   showInlineStatus,
   confirmDialog,
   toast
-} from "./shared.js?v=20260816-p11";
+} from "./shared.js?v=20260816-p12";
 
 // -----------------------------
 // Config
@@ -2208,7 +2208,7 @@ function openHostGuideModal() {
         <div class="guideHead"><span class="guideNum">5</span> Your tools</div>
         <ul class="guideList muted">
           <li><a href="./admin/">Manage Events</a> (top nav) — edit your event's details, watch table signups live, and copy the exact Discord bind command.</li>
-          <li><b>📅 My Events</b> (top right) — everything you organize, host, or have joined, across all events, current and past.</li>
+          <li><b>📅 My Profile and Events</b> (top right) — everything you organize, host, or have joined, across all events, current and past.</li>
         </ul>
       </div>
 
@@ -2308,7 +2308,7 @@ async function openMyEventsModal() {
   const googleInfo = (currentUser.providerData || []).find((pd) => pd.providerId === "google.com");
   const googleLinked = !!googleInfo;
 
-  openModal("My Events", `
+  openModal("My Profile and Events", `
     <div class="modalStack">
       <div class="accountRow">
         <div style="min-width:0;">
