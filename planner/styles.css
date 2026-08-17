@@ -1584,3 +1584,60 @@ textarea:focus {
   background: rgba(245, 158, 11, .12);
   color: #fed7aa;
 }
+
+/* =========================  Host Guide  ========================= */
+
+.guideIntro {
+  line-height: 1.5;
+}
+
+.guideSection {
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, .035);
+}
+
+.guideHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  color: var(--text);
+  font-weight: 800;
+}
+
+.guideNum {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.guideList {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 7px;
+  line-height: 1.45;
+}
+
+.guideList li::marker {
+  color: var(--gold);
+}
+
+.guide code {
+  padding: 1px 6px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, .35);
+  color: #ffd9a8;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 12px;
+}

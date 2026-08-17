@@ -38,7 +38,7 @@ import {
   showInlineStatus,
   confirmDialog,
   toast
-} from "./shared.js?v=20260816-p9";
+} from "./shared.js?v=20260816-p10";
 
 // -----------------------------
 // Config
@@ -2134,33 +2134,61 @@ function openCreateGameDayModal() {
 // -----------------------------
 function openHostGuideModal() {
   openModal("Host Guide", `
-    <div class="modalStack">
-      <div class="muted">As an approved host you can run Game Days here on the website — and optionally bring the live planner board into <b>your own Discord server</b>.</div>
+    <div class="modalStack guide">
 
-      <div>
-        <div class="label" style="font-weight:800; margin-bottom:6px;">1 · Create your Game Day</div>
-        <div class="muted">Use <b>Create Game Day</b> on this page (or <code>/gameday_create_and_bind</code> in Discord, step 3). You fully manage the events you create — edit, delete, and moderate tables and requests.</div>
+      <div class="muted guideIntro">
+        You can create and run Game Days — public or private — right from this page,
+        with an optional live board in your own Discord server. Here's the whole
+        process, start to finish.
       </div>
 
-      <div>
-        <div class="label" style="font-weight:800; margin-bottom:6px;">2 · Add the planner bot to your server</div>
-        <div class="muted" style="margin-bottom:10px;">You need the <b>Manage Server</b> permission in that Discord. The bot posts a pinned, live-updating board — it can't read your messages.</div>
+      <div class="guideSection">
+        <div class="guideHead"><span class="guideNum">1</span> Create your Game Day</div>
+        <div class="muted">Tap <b>Create Game Day</b> and set the title, start time (Central), and location. Then pick who can see it:</div>
+        <ul class="guideList muted">
+          <li><b>🌐 Public</b> — listed on the planner and events pages for everyone to browse, share, and join.</li>
+          <li><b>🔒 Private</b> — completely hidden. Only people you invite can see it or join. Tick <b>Require approval</b> and anyone using your invite link waits for your OK first — that stops forwarded links.</li>
+        </ul>
+      </div>
+
+      <div class="guideSection">
+        <div class="guideHead"><span class="guideNum">2</span> Private events: inviting people</div>
+        <ul class="guideList muted">
+          <li><b>🔗 Copy Invite Link</b> — on the event card or inside the event — and share it. Anyone with the link joins instantly (or requests to join, if approval is on).</li>
+          <li><b>Invited…</b> shows everyone with access. Approve or deny pending requests, and remove anyone, anytime.</li>
+          <li><b>Reset Link</b> instantly kills a leaked link. People already invited keep their access.</li>
+          <li>Bind the event to a <b>private Discord channel</b> (step 4) and everyone in that channel is invited automatically.</li>
+        </ul>
+      </div>
+
+      <div class="guideSection">
+        <div class="guideHead"><span class="guideNum">3</span> Running the day</div>
+        <ul class="guideList muted">
+          <li>Attendees (and you) tap <b>Host a Table</b> to run a game — pick it from BoardGameGeek, set seats, a start time, and any expansions.</li>
+          <li><b>Request a Game</b> posts a wish — anyone can pick it up and host it.</li>
+          <li>Joining a full table adds you to the <b>waitlist</b>; when a seat opens, the first in line is promoted automatically.</li>
+          <li>As organizer you can edit or delete any table or request in your event. Everything updates live for everyone — web and Discord.</li>
+        </ul>
+      </div>
+
+      <div class="guideSection">
+        <div class="guideHead"><span class="guideNum">4</span> Discord — optional, but great</div>
+        <div class="muted" style="margin-bottom:10px;">Put a live, self-updating board in your own server. You need the <b>Manage Server</b> permission there. The bot only posts and pins its board — it can't read your messages.</div>
         <a class="btn btn-primary" href="${BOT_INVITE_URL}" target="_blank" rel="noopener">➕ Add DFWGV Planner Bot to your server</a>
+        <ul class="guideList muted" style="margin-top:12px;">
+          <li>In the channel that should show the board, run <code>/planner_bind</code> and pick your event (only yours appear). Or create + bind in one step with <code>/gameday_create_and_bind</code>.</li>
+          <li>Binding a <b>private</b> event auto-invites everyone currently in the channel; run <code>/planner_invite_sync</code> anytime to pick up new members.</li>
+          <li>The pinned board syncs both ways — joins in Discord appear on the web and vice versa, live.</li>
+          <li>Handy: <code>/planner_event</code> (what's bound here), <code>/planner_refresh</code>, <code>/planner_unbind</code>.</li>
+        </ul>
       </div>
 
-      <div>
-        <div class="label" style="font-weight:800; margin-bottom:6px;">3 · Bind your event to a channel</div>
-        <div class="muted">In the channel that should show the board, run <code>/planner_bind</code> and pick your Game Day from the list (only your events appear). Or create + bind in one step with <code>/gameday_create_and_bind</code>.</div>
-      </div>
-
-      <div>
-        <div class="label" style="font-weight:800; margin-bottom:6px;">Your dashboard</div>
-        <div class="muted">Open <a href="./admin/">Manage Events</a> (also in the top nav) to edit your event's details, watch table signups, see its Discord link status, and copy the exact bind command for your event.</div>
-      </div>
-
-      <div>
-        <div class="label" style="font-weight:800; margin-bottom:6px;">4 · It stays in sync</div>
-        <div class="muted">The board updates live as people join from Discord or the web. Useful commands: <code>/planner_event</code> (what's bound here), <code>/planner_refresh</code>, <code>/planner_unbind</code>.</div>
+      <div class="guideSection">
+        <div class="guideHead"><span class="guideNum">5</span> Your tools</div>
+        <ul class="guideList muted">
+          <li><a href="./admin/">Manage Events</a> (top nav) — edit your event's details, watch table signups live, and copy the exact Discord bind command.</li>
+          <li><b>📅 My Events</b> (top right) — everything you organize, host, or have joined, across all events, current and past.</li>
+        </ul>
       </div>
 
       <div class="modalActions">
