@@ -12,6 +12,8 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js";
 
+import { esc, asDate, fmtDate, fmtCentralDatetimeValue, parseDatetimeLocalToISO } from "../shared.js?v=20260816-p1";
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -54,16 +56,6 @@ let unsubTables = null;
 // Role resolved server-side: owner sees everything; hosts see their own events.
 let myRole = { owner: false, host: false };
 
-function esc(s) {
-  return String(s ?? "").replace(/[&<>"']/g, (m) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;"
-  }[m]));
-}
-
 function isAdmin(user) {
   if (!user) return false;
   const owner = appConfig.OWNER_UID;
@@ -93,33 +85,6 @@ async function displayNameForUser(user) {
   }
 }
 
-function asDate(v) {
-  if (!v) return null;
-  if (v.toDate) return v.toDate();
-  const d = new Date(v);
-  return Number.isNaN(d.getTime()) ? null : d;
-}
-
-function fmtDate(v) {
-  const d = asDate(v);
-  if (!d) return "Date TBD";
-  return d.toLocaleString("en-US", {
-    timeZone: "America/Chicago",
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit"
-  });
-}
-
-function toLocalInput(v) {
-  const d = asDate(v);
-  if (!d) return "";
-  const pad = (n) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
-
 function showStatus(msg) {
   statusBox.textContent = msg || "";
   statusBox.style.display = msg ? "" : "none";
@@ -138,7 +103,8 @@ function selectEvent(id) {
 
   eventId.value = gd.id;
   eventTitle.value = gd.title || "";
-  eventStart.value = toLocalInput(gd.startsAt);
+  // Prefill in CENTRAL wall clock — the submit path parses as Central.
+  eventStart.value = fmtCentralDatetimeValue(gd.startsAt);
   eventStatus.value = gd.status || "draft";
   eventLocation.value = gd.location || "";
   publicLink.href = `../events/?id=${encodeURIComponent(gd.id)}`;
@@ -148,6 +114,12 @@ function selectEvent(id) {
 }
 
 function newEvent() {
+  // Stop the previous event's tables listener so its next snapshot can't
+  // overwrite the "save first" placeholder below.
+  if (unsubTables) {
+    unsubTables();
+    unsubTables = null;
+  }
   selectedId = "";
   eventId.value = "";
   eventTitle.value = "";
@@ -260,6 +232,13 @@ function subscribeEvents() {
     events = myRole.owner ? all : all.filter((gd) => currentUser && gd.createdBy === currentUser.uid);
     renderEvents();
     if (!selectedId && events.length) selectEvent(events[0].id);
+    // A just-created event: populate the form once its doc arrives, but never
+    // clobber a form the user is already editing (guarded by the id check).
+    else if (selectedId && eventId.value === selectedId && events.some((e) => e.id === selectedId)) {
+      const currentTitle = eventTitle.value;
+      const gd = events.find((e) => e.id === selectedId);
+      if (gd && (!currentTitle || currentTitle === gd.title)) selectEvent(selectedId);
+    }
   }, (err) => showError(err.message || String(err)));
 }
 
@@ -280,7 +259,8 @@ eventForm?.addEventListener("submit", async (ev) => {
 
   const payload = {
     title: eventTitle.value.trim(),
-    startsAt: eventStart.value ? new Date(eventStart.value).toISOString() : "",
+    // Parse the field as CENTRAL wall clock (matches the planner's create modal).
+    startsAt: eventStart.value ? parseDatetimeLocalToISO(eventStart.value) : "",
     location: eventLocation.value.trim(),
     status: eventStatus.value
   };
@@ -291,7 +271,10 @@ eventForm?.addEventListener("submit", async (ev) => {
       showStatus("Event updated.");
     } else {
       const result = await fnCreateGameDay(payload);
+      // Bind the form to the new event immediately — leaving eventId empty
+      // made a second Save create a duplicate event.
       selectedId = result.data.gamedayId;
+      eventId.value = selectedId;
       showStatus("Event created.");
     }
   } catch (e) {

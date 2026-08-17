@@ -18,6 +18,8 @@ import {
   where
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
+import { esc, asDate, fmtDate, centralDateKey } from "../shared.js?v=20260816-p1";
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -57,29 +59,6 @@ function setAdminNavVisibility(user) {
   adminLinks.forEach((link) => {
     link.hidden = !isAdminUser(user);
   });
-}
-
-function esc(s) {
-  return String(s ?? "").replace(/[&<>"']/g, (m) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;"
-  }[m]));
-}
-
-function asDate(v) {
-  if (!v) return null;
-  if (v.toDate) return v.toDate();
-  if (typeof v.seconds === "number") {
-    return new Date((v.seconds * 1000) + Math.floor((v.nanoseconds || 0) / 1000000));
-  }
-  if (typeof v._seconds === "number") {
-    return new Date((v._seconds * 1000) + Math.floor((v._nanoseconds || 0) / 1000000));
-  }
-  const d = new Date(v);
-  return Number.isNaN(d.getTime()) ? null : d;
 }
 
 function normalizeBggThingPayload(payload) {
@@ -144,20 +123,6 @@ async function hydrateGameMeta(root, item) {
   }
 }
 
-function fmtDate(v) {
-  const d = asDate(v);
-  if (!d) return "Date TBD";
-  return d.toLocaleString("en-US", {
-    timeZone: "America/Chicago",
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit"
-  });
-}
-
 function calendarUrl(gd) {
   const d = asDate(gd.startsAt);
   if (!d) return "#";
@@ -181,17 +146,6 @@ function isPastEvent(gd) {
   const d = asDate(gd.startsAt);
   if (!d) return false;
   return centralDateKey(d) < centralDateKey(new Date());
-}
-
-function centralDateKey(date) {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: "America/Chicago",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit"
-  }).formatToParts(date);
-  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
-  return `${values.year}-${values.month}-${values.day}`;
 }
 
 function renderEventCollection(host, items, emptyText) {
@@ -394,11 +348,15 @@ async function loadEvent(id) {
   unsubTables = onSnapshot(tablesQ, (tableSnap) => {
     tables = tableSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
     renderTables();
+  }, () => {
+    publicTables.innerHTML = `<div class="muted">Couldn't load tables — check your connection.</div>`;
   });
 
   const postsQ = query(collection(db, "gamedays", id, "posts"), orderBy("createdAt", "desc"));
   unsubPosts = onSnapshot(postsQ, (postSnap) => {
     renderWants(postSnap.docs.map((d) => ({ id: d.id, ...d.data() })));
+  }, () => {
+    publicWants.innerHTML = `<div class="muted">Couldn't load requests — check your connection.</div>`;
   });
 }
 
@@ -431,10 +389,27 @@ onAuthStateChanged(auth, (user) => {
   setAdminNavVisibility(user || null);
 });
 
-const params = new URLSearchParams(window.location.search);
-const eventId = params.get("id");
-if (eventId) {
-  await loadEvent(eventId);
-} else {
-  await loadList();
+// Boot with error handling — a Firestore failure must never leave a blank page.
+async function boot() {
+  const params = new URLSearchParams(window.location.search);
+  const eventId = params.get("id");
+  try {
+    if (eventId) {
+      await loadEvent(eventId);
+    } else {
+      await loadList();
+    }
+  } catch (e) {
+    console.error("Events page failed to load", e);
+    eventListView.style.display = "";
+    eventDetailView.style.display = "none";
+    upcomingEvents.innerHTML = `
+      <div class="muted">Couldn't load events — check your connection.</div>
+      <button class="btn" id="btnRetryLoad" style="margin-top:10px;">Retry</button>
+    `;
+    pastEvents.innerHTML = "";
+    document.querySelector("#btnRetryLoad")?.addEventListener("click", () => location.reload());
+  }
 }
+
+await boot();

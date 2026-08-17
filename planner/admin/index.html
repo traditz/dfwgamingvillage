@@ -7,8 +7,13 @@
   <meta name="description" content="Admin dashboard for DFWGV Planner." />
   <meta name="theme-color" content="#d71920" />
   <link rel="icon" href="../dfwgv-icon.png" />
-  <link rel="stylesheet" href="../styles.css?v=20260612-v5" />
-  <link rel="stylesheet" href="./admin.css?v=20260612-v2" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" />
+
+  <link rel="stylesheet" href="../styles.css?v=20260816-p1" />
+  <link rel="stylesheet" href="./admin.css?v=20260816-p1" />
 </head>
 <body>
   <header class="topbar">
@@ -70,7 +75,7 @@
           </label>
           <div class="formGrid">
             <label class="field">
-              <div class="label">Start</div>
+              <div class="label">Start (Central)</div>
               <input id="eventStart" type="datetime-local" required />
             </label>
             <label class="field">
@@ -109,7 +114,7 @@
         </div>
       </section>
 
-      <section class="card" id="hostsCard">
+      <section class="card cardSpan" id="hostsCard">
         <div class="cardhead">
           <h2>Hosts</h2>
         </div>
@@ -135,7 +140,7 @@
         <div class="modalError" id="hostErrorBox" style="display:none;"></div>
       </section>
 
-      <section class="card" id="readinessCard">
+      <section class="card cardSpan" id="readinessCard">
         <div class="cardhead">
           <h2>Readiness</h2>
         </div>
@@ -159,7 +164,7 @@
         </div>
       </section>
 
-      <section class="card">
+      <section class="card cardSpan">
         <div class="cardhead">
           <h2>Tables</h2>
         </div>
@@ -168,6 +173,6 @@
     </section>
   </main>
 
-  <script type="module" src="./admin.js?v=20260816-v4"></script>
+  <script type="module" src="./admin.js?v=20260816-p1"></script>
 </body>
 </html>

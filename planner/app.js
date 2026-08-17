@@ -19,6 +19,18 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js";
 
+import {
+  esc,
+  asDate,
+  fmtDate,
+  fmtTime,
+  centralDateKey,
+  centralTimeHHMM,
+  fmtCentralDatetimeValue,
+  parseDatetimeLocalToISO,
+  unwrapCallableError
+} from "./shared.js?v=20260816-p1";
+
 // -----------------------------
 // Config
 // -----------------------------
@@ -139,70 +151,6 @@ let unsubPosts = null;
 // -----------------------------
 // Helpers
 // -----------------------------
-function esc(s) {
-  return String(s ?? "").replace(/[&<>"']/g, (m) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;"
-  }[m]));
-}
-
-// FIX: Force America/Chicago timezone for display
-function fmtDate(d) {
-  try {
-    const dt = d instanceof Date ? d : new Date(d);
-    return dt.toLocaleString("en-US", {
-      timeZone: "America/Chicago",
-      weekday: "short",
-      year: "numeric",
-      month: "numeric",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit"
-    });
-  } catch {
-    return String(d || "");
-  }
-}
-
-function asDate(v) {
-  if (!v) return null;
-  if (v.toDate) return v.toDate();
-  if (typeof v.seconds === "number") {
-    return new Date((v.seconds * 1000) + Math.floor((v.nanoseconds || 0) / 1000000));
-  }
-  if (typeof v._seconds === "number") {
-    return new Date((v._seconds * 1000) + Math.floor((v._nanoseconds || 0) / 1000000));
-  }
-  const d = v instanceof Date ? v : new Date(v);
-  return Number.isNaN(d.getTime()) ? null : d;
-}
-
-function centralDateKey(date) {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: "America/Chicago",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit"
-  }).formatToParts(date);
-  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
-  return `${values.year}-${values.month}-${values.day}`;
-}
-
-// Central-time "HH:MM" for a Date (used as a sensible default within the day).
-function centralTimeHHMM(date) {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: "America/Chicago",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false
-  }).formatToParts(date);
-  const v = Object.fromEntries(parts.map((p) => [p.type, p.value]));
-  const hh = v.hour === "24" ? "00" : v.hour; // some engines emit 24 at midnight
-  return `${hh}:${v.minute}`;
-}
 
 // datetime-local bounds restricting a table's start to the open event's day.
 // The datetime-local value is treated as Central throughout the app, so the
@@ -464,47 +412,6 @@ function confirmDialog({ title = "Please confirm", message = "", confirmLabel = 
   });
 }
 
-function fmtLocalDatetimeValue(date = new Date()) {
-  const pad = (n) => String(n).padStart(2, "0");
-  const yyyy = date.getFullYear();
-  const mm = pad(date.getMonth() + 1);
-  const dd = pad(date.getDate());
-  const hh = pad(date.getHours());
-  const mi = pad(date.getMinutes());
-  return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
-}
-
-// FIX: Parse local input as Dallas/Central time specifically
-function parseDatetimeLocalToISO(v) {
-  if (!v) return null;
-  const d = new Date(v);
-  if (Number.isNaN(d.getTime())) return null;
-
-  try {
-      const isoAsUtc = v + "Z"; 
-      const refDate = new Date(isoAsUtc);
-      
-      const parts = new Intl.DateTimeFormat('en-US', {
-          timeZone: 'America/Chicago',
-          timeZoneName: 'shortOffset'
-      }).formatToParts(refDate);
-      
-      const offsetPart = parts.find(p => p.type === 'timeZoneName')?.value; 
-      if (!offsetPart) return new Date(v).toISOString(); 
-      
-      const offset = offsetPart.replace("GMT", ""); 
-      const offsetNum = parseInt(offset);
-      
-      const absOffset = Math.abs(offsetNum);
-      const sign = offsetNum >= 0 ? "+" : "-";
-      const offsetStr = `${sign}${String(absOffset).padStart(2, '0')}:00`;
-      
-      return `${v}:00${offsetStr}`;
-  } catch (e) {
-      console.error("Timezone parse error", e);
-      return new Date(v).toISOString(); 
-  }
-}
 
 function showInlineError(msg) {
   const el = qs("#modalError");
@@ -520,10 +427,6 @@ function showInlineStatus(msg) {
   el.style.display = msg ? "" : "none";
 }
 
-function unwrapCallableError(e) {
-  const msg = e?.message || String(e);
-  return msg;
-}
 
 function stopRosterListenersExcept(keepIds = new Set()) {
   for (const [tableId, unsub] of rosterUnsubsByTableId.entries()) {
@@ -796,6 +699,7 @@ async function handleDiscordCallbackIfPresent() {
     clearUrlParams();
     sessionStorage.removeItem("discord_oauth_state");
     sessionStorage.removeItem("discord_pkce_verifier");
+    sessionStorage.removeItem("discord_return_to");
   }
 }
 
@@ -960,7 +864,7 @@ function openGameSearchModal({ title }) {
 function openHostTableFormModal({ gamedayId, thing }) {
   return new Promise((resolve) => {
     const bounds = eventDayBounds();
-    const defaultStart = bounds ? bounds.default : fmtLocalDatetimeValue(new Date(Date.now() + 60 * 60 * 1000));
+    const defaultStart = bounds ? bounds.default : fmtCentralDatetimeValue(new Date(Date.now() + 60 * 60 * 1000));
     const dtAttrs = bounds ? ` min="${bounds.min}" max="${bounds.max}"` : "";
     const dtHint = bounds ? `<div class="hint muted">Must be on the event day (${esc(bounds.label)}).</div>` : "";
     const defaultCap = thing?.maxPlayers || "";
@@ -1120,14 +1024,15 @@ function openEditTableModal(t) {
       </div>
     `);
     
-    // Pre-fill
-    const startVal = t.startTime ? fmtLocalDatetimeValue(t.startTime.toDate ? t.startTime.toDate() : new Date(t.startTime)) : "";
-    qs("#editStart").value = startVal;
+    // Pre-fill with the CENTRAL wall clock — the parse side interprets the
+    // field as Central, so a browser-local prefill would shift the time for
+    // any host outside Central.
+    qs("#editStart").value = t.startTime ? fmtCentralDatetimeValue(t.startTime) : "";
     qs("#editCap").value = t.capacity;
     qs("#editNotes").value = t.notes || "";
 
-    qs("#btnCancel").onclick = closeModal;
-    qs("#btnSave").onclick = async () => {
+    qs("#btnCancel").addEventListener("click", closeModal);
+    qs("#btnSave").addEventListener("click", async () => {
         const startVal = qs("#editStart").value;
         const startIso = parseDatetimeLocalToISO(startVal);
         const cap = Number(qs("#editCap").value);
@@ -1141,7 +1046,12 @@ function openEditTableModal(t) {
             showInlineError(`Tables must start on the event day (${bounds.label}).`);
             return;
         }
-        
+
+        const btnSave = qs("#btnSave");
+        const btnCancel = qs("#btnCancel");
+        btnSave.disabled = true;
+        btnCancel.disabled = true;
+        showInlineError("");
         showInlineStatus("Saving...");
         try {
             await fnUpdateTable({
@@ -1153,9 +1063,12 @@ function openEditTableModal(t) {
             });
             closeModal();
         } catch (e) {
-            showInlineStatus(unwrapCallableError(e));
+            btnSave.disabled = false;
+            btnCancel.disabled = false;
+            showInlineStatus("");
+            showInlineError(unwrapCallableError(e));
         }
-    };
+    });
 }
 
 // -----------------------------
@@ -1766,7 +1679,7 @@ async function wantToPlayFlow(gamedayId) {
 }
 
 function openCreateGameDayModal() {
-  const defaultStart = fmtLocalDatetimeValue(new Date(Date.now() + 24 * 60 * 60 * 1000));
+  const defaultStart = fmtCentralDatetimeValue(new Date(Date.now() + 24 * 60 * 60 * 1000));
   openModal("Create Game Day", `
     <div class="modalStack">
       <label class="field">

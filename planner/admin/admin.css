@@ -12,8 +12,9 @@
   gap: 14px;
 }
 
-.adminGrid > .card:nth-child(4),
-.adminGrid > .card:nth-child(5) {
+/* Cards that span the full grid width, marked explicitly in the markup —
+   positional nth-child rules broke whenever cards were added or reordered. */
+.adminGrid > .cardSpan {
   grid-column: 1 / -1;
 }
 
@@ -183,8 +184,7 @@
     grid-template-columns: 1fr;
   }
 
-  .adminGrid > .card:nth-child(4),
-  .adminGrid > .card:nth-child(5) {
+  .adminGrid > .cardSpan {
     grid-column: auto;
   }
 

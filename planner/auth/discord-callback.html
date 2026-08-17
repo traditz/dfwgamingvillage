@@ -18,15 +18,27 @@
       const params = new URLSearchParams(window.location.search);
       const code = params.get("code");
       const state = params.get("state");
+      const oauthError = params.get("error");
 
-      // If Discord returned an error, just bounce back to planner with the same params.
+      // User cancelled (or Discord errored): explain instead of silently bouncing.
+      if (oauthError && !code) {
+        document.querySelector(".muted").innerHTML =
+          'Sign-in was cancelled — no worries. <a href="/planner/">Back to the planner</a>.';
+        return;
+      }
+
+      // Enforce same-origin on the stored return URL. new URL(absolute, base)
+      // ignores the base, so the origin must be checked explicitly.
       const returnToRaw = sessionStorage.getItem("discord_return_to") || "/planner/";
-      const returnTo = new URL(returnToRaw, window.location.origin);
+      let returnTo = new URL(returnToRaw, window.location.origin);
+      if (returnTo.origin !== window.location.origin) {
+        returnTo = new URL("/planner/", window.location.origin);
+      }
 
       if (code) returnTo.searchParams.set("code", code);
       if (state) returnTo.searchParams.set("state", state);
 
-      // Keep the user on the same origin and hand off to app.js on the planner page
+      // Hand off to app.js on the planner page
       window.location.replace(returnTo.toString());
     })();
   </script>
