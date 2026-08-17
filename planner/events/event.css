@@ -1,5 +1,5 @@
 .publicShell {
-  padding-bottom: 74px;
+  padding-bottom: 28px;
 }
 
 .publicHero {
@@ -53,7 +53,7 @@
 .eventTileTitle {
   color: var(--text);
   font-size: 18px;
-  font-weight: 950;
+  font-weight: 900;
   line-height: 1.1;
 }
 
@@ -179,7 +179,7 @@
 
 .publicTableTitle {
   color: var(--text);
-  font-weight: 950;
+  font-weight: 900;
   line-height: 1.12;
   overflow-wrap: anywhere;
 }

@@ -17,12 +17,15 @@ import {
   query,
   where
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js";
 
-import { esc, asDate, fmtDate, centralDateKey, toast } from "../shared.js?v=20260816-p2";
+import { esc, asDate, fmtDate, centralDateKey, toast } from "../shared.js?v=20260816-p4";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const functions = getFunctions(app, appConfig.FUNCTIONS_REGION);
+const fnGetMyPlannerRole = httpsCallable(functions, "getMyPlannerRole");
 
 const pageTitle = document.querySelector("#pageTitle");
 const eventListView = document.querySelector("#eventListView");
@@ -48,17 +51,11 @@ let unsubTables = null;
 let unsubPosts = null;
 const bggMetaCache = new Map();
 
-function isAdminUser(user) {
+function isOwnerFallback(user) {
   if (!user) return false;
   const owner = appConfig.OWNER_UID;
   if (!owner) return false;
   return user.uid === owner || user.uid === `discord:${owner}`;
-}
-
-function setAdminNavVisibility(user) {
-  adminLinks.forEach((link) => {
-    link.hidden = !isAdminUser(user);
-  });
 }
 
 function normalizeBggThingPayload(payload) {
@@ -281,7 +278,7 @@ function renderWants(posts) {
   publicWants.innerHTML = "";
   const wants = posts.filter((p) => p.kind === "want_to_play");
   if (!wants.length) {
-    publicWants.innerHTML = `<div class="muted">No want-to-play posts yet.</div>`;
+    publicWants.innerHTML = `<div class="muted">No game requests yet.</div>`;
     return;
   }
 
@@ -295,54 +292,86 @@ function renderWants(posts) {
   }
 }
 
-async function loadList() {
-  eventListView.style.display = "";
-  eventDetailView.style.display = "none";
-  pageTitle.textContent = "DFWGV Events";
-  const q = query(collection(db, "gamedays"), where("status", "==", "published"), orderBy("startsAt", "asc"));
-  const snap = await getDocs(q);
-  renderEventList(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+let unsubList = null;
+let unsubEventDoc = null;
+
+function stopDetailListeners() {
+  if (unsubTables) { unsubTables(); unsubTables = null; }
+  if (unsubPosts) { unsubPosts(); unsubPosts = null; }
+  if (unsubEventDoc) { unsubEventDoc(); unsubEventDoc = null; }
 }
 
-async function loadEvent(id) {
-  const snap = await getDoc(doc(db, "gamedays", id));
-  if (!snap.exists()) {
-    eventListView.style.display = "";
-    eventDetailView.style.display = "none";
-    upcomingEvents.innerHTML = `<div class="muted">That event was not found or is not public.</div>`;
+function loadList() {
+  stopDetailListeners();
+  eventListView.style.display = "";
+  eventDetailView.style.display = "none";
+  const header = document.querySelector(".publicPageHeader");
+  if (header) header.style.display = "";
+  pageTitle.textContent = "DFWGV Events";
+  document.title = "DFWGV Events";
+  const q = query(collection(db, "gamedays"), where("status", "==", "published"), orderBy("startsAt", "asc"));
+  if (unsubList) unsubList();
+  unsubList = onSnapshot(q, (snap) => {
+    renderEventList(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+  }, () => {
+    upcomingEvents.innerHTML = `
+      <div class="muted">Couldn't load events — check your connection.</div>
+      <button class="btn" id="btnRetryLoad" style="margin-top:10px;">Retry</button>
+    `;
     pastEvents.innerHTML = "";
-    return;
-  }
+    document.querySelector("#btnRetryLoad")?.addEventListener("click", () => location.reload());
+  });
+}
 
-  const gd = { id: snap.id, ...snap.data() };
-  if (gd.status !== "published") {
-    eventListView.style.display = "";
-    eventDetailView.style.display = "none";
-    upcomingEvents.innerHTML = `<div class="muted">That event is not public yet.</div>`;
-    pastEvents.innerHTML = "";
-    return;
-  }
-
-  eventListView.style.display = "none";
-  eventDetailView.style.display = "";
-  pageTitle.textContent = "";
+function renderDetailHeader(gd) {
   eventTitle.textContent = gd.title || "DFWGV Game Day";
+  document.title = `${gd.title || "DFWGV Game Day"} — DFWGV Events`;
   const isPast = isPastEvent(gd);
   eventMeta.innerHTML = `
     ${isPast ? `<span class="eventPill is-history">Past Event</span>` : ""}
     <span class="eventPill">${esc(fmtDate(gd.startsAt))}</span>
     ${gd.location ? `<span class="eventPill">${esc(gd.location)}</span>` : ""}
   `;
-  if (historyNotice) {
-    historyNotice.style.display = isPast ? "" : "none";
-  }
-  btnOpenPlanner.href = `../?event=${encodeURIComponent(id)}`;
+  if (historyNotice) historyNotice.style.display = isPast ? "" : "none";
+  btnOpenPlanner.href = `../?event=${encodeURIComponent(gd.id)}`;
   btnOpenPlanner.textContent = isPast ? "View in Planner" : "Host or Join";
   btnOpenPlanner.classList.toggle("btn-primary", !isPast);
   btnCalendar.href = calendarUrl(gd);
+}
 
-  if (unsubTables) unsubTables();
-  if (unsubPosts) unsubPosts();
+function showUnavailable(msg) {
+  toast(msg, "info", 6000);
+  history.replaceState({}, "", "./");
+  loadList();
+}
+
+async function loadEvent(id) {
+  const snap = await getDoc(doc(db, "gamedays", id));
+  if (!snap.exists()) return showUnavailable("That event link isn't available — it may have been removed. Here's what's on:");
+
+  const gd = { id: snap.id, ...snap.data() };
+  if (gd.status !== "published") return showUnavailable("That event isn't public yet. Here's what's on:");
+
+  eventListView.style.display = "none";
+  eventDetailView.style.display = "";
+  // The generic "Event" header block is redundant on the detail view — the
+  // card right below carries the real title.
+  const header = document.querySelector(".publicPageHeader");
+  if (header) header.style.display = "none";
+  pageTitle.textContent = "";
+  renderDetailHeader(gd);
+
+  stopDetailListeners();
+
+  // Keep the header live; bounce to the list if the event stops being public.
+  unsubEventDoc = onSnapshot(doc(db, "gamedays", id), (s) => {
+    if (!s.exists() || (s.data() || {}).status !== "published") {
+      stopDetailListeners();
+      showUnavailable("This event is no longer public.");
+      return;
+    }
+    renderDetailHeader({ id: s.id, ...s.data() });
+  });
 
   const tablesQ = query(collection(db, "gamedays", id, "tables"), orderBy("startTime", "asc"));
   unsubTables = onSnapshot(tablesQ, (tableSnap) => {
@@ -385,8 +414,36 @@ btnPastEventsToggle?.addEventListener("click", () => {
   btnPastEventsToggle.setAttribute("aria-expanded", String(shouldShow));
 });
 
-onAuthStateChanged(auth, (user) => {
-  setAdminNavVisibility(user || null);
+onAuthStateChanged(auth, async (user) => {
+  // Reflect the signed-in state — the static "Sign in to join" read as
+  // signed-out even for signed-in visitors.
+  const authLink = document.querySelector("#pubAuthLink");
+  const authStatusEl = document.querySelector("#pubAuthStatus");
+  if (authLink) authLink.textContent = user ? "Open Planner" : "Sign in to join";
+
+  let owner = false;
+  let host = false;
+  let nickname = "";
+  if (user) {
+    try {
+      const r = await fnGetMyPlannerRole({});
+      owner = !!r.data?.owner;
+      host = !!r.data?.host;
+      nickname = r.data?.nickname || "";
+    } catch {
+      owner = isOwnerFallback(user);
+      host = owner;
+    }
+  }
+  if (authStatusEl) {
+    authStatusEl.style.display = user ? "" : "none";
+    authStatusEl.textContent = user ? (nickname ? `Signed in as ${nickname}` : "Signed in") : "";
+  }
+  // Owner sees "Admin", approved hosts see "My Events" — matching the planner.
+  adminLinks.forEach((link) => {
+    link.hidden = !(owner || host);
+    if (owner || host) link.textContent = owner ? "Admin" : "My Events";
+  });
 });
 
 // Boot with error handling — a Firestore failure must never leave a blank page.

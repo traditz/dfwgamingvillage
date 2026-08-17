@@ -28,7 +28,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" />
 
-  <link rel="stylesheet" href="./styles.css?v=20260816-p3" />
+  <link rel="stylesheet" href="./styles.css?v=20260816-p4" />
 </head>
 <body>
   <header class="topbar">
@@ -51,8 +51,7 @@
 
     <div class="authbar" id="authbar">
       <div class="auth-status" id="authStatus">Loading auth...</div>
-      <button class="btn" id="btnDiscord">Sign in with Discord</button>
-      <button class="btn" id="btnGoogle">Sign in with Google</button>
+      <button class="btn btn-primary" id="btnSignIn" style="display:none;">Sign In</button>
       <button class="btn" id="btnNickname" style="display:none;">✏️ Nickname</button>
       <button class="btn btn-danger" id="btnSignOut" style="display:none;">Sign out</button>
     </div>
@@ -60,10 +59,10 @@
 
   <main class="container">
     <section class="plannerHero plannerBanner" aria-label="DFW Gaming Village">
-      <img src="./banner2.png" alt="DFW Gaming Village" />
+      <img src="./banner2.png" alt="DFW Gaming Village" fetchpriority="high" />
     </section>
 
-    <section class="plannerPageHeader" aria-labelledby="plannerPageTitle">
+    <section class="plannerPageHeader plannerOnlyHeader" aria-labelledby="plannerPageTitle">
       <div class="eyebrow">DFW Gaming Village</div>
       <h1 id="plannerPageTitle">DFWGV Planner</h1>
     </section>
@@ -74,12 +73,15 @@
           <h2>Upcoming Game Days</h2>
           <div class="cardActions">
             <button class="btn" id="btnPastEvents">Past Events</button>
-            <button class="btn" id="btnBecomeHost" style="display:none;">Become a Host</button>
+            <button class="btn" id="btnBecomeHost" style="display:none;">Request Organizer Access</button>
             <button class="btn btn-primary" id="btnCreateGameDay" style="display:none;">Create Game Day</button>
           </div>
         </div>
-        <div class="muted">Click a Game Day to open its planner.</div>
-        <div id="gamedayList" class="list"></div>
+        <div class="muted">Choose a game day to see and join its tables.</div>
+        <div id="gamedayList" class="list">
+          <div class="skeletonCard" aria-hidden="true"></div>
+          <div class="skeletonCard" aria-hidden="true"></div>
+        </div>
         <div id="pastEventsPanel" class="pastEventsPanel" style="display:none;">
           <div class="pastEventsLabel">Past Events</div>
           <div id="pastGamedayList" class="list"></div>
@@ -96,7 +98,7 @@
 
         <div class="actions">
           <button class="btn btn-primary" id="btnHostTable">Host a Table</button>
-          <button class="btn" id="btnWantToPlay">Want to Play</button>
+          <button class="btn" id="btnWantToPlay">Request a Game</button>
         </div>
 
         <div class="split">
@@ -111,7 +113,7 @@
           </div>
 
           <div>
-            <h3>Want to Play</h3>
+            <h3>Game Requests</h3>
             <div id="wantsList" class="list"></div>
           </div>
         </div>
@@ -129,7 +131,7 @@
     </div>
   </div>
 
-  <script type="module" src="./app.js?v=20260816-p3"></script>
+  <script type="module" src="./app.js?v=20260816-p4"></script>
   <script src="../site-analytics.js?v=20260611-planner"></script>
 </body>
 </html>

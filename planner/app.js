@@ -36,7 +36,7 @@ import {
   showInlineStatus,
   confirmDialog,
   toast
-} from "./shared.js?v=20260816-p3";
+} from "./shared.js?v=20260816-p4";
 
 // -----------------------------
 // Config
@@ -80,7 +80,7 @@ const fnSetNickname = httpsCallable(functions, "setNickname");
 // UI bindings
 // -----------------------------
 const authStatus = document.querySelector("#authStatus");
-const btnDiscord = document.querySelector("#btnDiscord");
+const btnSignIn = document.querySelector("#btnSignIn");
 const btnSignOut = document.querySelector("#btnSignOut");
 const adminLinks = document.querySelectorAll("[data-admin-link]");
 
@@ -88,7 +88,6 @@ const adminLinks = document.querySelectorAll("[data-admin-link]");
 
 const btnCreateGameDay = document.querySelector("#btnCreateGameDay");
 const btnPastEvents = document.querySelector("#btnPastEvents");
-const btnGoogle = document.querySelector("#btnGoogle");
 const btnBecomeHost = document.querySelector("#btnBecomeHost");
 const btnNickname = document.querySelector("#btnNickname");
 const btnHostGuide = document.querySelector("#btnHostGuide");
@@ -132,6 +131,7 @@ let lastGameDaysRaw = [];
 // Platform role, resolved server-side after sign-in (owner = site admin,
 // host = approved to create Game Days, requested = pending host request).
 let myRole = { owner: false, host: false, requested: false };
+let lastDisplayName = "";
 let initialEventId = new URLSearchParams(window.location.search).get("event") || "";
 
 // tables pagination
@@ -286,6 +286,13 @@ async function refreshMyRole() {
     if (seq !== roleSeq) return; // superseded by a newer auth change
     myRole = { owner: false, host: false, requested: false, ...(r.data || {}) };
     if (myRole.nickname) setAuthStatus(`Signed in as: ${myRole.nickname}`);
+
+    // One-time nudge: your sign-in name is public on rosters; nicknames exist.
+    if (!myRole.nickname && !localStorage.getItem("plannerNickNudge")) {
+      localStorage.setItem("plannerNickNudge", "1");
+      const shownAs = lastDisplayName ? ` You'll appear as “${lastDisplayName}” on game days.` : "";
+      toast(`Welcome!${shownAs} Want a different name? Tap the ✏️ Nickname button up top.`, "info", 8000);
+    }
   } catch {
     if (seq !== roleSeq) return;
     // Callable unavailable (e.g. mid-deploy): fall back to the client owner
@@ -305,7 +312,7 @@ function applyRoleUI() {
     const show = signedIn && !myRole.owner && !myRole.host;
     btnBecomeHost.style.display = show ? "" : "none";
     btnBecomeHost.disabled = myRole.requested;
-    btnBecomeHost.textContent = myRole.requested ? "Host request pending" : "Become a Host";
+    btnBecomeHost.textContent = myRole.requested ? "Organizer request pending" : "Request Organizer Access";
   }
   if (btnHostGuide) {
     btnHostGuide.style.display = signedIn && (myRole.owner || myRole.host) ? "" : "none";
@@ -415,19 +422,30 @@ function updateRosterDom(tableId) {
 // Toggle a table card's Join/Leave buttons in place (no DOM rebuild) so live
 // roster updates don't cause the whole list to flicker.
 function applyJoinLeaveState(card, t) {
+  const uid = currentUser?.uid;
+  const roster = rosterByTableId.get(t.id);
+  const isSignedUp = !!(roster && uid && (roster.confirmedIds.has(uid) || roster.waitlistIds.has(uid)));
+  const isHostMine = !!(uid && t.hostUid && uid === t.hostUid);
+
+  // Card-level cue even when the action row is absent (past events).
+  card.classList.toggle("is-mine", isSignedUp || isHostMine);
+
   const joinBtn = card.querySelector('[data-action="join"]');
   const leaveBtn = card.querySelector('[data-action="leave"]');
   if (!joinBtn || !leaveBtn) return;
 
-  const roster = rosterByTableId.get(t.id);
-  const uid = currentUser?.uid;
-  const isSignedUp = !!(roster && uid && (roster.confirmedIds.has(uid) || roster.waitlistIds.has(uid)));
   const isPast = currentEventIsPast();
-  const canJoin = !!currentUser && !isSignedUp && !isPast;
 
-  // Card-level cue: subtly flag tables the signed-in user hosts or has joined.
-  const isHostMine = !!(uid && t.hostUid && uid === t.hostUid);
-  card.classList.toggle("is-mine", isSignedUp || isHostMine);
+  if (isHostMine) {
+    // The host manages via Leave (which deletes the table) — a permanently
+    // disabled "Joined" pill is just noise on their own card.
+    joinBtn.style.display = "none";
+    leaveBtn.style.display = isPast ? "none" : "";
+    leaveBtn.disabled = isPast;
+    leaveBtn.textContent = "Leave";
+    return;
+  }
+  joinBtn.style.display = "";
 
   if (isSignedUp) {
     joinBtn.disabled = true;
@@ -438,8 +456,10 @@ function applyJoinLeaveState(card, t) {
     leaveBtn.disabled = isPast;
     leaveBtn.textContent = "Leave";
   } else {
-    joinBtn.disabled = !canJoin;
-    joinBtn.textContent = "Join";
+    // Signed-out visitors keep an ENABLED Join that routes to the sign-in
+    // chooser — a dead disabled button explains nothing on a phone.
+    joinBtn.disabled = isPast;
+    joinBtn.textContent = currentUser ? "Join" : "Sign in to join";
     joinBtn.classList.add("btn-primary");
     joinBtn.title = isPast ? "Past events are read-only." : "";
     leaveBtn.style.display = "none";
@@ -524,21 +544,58 @@ function setAuthStatus(text) {
 
 
 function setButtonsForAuth(user) {
-  if (!btnDiscord || !btnSignOut) return;
+  if (!btnSignIn || !btnSignOut) return;
 
   if (user) {
-    btnDiscord.style.display = "none";
-    if (btnGoogle) btnGoogle.style.display = "none";
+    btnSignIn.style.display = "none";
     btnSignOut.style.display = "";
     if (btnNickname) btnNickname.style.display = "";
   } else {
-    btnDiscord.style.display = "";
-    if (btnGoogle) btnGoogle.style.display = "";
+    btnSignIn.style.display = "";
     btnSignOut.style.display = "none";
     if (btnNickname) btnNickname.style.display = "none";
   }
   // Create Game Day / Request Organizer Access buttons are role-driven.
   applyRoleUI();
+}
+
+// One sign-in entry point: a chooser with a hint per provider. Also opened
+// when a signed-out visitor taps Join / Host a Table / Request a Game.
+function openSignInModal(message) {
+  openModal("Sign In", `
+    <div class="modalStack">
+      <div class="muted">${esc(message || "Signing in takes a few seconds and lets hosts see who's coming.")}</div>
+      <div>
+        <button class="btn btn-primary" id="btnSignInDiscord" style="width:100%;">Sign in with Discord</button>
+        <div class="hint muted" style="margin-top:6px;">In our Discord server? Use this — your name carries over.</div>
+      </div>
+      <div>
+        <button class="btn" id="btnSignInGoogle" style="width:100%;">Sign in with Google</button>
+        <div class="hint muted" style="margin-top:6px;">No Discord? Any Google account works.</div>
+      </div>
+      <div class="modalActions">
+        <button class="btn" id="btnCancel">Cancel</button>
+      </div>
+    </div>
+  `);
+  qs("#btnCancel")?.addEventListener("click", closeModal);
+  qs("#btnSignInDiscord")?.addEventListener("click", async () => {
+    const url = await buildDiscordAuthUrl();
+    window.location.href = url;
+  });
+  qs("#btnSignInGoogle")?.addEventListener("click", async () => {
+    try {
+      const { GoogleAuthProvider, signInWithPopup } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js");
+      await signInWithPopup(auth, new GoogleAuthProvider());
+      closeModal();
+      toast("Signed in!", "success");
+    } catch (e) {
+      // Closing the popup isn't an error worth surfacing.
+      if (e?.code !== "auth/popup-closed-by-user" && e?.code !== "auth/cancelled-popup-request") {
+        toast(`Google sign-in failed: ${e?.message || e}`, "error");
+      }
+    }
+  });
 }
 
 // -----------------------------
@@ -683,8 +740,6 @@ function openGameSearchModal({ title }) {
         card.type = "button";
         card.className = "resultCard";
         // FIX: Force white text and left alignment for visibility
-        card.style.color = "#fff";
-        card.style.textAlign = "left";
 
         card.innerHTML = `
           <div class="resultThumb">
@@ -692,7 +747,7 @@ function openGameSearchModal({ title }) {
           </div>
           <div class="resultBody">
             <div class="resultTitle">${esc(it.name || "Unknown")}</div>
-            <div class="resultMeta muted" style="color: #ccc;">${esc(sub)}</div>
+            <div class="resultMeta muted">${esc(sub)}</div>
           </div>
         `;
 
@@ -980,7 +1035,7 @@ function openEditTableModal(t) {
 // -----------------------------
 function openWantToPlayFormModal({ gamedayId, thing }) {
   return new Promise((resolve) => {
-    openModal("Want to Play", `
+    openModal("Request a Game", `
       <div class="modalStack">
         <div class="gameHeader">
           <div class="gameHeaderThumb">
@@ -1077,6 +1132,13 @@ function subscribeGameDays() {
         toast("This Game Day is no longer available.", "info");
       }
     }
+  }, () => {
+    // Snapshot failure (offline, rules): never leave a blank/broken-looking list.
+    gamedayList.innerHTML = `
+      <div class="muted">Couldn't load game days — check your connection.</div>
+      <button class="btn" id="btnRetryGamedays" style="margin-top:6px;">Retry</button>
+    `;
+    document.querySelector("#btnRetryGamedays")?.addEventListener("click", subscribeGameDays);
   });
 }
 
@@ -1137,7 +1199,7 @@ function renderGameDays(list) {
 
   gamedayList.innerHTML = "";
   if (!visibleGameDays.length) {
-    gamedayList.innerHTML = `<div class="muted">No upcoming game days.</div>`;
+    gamedayList.innerHTML = `<div class="muted">No upcoming game days yet — check back soon!</div>`;
   } else {
     for (const gd of visibleGameDays) {
       const startsAt = asDate(gd.startsAt);
@@ -1157,7 +1219,7 @@ function renderGameDays(list) {
       const publicLink = document.createElement("a");
       publicLink.className = "btn eventCardAction";
       publicLink.href = `./events/?id=${encodeURIComponent(gd.id)}`;
-      publicLink.textContent = "Public";
+      publicLink.textContent = "View / Share";
       publicLink.addEventListener("click", (e) => e.stopPropagation());
       actions.appendChild(publicLink);
 
@@ -1225,7 +1287,7 @@ function renderPastGameDays() {
     const publicLink = document.createElement("a");
     publicLink.className = "btn eventCardAction";
     publicLink.href = `./events/?id=${encodeURIComponent(gd.id)}`;
-    publicLink.textContent = "Public";
+    publicLink.textContent = "View / Share";
     publicLink.addEventListener("click", (e) => e.stopPropagation());
     actions.appendChild(publicLink);
 
@@ -1292,7 +1354,19 @@ function refreshSeatsDom(card, t) {
   if (textEl) textEl.textContent = `Seats: ${confirmed}/${cap}${waitlist ? ` • Waitlist: ${waitlist}` : ""}`;
   const fillEl = seatsEl.querySelector(".seatsFill");
   if (fillEl) fillEl.style.width = `${cap ? Math.min(100, Math.round((confirmed / cap) * 100)) : 0}%`;
-  seatsEl.classList.toggle("is-full", cap > 0 && confirmed >= cap);
+  const isFull = cap > 0 && confirmed >= cap;
+  seatsEl.classList.toggle("is-full", isFull);
+
+  // Explain the waitlist in words — the red bar alone says nothing.
+  let note = seatsEl.querySelector(".seatsNote");
+  if (isFull && !note) {
+    note = document.createElement("span");
+    note.className = "seatsNote muted";
+    note.textContent = "Table full — Join adds you to the waitlist.";
+    seatsEl.appendChild(note);
+  } else if (!isFull && note) {
+    note.remove();
+  }
 }
 
 // Everything that affects a card's static markup. When unchanged, the card's
@@ -1313,7 +1387,11 @@ function tableRenderSig(t, isPast) {
 
 function buildTableCard(t, isPast, sig) {
   const startTime = asDate(t.startTime);
-  const timeDisplay = startTime ? esc(fmtDate(startTime)) : "TBD";
+  // Tables are same-day as their event, so time-only ("2:00 PM") reads far
+  // better than 8 repeated full dates; legacy off-day rows keep the full date.
+  const eventDay = currentGameDay ? asDate(currentGameDay.startsAt) : null;
+  const sameDay = !!(startTime && eventDay && centralDateKey(startTime) === centralDateKey(eventDay));
+  const timeDisplay = startTime ? esc(sameDay ? fmtTime(startTime) : fmtDate(startTime)) : "TBD";
 
   const cap = Number(t.capacity || 0);
   const { confirmed, waitlist: wait } = seatCounts(t);
@@ -1326,18 +1404,25 @@ function buildTableCard(t, isPast, sig) {
   const bggUrl = t.bggId ? `https://boardgamegeek.com/boardgame/${encodeURIComponent(t.bggId)}` : null;
 
   const expansions = Array.isArray(t.expansions) ? t.expansions : [];
-  const expansionsHtml = expansions.length
+  const expLinks = expansions.map((e) => {
+    const expId = e?.bggId ?? "";
+    const expName = e?.name ?? "";
+    const expUrl = expId ? `https://boardgamegeek.com/boardgame/${encodeURIComponent(expId)}` : null;
+    return expUrl
+      ? `<div><a href="${esc(expUrl)}" target="_blank" rel="noopener">${esc(expName)}</a></div>`
+      : `<div>${esc(expName)}</div>`;
+  });
+  // Long expansion lists collapse to the first 3 with a toggle — full list
+  // always reachable, cards stay scannable.
+  const expansionsHtml = expLinks.length
     ? `
-      <div class="muted" style="margin-top:8px;">
+      <div class="muted expansionsBlock" style="margin-top:8px;">
         <div style="font-weight:600; margin-bottom:4px;">Expansions:</div>
-        ${expansions.map((e) => {
-          const expId = e?.bggId ?? "";
-          const expName = e?.name ?? "";
-          const expUrl = expId ? `https://boardgamegeek.com/boardgame/${encodeURIComponent(expId)}` : null;
-          return expUrl
-            ? `<div><a href="${esc(expUrl)}" target="_blank" rel="noopener">${esc(expName)}</a></div>`
-            : `<div>${esc(expName)}</div>`;
-        }).join("")}
+        ${expLinks.slice(0, 3).join("")}
+        ${expLinks.length > 3
+          ? `<div class="expMore" hidden>${expLinks.slice(3).join("")}</div>
+             <button type="button" class="btn btn-small expToggle">+${expLinks.length - 3} more</button>`
+          : ""}
       </div>
     `
     : "";
@@ -1365,7 +1450,7 @@ function buildTableCard(t, isPast, sig) {
           <span class="seatsBar"><span class="seatsFill" style="width:${cap ? Math.min(100, Math.round((confirmed / cap) * 100)) : 0}%"></span></span>
         </div>
       </div>
-      ${t.notes ? `<div class="notes"><span style="font-weight:600;">Notes:</span> ${esc(t.notes)}</div>` : ""}
+      ${t.notes ? `<div class="notes notesClamp"><span style="font-weight:600;">Notes:</span> ${esc(t.notes)}</div>` : ""}
       ${expansionsHtml}
       <div class="roster" data-roster-for="${esc(t.id)}">
         <div class="rosterTopline">Players</div>
@@ -1387,19 +1472,28 @@ function buildTableCard(t, isPast, sig) {
         </div>
       </div>
 
+      ${isPast ? "" : `
       <div class="row3">
         <button class="btn btn-primary" data-action="join">Join</button>
         <button class="btn" data-action="leave">Leave</button>
         ${canEdit ? `<button class="btn" data-action="edit">Edit</button>` : ""}
-        ${canDelete ? `<button class="btn btn-danger" data-action="delete" style="margin-left:auto;">Delete</button>` : ""}
-      </div>
+        ${canDelete ? `<button class="btn btn-danger" data-action="delete">Delete</button>` : ""}
+      </div>`}
     </div>
   `;
+
+  el.querySelector(".expToggle")?.addEventListener("click", (ev) => {
+    const more = el.querySelector(".expMore");
+    if (!more) return;
+    const show = more.hidden;
+    more.hidden = !show;
+    ev.currentTarget.textContent = show ? "Show fewer" : `+${expLinks.length - 3} more`;
+  });
 
   el.querySelector('[data-action="join"]')?.addEventListener("click", async (ev) => {
     ev.stopPropagation();
     if (stopPastEventAction(ev)) return;
-    if (!currentUser) return toast("Please sign in first.", "info");
+    if (!currentUser) return openSignInModal();
 
     const btn = ev.currentTarget;
     const prevLabel = btn.textContent;
@@ -1419,7 +1513,7 @@ function buildTableCard(t, isPast, sig) {
   el.querySelector('[data-action="leave"]')?.addEventListener("click", async (ev) => {
     ev.stopPropagation();
     if (stopPastEventAction(ev)) return;
-    if (!currentUser) return toast("Please sign in first.", "info");
+    if (!currentUser) return openSignInModal();
 
     // HOST LEAVE WARNING
     if (isHost) {
@@ -1472,6 +1566,24 @@ function buildTableCard(t, isPast, sig) {
   return el;
 }
 
+// Adds a Show more/less toggle to notes that exceed the 3-line clamp.
+function setupNotesClamp(card) {
+  const notes = card.querySelector(".notes");
+  if (!notes || card.querySelector(".notesToggle")) return;
+  requestAnimationFrame(() => {
+    if (!notes.isConnected || notes.scrollHeight <= notes.clientHeight + 4) return;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "btn btn-small notesToggle";
+    btn.textContent = "Show more";
+    btn.addEventListener("click", () => {
+      const clamped = notes.classList.toggle("notesClamp");
+      btn.textContent = clamped ? "Show more" : "Show less";
+    });
+    notes.after(btn);
+  });
+}
+
 function renderTablesPage() {
   const total = currentTables.length;
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -1495,7 +1607,7 @@ function renderTablesPage() {
   }
 
   if (!pageItems.length) {
-    tablesList.innerHTML = `<div class="muted">No hosted tables yet.</div>`;
+    tablesList.innerHTML = `<div class="muted">No tables yet. Tap “Host a Table” to run a game, or “Request a Game” to ask for one.</div>`;
     return;
   }
 
@@ -1530,7 +1642,10 @@ function renderTablesPage() {
     if (el !== expectedNext) tablesList.insertBefore(el, expectedNext);
     cursor = el;
 
-    if (isNew) hydrateGameMeta(el, t);
+    if (isNew) {
+      hydrateGameMeta(el, t);
+      setupNotesClamp(el);
+    }
     updateRosterDom(t.id);
     applyJoinLeaveState(el, t);
     refreshSeatsDom(el, t);
@@ -1560,7 +1675,7 @@ function renderWants(items) {
   wantsList.innerHTML = "";
   const isPast = currentEventIsPast();
   if (!items.length) {
-    wantsList.innerHTML = `<div class="muted">No “want to play” posts yet.</div>`;
+    wantsList.innerHTML = `<div class="muted">No requests yet. Tap “Request a Game” to ask for a game — a host may pick it up.</div>`;
     return;
   }
 
@@ -1660,7 +1775,7 @@ async function hostTableFlow(gamedayId) {
 }
 
 async function wantToPlayFlow(gamedayId) {
-  const thing = await openGameSearchModal({ title: "Select a game you want to play" });
+  const thing = await openGameSearchModal({ title: "Select a game to request" });
   if (!thing) return;
   await openWantToPlayFormModal({ gamedayId, thing });
 }
@@ -1836,27 +1951,12 @@ function openNicknameModal() {
 // -----------------------------
 // Event wiring
 // -----------------------------
-if (btnDiscord) btnDiscord.addEventListener("click", async () => {
-  const url = await buildDiscordAuthUrl();
-  window.location.href = url;
-});
-
-if (btnGoogle) btnGoogle.addEventListener("click", async () => {
-  try {
-    const { GoogleAuthProvider, signInWithPopup } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js");
-    await signInWithPopup(auth, new GoogleAuthProvider());
-  } catch (e) {
-    // User closing the popup isn't an error worth surfacing.
-    if (e?.code !== "auth/popup-closed-by-user" && e?.code !== "auth/cancelled-popup-request") {
-      toast(`Google sign-in failed: ${e?.message || e}`, "error");
-    }
-  }
-});
+if (btnSignIn) btnSignIn.addEventListener("click", () => openSignInModal());
 
 if (btnBecomeHost) btnBecomeHost.addEventListener("click", async () => {
-  if (!currentUser) return toast("Please sign in first.", "info");
+  if (!currentUser) return openSignInModal();
   const ok = await confirmDialog({
-    title: "Request host access?",
+    title: "Request organizer access?",
     message: "This asks the site owner for permission to create and manage your own Game Days.",
     confirmLabel: "Send request"
   });
@@ -1874,7 +1974,7 @@ if (btnBecomeHost) btnBecomeHost.addEventListener("click", async () => {
 if (btnHostGuide) btnHostGuide.addEventListener("click", openHostGuideModal);
 
 if (btnNickname) btnNickname.addEventListener("click", () => {
-  if (!currentUser) return toast("Please sign in first.", "info");
+  if (!currentUser) return openSignInModal();
   openNicknameModal();
 });
 
@@ -1885,7 +1985,7 @@ if (btnSignOut) btnSignOut.addEventListener("click", async () => {
 });
 
 if (btnCreateGameDay) btnCreateGameDay.addEventListener("click", async () => {
-  if (!currentUser) return toast("Please sign in first.", "info");
+  if (!currentUser) return openSignInModal();
   openCreateGameDayModal();
 });
 
@@ -1899,7 +1999,7 @@ if (btnHostTable) btnHostTable.addEventListener("click", async () => {
   try {
     if (stopPastEventAction()) return;
     if (!currentUser) {
-      toast("Please sign in first.", "info");
+      openSignInModal();
       return;
     }
     if (!currentGameDayId) {
@@ -1917,7 +2017,7 @@ if (btnHostTable) btnHostTable.addEventListener("click", async () => {
 
 if (btnWantToPlay) btnWantToPlay.addEventListener("click", async () => {
   if (stopPastEventAction()) return;
-  if (!currentUser) return toast("Please sign in first.", "info");
+  if (!currentUser) return openSignInModal();
   if (!currentGameDayId) return;
   await wantToPlayFlow(currentGameDayId);
 });
@@ -1958,8 +2058,10 @@ onAuthStateChanged(auth, async (user) => {
   myRole = { owner: false, host: false, requested: false };
   if (user) {
     const name = await displayNameForUser(user);
+    lastDisplayName = name;
     setAuthStatus(`Signed in as: ${name}`);
   } else {
+    lastDisplayName = "";
     setAuthStatus("Not signed in.");
   }
   setButtonsForAuth(user);

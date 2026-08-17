@@ -12,7 +12,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js";
 
-import { esc, asDate, fmtDate, fmtCentralDatetimeValue, parseDatetimeLocalToISO, confirmDialog, toast } from "../shared.js?v=20260816-p2";
+import { esc, asDate, fmtDate, fmtCentralDatetimeValue, parseDatetimeLocalToISO, confirmDialog, toast } from "../shared.js?v=20260816-p4";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -231,6 +231,7 @@ function subscribeEvents() {
     // Hosts only see (and manage) the events they created; owner sees all.
     events = myRole.owner ? all : all.filter((gd) => currentUser && gd.createdBy === currentUser.uid);
     renderEvents();
+    renderReadiness();
     if (!selectedId && events.length) selectEvent(events[0].id);
     // A just-created event: populate the form once its doc arrives, but never
     // clobber a form the user is already editing (guarded by the id check).
@@ -316,18 +317,21 @@ btnCopyBindCommand?.addEventListener("click", async () => {
   }
 });
 
-onAuthStateChanged(auth, async (user) => {
-  currentUser = user || null;
-
-  // Resolve role server-side (owner/host); fall back to the client owner check.
+async function resolveAccess() {
+  const user = currentUser;
   myRole = { owner: false, host: false };
-  if (currentUser) {
+  let roleError = false;
+
+  if (user) {
     try {
       const r = await fnGetMyPlannerRole({});
       myRole = { owner: false, host: false, ...(r.data || {}) };
     } catch {
-      const owner = isAdmin(currentUser);
-      myRole = { owner, host: owner };
+      // A transient failure must not read as "your access was removed" —
+      // fall back to the owner check, otherwise offer a Retry.
+      const owner = isAdmin(user);
+      if (owner) myRole = { owner: true, host: true };
+      else roleError = true;
     }
   }
 
@@ -337,14 +341,19 @@ onAuthStateChanged(auth, async (user) => {
     if (access) link.textContent = myRole.owner ? "Admin" : "My Events";
   });
 
+  const blockedRetry = document.querySelector("#blockedRetry");
   if (!access) {
-    authStatus.textContent = currentUser ? "Signed in — host access required." : "Not signed in.";
+    authStatus.textContent = user
+      ? (roleError ? "Signed in — couldn't verify access." : "Signed in — host access required.")
+      : "Not signed in.";
+    if (blockedRetry) blockedRetry.style.display = roleError ? "" : "none";
     blockedState.style.display = "";
     adminApp.style.display = "none";
     return;
   }
+  if (blockedRetry) blockedRetry.style.display = "none";
 
-  const name = myRole.nickname || await displayNameForUser(currentUser);
+  const name = myRole.nickname || await displayNameForUser(user);
   authStatus.textContent = `${myRole.owner ? "Admin" : "Host"}: ${name}`;
 
   // Owner-only panels
@@ -357,7 +366,26 @@ onAuthStateChanged(auth, async (user) => {
   adminApp.style.display = "";
   subscribeEvents();
   if (myRole.owner) loadHosts();
+}
+
+onAuthStateChanged(auth, async (user) => {
+  currentUser = user || null;
+  await resolveAccess();
 });
+
+document.querySelector("#btnRetryAccess")?.addEventListener("click", resolveAccess);
+
+// Live counts for the At a Glance card (owner-only card; data already loaded).
+function renderReadiness() {
+  const set = (sel, v) => {
+    const el = document.querySelector(sel);
+    if (el) el.textContent = String(v);
+  };
+  set("#statPublished", events.filter((e) => e.status === "published").length);
+  set("#statDraft", events.filter((e) => e.status === "draft").length);
+  set("#statHosts", (hostData.hosts || []).length);
+  set("#statRequests", (hostData.requests || []).length);
+}
 
 // ----------------------------
 // Hosts panel
@@ -390,6 +418,7 @@ async function loadHosts() {
   try {
     hostData = (await fnListHostAdmin({})).data || { hosts: [], requests: [], users: [], invites: [] };
     renderHostsPanel();
+    renderReadiness();
   } catch (e) {
     showHostError(e?.message || String(e));
   }

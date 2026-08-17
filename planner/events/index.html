@@ -4,15 +4,27 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>DFWGV Events</title>
-  <meta name="description" content="DFW Gaming Village game day event pages." />
+  <meta name="description" content="DFW Gaming Village game days — see hosted tables, open seats, and game requests, then sign in to join." />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://dfwgamingvillage.com/planner/events/" />
+  <meta property="og:title" content="DFWGV Events" />
+  <meta property="og:description" content="DFW Gaming Village game days — see hosted tables, open seats, and game requests, then sign in to join." />
+  <meta property="og:image" content="https://dfwgamingvillage.com/planner/banner2.png" />
+
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:title" content="DFWGV Events" />
+  <meta property="twitter:description" content="DFW Gaming Village game days — see hosted tables, open seats, and game requests, then sign in to join." />
+  <meta property="twitter:image" content="https://dfwgamingvillage.com/planner/banner2.png" />
+
   <meta name="theme-color" content="#d71920" />
   <link rel="icon" href="../dfwgv-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" />
 
-  <link rel="stylesheet" href="../styles.css?v=20260816-p2" />
-  <link rel="stylesheet" href="./event.css?v=20260816-p2" />
+  <link rel="stylesheet" href="../styles.css?v=20260816-p4" />
+  <link rel="stylesheet" href="./event.css?v=20260816-p4" />
 </head>
 <body>
   <header class="topbar">
@@ -31,7 +43,8 @@
       <a href="../admin/" data-admin-link hidden>Admin</a>
     </nav>
     <div class="authbar">
-      <a class="btn btn-primary" href="../">Sign in to join</a>
+      <div class="auth-status" id="pubAuthStatus" style="display:none;"></div>
+      <a class="btn btn-primary" id="pubAuthLink" href="../">Sign in to join</a>
     </div>
   </header>
 
@@ -92,14 +105,14 @@
 
       <section class="card">
         <div class="cardhead">
-          <h2>Want to Play</h2>
+          <h2>Game Requests</h2>
         </div>
         <div id="publicWants" class="list"></div>
       </section>
     </section>
   </main>
 
-  <script type="module" src="./event.js?v=20260816-p2"></script>
+  <script type="module" src="./event.js?v=20260816-p4"></script>
   <script src="../../site-analytics.js?v=20260611-planner"></script>
 </body>
 </html>

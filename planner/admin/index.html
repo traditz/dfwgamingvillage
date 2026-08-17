@@ -12,8 +12,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" />
 
-  <link rel="stylesheet" href="../styles.css?v=20260816-p2" />
-  <link rel="stylesheet" href="./admin.css?v=20260816-p2" />
+  <link rel="stylesheet" href="../styles.css?v=20260816-p4" />
+  <link rel="stylesheet" href="./admin.css?v=20260816-p4" />
 </head>
 <body>
   <header class="topbar">
@@ -51,6 +51,10 @@
         <h2>Admin Access</h2>
       </div>
       <div class="muted">Sign in from the planner with the owner account or an approved host account to use this dashboard. Hosts see and manage the events they created.</div>
+      <div id="blockedRetry" style="display:none; margin-top:12px;">
+        <div class="modalError" style="display:block;">Couldn't verify your access — this is usually a network hiccup.</div>
+        <button class="btn" id="btnRetryAccess" style="margin-top:10px;">Retry</button>
+      </div>
     </section>
 
     <section id="adminApp" class="adminGrid" style="display:none;">
@@ -142,24 +146,24 @@
 
       <section class="card cardSpan" id="readinessCard">
         <div class="cardhead">
-          <h2>Readiness</h2>
+          <h2>At a Glance</h2>
         </div>
         <div class="healthGrid">
           <div class="healthCard">
-            <div class="healthLabel">Firestore Rules</div>
-            <div class="healthValue">Public published reads</div>
+            <div class="healthLabel">Published Events</div>
+            <div class="healthValue" id="statPublished">—</div>
           </div>
           <div class="healthCard">
-            <div class="healthLabel">Writes</div>
-            <div class="healthValue">Functions only</div>
+            <div class="healthLabel">Draft Events</div>
+            <div class="healthValue" id="statDraft">—</div>
           </div>
           <div class="healthCard">
-            <div class="healthLabel">Discord Sync</div>
-            <div class="healthValue">Bot watcher</div>
+            <div class="healthLabel">Approved Hosts</div>
+            <div class="healthValue" id="statHosts">—</div>
           </div>
           <div class="healthCard">
-            <div class="healthLabel">Audit Log</div>
-            <div class="healthValue">Planned</div>
+            <div class="healthLabel">Pending Requests</div>
+            <div class="healthValue" id="statRequests">—</div>
           </div>
         </div>
       </section>
@@ -183,6 +187,6 @@
     </div>
   </div>
 
-  <script type="module" src="./admin.js?v=20260816-p2"></script>
+  <script type="module" src="./admin.js?v=20260816-p4"></script>
 </body>
 </html>
