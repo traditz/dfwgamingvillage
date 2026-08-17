@@ -1671,3 +1671,30 @@ textarea:focus {
   background: linear-gradient(180deg, #f87171, var(--accent-2));
   box-shadow: 0 0 6px rgba(239, 68, 68, .4);
 }
+
+/* ================  Custom sign-ups (non-game entries)  ================ */
+
+.signupPill {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(96, 165, 250, .45);
+  border-radius: var(--radius-pill);
+  padding: 2px 8px;
+  background: rgba(96, 165, 250, .12);
+  color: #bfdbfe;
+  font-size: 11px;
+  font-weight: 800;
+  vertical-align: middle;
+}
+
+.customBlock {
+  padding: 12px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, .03);
+}
+
+.customBlock .label {
+  font-weight: 800;
+  margin-bottom: 4px;
+}

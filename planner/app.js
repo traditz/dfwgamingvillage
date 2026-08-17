@@ -38,7 +38,7 @@ import {
   showInlineStatus,
   confirmDialog,
   toast
-} from "./shared.js?v=20260816-p12";
+} from "./shared.js?v=20260816-p13";
 
 // -----------------------------
 // Config
@@ -727,6 +727,15 @@ function openGameSearchModal({ title }) {
 
         <div class="searchResults" id="results"></div>
 
+        <div class="customBlock">
+          <div class="label">Not a game?</div>
+          <div class="hint muted">Make a custom sign-up sheet — food run, early setup, library help, anything people can claim a spot on.</div>
+          <div class="modalRow" style="margin-top:8px;">
+            <input id="customName" class="input" type="text" maxlength="80" placeholder="e.g. Pizza run — who's in?" />
+            <button class="btn" id="btnCustom">Create sign-up</button>
+          </div>
+        </div>
+
         <div class="modalActions">
           <button class="btn" id="btnCancel">Cancel</button>
         </div>
@@ -749,6 +758,23 @@ function openGameSearchModal({ title }) {
     };
 
     btnCancel.addEventListener("click", () => done(null));
+
+    // Custom sign-up: skip BoardGameGeek entirely and name it yourself.
+    const doCustom = () => {
+      const name = String(qs("#customName")?.value || "").trim();
+      if (name.length < 2) {
+        showInlineError("Give your sign-up a short title.");
+        return;
+      }
+      done({ isCustom: true, name });
+    };
+    qs("#btnCustom")?.addEventListener("click", doCustom);
+    qs("#customName")?.addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter") {
+        ev.preventDefault();
+        doCustom();
+      }
+    });
 
     const renderResults = (items) => {
       results.innerHTML = "";
@@ -850,19 +876,21 @@ function openHostTableFormModal({ gamedayId, thing }) {
     const defaultStart = bounds ? bounds.default : fmtCentralDatetimeValue(new Date(Date.now() + 60 * 60 * 1000));
     const dtAttrs = bounds ? ` min="${bounds.min}" max="${bounds.max}"` : "";
     const dtHint = bounds ? `<div class="hint muted">Must be on the event day (${esc(bounds.label)}).</div>` : "";
-    const defaultCap = thing?.maxPlayers || "";
+    const isCustom = thing.isCustom === true;
+    const defaultCap = isCustom ? "" : (thing?.maxPlayers || "");
 
-    openModal("Host a Table", `
+    openModal(isCustom ? "Create a Sign-Up" : "Host a Table", `
       <div class="modalStack">
         <div class="gameHeader">
           <div class="gameHeaderThumb">
-            ${thing.thumbUrl ? `<img src="${esc(thing.thumbUrl)}" alt="" loading="lazy" />` : `<div class="thumbph">🎲</div>`}
+            ${thing.thumbUrl ? `<img src="${esc(thing.thumbUrl)}" alt="" loading="lazy" />` : `<div class="thumbph">${isCustom ? "📋" : "🎲"}</div>`}
           </div>
           <div class="gameHeaderBody">
             <div class="gameHeaderTitle">${esc(thing.name)}</div>
             <div class="muted">
-              ${thing.year ? `Year: ${esc(thing.year)}` : ""}
-              ${(thing.minPlayers && thing.maxPlayers) ? ` • Players: ${esc(thing.minPlayers)}-${esc(thing.maxPlayers)}` : ""}
+              ${isCustom
+                ? "Custom sign-up — people claim a spot just like a table"
+                : `${thing.year ? `Year: ${esc(thing.year)}` : ""}${(thing.minPlayers && thing.maxPlayers) ? ` • Players: ${esc(thing.minPlayers)}-${esc(thing.maxPlayers)}` : ""}`}
             </div>
           </div>
         </div>
@@ -875,17 +903,18 @@ function openHostTableFormModal({ gamedayId, thing }) {
           </label>
 
           <label class="field">
-            <div class="label">Seats</div>
-            <input id="capacity" class="input" type="number" min="1" step="1" placeholder="e.g. 4" value="${esc(defaultCap)}" />
-            <div class="hint muted">Defaults to max players if known.</div>
+            <div class="label">${isCustom ? "Spots" : "Seats"}</div>
+            <input id="capacity" class="input" type="number" min="1" step="1" placeholder="${isCustom ? "e.g. 6" : "e.g. 4"}" value="${esc(defaultCap)}" />
+            <div class="hint muted">${isCustom ? "How many people can sign up?" : "Defaults to max players if known."}</div>
           </label>
 
           <label class="field fieldSpan2">
             <div class="label">Notes</div>
-            <textarea id="notes" class="textarea" rows="3" placeholder="Optional: teach game, bring expansion, start at 2pm, etc."></textarea>
+            <textarea id="notes" class="textarea" rows="3" placeholder="${isCustom ? "Optional: where to meet, what to bring, timing…" : "Optional: teach game, bring expansion, start at 2pm, etc."}"></textarea>
           </label>
         </div>
 
+        ${isCustom ? "" : `
         <div class="expBlock">
           <div class="label">Expansions (optional)</div>
           <div class="expList" id="expList">
@@ -899,14 +928,14 @@ function openHostTableFormModal({ gamedayId, thing }) {
               : `<div class="muted">No expansions found for this title.</div>`
             }
           </div>
-        </div>
+        </div>`}
 
         <div class="modalStatus" id="modalStatus" style="display:none;"></div>
         <div class="modalError" id="modalError" style="display:none;"></div>
 
         <div class="modalActions">
           <button class="btn" id="btnCancel">Cancel</button>
-          <button class="btn btn-primary" id="btnCreate">Create table</button>
+          <button class="btn btn-primary" id="btnCreate">${isCustom ? "Create sign-up" : "Create table"}</button>
         </div>
       </div>
     `, { onDismiss: () => done(null) });
@@ -944,18 +973,21 @@ function openHostTableFormModal({ gamedayId, thing }) {
         ? capRaw
         : (Number(thing.maxPlayers) || 0);
 
-      // UPDATED VALIDATION LINE: 2 to 999
-      if (!capFinal || capFinal < 2 || capFinal > 999) {
-        showInlineError("Seats must be between 2 and 999.");
+      // Games need 2+ players; a custom sign-up can have a single spot.
+      const minCap = isCustom ? 1 : 2;
+      if (!capFinal || capFinal < minCap || capFinal > 999) {
+        showInlineError(`${isCustom ? "Spots" : "Seats"} must be between ${minCap} and 999.`);
         return;
       }
 
       const notes = String(qs("#notes").value || "").trim();
 
       const expList = qs("#expList");
-      const checked = Array.from(expList.querySelectorAll('input[type="checkbox"]:checked'))
-        .map((c) => String(c.value))
-        .filter(Boolean);
+      const checked = expList
+        ? Array.from(expList.querySelectorAll('input[type="checkbox"]:checked'))
+            .map((c) => String(c.value))
+            .filter(Boolean)
+        : [];
 
       try {
         btnCreate.disabled = true;
@@ -964,11 +996,12 @@ function openHostTableFormModal({ gamedayId, thing }) {
 
         await fnCreateTable({
           gamedayId,
-          bggId: String(thing.bggId),
+          isCustom,
+          bggId: isCustom ? "" : String(thing.bggId),
           gameName: thing.name,
-          thumbUrl: thing.thumbUrl || "",
-          bggYear: thing.bggYear || thing.year || null,
-          bggRating: thing.bggRating || null,
+          thumbUrl: isCustom ? "" : (thing.thumbUrl || ""),
+          bggYear: isCustom ? null : (thing.bggYear || thing.year || null),
+          bggRating: isCustom ? null : (thing.bggRating || null),
           startTime: startIso,
           capacity: capFinal,
           notes,
@@ -1494,6 +1527,8 @@ function buildTableCard(t, isPast, sig) {
   const canEdit = !isPast && (isHost || canManageEvent);
 
   const bggUrl = t.bggId ? `https://boardgamegeek.com/boardgame/${encodeURIComponent(t.bggId)}` : null;
+  // Custom sign-ups (food runs, setup crew) have no BGG game behind them.
+  const isCustomEntry = t.isCustom === true || !t.bggId;
 
   const expansions = Array.isArray(t.expansions) ? t.expansions : [];
   const expLinks = expansions.map((e) => {
@@ -1525,12 +1560,12 @@ function buildTableCard(t, isPast, sig) {
   el.dataset.sig = sig;
   el.innerHTML = `
     <div class="thumb">
-      ${t.thumbUrl ? `<img src="${esc(t.thumbUrl)}" alt="" loading="lazy" />` : `<div class="thumbph">🎲</div>`}
+      ${t.thumbUrl ? `<img src="${esc(t.thumbUrl)}" alt="" loading="lazy" />` : `<div class="thumbph">${isCustomEntry ? "📋" : "🎲"}</div>`}
     </div>
     <div class="body">
       <div class="row1">
         <div class="name">
-          ${bggUrl ? `<a href="${esc(bggUrl)}" target="_blank" rel="noopener">${esc(t.gameName || "Game")}</a>` : esc(t.gameName || "Game")}
+          ${isCustomEntry ? `<span class="signupPill">📋 Sign-up</span> ` : ""}${bggUrl ? `<a href="${esc(bggUrl)}" target="_blank" rel="noopener">${esc(t.gameName || "Game")}</a>` : esc(t.gameName || "Game")}
           <div class="gameMeta" data-game-meta ${gameMetaText(t) ? "" : "style=\"display:none;\""}>${esc(gameMetaText(t))}</div>
         </div>
         <div class="time">${timeDisplay}</div>
