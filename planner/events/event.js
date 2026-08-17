@@ -19,7 +19,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js";
 
-import { esc, asDate, fmtDate, centralDateKey, toast } from "../shared.js?v=20260816-p5";
+import { esc, asDate, fmtDate, centralDateKey, toast } from "../shared.js?v=20260816-p6";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -433,7 +433,7 @@ onAuthStateChanged(auth, async (user) => {
   // Owner sees "Admin", approved hosts see "My Events" — matching the planner.
   adminLinks.forEach((link) => {
     link.hidden = !(owner || host);
-    if (owner || host) link.textContent = owner ? "Admin" : "My Events";
+    if (owner || host) link.textContent = owner ? "Admin" : "Manage Events";
   });
 });
 

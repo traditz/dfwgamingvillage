@@ -36,7 +36,7 @@ import {
   showInlineStatus,
   confirmDialog,
   toast
-} from "./shared.js?v=20260816-p5";
+} from "./shared.js?v=20260816-p6";
 
 // -----------------------------
 // Config
@@ -75,6 +75,7 @@ const fnLeaveTable = httpsCallable(functions, "leaveTable");
 const fnGetMyPlannerRole = httpsCallable(functions, "getMyPlannerRole");
 const fnRequestHostAccess = httpsCallable(functions, "requestHostAccess");
 const fnSetNickname = httpsCallable(functions, "setNickname");
+const fnGetMyActivity = httpsCallable(functions, "getMyActivity");
 
 // -----------------------------
 // UI bindings
@@ -90,6 +91,7 @@ const btnCreateGameDay = document.querySelector("#btnCreateGameDay");
 const btnPastEvents = document.querySelector("#btnPastEvents");
 const btnBecomeHost = document.querySelector("#btnBecomeHost");
 const btnNickname = document.querySelector("#btnNickname");
+const btnMyEvents = document.querySelector("#btnMyEvents");
 const btnHostGuide = document.querySelector("#btnHostGuide");
 
 // Discord bot invite: same application as OAuth. Permissions = View Channels,
@@ -321,7 +323,7 @@ function applyRoleUI() {
   adminLinks.forEach((link) => {
     const show = signedIn && (myRole.owner || myRole.host);
     link.hidden = !show;
-    if (show) link.textContent = myRole.owner ? "Admin" : "My Events";
+    if (show) link.textContent = myRole.owner ? "Admin" : "Manage Events";
   });
   // Organizer-only controls live inside rendered lists — refresh them.
   if (lastGameDaysRaw.length) renderGameDays(lastGameDaysRaw);
@@ -550,10 +552,12 @@ function setButtonsForAuth(user) {
     btnSignIn.style.display = "none";
     btnSignOut.style.display = "";
     if (btnNickname) btnNickname.style.display = "";
+    if (btnMyEvents) btnMyEvents.style.display = "";
   } else {
     btnSignIn.style.display = "";
     btnSignOut.style.display = "none";
     if (btnNickname) btnNickname.style.display = "none";
+    if (btnMyEvents) btnMyEvents.style.display = "none";
   }
   // Create Game Day / Request Organizer Access buttons are role-driven.
   applyRoleUI();
@@ -1877,7 +1881,7 @@ function openHostGuideModal() {
 
       <div>
         <div class="label" style="font-weight:800; margin-bottom:6px;">Your dashboard</div>
-        <div class="muted">Open <a href="./admin/">My Events</a> (also in the top nav) to edit your event's details, watch table signups, see its Discord link status, and copy the exact bind command for your event.</div>
+        <div class="muted">Open <a href="./admin/">Manage Events</a> (also in the top nav) to edit your event's details, watch table signups, see its Discord link status, and copy the exact bind command for your event.</div>
       </div>
 
       <div>
@@ -1894,9 +1898,164 @@ function openHostGuideModal() {
 }
 
 // -----------------------------
+// My Events hub: account, linked sign-ins, and activity across all events
+// -----------------------------
+let myActivity = null; // cached items from getMyActivity
+
+function activityBadge(item) {
+  const label = item.role === "organizing" ? "Organizing"
+    : item.role === "hosting" ? `Hosting: ${item.gameName}`
+    : item.role === "waitlist" ? `Waitlist: ${item.gameName}`
+    : `Playing: ${item.gameName}`;
+  const cls = item.role === "organizing" ? "is-organizing"
+    : item.role === "hosting" ? "is-hosting"
+    : item.role === "waitlist" ? "is-waitlist"
+    : "is-playing";
+  return `<span class="activityBadge ${cls}">${esc(label)}</span>`;
+}
+
+function renderMyActivity(tab) {
+  const host = qs("#activityList");
+  if (!host) return;
+  if (!myActivity) {
+    host.innerHTML = `<div class="muted">Loading your activity…</div>`;
+    return;
+  }
+
+  // Group items by game day, split into upcoming vs past.
+  const groups = new Map();
+  for (const item of myActivity) {
+    let g = groups.get(item.gamedayId);
+    if (!g) {
+      g = { gamedayId: item.gamedayId, title: item.title, startsAt: item.startsAt, location: item.location, items: [] };
+      groups.set(item.gamedayId, g);
+    }
+    g.items.push(item);
+  }
+  const all = [...groups.values()];
+  const wanted = all.filter((g) => (tab === "past") === isPastGameDay(g));
+  wanted.sort((a, b) => {
+    const at = asDate(a.startsAt)?.getTime() ?? 0;
+    const bt = asDate(b.startsAt)?.getTime() ?? 0;
+    return tab === "past" ? bt - at : at - bt;
+  });
+
+  if (!wanted.length) {
+    host.innerHTML = `<div class="muted">${tab === "past"
+      ? "No past events yet — your history will build up here."
+      : "Nothing coming up yet. Browse the game days and join a table!"}</div>`;
+    return;
+  }
+
+  host.innerHTML = wanted.map((g) => `
+    <div class="listitem activityGroup" data-open-gd="${esc(g.gamedayId)}">
+      <div style="flex:1; min-width:0;">
+        <div class="title">${esc(g.title)}</div>
+        <div class="meta muted">${esc(fmtDate(g.startsAt))}${g.location ? ` • ${esc(g.location)}` : ""}</div>
+        <div class="activityBadges">${g.items.map(activityBadge).join("")}</div>
+      </div>
+    </div>
+  `).join("");
+
+  host.querySelectorAll("[data-open-gd]").forEach((el) => {
+    el.addEventListener("click", () => {
+      const id = el.getAttribute("data-open-gd");
+      const gd = [...currentGameDays, ...currentPastGameDays].find((x) => x.id === id);
+      if (gd) {
+        closeModal();
+        openGameDay(gd);
+      } else {
+        toast("That event isn't currently published.", "info");
+      }
+    });
+  });
+}
+
+async function openMyEventsModal() {
+  if (!currentUser) return openSignInModal();
+
+  const isDiscordAccount = !!currentUser.uid?.startsWith("discord:");
+  const googleInfo = (currentUser.providerData || []).find((pd) => pd.providerId === "google.com");
+  const googleLinked = !!googleInfo;
+
+  openModal("My Events", `
+    <div class="modalStack">
+      <div class="accountRow">
+        <div style="min-width:0;">
+          <div class="label">Nickname</div>
+          <div class="muted">${esc(myRole.nickname || "(none — rosters show your sign-in name)")}</div>
+        </div>
+        <button class="btn btn-small" id="btnMeNickname">Change</button>
+      </div>
+
+      <div class="accountRow">
+        <div style="min-width:0;">
+          <div class="label">Discord</div>
+          <div class="muted">${isDiscordAccount
+            ? "Linked — this account signs in with Discord"
+            : "Not linked. To use Discord, sign out and sign in with Discord — then link Google there so both open this same account."}</div>
+        </div>
+        ${isDiscordAccount ? `<span class="eventPill">Linked</span>` : ""}
+      </div>
+
+      <div class="accountRow">
+        <div style="min-width:0;">
+          <div class="label">Google</div>
+          <div class="muted">${googleLinked
+            ? esc(googleInfo.email || "Linked")
+            : "Not linked. Link it and you can sign in either way — same account, same signups."}</div>
+        </div>
+        ${googleLinked
+          ? `<span class="eventPill">Linked</span>`
+          : (isDiscordAccount ? `<button class="btn btn-small" id="btnLinkGoogle">Link Google</button>` : "")}
+      </div>
+
+      <div class="tabRow">
+        <button class="btn tabBtn is-active" data-tab="upcoming">Current &amp; Upcoming</button>
+        <button class="btn tabBtn" data-tab="past">Past</button>
+      </div>
+      <div id="activityList" class="list"><div class="muted">Loading your activity…</div></div>
+    </div>
+  `);
+
+  qs("#btnMeNickname")?.addEventListener("click", () => openNicknameModal({ returnToMyEvents: true }));
+
+  qs("#btnLinkGoogle")?.addEventListener("click", async () => {
+    try {
+      const { GoogleAuthProvider, linkWithPopup } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js");
+      await linkWithPopup(auth.currentUser, new GoogleAuthProvider());
+      toast("Google linked! You can now sign in with either.", "success");
+      openMyEventsModal();
+    } catch (e) {
+      if (e?.code === "auth/credential-already-in-use") {
+        toast("That Google account already has its own planner account here. Use a different Google account, or keep them separate.", "error", 8000);
+      } else if (e?.code !== "auth/popup-closed-by-user" && e?.code !== "auth/cancelled-popup-request") {
+        toast(`Link failed: ${unwrapCallableError(e)}`, "error");
+      }
+    }
+  });
+
+  qs("#activityList")?.parentElement?.querySelectorAll(".tabBtn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      qs("#activityList")?.parentElement?.querySelectorAll(".tabBtn").forEach((b) => b.classList.toggle("is-active", b === btn));
+      renderMyActivity(btn.getAttribute("data-tab"));
+    });
+  });
+
+  try {
+    const r = await fnGetMyActivity({});
+    myActivity = (r.data && r.data.items) || [];
+    renderMyActivity("upcoming");
+  } catch (e) {
+    const host = qs("#activityList");
+    if (host) host.innerHTML = `<div class="modalError" style="display:block;">${esc(unwrapCallableError(e))}</div>`;
+  }
+}
+
+// -----------------------------
 // Nickname
 // -----------------------------
-function openNicknameModal() {
+function openNicknameModal(opts = {}) {
   openModal("Set Nickname", `
     <div class="modalStack">
       <label class="field">
@@ -1932,6 +2091,7 @@ function openNicknameModal() {
       setAuthStatus(`Signed in as: ${nick}`);
       closeModal();
       toast("Nickname updated everywhere.", "success");
+      if (opts.returnToMyEvents) openMyEventsModal();
     } catch (e) {
       btn.disabled = false;
       showInlineStatus("");
@@ -1973,6 +2133,11 @@ if (btnHostGuide) btnHostGuide.addEventListener("click", openHostGuideModal);
 if (btnNickname) btnNickname.addEventListener("click", () => {
   if (!currentUser) return openSignInModal();
   openNicknameModal();
+});
+
+if (btnMyEvents) btnMyEvents.addEventListener("click", () => {
+  if (!currentUser) return openSignInModal();
+  openMyEventsModal();
 });
 
 
