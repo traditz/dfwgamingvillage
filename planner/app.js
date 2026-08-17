@@ -38,7 +38,7 @@ import {
   showInlineStatus,
   confirmDialog,
   toast
-} from "./shared.js?v=20260816-p10";
+} from "./shared.js?v=20260816-p11";
 
 // -----------------------------
 // Config
@@ -1429,6 +1429,26 @@ function refreshSeatsDom(card, t) {
   const isFull = cap > 0 && confirmed >= cap;
   seatsEl.classList.toggle("is-full", isFull);
 
+  // Seat dots: one per chair, filled as people join (the bar stays as the
+  // fallback for unusually large capacities where dots would be noise).
+  const pipsEl = seatsEl.querySelector(".seatPips");
+  const barEl = seatsEl.querySelector(".seatsBar");
+  const usePips = cap > 0 && cap <= 12;
+  if (pipsEl) {
+    pipsEl.style.display = usePips ? "" : "none";
+    if (usePips) {
+      const filled = Math.min(confirmed, cap);
+      let html = "";
+      for (let i = 0; i < cap; i++) {
+        html += `<span class="seatDot${i < filled ? " is-filled" : ""}"></span>`;
+      }
+      pipsEl.innerHTML = html;
+    } else {
+      pipsEl.innerHTML = "";
+    }
+  }
+  if (barEl) barEl.style.display = usePips ? "none" : "";
+
   // Explain the waitlist in words — the red bar alone says nothing.
   let note = seatsEl.querySelector(".seatsNote");
   if (isFull && !note) {
@@ -1519,7 +1539,8 @@ function buildTableCard(t, isPast, sig) {
         <div class="muted">Host: <span class="hostName${isHost ? " is-you" : ""}">${esc(t.hostDisplayName || t.hostUid || "Unknown")}</span>${isHost ? " (you)" : ""}</div>
         <div class="seats" data-seats-root="${esc(t.id)}" data-cap="${cap}">
           <span class="seatsText muted">Seats: ${confirmed}/${cap}${wait ? ` • Waitlist: ${wait}` : ""}</span>
-          <span class="seatsBar" aria-hidden="true"><span class="seatsFill" style="width:${cap ? Math.min(100, Math.round((confirmed / cap) * 100)) : 0}%"></span></span>
+          <span class="seatPips" aria-hidden="true"></span>
+          <span class="seatsBar" aria-hidden="true" style="display:none;"><span class="seatsFill" style="width:${cap ? Math.min(100, Math.round((confirmed / cap) * 100)) : 0}%"></span></span>
         </div>
       </div>
       ${t.notes ? `<div class="notes notesClamp"><span style="font-weight:600;">Notes:</span> ${esc(t.notes)}</div>` : ""}
