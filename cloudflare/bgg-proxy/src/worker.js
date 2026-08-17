@@ -1174,6 +1174,35 @@ async function checkRedditDeals(env) {
       }
       await new Promise((r) => setTimeout(r, 400));
     }
+
+    // BGG's site-wide Hot Deals forum (forum id 10) — the same community
+    // deal stream as r/boardgamedeals, on BGG itself. New threads only.
+    try {
+      const res = await fetch("https://boardgamegeek.com/xmlapi2/forum?id=10", {
+        headers: { Authorization: `Bearer ${env.BGG_TOKEN}` }
+      });
+      if (res.ok) {
+        const xml = await res.text();
+        const cutoff = Date.now() - 3 * 864e5;
+        for (const t of xml.matchAll(/<thread\s+id="(\d+)"\s+subject="([^"]*)"[^>]*?postdate="([^"]*)"/g)) {
+          const pid = `bggdeal:${t[1]}`;
+          if (seen.has(pid)) continue;
+          const title = decodeEntities(t[2]);
+          const posted = new Date(t[3]);
+          if (isNaN(posted) || posted.getTime() < cutoff) continue;
+          const tl = title.toLowerCase();
+          const hit = wl.find((g) => g.words.length && g.words.every((w) => tl.includes(w)));
+          if (!hit) continue;
+          const priceInTitle = parseFloat((title.match(/\$\s?(\d{1,4}(?:\.\d\d)?)/) || [])[1] || "") || null;
+          matches.push({
+            game: hit.name, gameId: hit.id, title, sub: "BGG Hot Deals",
+            url: `https://boardgamegeek.com/thread/${t[1]}`,
+            date: posted.toISOString().slice(0, 10), priceInTitle
+          });
+          seen.add(pid);
+        }
+      }
+    } catch { /* next sweep retries */ }
     await env.HOT_HISTORY.put(REDDIT_SEEN_KEY, JSON.stringify([...seen].slice(-500)));
 
     if (matches.length) {
@@ -1187,10 +1216,10 @@ async function checkRedditDeals(env) {
             embeds: [{
               title: "🔥 Community deal spotted",
               description: matches.slice(0, 10).map((m) =>
-                `**[${m.game}](https://boardgamegeek.com/boardgame/${m.gameId})** — [${m.title.slice(0, 120)}](${m.url}) · r/${m.sub}`
+                `**[${m.game}](https://boardgamegeek.com/boardgame/${m.gameId})** — [${m.title.slice(0, 120)}](${m.url}) · ${m.sub === "BGG Hot Deals" ? m.sub : `r/${m.sub}`}${m.priceInTitle ? ` · $${m.priceInTitle}` : ""}`
               ).join("\n\n").slice(0, 3900),
               color: 0x9B59B6,
-              footer: { text: "DFWGV Librarian · r/boardgamedeals + r/BoardGameExchange" },
+              footer: { text: "DFWGV Librarian · r/boardgamedeals + r/BoardGameExchange + BGG Hot Deals" },
               timestamp: new Date().toISOString()
             }]
           })
@@ -2041,7 +2070,7 @@ One section for EVERY game in watchlistSpotlight, using its id, in the order giv
 ===EXTRA===
 Two INDEPENDENT subsections — evaluate each on its own:
 "🛒 Opportunities" — ALWAYS write this when topUnownedCandidates or sustainedHotnessUnowned has entries (they almost always do): the 3 strongest unowned pickups today, two lines each — the signal (rating/rank, hotness streak, or a recent price alert), and why it matters for a lending library. Omit only if BOTH lists are truly empty.
-"📣 Signals" — only when newExpansionOrEditionAnnouncements or communityDealsSpotted has entries (announcements can crater old-edition prices — an opportunity; community deals link to Reddit posts worth acting on fast — include the asking price when priceInTitle is present and compare it to our tracked prices). Omitting Signals must NOT stop you writing Opportunities.
+"📣 Signals" — only when newExpansionOrEditionAnnouncements or communityDealsSpotted has entries (announcements can crater old-edition prices — an opportunity; community deals link to Reddit or BGG Hot Deals posts worth acting on fast — include the asking price when priceInTitle is present and compare it to our tracked prices). Omitting Signals must NOT stop you writing Opportunities.
 Leave EXTRA empty only in the rare case that both subsections have nothing.
 
 Data guidance:
