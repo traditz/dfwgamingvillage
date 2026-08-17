@@ -13,7 +13,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js";
 
-import { esc, asDate, fmtDate, fmtCentralDatetimeValue, parseDatetimeLocalToISO, confirmDialog, toast } from "../shared.js?v=20260817-p16";
+import { esc, asDate, fmtDate, fmtEventWhen, centralDateKey, fmtCentralDatetimeValue, parseDatetimeLocalToISO, confirmDialog, toast } from "../shared.js?v=20260817-p17";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -40,6 +40,7 @@ const eventTitle = document.querySelector("#eventTitle");
 const eventStart = document.querySelector("#eventStart");
 const eventStatus = document.querySelector("#eventStatus");
 const eventVisibility = document.querySelector("#eventVisibility");
+const eventEndDate = document.querySelector("#eventEndDate");
 const eventLocation = document.querySelector("#eventLocation");
 const btnDeleteEvent = document.querySelector("#btnDeleteEvent");
 const publicLink = document.querySelector("#publicLink");
@@ -109,6 +110,10 @@ function selectEvent(id) {
   eventStart.value = fmtCentralDatetimeValue(gd.startsAt);
   eventStatus.value = gd.status || "draft";
   if (eventVisibility) eventVisibility.value = gd.visibility === "private" ? "private" : "public";
+  if (eventEndDate) {
+    const end = asDate(gd.endsAt);
+    eventEndDate.value = end ? centralDateKey(end) : "";
+  }
   eventLocation.value = gd.location || "";
   publicLink.href = `../events/?id=${encodeURIComponent(gd.id)}`;
   renderDiscordBinding(gd);
@@ -129,6 +134,7 @@ function newEvent() {
   eventStart.value = "";
   eventStatus.value = "draft";
   if (eventVisibility) eventVisibility.value = "public";
+  if (eventEndDate) eventEndDate.value = "";
   eventLocation.value = "";
   publicLink.href = "../events/";
   renderDiscordBinding(null);
@@ -196,7 +202,7 @@ function renderEvents() {
     row.innerHTML = `
       <div>
         <div class="rowTitle">${esc(gd.title || "Game Day")}</div>
-        <div class="rowMeta">${esc(fmtDate(gd.startsAt))}${gd.location ? ` - ${esc(gd.location)}` : ""}</div>
+        <div class="rowMeta">${esc(fmtEventWhen(gd.startsAt, gd.endsAt))}${gd.location ? ` - ${esc(gd.location)}` : ""}</div>
         <div class="rowMeta">${discordBinding(gd).channelId ? `Discord: ${esc(discordBinding(gd).channelName ? `#${discordBinding(gd).channelName}` : discordBinding(gd).channelId)}` : "Discord: Not linked"}</div>
       </div>
       <span class="statusPill ${esc(gd.status || "draft")}">${esc(gd.status || "draft")}</span>
@@ -272,7 +278,11 @@ eventForm?.addEventListener("submit", async (ev) => {
     startsAt: eventStart.value ? parseDatetimeLocalToISO(eventStart.value) : "",
     location: eventLocation.value.trim(),
     status: eventStatus.value,
-    visibility: eventVisibility ? eventVisibility.value : "public"
+    visibility: eventVisibility ? eventVisibility.value : "public",
+    // Blank clears it (back to a single-day event).
+    endsAt: (eventEndDate && eventEndDate.value)
+      ? parseDatetimeLocalToISO(`${eventEndDate.value}T23:59`)
+      : null
   };
 
   try {

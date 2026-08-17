@@ -28,6 +28,9 @@ import {
   fmtTime,
   centralDateKey,
   centralTimeHHMM,
+  eventDayKeys,
+  fmtDayLabel,
+  fmtEventWhen,
   fmtCentralDatetimeValue,
   parseDatetimeLocalToISO,
   unwrapCallableError,
@@ -38,7 +41,7 @@ import {
   showInlineStatus,
   confirmDialog,
   toast
-} from "./shared.js?v=20260817-p16";
+} from "./shared.js?v=20260817-p17";
 
 // -----------------------------
 // Config
@@ -186,14 +189,27 @@ let unsubPosts = null;
 function eventDayBounds() {
   const startsAt = currentGameDay ? asDate(currentGameDay.startsAt) : null;
   if (!startsAt) return null;
-  const day = centralDateKey(startsAt);           // "YYYY-MM-DD" (Central)
-  const [y, m, d] = day.split("-");
+  const days = eventDayKeys(currentGameDay.startsAt, currentGameDay.endsAt);
+  const first = days[0];
+  const last = days[days.length - 1];
+  const multiDay = days.length > 1;
+
+  // On a multi-day event default to today when the event is running, so
+  // hosting during a convention lands on the right day automatically.
+  const todayKey = centralDateKey(new Date());
+  const defaultDay = days.includes(todayKey) ? todayKey : first;
+
   return {
-    day,
-    label: `${+m}/${+d}/${y}`,
-    min: `${day}T00:00`,
-    max: `${day}T23:59`,
-    default: `${day}T${centralTimeHHMM(startsAt)}`  // default to the event's start time
+    day: first,
+    days,
+    multiDay,
+    isEventDay: (key) => days.includes(key),
+    label: multiDay
+      ? `${fmtDayLabel(first)} – ${fmtDayLabel(last)}`
+      : fmtDayLabel(first),
+    min: `${first}T00:00`,
+    max: `${last}T23:59`,
+    default: `${defaultDay}T${centralTimeHHMM(startsAt)}`
   };
 }
 
@@ -875,7 +891,7 @@ function openHostTableFormModal({ gamedayId, thing }) {
     const bounds = eventDayBounds();
     const defaultStart = bounds ? bounds.default : fmtCentralDatetimeValue(new Date(Date.now() + 60 * 60 * 1000));
     const dtAttrs = bounds ? ` min="${bounds.min}" max="${bounds.max}"` : "";
-    const dtHint = bounds ? `<div class="hint muted">Must be on the event day (${esc(bounds.label)}).</div>` : "";
+    const dtHint = bounds ? `<div class="hint muted">Must be during the event (${esc(bounds.label)}).</div>` : "";
     const isCustom = thing.isCustom === true;
     const defaultCap = isCustom ? "" : (thing?.maxPlayers || "");
 
@@ -967,8 +983,8 @@ function openHostTableFormModal({ gamedayId, thing }) {
         showInlineError("Please choose a valid start time.");
         return;
       }
-      if (bounds && startVal.slice(0, 10) !== bounds.day) {
-        showInlineError(`Tables must start on the event day (${bounds.label}).`);
+      if (bounds && !bounds.isEventDay(startVal.slice(0, 10))) {
+        showInlineError(`Tables must start during the event (${bounds.label}).`);
         return;
       }
 
@@ -1030,7 +1046,7 @@ function openHostTableFormModal({ gamedayId, thing }) {
 function openEditTableModal(t) {
     const bounds = eventDayBounds();
     const dtAttrs = bounds ? ` min="${bounds.min}" max="${bounds.max}"` : "";
-    const dtHint = bounds ? `<div class="hint muted">Must be on the event day (${esc(bounds.label)}).</div>` : "";
+    const dtHint = bounds ? `<div class="hint muted">Must be during the event (${esc(bounds.label)}).</div>` : "";
     openModal("Edit Table", `
       <div class="modalStack">
         <div class="modalGrid">
@@ -1065,8 +1081,8 @@ function openEditTableModal(t) {
             showInlineError("Invalid Start or Seats (must be 2-999).");
             return;
         }
-        if (bounds && startVal.slice(0, 10) !== bounds.day) {
-            showInlineError(`Tables must start on the event day (${bounds.label}).`);
+        if (bounds && !bounds.isEventDay(startVal.slice(0, 10))) {
+            showInlineError(`Tables must start during the event (${bounds.label}).`);
             return;
         }
 
@@ -1298,7 +1314,7 @@ function renderGameDays(list) {
       el.innerHTML = `
         <div>
           <button type="button" class="cardOpenBtn"><span class="title">${esc(gd.title || "Game Day")}</span></button>
-          <div class="meta">${gd.visibility === "private" ? `<span class="eventPill is-private">🔒 Private</span> ` : ""}${esc(fmtDate(startsAt))}${gd.location ? ` • ${esc(gd.location)}` : ""}${gd.createdByDisplayName ? ` • Hosted by ${esc(gd.createdByDisplayName)}` : ""}</div>
+          <div class="meta">${gd.visibility === "private" ? `<span class="eventPill is-private">🔒 Private</span> ` : ""}${esc(fmtEventWhen(gd.startsAt, gd.endsAt))}${gd.location ? ` • ${esc(gd.location)}` : ""}${gd.createdByDisplayName ? ` • Hosted by ${esc(gd.createdByDisplayName)}` : ""}</div>
         </div>
       `;
 
@@ -1518,9 +1534,9 @@ function buildTableCard(t, isPast, sig) {
   const startTime = asDate(t.startTime);
   // Tables are same-day as their event, so time-only ("2:00 PM") reads far
   // better than 8 repeated full dates; legacy off-day rows keep the full date.
-  const eventDay = currentGameDay ? asDate(currentGameDay.startsAt) : null;
-  const sameDay = !!(startTime && eventDay && centralDateKey(startTime) === centralDateKey(eventDay));
-  const timeDisplay = startTime ? esc(sameDay ? fmtTime(startTime) : fmtDate(startTime)) : "TBD";
+  const eventDays = currentGameDay ? eventDayKeys(currentGameDay.startsAt, currentGameDay.endsAt) : [];
+  const inEvent = !!(startTime && eventDays.includes(centralDateKey(startTime)));
+  const timeDisplay = startTime ? esc(inEvent ? fmtTime(startTime) : fmtDate(startTime)) : "TBD";
 
   const cap = Number(t.capacity || 0);
   const { confirmed, waitlist: wait } = seatCounts(t);
@@ -1756,6 +1772,13 @@ function renderTablesPage() {
   for (const el of tablesList.querySelectorAll("[data-table-card]")) {
     existing.set(el.dataset.tableCard, el);
   }
+  // Day headers are rebuilt each pass — they're cheap and carry no state.
+  tablesList.querySelectorAll("[data-day-header]").forEach((el) => el.remove());
+
+  // Multi-day events group their tables under a header per day.
+  const bounds = eventDayBounds();
+  const showDayHeaders = !!(bounds && bounds.multiDay);
+  let lastDayKey = null;
 
   let cursor = null;
   for (const t of pageItems) {
@@ -1772,6 +1795,26 @@ function renderTablesPage() {
       isNew = true;
     }
     existing.delete(t.id);
+
+    // Day header whenever the day changes (and at the top of each page).
+    if (showDayHeaders) {
+      const st = asDate(t.startTime);
+      const dayKey = st ? centralDateKey(st) : "";
+      if (dayKey && dayKey !== lastDayKey) {
+        lastDayKey = dayKey;
+        const header = document.createElement("div");
+        header.className = "dayHeader";
+        header.setAttribute("data-day-header", dayKey);
+        const dayNum = bounds.days.indexOf(dayKey);
+        header.innerHTML = `
+          <span class="dayHeaderLabel">${esc(fmtDayLabel(dayKey))}</span>
+          ${dayNum >= 0 ? `<span class="dayHeaderBadge">Day ${dayNum + 1}</span>` : ""}
+        `;
+        const at = cursor ? cursor.nextElementSibling : tablesList.firstElementChild;
+        tablesList.insertBefore(header, at);
+        cursor = header;
+      }
+    }
 
     // Keep DOM order aligned with the sorted data without touching settled nodes.
     const expectedNext = cursor ? cursor.nextElementSibling : tablesList.firstElementChild;
@@ -1899,7 +1942,7 @@ function renderGameDayHeader(gd) {
     <div class="muted">
       ${isPast ? `<span class="eventPill is-history">Past Event</span> ` : ""}
       ${isPrivate ? `<span class="eventPill is-private">🔒 Private</span> ` : ""}
-      ${esc(fmtDate(startsAt))}${gd.location ? ` • ${esc(gd.location)}` : ""}${gd.createdByDisplayName ? ` • Hosted by ${esc(gd.createdByDisplayName)}` : ""}
+      ${esc(fmtEventWhen(gd.startsAt, gd.endsAt))}${gd.location ? ` • ${esc(gd.location)}` : ""}${gd.createdByDisplayName ? ` • Hosted by ${esc(gd.createdByDisplayName)}` : ""}
     </div>
     ${isPrivate && canManage ? `
     <div class="actions inviteControls">
@@ -2112,6 +2155,12 @@ function openCreateGameDayModal() {
         </label>
 
         <label class="field">
+          <div class="label">Last day (optional)</div>
+          <input id="gdEndDate" class="input" type="date" />
+          <div class="hint muted">Set this for conventions that run several days.</div>
+        </label>
+
+        <label class="field fieldSpan2">
           <div class="label">Location (optional)</div>
           <input id="gdLocation" class="input" type="text" placeholder="e.g. DFW Gaming Village" />
         </label>
@@ -2174,7 +2223,14 @@ function openCreateGameDayModal() {
       showInlineStatus("Creating…");
       const visibility = qs("#gdVisibility")?.value === "private" ? "private" : "public";
       const inviteApproval = visibility === "private" && !!qs("#gdInviteApproval")?.checked;
-      await fnCreateGameDay({ title, location, startsAt: startIso, visibility, inviteApproval });
+      // A last day makes this a multi-day event; stored as that day's end.
+      const endDay = String(qs("#gdEndDate")?.value || "").trim();
+      const endsAt = endDay ? parseDatetimeLocalToISO(`${endDay}T23:59`) : null;
+      if (endDay && endDay < startVal.slice(0, 10)) {
+        showInlineError("The last day can't be before the start.");
+        return;
+      }
+      await fnCreateGameDay({ title, location, startsAt: startIso, endsAt, visibility, inviteApproval });
       closeModal();
       if (visibility === "private") {
         toast("Private event created — open it and tap 🔗 Copy Invite Link to invite people.", "success", 8000);

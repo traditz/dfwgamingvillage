@@ -19,7 +19,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js";
 
-import { esc, asDate, fmtDate, centralDateKey, toast } from "../shared.js?v=20260817-p16";
+import { esc, asDate, fmtDate, fmtTime, fmtEventWhen, fmtDayLabel, eventDayKeys, centralDateKey, toast } from "../shared.js?v=20260817-p17";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -46,6 +46,7 @@ const filters = document.querySelector("#filters");
 const adminLinks = document.querySelectorAll("[data-admin-link]");
 
 let activeFilter = "all";
+let currentGd = null;
 let tables = [];
 let unsubTables = null;
 let unsubPosts = null;
@@ -162,7 +163,7 @@ function renderEventCollection(host, items, emptyText) {
       <div class="eventCardMain">
         <div class="eventCardKicker">${isPast ? "Past Event" : "Upcoming Event"}</div>
         <div class="eventTileTitle eventCardTitle">${esc(gd.title || "DFWGV Game Day")}</div>
-        <div class="eventCardMeta">${esc(fmtDate(gd.startsAt))}</div>
+        <div class="eventCardMeta">${esc(fmtEventWhen(gd.startsAt, gd.endsAt))}</div>
         ${gd.location ? `<div class="eventCardMeta">${esc(gd.location)}</div>` : ""}
       </div>
       <div class="eventCardFooter">
@@ -219,7 +220,27 @@ function renderTables() {
     return;
   }
 
+  // Multi-day events (conventions) group their tables under a header per day.
+  const days = currentGd ? eventDayKeys(currentGd.startsAt, currentGd.endsAt) : [];
+  const showDayHeaders = days.length > 1;
+  let lastDayKey = null;
+
   for (const t of visible) {
+    if (showDayHeaders) {
+      const st = asDate(t.startTime);
+      const dayKey = st ? centralDateKey(st) : "";
+      if (dayKey && dayKey !== lastDayKey) {
+        lastDayKey = dayKey;
+        const dayNum = days.indexOf(dayKey);
+        const header = document.createElement("div");
+        header.className = "dayHeader";
+        header.innerHTML = `
+          <span class="dayHeaderLabel">${esc(fmtDayLabel(dayKey))}</span>
+          ${dayNum >= 0 ? `<span class="dayHeaderBadge">Day ${dayNum + 1}</span>` : ""}
+        `;
+        publicTables.appendChild(header);
+      }
+    }
     const cap = Number(t.capacity || 0);
     const confirmed = Number(t.confirmedCount || 0);
     const wait = Number(t.waitlistCount || 0);
@@ -249,7 +270,7 @@ function renderTables() {
             : `Waitlist ${wait}`}
         </div>
         <div class="publicTableMeta">Host: ${esc(t.hostDisplayName || "Unknown")}</div>
-        <div class="publicTableMeta">Starts: ${esc(fmtDate(t.startTime))}</div>
+        <div class="publicTableMeta">Starts: ${esc(showDayHeaders ? fmtTime(t.startTime) : fmtDate(t.startTime))}</div>
         ${t.notes ? `<div class="publicTableMeta">${esc(t.notes)}</div>` : ""}
       </div>
     `;
@@ -333,7 +354,7 @@ function renderDetailHeader(gd) {
   const isPast = isPastEvent(gd);
   eventMeta.innerHTML = `
     ${isPast ? `<span class="eventPill is-history">Past Event</span>` : ""}
-    <span class="eventPill">${esc(fmtDate(gd.startsAt))}</span>
+    <span class="eventPill">${esc(fmtEventWhen(gd.startsAt, gd.endsAt))}</span>
     ${gd.location ? `<span class="eventPill">${esc(gd.location)}</span>` : ""}
   `;
   if (historyNotice) historyNotice.style.display = isPast ? "" : "none";
@@ -369,6 +390,7 @@ async function loadEvent(id) {
   const header = document.querySelector(".publicPageHeader");
   if (header) header.style.display = "none";
   pageTitle.textContent = "";
+  currentGd = gd;
   renderDetailHeader(gd);
 
   stopDetailListeners();
@@ -380,7 +402,8 @@ async function loadEvent(id) {
       showUnavailable("This event is no longer public.");
       return;
     }
-    renderDetailHeader({ id: s.id, ...s.data() });
+    currentGd = { id: s.id, ...s.data() };
+    renderDetailHeader(currentGd);
   });
 
   const tablesQ = query(collection(db, "gamedays", id, "tables"), orderBy("startTime", "asc"));

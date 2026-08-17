@@ -79,6 +79,56 @@ export function centralTimeHHMM(date) {
   return `${hh}:${v.minute}`;
 }
 
+// ---- Multi-day events -------------------------------------------------
+// An event spans the Central days from startsAt to endsAt (inclusive).
+// Single-day events simply have no endsAt.
+
+// "YYYY-MM-DD" -> Date at midday UTC (safely inside that Central day).
+export function dayKeyToDate(dayKey) {
+  return new Date(`${dayKey}T12:00:00Z`);
+}
+
+// "Sat, Aug 22" for a day key.
+export function fmtDayLabel(dayKey) {
+  return dayKeyToDate(dayKey).toLocaleDateString("en-US", {
+    timeZone: "America/Chicago",
+    weekday: "short",
+    month: "short",
+    day: "numeric"
+  });
+}
+
+// Every Central day the event covers, in order.
+export function eventDayKeys(startsAt, endsAt) {
+  const start = asDate(startsAt);
+  if (!start) return [];
+  const first = centralDateKey(start);
+  const end = asDate(endsAt);
+  if (!end) return [first];
+  const last = centralDateKey(end);
+  if (last <= first) return [first];
+
+  const days = [];
+  let cursor = dayKeyToDate(first);
+  for (let i = 0; i < 60; i++) { // sane cap
+    const key = centralDateKey(cursor);
+    days.push(key);
+    if (key >= last) break;
+    cursor = new Date(cursor.getTime() + 24 * 60 * 60 * 1000);
+  }
+  return days;
+}
+
+// "Fri, Aug 21, 2026, 2:00 PM" or "Fri, Aug 21 – Sun, Aug 23, 2026" for a span.
+export function fmtEventWhen(startsAt, endsAt) {
+  const start = asDate(startsAt);
+  if (!start) return "Date TBD";
+  const days = eventDayKeys(startsAt, endsAt);
+  if (days.length <= 1) return fmtDate(start);
+  const year = start.toLocaleDateString("en-US", { timeZone: "America/Chicago", year: "numeric" });
+  return `${fmtDayLabel(days[0])} – ${fmtDayLabel(days[days.length - 1])}, ${year}`;
+}
+
 // datetime-local prefill value representing this instant's CENTRAL wall clock.
 // Must be used for every datetime-local prefill, because parseDatetimeLocalToISO
 // interprets the field as Central — prefilling with browser-local time shifts
