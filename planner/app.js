@@ -7,7 +7,7 @@ import {
   getAuth,
   onAuthStateChanged,
   signOut
-  // REMOVED: signInWithEmailAndPassword, createUserWithEmailAndPassword
+  
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {
   getFirestore,
@@ -36,7 +36,7 @@ import {
   showInlineStatus,
   confirmDialog,
   toast
-} from "./shared.js?v=20260816-p2";
+} from "./shared.js?v=20260816-p3";
 
 // -----------------------------
 // Config
@@ -51,8 +51,7 @@ const {
   DISCORD_PROMPT,
   DISCORD_AUTH_FUNCTION_URL,
   BGG_SEARCH_URL,
-  BGG_THING_URL,
-  OWNER_UID
+  BGG_THING_URL
 } = appConfig;
 
 // -----------------------------
@@ -85,7 +84,7 @@ const btnDiscord = document.querySelector("#btnDiscord");
 const btnSignOut = document.querySelector("#btnSignOut");
 const adminLinks = document.querySelectorAll("[data-admin-link]");
 
-// REMOVED: Email UI bindings (emailCard, inputs, buttons)
+
 
 const btnCreateGameDay = document.querySelector("#btnCreateGameDay");
 const btnPastEvents = document.querySelector("#btnPastEvents");
@@ -110,7 +109,6 @@ const btnBack = document.querySelector("#btnBack");
 
 const btnHostTable = document.querySelector("#btnHostTable");
 const btnWantToPlay = document.querySelector("#btnWantToPlay");
-const btnRefresh = document.querySelector("#btnRefresh");
 
 const tablesList = document.querySelector("#tablesList");
 const wantsList = document.querySelector("#wantsList");
@@ -242,6 +240,8 @@ async function hydrateGameMeta(root, item) {
   const host = root?.querySelector?.("[data-game-meta]");
   if (!host || !item?.bggId || gameMetaText(item)) return;
   const meta = await fetchBggMeta(item.bggId);
+  // The card may have been rebuilt while the BGG fetch was in flight.
+  if (!host.isConnected) return;
   const text = gameMetaText(meta);
   if (text) {
     host.textContent = text;
@@ -249,7 +249,7 @@ async function hydrateGameMeta(root, item) {
   }
 }
 
-// FIX: Robust check for admin ID (handles both "123" and "discord:123")
+// Robust check for admin ID (handles both "123" and "discord:123")
 function isAdminUser(user) {
   if (!user) return false;
   const owner = appConfig.OWNER_UID;
@@ -273,7 +273,9 @@ function isOrganizerOf(gd) {
   return !!(currentUser && gd && gd.createdBy && gd.createdBy === currentUser.uid);
 }
 
+let roleSeq = 0;
 async function refreshMyRole() {
+  const seq = ++roleSeq;
   if (!currentUser) {
     myRole = { owner: false, host: false, requested: false };
     applyRoleUI();
@@ -281,12 +283,15 @@ async function refreshMyRole() {
   }
   try {
     const r = await fnGetMyPlannerRole({});
+    if (seq !== roleSeq) return; // superseded by a newer auth change
     myRole = { owner: false, host: false, requested: false, ...(r.data || {}) };
     if (myRole.nickname) setAuthStatus(`Signed in as: ${myRole.nickname}`);
   } catch {
-    // Callable unavailable (e.g. mid-deploy): fall back to the client owner check.
+    if (seq !== roleSeq) return;
+    // Callable unavailable (e.g. mid-deploy): fall back to the client owner
+    // check, keeping any nickname we already knew.
     const owner = isAdminUser(currentUser);
-    myRole = { owner, host: owner, requested: false };
+    myRole = { owner, host: owner, requested: false, nickname: myRole.nickname };
   }
   applyRoleUI();
 }
@@ -317,12 +322,6 @@ function applyRoleUI() {
     renderTablesPage();
     renderWants(currentPosts);
   }
-}
-
-function setAdminNavVisibility(user) {
-  adminLinks.forEach((link) => {
-    link.hidden = !isAdminUser(user);
-  });
 }
 
 async function displayNameForUser(user) {
@@ -367,11 +366,11 @@ function ensureRosterListener(gamedayId, tableId) {
 
     snap.forEach((d) => {
       const s = d.data() || {};
-      const name = String(s.displayName || d.id || "").trim();
       const uid = s.uid || d.id;
-      
-      if (!name) return;
-      
+      // Count EVERY signup doc — a missing display name must not make the
+      // roster (and seat counts) disagree with the server.
+      const name = String(s.displayName || "").trim() || "Player";
+
       if (s.status === "waitlist") {
           waitlist.push({ name, uid });
           waitlistIds.add(uid);
@@ -409,19 +408,8 @@ function updateRosterDom(tableId) {
   if (wCountEl) wCountEl.textContent = String(roster.waitlist.length);
 
   const card = host.closest(".tablecard");
-  if (card) {
-    const seatsEl = card.querySelector(`[data-seats-root="${CSS.escape(String(tableId))}"]`);
-    if (seatsEl) {
-      const cap = Number(seatsEl.getAttribute("data-cap")) || 0;
-      const confCount = roster.confirmed.length;
-      const waitCount = roster.waitlist.length;
-      const textEl = seatsEl.querySelector(".seatsText");
-      if (textEl) textEl.textContent = `Seats: ${confCount}/${cap}${waitCount ? ` • Waitlist: ${waitCount}` : ""}`;
-      const fillEl = seatsEl.querySelector(".seatsFill");
-      if (fillEl) fillEl.style.width = `${cap ? Math.min(100, Math.round((confCount / cap) * 100)) : 0}%`;
-      seatsEl.classList.toggle("is-full", cap > 0 && confCount >= cap);
-    }
-  }
+  const t = currentTables.find((x) => x.id === tableId);
+  if (card && t) refreshSeatsDom(card, t);
 }
 
 // Toggle a table card's Join/Leave buttons in place (no DOM rebuild) so live
@@ -533,7 +521,7 @@ function setAuthStatus(text) {
   authStatus.textContent = text;
 }
 
-// REMOVED: showEmailCard() function
+
 
 function setButtonsForAuth(user) {
   if (!btnDiscord || !btnSignOut) return;
@@ -549,7 +537,7 @@ function setButtonsForAuth(user) {
     btnSignOut.style.display = "none";
     if (btnNickname) btnNickname.style.display = "none";
   }
-  // Create Game Day / Become a Host / Manage Hosts are role-driven.
+  // Create Game Day / Request Organizer Access buttons are role-driven.
   applyRoleUI();
 }
 
@@ -603,8 +591,6 @@ async function handleDiscordCallbackIfPresent() {
     const returnTo = sessionStorage.getItem("discord_return_to") || "/planner/";
     window.location.replace(returnTo);
     return;
-
-    closeModal();
   } catch (e) {
     openModal("Discord Sign-in", `
       <div class="muted">Sign-in failed.</div>
@@ -1076,7 +1062,37 @@ function subscribeGameDays() {
     const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
     lastGameDaysRaw = list;
     renderGameDays(list);
+    tryOpenDeepLink();
+
+    // Keep the OPEN game day's header live, and bounce out if it vanishes
+    // (deleted/unpublished while someone was looking at it).
+    if (currentGameDayId) {
+      const fresh = list.find((g) => g.id === currentGameDayId);
+      if (fresh) {
+        currentGameDay = fresh;
+        renderGameDayHeader(fresh);
+      } else {
+        showGameDayList();
+        history.replaceState({}, "", gameDayUrl(null));
+        toast("This Game Day is no longer available.", "info");
+      }
+    }
   });
+}
+
+// Deep links (?event=) are consumed here — from snapshot data only, never as
+// a side effect of unrelated re-renders.
+function tryOpenDeepLink() {
+  if (!initialEventId) return;
+  const all = [...currentGameDays, ...currentPastGameDays];
+  const match = all.find((gd) => gd.id === initialEventId);
+  initialEventId = "";
+  if (match) {
+    openGameDay(match, { push: false, deepLink: true });
+  } else {
+    toast("That event link isn't available — it may have been removed or unpublished.", "info", 6000);
+    history.replaceState({}, "", gameDayUrl(null));
+  }
 }
 
 function subscribeGameDayDetails(gamedayId) {
@@ -1086,7 +1102,8 @@ function subscribeGameDayDetails(gamedayId) {
   const tablesQ = query(collection(db, "gamedays", gamedayId, "tables"), orderBy("startTime", "asc"));
   unsubTables = onSnapshot(tablesQ, (snap) => {
     currentTables = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-    currentPage = 0;
+    // NOTE: no page reset here — a remote join must not yank viewers back to
+    // page 1. The page resets in openGameDay when a new event is opened.
     renderTablesPage();
   });
 
@@ -1181,14 +1198,6 @@ function renderGameDays(list) {
     }
   }
 
-  if (initialEventId) {
-    const match = sorted.find((gd) => gd.id === initialEventId);
-    if (match) {
-      initialEventId = "";
-      // Deep-linked open: URL already carries ?event=, so don't push a new entry.
-      openGameDay(match, { push: false });
-    }
-  }
 }
 
 function renderPastGameDays() {
@@ -1264,6 +1273,205 @@ function stopPastEventAction(ev) {
   return true;
 }
 
+// Seat numbers have ONE source of truth: the live roster once loaded (counting
+// every signup doc, named or not), falling back to the table doc's denormalized
+// counts before the roster listener delivers. Prevents visible count jumps.
+function seatCounts(t) {
+  const r = rosterByTableId.get(t.id);
+  if (r) return { confirmed: r.confirmed.length, waitlist: r.waitlist.length };
+  return { confirmed: Number(t.confirmedCount || 0), waitlist: Number(t.waitlistCount || 0) };
+}
+
+// The only writer of the seats text/bar/full state.
+function refreshSeatsDom(card, t) {
+  const seatsEl = card.querySelector(`[data-seats-root="${CSS.escape(String(t.id))}"]`);
+  if (!seatsEl) return;
+  const cap = Number(t.capacity || 0);
+  const { confirmed, waitlist } = seatCounts(t);
+  const textEl = seatsEl.querySelector(".seatsText");
+  if (textEl) textEl.textContent = `Seats: ${confirmed}/${cap}${waitlist ? ` • Waitlist: ${waitlist}` : ""}`;
+  const fillEl = seatsEl.querySelector(".seatsFill");
+  if (fillEl) fillEl.style.width = `${cap ? Math.min(100, Math.round((confirmed / cap) * 100)) : 0}%`;
+  seatsEl.classList.toggle("is-full", cap > 0 && confirmed >= cap);
+}
+
+// Everything that affects a card's static markup. When unchanged, the card's
+// DOM node is reused verbatim by the reconcile — preserving in-flight button
+// labels, scroll position, and focus during live updates.
+function tableRenderSig(t, isPast) {
+  const isHost = !!(currentUser && currentUser.uid === t.hostUid);
+  const canManage = !isPast && (isHost || isAdmin() || isOrganizerOf(currentGameDay));
+  return JSON.stringify([
+    asDate(t.startTime)?.getTime() ?? null,
+    t.capacity, t.notes, t.gameName, t.thumbUrl, t.bggId,
+    t.hostUid, t.hostDisplayName,
+    Array.isArray(t.expansions) ? t.expansions.map((e) => e?.bggId) : [],
+    isHost, canManage, isPast,
+    currentUser?.uid || null
+  ]);
+}
+
+function buildTableCard(t, isPast, sig) {
+  const startTime = asDate(t.startTime);
+  const timeDisplay = startTime ? esc(fmtDate(startTime)) : "TBD";
+
+  const cap = Number(t.capacity || 0);
+  const { confirmed, waitlist: wait } = seatCounts(t);
+
+  const isHost = currentUser && (currentUser.uid === t.hostUid);
+  const canManageEvent = isAdmin() || isOrganizerOf(currentGameDay);
+  const canDelete = !isPast && (isHost || canManageEvent);
+  const canEdit = !isPast && (isHost || canManageEvent);
+
+  const bggUrl = t.bggId ? `https://boardgamegeek.com/boardgame/${encodeURIComponent(t.bggId)}` : null;
+
+  const expansions = Array.isArray(t.expansions) ? t.expansions : [];
+  const expansionsHtml = expansions.length
+    ? `
+      <div class="muted" style="margin-top:8px;">
+        <div style="font-weight:600; margin-bottom:4px;">Expansions:</div>
+        ${expansions.map((e) => {
+          const expId = e?.bggId ?? "";
+          const expName = e?.name ?? "";
+          const expUrl = expId ? `https://boardgamegeek.com/boardgame/${encodeURIComponent(expId)}` : null;
+          return expUrl
+            ? `<div><a href="${esc(expUrl)}" target="_blank" rel="noopener">${esc(expName)}</a></div>`
+            : `<div>${esc(expName)}</div>`;
+        }).join("")}
+      </div>
+    `
+    : "";
+
+  const el = document.createElement("div");
+  el.className = "tablecard";
+  el.dataset.tableCard = t.id;
+  el.dataset.sig = sig;
+  el.innerHTML = `
+    <div class="thumb">
+      ${t.thumbUrl ? `<img src="${esc(t.thumbUrl)}" alt="" loading="lazy" />` : `<div class="thumbph">🎲</div>`}
+    </div>
+    <div class="body">
+      <div class="row1">
+        <div class="name">
+          ${bggUrl ? `<a href="${esc(bggUrl)}" target="_blank" rel="noopener">${esc(t.gameName || "Game")}</a>` : esc(t.gameName || "Game")}
+          <div class="gameMeta" data-game-meta ${gameMetaText(t) ? "" : "style=\"display:none;\""}>${esc(gameMetaText(t))}</div>
+        </div>
+        <div class="time">${timeDisplay}</div>
+      </div>
+      <div class="row2">
+        <div class="muted">Host: <span class="hostName${isHost ? " is-you" : ""}">${esc(t.hostDisplayName || t.hostUid || "Unknown")}</span>${isHost ? " (you)" : ""}</div>
+        <div class="seats" data-seats-root="${esc(t.id)}" data-cap="${cap}">
+          <span class="seatsText muted">Seats: ${confirmed}/${cap}${wait ? ` • Waitlist: ${wait}` : ""}</span>
+          <span class="seatsBar"><span class="seatsFill" style="width:${cap ? Math.min(100, Math.round((confirmed / cap) * 100)) : 0}%"></span></span>
+        </div>
+      </div>
+      ${t.notes ? `<div class="notes"><span style="font-weight:600;">Notes:</span> ${esc(t.notes)}</div>` : ""}
+      ${expansionsHtml}
+      <div class="roster" data-roster-for="${esc(t.id)}">
+        <div class="rosterTopline">Players</div>
+        <div class="rosterGrid">
+          <div class="rosterGroup">
+            <div class="rosterGroupHead">
+              <span>Confirmed</span>
+              <span class="rosterCount" data-roster-count="confirmed">${confirmed}</span>
+            </div>
+            <div class="rosterNames" data-roster-kind="confirmed"><span class="rosterEmpty">None yet</span></div>
+          </div>
+          <div class="rosterGroup">
+            <div class="rosterGroupHead">
+              <span>Waitlist</span>
+              <span class="rosterCount" data-roster-count="waitlist">${wait}</span>
+            </div>
+            <div class="rosterNames" data-roster-kind="waitlist"><span class="rosterEmpty">None yet</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row3">
+        <button class="btn btn-primary" data-action="join">Join</button>
+        <button class="btn" data-action="leave">Leave</button>
+        ${canEdit ? `<button class="btn" data-action="edit">Edit</button>` : ""}
+        ${canDelete ? `<button class="btn btn-danger" data-action="delete" style="margin-left:auto;">Delete</button>` : ""}
+      </div>
+    </div>
+  `;
+
+  el.querySelector('[data-action="join"]')?.addEventListener("click", async (ev) => {
+    ev.stopPropagation();
+    if (stopPastEventAction(ev)) return;
+    if (!currentUser) return toast("Please sign in first.", "info");
+
+    const btn = ev.currentTarget;
+    const prevLabel = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "Joining…";
+    try {
+      await fnJoinTable({ gamedayId: currentGameDayId, tableId: t.id });
+      toast("You're on the list.", "success");
+      // roster snapshot refreshes the button to its joined state
+    } catch (e) {
+      btn.disabled = false;
+      btn.textContent = prevLabel;
+      toast(`Join failed: ${unwrapCallableError(e)}`, "error");
+    }
+  });
+
+  el.querySelector('[data-action="leave"]')?.addEventListener("click", async (ev) => {
+    ev.stopPropagation();
+    if (stopPastEventAction(ev)) return;
+    if (!currentUser) return toast("Please sign in first.", "info");
+
+    // HOST LEAVE WARNING
+    if (isHost) {
+      const ok = await confirmDialog({
+        title: "Leave & delete table?",
+        message: "⚠️ You are the host.\n\nLeaving will DELETE this table and remove all players.",
+        confirmLabel: "Delete table",
+        danger: true
+      });
+      if (!ok) return;
+    }
+
+    const btn = el.querySelector('[data-action="leave"]');
+    const prevLabel = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "Leaving…";
+    try {
+      await fnLeaveTable({ gamedayId: currentGameDayId, tableId: t.id });
+      toast(isHost ? "Table deleted." : "You left the table.", "success");
+    } catch (e) {
+      btn.disabled = false;
+      btn.textContent = prevLabel;
+      toast(`Leave failed: ${unwrapCallableError(e)}`, "error");
+    }
+  });
+
+  el.querySelector('[data-action="edit"]')?.addEventListener("click", async (ev) => {
+    ev.stopPropagation();
+    if (stopPastEventAction(ev)) return;
+    openEditTableModal(t);
+  });
+
+  el.querySelector('[data-action="delete"]')?.addEventListener("click", async (ev) => {
+    ev.stopPropagation();
+    const ok = await confirmDialog({
+      title: "Delete table?",
+      message: "This removes the table and all of its signups.",
+      confirmLabel: "Delete table",
+      danger: true
+    });
+    if (!ok) return;
+    try {
+      await fnDeleteTable({ gamedayId: currentGameDayId, tableId: t.id });
+      toast("Table deleted.", "success");
+    } catch (e) {
+      toast(`Delete failed: ${unwrapCallableError(e)}`, "error");
+    }
+  });
+
+  return el;
+}
+
 function renderTablesPage() {
   const total = currentTables.length;
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -1286,204 +1494,50 @@ function renderTablesPage() {
     tablePager.style.display = "none";
   }
 
-  tablesList.innerHTML = "";
   if (!pageItems.length) {
     tablesList.innerHTML = `<div class="muted">No hosted tables yet.</div>`;
     return;
   }
 
+  // Clear a possible empty-state placeholder before reconciling real cards.
+  if (!tablesList.querySelector("[data-table-card]")) tablesList.innerHTML = "";
+
+  // Keyed reconcile: reuse each card whose render signature is unchanged so a
+  // remote join/edit can never destroy in-flight buttons, scroll, or focus.
+  const existing = new Map();
+  for (const el of tablesList.querySelectorAll("[data-table-card]")) {
+    existing.set(el.dataset.tableCard, el);
+  }
+
+  let cursor = null;
   for (const t of pageItems) {
-    const startTime = t.startTime?.toDate ? t.startTime.toDate() : t.startTime;
-    const timeDisplay = startTime ? esc(fmtDate(startTime)) : "TBD";
-
-    const cap = Number(t.capacity || 0);
-    const confirmed = Number(t.confirmedCount || 0);
-    const wait = Number(t.waitlistCount || 0);
-
-    const roster = rosterByTableId.get(t.id);
-    const isSignedUp = roster && (roster.confirmedIds.has(currentUser?.uid) || roster.waitlistIds.has(currentUser?.uid));
-
-    const canJoin = !!currentUser && !isSignedUp && !isPast;
-
-    // Permissions: table host, event organizer, or site owner
-    const isHost = currentUser && (currentUser.uid === t.hostUid);
-    const canManageEvent = isAdmin() || isOrganizerOf(currentGameDay);
-    const canDelete = !isPast && (isHost || canManageEvent);
-    const canEdit = !isPast && (isHost || canManageEvent);
-
-    const bggUrl = t.bggId ? `https://boardgamegeek.com/boardgame/${encodeURIComponent(t.bggId)}` : null;
-
-    const expansions = Array.isArray(t.expansions) ? t.expansions : [];
-    const expansionsHtml = expansions.length
-      ? `
-        <div class="muted" style="margin-top:8px;">
-          <div style="font-weight:600; margin-bottom:4px;">Expansions:</div>
-          ${expansions.map((e) => {
-            const expId = e?.bggId ?? "";
-            const expName = e?.name ?? "";
-            const expUrl = expId ? `https://boardgamegeek.com/boardgame/${encodeURIComponent(expId)}` : null;
-            return expUrl
-              ? `<div><a href="${esc(expUrl)}" target="_blank" rel="noopener">${esc(expName)}</a></div>`
-              : `<div>${esc(expName)}</div>`;
-          }).join("")}
-        </div>
-      `
-      : "";
-
-    const el = document.createElement("div");
-    el.className = "tablecard";
-    el.dataset.tableCard = t.id;
-    el.innerHTML = `
-      <div class="thumb">
-        ${t.thumbUrl ? `<img src="${esc(t.thumbUrl)}" alt="" loading="lazy" />` : `<div class="thumbph">🎲</div>`}
-      </div>
-      <div class="body">
-        <div class="row1">
-          <div class="name">
-            ${bggUrl ? `<a href="${esc(bggUrl)}" target="_blank" rel="noopener">${esc(t.gameName || "Game")}</a>` : esc(t.gameName || "Game")}
-            <div class="gameMeta" data-game-meta ${gameMetaText(t) ? "" : "style=\"display:none;\""}>${esc(gameMetaText(t))}</div>
-          </div>
-          <div class="time">${timeDisplay}</div>
-        </div>
-        <div class="row2">
-          <div class="muted">Host: <span class="hostName${isHost ? " is-you" : ""}">${esc(t.hostDisplayName || t.hostUid || "Unknown")}</span>${isHost ? " (you)" : ""}</div>
-          <div class="seats" data-seats-root="${esc(t.id)}" data-cap="${cap}">
-            <span class="seatsText muted">Seats: ${confirmed}/${cap}${wait ? ` • Waitlist: ${wait}` : ""}</span>
-            <span class="seatsBar"><span class="seatsFill" style="width:${cap ? Math.min(100, Math.round((confirmed / cap) * 100)) : 0}%"></span></span>
-          </div>
-        </div>
-        ${t.notes ? `<div class="notes"><span style="font-weight:600;">Notes:</span> ${esc(t.notes)}</div>` : ""}
-        ${expansionsHtml}
-        <div class="roster" data-roster-for="${esc(t.id)}" style="margin-top:8px;">
-          <div class="muted" style="font-weight:600; margin-bottom:4px;">Players:</div>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-            <div>
-              <div class="muted" style="font-weight:600;">✅ Confirmed</div>
-              <div class="muted" data-roster-kind="confirmed">—</div>
-            </div>
-            <div>
-              <div class="muted" style="font-weight:600;">⏳ Waitlist</div>
-              <div class="muted" data-roster-kind="waitlist">—</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="row3">
-          <button class="btn btn-primary" data-action="join">Join</button>
-          <button class="btn" data-action="leave">Leave</button>
-          ${canEdit ? `<button class="btn" data-action="edit">Edit</button>` : ""}
-          ${canDelete ? `<button class="btn btn-danger" data-action="delete" style="margin-left:auto;">Delete</button>` : ""}
-        </div>
-      </div>
-    `;
-
-    const rosterEl = el.querySelector(".roster");
-    if (rosterEl) {
-      rosterEl.removeAttribute("style");
-      rosterEl.innerHTML = `
-        <div class="rosterTopline">Players</div>
-        <div class="rosterGrid">
-          <div class="rosterGroup">
-            <div class="rosterGroupHead">
-              <span>Confirmed</span>
-              <span class="rosterCount" data-roster-count="confirmed">${confirmed}</span>
-            </div>
-            <div class="rosterNames" data-roster-kind="confirmed"><span class="rosterEmpty">None yet</span></div>
-          </div>
-          <div class="rosterGroup">
-            <div class="rosterGroupHead">
-              <span>Waitlist</span>
-              <span class="rosterCount" data-roster-count="waitlist">${wait}</span>
-            </div>
-            <div class="rosterNames" data-roster-kind="waitlist"><span class="rosterEmpty">None yet</span></div>
-          </div>
-        </div>
-      `;
+    const sig = tableRenderSig(t, isPast);
+    let el = existing.get(t.id);
+    let isNew = false;
+    if (el && el.dataset.sig !== sig) {
+      const fresh = buildTableCard(t, isPast, sig);
+      el.replaceWith(fresh);
+      el = fresh;
+      isNew = true;
+    } else if (!el) {
+      el = buildTableCard(t, isPast, sig);
+      isNew = true;
     }
+    existing.delete(t.id);
 
-    el.querySelector('[data-action="join"]')?.addEventListener("click", async (ev) => {
-      ev.stopPropagation();
-      if (stopPastEventAction(ev)) return;
-      if (!currentUser) return toast("Please sign in first.", "info");
+    // Keep DOM order aligned with the sorted data without touching settled nodes.
+    const expectedNext = cursor ? cursor.nextElementSibling : tablesList.firstElementChild;
+    if (el !== expectedNext) tablesList.insertBefore(el, expectedNext);
+    cursor = el;
 
-      const btn = ev.currentTarget;
-      const prevLabel = btn.textContent;
-      btn.disabled = true;
-      btn.textContent = "Joining…";
-      try {
-        await fnJoinTable({ gamedayId: currentGameDayId, tableId: t.id });
-        toast("You're on the list.", "success");
-        // roster snapshot refreshes the button to its joined state
-      } catch (e) {
-        btn.disabled = false;
-        btn.textContent = prevLabel;
-        toast(`Join failed: ${unwrapCallableError(e)}`, "error");
-      }
-    });
-
-    el.querySelector('[data-action="leave"]')?.addEventListener("click", async (ev) => {
-      ev.stopPropagation();
-      if (stopPastEventAction(ev)) return;
-      if (!currentUser) return toast("Please sign in first.", "info");
-
-      // HOST LEAVE WARNING
-      if (isHost) {
-        const ok = await confirmDialog({
-          title: "Leave & delete table?",
-          message: "⚠️ You are the host.\n\nLeaving will DELETE this table and remove all players.",
-          confirmLabel: "Delete table",
-          danger: true
-        });
-        if (!ok) return;
-      }
-
-      const btn = ev.currentTarget;
-      const prevLabel = btn.textContent;
-      btn.disabled = true;
-      btn.textContent = "Leaving…";
-      try {
-        await fnLeaveTable({ gamedayId: currentGameDayId, tableId: t.id });
-        toast(isHost ? "Table deleted." : "You left the table.", "success");
-      } catch (e) {
-        btn.disabled = false;
-        btn.textContent = prevLabel;
-        toast(`Leave failed: ${unwrapCallableError(e)}`, "error");
-      }
-    });
-
-    el.querySelector('[data-action="edit"]')?.addEventListener("click", async (ev) => {
-      ev.stopPropagation();
-      if (stopPastEventAction(ev)) return;
-      openEditTableModal(t);
-    });
-
-    // NEW: Delete handler
-    const delBtn = el.querySelector('[data-action="delete"]');
-    if (delBtn) {
-        delBtn.addEventListener("click", async (ev) => {
-            ev.stopPropagation();
-            const ok = await confirmDialog({
-              title: "Delete table?",
-              message: "This removes the table and all of its signups.",
-              confirmLabel: "Delete table",
-              danger: true
-            });
-            if (!ok) return;
-            try {
-                await fnDeleteTable({ gamedayId: currentGameDayId, tableId: t.id });
-                toast("Table deleted.", "success");
-            } catch (e) {
-                toast(`Delete failed: ${unwrapCallableError(e)}`, "error");
-            }
-        });
-    }
-
-    tablesList.appendChild(el);
-    hydrateGameMeta(el, t);
-    // Populate roster + action-button state immediately if we already have it.
+    if (isNew) hydrateGameMeta(el, t);
     updateRosterDom(t.id);
     applyJoinLeaveState(el, t);
+    refreshSeatsDom(el, t);
   }
+
+  // Cards whose tables left this page (or were deleted) go away.
+  for (const el of existing.values()) el.remove();
 }
 
 function wantPostHtml(p, bggUrl, canDelete = false) {
@@ -1519,7 +1573,7 @@ function renderWants(items) {
     el.className = "listitem wantItem";
     el.innerHTML = wantPostHtml(p, bggUrl, canDelete);
 
-    // NEW: Delete handler
+    
     const delBtn = el.querySelector("button");
     if (delBtn) {
         delBtn.addEventListener("click", async (ev) => {
@@ -1569,9 +1623,7 @@ function showGameDayCard() {
   gamedayCard.style.display = "";
 }
 
-function openGameDay(gd, { push = true } = {}) {
-  currentGameDayId = gd.id;
-  currentGameDay = gd;
+function renderGameDayHeader(gd) {
   gamedayTitle.textContent = gd.title || "Game Day";
   const startsAt = asDate(gd.startsAt);
   const isPast = isPastGameDay(gd);
@@ -1582,9 +1634,23 @@ function openGameDay(gd, { push = true } = {}) {
     </div>
   `;
   setPastEventActions(isPast);
+}
+
+function openGameDay(gd, { push = true, deepLink = false } = {}) {
+  currentGameDayId = gd.id;
+  currentGameDay = gd;
+  currentPage = 0;
+  renderGameDayHeader(gd);
   showGameDayCard();
   subscribeGameDayDetails(gd.id);
-  if (push) history.pushState({ event: gd.id }, "", gameDayUrl(gd.id));
+  if (deepLink) {
+    // A deep-linked load has only one history entry; give Back somewhere to
+    // land (the list) instead of leaving the site.
+    history.replaceState({}, "", gameDayUrl(null));
+    history.pushState({ event: gd.id }, "", gameDayUrl(gd.id));
+  } else if (push) {
+    history.pushState({ event: gd.id }, "", gameDayUrl(gd.id));
+  }
 }
 
 async function hostTableFlow(gamedayId) {
@@ -1670,7 +1736,7 @@ function openCreateGameDayModal() {
   });
 }
 
-// REMOVED: doEmailSignIn, doEmailSignUp
+
 
 // -----------------------------
 // Host Guide (bring the planner bot to your own Discord)
@@ -1812,7 +1878,7 @@ if (btnNickname) btnNickname.addEventListener("click", () => {
   openNicknameModal();
 });
 
-// REMOVED: btnEmail, btnEmailCancel, btnEmailSignIn, btnEmailSignUp listeners
+
 
 if (btnSignOut) btnSignOut.addEventListener("click", async () => {
   await signOut(auth);
@@ -1856,19 +1922,19 @@ if (btnWantToPlay) btnWantToPlay.addEventListener("click", async () => {
   await wantToPlayFlow(currentGameDayId);
 });
 
-// The board is fully live via onSnapshot; the manual Refresh button was removed.
-// Re-subscribe on demand only if a legacy #btnRefresh is still present.
-if (btnRefresh) btnRefresh.addEventListener("click", () => {
-  if (currentGameDayId) subscribeGameDayDetails(currentGameDayId);
-});
-
 // Browser back/forward navigates between the list and a Game Day.
 window.addEventListener("popstate", () => {
   const id = new URLSearchParams(window.location.search).get("event");
   if (!id) return showGameDayList();
   const gd = [...currentGameDays, ...currentPastGameDays].find((g) => g.id === id);
-  if (gd) openGameDay(gd, { push: false });
-  else showGameDayList();
+  if (gd) {
+    openGameDay(gd, { push: false });
+  } else {
+    // Snapshot data may not have arrived yet — re-arm the deep link so the
+    // next game-days snapshot opens it, instead of stranding the URL.
+    initialEventId = id;
+    showGameDayList();
+  }
 });
 
 // pager
@@ -1887,7 +1953,9 @@ if (btnNext) btnNext.addEventListener("click", () => {
 // -----------------------------
 onAuthStateChanged(auth, async (user) => {
   currentUser = user || null;
-  setAdminNavVisibility(currentUser);
+  // Reset the role synchronously so a previous user's buttons never flash
+  // while the server-side role check is in flight.
+  myRole = { owner: false, host: false, requested: false };
   if (user) {
     const name = await displayNameForUser(user);
     setAuthStatus(`Signed in as: ${name}`);
