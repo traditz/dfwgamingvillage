@@ -38,7 +38,7 @@ import {
   showInlineStatus,
   confirmDialog,
   toast
-} from "./shared.js?v=20260816-p7";
+} from "./shared.js?v=20260816-p8";
 
 // -----------------------------
 // Config
@@ -1267,12 +1267,28 @@ function renderGameDays(list) {
       const actions = document.createElement("div");
       actions.className = "eventCardFooter plannerEventActions";
 
-      const publicLink = document.createElement("a");
-      publicLink.className = "btn eventCardAction";
-      publicLink.href = `./events/?id=${encodeURIComponent(gd.id)}`;
-      publicLink.textContent = "View / Share";
-      publicLink.addEventListener("click", (e) => e.stopPropagation());
-      actions.appendChild(publicLink);
+      // Private events have no public share page — organizers get the invite
+      // link instead; public events keep View / Share.
+      if (gd.visibility === "private") {
+        if (isAdmin() || isOrganizerOf(gd)) {
+          const inviteBtn = document.createElement("button");
+          inviteBtn.type = "button";
+          inviteBtn.className = "btn eventCardAction";
+          inviteBtn.textContent = "🔗 Invite Link";
+          inviteBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            copyInviteLink(gd.id);
+          });
+          actions.appendChild(inviteBtn);
+        }
+      } else {
+        const publicLink = document.createElement("a");
+        publicLink.className = "btn eventCardAction";
+        publicLink.href = `./events/?id=${encodeURIComponent(gd.id)}`;
+        publicLink.textContent = "View / Share";
+        publicLink.addEventListener("click", (e) => e.stopPropagation());
+        actions.appendChild(publicLink);
+      }
 
       // Delete: site owner, or this Game Day's organizer
       if (isAdmin() || isOrganizerOf(gd)) {
@@ -1336,12 +1352,15 @@ function renderPastGameDays() {
     const actions = document.createElement("div");
     actions.className = "eventCardFooter plannerEventActions";
 
-    const publicLink = document.createElement("a");
-    publicLink.className = "btn eventCardAction";
-    publicLink.href = `./events/?id=${encodeURIComponent(gd.id)}`;
-    publicLink.textContent = "View / Share";
-    publicLink.addEventListener("click", (e) => e.stopPropagation());
-    actions.appendChild(publicLink);
+    // Past private events: no public share page either.
+    if (gd.visibility !== "private") {
+      const publicLink = document.createElement("a");
+      publicLink.className = "btn eventCardAction";
+      publicLink.href = `./events/?id=${encodeURIComponent(gd.id)}`;
+      publicLink.textContent = "View / Share";
+      publicLink.addEventListener("click", (e) => e.stopPropagation());
+      actions.appendChild(publicLink);
+    }
 
     el.appendChild(actions);
     el.querySelector(".cardOpenBtn")?.addEventListener("click", (e) => {
@@ -1790,6 +1809,21 @@ function showGameDayCard() {
   gamedayCard.style.display = "";
 }
 
+// Fetch the current invite token and put the invite link on the clipboard.
+// (Rules only let the organizer/admin read the token.)
+async function copyInviteLink(gamedayId) {
+  try {
+    const snap = await getDoc(doc(db, "gamedays", gamedayId));
+    const token = snap.exists() ? (snap.data() || {}).inviteToken : null;
+    if (!token) return toast("No invite link yet — open the event and tap Reset Link.", "info");
+    const link = `${window.location.origin}${window.location.pathname}?event=${encodeURIComponent(gamedayId)}&invite=${encodeURIComponent(token)}`;
+    await navigator.clipboard.writeText(link);
+    toast("Invite link copied — anyone with it can join this private event.", "success", 6000);
+  } catch (e) {
+    toast(`Couldn't copy the link: ${unwrapCallableError(e)}`, "error");
+  }
+}
+
 function renderGameDayHeader(gd) {
   gamedayTitle.textContent = gd.title || "Game Day";
   const startsAt = asDate(gd.startsAt);
@@ -1815,17 +1849,7 @@ function renderGameDayHeader(gd) {
     const buildLink = (token) =>
       `${window.location.origin}${window.location.pathname}?event=${encodeURIComponent(gd.id)}&invite=${encodeURIComponent(token)}`;
 
-    gamedayMeta.querySelector("#btnCopyInvite")?.addEventListener("click", async () => {
-      try {
-        const snap = await getDoc(doc(db, "gamedays", gd.id));
-        const token = snap.exists() ? (snap.data() || {}).inviteToken : null;
-        if (!token) return toast("No invite link yet — try Reset Link.", "info");
-        await navigator.clipboard.writeText(buildLink(token));
-        toast("Invite link copied — anyone with it can join this private event.", "success", 6000);
-      } catch (e) {
-        toast(`Couldn't copy the link: ${unwrapCallableError(e)}`, "error");
-      }
-    });
+    gamedayMeta.querySelector("#btnCopyInvite")?.addEventListener("click", () => copyInviteLink(gd.id));
 
     gamedayMeta.querySelector("#btnResetInvite")?.addEventListener("click", async () => {
       const ok = await confirmDialog({
