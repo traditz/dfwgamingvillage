@@ -1560,3 +1560,21 @@ textarea:focus {
   background: rgba(34, 197, 94, .12);
   color: #bbf7d0;
 }
+
+/* ========================  Private events  ======================== */
+
+.eventPill.is-private {
+  border-color: rgba(245, 197, 66, .5);
+  background: var(--gold-soft);
+  color: #ffe7a3;
+}
+
+.activityBadge.is-invited {
+  border-color: rgba(96, 165, 250, .45);
+  background: rgba(96, 165, 250, .12);
+  color: #bfdbfe;
+}
+
+.inviteControls {
+  margin-top: 10px;
+}

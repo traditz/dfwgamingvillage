@@ -8,11 +8,12 @@ import {
   collection,
   onSnapshot,
   orderBy,
-  query
+  query,
+  where
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js";
 
-import { esc, asDate, fmtDate, fmtCentralDatetimeValue, parseDatetimeLocalToISO, confirmDialog, toast } from "../shared.js?v=20260816-p6";
+import { esc, asDate, fmtDate, fmtCentralDatetimeValue, parseDatetimeLocalToISO, confirmDialog, toast } from "../shared.js?v=20260816-p7";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -38,6 +39,7 @@ const eventId = document.querySelector("#eventId");
 const eventTitle = document.querySelector("#eventTitle");
 const eventStart = document.querySelector("#eventStart");
 const eventStatus = document.querySelector("#eventStatus");
+const eventVisibility = document.querySelector("#eventVisibility");
 const eventLocation = document.querySelector("#eventLocation");
 const btnDeleteEvent = document.querySelector("#btnDeleteEvent");
 const publicLink = document.querySelector("#publicLink");
@@ -106,6 +108,7 @@ function selectEvent(id) {
   // Prefill in CENTRAL wall clock — the submit path parses as Central.
   eventStart.value = fmtCentralDatetimeValue(gd.startsAt);
   eventStatus.value = gd.status || "draft";
+  if (eventVisibility) eventVisibility.value = gd.visibility === "private" ? "private" : "public";
   eventLocation.value = gd.location || "";
   publicLink.href = `../events/?id=${encodeURIComponent(gd.id)}`;
   renderDiscordBinding(gd);
@@ -125,6 +128,7 @@ function newEvent() {
   eventTitle.value = "";
   eventStart.value = "";
   eventStatus.value = "draft";
+  if (eventVisibility) eventVisibility.value = "public";
   eventLocation.value = "";
   publicLink.href = "../events/";
   renderDiscordBinding(null);
@@ -225,7 +229,11 @@ function renderTables(items) {
 
 function subscribeEvents() {
   if (unsubEvents) unsubEvents();
-  const q = query(collection(db, "gamedays"), orderBy("startsAt", "desc"));
+  // Owner reads everything (rules allow admins); hosts query only their own
+  // events — under the private-events rules an unfiltered query would be denied.
+  const q = myRole.owner
+    ? query(collection(db, "gamedays"), orderBy("startsAt", "desc"))
+    : query(collection(db, "gamedays"), where("createdBy", "==", currentUser.uid), orderBy("startsAt", "desc"));
   unsubEvents = onSnapshot(q, (snap) => {
     const all = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
     // Hosts only see (and manage) the events they created; owner sees all.
@@ -263,7 +271,8 @@ eventForm?.addEventListener("submit", async (ev) => {
     // Parse the field as CENTRAL wall clock (matches the planner's create modal).
     startsAt: eventStart.value ? parseDatetimeLocalToISO(eventStart.value) : "",
     location: eventLocation.value.trim(),
-    status: eventStatus.value
+    status: eventStatus.value,
+    visibility: eventVisibility ? eventVisibility.value : "public"
   };
 
   try {

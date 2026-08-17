@@ -19,7 +19,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js";
 
-import { esc, asDate, fmtDate, centralDateKey, toast } from "../shared.js?v=20260816-p6";
+import { esc, asDate, fmtDate, centralDateKey, toast } from "../shared.js?v=20260816-p7";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -300,7 +300,12 @@ function loadList() {
   if (header) header.style.display = "";
   pageTitle.textContent = "DFWGV Events";
   document.title = "DFWGV Events";
-  const q = query(collection(db, "gamedays"), where("status", "==", "published"), orderBy("startsAt", "asc"));
+  const q = query(
+    collection(db, "gamedays"),
+    where("visibility", "==", "public"),
+    where("status", "==", "published"),
+    orderBy("startsAt", "asc")
+  );
   if (unsubList) unsubList();
   unsubList = onSnapshot(q, (snap) => {
     renderEventList(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
@@ -337,7 +342,13 @@ function showUnavailable(msg) {
 }
 
 async function loadEvent(id) {
-  const snap = await getDoc(doc(db, "gamedays", id));
+  let snap;
+  try {
+    snap = await getDoc(doc(db, "gamedays", id));
+  } catch {
+    // Permission denied — a private event this visitor can't read.
+    return showUnavailable("That event is private. Ask the organizer for an invite link. Here's what's public:");
+  }
   if (!snap.exists()) return showUnavailable("That event link isn't available — it may have been removed. Here's what's on:");
 
   const gd = { id: snap.id, ...snap.data() };

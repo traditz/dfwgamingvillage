@@ -12,6 +12,8 @@ import {
 import {
   getFirestore,
   collection,
+  doc,
+  getDoc,
   query,
   where,
   orderBy,
@@ -36,7 +38,7 @@ import {
   showInlineStatus,
   confirmDialog,
   toast
-} from "./shared.js?v=20260816-p6";
+} from "./shared.js?v=20260816-p7";
 
 // -----------------------------
 // Config
@@ -76,6 +78,10 @@ const fnGetMyPlannerRole = httpsCallable(functions, "getMyPlannerRole");
 const fnRequestHostAccess = httpsCallable(functions, "requestHostAccess");
 const fnSetNickname = httpsCallable(functions, "setNickname");
 const fnGetMyActivity = httpsCallable(functions, "getMyActivity");
+const fnRedeemInvite = httpsCallable(functions, "redeemInvite");
+const fnRotateInviteToken = httpsCallable(functions, "rotateInviteToken");
+const fnListInvites = httpsCallable(functions, "listInvites");
+const fnRemoveInvite = httpsCallable(functions, "removeInvite");
 
 // -----------------------------
 // UI bindings
@@ -134,7 +140,24 @@ let lastGameDaysRaw = [];
 // host = approved to create Game Days, requested = pending host request).
 let myRole = { owner: false, host: false, requested: false };
 let lastDisplayName = "";
+let myPrivateGamedays = []; // private events I organize / joined / am invited to
 let initialEventId = new URLSearchParams(window.location.search).get("event") || "";
+
+// Invite link (?event=<id>&invite=<token>): captured at boot, redeemed after
+// sign-in, then stripped from the URL.
+let pendingInvite = null;
+let invitePromptShown = false;
+{
+  const bootParams = new URLSearchParams(window.location.search);
+  const inviteToken = bootParams.get("invite");
+  const inviteEvent = bootParams.get("event");
+  if (inviteToken && inviteEvent) {
+    pendingInvite = { gamedayId: inviteEvent, token: inviteToken };
+    const u = new URL(window.location.href);
+    u.searchParams.delete("invite");
+    window.history.replaceState({}, "", u.toString());
+  }
+}
 
 // tables pagination
 let currentTables = [];
@@ -1115,7 +1138,12 @@ function openWantToPlayFormModal({ gamedayId, thing }) {
 // -----------------------------
 function subscribeGameDays() {
   if (unsubGameDays) unsubGameDays();
-  const q = query(collection(db, "gamedays"), where("status", "==", "published"), orderBy("startsAt", "asc"));
+  const q = query(
+    collection(db, "gamedays"),
+    where("visibility", "==", "public"),
+    where("status", "==", "published"),
+    orderBy("startsAt", "asc")
+  );
   unsubGameDays = onSnapshot(q, (snap) => {
     const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
     lastGameDaysRaw = list;
@@ -1129,7 +1157,8 @@ function subscribeGameDays() {
       if (fresh) {
         currentGameDay = fresh;
         renderGameDayHeader(fresh);
-      } else {
+      } else if (currentGameDay?.visibility !== "private") {
+        // Private events aren't in the public snapshot — never bounce those.
         showGameDayList();
         history.replaceState({}, "", gameDayUrl(null));
         toast("This Game Day is no longer available.", "info");
@@ -1151,12 +1180,30 @@ function tryOpenDeepLink() {
   if (!initialEventId) return;
   const all = [...currentGameDays, ...currentPastGameDays];
   const match = all.find((gd) => gd.id === initialEventId);
+  const id = initialEventId;
   initialEventId = "";
   if (match) {
     openGameDay(match, { push: false, deepLink: true });
+    return;
+  }
+  if (currentUser) {
+    // Possibly a private event this user can read (invitee/organizer/admin).
+    getDoc(doc(db, "gamedays", id)).then((snap) => {
+      if (snap.exists()) {
+        openGameDay({ id: snap.id, ...snap.data() }, { push: false, deepLink: true });
+      } else {
+        toast("That event link isn't available — it may have been removed or unpublished.", "info", 6000);
+        history.replaceState({}, "", gameDayUrl(null));
+      }
+    }).catch(() => {
+      toast("That event isn't available — it may be private. Ask the organizer for an invite link.", "info", 7000);
+      history.replaceState({}, "", gameDayUrl(null));
+    });
+  } else if (pendingInvite && pendingInvite.gamedayId === id) {
+    // Invite flow will reopen it after sign-in; keep quiet for now.
+    initialEventId = id;
   } else {
-    toast("That event link isn't available — it may have been removed or unpublished.", "info", 6000);
-    history.replaceState({}, "", gameDayUrl(null));
+    toast("Sign in to view that event — it may be private.", "info", 6000);
   }
 }
 
@@ -1184,7 +1231,9 @@ function subscribeGameDayDetails(gamedayId) {
 // Rendering
 // -----------------------------
 function renderGameDays(list) {
-  const sorted = sortByStartsAtAsc(list);
+  // Private events I'm part of merge into the list (never in the public query).
+  const merged = [...list, ...myPrivateGamedays.filter((p) => !list.some((g) => g.id === p.id))];
+  const sorted = sortByStartsAtAsc(merged);
   const visibleGameDays = sorted.filter((gd) => !isPastGameDay(gd));
   currentGameDays = visibleGameDays;
   currentPastGameDays = sortByStartsAtDesc(sorted.filter(isPastGameDay));
@@ -1211,7 +1260,7 @@ function renderGameDays(list) {
       el.innerHTML = `
         <div>
           <button type="button" class="cardOpenBtn"><span class="title">${esc(gd.title || "Game Day")}</span></button>
-          <div class="meta">${esc(fmtDate(startsAt))}${gd.location ? ` • ${esc(gd.location)}` : ""}${gd.createdByDisplayName ? ` • Hosted by ${esc(gd.createdByDisplayName)}` : ""}</div>
+          <div class="meta">${gd.visibility === "private" ? `<span class="eventPill is-private">🔒 Private</span> ` : ""}${esc(fmtDate(startsAt))}${gd.location ? ` • ${esc(gd.location)}` : ""}${gd.createdByDisplayName ? ` • Hosted by ${esc(gd.createdByDisplayName)}` : ""}</div>
         </div>
       `;
 
@@ -1745,13 +1794,150 @@ function renderGameDayHeader(gd) {
   gamedayTitle.textContent = gd.title || "Game Day";
   const startsAt = asDate(gd.startsAt);
   const isPast = isPastGameDay(gd);
+  const isPrivate = gd.visibility === "private";
+  const canManage = isAdmin() || isOrganizerOf(gd);
   gamedayMeta.innerHTML = `
     <div class="muted">
       ${isPast ? `<span class="eventPill is-history">Past Event</span> ` : ""}
+      ${isPrivate ? `<span class="eventPill is-private">🔒 Private</span> ` : ""}
       ${esc(fmtDate(startsAt))}${gd.location ? ` • ${esc(gd.location)}` : ""}${gd.createdByDisplayName ? ` • Hosted by ${esc(gd.createdByDisplayName)}` : ""}
     </div>
+    ${isPrivate && canManage ? `
+    <div class="actions inviteControls">
+      <button class="btn" id="btnCopyInvite">🔗 Copy Invite Link</button>
+      <button class="btn" id="btnManageInvites">Invited…</button>
+      <button class="btn" id="btnResetInvite">Reset Link</button>
+    </div>` : ""}
   `;
   setPastEventActions(isPast);
+
+  if (isPrivate && canManage) {
+    const buildLink = (token) =>
+      `${window.location.origin}${window.location.pathname}?event=${encodeURIComponent(gd.id)}&invite=${encodeURIComponent(token)}`;
+
+    gamedayMeta.querySelector("#btnCopyInvite")?.addEventListener("click", async () => {
+      try {
+        const snap = await getDoc(doc(db, "gamedays", gd.id));
+        const token = snap.exists() ? (snap.data() || {}).inviteToken : null;
+        if (!token) return toast("No invite link yet — try Reset Link.", "info");
+        await navigator.clipboard.writeText(buildLink(token));
+        toast("Invite link copied — anyone with it can join this private event.", "success", 6000);
+      } catch (e) {
+        toast(`Couldn't copy the link: ${unwrapCallableError(e)}`, "error");
+      }
+    });
+
+    gamedayMeta.querySelector("#btnResetInvite")?.addEventListener("click", async () => {
+      const ok = await confirmDialog({
+        title: "Reset invite link?",
+        message: "The old link stops working immediately. People already invited keep their access.",
+        confirmLabel: "Reset Link"
+      });
+      if (!ok) return;
+      try {
+        const r = await fnRotateInviteToken({ gamedayId: gd.id });
+        await navigator.clipboard.writeText(buildLink(r.data.token));
+        toast("New invite link created and copied.", "success", 6000);
+      } catch (e) {
+        toast(unwrapCallableError(e), "error");
+      }
+    });
+
+    gamedayMeta.querySelector("#btnManageInvites")?.addEventListener("click", () => openInvitesModal(gd));
+  }
+}
+
+async function openInvitesModal(gd) {
+  openModal(`Invited — ${gd.title || "Game Day"}`, `<div class="modalStack"><div class="muted">Loading…</div></div>`);
+  const render = async () => {
+    let invites = [];
+    try {
+      invites = ((await fnListInvites({ gamedayId: gd.id })).data || {}).invites || [];
+    } catch (e) {
+      const body = document.querySelector("#modalBody");
+      if (body) body.innerHTML = `<div class="modalError" style="display:block;">${esc(unwrapCallableError(e))}</div>`;
+      return;
+    }
+    const body = document.querySelector("#modalBody");
+    if (!body) return;
+    body.innerHTML = `
+      <div class="modalStack">
+        <div class="muted">${invites.length} invited. Anyone here can view and join this private event.</div>
+        <div class="list">
+          ${invites.length ? invites.map((i) => `
+            <div class="listitem" style="cursor:default;">
+              <div style="flex:1; min-width:0;">
+                <div class="title">${esc(i.displayName || i.uid)}</div>
+                <div class="meta muted">${esc(i.addedVia === "channel-sync" ? "From Discord channel" : "Invite link")}</div>
+              </div>
+              <button class="btn btn-small btn-danger" data-uninvite="${esc(i.uid)}">Remove</button>
+            </div>
+          `).join("") : `<div class="muted">Nobody yet — copy the invite link and share it.</div>`}
+        </div>
+      </div>
+    `;
+    body.querySelectorAll("[data-uninvite]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        btn.disabled = true;
+        try {
+          await fnRemoveInvite({ gamedayId: gd.id, uid: btn.getAttribute("data-uninvite") });
+          toast("Removed from the invite list.", "success");
+          await render();
+        } catch (e) {
+          btn.disabled = false;
+          toast(unwrapCallableError(e), "error");
+        }
+      });
+    });
+  };
+  await render();
+}
+
+// Refresh the private-events merge from the server (also powers My Events).
+async function refreshMyActivitySummary() {
+  if (!currentUser) {
+    myPrivateGamedays = [];
+    if (lastGameDaysRaw.length) renderGameDays(lastGameDaysRaw);
+    return;
+  }
+  try {
+    const r = await fnGetMyActivity({});
+    const items = (r.data && r.data.items) || [];
+    myActivity = items;
+    const seen = new Map();
+    for (const it of items) {
+      if (it.visibility === "private" && !seen.has(it.gamedayId)) {
+        seen.set(it.gamedayId, {
+          id: it.gamedayId,
+          title: it.title,
+          startsAt: it.startsAt,
+          location: it.location,
+          status: it.status,
+          visibility: "private",
+          createdBy: it.createdBy || null
+        });
+      }
+    }
+    myPrivateGamedays = [...seen.values()];
+    renderGameDays(lastGameDaysRaw);
+  } catch {
+    /* non-fatal: public list still works */
+  }
+}
+
+async function tryRedeemPendingInvite() {
+  if (!pendingInvite || !currentUser) return;
+  const inv = pendingInvite;
+  pendingInvite = null;
+  try {
+    const r = await fnRedeemInvite({ gamedayId: inv.gamedayId, token: inv.token });
+    toast(`Invite accepted — welcome to “${r.data?.title || "the event"}”!`, "success", 6000);
+    await refreshMyActivitySummary();
+    initialEventId = inv.gamedayId;
+    tryOpenDeepLink();
+  } catch (e) {
+    toast(unwrapCallableError(e), "error", 8000);
+  }
 }
 
 function openGameDay(gd, { push = true, deepLink = false } = {}) {
@@ -1803,6 +1989,15 @@ function openCreateGameDayModal() {
           <div class="label">Location (optional)</div>
           <input id="gdLocation" class="input" type="text" placeholder="e.g. DFW Gaming Village" />
         </label>
+
+        <label class="field fieldSpan2">
+          <div class="label">Visibility</div>
+          <select id="gdVisibility" class="input">
+            <option value="public">Public — listed for everyone</option>
+            <option value="private">Private — invite link only</option>
+          </select>
+          <div class="hint muted">Private events are hidden from the public lists; you'll get an invite link to share.</div>
+        </label>
       </div>
 
       <div class="modalStatus" id="modalStatus" style="display:none;"></div>
@@ -1841,9 +2036,15 @@ function openCreateGameDayModal() {
       btnCreate.disabled = true;
       btnCancel.disabled = true;
       showInlineStatus("Creating…");
-      await fnCreateGameDay({ title, location, startsAt: startIso });
+      const visibility = qs("#gdVisibility")?.value === "private" ? "private" : "public";
+      await fnCreateGameDay({ title, location, startsAt: startIso, visibility });
       closeModal();
-      toast("Game Day created.", "success");
+      if (visibility === "private") {
+        toast("Private event created — open it and tap 🔗 Copy Invite Link to invite people.", "success", 8000);
+        refreshMyActivitySummary();
+      } else {
+        toast("Game Day created.", "success");
+      }
     } catch (e) {
       btnCreate.disabled = false;
       btnCancel.disabled = false;
@@ -1906,10 +2107,12 @@ function activityBadge(item) {
   const label = item.role === "organizing" ? "Organizing"
     : item.role === "hosting" ? `Hosting: ${item.gameName}`
     : item.role === "waitlist" ? `Waitlist: ${item.gameName}`
+    : item.role === "invited" ? "Invited"
     : `Playing: ${item.gameName}`;
   const cls = item.role === "organizing" ? "is-organizing"
     : item.role === "hosting" ? "is-hosting"
     : item.role === "waitlist" ? "is-waitlist"
+    : item.role === "invited" ? "is-invited"
     : "is-playing";
   return `<span class="activityBadge ${cls}">${esc(label)}</span>`;
 }
@@ -1960,7 +2163,7 @@ function renderMyActivity(tab) {
   host.querySelectorAll("[data-open-gd]").forEach((el) => {
     el.addEventListener("click", () => {
       const id = el.getAttribute("data-open-gd");
-      const gd = [...currentGameDays, ...currentPastGameDays].find((x) => x.id === id);
+      const gd = [...currentGameDays, ...currentPastGameDays, ...myPrivateGamedays].find((x) => x.id === id);
       if (gd) {
         closeModal();
         openGameDay(gd);
@@ -2237,6 +2440,14 @@ onAuthStateChanged(auth, async (user) => {
 
   // Resolve platform role (owner/host) server-side; re-applies role UI when done.
   refreshMyRole();
+  refreshMyActivitySummary();
+  tryRedeemPendingInvite();
+
+  // Arrived on an invite link while signed out: prompt once.
+  if (!user && pendingInvite && !invitePromptShown) {
+    invitePromptShown = true;
+    openSignInModal("You've been invited to a private event — sign in to accept the invite.");
+  }
 });
 
 // start
