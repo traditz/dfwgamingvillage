@@ -41,7 +41,7 @@ import {
   showInlineStatus,
   confirmDialog,
   toast
-} from "./shared.js?v=20260817-p17";
+} from "./shared.js?v=20260817-p18";
 
 // -----------------------------
 // Config
@@ -1517,6 +1517,20 @@ function refreshSeatsDom(card, t) {
 // Everything that affects a card's static markup. When unchanged, the card's
 // DOM node is reused verbatim by the reconcile — preserving in-flight button
 // labels, scroll position, and focus during live updates.
+// "" | "started" | "past" — only meaningful for multi-day events, where a
+// finished day's tables drop to the bottom and read as Past.
+function tableTimeState(t) {
+  const bounds = eventDayBounds();
+  if (!bounds || !bounds.multiDay) return "";
+  const st = asDate(t.startTime);
+  if (!st) return "";
+  const dayKey = centralDateKey(st);
+  const todayKey = centralDateKey(new Date());
+  if (dayKey < todayKey) return "past";
+  if (dayKey === todayKey && st.getTime() < Date.now()) return "started";
+  return "";
+}
+
 function tableRenderSig(t, isPast) {
   const isHost = !!(currentUser && currentUser.uid === t.hostUid);
   const canManage = !isPast && (isHost || isAdmin() || isOrganizerOf(currentGameDay));
@@ -1526,7 +1540,8 @@ function tableRenderSig(t, isPast) {
     t.hostUid, t.hostDisplayName,
     Array.isArray(t.expansions) ? t.expansions.map((e) => e?.bggId) : [],
     isHost, canManage, isPast,
-    currentUser?.uid || null
+    currentUser?.uid || null,
+    tableTimeState(t)
   ]);
 }
 
@@ -1578,6 +1593,7 @@ function buildTableCard(t, isPast, sig) {
   el.className = "tablecard";
   el.dataset.tableCard = t.id;
   el.dataset.sig = sig;
+  if (tableTimeState(t) === "past") el.classList.add("is-pastTable");
   el.innerHTML = `
     <div class="thumb">
       ${t.thumbUrl
@@ -1589,7 +1605,12 @@ function buildTableCard(t, isPast, sig) {
     <div class="body">
       <div class="row1">
         <div class="name">
-          ${isCustomEntry ? `<span class="signupPill">📋 Sign-up</span> ` : ""}${bggUrl ? `<a href="${esc(bggUrl)}" target="_blank" rel="noopener">${esc(t.gameName || "Game")}</a>` : esc(t.gameName || "Game")}
+          ${(() => {
+            const st = tableTimeState(t);
+            if (st === "past") return `<span class="timePill is-past">Past</span> `;
+            if (st === "started") return `<span class="timePill is-started">Started</span> `;
+            return "";
+          })()}${isCustomEntry ? `<span class="signupPill">📋 Sign-up</span> ` : ""}${bggUrl ? `<a href="${esc(bggUrl)}" target="_blank" rel="noopener">${esc(t.gameName || "Game")}</a>` : esc(t.gameName || "Game")}
           <div class="gameMeta" data-game-meta ${gameMetaText(t) ? "" : "style=\"display:none;\""}>${esc(gameMetaText(t))}</div>
         </div>
         <div class="time">${timeDisplay}</div>
@@ -1742,8 +1763,23 @@ function renderTablesPage() {
   currentPage = Math.max(0, Math.min(currentPage, pages - 1));
   const isPast = currentEventIsPast();
 
+  // Multi-day events push finished days to the bottom so what's still ahead
+  // leads. Single-day events keep their plain chronological order.
+  const boundsForOrder = eventDayBounds();
+  let ordered = currentTables;
+  if (boundsForOrder && boundsForOrder.multiDay) {
+    const todayKey = centralDateKey(new Date());
+    const dayOf = (t) => {
+      const st = asDate(t.startTime);
+      return st ? centralDateKey(st) : "";
+    };
+    const upcoming = currentTables.filter((t) => !dayOf(t) || dayOf(t) >= todayKey);
+    const finished = currentTables.filter((t) => dayOf(t) && dayOf(t) < todayKey);
+    ordered = [...upcoming, ...finished];
+  }
+
   const startIdx = currentPage * PAGE_SIZE;
-  const pageItems = currentTables.slice(startIdx, startIdx + PAGE_SIZE);
+  const pageItems = ordered.slice(startIdx, startIdx + PAGE_SIZE);
 
   const visibleIds = new Set(pageItems.map((t) => t.id));
   stopRosterListenersExcept(visibleIds);
@@ -1806,9 +1842,15 @@ function renderTablesPage() {
         header.className = "dayHeader";
         header.setAttribute("data-day-header", dayKey);
         const dayNum = bounds.days.indexOf(dayKey);
+        const todayKey = centralDateKey(new Date());
+        const isFinished = dayKey < todayKey;
+        const isToday = dayKey === todayKey;
+        header.classList.toggle("is-past", isFinished);
         header.innerHTML = `
           <span class="dayHeaderLabel">${esc(fmtDayLabel(dayKey))}</span>
           ${dayNum >= 0 ? `<span class="dayHeaderBadge">Day ${dayNum + 1}</span>` : ""}
+          ${isFinished ? `<span class="dayHeaderState is-past">Past</span>` : ""}
+          ${isToday ? `<span class="dayHeaderState is-today">Today</span>` : ""}
         `;
         const at = cursor ? cursor.nextElementSibling : tablesList.firstElementChild;
         tablesList.insertBefore(header, at);
@@ -2675,6 +2717,21 @@ onAuthStateChanged(auth, async (user) => {
     openSignInModal("You've been invited to a private event — sign in to accept the invite.");
   }
 });
+
+// A day rolling over is a clock event, not a data change — nothing would
+// otherwise redraw the board at midnight, so tick the views along.
+let lastTickDayKey = centralDateKey(new Date());
+setInterval(() => {
+  const nowKey = centralDateKey(new Date());
+  const dayChanged = nowKey !== lastTickDayKey;
+  lastTickDayKey = nowKey;
+  if (!currentGameDayId) return;
+  const bounds = eventDayBounds();
+  if (!bounds || !bounds.multiDay) return;
+  // Every minute keeps "Started" honest; a day change reshuffles the groups.
+  renderTablesPage();
+  if (dayChanged && lastGameDaysRaw.length) renderGameDays(lastGameDaysRaw);
+}, 60 * 1000);
 
 // start
 await handleDiscordCallbackIfPresent();

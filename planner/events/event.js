@@ -19,7 +19,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js";
 
-import { esc, asDate, fmtDate, fmtTime, fmtEventWhen, fmtDayLabel, eventDayKeys, centralDateKey, toast } from "../shared.js?v=20260817-p17";
+import { esc, asDate, fmtDate, fmtTime, fmtEventWhen, fmtDayLabel, eventDayKeys, centralDateKey, toast } from "../shared.js?v=20260817-p18";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -220,23 +220,40 @@ function renderTables() {
     return;
   }
 
-  // Multi-day events (conventions) group their tables under a header per day.
+  // Multi-day events (conventions) group their tables under a header per day,
+  // with finished days pushed to the bottom and marked Past.
   const days = currentGd ? eventDayKeys(currentGd.startsAt, currentGd.endsAt) : [];
   const showDayHeaders = days.length > 1;
   let lastDayKey = null;
 
-  for (const t of visible) {
+  let ordered = visible;
+  const todayKey = centralDateKey(new Date());
+  if (showDayHeaders) {
+    const dayOf = (t) => {
+      const st = asDate(t.startTime);
+      return st ? centralDateKey(st) : "";
+    };
+    ordered = [
+      ...visible.filter((t) => !dayOf(t) || dayOf(t) >= todayKey),
+      ...visible.filter((t) => dayOf(t) && dayOf(t) < todayKey)
+    ];
+  }
+
+  for (const t of ordered) {
     if (showDayHeaders) {
       const st = asDate(t.startTime);
       const dayKey = st ? centralDateKey(st) : "";
       if (dayKey && dayKey !== lastDayKey) {
         lastDayKey = dayKey;
         const dayNum = days.indexOf(dayKey);
+        const isFinished = dayKey < todayKey;
         const header = document.createElement("div");
-        header.className = "dayHeader";
+        header.className = `dayHeader${isFinished ? " is-past" : ""}`;
         header.innerHTML = `
           <span class="dayHeaderLabel">${esc(fmtDayLabel(dayKey))}</span>
           ${dayNum >= 0 ? `<span class="dayHeaderBadge">Day ${dayNum + 1}</span>` : ""}
+          ${isFinished ? `<span class="dayHeaderState is-past">Past</span>` : ""}
+          ${dayKey === todayKey ? `<span class="dayHeaderState is-today">Today</span>` : ""}
         `;
         publicTables.appendChild(header);
       }
@@ -249,8 +266,13 @@ function renderTables() {
     // Custom sign-up sheets (food run, setup crew) have no box art to show.
     const isCustomEntry = t.isCustom === true || !t.bggId;
 
+    const stDay = asDate(t.startTime) ? centralDateKey(asDate(t.startTime)) : "";
+    const isPastTable = showDayHeaders && stDay && stDay < todayKey;
+    const isStarted = showDayHeaders && stDay === todayKey
+      && asDate(t.startTime) && asDate(t.startTime).getTime() < Date.now();
+
     const el = document.createElement("article");
-    el.className = "publicTable";
+    el.className = `publicTable${isPastTable ? " is-pastTable" : ""}`;
     el.innerHTML = `
       <div class="publicThumb">
         ${t.thumbUrl
@@ -261,7 +283,7 @@ function renderTables() {
       </div>
       <div>
         <div class="publicTableTitle">
-          ${bggUrl ? `<a href="${esc(bggUrl)}" target="_blank" rel="noopener">${esc(t.gameName || "Game")}</a>` : esc(t.gameName || "Game")}
+          ${isPastTable ? `<span class="timePill is-past">Past</span> ` : ""}${isStarted ? `<span class="timePill is-started">Started</span> ` : ""}${bggUrl ? `<a href="${esc(bggUrl)}" target="_blank" rel="noopener">${esc(t.gameName || "Game")}</a>` : esc(t.gameName || "Game")}
           <div class="gameMeta" data-game-meta ${gameMetaText(t) ? "" : "style=\"display:none;\""}>${esc(gameMetaText(t))}</div>
         </div>
         <div class="seatBadge ${openSeats ? "is-open" : ""}">
@@ -501,5 +523,10 @@ async function boot() {
     document.querySelector("#btnRetryLoad")?.addEventListener("click", () => location.reload());
   }
 }
+
+// Day rollovers are clock events — refresh the grouping periodically.
+setInterval(() => {
+  if (currentGd && eventDayKeys(currentGd.startsAt, currentGd.endsAt).length > 1) renderTables();
+}, 60 * 1000);
 
 await boot();
