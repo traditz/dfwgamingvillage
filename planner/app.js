@@ -41,7 +41,7 @@ import {
   showInlineStatus,
   confirmDialog,
   toast
-} from "./shared.js?v=20260817-p18";
+} from "./shared.js?v=20260817-p19";
 
 // -----------------------------
 // Config
@@ -2249,11 +2249,21 @@ function openCreateGameDayModal() {
     }
 
     // datetime-local is interpreted as Central, matching the rest of the app.
-    const startIso = parseDatetimeLocalToISO(qs("#gdStart").value);
+    const gdStartVal = String(qs("#gdStart").value || "");
+    const startIso = parseDatetimeLocalToISO(gdStartVal);
     if (!startIso) {
       showInlineError("Please choose a valid start time.");
       return;
     }
+
+    // Validate the optional last day BEFORE disabling the buttons, so a bad
+    // value leaves the form usable.
+    const endDay = String(qs("#gdEndDate")?.value || "").trim();
+    if (endDay && endDay < gdStartVal.slice(0, 10)) {
+      showInlineError("The last day can't be before the start.");
+      return;
+    }
+    const endsAt = endDay ? parseDatetimeLocalToISO(`${endDay}T23:59`) : null;
 
     const location = String(qs("#gdLocation").value || "").trim();
 
@@ -2265,13 +2275,6 @@ function openCreateGameDayModal() {
       showInlineStatus("Creating…");
       const visibility = qs("#gdVisibility")?.value === "private" ? "private" : "public";
       const inviteApproval = visibility === "private" && !!qs("#gdInviteApproval")?.checked;
-      // A last day makes this a multi-day event; stored as that day's end.
-      const endDay = String(qs("#gdEndDate")?.value || "").trim();
-      const endsAt = endDay ? parseDatetimeLocalToISO(`${endDay}T23:59`) : null;
-      if (endDay && endDay < startVal.slice(0, 10)) {
-        showInlineError("The last day can't be before the start.");
-        return;
-      }
       await fnCreateGameDay({ title, location, startsAt: startIso, endsAt, visibility, inviteApproval });
       closeModal();
       if (visibility === "private") {
