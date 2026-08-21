@@ -44,7 +44,7 @@ import {
   showInlineStatus,
   confirmDialog,
   toast
-} from "./shared.js?v=20260817-p31";
+} from "./shared.js?v=20260817-p32";
 
 // -----------------------------
 // Config
@@ -2128,11 +2128,11 @@ function wantPostHtml(p, bggUrl, { canDelete = false, canAct = false, iAmInteres
       ${names.length ? `<div class="wantInterest">🙋 <b>${names.length}</b> would play — ${esc(names.join(", "))}</div>` : ""}
       ${p.notes ? `<div class="wantNote"><span>Note</span> <div class="wantNoteText">${esc(p.notes)}</div></div>` : ""}
     </div>
-    <div class="wantActions">
-      ${canAct ? `<button class="btn btn-small" data-action="want-convert">🎲 Host this</button>` : ""}
-      ${canAct ? `<button class="btn btn-small${iAmInterested ? " is-on" : ""}" data-action="want-interest">${iAmInterested ? "✔ Interested" : "🙋 I'd play this"}</button>` : ""}
-      ${canDelete ? `<button class="btn btn-danger btn-small" data-action="want-delete">Delete</button>` : ""}
-    </div>
+    ${(canAct || canDelete) ? `<div class="wantActions">${[
+      canAct ? `<button class="btn btn-small" data-action="want-convert">🎲 Host this</button>` : "",
+      canAct ? `<button class="btn btn-small${iAmInterested ? " is-on" : ""}" data-action="want-interest">${iAmInterested ? "✔ Interested" : "🙋 I'd play this"}</button>` : "",
+      canDelete ? `<button class="btn btn-danger btn-small" data-action="want-delete">Delete</button>` : ""
+    ].join("")}</div>` : ""}
   `;
 }
 
