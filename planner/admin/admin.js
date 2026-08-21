@@ -13,7 +13,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js";
 
-import { esc, asDate, fmtDate, fmtEventWhen, centralDateKey, fmtCentralDatetimeValue, parseDatetimeLocalToISO, confirmDialog, toast } from "../shared.js?v=20260817-p24";
+import { esc, asDate, fmtDate, fmtEventWhen, centralDateKey, fmtCentralDatetimeValue, parseDatetimeLocalToISO, confirmDialog, toast } from "../shared.js?v=20260817-p25";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -47,6 +47,7 @@ const publicLink = document.querySelector("#publicLink");
 const discordStatusValue = document.querySelector("#discordStatusValue");
 const discordHelp = document.querySelector("#discordHelp");
 const discordCommand = document.querySelector("#discordCommand");
+const discordChannelList = document.querySelector("#discordChannelList");
 const btnCopyBindCommand = document.querySelector("#btnCopyBindCommand");
 const statusBox = document.querySelector("#statusBox");
 const errorBox = document.querySelector("#errorBox");
@@ -139,15 +140,51 @@ function newEvent() {
   renderEvents();
 }
 
-function discordBinding(gd) {
+// An event can post its board in many channels across many servers. The
+// gameday's `discordChannels` array is the full picture; `discord` only ever
+// held whichever channel was bound most recently, so it's the fallback for
+// events bound before multi-channel existed.
+function discordBindings(gd) {
+  const list = Array.isArray(gd?.discordChannels) ? gd.discordChannels : [];
+  if (list.length) {
+    return list
+      .map((c) => ({
+        channelId: String(c?.channelId || "").trim(),
+        channelName: String(c?.channelName || "").trim(),
+        guildId: String(c?.guildId || "").trim(),
+        guildName: String(c?.guildName || "").trim(),
+        messageId: String(c?.plannerMessageId || "").trim(),
+        lastSyncedAt: c?.lastSyncedAt || null
+      }))
+      .filter((c) => c.channelId);
+  }
+
   const discord = gd?.discord && typeof gd.discord === "object" ? gd.discord : {};
   const channelId = String(discord.channelId || "").trim();
-  return {
+  if (!channelId) return [];
+  return [{
     channelId,
     channelName: String(discord.channelName || "").trim(),
+    guildId: String(discord.guildId || "").trim(),
+    guildName: String(discord.guildName || "").trim(),
     messageId: String(discord.plannerMessageId || "").trim(),
     lastSyncedAt: discord.lastSyncedAt || null
-  };
+  }];
+}
+
+// Group by server so "posted in two different Discords" is obvious at a glance.
+function groupBindingsByServer(bindings) {
+  const byServer = new Map();
+  for (const b of bindings) {
+    const key = b.guildId || "unknown";
+    if (!byServer.has(key)) {
+      byServer.set(key, { guildId: b.guildId, guildName: b.guildName, channels: [] });
+    }
+    const entry = byServer.get(key);
+    if (!entry.guildName && b.guildName) entry.guildName = b.guildName;
+    entry.channels.push(b);
+  }
+  return [...byServer.values()];
 }
 
 function bindCommand(gamedayId) {
@@ -166,23 +203,43 @@ function renderDiscordBinding(gd) {
     return;
   }
 
-  const binding = discordBinding(gd);
-  const command = bindCommand(gd.id);
-  discordCommand.textContent = command;
+  const bindings = discordBindings(gd);
+  discordCommand.textContent = bindCommand(gd.id);
   btnCopyBindCommand.disabled = false;
 
-  if (binding.channelId) {
-    const label = binding.channelName ? `#${binding.channelName}` : `channel ${binding.channelId}`;
-    discordStatusValue.textContent = `Linked to ${label}`;
-    discordStatusValue.className = "discordStatus is-linked";
-    const syncText = binding.lastSyncedAt ? ` Last sync: ${fmtDate(binding.lastSyncedAt)}.` : "";
-    discordHelp.textContent = `Run /planner_event in Discord to inspect it, /planner_refresh to rebuild the board, or /planner_unbind in that channel to detach it.${syncText}`;
+  if (!bindings.length) {
+    discordStatusValue.textContent = "Not linked to Discord";
+    discordStatusValue.className = "discordStatus is-unlinked";
+    discordHelp.textContent = "Run this in the Discord channel that should host the planner board.";
+    if (discordChannelList) discordChannelList.innerHTML = "";
     return;
   }
 
-  discordStatusValue.textContent = "Not linked to Discord";
-  discordStatusValue.className = "discordStatus is-unlinked";
-  discordHelp.textContent = "Run this in the Discord channel that should host the planner board.";
+  const servers = groupBindingsByServer(bindings);
+  const chanWord = bindings.length === 1 ? "channel" : "channels";
+  const srvWord = servers.length === 1 ? "server" : "servers";
+  discordStatusValue.textContent =
+    `Live in ${bindings.length} ${chanWord} across ${servers.length} ${srvWord}`;
+  discordStatusValue.className = "discordStatus is-linked";
+  discordHelp.textContent =
+    "Every board below shows the same event and updates together. Run /planner_bind in "
+    + "another channel to add one, or /planner_unbind in a channel to drop just that one.";
+
+  if (discordChannelList) {
+    discordChannelList.innerHTML = servers.map((s) => `
+      <div class="bindServer">
+        <div class="bindServerName">${esc(s.guildName || `Server ${s.guildId || "unknown"}`)}</div>
+        <ul class="bindChannels">
+          ${s.channels.map((c) => `
+            <li>
+              <span class="bindChannelName">#${esc(c.channelName || c.channelId)}</span>
+              <span class="bindSync muted">${c.lastSyncedAt ? `synced ${esc(fmtDate(c.lastSyncedAt))}` : "not synced yet"}</span>
+            </li>
+          `).join("")}
+        </ul>
+      </div>
+    `).join("");
+  }
 }
 
 function renderEvents() {

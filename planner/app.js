@@ -43,7 +43,7 @@ import {
   showInlineStatus,
   confirmDialog,
   toast
-} from "./shared.js?v=20260817-p24";
+} from "./shared.js?v=20260817-p25";
 
 // -----------------------------
 // Config
