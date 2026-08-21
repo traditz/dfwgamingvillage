@@ -126,16 +126,16 @@ export function eventEndTimeLabel(endsAt) {
   return centralTimeHHMM(end) === "23:59" ? "" : fmtTime(end);
 }
 
-// "Fri, Aug 21, 2026, 2:00 PM" or "Fri, Aug 21 – Sun, Aug 23, 2026 · ends 6:00 PM".
+// "Fri, Aug 21, 2026, 2:00 PM" for one day, or for a span:
+// "Fri, Aug 21, 2026, 2:00 PM – Sun, Aug 23, 7:00 PM".
 export function fmtEventWhen(startsAt, endsAt) {
   const start = asDate(startsAt);
   if (!start) return "Date TBD";
   const days = eventDayKeys(startsAt, endsAt);
   if (days.length <= 1) return fmtDate(start);
-  const year = start.toLocaleDateString("en-US", { timeZone: "America/Chicago", year: "numeric" });
   const endsLabel = eventEndTimeLabel(endsAt);
-  return `${fmtDayLabel(days[0])} – ${fmtDayLabel(days[days.length - 1])}, ${year}`
-    + (endsLabel ? ` · ends ${endsLabel}` : "");
+  return `${fmtDate(start)} – ${fmtDayLabel(days[days.length - 1])}`
+    + (endsLabel ? `, ${endsLabel}` : "");
 }
 
 // datetime-local prefill value representing this instant's CENTRAL wall clock.

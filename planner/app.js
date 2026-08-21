@@ -42,7 +42,7 @@ import {
   showInlineStatus,
   confirmDialog,
   toast
-} from "./shared.js?v=20260817-p21";
+} from "./shared.js?v=20260817-p22";
 
 // -----------------------------
 // Config
@@ -209,7 +209,9 @@ function eventDayBounds() {
     day: first,
     days,
     multiDay,
+    firstDay: first,
     lastDay: last,
+    startsLabel: fmtTime(startsAt),
     endsLabel,
     isEventDay: (key) => days.includes(key),
     label: (multiDay
@@ -1890,6 +1892,8 @@ function renderTablesPage() {
           ${dayNum >= 0 ? `<span class="dayHeaderBadge">Day ${dayNum + 1}</span>` : ""}
           ${isFinished ? `<span class="dayHeaderState is-past">Past</span>` : ""}
           ${isToday ? `<span class="dayHeaderState is-today">Today</span>` : ""}
+          ${dayKey === bounds.firstDay
+            ? `<span class="dayHeaderEnds muted">starts ${esc(bounds.startsLabel)}</span>` : ""}
           ${(bounds.endsLabel && dayKey === bounds.lastDay)
             ? `<span class="dayHeaderEnds muted">ends ${esc(bounds.endsLabel)}</span>` : ""}
         `;
