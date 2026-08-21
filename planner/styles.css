@@ -1708,35 +1708,41 @@ textarea:focus {
 
 /* ==================  Multi-day events: day grouping  ================== */
 
+/* A day heading introduces the cards under it, so it reads as a section rule
+   rather than another bordered box competing with them. On the events page it
+   also has to span the full 2-column grid instead of taking one card's cell. */
 .dayHeader {
+  grid-column: 1 / -1;
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin: 6px 0 2px;
-  padding: 8px 12px;
-  border: 1px solid var(--line);
-  border-left: 3px solid var(--gold);
-  border-radius: var(--radius-sm);
-  background: rgba(245, 197, 66, .08);
+  gap: 9px;
+  margin: 26px 0 10px;
+  padding: 0 2px 7px;
+  border: 0;
+  border-bottom: 1px solid rgba(245, 197, 66, .3);
+  border-radius: 0;
+  background: none;
 }
 
-.dayHeader:not(:first-child) {
-  margin-top: 18px;
+.dayHeader:first-child {
+  margin-top: 4px;
 }
 
 .dayHeaderLabel {
-  color: var(--text);
-  font-size: 15px;
+  color: var(--gold);
+  font-size: 12px;
   font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .07em;
 }
 
 .dayHeaderBadge {
-  border: 1px solid rgba(245, 197, 66, .4);
+  border: 1px solid rgba(255, 255, 255, .18);
   border-radius: var(--radius-pill);
-  padding: 2px 9px;
-  background: rgba(245, 197, 66, .12);
-  color: #ffe7a3;
-  font-size: 11px;
+  padding: 1px 8px;
+  background: rgba(255, 255, 255, .06);
+  color: var(--muted);
+  font-size: 10px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: .04em;
@@ -1745,9 +1751,11 @@ textarea:focus {
 /* ============  Past days / started tables (multi-day events)  ============ */
 
 .dayHeader.is-past {
-  border-left-color: rgba(255, 255, 255, .25);
-  background: rgba(255, 255, 255, .03);
-  opacity: .75;
+  border-bottom-color: rgba(255, 255, 255, .16);
+}
+
+.dayHeader.is-past .dayHeaderLabel {
+  color: var(--muted);
 }
 
 .dayHeaderState {

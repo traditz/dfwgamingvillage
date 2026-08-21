@@ -19,7 +19,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js";
 
-import { esc, asDate, fmtDate, fmtTime, fmtEventWhen, fmtDayLabel, eventDayKeys, centralDateKey, toast } from "../shared.js?v=20260817-p26";
+import { esc, asDate, fmtDate, fmtTime, fmtEventWhen, fmtDayLabel, eventDayKeys, centralDateKey, toast } from "../shared.js?v=20260817-p27";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
