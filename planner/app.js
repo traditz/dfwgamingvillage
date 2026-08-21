@@ -43,7 +43,7 @@ import {
   showInlineStatus,
   confirmDialog,
   toast
-} from "./shared.js?v=20260817-p29";
+} from "./shared.js?v=20260817-p30";
 
 // -----------------------------
 // Config
@@ -2030,7 +2030,7 @@ function wantPostHtml(p, bggUrl, { canDelete = false, canAct = false, iAmInteres
       </div>
     </div>
     <div class="wantDetails">
-      <div class="wantBy"><span>Requested by</span> ${esc(p.createdByDisplayName || p.createdByUid || "Someone")}</div>
+      <div class="wantBy"><span>Requested by</span> ${esc(p.createdByDisplayName || p.createdByUid || "Someone")}${p.restoredAt ? ` <span class="restoredPill" title="A table picked this up, then closed">↩️ back on the list</span>` : ""}</div>
       ${names.length ? `<div class="wantInterest">🙋 <b>${names.length}</b> would play — ${esc(names.join(", "))}</div>` : ""}
       ${p.notes ? `<div class="wantNote"><span>Note</span> <div class="wantNoteText">${esc(p.notes)}</div></div>` : ""}
     </div>

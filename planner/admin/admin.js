@@ -13,7 +13,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js";
 
-import { esc, asDate, fmtDate, fmtEventWhen, centralDateKey, fmtCentralDatetimeValue, parseDatetimeLocalToISO, confirmDialog, toast, unwrapCallableError } from "../shared.js?v=20260817-p29";
+import { esc, asDate, fmtDate, fmtEventWhen, centralDateKey, fmtCentralDatetimeValue, parseDatetimeLocalToISO, confirmDialog, toast, unwrapCallableError } from "../shared.js?v=20260817-p30";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -265,6 +265,7 @@ const AUDIT_ACTIONS = {
   "table.leave":        { icon: "\u21a9\ufe0f", group: "signup", text: (e) => e.payload?.promotedName
                             ? `left a table \u2014 ${e.payload.promotedName} moved up from the waitlist`
                             : (e.payload?.tableDeleted ? "left a table, which removed it" : "left a table") },
+  "want.restore":       { icon: "↩️", group: "table",  text: (e) => `closed a table, putting the ${e.payload?.gameName || "game"} request back` },
   "want.interest":      { icon: "🙋", group: "signup", text: (e) => e.payload?.on === false
                             ? `withdrew interest in ${e.payload?.gameName || "a request"}`
                             : `would play ${e.payload?.gameName || "a requested game"}` },
