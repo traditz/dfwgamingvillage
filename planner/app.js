@@ -44,7 +44,7 @@ import {
   showInlineStatus,
   confirmDialog,
   toast
-} from "./shared.js?v=20260817-p32";
+} from "./shared.js?v=20260817-p33";
 
 // -----------------------------
 // Config
@@ -2043,7 +2043,7 @@ btnInbox?.addEventListener("click", openInboxModal);
 // Guests consume real seats, but an old bot recomputing counts as
 // signup-count can soft-overfill during the deploy gap — flipped on only
 // once the bot redeploy is confirmed.
-const GUESTS_ENABLED = false;
+const GUESTS_ENABLED = true;
 
 // One join implementation for every path (plain join, party join, and the
 // post-conflict retry). The server only runs the overlap check when the
