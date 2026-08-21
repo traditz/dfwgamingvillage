@@ -42,7 +42,7 @@ import {
   showInlineStatus,
   confirmDialog,
   toast
-} from "./shared.js?v=20260817-p20";
+} from "./shared.js?v=20260817-p21";
 
 // -----------------------------
 // Config
@@ -1324,13 +1324,27 @@ function renderGameDays(list) {
     gamedayList.innerHTML = `<div class="muted">No upcoming game days yet — check back soon!</div>`;
   } else {
     for (const gd of visibleGameDays) {
-      const startsAt = asDate(gd.startsAt);
       const el = document.createElement("div");
       el.className = "listitem eventCard";
       el.innerHTML = `
-        <div>
+        <div class="eventCardMain">
+          ${gd.visibility === "private"
+            ? `<div class="eventCardBadges"><span class="eventPill is-private">🔒 Private</span></div>` : ""}
           <button type="button" class="cardOpenBtn"><span class="title">${esc(gd.title || "Game Day")}</span></button>
-          <div class="meta">${gd.visibility === "private" ? `<span class="eventPill is-private">🔒 Private</span> ` : ""}${esc(fmtEventWhen(gd.startsAt, gd.endsAt))}${gd.location ? ` • ${esc(gd.location)}` : ""}${gd.createdByDisplayName ? ` • Hosted by ${esc(gd.createdByDisplayName)}` : ""}</div>
+          <div class="eventCardLines">
+            <div class="eventCardLine is-when">
+              <span class="eventCardIcon" aria-hidden="true">📅</span>
+              <span>${esc(fmtEventWhen(gd.startsAt, gd.endsAt))}</span>
+            </div>
+            ${gd.location ? `<div class="eventCardLine">
+              <span class="eventCardIcon" aria-hidden="true">📍</span>
+              <span>${esc(gd.location)}</span>
+            </div>` : ""}
+            ${gd.createdByDisplayName ? `<div class="eventCardLine">
+              <span class="eventCardIcon" aria-hidden="true">👤</span>
+              <span>Hosted by ${esc(gd.createdByDisplayName)}</span>
+            </div>` : ""}
+          </div>
         </div>
       `;
 
@@ -1413,9 +1427,18 @@ function renderPastGameDays() {
     const el = document.createElement("div");
     el.className = "listitem eventCard pastEventItem";
     el.innerHTML = `
-      <div>
+      <div class="eventCardMain">
         <button type="button" class="cardOpenBtn"><span class="title">${esc(gd.title || "Game Day")}</span></button>
-        <div class="meta">${esc(fmtDate(asDate(gd.startsAt)))}${gd.location ? ` • ${esc(gd.location)}` : ""}</div>
+        <div class="eventCardLines">
+          <div class="eventCardLine is-when">
+            <span class="eventCardIcon" aria-hidden="true">📅</span>
+            <span>${esc(fmtEventWhen(gd.startsAt, gd.endsAt))}</span>
+          </div>
+          ${gd.location ? `<div class="eventCardLine">
+            <span class="eventCardIcon" aria-hidden="true">📍</span>
+            <span>${esc(gd.location)}</span>
+          </div>` : ""}
+        </div>
       </div>
     `;
 

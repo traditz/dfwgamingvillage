@@ -598,7 +598,7 @@ textarea:focus {
   font-size: clamp(16px, 2vw, 20px);
   font-weight: 900;
   line-height: 1.18;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .eventCardMeta,
@@ -1809,5 +1809,66 @@ textarea:focus {
 .dayHeaderEnds {
   margin-left: auto;
   font-size: 12px;
+  font-weight: 600;
+}
+
+/* ---- Game day cards in the planner's list column --------------------------
+   That column is a fixed 360px, so the actions never fit beside the text —
+   side-by-side squeezed the title into a ~130px ribbon. These cards stack at
+   every width, and each fact gets its own line instead of a "a • b • c" run-on. */
+.listitem.eventCard {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+}
+
+.listitem.eventCard .plannerEventActions {
+  align-self: stretch;
+  justify-content: flex-start;
+}
+
+.listitem.eventCard .eventCardAction {
+  flex: 1 1 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Destructive action stays compact so it doesn't read as the main choice. */
+.listitem.eventCard .eventCardAction.btn-danger {
+  flex: 0 0 auto;
+}
+
+.eventCardBadges {
+  margin-bottom: 8px;
+}
+
+.eventCardLines {
+  display: grid;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.eventCardLine {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+  overflow-wrap: break-word;
+}
+
+.eventCardIcon {
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+  opacity: .8;
+}
+
+/* When it happens is the fact people scan for first. */
+.eventCardLine.is-when {
+  color: var(--text);
   font-weight: 600;
 }
