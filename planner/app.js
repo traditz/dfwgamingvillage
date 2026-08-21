@@ -44,7 +44,7 @@ import {
   showInlineStatus,
   confirmDialog,
   toast
-} from "./shared.js?v=20260817-p33";
+} from "./shared.js?v=20260817-p34";
 
 // -----------------------------
 // Config
@@ -135,6 +135,10 @@ const tablePager = document.querySelector("#tablePager");
 const btnPrev = document.querySelector("#btnPrev");
 const btnNext = document.querySelector("#btnNext");
 const pageInfo = document.querySelector("#pageInfo");
+const tablePagerBottom = document.querySelector("#tablePagerBottom");
+const btnPrevBottom = document.querySelector("#btnPrevBottom");
+const btnNextBottom = document.querySelector("#btnNextBottom");
+const pageInfoBottom = document.querySelector("#pageInfoBottom");
 
 // Modal element wiring lives in shared.js (single controller for all pages).
 
@@ -1860,10 +1864,14 @@ function renderTablesPage() {
   }
 
   if (total > PAGE_SIZE) {
+    const label = `Page ${currentPage + 1} / ${pages}`;
     tablePager.style.display = "";
-    pageInfo.textContent = `Page ${currentPage + 1} / ${pages}`;
+    pageInfo.textContent = label;
+    if (tablePagerBottom) tablePagerBottom.style.display = "";
+    if (pageInfoBottom) pageInfoBottom.textContent = label;
   } else {
     tablePager.style.display = "none";
+    if (tablePagerBottom) tablePagerBottom.style.display = "none";
   }
 
   if (!pageItems.length) {
@@ -2974,6 +2982,18 @@ if (btnNext) btnNext.addEventListener("click", () => {
   const pages = Math.max(1, Math.ceil(currentTables.length / PAGE_SIZE));
   currentPage = Math.min(pages - 1, currentPage + 1);
   renderTablesPage();
+});
+// Bottom pager mirrors the top one — handy after scrolling through a full page.
+if (btnPrevBottom) btnPrevBottom.addEventListener("click", () => {
+  currentPage = Math.max(0, currentPage - 1);
+  renderTablesPage();
+  tablesList?.scrollIntoView({ block: "start" });
+});
+if (btnNextBottom) btnNextBottom.addEventListener("click", () => {
+  const pages = Math.max(1, Math.ceil(currentTables.length / PAGE_SIZE));
+  currentPage = Math.min(pages - 1, currentPage + 1);
+  renderTablesPage();
+  tablesList?.scrollIntoView({ block: "start" });
 });
 
 // -----------------------------

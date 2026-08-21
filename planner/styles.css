@@ -726,6 +726,10 @@ textarea:focus {
   background: rgba(255, 255, 255, .04);
 }
 
+#tablePagerBottom {
+  margin-top: 10px;
+}
+
 .tables {
   display: flex;
   flex-direction: column;
