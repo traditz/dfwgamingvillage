@@ -1872,3 +1872,29 @@ textarea:focus {
   color: var(--text);
   font-weight: 600;
 }
+
+/* ---- Expansion lists on table cards ---------------------------------------
+   Names are shortened against the base game before they get here, so each one
+   fits on a single line and the list reads as a list instead of a paragraph.
+   (Replaces the old inline-styled stack of divs.) */
+.expansionsBlock {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.expansionsLabel {
+  margin-bottom: 3px;
+  font-weight: 600;
+}
+
+.expansionsList {
+  margin: 0;
+  padding-left: 15px;
+  line-height: 1.4;
+  list-style: disc;
+}
+
+.expansionsList li::marker {
+  color: rgba(255, 255, 255, .34);
+}

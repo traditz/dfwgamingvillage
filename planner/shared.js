@@ -410,3 +410,24 @@ export function toast(message, kind = "info", timeout = 4000) {
 if (typeof document !== "undefined" && document.body) {
   ensureToastHost();
 }
+
+// BoardGameGeek repeats the base game in every expansion title
+// ("Twilight Imperium: Fourth Edition – Prophecy of Kings"), which turns a
+// three-item list into a wall of wrapped text. The card already says which
+// game it is, so drop the part the reader knows and keep what distinguishes
+// each expansion. Falls back to the full name if trimming leaves nothing.
+export function shortExpansionName(name, gameName) {
+  const full = String(name || "").trim();
+  const base = String(gameName || "").trim();
+  if (!full || !base) return full;
+
+  const basePattern = base.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  let out = full
+    // "<base> – Foo" / "<base>: Foo" / "<base>, Foo"
+    .replace(new RegExp(`^${basePattern}\\s*[\u2013\u2014:,-]\\s*`, "i"), "")
+    // "Foo (Fan expansion to <base>)"
+    .replace(new RegExp(`\\s*\\([^()]*${basePattern}[^()]*\\)\\s*$`, "i"), "")
+    .trim();
+
+  return out || full;
+}

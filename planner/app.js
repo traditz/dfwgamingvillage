@@ -32,6 +32,7 @@ import {
   fmtDayLabel,
   fmtEventWhen,
   eventEndTimeLabel,
+  shortExpansionName,
   fmtCentralDatetimeValue,
   parseDatetimeLocalToISO,
   unwrapCallableError,
@@ -42,7 +43,7 @@ import {
   showInlineStatus,
   confirmDialog,
   toast
-} from "./shared.js?v=20260817-p23";
+} from "./shared.js?v=20260817-p24";
 
 // -----------------------------
 // Config
@@ -1612,21 +1613,21 @@ function buildTableCard(t, isPast, sig) {
   const expansions = Array.isArray(t.expansions) ? t.expansions : [];
   const expLinks = expansions.map((e) => {
     const expId = e?.bggId ?? "";
-    const expName = e?.name ?? "";
+    const expName = shortExpansionName(e?.name ?? "", t.gameName ?? "");
     const expUrl = expId ? `https://boardgamegeek.com/boardgame/${encodeURIComponent(expId)}` : null;
     return expUrl
-      ? `<div><a href="${esc(expUrl)}" target="_blank" rel="noopener">${esc(expName)}</a></div>`
-      : `<div>${esc(expName)}</div>`;
+      ? `<li><a href="${esc(expUrl)}" target="_blank" rel="noopener">${esc(expName)}</a></li>`
+      : `<li>${esc(expName)}</li>`;
   });
   // Long expansion lists collapse to the first 3 with a toggle — full list
   // always reachable, cards stay scannable.
   const expansionsHtml = expLinks.length
     ? `
-      <div class="muted expansionsBlock" style="margin-top:8px;">
-        <div style="font-weight:600; margin-bottom:4px;">Expansions:</div>
-        ${expLinks.slice(0, 3).join("")}
+      <div class="expansionsBlock">
+        <div class="expansionsLabel">Expansions</div>
+        <ul class="expansionsList">${expLinks.slice(0, 3).join("")}</ul>
         ${expLinks.length > 3
-          ? `<div class="expMore" hidden>${expLinks.slice(3).join("")}</div>
+          ? `<ul class="expansionsList expMore" hidden>${expLinks.slice(3).join("")}</ul>
              <button type="button" class="btn btn-small expToggle">+${expLinks.length - 3} more</button>`
           : ""}
       </div>
