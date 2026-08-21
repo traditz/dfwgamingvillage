@@ -31,6 +31,7 @@ import {
   eventDayKeys,
   fmtDayLabel,
   fmtEventWhen,
+  eventEndTimeLabel,
   fmtCentralDatetimeValue,
   parseDatetimeLocalToISO,
   unwrapCallableError,
@@ -41,7 +42,7 @@ import {
   showInlineStatus,
   confirmDialog,
   toast
-} from "./shared.js?v=20260817-p19";
+} from "./shared.js?v=20260817-p20";
 
 // -----------------------------
 // Config
@@ -199,16 +200,23 @@ function eventDayBounds() {
   const todayKey = centralDateKey(new Date());
   const defaultDay = days.includes(todayKey) ? todayKey : first;
 
+  // When the organizer set a wrap-up time, tables can't be scheduled past it.
+  const endsAtDate = asDate(currentGameDay.endsAt);
+  const endsLabel = eventEndTimeLabel(currentGameDay.endsAt);
+  const max = endsAtDate ? fmtCentralDatetimeValue(endsAtDate) : `${last}T23:59`;
+
   return {
     day: first,
     days,
     multiDay,
+    lastDay: last,
+    endsLabel,
     isEventDay: (key) => days.includes(key),
-    label: multiDay
+    label: (multiDay
       ? `${fmtDayLabel(first)} – ${fmtDayLabel(last)}`
-      : fmtDayLabel(first),
+      : fmtDayLabel(first)) + (endsLabel ? `, ending ${endsLabel}` : ""),
     min: `${first}T00:00`,
-    max: `${last}T23:59`,
+    max,
     default: `${defaultDay}T${centralTimeHHMM(startsAt)}`
   };
 }
@@ -987,6 +995,10 @@ function openHostTableFormModal({ gamedayId, thing }) {
         showInlineError(`Tables must start during the event (${bounds.label}).`);
         return;
       }
+      if (bounds && bounds.endsLabel && startVal > bounds.max) {
+        showInlineError(`The event wraps up at ${bounds.endsLabel} — pick an earlier start.`);
+        return;
+      }
 
       const capRaw = Number(qs("#capacity").value || 0);
       const capFinal = (Number.isFinite(capRaw) && capRaw > 0)
@@ -1083,6 +1095,10 @@ function openEditTableModal(t) {
         }
         if (bounds && !bounds.isEventDay(startVal.slice(0, 10))) {
             showInlineError(`Tables must start during the event (${bounds.label}).`);
+            return;
+        }
+        if (bounds && bounds.endsLabel && startVal > bounds.max) {
+            showInlineError(`The event wraps up at ${bounds.endsLabel} — pick an earlier start.`);
             return;
         }
 
@@ -1851,6 +1867,8 @@ function renderTablesPage() {
           ${dayNum >= 0 ? `<span class="dayHeaderBadge">Day ${dayNum + 1}</span>` : ""}
           ${isFinished ? `<span class="dayHeaderState is-past">Past</span>` : ""}
           ${isToday ? `<span class="dayHeaderState is-today">Today</span>` : ""}
+          ${(bounds.endsLabel && dayKey === bounds.lastDay)
+            ? `<span class="dayHeaderEnds muted">ends ${esc(bounds.endsLabel)}</span>` : ""}
         `;
         const at = cursor ? cursor.nextElementSibling : tablesList.firstElementChild;
         tablesList.insertBefore(header, at);
@@ -2197,9 +2215,9 @@ function openCreateGameDayModal() {
         </label>
 
         <label class="field">
-          <div class="label">Last day (optional)</div>
-          <input id="gdEndDate" class="input" type="date" />
-          <div class="hint muted">Set this for conventions that run several days.</div>
+          <div class="label">Ends (optional)</div>
+          <input id="gdEndDate" class="input" type="datetime-local" />
+          <div class="hint muted">For conventions: the last day and the time it wraps up.</div>
         </label>
 
         <label class="field fieldSpan2">
@@ -2256,14 +2274,16 @@ function openCreateGameDayModal() {
       return;
     }
 
-    // Validate the optional last day BEFORE disabling the buttons, so a bad
-    // value leaves the form usable.
-    const endDay = String(qs("#gdEndDate")?.value || "").trim();
-    if (endDay && endDay < gdStartVal.slice(0, 10)) {
-      showInlineError("The last day can't be before the start.");
+    // Validate the optional end BEFORE disabling the buttons, so a bad value
+    // leaves the form usable. A date-only entry means "end of that day".
+    const endVal = String(qs("#gdEndDate")?.value || "").trim();
+    if (endVal && endVal <= gdStartVal) {
+      showInlineError("The event has to end after it starts.");
       return;
     }
-    const endsAt = endDay ? parseDatetimeLocalToISO(`${endDay}T23:59`) : null;
+    const endsAt = endVal
+      ? parseDatetimeLocalToISO(endVal.length === 10 ? `${endVal}T23:59` : endVal)
+      : null;
 
     const location = String(qs("#gdLocation").value || "").trim();
 

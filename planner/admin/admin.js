@@ -13,7 +13,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js";
 
-import { esc, asDate, fmtDate, fmtEventWhen, centralDateKey, fmtCentralDatetimeValue, parseDatetimeLocalToISO, confirmDialog, toast } from "../shared.js?v=20260817-p19";
+import { esc, asDate, fmtDate, fmtEventWhen, centralDateKey, fmtCentralDatetimeValue, parseDatetimeLocalToISO, confirmDialog, toast } from "../shared.js?v=20260817-p20";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -110,10 +110,7 @@ function selectEvent(id) {
   eventStart.value = fmtCentralDatetimeValue(gd.startsAt);
   eventStatus.value = gd.status || "draft";
   if (eventVisibility) eventVisibility.value = gd.visibility === "private" ? "private" : "public";
-  if (eventEndDate) {
-    const end = asDate(gd.endsAt);
-    eventEndDate.value = end ? centralDateKey(end) : "";
-  }
+  if (eventEndDate) eventEndDate.value = gd.endsAt ? fmtCentralDatetimeValue(gd.endsAt) : "";
   eventLocation.value = gd.location || "";
   publicLink.href = `../events/?id=${encodeURIComponent(gd.id)}`;
   renderDiscordBinding(gd);
@@ -281,7 +278,7 @@ eventForm?.addEventListener("submit", async (ev) => {
     visibility: eventVisibility ? eventVisibility.value : "public",
     // Blank clears it (back to a single-day event).
     endsAt: (eventEndDate && eventEndDate.value)
-      ? parseDatetimeLocalToISO(`${eventEndDate.value}T23:59`)
+      ? parseDatetimeLocalToISO(eventEndDate.value)
       : null
   };
 
