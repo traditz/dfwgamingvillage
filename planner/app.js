@@ -17,6 +17,7 @@ import {
   query,
   where,
   orderBy,
+  limit,
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js";
@@ -43,7 +44,7 @@ import {
   showInlineStatus,
   confirmDialog,
   toast
-} from "./shared.js?v=20260817-p30";
+} from "./shared.js?v=20260817-p31";
 
 // -----------------------------
 // Config
@@ -78,6 +79,7 @@ const fnDeleteTable = httpsCallable(functions, "deleteTable");
 const fnCreateWantToPlay = httpsCallable(functions, "createWantToPlay");
 const fnDeleteWantToPlay = httpsCallable(functions, "deleteWantToPlay");
 const fnToggleWantInterest = httpsCallable(functions, "toggleWantInterest");
+const fnMarkNotificationsRead = httpsCallable(functions, "markNotificationsRead");
 const fnJoinTable = httpsCallable(functions, "joinTable");
 const fnLeaveTable = httpsCallable(functions, "leaveTable");
 const fnGetMyPlannerRole = httpsCallable(functions, "getMyPlannerRole");
@@ -105,6 +107,8 @@ const btnPastEvents = document.querySelector("#btnPastEvents");
 const btnBecomeHost = document.querySelector("#btnBecomeHost");
 const btnNickname = document.querySelector("#btnNickname");
 const btnMyEvents = document.querySelector("#btnMyEvents");
+const btnInbox = document.querySelector("#btnInbox");
+const inboxBadge = document.querySelector("#inboxBadge");
 const btnHostGuide = document.querySelector("#btnHostGuide");
 
 // Discord bot invite: same application as OAuth. Permissions = View Channels,
@@ -611,11 +615,13 @@ function setButtonsForAuth(user) {
     btnSignOut.style.display = "";
     if (btnNickname) btnNickname.style.display = "";
     if (btnMyEvents) btnMyEvents.style.display = "";
+    if (btnInbox) btnInbox.style.display = "";
   } else {
     btnSignIn.style.display = "";
     btnSignOut.style.display = "none";
     if (btnNickname) btnNickname.style.display = "none";
     if (btnMyEvents) btnMyEvents.style.display = "none";
+    if (btnInbox) btnInbox.style.display = "none";
   }
   // Create Game Day / Request Organizer Access buttons are role-driven.
   applyRoleUI();
@@ -1946,6 +1952,94 @@ function renderTablesPage() {
   for (const el of existing.values()) el.remove();
 }
 
+// -----------------------------
+// In-app inbox (the bell)
+// -----------------------------
+// Same outbox the Discord bot drains. Discord delivery stamps sentAt; the
+// web tracks its own readAt, so a message shows here whether or not a DM
+// also went out. This is the only channel for people signed in with Google.
+let inboxItems = [];
+let inboxUnsub = null;
+let inboxPrimed = false;
+
+// Messages are authored in Discord markdown. Render the two constructs we
+// actually use: **bold** and <t:unix:f> timestamps (shown in Central).
+function inboxMessageHtml(text) {
+  let out = esc(String(text || ""));
+  out = out.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+  out = out.replace(/&lt;t:(\d+):[a-zA-Z]&gt;/g, (_, secs) => esc(fmtDate(new Date(Number(secs) * 1000))));
+  out = out.replace(/(https?:\/\/[^\s<]+)/g, (m) => `<a href="${m}">${m.replace(/^https?:\/\/(www\.)?/, "")}</a>`);
+  return out;
+}
+
+function inboxPlainText(text) {
+  return String(text || "").replace(/\*\*/g, "").replace(/<t:(\d+):[a-zA-Z]>/g,
+    (_, secs) => fmtTime(new Date(Number(secs) * 1000))).replace(/https?:\/\/\S+/g, "").trim();
+}
+
+function updateInboxBadge() {
+  if (!inboxBadge) return;
+  const unread = inboxItems.filter((n) => !n.readAt).length;
+  inboxBadge.textContent = unread > 9 ? "9+" : String(unread);
+  inboxBadge.hidden = unread === 0;
+  if (btnInbox) btnInbox.setAttribute("aria-label", unread ? `Notifications, ${unread} unread` : "Notifications");
+}
+
+function startInboxListener(uid) {
+  stopInboxListener();
+  inboxPrimed = false;
+  const q = query(
+    collection(db, "plannerNotifications"),
+    where("uid", "==", uid),
+    orderBy("createdAt", "desc"),
+    limit(30)
+  );
+  inboxUnsub = onSnapshot(q, (snap) => {
+    const prevIds = new Set(inboxItems.map((n) => n.id));
+    inboxItems = snap.docs.map((d) => ({ id: d.id, ...(d.data() || {}) }));
+    updateInboxBadge();
+    // Toast genuinely new arrivals while the page is open — a seat opening
+    // up should interrupt; the initial load should not.
+    if (inboxPrimed) {
+      for (const n of inboxItems) {
+        if (!prevIds.has(n.id) && !n.readAt) toast(inboxPlainText(n.message), "success");
+      }
+    }
+    inboxPrimed = true;
+  }, (err) => {
+    console.warn("inbox listener", err);
+  });
+}
+
+function stopInboxListener() {
+  if (inboxUnsub) { try { inboxUnsub(); } catch {} }
+  inboxUnsub = null;
+  inboxItems = [];
+  updateInboxBadge();
+}
+
+function openInboxModal() {
+  const rows = inboxItems.length
+    ? inboxItems.map((n) => `
+        <div class="inboxItem${n.readAt ? "" : " is-unread"}">
+          <div>${inboxMessageHtml(n.message)}</div>
+          <div class="inboxWhen muted">${n.createdAt ? esc(fmtDate(asDate(n.createdAt))) : ""}</div>
+        </div>`).join("")
+    : `<div class="muted">Nothing yet. You'll hear here when a request of yours is picked up, or a seat opens up for you.</div>`;
+
+  openModal("Notifications", `<div class="inboxList">${rows}</div>`);
+
+  const unreadIds = inboxItems.filter((n) => !n.readAt).map((n) => n.id);
+  if (unreadIds.length) {
+    // Optimistic: clear the badge now; the snapshot confirms shortly.
+    inboxItems = inboxItems.map((n) => (n.readAt ? n : { ...n, readAt: new Date() }));
+    updateInboxBadge();
+    fnMarkNotificationsRead({ ids: unreadIds }).catch(() => {});
+  }
+}
+
+btnInbox?.addEventListener("click", openInboxModal);
+
 // Guests consume real seats, but an old bot recomputing counts as
 // signup-count can soft-overfill during the deploy gap — flipped on only
 // once the bot redeploy is confirmed.
@@ -2899,6 +2993,7 @@ onAuthStateChanged(auth, async (user) => {
     setAuthStatus("Not signed in.");
   }
   setButtonsForAuth(user);
+  if (user) startInboxListener(user.uid); else stopInboxListener();
 
   // Re-render to show/hide owner-only controls (delete/edit, want-to-play delete)
   // on auth change. Both tables and wants are kept in state so both refresh.
