@@ -13,7 +13,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js";
 
-import { esc, asDate, fmtDate, fmtEventWhen, centralDateKey, fmtCentralDatetimeValue, parseDatetimeLocalToISO, confirmDialog, toast } from "../shared.js?v=20260817-p25";
+import { esc, asDate, fmtDate, fmtEventWhen, centralDateKey, fmtCentralDatetimeValue, parseDatetimeLocalToISO, confirmDialog, toast } from "../shared.js?v=20260817-p26";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -253,11 +253,19 @@ function renderEvents() {
     const row = document.createElement("button");
     row.type = "button";
     row.className = `adminRow ${gd.id === selectedId ? "is-active" : ""}`;
+    // One channel names it; several just get a count, since the full list is
+    // in the Discord Channels card for whichever event is selected.
+    const bound = discordBindings(gd);
+    const discordLabel = !bound.length
+      ? "Discord: Not linked"
+      : bound.length === 1
+        ? `Discord: ${esc(bound[0].channelName ? `#${bound[0].channelName}` : bound[0].channelId)}`
+        : `Discord: ${bound.length} channels`;
     row.innerHTML = `
       <div>
         <div class="rowTitle">${esc(gd.title || "Game Day")}</div>
         <div class="rowMeta">${esc(fmtEventWhen(gd.startsAt, gd.endsAt))}${gd.location ? ` - ${esc(gd.location)}` : ""}</div>
-        <div class="rowMeta">${discordBinding(gd).channelId ? `Discord: ${esc(discordBinding(gd).channelName ? `#${discordBinding(gd).channelName}` : discordBinding(gd).channelId)}` : "Discord: Not linked"}</div>
+        <div class="rowMeta">${discordLabel}</div>
       </div>
       <span class="statusPill ${esc(gd.status || "draft")}">${esc(gd.status || "draft")}</span>
     `;
