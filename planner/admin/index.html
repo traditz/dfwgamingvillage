@@ -12,8 +12,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" />
 
-  <link rel="stylesheet" href="../styles.css?v=20260817-p27" />
-  <link rel="stylesheet" href="./admin.css?v=20260817-p27" />
+  <link rel="stylesheet" href="../styles.css?v=20260817-p28" />
+  <link rel="stylesheet" href="./admin.css?v=20260817-p28" />
 </head>
 <body>
   <header class="topbar">
@@ -130,6 +130,27 @@
         </div>
       </section>
 
+      <section class="card cardSpan" id="activityCard">
+        <div class="cardhead">
+          <h2>Activity</h2>
+          <div class="cardActions">
+            <select id="activityFilter" class="input">
+              <option value="">All activity</option>
+              <option value="table">Tables only</option>
+              <option value="signup">Sign-ups only</option>
+              <option value="event">Event changes</option>
+              <option value="access">Access &amp; invites</option>
+            </select>
+            <button class="btn" type="button" id="btnRefreshActivity">Refresh</button>
+          </div>
+        </div>
+        <div class="muted" id="activityHint">Select an event to see who did what.</div>
+        <ol class="auditList" id="activityList"></ol>
+        <div class="adminActions">
+          <button class="btn" type="button" id="btnMoreActivity" style="display:none;">Load older</button>
+        </div>
+      </section>
+
       <section class="card cardSpan" id="hostsCard">
         <div class="cardhead">
           <h2>Hosts</h2>
@@ -199,6 +220,6 @@
     </div>
   </div>
 
-  <script type="module" src="./admin.js?v=20260817-p27"></script>
+  <script type="module" src="./admin.js?v=20260817-p28"></script>
 </body>
 </html>

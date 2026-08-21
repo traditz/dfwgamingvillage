@@ -13,7 +13,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js";
 
-import { esc, asDate, fmtDate, fmtEventWhen, centralDateKey, fmtCentralDatetimeValue, parseDatetimeLocalToISO, confirmDialog, toast } from "../shared.js?v=20260817-p27";
+import { esc, asDate, fmtDate, fmtEventWhen, centralDateKey, fmtCentralDatetimeValue, parseDatetimeLocalToISO, confirmDialog, toast, unwrapCallableError } from "../shared.js?v=20260817-p28";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -26,6 +26,7 @@ const fnDeleteGameDay = httpsCallable(functions, "deleteGameDay");
 const fnListHostAdmin = httpsCallable(functions, "listHostAdmin");
 const fnManageHost = httpsCallable(functions, "manageHost");
 const fnGetMyPlannerRole = httpsCallable(functions, "getMyPlannerRole");
+const fnListAuditLog = httpsCallable(functions, "listAuditLog");
 
 const authStatus = document.querySelector("#authStatus");
 const adminLinks = document.querySelectorAll("[data-admin-link]");
@@ -48,6 +49,11 @@ const discordStatusValue = document.querySelector("#discordStatusValue");
 const discordHelp = document.querySelector("#discordHelp");
 const discordCommand = document.querySelector("#discordCommand");
 const discordChannelList = document.querySelector("#discordChannelList");
+const activityList = document.querySelector("#activityList");
+const activityHint = document.querySelector("#activityHint");
+const activityFilter = document.querySelector("#activityFilter");
+const btnRefreshActivity = document.querySelector("#btnRefreshActivity");
+const btnMoreActivity = document.querySelector("#btnMoreActivity");
 const btnCopyBindCommand = document.querySelector("#btnCopyBindCommand");
 const statusBox = document.querySelector("#statusBox");
 const errorBox = document.querySelector("#errorBox");
@@ -115,6 +121,7 @@ function selectEvent(id) {
   eventLocation.value = gd.location || "";
   publicLink.href = `../events/?id=${encodeURIComponent(gd.id)}`;
   renderDiscordBinding(gd);
+  loadActivity();
   renderEvents();
   subscribeTables(gd.id);
 }
@@ -136,6 +143,7 @@ function newEvent() {
   eventLocation.value = "";
   publicLink.href = "../events/";
   renderDiscordBinding(null);
+  loadActivity();
   tableRows.innerHTML = `<div class="muted">Save the event before managing tables.</div>`;
   renderEvents();
 }
@@ -241,6 +249,119 @@ function renderDiscordBinding(gd) {
     `).join("");
   }
 }
+
+// ---------------------------------------------------------------- activity
+// Each audit action becomes one plain sentence. Anything unrecognised still
+// renders (as its raw action name) rather than vanishing from the log.
+const AUDIT_ACTIONS = {
+  "table.create":       { icon: "\u2795", group: "table",  text: (e) => `hosted ${e.payload?.gameName || "a table"}` },
+  "table.update":       { icon: "\u270f\ufe0f", group: "table",  text: (e) => `edited a table${e.payload?.fields?.length ? ` (${e.payload.fields.join(", ")})` : ""}` },
+  "table.delete":       { icon: "\ud83d\uddd1\ufe0f", group: "table",  text: () => "deleted a table" },
+  "table.join":         { icon: "\u2705", group: "signup", text: (e) => `joined ${e.payload?.gameName || "a table"}` },
+  "table.waitlist":     { icon: "\u23f3", group: "signup", text: (e) => `joined the waitlist for ${e.payload?.gameName || "a table"}` },
+  "table.leave":        { icon: "\u21a9\ufe0f", group: "signup", text: (e) => e.payload?.promotedName
+                            ? `left a table \u2014 ${e.payload.promotedName} moved up from the waitlist`
+                            : (e.payload?.tableDeleted ? "left a table, which removed it" : "left a table") },
+  "gameday.create":     { icon: "\ud83d\udcc5", group: "event",  text: (e) => `created the event${e.payload?.title ? ` \u201c${e.payload.title}\u201d` : ""}` },
+  "gameday.update":     { icon: "\u2699\ufe0f", group: "event",  text: (e) => `updated the event${e.payload?.fields?.length ? ` (${e.payload.fields.join(", ")})` : ""}` },
+  "gameday.delete":     { icon: "\ud83d\uddd1\ufe0f", group: "event",  text: () => "deleted the event" },
+  "invite.request":     { icon: "\ud83d\udd11", group: "access", text: () => "requested an invite" },
+  "invite.redeem":      { icon: "\ud83d\udd11", group: "access", text: () => "joined via an invite link" },
+  "invite.approve":     { icon: "\ud83d\udc4d", group: "access", text: () => "approved an invite request" },
+  "invite.deny":        { icon: "\ud83d\udc4e", group: "access", text: () => "denied an invite request" },
+  "invite.rotate":      { icon: "\ud83d\udd04", group: "access", text: () => "reset the invite link" },
+  "invite.remove":      { icon: "\u274c", group: "access", text: () => "removed someone's access" }
+};
+
+let activityEntries = [];
+let activityCursor = null;
+let activityLoading = false;
+
+function auditActorLabel(entry) {
+  if (entry.actorName) return entry.actorName;
+  const uid = String(entry.actorUid || "");
+  if (!uid) return "Someone";
+  // Older rows predate the name snapshot; a Discord uid is at least a hint.
+  return uid.startsWith("discord:") ? "A Discord user" : "Someone";
+}
+
+function renderActivity() {
+  if (!activityList) return;
+  const want = activityFilter?.value || "";
+  const rows = activityEntries.filter((e) => {
+    if (!want) return true;
+    return (AUDIT_ACTIONS[e.action]?.group || "") === want;
+  });
+
+  if (!rows.length) {
+    activityList.innerHTML = `<li class="auditEmpty muted">${
+      activityEntries.length ? "Nothing matches this filter." : "No activity recorded for this event yet."
+    }</li>`;
+    return;
+  }
+
+  activityList.innerHTML = rows.map((e) => {
+    const def = AUDIT_ACTIONS[e.action];
+    const what = def ? def.text(e) : esc(e.action);
+    return `
+      <li class="auditRow">
+        <span class="auditIcon" aria-hidden="true">${def ? def.icon : "\u2022"}</span>
+        <div class="auditBody">
+          <div class="auditText"><b>${esc(auditActorLabel(e))}</b> ${what}</div>
+          <div class="auditWhen muted">${e.createdAt ? esc(fmtDate(e.createdAt)) : "unknown time"}</div>
+        </div>
+      </li>
+    `;
+  }).join("");
+}
+
+async function loadActivity({ append = false } = {}) {
+  if (!activityList || activityLoading) return;
+  if (!selectedId) {
+    activityEntries = [];
+    activityCursor = null;
+    activityList.innerHTML = "";
+    if (activityHint) activityHint.textContent = "Select an event to see who did what.";
+    if (btnMoreActivity) btnMoreActivity.style.display = "none";
+    return;
+  }
+
+  activityLoading = true;
+  if (activityHint) activityHint.textContent = "Loading activity\u2026";
+
+  try {
+    const res = await fnListAuditLog({
+      gamedayId: selectedId,
+      limit: 50,
+      ...(append && activityCursor ? { before: activityCursor } : {})
+    });
+    const batch = res?.data?.entries || [];
+    activityEntries = append ? [...activityEntries, ...batch] : batch;
+    const last = batch[batch.length - 1];
+    activityCursor = last?.createdAt ? new Date(last.createdAt).getTime() : null;
+
+    if (activityHint) {
+      activityHint.textContent = activityEntries.length
+        ? `${activityEntries.length} event${activityEntries.length === 1 ? "" : "s"} shown, newest first.`
+        : "No activity recorded for this event yet.";
+    }
+    if (btnMoreActivity) {
+      btnMoreActivity.style.display = res?.data?.hasMore ? "" : "none";
+    }
+    renderActivity();
+  } catch (err) {
+    activityEntries = [];
+    activityList.innerHTML = "";
+    if (activityHint) activityHint.textContent = unwrapCallableError(err);
+    if (btnMoreActivity) btnMoreActivity.style.display = "none";
+  } finally {
+    activityLoading = false;
+  }
+}
+
+btnRefreshActivity?.addEventListener("click", () => loadActivity());
+btnMoreActivity?.addEventListener("click", () => loadActivity({ append: true }));
+activityFilter?.addEventListener("change", renderActivity);
 
 function renderEvents() {
   eventRows.innerHTML = "";
