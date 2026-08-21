@@ -42,7 +42,7 @@ import {
   showInlineStatus,
   confirmDialog,
   toast
-} from "./shared.js?v=20260817-p22";
+} from "./shared.js?v=20260817-p23";
 
 // -----------------------------
 // Config
@@ -1017,11 +1017,13 @@ function openHostTableFormModal({ gamedayId, thing }) {
       const notes = String(qs("#notes").value || "").trim();
 
       const expList = qs("#expList");
-      const checked = expList
+      const checkedBoxes = expList
         ? Array.from(expList.querySelectorAll('input[type="checkbox"]:checked'))
-            .map((c) => String(c.value))
-            .filter(Boolean)
         : [];
+      const checked = checkedBoxes.map((c) => String(c.value)).filter(Boolean);
+      // Sent alongside the ids so the server can still label them if BGG is
+      // down when the table is created.
+      const checkedNames = checkedBoxes.map((c) => c.parentElement?.querySelector("span")?.textContent?.trim() || "");
 
       try {
         btnCreate.disabled = true;
@@ -1039,7 +1041,8 @@ function openHostTableFormModal({ gamedayId, thing }) {
           startTime: startIso,
           capacity: capFinal,
           notes,
-          expansionIds: checked
+          expansionIds: checked,
+          expansionNames: checkedNames
         });
 
         showInlineStatus("Created!");
