@@ -43,7 +43,7 @@ import {
   showInlineStatus,
   confirmDialog,
   toast
-} from "./shared.js?v=20260817-p28";
+} from "./shared.js?v=20260817-p29";
 
 // -----------------------------
 // Config
@@ -77,6 +77,7 @@ const fnUpdateTable = httpsCallable(functions, "updateTable");
 const fnDeleteTable = httpsCallable(functions, "deleteTable");
 const fnCreateWantToPlay = httpsCallable(functions, "createWantToPlay");
 const fnDeleteWantToPlay = httpsCallable(functions, "deleteWantToPlay");
+const fnToggleWantInterest = httpsCallable(functions, "toggleWantInterest");
 const fnJoinTable = httpsCallable(functions, "joinTable");
 const fnLeaveTable = httpsCallable(functions, "leaveTable");
 const fnGetMyPlannerRole = httpsCallable(functions, "getMyPlannerRole");
@@ -430,17 +431,22 @@ function ensureRosterListener(gamedayId, tableId) {
       // Count EVERY signup doc — a missing display name must not make the
       // roster (and seat counts) disagree with the server.
       const name = String(s.displayName || "").trim() || "Player";
+      const guests = Math.max(0, Number(s.guestCount || 0));
 
       if (s.status === "waitlist") {
-          waitlist.push({ name, uid });
+          waitlist.push({ name, uid, guests });
           waitlistIds.add(uid);
       } else {
-          confirmed.push({ name, uid });
+          confirmed.push({ name, uid, guests });
           confirmedIds.add(uid);
       }
     });
 
-    rosterByTableId.set(tableId, { confirmed, waitlist, confirmedIds, waitlistIds });
+    const seats = (list) => list.reduce((n, e) => n + 1 + e.guests, 0);
+    rosterByTableId.set(tableId, {
+      confirmed, waitlist, confirmedIds, waitlistIds,
+      confirmedSeats: seats(confirmed), waitlistSeats: seats(waitlist)
+    });
     updateRosterDom(tableId);
     // Targeted button refresh instead of a full page re-render (avoids flicker).
     const card = tablesList?.querySelector?.(`[data-table-card="${CSS.escape(String(tableId))}"]`);
@@ -525,7 +531,8 @@ function rosterNamesHtml(entries) {
   const myUid = currentUser?.uid;
   return entries.map((e) => {
     const isYou = !!(myUid && e.uid === myUid);
-    return `<span class="rosterChip${isYou ? " is-you" : ""}">${esc(e.name)}${isYou ? " (you)" : ""}</span>`;
+    const party = e.guests > 0 ? ` +${e.guests}` : "";
+    return `<span class="rosterChip${isYou ? " is-you" : ""}">${esc(e.name)}${party}${isYou ? " (you)" : ""}</span>`;
   }).join("");
 }
 
@@ -897,7 +904,7 @@ function openGameSearchModal({ title }) {
 // -----------------------------
 // Modal: host table form (no prompts)
 // -----------------------------
-function openHostTableFormModal({ gamedayId, thing }) {
+function openHostTableFormModal({ gamedayId, thing, fromPostId = null, requestedByName = "" }) {
   return new Promise((resolve) => {
     const bounds = eventDayBounds();
     const defaultStart = bounds ? bounds.default : fmtCentralDatetimeValue(new Date(Date.now() + 60 * 60 * 1000));
@@ -908,6 +915,7 @@ function openHostTableFormModal({ gamedayId, thing }) {
 
     openModal(isCustom ? "Create a Sign-Up" : "Host a Table", `
       <div class="modalStack">
+        ${fromPostId ? `<div class="convertBanner">🙋 Picking up ${esc(requestedByName || "someone")}'s request — it clears once your table is up.</div>` : ""}
         <div class="gameHeader">
           <div class="gameHeaderThumb">
             ${thing.thumbUrl
@@ -938,6 +946,16 @@ function openHostTableFormModal({ gamedayId, thing }) {
             <input id="capacity" class="input" type="number" min="1" step="1" placeholder="${isCustom ? "e.g. 6" : "e.g. 4"}" value="${esc(defaultCap)}" />
             <div class="hint muted">${isCustom ? "How many people can sign up?" : "Defaults to max players if known."}</div>
           </label>
+
+          ${isCustom ? "" : `
+          <div class="field fieldSpan2">
+            <div class="label">Whose copy?</div>
+            <div class="copyChoice" role="radiogroup" aria-label="Whose copy of the game">
+              <label class="check"><input type="radio" name="gameSource" value="personal" checked /> <span>🎒 My copy</span></label>
+              <label class="check"><input type="radio" name="gameSource" value="library" /> <span>📚 Library copy</span></label>
+            </div>
+            <div class="hint muted">Library copies are checked against the event's game library.</div>
+          </div>`}
 
           <label class="field fieldSpan2">
             <div class="label">Notes</div>
@@ -1043,7 +1061,9 @@ function openHostTableFormModal({ gamedayId, thing }) {
           capacity: capFinal,
           notes,
           expansionIds: checked,
-          expansionNames: checkedNames
+          expansionNames: checkedNames,
+          fromPostId: fromPostId || null,
+          gameSource: (qs('input[name="gameSource"]:checked')?.value === "library") ? "library" : "personal"
         });
 
         showInlineStatus("Created!");
@@ -1510,7 +1530,9 @@ function stopPastEventAction(ev) {
 // counts before the roster listener delivers. Prevents visible count jumps.
 function seatCounts(t) {
   const r = rosterByTableId.get(t.id);
-  if (r) return { confirmed: r.confirmed.length, waitlist: r.waitlist.length };
+  // Seats (people incl. guests), not signup docs — matches the server's
+  // aggregate meaning. Fallback uses the denormalized counts, same units.
+  if (r) return { confirmed: r.confirmedSeats, waitlist: r.waitlistSeats };
   return { confirmed: Number(t.confirmedCount || 0), waitlist: Number(t.waitlistCount || 0) };
 }
 
@@ -1583,6 +1605,8 @@ function tableRenderSig(t, isPast) {
     asDate(t.startTime)?.getTime() ?? null,
     t.capacity, t.notes, t.gameName, t.thumbUrl, t.bggId,
     t.hostUid, t.hostDisplayName,
+    t.requestedByDisplayName ?? null,
+    t.gameSource ?? null,
     Array.isArray(t.expansions) ? t.expansions.map((e) => e?.bggId) : [],
     isHost, canManage, isPast,
     currentUser?.uid || null,
@@ -1662,6 +1686,8 @@ function buildTableCard(t, isPast, sig) {
       </div>
       <div class="row2">
         <div class="muted">Host: <span class="hostName${isHost ? " is-you" : ""}">${esc(t.hostDisplayName || t.hostUid || "Unknown")}</span>${isHost ? " (you)" : ""}</div>
+        ${t.requestedByDisplayName ? `<div class="muted requestedBy">🙋 Requested by ${esc(t.requestedByDisplayName)}</div>` : ""}
+        ${t.gameSource === "library" ? `<div class="libPill">📚 Library copy</div>` : ""}
         <div class="seats" data-seats-root="${esc(t.id)}" data-cap="${cap}">
           <span class="seatsText muted">Seats: ${confirmed}/${cap}${wait ? ` • Waitlist: ${wait}` : ""}</span>
           <span class="seatPips" aria-hidden="true"></span>
@@ -1715,17 +1741,12 @@ function buildTableCard(t, isPast, sig) {
 
     const btn = ev.currentTarget;
     const prevLabel = btn.textContent;
-    btn.disabled = true;
-    btn.textContent = "Joining…";
-    try {
-      await fnJoinTable({ gamedayId: currentGameDayId, tableId: t.id });
-      toast("You're on the list.", "success");
-      // roster snapshot refreshes the button to its joined state
-    } catch (e) {
-      btn.disabled = false;
-      btn.textContent = prevLabel;
-      toast(`Join failed: ${unwrapCallableError(e)}`, "error");
+    let guestCount = 0;
+    if (GUESTS_ENABLED && t.isCustom !== true) {
+      guestCount = await openJoinPartyModal(t);
+      if (guestCount === null) return; // cancelled
     }
+    await attemptJoin(t, btn, prevLabel, { guestCount });
   });
 
   el.querySelector('[data-action="leave"]')?.addEventListener("click", async (ev) => {
@@ -1925,7 +1946,82 @@ function renderTablesPage() {
   for (const el of existing.values()) el.remove();
 }
 
-function wantPostHtml(p, bggUrl, canDelete = false) {
+// Guests consume real seats, but an old bot recomputing counts as
+// signup-count can soft-overfill during the deploy gap — flipped on only
+// once the bot redeploy is confirmed.
+const GUESTS_ENABLED = false;
+
+// One join implementation for every path (plain join, party join, and the
+// post-conflict retry). The server only runs the overlap check when the
+// client declares it can handle the confirm round-trip.
+async function attemptJoin(t, btn, prevLabel, { guestCount = 0, force = false } = {}) {
+  btn.disabled = true;
+  btn.textContent = "Joining…";
+  try {
+    const res = await fnJoinTable({
+      gamedayId: currentGameDayId,
+      tableId: t.id,
+      clientSupportsConfirm: true,
+      force,
+      ...(guestCount > 0 ? { guestCount } : {})
+    });
+
+    if (res?.data?.needsConfirm) {
+      btn.disabled = false;
+      btn.textContent = prevLabel;
+      const c = res.data.conflicts?.[0];
+      const when = c?.startTime ? fmtTime(new Date(c.startTime)) : "around the same time";
+      const where = c && c.gamedayId !== currentGameDayId ? " (another event)" : "";
+      const extra = (res.data.conflicts?.length || 0) > 1
+        ? ` — plus ${res.data.conflicts.length - 1} more`
+        : "";
+      const ok = await confirmDialog({
+        title: "Schedule overlap",
+        message: `You're already in ${c?.gameName || "another game"} at ${when}${where}${extra}. Join this one too?`,
+        confirmLabel: "Join anyway"
+      });
+      if (ok) await attemptJoin(t, btn, prevLabel, { guestCount, force: true });
+      return;
+    }
+
+    toast("You're on the list.", "success");
+    // roster snapshot refreshes the button to its joined state
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = prevLabel;
+    toast(`Join failed: ${unwrapCallableError(e)}`, "error");
+  }
+}
+
+// "Just me / +1 / +2 / +3" — resolves the guest count, or null on cancel.
+function openJoinPartyModal(t) {
+  return new Promise((resolve) => {
+    let done = false;
+    const finish = (v) => { if (!done) { done = true; closeModal(); resolve(v); } };
+    openModal("Who's coming?", `
+      <div class="modalStack">
+        <div class="muted">Joining <b>${esc(t.gameName || "this table")}</b>. Bringing anyone without an account? They'll take real seats.</div>
+        <div class="partyChoices">
+          <button class="btn btn-primary" data-party="0">Just me</button>
+          <button class="btn" data-party="1">+1</button>
+          <button class="btn" data-party="2">+2</button>
+          <button class="btn" data-party="3">+3</button>
+        </div>
+      </div>
+    `, { onDismiss: () => { if (!done) { done = true; resolve(null); } } });
+    for (const b of document.querySelectorAll("[data-party]")) {
+      b.addEventListener("click", () => finish(Number(b.dataset.party)));
+    }
+  });
+}
+
+function wantInterestNames(p) {
+  return (Array.isArray(p.interested) ? p.interested : [])
+    .map((x) => x?.name).filter(Boolean);
+}
+
+function wantPostHtml(p, bggUrl, { canDelete = false, canAct = false, iAmInterested = false } = {}) {
+  const names = wantInterestNames(p);
   return `
     <div class="wantGame">
       <div class="title">
@@ -1935,9 +2031,14 @@ function wantPostHtml(p, bggUrl, canDelete = false) {
     </div>
     <div class="wantDetails">
       <div class="wantBy"><span>Requested by</span> ${esc(p.createdByDisplayName || p.createdByUid || "Someone")}</div>
+      ${names.length ? `<div class="wantInterest">🙋 <b>${names.length}</b> would play — ${esc(names.join(", "))}</div>` : ""}
       ${p.notes ? `<div class="wantNote"><span>Note</span> <div class="wantNoteText">${esc(p.notes)}</div></div>` : ""}
     </div>
-    ${canDelete ? `<div class="wantActions"><button class="btn btn-danger btn-small">Delete</button></div>` : ""}
+    <div class="wantActions">
+      ${canAct ? `<button class="btn btn-small" data-action="want-convert">🎲 Host this</button>` : ""}
+      ${canAct ? `<button class="btn btn-small${iAmInterested ? " is-on" : ""}" data-action="want-interest">${iAmInterested ? "✔ Interested" : "🙋 I'd play this"}</button>` : ""}
+      ${canDelete ? `<button class="btn btn-danger btn-small" data-action="want-delete">Delete</button>` : ""}
+    </div>
   `;
 }
 
@@ -1952,32 +2053,51 @@ function renderWants(items) {
   for (const p of items) {
     const isCreator = currentUser && (currentUser.uid === p.createdByUid);
     const canDelete = !isPast && (isCreator || isAdmin() || isOrganizerOf(currentGameDay));
+    const canAct = !isPast && !!currentUser;
+    const iAmInterested = !!(currentUser
+      && (Array.isArray(p.interested) ? p.interested : []).some((x) => x?.uid === currentUser.uid));
 
     const bggUrl = p.bggId ? `https://boardgamegeek.com/boardgame/${encodeURIComponent(p.bggId)}` : null;
     const el = document.createElement("div");
     el.className = "listitem wantItem";
-    el.innerHTML = wantPostHtml(p, bggUrl, canDelete);
+    el.innerHTML = wantPostHtml(p, bggUrl, { canDelete, canAct, iAmInterested });
 
-    
-    const delBtn = el.querySelector("button");
-    if (delBtn) {
-        delBtn.addEventListener("click", async (ev) => {
-            ev.stopPropagation();
-            const ok = await confirmDialog({
-              title: "Delete request?",
-              message: `Remove the “want to play” request for ${p.gameName || "this game"}?`,
-              confirmLabel: "Delete request",
-              danger: true
-            });
-            if (!ok) return;
-            try {
-                await fnDeleteWantToPlay({ gamedayId: currentGameDayId, postId: p.id });
-                toast("Request deleted.", "success");
-            } catch (e) {
-                toast(`Delete failed: ${unwrapCallableError(e)}`, "error");
-            }
+    // Keyed bindings — never querySelector("button"), which grabs whichever
+    // action happens to render first.
+    el.querySelector('[data-action="want-delete"]')?.addEventListener("click", async (ev) => {
+        ev.stopPropagation();
+        const ok = await confirmDialog({
+          title: "Delete request?",
+          message: `Remove the “want to play” request for ${p.gameName || "this game"}?`,
+          confirmLabel: "Delete request",
+          danger: true
         });
-    }
+        if (!ok) return;
+        try {
+            await fnDeleteWantToPlay({ gamedayId: currentGameDayId, postId: p.id });
+            toast("Request deleted.", "success");
+        } catch (e) {
+            toast(`Delete failed: ${unwrapCallableError(e)}`, "error");
+        }
+    });
+
+    el.querySelector('[data-action="want-interest"]')?.addEventListener("click", async (ev) => {
+        ev.stopPropagation();
+        const btn = ev.currentTarget;
+        btn.disabled = true;
+        try {
+            await fnToggleWantInterest({ gamedayId: currentGameDayId, postId: p.id });
+            // The posts snapshot re-renders the list with the new state.
+        } catch (e) {
+            btn.disabled = false;
+            toast(unwrapCallableError(e), "error");
+        }
+    });
+
+    el.querySelector('[data-action="want-convert"]')?.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        convertRequestFlow(p);
+    });
 
     wantsList.appendChild(el);
     hydrateGameMeta(el, p);
@@ -2221,6 +2341,33 @@ async function hostTableFlow(gamedayId) {
   const thing = await openGameSearchModal({ title: "Select a game to host" });
   if (!thing) return;
   await openHostTableFormModal({ gamedayId, thing });
+}
+
+// "Host this" on a game request: the normal host flow, pre-filled with the
+// requested game. The request is consumed server-side when the table lands.
+async function convertRequestFlow(p) {
+  if (!currentUser) { openSignInModal(); return; }
+  let thing = null;
+  try {
+    const j = await bggThing(p.bggId);
+    thing = { ...(j.thing || {}), expansions: j.expansions || [] };
+  } catch (e) {
+    // BGG down: fall back to what the request already knows. No expansions,
+    // but the table still gets created.
+    thing = null;
+  }
+  if (!thing || !thing.bggId) {
+    thing = {
+      bggId: p.bggId, name: p.gameName, thumbUrl: p.thumbUrl || "",
+      bggYear: p.bggYear || null, bggRating: p.bggRating || null, expansions: []
+    };
+  }
+  await openHostTableFormModal({
+    gamedayId: currentGameDayId,
+    thing,
+    fromPostId: p.id,
+    requestedByName: p.createdByDisplayName || ""
+  });
 }
 
 async function wantToPlayFlow(gamedayId) {

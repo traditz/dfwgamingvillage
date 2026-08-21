@@ -19,7 +19,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js";
 
-import { esc, asDate, fmtDate, fmtTime, fmtEventWhen, fmtDayLabel, eventDayKeys, centralDateKey, toast } from "../shared.js?v=20260817-p28";
+import { esc, asDate, fmtDate, fmtTime, fmtEventWhen, fmtDayLabel, eventDayKeys, centralDateKey, toast } from "../shared.js?v=20260817-p29";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -292,6 +292,7 @@ function renderTables() {
             : `Waitlist ${wait}`}
         </div>
         <div class="publicTableMeta">Host: ${esc(t.hostDisplayName || "Unknown")}</div>
+        ${t.gameSource === "library" ? `<div class="publicTableMeta">📚 Library copy</div>` : ""}
         <div class="publicTableMeta">Starts: ${esc(showDayHeaders ? fmtTime(t.startTime) : fmtDate(t.startTime))}</div>
         ${t.notes ? `<div class="publicTableMeta">${esc(t.notes)}</div>` : ""}
       </div>
@@ -311,6 +312,7 @@ function wantPostHtml(p, bggUrl) {
     </div>
     <div class="wantDetails">
       <div class="wantBy"><span>Requested by</span> ${esc(p.createdByDisplayName || "Someone")}</div>
+      ${Number(p.interestedCount || 0) > 0 ? `<div class="wantInterest">🙋 <b>${Number(p.interestedCount)}</b> would play</div>` : ""}
       ${p.notes ? `<div class="wantNote"><span>Note</span> <div class="wantNoteText">${esc(p.notes)}</div></div>` : ""}
     </div>
   `;
