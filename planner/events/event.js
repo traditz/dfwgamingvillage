@@ -19,7 +19,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js";
 
-import { esc, asDate, fmtDate, fmtTime, fmtEventWhen, fmtDayLabel, eventDayKeys, centralDateKey, toast } from "../shared.js?v=20260817-p34";
+import { esc, asDate, fmtDate, fmtTime, fmtEventWhen, fmtDayLabel, eventDayKeys, centralDateKey, isPastEventDates, toast } from "../shared.js?v=20260817-p35";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -141,9 +141,8 @@ function eventUrl(id) {
 }
 
 function isPastEvent(gd) {
-  const d = asDate(gd.startsAt);
-  if (!d) return false;
-  return centralDateKey(d) < centralDateKey(new Date());
+  // Multi-day events stay current through their final day.
+  return isPastEventDates(gd?.startsAt, gd?.endsAt);
 }
 
 function renderEventCollection(host, items, emptyText) {

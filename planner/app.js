@@ -33,6 +33,7 @@ import {
   fmtDayLabel,
   fmtEventWhen,
   eventEndTimeLabel,
+  isPastEventDates,
   shortExpansionName,
   fmtCentralDatetimeValue,
   parseDatetimeLocalToISO,
@@ -44,7 +45,7 @@ import {
   showInlineStatus,
   confirmDialog,
   toast
-} from "./shared.js?v=20260817-p34";
+} from "./shared.js?v=20260817-p35";
 
 // -----------------------------
 // Config
@@ -215,28 +216,34 @@ function eventDayBounds() {
   const endsLabel = eventEndTimeLabel(currentGameDay.endsAt);
   const max = endsAtDate ? fmtCentralDatetimeValue(endsAtDate) : `${last}T23:59`;
 
+  // Days already behind us can't take new tables, so on day 2 of a convention
+  // the picker starts at day 2 rather than letting you schedule into day 1.
+  const earliestDay = todayKey > first ? todayKey : first;
+
   return {
     day: first,
     days,
     multiDay,
     firstDay: first,
     lastDay: last,
+    todayKey,
+    earliestDay,
     startsLabel: fmtTime(startsAt),
     endsLabel,
     isEventDay: (key) => days.includes(key),
+    isPastDay: (key) => !!key && key < todayKey,
     label: (multiDay
       ? `${fmtDayLabel(first)} – ${fmtDayLabel(last)}`
       : fmtDayLabel(first)) + (endsLabel ? `, ending ${endsLabel}` : ""),
-    min: `${first}T00:00`,
+    min: `${earliestDay}T00:00`,
     max,
     default: `${defaultDay}T${centralTimeHHMM(startsAt)}`
   };
 }
 
 function isPastGameDay(gd) {
-  const startsAt = asDate(gd?.startsAt);
-  if (!startsAt) return false;
-  return centralDateKey(startsAt) < centralDateKey(new Date());
+  // Multi-day events stay current through their final day.
+  return isPastEventDates(gd?.startsAt, gd?.endsAt);
 }
 
 function sortByStartsAtAsc(items) {
@@ -1026,6 +1033,10 @@ function openHostTableFormModal({ gamedayId, thing, fromPostId = null, requested
         showInlineError(`Tables must start during the event (${bounds.label}).`);
         return;
       }
+      if (bounds && bounds.isPastDay(startVal.slice(0, 10))) {
+        showInlineError(`That day of the event has already passed — pick today or later.`);
+        return;
+      }
       if (bounds && bounds.endsLabel && startVal > bounds.max) {
         showInlineError(`The event wraps up at ${bounds.endsLabel} — pick an earlier start.`);
         return;
@@ -1131,6 +1142,10 @@ function openEditTableModal(t) {
         }
         if (bounds && !bounds.isEventDay(startVal.slice(0, 10))) {
             showInlineError(`Tables must start during the event (${bounds.label}).`);
+            return;
+        }
+        if (bounds && bounds.isPastDay(startVal.slice(0, 10))) {
+            showInlineError(`That day of the event has already passed — pick today or later.`);
             return;
         }
         if (bounds && bounds.endsLabel && startVal > bounds.max) {

@@ -99,6 +99,26 @@ export function fmtDayLabel(dayKey) {
 }
 
 // Every Central day the event covers, in order.
+// The last Central day an event covers. A multi-day event is "current" right
+// through its final day — judging by startsAt alone makes a convention look
+// finished on its second morning.
+export function eventLastDayKey(startsAt, endsAt) {
+  const start = asDate(startsAt);
+  if (!start) return null;
+  const first = centralDateKey(start);
+  const end = asDate(endsAt);
+  if (!end) return first;
+  const last = centralDateKey(end);
+  return last > first ? last : first;
+}
+
+// True once the event's LAST day is behind us.
+export function isPastEventDates(startsAt, endsAt) {
+  const lastKey = eventLastDayKey(startsAt, endsAt);
+  if (!lastKey) return false;
+  return lastKey < centralDateKey(new Date());
+}
+
 export function eventDayKeys(startsAt, endsAt) {
   const start = asDate(startsAt);
   if (!start) return [];
