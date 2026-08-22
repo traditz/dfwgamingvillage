@@ -845,6 +845,19 @@ async function fetchEbaySoldOfficial(env, name) {
 /* ============ Watched-game intelligence (BGG-native + community) ============ */
 
 const WORKER_SELF_URL = "https://dfwgv-bgg-proxy.joemsprague.workers.dev";
+
+/** Invoke one of our own token-gated job routes as a FRESH invocation (own
+ *  subrequest budget). Goes through the SELF service binding — Cloudflare
+ *  blocks a Worker from fetch()ing its own hostname (error 1042), which is
+ *  why the chained jobs silently never ran before this existed. */
+function selfInvoke(env, path) {
+  const req = new Request(`${WORKER_SELF_URL}${path}`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${env.ANALYTICS_ADMIN_TOKEN}` }
+  });
+  const p = env.SELF ? env.SELF.fetch(req) : fetch(req);
+  return p.catch(() => { /* the next cron retries */ });
+}
 const LIVE_MARKET_KEY = "live-market-cache"; // freshest retail/eBay snapshot per game (staged 6-hourly)
 const GAME_INTEL_KEY = "game-intel";         // forum chatter + videos per game (staged, rotating)
 const INTEL_CURSOR_KEY = "intel-cursor";     // rotation pointer for the intel job
@@ -1009,10 +1022,11 @@ async function fetchBlueskyMentions(name) {
   } catch { return null; }
 }
 
-/** Mainstream press coverage via Google News RSS: 14-day count + latest. */
+/** Mainstream press coverage via Bing News RSS (Google News 503s sustained
+ *  datacenter traffic; Bing answers): 14-day count + latest + headlines. */
 async function fetchNewsBuzz(name) {
   try {
-    const res = await fetch(`https://news.google.com/rss/search?q=${encodeURIComponent(`"${name}" board game`)}&hl=en-US&gl=US&ceid=US:en`, {
+    const res = await fetch(`https://www.bing.com/news/search?q=${encodeURIComponent(`"${name}" board game`)}&format=rss`, {
       headers: { "User-Agent": BROWSER_UA }
     });
     if (!res.ok) return null;
@@ -1333,17 +1347,15 @@ async function gatherIntelSlice(env, includeReddit) {
       const reddit = await fetchRedditMentions(g.name);
       let podcasts = prev.buzz && prev.buzz.podcasts ? prev.buzz.podcasts : null;
       let podcastsAt = (prev.buzz && prev.buzz.podcastsAt) || 0;
-      if (Date.now() - podcastsAt > 40 * 3600e3) {
+      if (Date.now() - podcastsAt > 7 * 864e5) { // weekly: Apple rate-limits datacenter IPs (429)
         podcasts = await fetchPodcastMentions(g.name);
         podcastsAt = Date.now();
       }
-      // Noble Knight used/OOP prices, refreshed at most every ~40 hours.
-      let nk = prev.nk || null;
-      let nkAt = prev.nkAt || 0;
-      if (Date.now() - nkAt > 40 * 3600e3) {
-        nk = await fetchNobleKnight(g.name);
-        nkAt = Date.now();
-      }
+      // Noble Knight: their item listings are JS-rendered (the server HTML
+      // ignores the query), so this source is PARKED until a data route
+      // exists — no fetch spent.
+      const nk = prev.nk || null;
+      const nkAt = prev.nkAt || 0;
       const buzz = {
         redditMentions14d: reddit ? reddit.count : null,
         redditTitles: reddit ? reddit.titles : [],
@@ -1394,31 +1406,35 @@ async function runAuctionSweep(env) {
   let tracked = {};
   try { tracked = JSON.parse((await env.HOT_HISTORY.get(AUCTION_LISTS_KEY)) || "{}"); } catch { /* rebuild */ }
 
-  // 1. Discovery: two pages of recent geeklists, auction-titled only.
-  for (const page of [1, 2]) {
-    try {
-      const res = await fetch(`https://boardgamegeek.com/api/geeklists?page=${page}`, {
-        headers: { Authorization: `Bearer ${env.BGG_TOKEN}`, Accept: "application/json" }
-      });
-      if (!res.ok) continue;
-      const d = await res.json();
-      for (const l of d.lists || []) {
-        const title = String(l.title || l.name || "");
-        // Auctions AND fixed-price sale lists (virtual flea markets, BST
-        // lists) — but not math trades, which carry no prices.
+  // 1. Discovery: BGG's "Recent additions" RSS filtered to geeklists —
+  //    ~120 newest lists with ids and dates in one request (the JSON
+  //    /api/geeklists endpoint is a fixed featured list and useless here).
+  //    Track auctions AND fixed-price sale lists (virtual flea markets, BST
+  //    lists) — but not math trades, which carry no prices.
+  try {
+    const res = await fetch("https://boardgamegeek.com/recentadditions/rss?domain=boardgame&infilters[]=geeklist", {
+      headers: { Authorization: `Bearer ${env.BGG_TOKEN}`, "User-Agent": BROWSER_UA }
+    });
+    if (res.ok) {
+      const xml = await res.text();
+      for (const item of xml.split(/<item>/).slice(1)) {
+        const rawTitle = decodeEntities(((item.match(/<title>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/) || [])[1] || "").trim());
+        const title = rawTitle.replace(/^GeekList:\s*/i, "");
+        const id = ((item.match(/<link>[^<]*\/geeklist\/(\d+)/) || [])[1]);
+        if (!id || !title) continue;
         if (!/auction|flea|for ?sale|selling|sale list|\bbst\b/i.test(title)) continue;
         if (/math ?trade/i.test(title)) continue;
-        const prev = tracked[l.id] || {};
-        tracked[l.id] = {
+        const prev = tracked[id] || {};
+        tracked[id] = {
           ...prev,
           title: title.slice(0, 140),
           kind: /auction/i.test(title) ? "auction" : "sale",
           lastSeen: Date.now(),
-          closed: /closed|ended/i.test(title) || prev.closed || false
+          closed: /closed|ended/i.test(title) || prev.closed || false
         };
       }
-    } catch { /* discovery is best-effort */ }
-  }
+    }
+  } catch { /* discovery is best-effort */ }
   for (const [id, t] of Object.entries(tracked)) {
     if (Date.now() - (t.lastSeen || 0) > 30 * 864e5) delete tracked[id];
   }
@@ -1540,10 +1556,7 @@ async function handleCronIntel(request, env, ctx, cors) {
   ctx.waitUntil((async () => {
     const more = await gatherIntelSlice(env, hops === 0);
     if (more && hops < 10) {
-      await fetch(`${WORKER_SELF_URL}/api/cron-intel?hops=${hops + 1}`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${env.ANALYTICS_ADMIN_TOKEN}` }
-      }).catch(() => { /* next cron continues the rotation */ });
+      await selfInvoke(env, `/api/cron-intel?hops=${hops + 1}`);
     }
   })());
   return jsonResponse({ ok: true, hops }, 200, cors);
@@ -2517,7 +2530,7 @@ async function handlePriceAnalysis(request, env, cors) {
     saleCalendar: saleEventContext(),
     reprintCampaignLive: reprint || "none active",
     recentAwards: (giEntry && giEntry.recentHonors && giEntry.recentHonors.length) ? giEntry.recentHonors : "none recently",
-    nobleKnightUsedRetail: (giEntry && giEntry.nk) || (await fetchNobleKnight(name)) || "no listings",
+    nobleKnightUsedRetail: (giEntry && giEntry.nk) || "not available (source parked)",
     trackedHistory: tracked || "not on the watchlist — no tracked history yet",
     watchTarget: watched ? watched.target || null : null,
     recentAlerts: alerts,
@@ -2954,10 +2967,7 @@ async function checkWatchedPrices(env, ctx, start = 0) {
   // More games to check → chain the next slice as its own invocation.
   const nextStart = start + slice.length;
   if (nextStart < total && ctx) {
-    ctx.waitUntil(fetch(`${WORKER_SELF_URL}/api/cron-prices?start=${nextStart}`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${env.ANALYTICS_ADMIN_TOKEN}` }
-    }).catch(() => { /* the next cron sweep will cover the rest */ }));
+    ctx.waitUntil(selfInvoke(env, `/api/cron-prices?start=${nextStart}`));
   }
   return { checked: slice.length, alerts, totalWatched: total, continuing: nextStart < total };
 }
@@ -3266,14 +3276,8 @@ export default {
     ctx.waitUntil(checkWatchedPrices(env, ctx, 0));
     // Forum/YouTube/eBay-sold/Reddit intel runs as a separate invocation via
     // the worker's own URL so it gets its own free-plan subrequest budget.
-    ctx.waitUntil(fetch(`${WORKER_SELF_URL}/api/cron-intel`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${env.ANALYTICS_ADMIN_TOKEN}` }
-    }).catch(() => {}));
-    ctx.waitUntil(fetch(`${WORKER_SELF_URL}/api/cron-auctions`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${env.ANALYTICS_ADMIN_TOKEN}` }
-    }).catch(() => {}));
+    ctx.waitUntil(selfInvoke(env, "/api/cron-intel"));
+    ctx.waitUntil(selfInvoke(env, "/api/cron-auctions"));
   },
 
   async fetch(request, env, ctx) {
