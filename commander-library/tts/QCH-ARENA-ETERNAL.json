@@ -17,7 +17,7 @@
  "LuaScriptState": "",
  "ObjectStates": [
   {
-   "GUID": "fbeee3",
+   "GUID": "c106fe",
    "Name": "Card",
    "Transform": {
     "posX": -4.5,
@@ -65,7 +65,7 @@
    "XmlUI": ""
   },
   {
-   "GUID": "13f1df",
+   "GUID": "afb520",
    "Name": "DeckCustom",
    "Transform": {
     "posX": 0,
@@ -222,7 +222,7 @@
    "XmlUI": "",
    "ContainedObjects": [
     {
-     "GUID": "311d69",
+     "GUID": "4e09a4",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -270,7 +270,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "7153f0",
+     "GUID": "ea098b",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -318,7 +318,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "e02cdf",
+     "GUID": "11ba55",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -366,7 +366,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "92fa88",
+     "GUID": "4b661b",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -414,7 +414,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "2cfe86",
+     "GUID": "623044",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -462,7 +462,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "bfe69a",
+     "GUID": "3c31a2",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -510,7 +510,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "69535a",
+     "GUID": "f43ad2",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -558,7 +558,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "6f3f3e",
+     "GUID": "f09d45",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -606,7 +606,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "ffb07e",
+     "GUID": "6dedcc",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -654,7 +654,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "206b2e",
+     "GUID": "7413b8",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -702,7 +702,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "fe4c6e",
+     "GUID": "3a310f",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -750,7 +750,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "e20a88",
+     "GUID": "fbf109",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -798,7 +798,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "810771",
+     "GUID": "2ea3bb",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -846,7 +846,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "99abab",
+     "GUID": "50ec0b",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -894,7 +894,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "f09426",
+     "GUID": "03dc4d",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -942,7 +942,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "e4c69a",
+     "GUID": "94bc99",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -990,7 +990,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "5bd172",
+     "GUID": "54987b",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1038,7 +1038,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "5c2e6b",
+     "GUID": "12c317",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1086,7 +1086,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "850b8e",
+     "GUID": "0dcf30",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1134,7 +1134,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "3d7e09",
+     "GUID": "ea5a04",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1182,7 +1182,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "b3c491",
+     "GUID": "e7493b",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1230,7 +1230,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "3ff98c",
+     "GUID": "e2e414",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1278,7 +1278,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "a21cce",
+     "GUID": "2b4dcf",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1326,7 +1326,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "67afec",
+     "GUID": "ff974b",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1374,7 +1374,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "824765",
+     "GUID": "da61a9",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1422,7 +1422,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "cbc6f4",
+     "GUID": "ec6d27",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1470,7 +1470,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "a9c347",
+     "GUID": "87e963",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1518,7 +1518,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "f21e94",
+     "GUID": "cab798",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1566,7 +1566,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "ad17e5",
+     "GUID": "3cfdfd",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1614,7 +1614,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "57a652",
+     "GUID": "c79cf2",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1662,7 +1662,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "349352",
+     "GUID": "1aa62e",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1710,7 +1710,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "c0ff11",
+     "GUID": "fe9126",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1758,7 +1758,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "fcf24c",
+     "GUID": "c3d91f",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1806,7 +1806,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "9f6b93",
+     "GUID": "ac4af1",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1854,7 +1854,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "29ac56",
+     "GUID": "5e23db",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1902,7 +1902,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "3ee6d2",
+     "GUID": "8d13e0",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1950,7 +1950,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "6ef968",
+     "GUID": "e2c149",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1998,7 +1998,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "3f16d8",
+     "GUID": "14ea69",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2046,7 +2046,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "4730c2",
+     "GUID": "51638a",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2094,7 +2094,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "1081f7",
+     "GUID": "540e9d",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2142,7 +2142,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "690e98",
+     "GUID": "f4ad71",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2190,7 +2190,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "32e159",
+     "GUID": "0f305b",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2238,7 +2238,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "490c4f",
+     "GUID": "83e42d",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2286,7 +2286,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "773a62",
+     "GUID": "8cc167",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2334,7 +2334,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "a1adda",
+     "GUID": "723c5a",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2382,7 +2382,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "d42b74",
+     "GUID": "f22d9f",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2430,7 +2430,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "be6c4d",
+     "GUID": "acfb7b",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2478,7 +2478,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "1ae1d6",
+     "GUID": "7bf7fb",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2526,7 +2526,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "8932a9",
+     "GUID": "57ee3b",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2574,7 +2574,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "0ede3a",
+     "GUID": "c44120",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2622,7 +2622,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "5f1bd2",
+     "GUID": "3ada3f",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2670,7 +2670,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "cfce8e",
+     "GUID": "0bfae0",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2718,7 +2718,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "dd71db",
+     "GUID": "1470d2",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2766,7 +2766,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "8c4dac",
+     "GUID": "c75928",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2814,7 +2814,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "9540fb",
+     "GUID": "b0759b",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2862,7 +2862,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "d33c63",
+     "GUID": "56c29a",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2910,7 +2910,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "e90944",
+     "GUID": "43caf2",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2958,7 +2958,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "1bf73c",
+     "GUID": "f05d09",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3006,7 +3006,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "cb5a4d",
+     "GUID": "975aea",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3054,7 +3054,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "210ff9",
+     "GUID": "390f49",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3102,7 +3102,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "17fc8d",
+     "GUID": "89a9df",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3150,7 +3150,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "a4ac1d",
+     "GUID": "922240",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3198,7 +3198,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "90c901",
+     "GUID": "6a8ae8",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3246,7 +3246,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "a278e7",
+     "GUID": "59c060",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3294,7 +3294,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "0c787c",
+     "GUID": "d35e50",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3342,7 +3342,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "21fa5e",
+     "GUID": "7c14c5",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3390,7 +3390,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "aa0566",
+     "GUID": "5730c0",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3438,7 +3438,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "9e82e6",
+     "GUID": "c50607",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3486,7 +3486,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "8c9b46",
+     "GUID": "c09c2c",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3534,7 +3534,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "bef9d4",
+     "GUID": "d33387",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3582,7 +3582,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "a34618",
+     "GUID": "8bf94c",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3630,7 +3630,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "d74d64",
+     "GUID": "c77052",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3678,7 +3678,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "d77898",
+     "GUID": "af637d",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3726,7 +3726,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "3cf522",
+     "GUID": "15083e",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3774,7 +3774,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "8d47c3",
+     "GUID": "b29c54",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3822,7 +3822,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "108ada",
+     "GUID": "6dd47b",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3870,7 +3870,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "a5c5b7",
+     "GUID": "5d3b81",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3918,7 +3918,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "df4d09",
+     "GUID": "3f98a0",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3966,7 +3966,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "221147",
+     "GUID": "22f1ed",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4014,7 +4014,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "a138c4",
+     "GUID": "c7c4fb",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4062,7 +4062,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "52296a",
+     "GUID": "38dd48",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4110,7 +4110,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "1411ff",
+     "GUID": "a14f84",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4158,7 +4158,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "4a0bea",
+     "GUID": "0da336",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4206,7 +4206,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "421232",
+     "GUID": "c10b29",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4254,7 +4254,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "8c1648",
+     "GUID": "d71a68",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4302,7 +4302,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "1ce9e3",
+     "GUID": "305a00",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4350,7 +4350,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "dc87c7",
+     "GUID": "625b45",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4398,7 +4398,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "819d21",
+     "GUID": "992ccf",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4446,7 +4446,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "b36918",
+     "GUID": "1716c7",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4494,7 +4494,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "ed7dc6",
+     "GUID": "71b779",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4542,7 +4542,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "cebfa7",
+     "GUID": "cfda30",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4590,7 +4590,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "3e37b9",
+     "GUID": "b92c99",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4638,7 +4638,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "ae204e",
+     "GUID": "4d5155",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4686,7 +4686,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "77b3ff",
+     "GUID": "25414a",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4734,7 +4734,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "935531",
+     "GUID": "20cfa2",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4782,7 +4782,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "d1d71d",
+     "GUID": "9f2eb8",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4830,7 +4830,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "9ceed7",
+     "GUID": "c7620a",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4878,7 +4878,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "7b154b",
+     "GUID": "0e3186",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4926,7 +4926,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "f14a7b",
+     "GUID": "d13c36",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4976,12 +4976,12 @@
    ]
   },
   {
-   "GUID": "4eb523",
-   "Name": "DeckCustom",
+   "GUID": "f9e16d",
+   "Name": "Infinite_Bag",
    "Transform": {
     "posX": 4.5,
     "posY": 1,
-    "posZ": 0,
+    "posZ": 3,
     "rotX": 0,
     "rotY": 180,
     "rotZ": 0,
@@ -4989,13 +4989,13 @@
     "scaleY": 1,
     "scaleZ": 1
    },
-   "Nickname": "QCH tokens",
-   "Description": "",
+   "Nickname": "Turret tokens",
+   "Description": "Infinite bag - draw tokens from here.",
    "GMNotes": "",
    "ColorDiffuse": {
-    "r": 0.713,
-    "g": 0.713,
-    "b": 0.713
+    "r": 0.35,
+    "g": 0.35,
+    "b": 0.35
    },
    "Locked": false,
    "Grid": true,
@@ -5004,40 +5004,19 @@
    "Sticky": true,
    "Tooltip": true,
    "GridProjection": false,
-   "HideWhenFaceDown": true,
+   "HideWhenFaceDown": false,
    "Hands": false,
-   "SidewaysCard": false,
-   "DeckIDs": [
-    300,
-    300,
-    300,
-    301,
-    301,
-    301,
-    302,
-    302,
-    302
-   ],
-   "CustomDeck": {
-    "3": {
-     "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-tokens-1.024f58b4da.png",
-     "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.16b6cb1403.png",
-     "NumWidth": 3,
-     "NumHeight": 1,
-     "BackIsHidden": true,
-     "UniqueBack": false,
-     "Type": 0
-    }
-   },
+   "MaterialIndex": -1,
+   "MeshIndex": -1,
    "LuaScript": "",
    "LuaScriptState": "",
    "XmlUI": "",
    "ContainedObjects": [
     {
-     "GUID": "37176b",
+     "GUID": "e1ec2d",
      "Name": "Card",
      "Transform": {
-      "posX": 4.5,
+      "posX": 0,
       "posY": 1,
       "posZ": 0,
       "rotX": 0,
@@ -5080,108 +5059,51 @@
      "LuaScript": "",
      "LuaScriptState": "",
      "XmlUI": ""
-    },
+    }
+   ]
+  },
+  {
+   "GUID": "37fe36",
+   "Name": "Infinite_Bag",
+   "Transform": {
+    "posX": 6.1,
+    "posY": 1,
+    "posZ": 3,
+    "rotX": 0,
+    "rotY": 180,
+    "rotZ": 0,
+    "scaleX": 1,
+    "scaleY": 1,
+    "scaleZ": 1
+   },
+   "Nickname": "Unholy Totem tokens",
+   "Description": "Infinite bag - draw tokens from here.",
+   "GMNotes": "",
+   "ColorDiffuse": {
+    "r": 0.35,
+    "g": 0.35,
+    "b": 0.35
+   },
+   "Locked": false,
+   "Grid": true,
+   "Snap": true,
+   "Autoraise": true,
+   "Sticky": true,
+   "Tooltip": true,
+   "GridProjection": false,
+   "HideWhenFaceDown": false,
+   "Hands": false,
+   "MaterialIndex": -1,
+   "MeshIndex": -1,
+   "LuaScript": "",
+   "LuaScriptState": "",
+   "XmlUI": "",
+   "ContainedObjects": [
     {
-     "GUID": "dcd8eb",
+     "GUID": "72b0cb",
      "Name": "Card",
      "Transform": {
-      "posX": 4.5,
-      "posY": 1,
-      "posZ": 0,
-      "rotX": 0,
-      "rotY": 180,
-      "rotZ": 0,
-      "scaleX": 1,
-      "scaleY": 1,
-      "scaleZ": 1
-     },
-     "Nickname": "Turret",
-     "Description": "Token Artifact Creature \u2014 Turret  0/3\n\nDefender and reach",
-     "GMNotes": "",
-     "ColorDiffuse": {
-      "r": 0.713,
-      "g": 0.713,
-      "b": 0.713
-     },
-     "Locked": false,
-     "Grid": true,
-     "Snap": true,
-     "Autoraise": true,
-     "Sticky": true,
-     "Tooltip": true,
-     "GridProjection": false,
-     "HideWhenFaceDown": true,
-     "Hands": true,
-     "CardID": 300,
-     "SidewaysCard": false,
-     "CustomDeck": {
-      "3": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-tokens-1.024f58b4da.png",
-       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.16b6cb1403.png",
-       "NumWidth": 3,
-       "NumHeight": 1,
-       "BackIsHidden": true,
-       "UniqueBack": false,
-       "Type": 0
-      }
-     },
-     "LuaScript": "",
-     "LuaScriptState": "",
-     "XmlUI": ""
-    },
-    {
-     "GUID": "f02f54",
-     "Name": "Card",
-     "Transform": {
-      "posX": 4.5,
-      "posY": 1,
-      "posZ": 0,
-      "rotX": 0,
-      "rotY": 180,
-      "rotZ": 0,
-      "scaleX": 1,
-      "scaleY": 1,
-      "scaleZ": 1
-     },
-     "Nickname": "Turret",
-     "Description": "Token Artifact Creature \u2014 Turret  0/3\n\nDefender and reach",
-     "GMNotes": "",
-     "ColorDiffuse": {
-      "r": 0.713,
-      "g": 0.713,
-      "b": 0.713
-     },
-     "Locked": false,
-     "Grid": true,
-     "Snap": true,
-     "Autoraise": true,
-     "Sticky": true,
-     "Tooltip": true,
-     "GridProjection": false,
-     "HideWhenFaceDown": true,
-     "Hands": true,
-     "CardID": 300,
-     "SidewaysCard": false,
-     "CustomDeck": {
-      "3": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-tokens-1.024f58b4da.png",
-       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.16b6cb1403.png",
-       "NumWidth": 3,
-       "NumHeight": 1,
-       "BackIsHidden": true,
-       "UniqueBack": false,
-       "Type": 0
-      }
-     },
-     "LuaScript": "",
-     "LuaScriptState": "",
-     "XmlUI": ""
-    },
-    {
-     "GUID": "7f02c8",
-     "Name": "Card",
-     "Transform": {
-      "posX": 4.5,
+      "posX": 0,
       "posY": 1,
       "posZ": 0,
       "rotX": 0,
@@ -5224,204 +5146,51 @@
      "LuaScript": "",
      "LuaScriptState": "",
      "XmlUI": ""
-    },
+    }
+   ]
+  },
+  {
+   "GUID": "e4d8ea",
+   "Name": "Infinite_Bag",
+   "Transform": {
+    "posX": 7.7,
+    "posY": 1,
+    "posZ": 3,
+    "rotX": 0,
+    "rotY": 180,
+    "rotZ": 0,
+    "scaleX": 1,
+    "scaleY": 1,
+    "scaleZ": 1
+   },
+   "Nickname": "Peeker tokens",
+   "Description": "Infinite bag - draw tokens from here.",
+   "GMNotes": "",
+   "ColorDiffuse": {
+    "r": 0.35,
+    "g": 0.35,
+    "b": 0.35
+   },
+   "Locked": false,
+   "Grid": true,
+   "Snap": true,
+   "Autoraise": true,
+   "Sticky": true,
+   "Tooltip": true,
+   "GridProjection": false,
+   "HideWhenFaceDown": false,
+   "Hands": false,
+   "MaterialIndex": -1,
+   "MeshIndex": -1,
+   "LuaScript": "",
+   "LuaScriptState": "",
+   "XmlUI": "",
+   "ContainedObjects": [
     {
-     "GUID": "2341c0",
+     "GUID": "b8d2e0",
      "Name": "Card",
      "Transform": {
-      "posX": 4.5,
-      "posY": 1,
-      "posZ": 0,
-      "rotX": 0,
-      "rotY": 180,
-      "rotZ": 0,
-      "scaleX": 1,
-      "scaleY": 1,
-      "scaleZ": 1
-     },
-     "Nickname": "Unholy Totem",
-     "Description": "Token Artifact Creature \u2014 Wall  0/3\n\nDefender",
-     "GMNotes": "",
-     "ColorDiffuse": {
-      "r": 0.713,
-      "g": 0.713,
-      "b": 0.713
-     },
-     "Locked": false,
-     "Grid": true,
-     "Snap": true,
-     "Autoraise": true,
-     "Sticky": true,
-     "Tooltip": true,
-     "GridProjection": false,
-     "HideWhenFaceDown": true,
-     "Hands": true,
-     "CardID": 301,
-     "SidewaysCard": false,
-     "CustomDeck": {
-      "3": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-tokens-1.024f58b4da.png",
-       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.16b6cb1403.png",
-       "NumWidth": 3,
-       "NumHeight": 1,
-       "BackIsHidden": true,
-       "UniqueBack": false,
-       "Type": 0
-      }
-     },
-     "LuaScript": "",
-     "LuaScriptState": "",
-     "XmlUI": ""
-    },
-    {
-     "GUID": "715d71",
-     "Name": "Card",
-     "Transform": {
-      "posX": 4.5,
-      "posY": 1,
-      "posZ": 0,
-      "rotX": 0,
-      "rotY": 180,
-      "rotZ": 0,
-      "scaleX": 1,
-      "scaleY": 1,
-      "scaleZ": 1
-     },
-     "Nickname": "Unholy Totem",
-     "Description": "Token Artifact Creature \u2014 Wall  0/3\n\nDefender",
-     "GMNotes": "",
-     "ColorDiffuse": {
-      "r": 0.713,
-      "g": 0.713,
-      "b": 0.713
-     },
-     "Locked": false,
-     "Grid": true,
-     "Snap": true,
-     "Autoraise": true,
-     "Sticky": true,
-     "Tooltip": true,
-     "GridProjection": false,
-     "HideWhenFaceDown": true,
-     "Hands": true,
-     "CardID": 301,
-     "SidewaysCard": false,
-     "CustomDeck": {
-      "3": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-tokens-1.024f58b4da.png",
-       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.16b6cb1403.png",
-       "NumWidth": 3,
-       "NumHeight": 1,
-       "BackIsHidden": true,
-       "UniqueBack": false,
-       "Type": 0
-      }
-     },
-     "LuaScript": "",
-     "LuaScriptState": "",
-     "XmlUI": ""
-    },
-    {
-     "GUID": "c4a7ae",
-     "Name": "Card",
-     "Transform": {
-      "posX": 4.5,
-      "posY": 1,
-      "posZ": 0,
-      "rotX": 0,
-      "rotY": 180,
-      "rotZ": 0,
-      "scaleX": 1,
-      "scaleY": 1,
-      "scaleZ": 1
-     },
-     "Nickname": "Peeker",
-     "Description": "Token Artifact Creature \u2014 Thopter  1/1\n\nFlying",
-     "GMNotes": "",
-     "ColorDiffuse": {
-      "r": 0.713,
-      "g": 0.713,
-      "b": 0.713
-     },
-     "Locked": false,
-     "Grid": true,
-     "Snap": true,
-     "Autoraise": true,
-     "Sticky": true,
-     "Tooltip": true,
-     "GridProjection": false,
-     "HideWhenFaceDown": true,
-     "Hands": true,
-     "CardID": 302,
-     "SidewaysCard": false,
-     "CustomDeck": {
-      "3": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-tokens-1.024f58b4da.png",
-       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.16b6cb1403.png",
-       "NumWidth": 3,
-       "NumHeight": 1,
-       "BackIsHidden": true,
-       "UniqueBack": false,
-       "Type": 0
-      }
-     },
-     "LuaScript": "",
-     "LuaScriptState": "",
-     "XmlUI": ""
-    },
-    {
-     "GUID": "5b1a47",
-     "Name": "Card",
-     "Transform": {
-      "posX": 4.5,
-      "posY": 1,
-      "posZ": 0,
-      "rotX": 0,
-      "rotY": 180,
-      "rotZ": 0,
-      "scaleX": 1,
-      "scaleY": 1,
-      "scaleZ": 1
-     },
-     "Nickname": "Peeker",
-     "Description": "Token Artifact Creature \u2014 Thopter  1/1\n\nFlying",
-     "GMNotes": "",
-     "ColorDiffuse": {
-      "r": 0.713,
-      "g": 0.713,
-      "b": 0.713
-     },
-     "Locked": false,
-     "Grid": true,
-     "Snap": true,
-     "Autoraise": true,
-     "Sticky": true,
-     "Tooltip": true,
-     "GridProjection": false,
-     "HideWhenFaceDown": true,
-     "Hands": true,
-     "CardID": 302,
-     "SidewaysCard": false,
-     "CustomDeck": {
-      "3": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-tokens-1.024f58b4da.png",
-       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.16b6cb1403.png",
-       "NumWidth": 3,
-       "NumHeight": 1,
-       "BackIsHidden": true,
-       "UniqueBack": false,
-       "Type": 0
-      }
-     },
-     "LuaScript": "",
-     "LuaScriptState": "",
-     "XmlUI": ""
-    },
-    {
-     "GUID": "e34416",
-     "Name": "Card",
-     "Transform": {
-      "posX": 4.5,
+      "posX": 0,
       "posY": 1,
       "posZ": 0,
       "rotX": 0,
@@ -5466,6 +5235,111 @@
      "XmlUI": ""
     }
    ]
+  },
+  {
+   "GUID": "10a338",
+   "Name": "Die_20",
+   "Transform": {
+    "posX": -6.5,
+    "posY": 1,
+    "posZ": 3,
+    "rotX": 0,
+    "rotY": 0,
+    "rotZ": 0,
+    "scaleX": 0.7,
+    "scaleY": 0.7,
+    "scaleZ": 0.7
+   },
+   "Nickname": "Round tracker / counters",
+   "Description": "",
+   "GMNotes": "",
+   "ColorDiffuse": {
+    "r": 0.85,
+    "g": 0.75,
+    "b": 0.35
+   },
+   "Locked": false,
+   "Grid": true,
+   "Snap": true,
+   "Autoraise": true,
+   "Sticky": true,
+   "Tooltip": true,
+   "GridProjection": false,
+   "HideWhenFaceDown": false,
+   "Hands": false,
+   "LuaScript": "",
+   "LuaScriptState": "",
+   "XmlUI": ""
+  },
+  {
+   "GUID": "a4d2b4",
+   "Name": "Die_6",
+   "Transform": {
+    "posX": -7.6,
+    "posY": 1,
+    "posZ": 3,
+    "rotX": 0,
+    "rotY": 0,
+    "rotZ": 0,
+    "scaleX": 0.7,
+    "scaleY": 0.7,
+    "scaleZ": 0.7
+   },
+   "Nickname": "Counters",
+   "Description": "",
+   "GMNotes": "",
+   "ColorDiffuse": {
+    "r": 0.85,
+    "g": 0.75,
+    "b": 0.35
+   },
+   "Locked": false,
+   "Grid": true,
+   "Snap": true,
+   "Autoraise": true,
+   "Sticky": true,
+   "Tooltip": true,
+   "GridProjection": false,
+   "HideWhenFaceDown": false,
+   "Hands": false,
+   "LuaScript": "",
+   "LuaScriptState": "",
+   "XmlUI": ""
+  },
+  {
+   "GUID": "c47f90",
+   "Name": "Die_6",
+   "Transform": {
+    "posX": -7.6,
+    "posY": 1,
+    "posZ": 4.2,
+    "rotX": 0,
+    "rotY": 0,
+    "rotZ": 0,
+    "scaleX": 0.7,
+    "scaleY": 0.7,
+    "scaleZ": 0.7
+   },
+   "Nickname": "Counters",
+   "Description": "",
+   "GMNotes": "",
+   "ColorDiffuse": {
+    "r": 0.85,
+    "g": 0.75,
+    "b": 0.35
+   },
+   "Locked": false,
+   "Grid": true,
+   "Snap": true,
+   "Autoraise": true,
+   "Sticky": true,
+   "Tooltip": true,
+   "GridProjection": false,
+   "HideWhenFaceDown": false,
+   "Hands": false,
+   "LuaScript": "",
+   "LuaScriptState": "",
+   "XmlUI": ""
   }
  ]
 }
