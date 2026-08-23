@@ -17,7 +17,7 @@
  "LuaScriptState": "",
  "ObjectStates": [
   {
-   "GUID": "dbe387",
+   "GUID": "d335e5",
    "Name": "Card",
    "Transform": {
     "posX": -4.5,
@@ -31,7 +31,7 @@
     "scaleZ": 1
    },
    "Nickname": "The Vadrigar, Arena Masters",
-   "Description": "Legendary Creature \u2014 Elder God  4/5\n\nChampions you control have haste.\nActive \u2014 {1}, Sacrifice another creature: Return target Champion card from your graveyard to the battlefield tapped. Activate only once each turn.",
+   "Description": "Legendary Creature \u2014 Elder God  4/4\n\nChampions you control have haste and ward {1}.\nActive \u2014 {1}, Sacrifice another creature: Return target Champion card from your graveyard to the battlefield tapped. Activate only once each turn.",
    "GMNotes": "",
    "ColorDiffuse": {
     "r": 0.713,
@@ -51,7 +51,7 @@
    "SidewaysCard": false,
    "CustomDeck": {
     "1": {
-     "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+     "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
      "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
      "NumWidth": 10,
      "NumHeight": 7,
@@ -65,7 +65,7 @@
    "XmlUI": ""
   },
   {
-   "GUID": "888432",
+   "GUID": "273535",
    "Name": "DeckCustom",
    "Transform": {
     "posX": 0,
@@ -199,7 +199,7 @@
    ],
    "CustomDeck": {
     "1": {
-     "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+     "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
      "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
      "NumWidth": 10,
      "NumHeight": 7,
@@ -222,7 +222,7 @@
    "XmlUI": "",
    "ContainedObjects": [
     {
-     "GUID": "c9f764",
+     "GUID": "2ea6ac",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -236,7 +236,7 @@
       "scaleZ": 1
      },
      "Nickname": "Anarki, Ascendant Junkie",
-     "Description": "Legendary Creature \u2014 Human Cyborg Champion  2/2\n\nHaste\nActive \u2014 {1}: Put a +1/+1 counter on Anarki and you gain 2 life. Activate only once each turn.",
+     "Description": "Legendary Creature \u2014 Human Cyborg Champion  2/3\n\nHaste\nActive \u2014 {1}: Put a +1/+1 counter on Anarki and you gain 2 life. Activate only once each turn.",
      "GMNotes": "",
      "ColorDiffuse": {
       "r": 0.713,
@@ -256,7 +256,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -270,7 +270,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "b3548f",
+     "GUID": "002eb4",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -284,7 +284,7 @@
       "scaleZ": 1
      },
      "Nickname": "Athena, Coalition Ranger",
-     "Description": "Legendary Creature \u2014 Human Scout Champion  2/2\n\nReach, vigilance\nActive \u2014 {1}: Untap target permanent you control. Activate only once each turn.",
+     "Description": "Legendary Creature \u2014 Human Scout Champion  2/3\n\nReach, vigilance\nActive \u2014 {1}: Untap target permanent you control. Activate only once each turn.",
      "GMNotes": "",
      "ColorDiffuse": {
       "r": 0.713,
@@ -304,7 +304,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -318,7 +318,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "d9c07f",
+     "GUID": "5f6482",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -332,7 +332,7 @@
       "scaleZ": 1
      },
      "Nickname": "Nyx, Fathom Agent",
-     "Description": "Legendary Creature \u2014 Rogue Champion  2/2\n\nWhenever Nyx deals combat damage to a player, that player discards a card.\nActive \u2014 {1}: Nyx phases out. Activate only once each turn.",
+     "Description": "Legendary Creature \u2014 Rogue Champion  2/3\n\nWhenever Nyx deals combat damage to a player, that player discards a card.\nActive \u2014 {1}: Nyx phases out. Activate only once each turn.",
      "GMNotes": "",
      "ColorDiffuse": {
       "r": 0.713,
@@ -352,7 +352,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -366,7 +366,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "8b4327",
+     "GUID": "ccb650",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -400,7 +400,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -414,7 +414,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "eda649",
+     "GUID": "0bccbb",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -428,7 +428,7 @@
       "scaleZ": 1
      },
      "Nickname": "Slash, Bloodfire Skater",
-     "Description": "Legendary Creature \u2014 Human Rogue Champion  2/2\n\nHaste\nWhenever Slash attacks, Slash deals 1 damage to each creature defending player controls.\nActive \u2014 {1}: Slash can't be blocked this turn. Activate only once each turn.",
+     "Description": "Legendary Creature \u2014 Human Rogue Champion  2/3\n\nHaste\nWhenever Slash attacks, Slash deals 1 damage to each creature defending player controls.\nActive \u2014 {1}: Slash can't be blocked this turn. Activate only once each turn.",
      "GMNotes": "",
      "ColorDiffuse": {
       "r": 0.713,
@@ -448,7 +448,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -462,7 +462,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "e6a9d6",
+     "GUID": "911d30",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -496,7 +496,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -510,7 +510,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "e5baac",
+     "GUID": "2e5c87",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -544,7 +544,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -558,7 +558,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "1dfa21",
+     "GUID": "c7e1e3",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -592,7 +592,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -606,7 +606,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "1804ef",
+     "GUID": "b822dd",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -640,7 +640,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -654,7 +654,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "feb0f8",
+     "GUID": "fc3509",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -668,7 +668,7 @@
       "scaleZ": 1
      },
      "Nickname": "Keel, Vindictive Bruiser",
-     "Description": "Legendary Creature \u2014 Human Soldier Champion  3/2\n\nVigilance\nActive \u2014 {1}{R}: Keel deals 2 damage divided as you choose among one or two targets. Activate only once each turn.",
+     "Description": "Legendary Creature \u2014 Human Soldier Champion  3/3\n\nVigilance\nActive \u2014 {1}: Keel deals 2 damage divided as you choose among one or two targets. Activate only once each turn.",
      "GMNotes": "",
      "ColorDiffuse": {
       "r": 0.713,
@@ -688,7 +688,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -702,7 +702,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "140094",
+     "GUID": "19c5f3",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -716,7 +716,7 @@
       "scaleZ": 1
      },
      "Nickname": "Strogg & Peeker",
-     "Description": "Legendary Creature \u2014 Strogg Soldier Champion  3/2\n\nWhen Strogg & Peeker enters, create a 1/1 colorless Thopter artifact creature token named Peeker with flying.\nActive \u2014 {1}: Target creature gets -1/-1 until end of turn. Activate only once each turn.",
+     "Description": "Legendary Creature \u2014 Strogg Soldier Champion  3/3\n\nWhen Strogg & Peeker enters, create a 1/1 colorless Thopter artifact creature token named Peeker with flying.\nActive \u2014 {1}: Target creature gets -1/-1 until end of turn. Activate only once each turn.",
      "GMNotes": "",
      "ColorDiffuse": {
       "r": 0.713,
@@ -736,7 +736,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -750,7 +750,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "d0598e",
+     "GUID": "55250c",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -764,7 +764,7 @@
       "scaleZ": 1
      },
      "Nickname": "Visor, Aggressive Vengeance",
-     "Description": "Legendary Creature \u2014 Human Soldier Champion  3/2\n\nMenace\nActive \u2014 {1}: Target creature can't block this turn. Activate only once each turn.",
+     "Description": "Legendary Creature \u2014 Human Soldier Champion  3/3\n\nMenace\nActive \u2014 {1}: Target creature can't block this turn. Activate only once each turn.",
      "GMNotes": "",
      "ColorDiffuse": {
       "r": 0.713,
@@ -784,7 +784,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -798,7 +798,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "5039d7",
+     "GUID": "9286b7",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -832,7 +832,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -846,7 +846,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "d16877",
+     "GUID": "fee272",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -880,7 +880,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -894,7 +894,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "963dc3",
+     "GUID": "a81306",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -928,7 +928,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -942,7 +942,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "a401df",
+     "GUID": "fbd441",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -956,7 +956,7 @@
       "scaleZ": 1
      },
      "Nickname": "Sorlag, Sorg-Class Warrior",
-     "Description": "Legendary Creature \u2014 Lizard Warrior Champion  4/4\n\nDeathtouch\nActive \u2014 {G}: Sorlag deals 1 damage to target creature. Activate only once each turn.",
+     "Description": "Legendary Creature \u2014 Lizard Warrior Champion  4/4\n\nDeathtouch\nActive \u2014 {G}, {T}: Sorlag deals 1 damage to target creature. Activate only once each turn.",
      "GMNotes": "",
      "ColorDiffuse": {
       "r": 0.713,
@@ -976,7 +976,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -990,7 +990,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "302562",
+     "GUID": "abef3a",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1024,7 +1024,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1038,7 +1038,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "93e4cc",
+     "GUID": "8153b1",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1072,7 +1072,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1086,7 +1086,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "4aacad",
+     "GUID": "f0baba",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1120,7 +1120,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1134,7 +1134,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "c7d05c",
+     "GUID": "511ba5",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1168,7 +1168,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1182,7 +1182,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "e3f93a",
+     "GUID": "288459",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1216,7 +1216,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1230,55 +1230,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "88792d",
-     "Name": "Card",
-     "Transform": {
-      "posX": 0,
-      "posY": 1,
-      "posZ": 0,
-      "rotX": 0,
-      "rotY": 180,
-      "rotZ": 180,
-      "scaleX": 1,
-      "scaleY": 1,
-      "scaleZ": 1
-     },
-     "Nickname": "Gauntlet",
-     "Description": "Artifact \u2014 Equipment\n\nEquipped creature gets +2/+0.\nEquip Champion {0}\nEquip {2}",
-     "GMNotes": "",
-     "ColorDiffuse": {
-      "r": 0.713,
-      "g": 0.713,
-      "b": 0.713
-     },
-     "Locked": false,
-     "Grid": true,
-     "Snap": true,
-     "Autoraise": true,
-     "Sticky": true,
-     "Tooltip": true,
-     "GridProjection": false,
-     "HideWhenFaceDown": true,
-     "Hands": true,
-     "CardID": 122,
-     "SidewaysCard": false,
-     "CustomDeck": {
-      "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
-       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
-       "NumWidth": 10,
-       "NumHeight": 7,
-       "BackIsHidden": true,
-       "UniqueBack": false,
-       "Type": 0
-      }
-     },
-     "LuaScript": "",
-     "LuaScriptState": "",
-     "XmlUI": ""
-    },
-    {
-     "GUID": "106196",
+     "GUID": "80afba",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1308,11 +1260,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 123,
+     "CardID": 122,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1326,7 +1278,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "024499",
+     "GUID": "385516",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1356,11 +1308,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 124,
+     "CardID": 123,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1374,55 +1326,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "cfdbb8",
-     "Name": "Card",
-     "Transform": {
-      "posX": 0,
-      "posY": 1,
-      "posZ": 0,
-      "rotX": 0,
-      "rotY": 180,
-      "rotZ": 180,
-      "scaleX": 1,
-      "scaleY": 1,
-      "scaleZ": 1
-     },
-     "Nickname": "Shotgun",
-     "Description": "Artifact \u2014 Equipment\n\nEquipped creature gets +2/+0 and has first strike.\nEquip Champion {1}\nEquip {3}",
-     "GMNotes": "",
-     "ColorDiffuse": {
-      "r": 0.713,
-      "g": 0.713,
-      "b": 0.713
-     },
-     "Locked": false,
-     "Grid": true,
-     "Snap": true,
-     "Autoraise": true,
-     "Sticky": true,
-     "Tooltip": true,
-     "GridProjection": false,
-     "HideWhenFaceDown": true,
-     "Hands": true,
-     "CardID": 125,
-     "SidewaysCard": false,
-     "CustomDeck": {
-      "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
-       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
-       "NumWidth": 10,
-       "NumHeight": 7,
-       "BackIsHidden": true,
-       "UniqueBack": false,
-       "Type": 0
-      }
-     },
-     "LuaScript": "",
-     "LuaScriptState": "",
-     "XmlUI": ""
-    },
-    {
-     "GUID": "d78e44",
+     "GUID": "101741",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1452,11 +1356,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 126,
+     "CardID": 124,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1470,7 +1374,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "e4e7c1",
+     "GUID": "e2cf94",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1500,11 +1404,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 127,
+     "CardID": 125,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1518,7 +1422,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "2cd3f9",
+     "GUID": "7d1173",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1548,11 +1452,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 128,
+     "CardID": 126,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1566,7 +1470,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "6cf58e",
+     "GUID": "6d9a75",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1596,11 +1500,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 129,
+     "CardID": 127,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1614,7 +1518,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "ecca3e",
+     "GUID": "a1e268",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1644,11 +1548,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 130,
+     "CardID": 128,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1662,7 +1566,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "a1b9bc",
+     "GUID": "d423ec",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1692,11 +1596,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 131,
+     "CardID": 129,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1710,7 +1614,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "77f169",
+     "GUID": "5f0860",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1740,11 +1644,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 132,
+     "CardID": 130,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1758,7 +1662,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "b0a27d",
+     "GUID": "6dc95d",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1788,11 +1692,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 133,
+     "CardID": 131,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1806,7 +1710,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "bf4bcb",
+     "GUID": "321015",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1836,11 +1740,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 134,
+     "CardID": 132,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1854,7 +1758,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "8de7d3",
+     "GUID": "881a16",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1884,11 +1788,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 135,
+     "CardID": 133,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1902,7 +1806,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "89b19d",
+     "GUID": "8ad3a0",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1932,11 +1836,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 136,
+     "CardID": 134,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1950,7 +1854,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "67de6d",
+     "GUID": "da6365",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1980,11 +1884,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 137,
+     "CardID": 135,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1998,7 +1902,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "933845",
+     "GUID": "c1567f",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2028,11 +1932,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 138,
+     "CardID": 136,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2046,7 +1950,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "283a63",
+     "GUID": "d1d8e2",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2076,11 +1980,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 139,
+     "CardID": 137,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2094,7 +1998,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "29a70c",
+     "GUID": "6bf56a",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2124,11 +2028,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 140,
+     "CardID": 138,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2142,7 +2046,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "aa5e0d",
+     "GUID": "2ecedb",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2172,11 +2076,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 141,
+     "CardID": 139,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2190,7 +2094,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "261e81",
+     "GUID": "d13632",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2220,11 +2124,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 142,
+     "CardID": 140,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2238,7 +2142,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "150813",
+     "GUID": "28d2b4",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2268,11 +2172,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 143,
+     "CardID": 141,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2286,7 +2190,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "575c30",
+     "GUID": "b90d29",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2316,11 +2220,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 144,
+     "CardID": 142,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2334,7 +2238,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "88c1c7",
+     "GUID": "603a8e",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2364,11 +2268,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 145,
+     "CardID": 143,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2382,7 +2286,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "41457f",
+     "GUID": "99d673",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2412,11 +2316,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 146,
+     "CardID": 144,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2430,7 +2334,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "beceb5",
+     "GUID": "777456",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2460,11 +2364,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 147,
+     "CardID": 145,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2478,7 +2382,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "6c150c",
+     "GUID": "1442b1",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2508,11 +2412,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 148,
+     "CardID": 146,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2526,7 +2430,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "450b57",
+     "GUID": "574c38",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2556,11 +2460,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 149,
+     "CardID": 147,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2574,7 +2478,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "69d0e3",
+     "GUID": "4510de",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2604,11 +2508,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 150,
+     "CardID": 148,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2622,7 +2526,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "72a0c8",
+     "GUID": "abd5a5",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2652,11 +2556,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 151,
+     "CardID": 149,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2670,7 +2574,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "38e302",
+     "GUID": "91ef05",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2700,11 +2604,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 152,
+     "CardID": 150,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2718,7 +2622,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "cdfca1",
+     "GUID": "ee67cc",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2748,11 +2652,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 153,
+     "CardID": 151,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2766,7 +2670,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "aa4819",
+     "GUID": "a8ed84",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2796,11 +2700,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 154,
+     "CardID": 152,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2814,7 +2718,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "d2f7e1",
+     "GUID": "c0a775",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2844,11 +2748,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 155,
+     "CardID": 153,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2862,7 +2766,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "2adedc",
+     "GUID": "4d1a0b",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2892,11 +2796,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 156,
+     "CardID": 154,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2910,7 +2814,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "a5d027",
+     "GUID": "7002fe",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2940,11 +2844,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 157,
+     "CardID": 155,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2958,7 +2862,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "479bc8",
+     "GUID": "70da2f",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2988,11 +2892,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 158,
+     "CardID": 156,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -3006,7 +2910,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "3f753b",
+     "GUID": "01701e",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3036,11 +2940,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 159,
+     "CardID": 157,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -3054,7 +2958,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "d68bf0",
+     "GUID": "fd9fc7",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3084,11 +2988,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 160,
+     "CardID": 158,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -3102,7 +3006,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "e0dddb",
+     "GUID": "ee1147",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3132,11 +3036,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 161,
+     "CardID": 159,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -3150,7 +3054,55 @@
      "XmlUI": ""
     },
     {
-     "GUID": "e44f45",
+     "GUID": "5c827d",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Ember of Cthugha",
+     "Description": "Enchantment\n\nAt the beginning of combat on your turn, target Champion you control gets +1/+0 and gains first strike until end of turn.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 160,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "21bdaf",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3180,11 +3132,11 @@
      "GridProjection": false,
      "HideWhenFaceDown": true,
      "Hands": true,
-     "CardID": 162,
+     "CardID": 161,
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -3198,7 +3150,55 @@
      "XmlUI": ""
     },
     {
-     "GUID": "b95c4a",
+     "GUID": "7a5d7b",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Overgrown Sanctum",
+     "Description": "Enchantment\n\nWhenever a Champion enters under your control, you gain 2 life.\nChampions you control get +0/+1.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 162,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "caf7a0",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3232,7 +3232,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -3246,7 +3246,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "a2407a",
+     "GUID": "884903",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3280,7 +3280,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -3294,7 +3294,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "60618b",
+     "GUID": "db024e",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3328,7 +3328,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -3342,7 +3342,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "78ab11",
+     "GUID": "32a008",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3376,7 +3376,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -3390,7 +3390,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "1c2c05",
+     "GUID": "b7423a",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3424,7 +3424,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -3438,7 +3438,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "794334",
+     "GUID": "584d31",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3472,7 +3472,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -3486,7 +3486,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "4bc21c",
+     "GUID": "e7be0c",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3520,7 +3520,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.ab06503494.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-faces-1.d8767fa0c6.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QCH-back.612be1b533.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -3534,7 +3534,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "eaf2fb",
+     "GUID": "1bbd0d",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3582,7 +3582,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "eaa24b",
+     "GUID": "a428ca",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3630,7 +3630,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "1f1a8d",
+     "GUID": "9e00f8",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3678,7 +3678,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "240a10",
+     "GUID": "678fe2",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3726,7 +3726,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "c6a458",
+     "GUID": "fecff9",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3774,7 +3774,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "9e2757",
+     "GUID": "c7c120",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3822,7 +3822,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "04b3fe",
+     "GUID": "41cb74",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3870,7 +3870,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "03815c",
+     "GUID": "da600f",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3918,7 +3918,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "6365eb",
+     "GUID": "a1f7e8",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3966,7 +3966,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "135def",
+     "GUID": "21a81d",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4014,7 +4014,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "53cf6e",
+     "GUID": "3f4cf3",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4062,7 +4062,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "5033af",
+     "GUID": "a168a7",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4110,7 +4110,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "90debc",
+     "GUID": "2d2688",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4158,7 +4158,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "b1be09",
+     "GUID": "7201e3",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4206,7 +4206,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "ac21e7",
+     "GUID": "61cf5a",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4254,7 +4254,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "5a18dd",
+     "GUID": "9776c3",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4302,7 +4302,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "a9ba1d",
+     "GUID": "ef37e2",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4350,7 +4350,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "2f019a",
+     "GUID": "c8d142",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4398,7 +4398,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "9ec7f4",
+     "GUID": "2a607b",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4446,7 +4446,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "5b48af",
+     "GUID": "0cf69a",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4494,7 +4494,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "25abab",
+     "GUID": "82f105",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4542,7 +4542,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "51fb3b",
+     "GUID": "e65ddd",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4590,7 +4590,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "a965d5",
+     "GUID": "c10f78",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4638,7 +4638,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "8bcf6e",
+     "GUID": "3fdce9",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4686,7 +4686,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "efa3bd",
+     "GUID": "871b16",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4734,7 +4734,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "a3260d",
+     "GUID": "fa5904",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4782,7 +4782,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "b14d56",
+     "GUID": "b2e0f3",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4830,7 +4830,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "3098ac",
+     "GUID": "82867d",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4878,7 +4878,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "b8136e",
+     "GUID": "2a0338",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4926,7 +4926,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "a6cb43",
+     "GUID": "059d09",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4976,7 +4976,7 @@
    ]
   },
   {
-   "GUID": "0bea54",
+   "GUID": "1162df",
    "Name": "DeckCustom",
    "Transform": {
     "posX": 4.5,
@@ -5031,7 +5031,7 @@
    "XmlUI": "",
    "ContainedObjects": [
     {
-     "GUID": "5c951b",
+     "GUID": "1e9bb5",
      "Name": "Card",
      "Transform": {
       "posX": 4.5,
@@ -5079,7 +5079,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "727ff4",
+     "GUID": "8d51d4",
      "Name": "Card",
      "Transform": {
       "posX": 4.5,
@@ -5127,7 +5127,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "5af9c6",
+     "GUID": "347243",
      "Name": "Card",
      "Transform": {
       "posX": 4.5,
@@ -5175,7 +5175,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "cbbff9",
+     "GUID": "52216e",
      "Name": "Card",
      "Transform": {
       "posX": 4.5,
@@ -5223,7 +5223,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "17719a",
+     "GUID": "00abd8",
      "Name": "Card",
      "Transform": {
       "posX": 4.5,
@@ -5271,7 +5271,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "b1b22f",
+     "GUID": "ce3023",
      "Name": "Card",
      "Transform": {
       "posX": 4.5,
