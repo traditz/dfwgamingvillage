@@ -17,7 +17,7 @@
  "LuaScriptState": "",
  "ObjectStates": [
   {
-   "GUID": "b5d850",
+   "GUID": "4bdf09",
    "Name": "Card",
    "Transform": {
     "posX": -4.5,
@@ -65,7 +65,7 @@
    "XmlUI": ""
   },
   {
-   "GUID": "113e83",
+   "GUID": "04bb61",
    "Name": "DeckCustom",
    "Transform": {
     "posX": 0,
@@ -222,7 +222,7 @@
    "XmlUI": "",
    "ContainedObjects": [
     {
-     "GUID": "5f4ffc",
+     "GUID": "243d12",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -270,7 +270,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "8b4605",
+     "GUID": "31a880",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -318,7 +318,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "9e1a02",
+     "GUID": "4595e6",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -366,7 +366,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "39903c",
+     "GUID": "f8acb0",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -414,7 +414,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "1cd6d2",
+     "GUID": "2e2b72",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -462,7 +462,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "c03c7e",
+     "GUID": "cf586c",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -510,7 +510,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "accd05",
+     "GUID": "efbead",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -558,7 +558,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "72470e",
+     "GUID": "8b3101",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -606,7 +606,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "a5d6a0",
+     "GUID": "0a819c",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -654,7 +654,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "9b6edd",
+     "GUID": "c5aeb3",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -702,7 +702,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "0a7ffa",
+     "GUID": "77113c",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -750,7 +750,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "77daa7",
+     "GUID": "a7f46e",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -798,7 +798,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "98a617",
+     "GUID": "052d21",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -846,7 +846,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "0c4690",
+     "GUID": "ef250d",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -894,7 +894,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "929c2c",
+     "GUID": "44ce7b",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -942,7 +942,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "904acb",
+     "GUID": "b816bc",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -990,7 +990,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "f9bc68",
+     "GUID": "484d7a",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1038,7 +1038,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "f1d5de",
+     "GUID": "633d02",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1086,7 +1086,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "b2c41a",
+     "GUID": "fe1493",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1134,7 +1134,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "4790ff",
+     "GUID": "46e623",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1182,7 +1182,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "40deb5",
+     "GUID": "62487f",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1230,7 +1230,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "48d75a",
+     "GUID": "b5bbe4",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1278,7 +1278,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "55ad3a",
+     "GUID": "a31e0d",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1326,7 +1326,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "588ded",
+     "GUID": "364c27",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1374,7 +1374,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "8c19e0",
+     "GUID": "d74a2c",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1422,7 +1422,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "0ed0e9",
+     "GUID": "a96d9c",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1470,7 +1470,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "3a9277",
+     "GUID": "0d0967",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1518,7 +1518,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "85ff32",
+     "GUID": "195ce8",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1566,7 +1566,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "1136d6",
+     "GUID": "9e9b9e",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1614,7 +1614,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "62ab1b",
+     "GUID": "31937e",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1662,7 +1662,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "bcb459",
+     "GUID": "f2d18e",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1710,7 +1710,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "7f1ed2",
+     "GUID": "877f79",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1758,7 +1758,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "7eddef",
+     "GUID": "a619f6",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1806,7 +1806,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "b3d1ce",
+     "GUID": "bb4094",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1854,7 +1854,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "ef2a5e",
+     "GUID": "57c560",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1902,7 +1902,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "5858af",
+     "GUID": "9df287",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1950,7 +1950,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "2c4300",
+     "GUID": "457626",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1998,7 +1998,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "927658",
+     "GUID": "ea08fe",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2046,7 +2046,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "1d2234",
+     "GUID": "42c808",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2094,7 +2094,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "167b37",
+     "GUID": "8a171f",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2142,7 +2142,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "31a920",
+     "GUID": "cc0c5f",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2190,7 +2190,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "868237",
+     "GUID": "bf95a6",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2238,7 +2238,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "5dfa94",
+     "GUID": "77a27f",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2286,7 +2286,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "0ba4eb",
+     "GUID": "283a80",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2334,7 +2334,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "70bb05",
+     "GUID": "2264c6",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2382,7 +2382,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "5c1be0",
+     "GUID": "036357",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2430,7 +2430,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "f68171",
+     "GUID": "280905",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2478,7 +2478,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "9aaeaa",
+     "GUID": "7cb977",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2526,7 +2526,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "ebdc09",
+     "GUID": "0cfa28",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2574,7 +2574,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "64858f",
+     "GUID": "917c39",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2622,7 +2622,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "c47ff4",
+     "GUID": "376eaf",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2670,7 +2670,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "62d704",
+     "GUID": "706dd2",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2718,7 +2718,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "cf6829",
+     "GUID": "154e2d",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2766,7 +2766,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "9890e5",
+     "GUID": "3c309b",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2814,7 +2814,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "1c4ba6",
+     "GUID": "f9497a",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2862,7 +2862,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "919cce",
+     "GUID": "c95ea3",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2910,7 +2910,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "2cdbb4",
+     "GUID": "6c82a8",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2958,7 +2958,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "b9dedb",
+     "GUID": "0e99d7",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3006,7 +3006,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "f4e6cc",
+     "GUID": "701af4",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3054,7 +3054,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "7e9ce6",
+     "GUID": "ec24a5",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3102,7 +3102,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "2b445b",
+     "GUID": "697722",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3150,7 +3150,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "ed6f45",
+     "GUID": "b392ec",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3198,7 +3198,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "abdcae",
+     "GUID": "242a7a",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3246,7 +3246,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "ebdd3e",
+     "GUID": "5de243",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3294,7 +3294,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "4c1e4c",
+     "GUID": "a377b7",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3342,7 +3342,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "1ef8a8",
+     "GUID": "c42a4e",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3390,7 +3390,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "9be023",
+     "GUID": "146144",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3438,7 +3438,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "4ba200",
+     "GUID": "985454",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3486,7 +3486,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "b45a9b",
+     "GUID": "81d212",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3534,7 +3534,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "68421b",
+     "GUID": "c40b14",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3582,7 +3582,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "b06442",
+     "GUID": "98bb14",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3630,7 +3630,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "d77c8d",
+     "GUID": "c5e47f",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3678,7 +3678,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "b1becb",
+     "GUID": "3245cf",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3726,7 +3726,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "43e105",
+     "GUID": "44ca92",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3774,7 +3774,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "cf682f",
+     "GUID": "7eae56",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3822,7 +3822,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "36574b",
+     "GUID": "05df3b",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3870,7 +3870,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "6906f7",
+     "GUID": "6ed614",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3918,7 +3918,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "c9f2ea",
+     "GUID": "c3af30",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3966,7 +3966,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "8ad202",
+     "GUID": "ef8393",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4014,7 +4014,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "186070",
+     "GUID": "c68957",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4062,7 +4062,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "f49825",
+     "GUID": "13399e",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4110,7 +4110,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "7bf09b",
+     "GUID": "fac2eb",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4158,7 +4158,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "e9ca18",
+     "GUID": "5a6ade",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4206,7 +4206,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "29e297",
+     "GUID": "06f527",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4254,7 +4254,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "0f0577",
+     "GUID": "b4b2ae",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4302,7 +4302,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "96e581",
+     "GUID": "891312",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4350,7 +4350,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "abab7b",
+     "GUID": "fd55e2",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4398,7 +4398,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "8ccfe4",
+     "GUID": "e2e611",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4446,7 +4446,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "f529a7",
+     "GUID": "659b5f",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4494,7 +4494,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "705914",
+     "GUID": "c3ccbb",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4542,7 +4542,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "6e4fc6",
+     "GUID": "f3cbbc",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4590,7 +4590,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "2e870f",
+     "GUID": "206568",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4638,7 +4638,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "ddb58f",
+     "GUID": "e5dd3e",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4686,7 +4686,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "58b8c8",
+     "GUID": "3be8da",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4734,7 +4734,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "d03cdf",
+     "GUID": "243e3d",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4782,7 +4782,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "544c32",
+     "GUID": "ae28ec",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4830,7 +4830,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "4fb180",
+     "GUID": "3735d2",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4878,7 +4878,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "266217",
+     "GUID": "c58860",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4926,7 +4926,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "cd6f55",
+     "GUID": "d55799",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4976,12 +4976,12 @@
    ]
   },
   {
-   "GUID": "928fcd",
-   "Name": "DeckCustom",
+   "GUID": "758635",
+   "Name": "Infinite_Bag",
    "Transform": {
     "posX": 4.5,
     "posY": 1,
-    "posZ": 0,
+    "posZ": 3,
     "rotX": 0,
     "rotY": 180,
     "rotZ": 0,
@@ -4989,13 +4989,13 @@
     "scaleY": 1,
     "scaleZ": 1
    },
-   "Nickname": "QDD tokens",
-   "Description": "",
+   "Nickname": "Knight tokens",
+   "Description": "Infinite bag - draw tokens from here.",
    "GMNotes": "",
    "ColorDiffuse": {
-    "r": 0.713,
-    "g": 0.713,
-    "b": 0.713
+    "r": 0.35,
+    "g": 0.35,
+    "b": 0.35
    },
    "Locked": false,
    "Grid": true,
@@ -5004,130 +5004,19 @@
    "Sticky": true,
    "Tooltip": true,
    "GridProjection": false,
-   "HideWhenFaceDown": true,
+   "HideWhenFaceDown": false,
    "Hands": false,
-   "SidewaysCard": false,
-   "DeckIDs": [
-    300,
-    300,
-    300
-   ],
-   "CustomDeck": {
-    "3": {
-     "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QDD-tokens-1.cb56a52464.png",
-     "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QDD-back.bb9987c1b6.png",
-     "NumWidth": 1,
-     "NumHeight": 1,
-     "BackIsHidden": true,
-     "UniqueBack": false,
-     "Type": 0
-    }
-   },
+   "MaterialIndex": -1,
+   "MeshIndex": -1,
    "LuaScript": "",
    "LuaScriptState": "",
    "XmlUI": "",
    "ContainedObjects": [
     {
-     "GUID": "b4c217",
+     "GUID": "a093d0",
      "Name": "Card",
      "Transform": {
-      "posX": 4.5,
-      "posY": 1,
-      "posZ": 0,
-      "rotX": 0,
-      "rotY": 180,
-      "rotZ": 0,
-      "scaleX": 1,
-      "scaleY": 1,
-      "scaleZ": 1
-     },
-     "Nickname": "Knight",
-     "Description": "Token Creature \u2014 Knight  2/2\n\nFirst strike",
-     "GMNotes": "",
-     "ColorDiffuse": {
-      "r": 0.713,
-      "g": 0.713,
-      "b": 0.713
-     },
-     "Locked": false,
-     "Grid": true,
-     "Snap": true,
-     "Autoraise": true,
-     "Sticky": true,
-     "Tooltip": true,
-     "GridProjection": false,
-     "HideWhenFaceDown": true,
-     "Hands": true,
-     "CardID": 300,
-     "SidewaysCard": false,
-     "CustomDeck": {
-      "3": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QDD-tokens-1.cb56a52464.png",
-       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QDD-back.bb9987c1b6.png",
-       "NumWidth": 1,
-       "NumHeight": 1,
-       "BackIsHidden": true,
-       "UniqueBack": false,
-       "Type": 0
-      }
-     },
-     "LuaScript": "",
-     "LuaScriptState": "",
-     "XmlUI": ""
-    },
-    {
-     "GUID": "78ddfc",
-     "Name": "Card",
-     "Transform": {
-      "posX": 4.5,
-      "posY": 1,
-      "posZ": 0,
-      "rotX": 0,
-      "rotY": 180,
-      "rotZ": 0,
-      "scaleX": 1,
-      "scaleY": 1,
-      "scaleZ": 1
-     },
-     "Nickname": "Knight",
-     "Description": "Token Creature \u2014 Knight  2/2\n\nFirst strike",
-     "GMNotes": "",
-     "ColorDiffuse": {
-      "r": 0.713,
-      "g": 0.713,
-      "b": 0.713
-     },
-     "Locked": false,
-     "Grid": true,
-     "Snap": true,
-     "Autoraise": true,
-     "Sticky": true,
-     "Tooltip": true,
-     "GridProjection": false,
-     "HideWhenFaceDown": true,
-     "Hands": true,
-     "CardID": 300,
-     "SidewaysCard": false,
-     "CustomDeck": {
-      "3": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/QDD-tokens-1.cb56a52464.png",
-       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/QDD-back.bb9987c1b6.png",
-       "NumWidth": 1,
-       "NumHeight": 1,
-       "BackIsHidden": true,
-       "UniqueBack": false,
-       "Type": 0
-      }
-     },
-     "LuaScript": "",
-     "LuaScriptState": "",
-     "XmlUI": ""
-    },
-    {
-     "GUID": "b83748",
-     "Name": "Card",
-     "Transform": {
-      "posX": 4.5,
+      "posX": 0,
       "posY": 1,
       "posZ": 0,
       "rotX": 0,
@@ -5172,6 +5061,111 @@
      "XmlUI": ""
     }
    ]
+  },
+  {
+   "GUID": "ff543b",
+   "Name": "Die_20",
+   "Transform": {
+    "posX": -6.5,
+    "posY": 1,
+    "posZ": 3,
+    "rotX": 0,
+    "rotY": 0,
+    "rotZ": 0,
+    "scaleX": 0.7,
+    "scaleY": 0.7,
+    "scaleZ": 0.7
+   },
+   "Nickname": "Round tracker / counters",
+   "Description": "",
+   "GMNotes": "",
+   "ColorDiffuse": {
+    "r": 0.85,
+    "g": 0.75,
+    "b": 0.35
+   },
+   "Locked": false,
+   "Grid": true,
+   "Snap": true,
+   "Autoraise": true,
+   "Sticky": true,
+   "Tooltip": true,
+   "GridProjection": false,
+   "HideWhenFaceDown": false,
+   "Hands": false,
+   "LuaScript": "",
+   "LuaScriptState": "",
+   "XmlUI": ""
+  },
+  {
+   "GUID": "a68c9a",
+   "Name": "Die_6",
+   "Transform": {
+    "posX": -7.6,
+    "posY": 1,
+    "posZ": 3,
+    "rotX": 0,
+    "rotY": 0,
+    "rotZ": 0,
+    "scaleX": 0.7,
+    "scaleY": 0.7,
+    "scaleZ": 0.7
+   },
+   "Nickname": "Counters",
+   "Description": "",
+   "GMNotes": "",
+   "ColorDiffuse": {
+    "r": 0.85,
+    "g": 0.75,
+    "b": 0.35
+   },
+   "Locked": false,
+   "Grid": true,
+   "Snap": true,
+   "Autoraise": true,
+   "Sticky": true,
+   "Tooltip": true,
+   "GridProjection": false,
+   "HideWhenFaceDown": false,
+   "Hands": false,
+   "LuaScript": "",
+   "LuaScriptState": "",
+   "XmlUI": ""
+  },
+  {
+   "GUID": "d736d6",
+   "Name": "Die_6",
+   "Transform": {
+    "posX": -7.6,
+    "posY": 1,
+    "posZ": 4.2,
+    "rotX": 0,
+    "rotY": 0,
+    "rotZ": 0,
+    "scaleX": 0.7,
+    "scaleY": 0.7,
+    "scaleZ": 0.7
+   },
+   "Nickname": "Counters",
+   "Description": "",
+   "GMNotes": "",
+   "ColorDiffuse": {
+    "r": 0.85,
+    "g": 0.75,
+    "b": 0.35
+   },
+   "Locked": false,
+   "Grid": true,
+   "Snap": true,
+   "Autoraise": true,
+   "Sticky": true,
+   "Tooltip": true,
+   "GridProjection": false,
+   "HideWhenFaceDown": false,
+   "Hands": false,
+   "LuaScript": "",
+   "LuaScriptState": "",
+   "XmlUI": ""
   }
  ]
 }
