@@ -17,7 +17,7 @@
  "LuaScriptState": "",
  "ObjectStates": [
   {
-   "GUID": "162c67",
+   "GUID": "daf508",
    "Name": "Card",
    "Transform": {
     "posX": -4.5,
@@ -51,7 +51,7 @@
    "SidewaysCard": false,
    "CustomDeck": {
     "1": {
-     "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+     "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
      "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
      "NumWidth": 10,
      "NumHeight": 7,
@@ -65,7 +65,7 @@
    "XmlUI": ""
   },
   {
-   "GUID": "cc87d9",
+   "GUID": "9f863d",
    "Name": "DeckCustom",
    "Transform": {
     "posX": 0,
@@ -199,7 +199,7 @@
    ],
    "CustomDeck": {
     "1": {
-     "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+     "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
      "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
      "NumWidth": 10,
      "NumHeight": 7,
@@ -222,7 +222,7 @@
    "XmlUI": "",
    "ContainedObjects": [
     {
-     "GUID": "61e8bd",
+     "GUID": "518dcf",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -256,7 +256,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -270,7 +270,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "f130c8",
+     "GUID": "481a19",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -304,7 +304,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -318,7 +318,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "f56b67",
+     "GUID": "ccafa6",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -352,7 +352,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -366,7 +366,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "68676a",
+     "GUID": "3d855b",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -400,7 +400,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -414,7 +414,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "c05581",
+     "GUID": "c32eec",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -448,7 +448,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -462,7 +462,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "2f5be7",
+     "GUID": "ab3f37",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -496,7 +496,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -510,7 +510,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "41901c",
+     "GUID": "e1cb7e",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -544,7 +544,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -558,7 +558,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "b54ee3",
+     "GUID": "6b59b8",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -592,7 +592,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -606,7 +606,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "d27b1b",
+     "GUID": "6ac6e9",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -640,7 +640,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -654,7 +654,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "8cd4c8",
+     "GUID": "a40984",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -688,7 +688,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -702,7 +702,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "a2825c",
+     "GUID": "76876c",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -736,7 +736,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -750,7 +750,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "41d7a5",
+     "GUID": "480fd7",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -784,7 +784,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -798,7 +798,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "626f29",
+     "GUID": "6596b1",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -832,7 +832,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -846,7 +846,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "538ab0",
+     "GUID": "8f1fde",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -880,7 +880,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -894,7 +894,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "097681",
+     "GUID": "5a6790",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -928,7 +928,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -942,7 +942,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "4f4c9e",
+     "GUID": "5bf153",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -976,7 +976,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -990,7 +990,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "83d4ba",
+     "GUID": "48fe98",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1024,7 +1024,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1038,7 +1038,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "ec2cda",
+     "GUID": "97468c",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1072,7 +1072,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1086,7 +1086,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "d8bc7b",
+     "GUID": "3eda5c",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1120,7 +1120,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1134,7 +1134,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "c26b59",
+     "GUID": "55479d",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1168,7 +1168,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1182,7 +1182,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "4ba11e",
+     "GUID": "39b06c",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1216,7 +1216,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1230,7 +1230,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "31cba2",
+     "GUID": "a9164e",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1264,7 +1264,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1278,7 +1278,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "4ae887",
+     "GUID": "adb366",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1312,7 +1312,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1326,7 +1326,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "71168c",
+     "GUID": "5bdc07",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1360,7 +1360,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1374,7 +1374,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "a23a38",
+     "GUID": "7f5ae1",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1408,7 +1408,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1422,7 +1422,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "0da4ef",
+     "GUID": "8255d1",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1456,7 +1456,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1470,7 +1470,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "35c3bf",
+     "GUID": "956260",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1504,7 +1504,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1518,7 +1518,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "06298d",
+     "GUID": "f0b6bd",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1552,7 +1552,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1566,7 +1566,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "ae9f9c",
+     "GUID": "973313",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1600,7 +1600,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1614,7 +1614,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "f692e7",
+     "GUID": "f0a574",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1648,7 +1648,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1662,7 +1662,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "2e1d4d",
+     "GUID": "c4981a",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1696,7 +1696,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1710,7 +1710,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "a1f55a",
+     "GUID": "00f8b3",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1744,7 +1744,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1758,7 +1758,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "c7f7b5",
+     "GUID": "3df046",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1792,7 +1792,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1806,7 +1806,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "adba4d",
+     "GUID": "df7319",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1840,7 +1840,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1854,7 +1854,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "a53e39",
+     "GUID": "2f0a87",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1888,7 +1888,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1902,7 +1902,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "d84def",
+     "GUID": "732dbe",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1936,7 +1936,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1950,7 +1950,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "e2a9d3",
+     "GUID": "696c32",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -1984,7 +1984,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -1998,7 +1998,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "6e76f5",
+     "GUID": "ebf290",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2032,7 +2032,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2046,7 +2046,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "800bba",
+     "GUID": "86599e",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2080,7 +2080,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2094,7 +2094,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "bcf848",
+     "GUID": "8cd1a3",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2128,7 +2128,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2142,7 +2142,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "4c01e4",
+     "GUID": "dec175",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2176,7 +2176,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2190,7 +2190,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "c3a1d3",
+     "GUID": "9e0a56",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2224,7 +2224,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2238,7 +2238,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "bd65a9",
+     "GUID": "129e41",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2272,7 +2272,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2286,7 +2286,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "98f2e3",
+     "GUID": "fe0c50",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2320,7 +2320,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2334,7 +2334,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "0f8213",
+     "GUID": "c2d8bc",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2368,7 +2368,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2382,7 +2382,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "433cf5",
+     "GUID": "262ae0",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2416,7 +2416,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2430,7 +2430,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "14025f",
+     "GUID": "e8e62f",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2464,7 +2464,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2478,7 +2478,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "138196",
+     "GUID": "e0f732",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2512,7 +2512,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2526,7 +2526,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "c02421",
+     "GUID": "f07f0f",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2560,7 +2560,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2574,7 +2574,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "dd3fc6",
+     "GUID": "aa31e4",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2608,7 +2608,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2622,7 +2622,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "f6c71b",
+     "GUID": "1d8ba4",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2656,7 +2656,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2670,7 +2670,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "1946c4",
+     "GUID": "b3d3b1",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2704,7 +2704,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2718,7 +2718,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "8e60c1",
+     "GUID": "70ded3",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2752,7 +2752,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2766,7 +2766,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "5383fa",
+     "GUID": "3afa9a",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2800,7 +2800,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2814,7 +2814,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "0ceb59",
+     "GUID": "95e3fe",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2848,7 +2848,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2862,7 +2862,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "d00e71",
+     "GUID": "ecc881",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2896,7 +2896,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2910,7 +2910,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "ce51e6",
+     "GUID": "871bac",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2944,7 +2944,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -2958,7 +2958,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "bae6be",
+     "GUID": "ac89cf",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -2992,7 +2992,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -3006,7 +3006,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "87cb03",
+     "GUID": "6e1db3",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3040,7 +3040,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -3054,7 +3054,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "6b49b8",
+     "GUID": "94167b",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3088,7 +3088,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -3102,7 +3102,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "29db1d",
+     "GUID": "04f0f2",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3136,7 +3136,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -3150,7 +3150,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "904421",
+     "GUID": "27106a",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3184,7 +3184,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -3198,7 +3198,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "86b291",
+     "GUID": "f88bd5",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3232,7 +3232,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -3246,7 +3246,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "f1fdb3",
+     "GUID": "eef844",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3280,7 +3280,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -3294,7 +3294,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "159bb0",
+     "GUID": "c83715",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3328,7 +3328,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -3342,7 +3342,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "2f1e30",
+     "GUID": "1da526",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3376,7 +3376,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -3390,7 +3390,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "604dd7",
+     "GUID": "ea9504",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3424,7 +3424,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -3438,7 +3438,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "5fc93b",
+     "GUID": "02b11d",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3472,7 +3472,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -3486,7 +3486,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "228e4c",
+     "GUID": "472192",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3520,7 +3520,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -3534,7 +3534,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "41d0b2",
+     "GUID": "4c9831",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3568,7 +3568,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -3582,7 +3582,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "fa3feb",
+     "GUID": "67ea65",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3616,7 +3616,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -3630,7 +3630,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "2d3699",
+     "GUID": "b10556",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3664,7 +3664,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -3678,7 +3678,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "7f5fc6",
+     "GUID": "92eaa3",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3712,7 +3712,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -3726,7 +3726,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "fe1152",
+     "GUID": "15da03",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3760,7 +3760,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -3774,7 +3774,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "b0cd3b",
+     "GUID": "c08694",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3808,7 +3808,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -3822,7 +3822,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "140303",
+     "GUID": "47d1d9",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3856,7 +3856,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -3870,7 +3870,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "9881b7",
+     "GUID": "451f3e",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3904,7 +3904,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -3918,7 +3918,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "13a3fb",
+     "GUID": "b084f5",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -3952,7 +3952,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -3966,7 +3966,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "69e785",
+     "GUID": "199e8b",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4000,7 +4000,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -4014,7 +4014,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "d22312",
+     "GUID": "b9fd6f",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4048,7 +4048,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -4062,7 +4062,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "118f33",
+     "GUID": "437a01",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4096,7 +4096,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -4110,7 +4110,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "0cde95",
+     "GUID": "82a905",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4144,7 +4144,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "1": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.146087cee1.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-faces-1.5d156cb20d.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 10,
        "NumHeight": 7,
@@ -4158,7 +4158,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "366ba7",
+     "GUID": "35eb23",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4206,7 +4206,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "b610c0",
+     "GUID": "b7700a",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4254,7 +4254,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "227708",
+     "GUID": "0483a8",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4302,7 +4302,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "04a473",
+     "GUID": "492bf4",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4350,7 +4350,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "b70dff",
+     "GUID": "8947b9",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4398,7 +4398,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "ae9987",
+     "GUID": "d29dda",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4446,7 +4446,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "208a47",
+     "GUID": "5b9983",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4494,7 +4494,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "c95f42",
+     "GUID": "e871fb",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4542,7 +4542,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "6f83f2",
+     "GUID": "d02bf2",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4590,7 +4590,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "3ec8d5",
+     "GUID": "b6094f",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4638,7 +4638,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "75c8d2",
+     "GUID": "a7e84b",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4686,7 +4686,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "61f7ff",
+     "GUID": "38f923",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4734,7 +4734,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "8a7d7d",
+     "GUID": "fa7926",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4782,7 +4782,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "2fccfa",
+     "GUID": "ff4a61",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4830,7 +4830,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "9d033f",
+     "GUID": "7c98dc",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4878,7 +4878,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "e66471",
+     "GUID": "129b70",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4926,7 +4926,7 @@
      "XmlUI": ""
     },
     {
-     "GUID": "055f4b",
+     "GUID": "0a5406",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -4976,7 +4976,7 @@
    ]
   },
   {
-   "GUID": "84d895",
+   "GUID": "1cb6a8",
    "Name": "Infinite_Bag",
    "Transform": {
     "posX": 4.5,
@@ -5013,7 +5013,7 @@
    "XmlUI": "",
    "ContainedObjects": [
     {
-     "GUID": "8a8918",
+     "GUID": "c6f4df",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -5047,7 +5047,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "3": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-tokens-1.40b7b77fb3.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-tokens-1.b9e4b92816.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 3,
        "NumHeight": 1,
@@ -5063,7 +5063,7 @@
    ]
   },
   {
-   "GUID": "03ef2b",
+   "GUID": "76cf72",
    "Name": "Infinite_Bag",
    "Transform": {
     "posX": 6.1,
@@ -5100,7 +5100,7 @@
    "XmlUI": "",
    "ContainedObjects": [
     {
-     "GUID": "960d9d",
+     "GUID": "0d52af",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -5134,7 +5134,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "3": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-tokens-1.40b7b77fb3.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-tokens-1.b9e4b92816.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 3,
        "NumHeight": 1,
@@ -5150,7 +5150,7 @@
    ]
   },
   {
-   "GUID": "83a048",
+   "GUID": "9dfb8d",
    "Name": "Infinite_Bag",
    "Transform": {
     "posX": 7.7,
@@ -5187,7 +5187,7 @@
    "XmlUI": "",
    "ContainedObjects": [
     {
-     "GUID": "1d0ecd",
+     "GUID": "f09d75",
      "Name": "Card",
      "Transform": {
       "posX": 0,
@@ -5221,7 +5221,7 @@
      "SidewaysCard": false,
      "CustomDeck": {
       "3": {
-       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-tokens-1.40b7b77fb3.png",
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-tokens-1.b9e4b92816.png",
        "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/ETQ-back.7690801e84.png",
        "NumWidth": 3,
        "NumHeight": 1,
@@ -5237,7 +5237,7 @@
    ]
   },
   {
-   "GUID": "c0d613",
+   "GUID": "a89212",
    "Name": "Die_20",
    "Transform": {
     "posX": -6.5,
@@ -5272,7 +5272,7 @@
    "XmlUI": ""
   },
   {
-   "GUID": "81633c",
+   "GUID": "1b1c09",
    "Name": "Die_6",
    "Transform": {
     "posX": -7.6,
@@ -5307,7 +5307,7 @@
    "XmlUI": ""
   },
   {
-   "GUID": "e57059",
+   "GUID": "515dc2",
    "Name": "Die_6",
    "Transform": {
     "posX": -7.6,
