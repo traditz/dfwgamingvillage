@@ -95,6 +95,8 @@ doom/doom1/art/E1M8_behind_barrels.png
 doom/doom1/art/E1M8_chaingun_room.png
 doom/doom1/art/E1M8_leaving_star_room.png
 doom/doom1/art/E1M8_oval_room.png
+doom/doom1/art/E1M9_crowd.png
+doom/doom1/art/E1_campaign_map.png
 doom/doom1/art/E2M2_machinery.png
 doom/doom1/art/E2M4_lowered_goodies.png
 doom/doom1/art/E2M8-noHUD.png
