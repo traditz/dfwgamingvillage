@@ -1,0 +1,5258 @@
+{
+ "SaveName": "",
+ "Date": "",
+ "VersionNumber": "",
+ "GameMode": "",
+ "GameType": "",
+ "GameComplexity": "",
+ "Tags": [],
+ "Gravity": 0.5,
+ "PlayArea": 0.5,
+ "Table": "",
+ "Sky": "",
+ "Note": "",
+ "Rules": "",
+ "XmlUI": "",
+ "LuaScript": "",
+ "LuaScriptState": "",
+ "ObjectStates": [
+  {
+   "GUID": "b7f0fe",
+   "Name": "Card",
+   "Transform": {
+    "posX": -4.5,
+    "posY": 1,
+    "posZ": 0,
+    "rotX": 0,
+    "rotY": 180,
+    "rotZ": 0,
+    "scaleX": 1,
+    "scaleY": 1,
+    "scaleZ": 1
+   },
+   "Nickname": "The Slayer, Unchained",
+   "Description": "Legendary Creature \u2014 Human Soldier  5/5\n\nFirst strike, vigilance, ward {1}\nWhenever The Slayer, Unchained attacks or blocks, it deals 2 damage to target creature defending player controls or attacking player controls. (The shield saw goes out. The shield saw comes back.)",
+   "GMNotes": "",
+   "ColorDiffuse": {
+    "r": 0.713,
+    "g": 0.713,
+    "b": 0.713
+   },
+   "Locked": false,
+   "Grid": true,
+   "Snap": true,
+   "Autoraise": true,
+   "Sticky": true,
+   "Tooltip": true,
+   "GridProjection": false,
+   "HideWhenFaceDown": true,
+   "Hands": true,
+   "CardID": 100,
+   "SidewaysCard": false,
+   "CustomDeck": {
+    "1": {
+     "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+     "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+     "NumWidth": 10,
+     "NumHeight": 7,
+     "BackIsHidden": true,
+     "UniqueBack": false,
+     "Type": 0
+    }
+   },
+   "LuaScript": "",
+   "LuaScriptState": "",
+   "XmlUI": ""
+  },
+  {
+   "GUID": "18d373",
+   "Name": "DeckCustom",
+   "Transform": {
+    "posX": 0,
+    "posY": 1,
+    "posZ": 0,
+    "rotX": 0,
+    "rotY": 180,
+    "rotZ": 180,
+    "scaleX": 1,
+    "scaleY": 1,
+    "scaleZ": 1
+   },
+   "Nickname": "AGE OF DREAD \u2014 DOOM: The Dark Ages (99)",
+   "Description": "",
+   "GMNotes": "",
+   "ColorDiffuse": {
+    "r": 0.713,
+    "g": 0.713,
+    "b": 0.713
+   },
+   "Locked": false,
+   "Grid": true,
+   "Snap": true,
+   "Autoraise": true,
+   "Sticky": true,
+   "Tooltip": true,
+   "GridProjection": false,
+   "HideWhenFaceDown": true,
+   "Hands": false,
+   "SidewaysCard": false,
+   "DeckIDs": [
+    101,
+    102,
+    103,
+    104,
+    105,
+    106,
+    107,
+    108,
+    109,
+    110,
+    111,
+    112,
+    113,
+    114,
+    115,
+    116,
+    117,
+    118,
+    119,
+    120,
+    121,
+    122,
+    123,
+    124,
+    125,
+    126,
+    127,
+    128,
+    129,
+    130,
+    131,
+    132,
+    133,
+    134,
+    135,
+    136,
+    137,
+    138,
+    139,
+    140,
+    141,
+    142,
+    143,
+    144,
+    145,
+    146,
+    147,
+    148,
+    149,
+    150,
+    151,
+    152,
+    153,
+    154,
+    155,
+    156,
+    157,
+    158,
+    159,
+    160,
+    161,
+    162,
+    163,
+    164,
+    165,
+    166,
+    166,
+    166,
+    166,
+    166,
+    166,
+    166,
+    166,
+    166,
+    167,
+    168,
+    168,
+    168,
+    168,
+    168,
+    168,
+    168,
+    168,
+    168,
+    168,
+    169,
+    169,
+    169,
+    169,
+    169,
+    169,
+    169,
+    169,
+    169,
+    169,
+    200,
+    201,
+    202,
+    203
+   ],
+   "CustomDeck": {
+    "1": {
+     "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+     "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+     "NumWidth": 10,
+     "NumHeight": 7,
+     "BackIsHidden": true,
+     "UniqueBack": false,
+     "Type": 0
+    },
+    "2": {
+     "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-2.c444454e63.png",
+     "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+     "NumWidth": 4,
+     "NumHeight": 1,
+     "BackIsHidden": true,
+     "UniqueBack": false,
+     "Type": 0
+    }
+   },
+   "LuaScript": "",
+   "LuaScriptState": "",
+   "XmlUI": "",
+   "ContainedObjects": [
+    {
+     "GUID": "12eaf7",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Dread Imp",
+     "Description": "Creature \u2014 Demon  2/1\n\nHaste\nWhen Dread Imp enters, it deals 1 damage to any target.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 101,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "7af9e7",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Holt Acolyte",
+     "Description": "Creature \u2014 Human Druid  1/1\n\n{T}: Add {G}.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 102,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "c800eb",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Holt Scout",
+     "Description": "Creature \u2014 Human Scout  1/1\n\nWhen Holt Scout enters, draw a card.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 103,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "5e7a4b",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Night Sentinel",
+     "Description": "Creature \u2014 Human Knight  2/2\n\nFirst strike",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 104,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "41fcbd",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Sentinel Outrider",
+     "Description": "Creature \u2014 Human Knight  2/2\n\nVigilance",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 105,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "2be2c5",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Komodo Lancer",
+     "Description": "Creature \u2014 Human Knight  3/2\n\nTrample (Sentinel cavalry rides what Hell abandoned.)",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 106,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "503036",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Mechanized Ballista",
+     "Description": "Artifact Creature \u2014 Construct  0/4\n\nDefender, reach\n{T}: Mechanized Ballista deals 1 damage to any target.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 107,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "d79b9f",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Sentinel Shieldwall",
+     "Description": "Creature \u2014 Human Knight  1/4\n\nVigilance\nSentinel Shieldwall can block an additional creature each combat.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 108,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "4e3f75",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Dread Arachnotron",
+     "Description": "Creature \u2014 Demon Spider  3/3\n\nReach\n{T}: Dread Arachnotron deals 1 damage to any target.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 109,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "6c6392",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Dread Knight of Hell",
+     "Description": "Creature \u2014 Demon Knight  4/3\n\nTrample\nDread Knight of Hell attacks each combat if able.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 110,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "7ea875",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Hellbeast of the Moors",
+     "Description": "Creature \u2014 Demon Beast  4/4\n\nTrample",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 111,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "216e93",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Hybrid Cacodemon",
+     "Description": "Creature \u2014 Demon  2/4\n\nFlying\nWhen Hybrid Cacodemon enters, it deals 2 damage to target creature an opponent controls. (The new mouth spits farther.)",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 112,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "851087",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "King Novik",
+     "Description": "Legendary Creature \u2014 Human Noble  3/3\n\nOther Knight creatures you control get +1/+1.\nWhen King Novik dies, create two 2/2 white Human Knight creature tokens with first strike. (The kings of Argent D'Nur do not leave the field empty.)",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 113,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "1b3749",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Moor Oracle",
+     "Description": "Creature \u2014 Human Druid  2/3\n\nWhen Moor Oracle enters, draw a card and you gain 2 life.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 114,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "55c0df",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Siege Revenant",
+     "Description": "Creature \u2014 Demon Skeleton  3/2\n\nHaste\nWhenever Siege Revenant attacks, it deals 2 damage to any target. (Its launchers were forged, not grown.)",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 115,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "345414",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Agaddon Hunter",
+     "Description": "Creature \u2014 Demon  5/4\n\nMenace\nWhenever Agaddon Hunter attacks, it deals 1 damage to each creature defending player controls. (The pack hunts through walls.)",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 116,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "0e7747",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Armored Mancubus",
+     "Description": "Creature \u2014 Demon  4/5\n\nWhenever Armored Mancubus attacks, it deals 2 damage divided as you choose among one or two target creatures defending player controls.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 117,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "395dad",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Serrat, the Slayer's Dragon",
+     "Description": "Legendary Creature \u2014 Dragon  5/4\n\nFlying\nWhenever Serrat, the Slayer's Dragon attacks, it deals 2 damage to target creature defending player controls. (Strafing runs, medieval edition.)",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 118,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "fa8b54",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Vagary of the Old War",
+     "Description": "Legendary Creature \u2014 Demon Spider  4/4\n\nMenace\nWhen Vagary of the Old War enters, target creature an opponent controls gets -2/-2 until end of turn.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 119,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "0a995a",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Titanic Sentinel Beast",
+     "Description": "Creature \u2014 Beast  7/7\n\nTrample, reach",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 120,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "e90bb4",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Ironclad Cyberdemon",
+     "Description": "Legendary Creature \u2014 Demon Cyborg  8/8\n\nTrample\nWhenever Ironclad Cyberdemon attacks, it deals 3 damage to any target. (The cannon predates gunpowder. It does not care.)",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 121,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "343f3a",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Prince Ahzrak",
+     "Description": "Legendary Creature \u2014 Demon Noble  7/6\n\nMenace, trample\nWhen Prince Ahzrak enters, each opponent sacrifices a creature of their choice.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 122,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "86ab9a",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Chainshot",
+     "Description": "Artifact \u2014 Equipment\n\nEquipped creature gets +1/+0.\nWhenever equipped creature attacks, tap target creature defending player controls.\nEquip {1}",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 123,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "129d51",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Impaler",
+     "Description": "Artifact \u2014 Equipment\n\nEquipped creature gets +2/+0 and has first strike.\nEquip {1}",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 124,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "f74476",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Shield Saw",
+     "Description": "Legendary Artifact \u2014 Equipment\n\nEquipped creature gets +1/+1 and has ward {1}.\nWhenever equipped creature attacks, it deals 1 damage to target creature defending player controls.\nEquip {1}",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 125,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "177b1f",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Ravager",
+     "Description": "Artifact \u2014 Equipment\n\nEquipped creature gets +3/+0.\nEquip {2}",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 126,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "432ba2",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Skullcrusher",
+     "Description": "Artifact \u2014 Equipment\n\nEquipped creature gets +2/+0.\nWhenever equipped creature attacks, it deals 1 damage to each of up to two target creatures defending player controls.\nEquip {2}",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 127,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "3bb503",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Siege Supplies",
+     "Description": "Artifact\n\nWhen Siege Supplies enters, draw a card.\n{T}: Add {R} or {W}.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 128,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "bb0849",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Supply Wagon",
+     "Description": "Artifact\n\n{T}: Add {C}.\n{2}, {T}, Sacrifice Supply Wagon: Draw a card.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 129,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "4028ca",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "War Ledger",
+     "Description": "Artifact\n\n{T}, Sacrifice War Ledger: Draw a card.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 130,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "505647",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Wraith Crystal",
+     "Description": "Artifact\n\n{T}: Add {R}, {G}, or {W}.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 131,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "87e7b6",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Battle Standard of D'Nur",
+     "Description": "Artifact\n\n{T}: Add two mana in any combination of {R}, {G}, and/or {W}.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 132,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "f7a31b",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Campaign Map",
+     "Description": "Artifact\n\nWhen Campaign Map enters, draw two cards.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 133,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "7eeea0",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Sentinel Forge",
+     "Description": "Artifact\n\nEquipment spells you cast cost {1} less to cast.\n{T}: Add {C}.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 134,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "a01f60",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Atlan",
+     "Description": "Legendary Artifact \u2014 Vehicle  8/8\n\nTrample\nCrew 3 (Tap any number of creatures you control with total power 3 or more: This Vehicle becomes an artifact creature until end of turn.)",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 135,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "0a9d32",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Bulwark Rite",
+     "Description": "Instant\n\nPrevent all damage that would be dealt to target creature you control this turn.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 136,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "430c00",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Dread Surge",
+     "Description": "Sorcery\n\nDread Surge deals X damage to any target.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 137,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "75ef9f",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Rally the Watch",
+     "Description": "Instant\n\nCreate a 2/2 white Human Knight creature token with first strike.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 138,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "57e6ce",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Forge the Line",
+     "Description": "Sorcery\n\nSearch your library for a basic land card, put it onto the battlefield tapped, then shuffle.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 139,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "be9453",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Hold the Bulwark",
+     "Description": "Instant\n\nTarget creature gets +0/+4 until end of turn. You gain 2 life.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 140,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "9c820d",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Maul the Invaders",
+     "Description": "Instant\n\nTarget creature you control fights target creature you don't control.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 141,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "a17b96",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Saw Toss",
+     "Description": "Instant\n\nSaw Toss deals 3 damage to target creature. (It comes back. The pieces of the target don't.)",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 142,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "adbe6c",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Shieldmaster's Grace",
+     "Description": "Instant\n\nTarget creature you control gains hexproof and indestructible until end of turn.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 143,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "068be6",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Banish the Hellspawn",
+     "Description": "Instant\n\nExile target attacking creature. Its controller gains 3 life.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 144,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "1885b7",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Colossal Charge",
+     "Description": "Instant\n\nTarget creature gets +4/+4 until end of turn. (Bigger is a strategy.)",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 145,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "6105a9",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Dragon Dive",
+     "Description": "Instant\n\nTarget creature gets +2/+0 and gains flying until end of turn.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 146,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "b9afe1",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Dread Rampage",
+     "Description": "Instant\n\nTarget creature gets +3/+0 and gains trample until end of turn.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 147,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "2ec326",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Primeval Vigor",
+     "Description": "Sorcery\n\nPut two +1/+1 counters on target creature. (The age of dread breeds to scale.)",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 148,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "5cf4ab",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Sentinel Muster",
+     "Description": "Sorcery\n\nCreate two 2/2 white Human Knight creature tokens with first strike.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 149,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "0d815c",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Sentinel War Council",
+     "Description": "Sorcery\n\nCreate a 2/2 white Human Knight creature token with first strike. You gain 2 life.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 150,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "1122e1",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Siege Volley",
+     "Description": "Sorcery\n\nSiege Volley deals 4 damage to target creature.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 151,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "ccd684",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Wraith Communion",
+     "Description": "Sorcery\n\nDraw a card. You gain 2 life.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 152,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "bff3a1",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Wrath of the Unchained",
+     "Description": "Instant\n\nTarget creature you control deals damage equal to its power to target creature you don't control.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 153,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "2237f0",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Break the Gates",
+     "Description": "Sorcery\n\nBreak the Gates deals 2 damage to each of up to two targets. (The wall was the argument; the ram is the rebuttal.)",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 154,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "69c9ad",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Cannonade",
+     "Description": "Instant\n\nCannonade deals 3 damage to any target.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 155,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "2e10dc",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Judgment of the Kings",
+     "Description": "Sorcery\n\nDestroy all creatures with power 2 or less.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 156,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "298de9",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Wraithstone Bloom",
+     "Description": "Sorcery\n\nSearch your library for up to two basic land cards, put them onto the battlefield tapped, then shuffle.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 157,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "a6437a",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Saw Cyclone",
+     "Description": "Sorcery\n\nSaw Cyclone deals 3 damage to each creature you don't control.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 158,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "de83e0",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Stampede Call",
+     "Description": "Sorcery\n\nCreate a 4/4 green Beast creature token with trample.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 159,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "9c52d0",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Overgrown Battleground",
+     "Description": "Enchantment\n\nAt the beginning of your end step, if you control a creature with power 4 or greater, draw a card. (The big ones always find more war.)",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 160,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "c3d221",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Sentinel Standard",
+     "Description": "Enchantment\n\nWhenever a creature you control with power 4 or greater attacks, you gain 2 life. (The banners rise for the giants.)",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 161,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "c3aa11",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Age of Dread",
+     "Description": "Enchantment\n\nCreatures you control get +1/+0.\nWhenever a creature you control with power 4 or greater attacks, it gains trample until end of turn.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 162,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "733f5f",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Argent D'Nur",
+     "Description": "Land\n\nArgent D'Nur enters tapped.\n{T}: Add {R}, {G}, or {W}.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 163,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "25dbf3",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Battlefield of the Old War",
+     "Description": "Land\n\nBattlefield of the Old War enters tapped.\n{T}: Add {R} or {G}.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 164,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "780ef5",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Dragon Roost",
+     "Description": "Land\n\nDragon Roost enters tapped.\n{T}: Add {R} or {G}.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 165,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "ba2674",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Forest",
+     "Description": "Basic Land \u2014 Forest",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 166,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "0e496d",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Forest",
+     "Description": "Basic Land \u2014 Forest",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 166,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "0ed58a",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Forest",
+     "Description": "Basic Land \u2014 Forest",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 166,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "eddd18",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Forest",
+     "Description": "Basic Land \u2014 Forest",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 166,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "cbb574",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Forest",
+     "Description": "Basic Land \u2014 Forest",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 166,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "fae443",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Forest",
+     "Description": "Basic Land \u2014 Forest",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 166,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "3aacc4",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Forest",
+     "Description": "Basic Land \u2014 Forest",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 166,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "c97740",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Forest",
+     "Description": "Basic Land \u2014 Forest",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 166,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "d63197",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Forest",
+     "Description": "Basic Land \u2014 Forest",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 166,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "a89599",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Immora",
+     "Description": "Land\n\nImmora enters tapped.\n{T}: Add {R} or {W}.\nWhen Immora enters, scry 1.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 167,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "a48085",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Mountain",
+     "Description": "Basic Land \u2014 Mountain",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 168,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "6b62c8",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Mountain",
+     "Description": "Basic Land \u2014 Mountain",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 168,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "7815b1",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Mountain",
+     "Description": "Basic Land \u2014 Mountain",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 168,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "3e55b0",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Mountain",
+     "Description": "Basic Land \u2014 Mountain",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 168,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "c5d416",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Mountain",
+     "Description": "Basic Land \u2014 Mountain",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 168,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "7798ae",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Mountain",
+     "Description": "Basic Land \u2014 Mountain",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 168,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "a3a426",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Mountain",
+     "Description": "Basic Land \u2014 Mountain",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 168,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "185b96",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Mountain",
+     "Description": "Basic Land \u2014 Mountain",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 168,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "a4980e",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Mountain",
+     "Description": "Basic Land \u2014 Mountain",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 168,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "236070",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Mountain",
+     "Description": "Basic Land \u2014 Mountain",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 168,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "3db315",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Plains",
+     "Description": "Basic Land \u2014 Plains",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 169,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "b4a994",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Plains",
+     "Description": "Basic Land \u2014 Plains",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 169,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "fa733c",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Plains",
+     "Description": "Basic Land \u2014 Plains",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 169,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "0ac5fc",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Plains",
+     "Description": "Basic Land \u2014 Plains",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 169,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "ee25b3",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Plains",
+     "Description": "Basic Land \u2014 Plains",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 169,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "41a1e5",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Plains",
+     "Description": "Basic Land \u2014 Plains",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 169,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "4a443e",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Plains",
+     "Description": "Basic Land \u2014 Plains",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 169,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "784de5",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Plains",
+     "Description": "Basic Land \u2014 Plains",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 169,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "9b01ec",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Plains",
+     "Description": "Basic Land \u2014 Plains",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 169,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "a3ebd2",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Plains",
+     "Description": "Basic Land \u2014 Plains",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 169,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "1": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-1.738244f89d.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 10,
+       "NumHeight": 7,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "8c927f",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Sentinel Barracks",
+     "Description": "Land\n\nSentinel Barracks enters tapped.\n{T}: Add {G} or {W}.\nWhen Sentinel Barracks enters, you gain 1 life.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 200,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "2": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-2.c444454e63.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 4,
+       "NumHeight": 1,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "0e13f5",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Siegeworks of Hell",
+     "Description": "Land\n\nSiegeworks of Hell enters tapped unless an opponent lost life this turn.\n{T}: Add {R} or {G}.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 201,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "2": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-2.c444454e63.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 4,
+       "NumHeight": 1,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "6a13e7",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "The Holt",
+     "Description": "Land\n\nThe Holt enters tapped.\n{T}: Add {G} or {W}.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 202,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "2": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-2.c444454e63.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 4,
+       "NumHeight": 1,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    },
+    {
+     "GUID": "5862e1",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 180,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "The Proving Grounds",
+     "Description": "Land\n\n{T}: Add {C}.\n{1}, {T}: Add {R}, {G}, or {W}.",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 203,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "2": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-faces-2.c444454e63.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 4,
+       "NumHeight": 1,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    }
+   ]
+  },
+  {
+   "GUID": "dd8b3c",
+   "Name": "Infinite_Bag",
+   "Transform": {
+    "posX": 4.5,
+    "posY": 1,
+    "posZ": 3,
+    "rotX": 0,
+    "rotY": 180,
+    "rotZ": 0,
+    "scaleX": 1,
+    "scaleY": 1,
+    "scaleZ": 1
+   },
+   "Nickname": "Human Knight tokens",
+   "Description": "Infinite bag - draw tokens from here.",
+   "GMNotes": "",
+   "ColorDiffuse": {
+    "r": 0.35,
+    "g": 0.35,
+    "b": 0.35
+   },
+   "Locked": false,
+   "Grid": true,
+   "Snap": true,
+   "Autoraise": true,
+   "Sticky": true,
+   "Tooltip": true,
+   "GridProjection": false,
+   "HideWhenFaceDown": false,
+   "Hands": false,
+   "MaterialIndex": -1,
+   "MeshIndex": -1,
+   "LuaScript": "",
+   "LuaScriptState": "",
+   "XmlUI": "",
+   "ContainedObjects": [
+    {
+     "GUID": "c361b4",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 0,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Human Knight",
+     "Description": "Token Creature \u2014 Human Knight  2/2\n\nFirst strike",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 300,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "3": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-tokens-1.f50b407b18.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 2,
+       "NumHeight": 1,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    }
+   ]
+  },
+  {
+   "GUID": "a48709",
+   "Name": "Infinite_Bag",
+   "Transform": {
+    "posX": 6.1,
+    "posY": 1,
+    "posZ": 3,
+    "rotX": 0,
+    "rotY": 180,
+    "rotZ": 0,
+    "scaleX": 1,
+    "scaleY": 1,
+    "scaleZ": 1
+   },
+   "Nickname": "Beast tokens",
+   "Description": "Infinite bag - draw tokens from here.",
+   "GMNotes": "",
+   "ColorDiffuse": {
+    "r": 0.35,
+    "g": 0.35,
+    "b": 0.35
+   },
+   "Locked": false,
+   "Grid": true,
+   "Snap": true,
+   "Autoraise": true,
+   "Sticky": true,
+   "Tooltip": true,
+   "GridProjection": false,
+   "HideWhenFaceDown": false,
+   "Hands": false,
+   "MaterialIndex": -1,
+   "MeshIndex": -1,
+   "LuaScript": "",
+   "LuaScriptState": "",
+   "XmlUI": "",
+   "ContainedObjects": [
+    {
+     "GUID": "70a3b3",
+     "Name": "Card",
+     "Transform": {
+      "posX": 0,
+      "posY": 1,
+      "posZ": 0,
+      "rotX": 0,
+      "rotY": 180,
+      "rotZ": 0,
+      "scaleX": 1,
+      "scaleY": 1,
+      "scaleZ": 1
+     },
+     "Nickname": "Beast",
+     "Description": "Token Creature \u2014 Beast  4/4\n\nTrample",
+     "GMNotes": "",
+     "ColorDiffuse": {
+      "r": 0.713,
+      "g": 0.713,
+      "b": 0.713
+     },
+     "Locked": false,
+     "Grid": true,
+     "Snap": true,
+     "Autoraise": true,
+     "Sticky": true,
+     "Tooltip": true,
+     "GridProjection": false,
+     "HideWhenFaceDown": true,
+     "Hands": true,
+     "CardID": 301,
+     "SidewaysCard": false,
+     "CustomDeck": {
+      "3": {
+       "FaceURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-tokens-1.f50b407b18.png",
+       "BackURL": "https://www.dfwgamingvillage.com/commander-library/tts/DDA-back.85b676b70c.png",
+       "NumWidth": 2,
+       "NumHeight": 1,
+       "BackIsHidden": true,
+       "UniqueBack": false,
+       "Type": 0
+      }
+     },
+     "LuaScript": "",
+     "LuaScriptState": "",
+     "XmlUI": ""
+    }
+   ]
+  },
+  {
+   "GUID": "bd8899",
+   "Name": "Die_20",
+   "Transform": {
+    "posX": -6.5,
+    "posY": 1,
+    "posZ": 3,
+    "rotX": 0,
+    "rotY": 0,
+    "rotZ": 0,
+    "scaleX": 0.7,
+    "scaleY": 0.7,
+    "scaleZ": 0.7
+   },
+   "Nickname": "Round tracker / counters",
+   "Description": "",
+   "GMNotes": "",
+   "ColorDiffuse": {
+    "r": 0.85,
+    "g": 0.75,
+    "b": 0.35
+   },
+   "Locked": false,
+   "Grid": true,
+   "Snap": true,
+   "Autoraise": true,
+   "Sticky": true,
+   "Tooltip": true,
+   "GridProjection": false,
+   "HideWhenFaceDown": false,
+   "Hands": false,
+   "LuaScript": "",
+   "LuaScriptState": "",
+   "XmlUI": ""
+  },
+  {
+   "GUID": "41089f",
+   "Name": "Die_6",
+   "Transform": {
+    "posX": -7.6,
+    "posY": 1,
+    "posZ": 3,
+    "rotX": 0,
+    "rotY": 0,
+    "rotZ": 0,
+    "scaleX": 0.7,
+    "scaleY": 0.7,
+    "scaleZ": 0.7
+   },
+   "Nickname": "Counters",
+   "Description": "",
+   "GMNotes": "",
+   "ColorDiffuse": {
+    "r": 0.85,
+    "g": 0.75,
+    "b": 0.35
+   },
+   "Locked": false,
+   "Grid": true,
+   "Snap": true,
+   "Autoraise": true,
+   "Sticky": true,
+   "Tooltip": true,
+   "GridProjection": false,
+   "HideWhenFaceDown": false,
+   "Hands": false,
+   "LuaScript": "",
+   "LuaScriptState": "",
+   "XmlUI": ""
+  },
+  {
+   "GUID": "5f870b",
+   "Name": "Die_6",
+   "Transform": {
+    "posX": -7.6,
+    "posY": 1,
+    "posZ": 4.2,
+    "rotX": 0,
+    "rotY": 0,
+    "rotZ": 0,
+    "scaleX": 0.7,
+    "scaleY": 0.7,
+    "scaleZ": 0.7
+   },
+   "Nickname": "Counters",
+   "Description": "",
+   "GMNotes": "",
+   "ColorDiffuse": {
+    "r": 0.85,
+    "g": 0.75,
+    "b": 0.35
+   },
+   "Locked": false,
+   "Grid": true,
+   "Snap": true,
+   "Autoraise": true,
+   "Sticky": true,
+   "Tooltip": true,
+   "GridProjection": false,
+   "HideWhenFaceDown": false,
+   "Hands": false,
+   "LuaScript": "",
+   "LuaScriptState": "",
+   "XmlUI": ""
+  }
+ ]
+}
