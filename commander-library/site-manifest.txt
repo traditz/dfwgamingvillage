@@ -53,7 +53,7 @@ doom/doom1/art/ArmorBonusP18.png
 doom/doom1/art/BDoom_Partial.png
 doom/doom1/art/Backpack_sprite.png
 doom/doom1/art/Baronofhell_sprite.png
-doom/doom1/art/Barons_of_Hell.png
+doom/doom1/art/Baronsinfighting-Dawnofthedead-e1m8.png
 doom/doom1/art/Barrelpre.jpg
 doom/doom1/art/Berzerk_sprite.png
 doom/doom1/art/Bfg9000_prev.png
