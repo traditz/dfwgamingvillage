@@ -1,0 +1,88 @@
+// THE DEVIL'S BARGAIN — Doom 3: Shadows over Mars Commander deck (100)
+
+// Commander
+1 Dr. Malcolm Betruger
+
+// Creatures (31)
+1 Pistol Z-Sec
+1 Possessed Worker
+1 Trite
+1 Maggot
+1 Sentry Bot
+1 UAC Researcher
+1 Z-Sec Enforcer
+1 Chainsaw Zombie
+1 Cherub
+1 Imp Ambusher
+1 Machinegun Z-Sec
+1 Maintenance Bot
+1 Sentry Escort
+1 Shotgun Z-Sec
+1 Turret Emplacement
+1 Wraith
+1 Bloated Cacodemon
+1 Invulnerability Hunter
+1 Mechanized Pinky
+1 Tentacle Commando
+1 Wailing Revenant
+1 Archvile Summoner
+1 Berserk Hunter
+1 Cavern Mancubus
+1 Chaingun Commando
+1 Helltime Hunter
+1 Hulking Hell Knight
+1 Vagary
+1 Guardian of Hell
+1 Sabaoth
+1 The Maledict
+
+// Other Artifacts (12)
+1 Elevator Keycode
+1 PDA
+1 Bio-Scanner
+1 Coolant Reserves
+1 Fusion Cell
+1 Grabber
+1 Martian Buddy Crate
+1 Security Keycard
+1 Supply Terminal
+1 Requisition Terminal
+1 The Artifact
+1 Soul Cube
+
+// Instants & Sorceries (18)
+1 Emergency Teleport
+1 Neurotoxin
+1 Autopsy Report
+1 Bulkhead Seal
+1 Video Log
+1 Betruger's Whisper
+1 Dark Dispatch
+1 Fed to the Pit
+1 Hallway Ambush
+1 Panic Broadcast
+1 Teleport Ambush
+1 Research Findings
+1 Security Lockdown
+1 Terminate the Experiment
+1 The Devil's Bargain
+1 Trite Swarm
+1 Mind Static
+1 Hell's Breach
+
+// Enchantments (2)
+1 Soul Siphon
+1 Possessed by the Dark
+
+// Lands (36)
+1 Alpha Labs
+1 Communications Tower
+1 Delta Labs
+1 EnPro Plant
+1 Erebus Excavation
+1 Hellmouth Breach
+13 Island
+1 Mars City Hangar
+14 Swamp
+1 The Dig Site
+1 The Monorail

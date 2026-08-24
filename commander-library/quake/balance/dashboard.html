@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Quake Commander Balance</title></head><body><style>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Quake Commander</title></head><body><style>
 :root{
   --page:#f9f9f7; --surface:#fcfcfb; --ink:#0b0b0b; --ink2:#52514e; --muted:#898781;
   --grid:#e1e0d9; --axisc:#c3c2b7; --bord:rgba(11,11,11,.10);
@@ -128,7 +128,7 @@ footer code{font-size:11px}
 </style>
 <div class="wrap">
 <header>
-<h1>Quake Commander — balance dashboard</h1>
+<h1>The Quake Collection — balance dashboard</h1>
 <p class="hs">Six custom Commander decks, validated by Monte Carlo simulation, real-precon calibration, Oracle templating lint,
 wiki theme audit and instrumented playtests. Sim run 2026-08-24 · dashboard generated 2026-08-24.</p>
 </header>
@@ -627,7 +627,7 @@ gate: ρ ≥ 0.7"><i class="gline" style="left:25.00%"></i><i class="gline" styl
 <ol>
 <li>Copy <code>quake/balance/playtests/TEMPLATE.md</code> to a new file (one per game) and fill in winner, ending round, MVP and dead cards.</li>
 <li>Follow <code>quake/balance/playtests/SCHEDULE.md</code> so table time covers all 15 pod combinations.</li>
-<li>Run <code>python common/sim/run.py --ingest-playtests</code>, then <code>python common/sim/dashboard.py</code> — the comparison table appears here.</li>
+<li>Run <code>python common/sim/run.py --ingest-playtests</code>, then <code>python common/sim/dashboard.py --collection quake</code> — the comparison table appears here.</li>
 </ol>
 <p class="fine">For Arena Eternal A/B nights, QCH-ARENA-ETERNAL-V1 in TTS Saved Objects is the pre-balance version.</p>
 </div>

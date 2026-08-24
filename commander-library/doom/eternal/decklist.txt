@@ -1,0 +1,92 @@
+// THE ARGENT HARVEST — Doom Eternal: The Maykr Directive Commander deck (100)
+
+// Commander
+1 The Khan Maykr
+
+// Creatures (23)
+1 Ascendant Acolyte
+1 Argent Shieldbearer
+1 Codex Custodian
+1 Deag Nilox, Hell Priest
+1 Emissary of the Khan
+1 Gargoyle Skirmisher
+1 Maykr Drone
+1 Prowler
+1 Sentinel Guardian
+1 Argent Scholar
+1 Carcass
+1 Deag Grav, Hell Priest
+1 Deag Ranak, Hell Priest
+1 Lattice Skimmer
+1 Maykr Overseer
+1 Whiplash
+1 Argent Reaper
+1 Blood Maykr
+1 Doom Hunter Sled
+1 Gladiator of the Blood Arena
+1 Marauder
+1 Maykr Ascendant
+1 The Seraphim
+
+// Equipment (2)
+1 Meat Hook
+1 Sentinel Blade
+
+// Other Artifacts (13)
+1 Argent Battery
+1 Argent Distillery
+1 Celestial Compass
+1 Choir Anchor
+1 Harvest Ledger
+1 Lattice Node
+1 Priest's Signet
+1 Wraith Crystal Shard
+1 Drone Foundry
+1 Sentinel Crystal
+1 Soul Turbine
+1 The Divinity Machine
+1 The BFG-10000
+
+// Instants & Sorceries (22)
+1 Argent Tithe
+1 Argent Lance
+1 Argent Transfusion
+1 Ascend the Unworthy
+1 Emergency Choir
+1 Maykr Decree
+1 Transmit the Directive
+1 Consecrate the Harvest
+1 Forced Ascension
+1 Halo Strike
+1 Judgment of the Khan
+1 Recall to Urdak
+1 Stasis Bomb
+1 Celestial Judgment
+1 Dissolution Beam
+1 Drone Choir
+1 Excommunicate the Beast
+1 Harvest Analysis
+1 Judgment Volley
+1 Silence the Priests
+1 Temporal Sink
+1 Wrath of the Khan
+
+// Enchantments (4)
+1 Doctrine of Ascendance
+1 Sentinel Oath
+1 Urdak's Toll
+1 The Directive
+
+// Lands (35)
+1 Hebeth
+13 Island
+1 Nekravol
+12 Plains
+1 Reclaimed Earth
+1 Sentinel Prime
+1 Shattered Mars
+1 Super Gore Nest
+1 Taras Nabad
+1 The Blood Arena
+1 The Fortress of Doom
+1 Urdak
