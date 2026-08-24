@@ -1,0 +1,423 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Quake Commander Balance</title></head><body><style>
+:root{
+  --page:#f9f9f7; --surface:#fcfcfb; --ink:#0b0b0b; --ink2:#52514e; --muted:#898781;
+  --grid:#e1e0d9; --axisc:#c3c2b7; --bord:rgba(11,11,11,.10);
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --neg:#e34948;
+  --pre:#86b6ef; --deemph:#c3c2b7; --band:rgba(42,120,214,.09); --refband:rgba(42,120,214,.06);
+  --goodtext:#006300; --serioustext:#b4552e; --warn:#fab219;
+  --shadow:0 4px 14px rgba(0,0,0,.12);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --page:#0d0d0d; --surface:#1a1a19; --ink:#ffffff; --ink2:#c3c2b7; --muted:#898781;
+    --grid:#2c2c2a; --axisc:#383835; --bord:rgba(255,255,255,.10);
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --neg:#e66767;
+    --pre:#6da7ec; --deemph:#4a4a47; --band:rgba(57,135,229,.14); --refband:rgba(57,135,229,.08);
+    --goodtext:#0ca30c; --serioustext:#ec835a;
+    --shadow:0 4px 14px rgba(0,0,0,.5);
+  }
+}
+:root[data-theme="dark"]{
+  --page:#0d0d0d; --surface:#1a1a19; --ink:#ffffff; --ink2:#c3c2b7; --muted:#898781;
+  --grid:#2c2c2a; --axisc:#383835; --bord:rgba(255,255,255,.10);
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --neg:#e66767;
+  --pre:#6da7ec; --deemph:#4a4a47; --band:rgba(57,135,229,.14); --refband:rgba(57,135,229,.08);
+  --goodtext:#0ca30c; --serioustext:#ec835a;
+  --shadow:0 4px 14px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);
+  font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;padding:26px 18px 60px}
+.wrap{max-width:1120px;margin:0 auto}
+header h1{font-size:24px;margin:0 0 4px;font-weight:650}
+header .hs{color:var(--ink2);font-size:13.5px;margin:0 0 20px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px}
+.tile{background:var(--surface);border:1px solid var(--bord);border-radius:10px;padding:13px 15px}
+.tile .tl{font-size:12.5px;color:var(--ink2)}
+.tile .tv{font-size:27px;font-weight:600;margin:2px 0}
+.tile .ts{font-size:11.5px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.card{background:var(--surface);border:1px solid var(--bord);border-radius:12px;padding:18px 20px 14px;min-width:0}
+.card.wide{grid-column:1/-1}
+.card h2{font-size:15px;margin:0 0 3px;font-weight:650}
+.card .sub{color:var(--ink2);font-size:12.5px;margin:0 0 14px}
+.card .body{font-size:13px;color:var(--ink);margin:8px 0}
+.fine{font-size:11.5px;color:var(--muted);margin:10px 0 4px}
+.legend{display:flex;gap:16px;font-size:12px;color:var(--ink2);margin:0 0 10px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:10px;height:10px;border-radius:3px;background:var(--s1);display:inline-block}
+.sw.pre{background:var(--pre)} .sw.neg{background:var(--neg)}
+.sw.p1{background:var(--s1)} .sw.p2{background:var(--s2)} .sw.p3{background:var(--s3)}
+.rrow{display:flex;align-items:center;gap:10px;min-height:30px}
+.rlab{flex:0 0 185px;font-size:13px;line-height:1.25;overflow-wrap:break-word}
+.rsub{display:block;color:var(--muted);font-size:10.5px}
+.rtrack{position:relative;flex:1;height:28px;border-radius:4px;outline:none}
+.rtrack:focus-visible{box-shadow:0 0 0 2px var(--s1)}
+.gline{position:absolute;top:2px;bottom:2px;width:1px;background:var(--grid)}
+.refline{position:absolute;top:0;bottom:0;width:1px;background:var(--axisc)}
+.band{position:absolute;top:2px;bottom:2px;background:var(--refband);border-radius:3px}
+.bar{position:absolute;left:0;top:7px;height:14px;background:var(--s1);border-radius:0 4px 4px 0}
+.bar.ctx{background:var(--deemph)}
+.rtrack:hover .bar,.rtrack:focus .bar{filter:brightness(1.09)}
+.dot{position:absolute;top:50%;width:10px;height:10px;border-radius:50%;background:var(--s1);
+  transform:translate(-50%,-50%);box-shadow:0 0 0 2px var(--surface)}
+.dot.pre{background:var(--pre)}
+.dot.p1{background:var(--s1);top:32%}.dot.p2{background:var(--s2)}.dot.p3{background:var(--s3);top:68%}
+.rtrack:hover .dot,.rtrack:focus .dot{filter:brightness(1.09)}
+.whisk{position:absolute;top:50%;height:2px;background:var(--s1);opacity:.5;transform:translateY(-50%);border-radius:1px}
+.conn{position:absolute;top:50%;height:2px;background:var(--pre);transform:translateY(-50%);border-radius:1px}
+.val{position:absolute;top:50%;transform:translateY(-50%);font-size:11.5px;font-weight:600;color:var(--ink2);white-space:nowrap}
+.raxis{position:relative;height:18px;margin:2px 0 4px 195px;font-size:11px;color:var(--muted)}
+.raxis span{position:absolute;transform:translateX(-50%)}
+.raxis .axnote{transform:translateX(-50%) translateY(11px);font-size:10px}
+.vlist{display:flex;flex-wrap:wrap;gap:4px 18px;margin:10px 0 0}
+.vrow{display:flex;align-items:center;gap:7px;font-size:12px}
+.vname{color:var(--ink2)}
+.chip{font-size:11.5px;font-weight:600}
+.chip.good{color:var(--goodtext)} .chip.low{color:var(--serioustext)}
+.dvgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px 26px}
+.dvpanel h3{font-size:13px;margin:12px 0 4px;font-weight:650}
+.dvrow{display:flex;align-items:center;gap:8px;min-height:22px;outline:none}
+.dvrow:focus-visible{box-shadow:0 0 0 2px var(--s1);border-radius:3px}
+.dvname{flex:0 0 44%;font-size:12px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dvtrack{position:relative;flex:1;height:18px}
+.dvmid{position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--axisc)}
+.dvbar{position:absolute;top:4px;height:10px;background:var(--s1)}
+.dvbar.pos{border-radius:0 3px 3px 0}
+.dvbar.neg{background:var(--neg);border-radius:3px 0 0 3px}
+.dvrow:hover .dvbar,.dvrow:focus .dvbar{filter:brightness(1.09)}
+.dvval{position:absolute;top:50%;transform:translateY(-50%);font-size:10.5px;font-weight:600;color:var(--muted);white-space:nowrap}
+.callout{display:flex;gap:10px;border-left:3px solid var(--warn);background:var(--band);
+  border-radius:0 8px 8px 0;padding:10px 12px;font-size:12.5px;margin-top:12px}
+.callout .cic{flex:0 0 auto}
+.empty{font-size:13.5px} .empty ol{margin:6px 0;padding-left:22px} .empty li{margin:4px 0}
+.empty code{background:var(--band);padding:1px 5px;border-radius:4px;font-size:12px}
+.q{color:var(--ink2)}
+.flaglist{margin:8px 0;padding-left:18px;font-size:12.5px} .flaglist li{margin:7px 0}
+.tv{margin-top:10px}
+.tv summary{font-size:11.5px;color:var(--muted);cursor:pointer;user-select:none}
+.tbl{border-collapse:collapse;font-size:12px;margin-top:8px;font-variant-numeric:tabular-nums;width:100%}
+.tbl th{text-align:left;font-weight:600;color:var(--ink2);border-bottom:1px solid var(--axisc);padding:4px 10px 4px 0}
+.tbl td{border-bottom:1px solid var(--grid);padding:4px 10px 4px 0}
+footer{color:var(--muted);font-size:12px;margin-top:26px;line-height:1.6}
+footer code{font-size:11px}
+.tip{position:fixed;z-index:50;display:none;background:var(--surface);color:var(--ink);
+  border:1px solid var(--bord);box-shadow:var(--shadow);border-radius:8px;padding:8px 11px;
+  font-size:12px;line-height:1.45;white-space:pre-line;pointer-events:none;max-width:280px}
+.tip b{font-weight:650}
+@media (max-width:860px){
+  .grid,.dvgrid{grid-template-columns:1fr}
+  .rrow{flex-wrap:wrap;gap:2px 10px;margin-bottom:6px}
+  .rlab{flex:1 1 100%}
+  .rtrack{flex:1 1 100%}
+  .raxis{margin-left:0}
+}
+</style>
+<div class="wrap">
+<header>
+<h1>Quake Commander — balance dashboard</h1>
+<p class="hs">Six custom Commander decks, validated by Monte Carlo simulation, real-precon calibration, Oracle templating lint,
+wiki theme audit and instrumented playtests. Sim run 2026-08-23 · dashboard generated 2026-08-23.</p>
+</header>
+<div class="kpis"><div class="tile"><div class="tl">Simulated games</div><div class="tv">100,005</div><div class="ts">0 engine errors · 1294 draws</div></div><div class="tile"><div class="tl">Win-rate spread</div><div class="tv">10.7 pts</div><div class="ts">30.1% top · 19.4% bottom · baseline 25%</div></div><div class="tile"><div class="tl">Precon band</div><div class="tv">3 of 6</div><div class="ts">in the 20–35% band · none above it</div></div><div class="tile"><div class="tl">Cards fully modelled</div><div class="tv">480/494</div><div class="ts">14 sentences skipped</div></div><div class="tile"><div class="tl">Table games logged</div><div class="tv">0</div><div class="ts">quake/balance/playtests/ · auto-ingested</div></div></div>
+<div class="grid">
+<div class="card wide">
+<h2>Deck win rates — 100,005 simulated games</h2>
+<p class="sub">Dot = win rate, whisker = 95% CI. The hairline is the 25% four-player baseline; distance from it is the signal, not the absolute number.</p>
+<div class="rrow"><div class="rlab">Ranger&#x27;s Run<span class="rsub">QDD · Ranger, Slayer of Shub-Niggurath</span></div><div class="rtrack" tabindex="0" data-tip="Ranger&#x27;s Run — 30.1%
+95% CI 29.8–30.5
+20,074 wins / 66,670 games
+avg win on round 13.5 · avg eliminated 10.9"><i class="gline" style="left:5.00%"></i><i class="gline" style="left:30.00%"></i><i class="gline" style="left:55.00%"></i><i class="gline" style="left:80.00%"></i><i class="refline" style="left:55.00%"></i><i class="whisk" style="left:78.87%;width:3.55%"></i><i class="dot" style="left:80.55%"></i><b class="val" style="left:calc(82.42% + 9px)">30.1%</b></div></div><div class="rrow"><div class="rlab">Bitterman&#x27;s War<span class="rsub">QAO · Bitterman, Lone Marine</span></div><div class="rtrack" tabindex="0" data-tip="Bitterman&#x27;s War — 26.3%
+95% CI 26.0–26.6
+17,517 wins / 66,670 games
+avg win on round 13.4 · avg eliminated 11.2"><i class="gline" style="left:5.00%"></i><i class="gline" style="left:30.00%"></i><i class="gline" style="left:55.00%"></i><i class="gline" style="left:80.00%"></i><i class="refline" style="left:55.00%"></i><i class="whisk" style="left:59.77%;width:3.17%"></i><i class="dot" style="left:61.37%"></i><b class="val" style="left:calc(62.95% + 9px)">26.3%</b></div></div><div class="rrow"><div class="rlab">Rhino Squad<span class="rsub">QST · Matthew Kane, Reactivated</span></div><div class="rtrack" tabindex="0" data-tip="Rhino Squad — 25.2%
+95% CI 24.9–25.5
+16,804 wins / 66,670 games
+avg win on round 12.9 · avg eliminated 11.2"><i class="gline" style="left:5.00%"></i><i class="gline" style="left:30.00%"></i><i class="gline" style="left:55.00%"></i><i class="gline" style="left:80.00%"></i><i class="refline" style="left:55.00%"></i><i class="whisk" style="left:54.34%;width:3.33%"></i><i class="dot" style="left:56.02%"></i><b class="val" style="left:calc(57.67% + 9px)">25.2%</b></div></div><div class="rrow"><div class="rlab">Hold The Line<span class="rsub">ETQ · GDF Field Commander</span></div><div class="rtrack" tabindex="0" data-tip="Hold The Line — 23.8%
+95% CI 23.4–24.1
+15,846 wins / 66,670 games
+avg win on round 13.3 · avg eliminated 11.7"><i class="gline" style="left:5.00%"></i><i class="gline" style="left:30.00%"></i><i class="gline" style="left:55.00%"></i><i class="gline" style="left:80.00%"></i><i class="refline" style="left:55.00%"></i><i class="whisk" style="left:47.23%;width:3.24%"></i><i class="dot" style="left:48.84%"></i><b class="val" style="left:calc(50.47% + 9px)">23.8%</b></div></div><div class="rrow"><div class="rlab">The Final Tier<span class="rsub">QAE · Xaero, Undefeated</span></div><div class="rtrack" tabindex="0" data-tip="The Final Tier — 23.3%
+95% CI 23.0–23.7
+15,562 wins / 66,670 games
+avg win on round 14.0 · avg eliminated 10.8"><i class="gline" style="left:5.00%"></i><i class="gline" style="left:30.00%"></i><i class="gline" style="left:55.00%"></i><i class="gline" style="left:80.00%"></i><i class="refline" style="left:55.00%"></i><i class="whisk" style="left:45.10%;width:3.22%"></i><i class="dot" style="left:46.71%"></i><b class="val" style="left:calc(48.32% + 9px)">23.3%</b></div></div><div class="rrow"><div class="rlab">Arena Eternal<span class="rsub">QCH · The Vadrigar, Arena Masters</span></div><div class="rtrack" tabindex="0" data-tip="Arena Eternal — 19.4%
+95% CI 19.1–19.7
+12,908 wins / 66,670 games
+avg win on round 13.4 · avg eliminated 10.9"><i class="gline" style="left:5.00%"></i><i class="gline" style="left:30.00%"></i><i class="gline" style="left:55.00%"></i><i class="gline" style="left:80.00%"></i><i class="refline" style="left:55.00%"></i><i class="whisk" style="left:25.34%;width:3.04%"></i><i class="dot" style="left:26.81%"></i><b class="val" style="left:calc(28.38% + 9px)">19.4%</b></div></div><div class="raxis"><span style="left:5.00%">15%</span><span style="left:30.00%">20%</span><span style="left:55.00%">25%</span><span style="left:80.00%">30%</span><span class="axnote" style="left:55.00%">baseline</span></div>
+<details class="tv"><summary>Table view</summary><table class="tbl"><thead><tr><th>Deck</th><th>Win rate</th><th>95% CI</th><th>Wins/games</th><th>Avg win round</th><th>Avg elim round</th></tr></thead><tbody><tr><td>Ranger&#x27;s Run</td><td>30.1%</td><td>29.8–30.5</td><td>20,074/66,670</td><td>13.5</td><td>10.9</td></tr><tr><td>Bitterman&#x27;s War</td><td>26.3%</td><td>26.0–26.6</td><td>17,517/66,670</td><td>13.4</td><td>11.2</td></tr><tr><td>Rhino Squad</td><td>25.2%</td><td>24.9–25.5</td><td>16,804/66,670</td><td>12.9</td><td>11.2</td></tr><tr><td>Hold The Line</td><td>23.8%</td><td>23.4–24.1</td><td>15,846/66,670</td><td>13.3</td><td>11.7</td></tr><tr><td>The Final Tier</td><td>23.3%</td><td>23.0–23.7</td><td>15,562/66,670</td><td>14.0</td><td>10.8</td></tr><tr><td>Arena Eternal</td><td>19.4%</td><td>19.1–19.7</td><td>12,908/66,670</td><td>13.4</td><td>10.9</td></tr></tbody></table></details>
+</div>
+<div class="card">
+<h2>Balance pass, before → after</h2>
+<p class="sub">The nerf/buff round that followed the first sim run. Spread tightened from 32.4–16.9 to 30.1–19.4.</p>
+<div class="legend"><span><i class="sw pre"></i>before</span><span><i class="sw"></i>after</span></div>
+<div class="rrow"><div class="rlab">Ranger&#x27;s Run<span class="rsub"></span></div><div class="rtrack" tabindex="0" data-tip="Ranger&#x27;s Run
+before balance pass: 32.4%
+after: 30.1% (-2.3)"><i class="gline" style="left:5.00%"></i><i class="gline" style="left:30.00%"></i><i class="gline" style="left:55.00%"></i><i class="gline" style="left:80.00%"></i><i class="refline" style="left:55.00%"></i><i class="conn" style="left:80.55%;width:11.50%"></i><i class="dot pre" style="left:92.05%"></i><i class="dot" style="left:80.55%"></i><b class="val" style="right:calc(19.45% + 10px)">30.1%</b></div></div><div class="rrow"><div class="rlab">Bitterman&#x27;s War<span class="rsub"></span></div><div class="rtrack" tabindex="0" data-tip="Bitterman&#x27;s War
+before balance pass: 30.0%
+after: 26.3% (-3.7)"><i class="gline" style="left:5.00%"></i><i class="gline" style="left:30.00%"></i><i class="gline" style="left:55.00%"></i><i class="gline" style="left:80.00%"></i><i class="refline" style="left:55.00%"></i><i class="conn" style="left:61.37%;width:18.68%"></i><i class="dot pre" style="left:80.05%"></i><i class="dot" style="left:61.37%"></i><b class="val" style="right:calc(38.63% + 10px)">26.3%</b></div></div><div class="rrow"><div class="rlab">Rhino Squad<span class="rsub"></span></div><div class="rtrack" tabindex="0" data-tip="Rhino Squad
+before balance pass: 24.1%
+after: 25.2% (+1.1)"><i class="gline" style="left:5.00%"></i><i class="gline" style="left:30.00%"></i><i class="gline" style="left:55.00%"></i><i class="gline" style="left:80.00%"></i><i class="refline" style="left:55.00%"></i><i class="conn" style="left:50.65%;width:5.37%"></i><i class="dot pre" style="left:50.65%"></i><i class="dot" style="left:56.02%"></i><b class="val" style="left:calc(56.02% + 10px)">25.2%</b></div></div><div class="rrow"><div class="rlab">Hold The Line<span class="rsub"></span></div><div class="rtrack" tabindex="0" data-tip="Hold The Line
+before balance pass: 22.0%
+after: 23.8% (+1.8)"><i class="gline" style="left:5.00%"></i><i class="gline" style="left:30.00%"></i><i class="gline" style="left:55.00%"></i><i class="gline" style="left:80.00%"></i><i class="refline" style="left:55.00%"></i><i class="conn" style="left:40.08%;width:8.76%"></i><i class="dot pre" style="left:40.08%"></i><i class="dot" style="left:48.84%"></i><b class="val" style="left:calc(48.84% + 10px)">23.8%</b></div></div><div class="rrow"><div class="rlab">The Final Tier<span class="rsub"></span></div><div class="rtrack" tabindex="0" data-tip="The Final Tier
+before balance pass: 22.8%
+after: 23.3% (+0.5)"><i class="gline" style="left:5.00%"></i><i class="gline" style="left:30.00%"></i><i class="gline" style="left:55.00%"></i><i class="gline" style="left:80.00%"></i><i class="refline" style="left:55.00%"></i><i class="conn" style="left:44.05%;width:2.66%"></i><i class="dot pre" style="left:44.05%"></i><i class="dot" style="left:46.71%"></i><b class="val" style="left:calc(46.71% + 10px)">23.3%</b></div></div><div class="rrow"><div class="rlab">Arena Eternal<span class="rsub"></span></div><div class="rtrack" tabindex="0" data-tip="Arena Eternal
+before balance pass: 16.9%
+after: 19.4% (+2.5)"><i class="gline" style="left:5.00%"></i><i class="gline" style="left:30.00%"></i><i class="gline" style="left:55.00%"></i><i class="gline" style="left:80.00%"></i><i class="refline" style="left:55.00%"></i><i class="conn" style="left:14.50%;width:12.31%"></i><i class="dot pre" style="left:14.50%"></i><i class="dot" style="left:26.81%"></i><b class="val" style="left:calc(26.81% + 10px)">19.4%</b></div></div><div class="raxis"><span style="left:5.00%">15%</span><span style="left:30.00%">20%</span><span style="left:55.00%">25%</span><span style="left:80.00%">30%</span></div>
+<details class="tv"><summary>Table view</summary><table class="tbl"><thead><tr><th>Deck</th><th>Before</th><th>After</th><th>Change</th></tr></thead><tbody><tr><td>Ranger&#x27;s Run</td><td>32.4%</td><td>30.1%</td><td>-2.3</td></tr><tr><td>Bitterman&#x27;s War</td><td>30.0%</td><td>26.3%</td><td>-3.7</td></tr><tr><td>Rhino Squad</td><td>24.1%</td><td>25.2%</td><td>+1.1</td></tr><tr><td>Hold The Line</td><td>22.0%</td><td>23.8%</td><td>+1.8</td></tr><tr><td>The Final Tier</td><td>22.8%</td><td>23.3%</td><td>+0.5</td></tr><tr><td>Arena Eternal</td><td>16.9%</td><td>19.4%</td><td>+2.5</td></tr></tbody></table></details>
+</div>
+<div class="card">
+<h2>Precon calibration — the absolute reference</h2>
+<p class="sub">Each deck 1-vs-3 against real WotC precons. Shaded band = the 20–35% bracket-2 target. No deck sits above it — the library errs weak, never strong.</p>
+<div class="rrow"><div class="rlab">Ranger&#x27;s Run<span class="rsub"></span></div><div class="rtrack" tabindex="0" data-tip="Ranger&#x27;s Run — 26.9% vs a table of three real precons
+1,999 games · target band 20–35%"><i class="band" style="left:50.00%;width:37.50%"></i><i class="gline" style="left:25.00%"></i><i class="gline" style="left:50.00%"></i><i class="gline" style="left:75.00%"></i><i class="gline" style="left:100.00%"></i><i class="bar" style="width:67.25%"></i><b class="val" style="left:calc(67.25% + 8px)">26.9%</b></div></div><div class="rrow"><div class="rlab">Bitterman&#x27;s War<span class="rsub"></span></div><div class="rtrack" tabindex="0" data-tip="Bitterman&#x27;s War — 23.5% vs a table of three real precons
+1,997 games · target band 20–35%"><i class="band" style="left:50.00%;width:37.50%"></i><i class="gline" style="left:25.00%"></i><i class="gline" style="left:50.00%"></i><i class="gline" style="left:75.00%"></i><i class="gline" style="left:100.00%"></i><i class="bar" style="width:58.75%"></i><b class="val" style="left:calc(58.75% + 8px)">23.5%</b></div></div><div class="rrow"><div class="rlab">Hold The Line<span class="rsub"></span></div><div class="rtrack" tabindex="0" data-tip="Hold The Line — 21.8% vs a table of three real precons
+1,997 games · target band 20–35%"><i class="band" style="left:50.00%;width:37.50%"></i><i class="gline" style="left:25.00%"></i><i class="gline" style="left:50.00%"></i><i class="gline" style="left:75.00%"></i><i class="gline" style="left:100.00%"></i><i class="bar" style="width:54.50%"></i><b class="val" style="left:calc(54.50% + 8px)">21.8%</b></div></div><div class="rrow"><div class="rlab">Rhino Squad<span class="rsub"></span></div><div class="rtrack" tabindex="0" data-tip="Rhino Squad — 18.1% vs a table of three real precons
+1,997 games · target band 20–35%"><i class="band" style="left:50.00%;width:37.50%"></i><i class="gline" style="left:25.00%"></i><i class="gline" style="left:50.00%"></i><i class="gline" style="left:75.00%"></i><i class="gline" style="left:100.00%"></i><i class="bar" style="width:45.25%"></i><b class="val" style="left:calc(45.25% + 8px)">18.1%</b></div></div><div class="rrow"><div class="rlab">The Final Tier<span class="rsub"></span></div><div class="rtrack" tabindex="0" data-tip="The Final Tier — 15.7% vs a table of three real precons
+1,996 games · target band 20–35%"><i class="band" style="left:50.00%;width:37.50%"></i><i class="gline" style="left:25.00%"></i><i class="gline" style="left:50.00%"></i><i class="gline" style="left:75.00%"></i><i class="gline" style="left:100.00%"></i><i class="bar" style="width:39.25%"></i><b class="val" style="left:calc(39.25% + 8px)">15.7%</b></div></div><div class="rrow"><div class="rlab">Arena Eternal<span class="rsub"></span></div><div class="rtrack" tabindex="0" data-tip="Arena Eternal — 13.0% vs a table of three real precons
+1,997 games · target band 20–35%"><i class="band" style="left:50.00%;width:37.50%"></i><i class="gline" style="left:25.00%"></i><i class="gline" style="left:50.00%"></i><i class="gline" style="left:75.00%"></i><i class="gline" style="left:100.00%"></i><i class="bar" style="width:32.50%"></i><b class="val" style="left:calc(32.50% + 8px)">13.0%</b></div></div><div class="raxis"><span style="left:0.00%">0%</span><span style="left:25.00%">10%</span><span style="left:50.00%">20%</span><span style="left:75.00%">30%</span><span style="left:100.00%">40%</span></div>
+<div class="vlist"><div class="vrow"><span class="vname">Ranger&#x27;s Run</span><span class="chip good">✓ in band</span></div><div class="vrow"><span class="vname">Bitterman&#x27;s War</span><span class="chip good">✓ in band</span></div><div class="vrow"><span class="vname">Hold The Line</span><span class="chip good">✓ in band</span></div><div class="vrow"><span class="vname">Rhino Squad</span><span class="chip low">▾ below band</span></div><div class="vrow"><span class="vname">The Final Tier</span><span class="chip low">▾ below band</span></div><div class="vrow"><span class="vname">Arena Eternal</span><span class="chip low">▾ below band</span></div></div>
+<p class="fine">Precon self-consistency (expect ≈25% each): Fae Dominion 17.9% · Spirit Squadron 29.9% · Land&#x27;s Wrath 27.3% · Masters of Evil 27.4%. Parser coverage of the precons: Fae Dominion 97% cards / 99% sentences, Spirit Squadron 77% cards / 89% sentences, Land&#x27;s Wrath 66% cards / 82% sentences, Masters of Evil 64% cards / 84% sentences. — misses weaken the precons, so custom rates are, if anything, overestimates.</p>
+<details class="tv"><summary>Table view</summary><table class="tbl"><thead><tr><th>Deck</th><th>Win rate</th><th>Games</th><th>Verdict</th></tr></thead><tbody><tr><td>Ranger&#x27;s Run</td><td>26.9%</td><td>1,999</td><td>in band</td></tr><tr><td>Bitterman&#x27;s War</td><td>23.5%</td><td>1,997</td><td>in band</td></tr><tr><td>Hold The Line</td><td>21.8%</td><td>1,997</td><td>in band</td></tr><tr><td>Rhino Squad</td><td>18.1%</td><td>1,997</td><td>below band - weaker than precon level</td></tr><tr><td>The Final Tier</td><td>15.7%</td><td>1,996</td><td>below band - weaker than precon level</td></tr><tr><td>Arena Eternal</td><td>13.0%</td><td>1,997</td><td>below band - weaker than precon level</td></tr></tbody></table></details>
+</div>
+<div class="card">
+<h2>Robustness — three AI temperaments</h2>
+<p class="sub">The same pods replayed with cautious, standard and aggressive players. The strongest and weakest decks stay the same everywhere — the rankings are findings, not artifacts of one heuristic.</p>
+<div class="legend"><span><i class="sw p1"></i>cautious</span><span><i class="sw p2"></i>standard</span><span><i class="sw p3"></i>aggressive</span></div>
+<div class="rrow"><div class="rlab">Ranger&#x27;s Run<span class="rsub"></span></div><div class="rtrack" tabindex="0" data-tip="Ranger&#x27;s Run
+cautious: 28.7% (CI 27.9–29.6)
+standard: 29.7% (CI 28.9–30.6)
+aggressive: 31.3% (CI 30.5–32.1)"><i class="gline" style="left:5.00%"></i><i class="gline" style="left:30.00%"></i><i class="gline" style="left:55.00%"></i><i class="gline" style="left:80.00%"></i><i class="refline" style="left:55.00%"></i><i class="dot p1" style="left:73.50%"></i><i class="dot p2" style="left:78.50%"></i><i class="dot p3" style="left:86.50%"></i></div></div><div class="rrow"><div class="rlab">Bitterman&#x27;s War<span class="rsub"></span></div><div class="rtrack" tabindex="0" data-tip="Bitterman&#x27;s War
+cautious: 27.1% (CI 26.3–27.9)
+standard: 27.1% (CI 26.3–27.9)
+aggressive: 27.1% (CI 26.4–28.0)"><i class="gline" style="left:5.00%"></i><i class="gline" style="left:30.00%"></i><i class="gline" style="left:55.00%"></i><i class="gline" style="left:80.00%"></i><i class="refline" style="left:55.00%"></i><i class="dot p1" style="left:65.50%"></i><i class="dot p2" style="left:65.50%"></i><i class="dot p3" style="left:65.50%"></i></div></div><div class="rrow"><div class="rlab">Rhino Squad<span class="rsub"></span></div><div class="rtrack" tabindex="0" data-tip="Rhino Squad
+cautious: 26.4% (CI 25.6–27.2)
+standard: 24.6% (CI 23.8–25.3)
+aggressive: 23.5% (CI 22.7–24.2)"><i class="gline" style="left:5.00%"></i><i class="gline" style="left:30.00%"></i><i class="gline" style="left:55.00%"></i><i class="gline" style="left:80.00%"></i><i class="refline" style="left:55.00%"></i><i class="dot p1" style="left:62.00%"></i><i class="dot p2" style="left:53.00%"></i><i class="dot p3" style="left:47.50%"></i></div></div><div class="rrow"><div class="rlab">Hold The Line<span class="rsub"></span></div><div class="rtrack" tabindex="0" data-tip="Hold The Line
+cautious: 20.0% (CI 19.2–20.7)
+standard: 24.0% (CI 23.2–24.8)
+aggressive: 24.4% (CI 23.7–25.2)"><i class="gline" style="left:5.00%"></i><i class="gline" style="left:30.00%"></i><i class="gline" style="left:55.00%"></i><i class="gline" style="left:80.00%"></i><i class="refline" style="left:55.00%"></i><i class="dot p1" style="left:30.00%"></i><i class="dot p2" style="left:50.00%"></i><i class="dot p3" style="left:52.00%"></i></div></div><div class="rrow"><div class="rlab">The Final Tier<span class="rsub"></span></div><div class="rtrack" tabindex="0" data-tip="The Final Tier
+cautious: 23.8% (CI 23.1–24.5)
+standard: 23.6% (CI 22.9–24.3)
+aggressive: 23.8% (CI 23.1–24.5)"><i class="gline" style="left:5.00%"></i><i class="gline" style="left:30.00%"></i><i class="gline" style="left:55.00%"></i><i class="gline" style="left:80.00%"></i><i class="refline" style="left:55.00%"></i><i class="dot p1" style="left:49.00%"></i><i class="dot p2" style="left:48.00%"></i><i class="dot p3" style="left:49.00%"></i></div></div><div class="rrow"><div class="rlab">Arena Eternal<span class="rsub"></span></div><div class="rtrack" tabindex="0" data-tip="Arena Eternal
+cautious: 19.7% (CI 18.9–20.4)
+standard: 18.9% (CI 18.2–19.6)
+aggressive: 18.5% (CI 17.8–19.1)"><i class="gline" style="left:5.00%"></i><i class="gline" style="left:30.00%"></i><i class="gline" style="left:55.00%"></i><i class="gline" style="left:80.00%"></i><i class="refline" style="left:55.00%"></i><i class="dot p1" style="left:28.50%"></i><i class="dot p2" style="left:24.50%"></i><i class="dot p3" style="left:22.50%"></i></div></div><div class="raxis"><span style="left:5.00%">15%</span><span style="left:30.00%">20%</span><span style="left:55.00%">25%</span><span style="left:80.00%">30%</span></div>
+<details class="tv"><summary>Table view</summary><table class="tbl"><thead><tr><th>Deck</th><th>cautious</th><th>standard</th><th>aggressive</th></tr></thead><tbody><tr><td>Ranger&#x27;s Run</td><td>28.7%</td><td>29.7%</td><td>31.3%</td></tr><tr><td>Bitterman&#x27;s War</td><td>27.1%</td><td>27.1%</td><td>27.1%</td></tr><tr><td>Rhino Squad</td><td>26.4%</td><td>24.6%</td><td>23.5%</td></tr><tr><td>Hold The Line</td><td>20.0%</td><td>24.0%</td><td>24.4%</td></tr><tr><td>The Final Tier</td><td>23.8%</td><td>23.6%</td><td>23.8%</td></tr><tr><td>Arena Eternal</td><td>19.7%</td><td>18.9%</td><td>18.5%</td></tr></tbody></table></details>
+</div>
+<div class="card">
+<h2>Goldfish clock — uncontested kill turn</h2>
+<p class="sub">Each deck solo against a do-nothing 40-life opponent. Shaded band = the ~8–11 bracket-2 window. Everyone is inside it: Arena Eternal's weakness is surviving interaction, not speed.</p>
+<div class="rrow"><div class="rlab">Rhino Squad<span class="rsub"></span></div><div class="rtrack" tabindex="0" data-tip="Rhino Squad
+avg kill turn 8.7 · median 8
+200 solo games vs a do-nothing 40-life dummy"><i class="band" style="left:66.67%;width:25.00%"></i><i class="gline" style="left:33.33%"></i><i class="gline" style="left:66.67%"></i><i class="gline" style="left:100.00%"></i><i class="bar" style="width:72.17%"></i><b class="val" style="left:calc(72.17% + 8px)">8.7</b></div></div><div class="rrow"><div class="rlab">Hold The Line<span class="rsub"></span></div><div class="rtrack" tabindex="0" data-tip="Hold The Line
+avg kill turn 8.7 · median 8
+200 solo games vs a do-nothing 40-life dummy"><i class="band" style="left:66.67%;width:25.00%"></i><i class="gline" style="left:33.33%"></i><i class="gline" style="left:66.67%"></i><i class="gline" style="left:100.00%"></i><i class="bar" style="width:72.83%"></i><b class="val" style="left:calc(72.83% + 8px)">8.7</b></div></div><div class="rrow"><div class="rlab">Arena Eternal<span class="rsub"></span></div><div class="rtrack" tabindex="0" data-tip="Arena Eternal
+avg kill turn 8.9 · median 8
+200 solo games vs a do-nothing 40-life dummy"><i class="band" style="left:66.67%;width:25.00%"></i><i class="gline" style="left:33.33%"></i><i class="gline" style="left:66.67%"></i><i class="gline" style="left:100.00%"></i><i class="bar" style="width:74.21%"></i><b class="val" style="left:calc(74.21% + 8px)">8.9</b></div></div><div class="rrow"><div class="rlab">Bitterman&#x27;s War<span class="rsub"></span></div><div class="rtrack" tabindex="0" data-tip="Bitterman&#x27;s War
+avg kill turn 9.3 · median 9
+200 solo games vs a do-nothing 40-life dummy"><i class="band" style="left:66.67%;width:25.00%"></i><i class="gline" style="left:33.33%"></i><i class="gline" style="left:66.67%"></i><i class="gline" style="left:100.00%"></i><i class="bar" style="width:77.62%"></i><b class="val" style="left:calc(77.62% + 8px)">9.3</b></div></div><div class="rrow"><div class="rlab">The Final Tier<span class="rsub"></span></div><div class="rtrack" tabindex="0" data-tip="The Final Tier
+avg kill turn 9.5 · median 9
+200 solo games vs a do-nothing 40-life dummy"><i class="band" style="left:66.67%;width:25.00%"></i><i class="gline" style="left:33.33%"></i><i class="gline" style="left:66.67%"></i><i class="gline" style="left:100.00%"></i><i class="bar" style="width:79.33%"></i><b class="val" style="left:calc(79.33% + 8px)">9.5</b></div></div><div class="rrow"><div class="rlab">Ranger&#x27;s Run<span class="rsub"></span></div><div class="rtrack" tabindex="0" data-tip="Ranger&#x27;s Run
+avg kill turn 10.2 · median 10
+200 solo games vs a do-nothing 40-life dummy"><i class="band" style="left:66.67%;width:25.00%"></i><i class="gline" style="left:33.33%"></i><i class="gline" style="left:66.67%"></i><i class="gline" style="left:100.00%"></i><i class="bar" style="width:84.62%"></i><b class="val" style="left:calc(84.62% + 8px)">10.2</b></div></div><div class="raxis"><span style="left:0.00%">0</span><span style="left:33.33%">4</span><span style="left:66.67%">8</span><span style="left:100.00%">12</span></div>
+<details class="tv"><summary>Table view</summary><table class="tbl"><thead><tr><th>Deck</th><th>Avg kill turn</th><th>Median</th></tr></thead><tbody><tr><td>Rhino Squad</td><td>8.7</td><td>8</td></tr><tr><td>Hold The Line</td><td>8.7</td><td>8</td></tr><tr><td>Arena Eternal</td><td>8.9</td><td>8</td></tr><tr><td>Bitterman&#x27;s War</td><td>9.3</td><td>9</td></tr><tr><td>The Final Tier</td><td>9.5</td><td>9</td></tr><tr><td>Ranger&#x27;s Run</td><td>10.2</td><td>10</td></tr></tbody></table><p class="fine">200 games per deck.</p></details>
+</div>
+<div class="card">
+<h2>Commander castable by turn 5</h2>
+<p class="sub">Pure draw simulation, no AI. Ranger&#x27;s Run is the outlier — a five-pip commander over a basics-heavy base — which is why its games feel bimodal at the table: colour-screwed, or the commander connecting.</p>
+<div class="rrow"><div class="rlab">Arena Eternal<span class="rsub"></span></div><div class="rtrack" tabindex="0" data-tip="Arena Eternal
+commander castable by turn 5: 77%
+avg castable turn 4.6
+mana screw (&lt;3 lands by T6): 6.4%"><i class="gline" style="left:25.00%"></i><i class="gline" style="left:50.00%"></i><i class="gline" style="left:75.00%"></i><i class="gline" style="left:100.00%"></i><i class="bar ctx" style="width:77.08%"></i><b class="val" style="left:calc(77.08% + 8px)">77%</b></div></div><div class="rrow"><div class="rlab">Rhino Squad<span class="rsub"></span></div><div class="rtrack" tabindex="0" data-tip="Rhino Squad
+commander castable by turn 5: 72%
+avg castable turn 4.9
+mana screw (&lt;3 lands by T6): 4.9%"><i class="gline" style="left:25.00%"></i><i class="gline" style="left:50.00%"></i><i class="gline" style="left:75.00%"></i><i class="gline" style="left:100.00%"></i><i class="bar ctx" style="width:72.38%"></i><b class="val" style="left:calc(72.38% + 8px)">72%</b></div></div><div class="rrow"><div class="rlab">Bitterman&#x27;s War<span class="rsub"></span></div><div class="rtrack" tabindex="0" data-tip="Bitterman&#x27;s War
+commander castable by turn 5: 72%
+avg castable turn 4.6
+mana screw (&lt;3 lands by T6): 5.0%"><i class="gline" style="left:25.00%"></i><i class="gline" style="left:50.00%"></i><i class="gline" style="left:75.00%"></i><i class="gline" style="left:100.00%"></i><i class="bar ctx" style="width:72.32%"></i><b class="val" style="left:calc(72.32% + 8px)">72%</b></div></div><div class="rrow"><div class="rlab">Hold The Line<span class="rsub"></span></div><div class="rtrack" tabindex="0" data-tip="Hold The Line
+commander castable by turn 5: 69%
+avg castable turn 5.1
+mana screw (&lt;3 lands by T6): 6.4%"><i class="gline" style="left:25.00%"></i><i class="gline" style="left:50.00%"></i><i class="gline" style="left:75.00%"></i><i class="gline" style="left:100.00%"></i><i class="bar ctx" style="width:68.73%"></i><b class="val" style="left:calc(68.73% + 8px)">69%</b></div></div><div class="rrow"><div class="rlab">The Final Tier<span class="rsub"></span></div><div class="rtrack" tabindex="0" data-tip="The Final Tier
+commander castable by turn 5: 54%
+avg castable turn 6.2
+mana screw (&lt;3 lands by T6): 5.5%"><i class="gline" style="left:25.00%"></i><i class="gline" style="left:50.00%"></i><i class="gline" style="left:75.00%"></i><i class="gline" style="left:100.00%"></i><i class="bar ctx" style="width:53.77%"></i><b class="val" style="left:calc(53.77% + 8px)">54%</b></div></div><div class="rrow"><div class="rlab">Ranger&#x27;s Run<span class="rsub"></span></div><div class="rtrack" tabindex="0" data-tip="Ranger&#x27;s Run
+commander castable by turn 5: 29%
+avg castable turn 7.4
+mana screw (&lt;3 lands by T6): 6.4%"><i class="gline" style="left:25.00%"></i><i class="gline" style="left:50.00%"></i><i class="gline" style="left:75.00%"></i><i class="gline" style="left:100.00%"></i><i class="bar" style="width:29.28%"></i><b class="val" style="left:calc(29.28% + 8px)">29%</b></div></div><div class="raxis"><span style="left:0.00%">0%</span><span style="left:25.00%">25%</span><span style="left:50.00%">50%</span><span style="left:75.00%">75%</span><span style="left:100.00%">100%</span></div>
+<details class="tv"><summary>Table view</summary><table class="tbl"><thead><tr><th>Deck</th><th>By turn 5</th><th>Avg castable turn</th><th>Screw rate</th></tr></thead><tbody><tr><td>Arena Eternal</td><td>77%</td><td>4.6</td><td>6.4%</td></tr><tr><td>Rhino Squad</td><td>72%</td><td>4.9</td><td>4.9%</td></tr><tr><td>Bitterman&#x27;s War</td><td>72%</td><td>4.6</td><td>5.0%</td></tr><tr><td>Hold The Line</td><td>69%</td><td>5.1</td><td>6.4%</td></tr><tr><td>The Final Tier</td><td>54%</td><td>6.2</td><td>5.5%</td></tr><tr><td>Ranger&#x27;s Run</td><td>29%</td><td>7.4</td><td>6.4%</td></tr></tbody></table></details>
+</div>
+<div class="card wide">
+<h2>Card impact — biggest movers per deck</h2>
+<p class="sub">Δwin = win rate when the card is seen in the first six rounds minus when it isn't (the six-round window removes the long-games-draw-more-cards bias). Top three pull the deck up, bottom three drag it down. Shared ±26-point scale. Full tables: quake/balance/report.md.</p>
+<div class="legend"><span><i class="sw"></i>pulls up</span><span><i class="sw neg"></i>drags down</span></div>
+<div class="dvgrid"><div class="dvpanel"><h3>Ranger&#x27;s Run</h3><div class="dvrow" tabindex="0" data-tip="Ranger, Slayer of Shub-Niggurath
+Δwin +22.7 pts
+seen early in 16,163 games · cast 100%
+11.2 dmg/g · 0.54 kills/g"><span class="dvname">Ranger, Slayer of Shub-Niggurath</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar pos" style="left:50%;width:43.75%"></i><b class="dvval" style="left:calc(93.75% + 6px)">+22.7</b></span></div><div class="dvrow" tabindex="0" data-tip="Rune of Black Magic
+Δwin +11.2 pts
+seen early in 9,812 games · cast 89%
+1.3 dmg/g · 0.00 kills/g"><span class="dvname">Rune of Black Magic</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar pos" style="left:50%;width:21.46%"></i><b class="dvval" style="left:calc(71.46% + 6px)">+11.2</b></span></div><div class="dvrow" tabindex="0" data-tip="Rune of Elder Magic
+Δwin +7.9 pts
+seen early in 9,909 games · cast 88%
+0.0 dmg/g · 0.00 kills/g"><span class="dvname">Rune of Elder Magic</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar pos" style="left:50%;width:15.24%"></i><b class="dvval" style="left:calc(65.24% + 6px)">+7.9</b></span></div><div class="dvrow" tabindex="0" data-tip="Spike Mine
+Δwin -4.2 pts
+seen early in 9,919 games · cast 89%
+0.2 dmg/g · 0.00 kills/g"><span class="dvname">Spike Mine</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar neg" style="left:41.90%;width:8.10%"></i><b class="dvval" style="right:calc(58.10% + 6px)">-4.2</b></span></div><div class="dvrow" tabindex="0" data-tip="Scrag
+Δwin -4.5 pts
+seen early in 9,920 games · cast 78%
+0.5 dmg/g · 0.01 kills/g"><span class="dvname">Scrag</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar neg" style="left:41.33%;width:8.67%"></i><b class="dvval" style="right:calc(58.67% + 6px)">-4.5</b></span></div><div class="dvrow" tabindex="0" data-tip="Phantom Swordsman
+Δwin -4.8 pts
+seen early in 9,856 games · cast 68%
+0.6 dmg/g · 0.03 kills/g"><span class="dvname">Phantom Swordsman</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar neg" style="left:40.78%;width:9.22%"></i><b class="dvval" style="right:calc(59.22% + 6px)">-4.8</b></span></div></div><div class="dvpanel"><h3>Bitterman&#x27;s War</h3><div class="dvrow" tabindex="0" data-tip="Force Field
+Δwin +14.4 pts
+seen early in 9,571 games · cast 71%
+0.0 dmg/g · 0.00 kills/g"><span class="dvname">Force Field</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar pos" style="left:50%;width:27.78%"></i><b class="dvval" style="left:calc(77.78% + 6px)">+14.4</b></span></div><div class="dvrow" tabindex="0" data-tip="Black Widow Guardian
+Δwin +13.6 pts
+seen early in 9,484 games · cast 74%
+2.0 dmg/g · 0.20 kills/g"><span class="dvname">Black Widow Guardian</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar pos" style="left:50%;width:26.15%"></i><b class="dvval" style="left:calc(76.15% + 6px)">+13.6</b></span></div><div class="dvrow" tabindex="0" data-tip="Tank Commander
+Δwin +9.6 pts
+seen early in 9,784 games · cast 72%
+1.8 dmg/g · 0.23 kills/g"><span class="dvname">Tank Commander</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar pos" style="left:50%;width:18.41%"></i><b class="dvval" style="left:calc(68.41% + 6px)">+9.6</b></span></div><div class="dvrow" tabindex="0" data-tip="Hand Grenade
+Δwin -4.6 pts
+seen early in 9,748 games · cast 82%
+0.0 dmg/g · 0.02 kills/g"><span class="dvname">Hand Grenade</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar neg" style="left:41.19%;width:8.81%"></i><b class="dvval" style="right:calc(58.81% + 6px)">-4.6</b></span></div><div class="dvrow" tabindex="0" data-tip="Quad Damage
+Δwin -4.9 pts
+seen early in 9,808 games · cast 69%
+0.0 dmg/g · 0.00 kills/g"><span class="dvname">Quad Damage</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar neg" style="left:40.53%;width:9.47%"></i><b class="dvval" style="right:calc(59.47% + 6px)">-4.9</b></span></div><div class="dvrow" tabindex="0" data-tip="Medic
+Δwin -5.8 pts
+seen early in 9,703 games · cast 87%
+0.6 dmg/g · 0.02 kills/g"><span class="dvname">Medic</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar neg" style="left:38.81%;width:11.19%"></i><b class="dvval" style="right:calc(61.19% + 6px)">-5.8</b></span></div></div><div class="dvpanel"><h3>Rhino Squad</h3><div class="dvrow" tabindex="0" data-tip="Voss, Strogg Commander
+Δwin +13.8 pts
+seen early in 9,700 games · cast 77%
+1.8 dmg/g · 0.42 kills/g"><span class="dvname">Voss, Strogg Commander</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar pos" style="left:50%;width:26.57%"></i><b class="dvval" style="left:calc(76.57% + 6px)">+13.8</b></span></div><div class="dvrow" tabindex="0" data-tip="Matthew Kane, Reactivated
+Δwin +6.2 pts
+seen early in 51,036 games · cast 100%
+10.0 dmg/g · 0.37 kills/g"><span class="dvname">Matthew Kane, Reactivated</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar pos" style="left:50%;width:12.00%"></i><b class="dvval" style="left:calc(62.00% + 6px)">+6.2</b></span></div><div class="dvrow" tabindex="0" data-tip="Strogg Gladiator
+Δwin +5.6 pts
+seen early in 9,770 games · cast 82%
+1.7 dmg/g · 0.15 kills/g"><span class="dvname">Strogg Gladiator</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar pos" style="left:50%;width:10.76%"></i><b class="dvval" style="left:calc(60.76% + 6px)">+5.6</b></span></div><div class="dvrow" tabindex="0" data-tip="Putrification
+Δwin -3.2 pts
+seen early in 9,765 games · cast 16%
+0.0 dmg/g · 0.03 kills/g"><span class="dvname">Putrification</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar neg" style="left:43.79%;width:6.21%"></i><b class="dvval" style="right:calc(56.21% + 6px)">-3.2</b></span></div><div class="dvrow" tabindex="0" data-tip="Orbital Dispersal
+Δwin -3.6 pts
+seen early in 9,670 games · cast 56%
+0.0 dmg/g · 0.52 kills/g"><span class="dvname">Orbital Dispersal</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar neg" style="left:43.08%;width:6.92%"></i><b class="dvval" style="right:calc(56.92% + 6px)">-3.6</b></span></div><div class="dvrow" tabindex="0" data-tip="Bidwell, Squad Technician
+Δwin -5.1 pts
+seen early in 9,744 games · cast 79%
+0.0 dmg/g · 0.00 kills/g"><span class="dvname">Bidwell, Squad Technician</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar neg" style="left:40.13%;width:9.87%"></i><b class="dvval" style="right:calc(59.87% + 6px)">-5.1</b></span></div></div><div class="dvpanel"><h3>Hold The Line</h3><div class="dvrow" tabindex="0" data-tip="Mobile Command Post
+Δwin +16.6 pts
+seen early in 9,711 games · cast 85%
+3.4 dmg/g · 0.15 kills/g"><span class="dvname">Mobile Command Post</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar pos" style="left:50%;width:31.92%"></i><b class="dvval" style="left:calc(81.92% + 6px)">+16.6</b></span></div><div class="dvrow" tabindex="0" data-tip="Cyclops Heavy Walker
+Δwin +9.9 pts
+seen early in 9,844 games · cast 79%
+3.4 dmg/g · 0.30 kills/g"><span class="dvname">Cyclops Heavy Walker</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar pos" style="left:50%;width:18.98%"></i><b class="dvval" style="left:calc(68.98% + 6px)">+9.9</b></span></div><div class="dvrow" tabindex="0" data-tip="Desecrator Hovertank
+Δwin +7.6 pts
+seen early in 9,711 games · cast 85%
+3.0 dmg/g · 0.25 kills/g"><span class="dvname">Desecrator Hovertank</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar pos" style="left:50%;width:14.60%"></i><b class="dvval" style="left:calc(64.60% + 6px)">+7.6</b></span></div><div class="dvrow" tabindex="0" data-tip="Strogg Technician
+Δwin -4.4 pts
+seen early in 9,800 games · cast 84%
+0.5 dmg/g · 0.02 kills/g"><span class="dvname">Strogg Technician</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar neg" style="left:41.57%;width:8.43%"></i><b class="dvval" style="right:calc(58.43% + 6px)">-4.4</b></span></div><div class="dvrow" tabindex="0" data-tip="GDF Engineer
+Δwin -4.4 pts
+seen early in 9,655 games · cast 81%
+0.0 dmg/g · 0.00 kills/g"><span class="dvname">GDF Engineer</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar neg" style="left:41.46%;width:8.54%"></i><b class="dvval" style="right:calc(58.54% + 6px)">-4.4</b></span></div><div class="dvrow" tabindex="0" data-tip="GDF Field Ops
+Δwin -5.8 pts
+seen early in 9,844 games · cast 78%
+0.3 dmg/g · 0.05 kills/g"><span class="dvname">GDF Field Ops</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar neg" style="left:38.75%;width:11.25%"></i><b class="dvval" style="right:calc(61.25% + 6px)">-5.8</b></span></div></div><div class="dvpanel"><h3>The Final Tier</h3><div class="dvrow" tabindex="0" data-tip="Major, Squad Leader
+Δwin +12.7 pts
+seen early in 9,654 games · cast 81%
+2.3 dmg/g · 0.13 kills/g"><span class="dvname">Major, Squad Leader</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar pos" style="left:50%;width:24.38%"></i><b class="dvval" style="left:calc(74.38% + 6px)">+12.7</b></span></div><div class="dvrow" tabindex="0" data-tip="Hunter, Lord of Battle
+Δwin +10.3 pts
+seen early in 9,648 games · cast 78%
+1.2 dmg/g · 0.07 kills/g"><span class="dvname">Hunter, Lord of Battle</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar pos" style="left:50%;width:19.83%"></i><b class="dvval" style="left:calc(69.83% + 6px)">+10.3</b></span></div><div class="dvrow" tabindex="0" data-tip="Cadaver, Rotting Contender
+Δwin +7.7 pts
+seen early in 9,730 games · cast 82%
+3.2 dmg/g · 0.11 kills/g"><span class="dvname">Cadaver, Rotting Contender</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar pos" style="left:50%;width:14.76%"></i><b class="dvval" style="left:calc(64.76% + 6px)">+7.7</b></span></div><div class="dvrow" tabindex="0" data-tip="Orbb, All-Seeing
+Δwin -3.9 pts
+seen early in 9,567 games · cast 79%
+0.8 dmg/g · 0.02 kills/g"><span class="dvname">Orbb, All-Seeing</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar neg" style="left:42.46%;width:7.54%"></i><b class="dvval" style="right:calc(57.54% + 6px)">-3.9</b></span></div><div class="dvrow" tabindex="0" data-tip="Kamikaze
+Δwin -4.3 pts
+seen early in 9,672 games · cast 77%
+0.0 dmg/g · 0.00 kills/g"><span class="dvname">Kamikaze</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar neg" style="left:41.64%;width:8.36%"></i><b class="dvval" style="right:calc(58.36% + 6px)">-4.3</b></span></div><div class="dvrow" tabindex="0" data-tip="Respawn Protocol
+Δwin -6.4 pts
+seen early in 9,796 games · cast 59%
+0.0 dmg/g · 0.00 kills/g"><span class="dvname">Respawn Protocol</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar neg" style="left:37.65%;width:12.35%"></i><b class="dvval" style="right:calc(62.35% + 6px)">-6.4</b></span></div></div><div class="dvpanel"><h3>Arena Eternal</h3><div class="dvrow" tabindex="0" data-tip="Volkerh, the Green Rot
+Δwin +24.3 pts
+seen early in 9,769 games · cast 69%
+2.4 dmg/g · 0.18 kills/g"><span class="dvname">Volkerh, the Green Rot</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar pos" style="left:50%;width:46.70%"></i><b class="dvval" style="left:calc(96.70% + 6px)">+24.3</b></span></div><div class="dvrow" tabindex="0" data-tip="The Vadrigar, Arena Masters
+Δwin +6.6 pts
+seen early in 49,922 games · cast 100%
+7.6 dmg/g · 0.42 kills/g"><span class="dvname">The Vadrigar, Arena Masters</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar pos" style="left:50%;width:12.77%"></i><b class="dvval" style="left:calc(62.77% + 6px)">+6.6</b></span></div><div class="dvrow" tabindex="0" data-tip="Galena, Priestess of Ithagnal
+Δwin +5.0 pts
+seen early in 9,506 games · cast 85%
+2.0 dmg/g · 0.04 kills/g"><span class="dvname">Galena, Priestess of Ithagnal</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar pos" style="left:50%;width:9.69%"></i><b class="dvval" style="left:calc(59.69% + 6px)">+5.0</b></span></div><div class="dvrow" tabindex="0" data-tip="Acid Spit
+Δwin -3.1 pts
+seen early in 9,383 games · cast 79%
+0.0 dmg/g · 0.11 kills/g"><span class="dvname">Acid Spit</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar neg" style="left:44.12%;width:5.88%"></i><b class="dvval" style="right:calc(55.88% + 6px)">-3.1</b></span></div><div class="dvrow" tabindex="0" data-tip="Roster Call
+Δwin -3.2 pts
+seen early in 9,584 games · cast 56%
+0.0 dmg/g · 0.00 kills/g"><span class="dvname">Roster Call</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar neg" style="left:43.87%;width:6.13%"></i><b class="dvval" style="right:calc(56.13% + 6px)">-3.2</b></span></div><div class="dvrow" tabindex="0" data-tip="Telefrag
+Δwin -3.6 pts
+seen early in 9,611 games · cast 75%
+0.0 dmg/g · 0.01 kills/g"><span class="dvname">Telefrag</span><span class="dvtrack"><i class="dvmid"></i><i class="dvbar neg" style="left:43.15%;width:6.85%"></i><b class="dvval" style="right:calc(56.85% + 6px)">-3.6</b></span></div></div></div>
+<details class="tv"><summary>Table view</summary><table class="tbl"><thead><tr><th>Deck</th><th>Card</th><th>Δwin (pts)</th></tr></thead><tbody><tr><td>Ranger&#x27;s Run</td><td>Ranger, Slayer of Shub-Niggurath</td><td>+22.7</td></tr><tr><td>Ranger&#x27;s Run</td><td>Rune of Black Magic</td><td>+11.2</td></tr><tr><td>Ranger&#x27;s Run</td><td>Rune of Elder Magic</td><td>+7.9</td></tr><tr><td>Ranger&#x27;s Run</td><td>Spike Mine</td><td>-4.2</td></tr><tr><td>Ranger&#x27;s Run</td><td>Scrag</td><td>-4.5</td></tr><tr><td>Ranger&#x27;s Run</td><td>Phantom Swordsman</td><td>-4.8</td></tr><tr><td>Bitterman&#x27;s War</td><td>Force Field</td><td>+14.4</td></tr><tr><td>Bitterman&#x27;s War</td><td>Black Widow Guardian</td><td>+13.6</td></tr><tr><td>Bitterman&#x27;s War</td><td>Tank Commander</td><td>+9.6</td></tr><tr><td>Bitterman&#x27;s War</td><td>Hand Grenade</td><td>-4.6</td></tr><tr><td>Bitterman&#x27;s War</td><td>Quad Damage</td><td>-4.9</td></tr><tr><td>Bitterman&#x27;s War</td><td>Medic</td><td>-5.8</td></tr><tr><td>Rhino Squad</td><td>Voss, Strogg Commander</td><td>+13.8</td></tr><tr><td>Rhino Squad</td><td>Matthew Kane, Reactivated</td><td>+6.2</td></tr><tr><td>Rhino Squad</td><td>Strogg Gladiator</td><td>+5.6</td></tr><tr><td>Rhino Squad</td><td>Putrification</td><td>-3.2</td></tr><tr><td>Rhino Squad</td><td>Orbital Dispersal</td><td>-3.6</td></tr><tr><td>Rhino Squad</td><td>Bidwell, Squad Technician</td><td>-5.1</td></tr><tr><td>Hold The Line</td><td>Mobile Command Post</td><td>+16.6</td></tr><tr><td>Hold The Line</td><td>Cyclops Heavy Walker</td><td>+9.9</td></tr><tr><td>Hold The Line</td><td>Desecrator Hovertank</td><td>+7.6</td></tr><tr><td>Hold The Line</td><td>Strogg Technician</td><td>-4.4</td></tr><tr><td>Hold The Line</td><td>GDF Engineer</td><td>-4.4</td></tr><tr><td>Hold The Line</td><td>GDF Field Ops</td><td>-5.8</td></tr><tr><td>The Final Tier</td><td>Major, Squad Leader</td><td>+12.7</td></tr><tr><td>The Final Tier</td><td>Hunter, Lord of Battle</td><td>+10.3</td></tr><tr><td>The Final Tier</td><td>Cadaver, Rotting Contender</td><td>+7.7</td></tr><tr><td>The Final Tier</td><td>Orbb, All-Seeing</td><td>-3.9</td></tr><tr><td>The Final Tier</td><td>Kamikaze</td><td>-4.3</td></tr><tr><td>The Final Tier</td><td>Respawn Protocol</td><td>-6.4</td></tr><tr><td>Arena Eternal</td><td>Volkerh, the Green Rot</td><td>+24.3</td></tr><tr><td>Arena Eternal</td><td>The Vadrigar, Arena Masters</td><td>+6.6</td></tr><tr><td>Arena Eternal</td><td>Galena, Priestess of Ithagnal</td><td>+5.0</td></tr><tr><td>Arena Eternal</td><td>Acid Spit</td><td>-3.1</td></tr><tr><td>Arena Eternal</td><td>Roster Call</td><td>-3.2</td></tr><tr><td>Arena Eternal</td><td>Telefrag</td><td>-3.6</td></tr></tbody></table></details>
+</div>
+<div class="card">
+<h2>Theme audit — wiki HP vs card stats</h2>
+<p class="sub">Spearman rank correlation between each creature's in-game hit points and its card power+toughness. Hairline = the ρ ≥ 0.7 gate. quake3, quakewars and champions have no HP bestiary to rank against (arena roster / multiplayer sets), so the audit covers the three campaign sets.</p>
+<div class="rrow"><div class="rlab">Quake II (QAO)<span class="rsub"></span></div><div class="rtrack" tabindex="0" data-tip="Quake II (QAO)
+Spearman ρ = 0.89 over 27 matched creatures
+gate: ρ ≥ 0.7"><i class="gline" style="left:25.00%"></i><i class="gline" style="left:50.00%"></i><i class="gline" style="left:75.00%"></i><i class="bar" style="width:89.00%"></i><i class="refline" style="left:70.00%"></i><b class="val" style="left:calc(89.00% + 8px)">0.89</b></div></div><div class="rrow"><div class="rlab">Quake 4 (QST)<span class="rsub"></span></div><div class="rtrack" tabindex="0" data-tip="Quake 4 (QST)
+Spearman ρ = 0.86 over 14 matched creatures
+gate: ρ ≥ 0.7"><i class="gline" style="left:25.00%"></i><i class="gline" style="left:50.00%"></i><i class="gline" style="left:75.00%"></i><i class="bar" style="width:86.00%"></i><i class="refline" style="left:70.00%"></i><b class="val" style="left:calc(86.00% + 8px)">0.86</b></div></div><div class="rrow"><div class="rlab">Quake (QDD)<span class="rsub"></span></div><div class="rtrack" tabindex="0" data-tip="Quake (QDD)
+Spearman ρ = 0.73 over 22 matched creatures
+gate: ρ ≥ 0.7"><i class="gline" style="left:25.00%"></i><i class="gline" style="left:50.00%"></i><i class="gline" style="left:75.00%"></i><i class="bar" style="width:73.00%"></i><i class="refline" style="left:70.00%"></i><b class="val" style="left:calc(73.00% + 8px)">0.73</b></div></div><div class="raxis"><span style="left:0.00%">0.00</span><span style="left:25.00%">0.25</span><span style="left:50.00%">0.50</span><span style="left:75.00%">0.75</span><span style="left:100.00%">1.00</span></div>
+<details class="tv"><summary>Table view</summary><table class="tbl"><thead><tr><th>Set</th><th>Spearman ρ</th><th>Creatures matched</th></tr></thead><tbody><tr><td>Quake II (QAO)</td><td>0.89</td><td>27</td></tr><tr><td>Quake 4 (QST)</td><td>0.86</td><td>14</td></tr><tr><td>Quake (QDD)</td><td>0.73</td><td>22</td></tr></tbody></table></details>
+</div>
+<div class="card">
+<h2>Wording &amp; feel checks</h2>
+<p class="sub">Oracle templating lint + EDHREC salt cross-reference.</p>
+<p class="body"><b>Templating.</b> 10 of 898 rules sentences have no close printed-Oracle analog — all reviewed as intentional custom-mechanic composites; two genuine wording misses were fixed.</p>
+<details class="tv"><summary>The 10 accepted flags</summary><ul class="flaglist"><li><b>Joker, Reckoning Marine</b> <span class="fine">(quake2, 0.50)</span><br><span class="q">“Whenever ~ attacks, Equipment attached to it gain &quot;Equipped creature has menace&quot; until end of turn.”</span></li><li><b>Big Gun Barrage</b> <span class="fine">(quake2, 0.55)</span><br><span class="q">“If no creature with flying was dealt damage this way, it deals 3 damage to any target instead.”</span></li><li><b>Commander&#x27;s Head</b> <span class="fine">(quake2, 0.60)</span><br><span class="q">“{3}, {T}, Sacrifice ~: Gain control of target artifact creature.”</span></li><li><b>Harvester</b> <span class="fine">(quake3, 0.52)</span><br><span class="q">“{2}, {T}, Remove three skull counters from ~: Create a 2/2 black Skeleton Warrior creature token with haste.”</span></li><li><b>Capture the Flag</b> <span class="fine">(quake3, 0.57)</span><br><span class="q">“At the beginning of your end step, if there are three or more flag counters on ~, remove them and draw two cards.”</span></li><li><b>Nailgun</b> <span class="fine">(quake3, 0.61)</span><br><span class="q">“Equipped creature gets +1/+1 and has &quot;{T}: ~ deals 1 damage to each of up to two target creatures.&quot;”</span></li><li><b>Recon</b> <span class="fine">(quake4, 0.58)</span><br><span class="q">“If a creature died this turn, draw two cards instead.”</span></li><li><b>The Lurching King</b> <span class="fine">(champions, 0.54)</span><br><span class="q">“Whenever ~ attacks, defending player sacrifices a creature unless they discard a card.”</span></li><li><b>Tri-Bolt</b> <span class="fine">(champions, 0.57)</span><br><span class="q">“Whenever equipped creature attacks, it deals 2 damage divided as you choose among one or two target creatures defending player controls.”</span></li><li><b>Ghost Walk</b> <span class="fine">(champions, 0.57)</span><br><span class="q">“Target creature you control phases out.”</span></li></ul></details>
+<div class="callout"><span class="cic">⚠</span><div><b>Salt watch.</b> Pentagram of Protection and both Invulnerabilities are analogs of Teferi&#x27;s Protection, a top-of-salt-list card on EDHREC. They are the likeliest source of &#x27;balance&#x27; complaints being about feel rather than power. Kept deliberately — they are iconic Quake powerups — but they are the first cards to revisit if the table keeps grumbling. Re-check any time with python common/sim/run.py --salt</div></div>
+</div>
+<div class="card wide">
+<h2>Table results vs simulation</h2>
+<p class="sub">Human playtests, side by side with the sim's expectation. Nothing logged yet — this panel fills itself in as games are recorded.</p>
+<div class="empty">
+<p><b>0 games logged.</b> To record a game:</p>
+<ol>
+<li>Copy <code>quake/balance/playtests/TEMPLATE.md</code> to a new file (one per game) and fill in winner, ending round, MVP and dead cards.</li>
+<li>Follow <code>quake/balance/playtests/SCHEDULE.md</code> so table time covers all 15 pod combinations.</li>
+<li>Run <code>python common/sim/run.py --ingest-playtests</code>, then <code>python common/sim/dashboard.py</code> — the comparison table appears here.</li>
+</ol>
+<p class="fine">For Arena Eternal A/B nights, QCH-ARENA-ETERNAL-V1 in TTS Saved Objects is the pre-balance version.</p>
+</div>
+</div>
+</div>
+<footer>
+<p><b>How honest are these numbers?</b> The engine models mana, the curve, combat with keywords, removal, wipes, tokens,
+equipment, Sagas, commander tax/damage and every ability it could parse — but not the stack, counterspells or politics.
+Absolute win rates are not Magic; distances from baseline and side-by-side comparisons are the signal.
+Full methodology: <code>quake/balance/BALANCE_PASS.md</code> · raw numbers: <code>quake/balance/report.md</code>.</p>
+<p>Regenerate after any sim run or playtest ingest: <code>python common/sim/dashboard.py</code></p>
+</footer>
+</div>
+<script>
+(function(){
+  var tip = document.createElement('div'); tip.className = 'tip'; document.body.appendChild(tip);
+  function show(el, x, y){
+    tip.textContent = el.getAttribute('data-tip'); tip.style.display = 'block';
+    var w = tip.offsetWidth, h = tip.offsetHeight;
+    var left = Math.min(Math.max(6, x + 14), window.innerWidth - w - 8);
+    var top = y - h - 12; if (top < 6) top = y + 18;
+    tip.style.left = left + 'px'; tip.style.top = top + 'px';
+  }
+  function hide(){ tip.style.display = 'none'; }
+  Array.prototype.forEach.call(document.querySelectorAll('[data-tip]'), function(el){
+    el.addEventListener('pointermove', function(e){ show(el, e.clientX, e.clientY); });
+    el.addEventListener('pointerleave', hide);
+    el.addEventListener('focus', function(){ var r = el.getBoundingClientRect(); show(el, r.left + r.width/2, r.top); });
+    el.addEventListener('blur', hide);
+  });
+  window.addEventListener('scroll', hide, true);
+})();
+</script></body></html>

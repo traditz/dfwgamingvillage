@@ -1,0 +1,1336 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Enemy Territory: Quake Wars — Custom MTG Set</title><style>@font-face{font-family:'Cinzel';font-style:normal;font-weight:700;src:url('../../common/fonts/Cinzel-700.woff2') format('woff2')}
+@font-face{font-family:'Crimson Text';font-style:italic;font-weight:400;src:url('../../common/fonts/CrimsonText-400-italic.woff2') format('woff2')}
+@font-face{font-family:'Crimson Text';font-style:normal;font-weight:400;src:url('../../common/fonts/CrimsonText-400.woff2') format('woff2')}
+@font-face{font-family:'Crimson Text';font-style:normal;font-weight:600;src:url('../../common/fonts/CrimsonText-600.woff2') format('woff2')}
+@font-face{font-family:'Philosopher';font-style:normal;font-weight:700;src:url('../../common/fonts/Philosopher-700.woff2') format('woff2')}
+</style><style>
+:root{--bg:#15161a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:#e8e6df;font-family:"Segoe UI",system-ui,Helvetica,Arial,sans-serif}
+header.page{padding:28px 32px 10px;border-bottom:1px solid #2a2c33}
+header.page h1{margin:0;font-size:30px;letter-spacing:.04em;color:#f0c96a;font-family:"Cinzel",Georgia,serif}
+header.page h1 small{display:block;font-size:13px;letter-spacing:.2em;color:#9aa0ad;font-family:"Segoe UI",system-ui,sans-serif;margin-top:4px}
+header.page a{color:#9aa0ad}
+.meta{color:#9aa0ad;font-size:13px;margin-top:10px;line-height:1.6}
+.meta b{color:#d8d4c8}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;padding:14px 32px;position:sticky;top:0;background:rgba(21,22,26,.96);backdrop-filter:blur(4px);z-index:5;border-bottom:1px solid #2a2c33;align-items:center}
+.toolbar button{background:#23252c;color:#d8d4c8;border:1px solid #3a3d47;border-radius:999px;padding:5px 12px;font-size:12px;cursor:pointer}
+.toolbar button.on{background:#f0c96a;color:#111;border-color:#f0c96a}
+.toolbar input{background:#23252c;color:#eee;border:1px solid #3a3d47;border-radius:8px;padding:6px 10px;font-size:13px;min-width:200px}
+.toolbar .sep{width:1px;height:22px;background:#3a3d47;margin:0 4px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:26px;padding:28px 32px 60px}
+
+/* ---------- the card ---------- */
+.card{container-type:inline-size;aspect-ratio:63/88;position:relative;background:#0b0b0b;border-radius:4.6%/3.3%;box-shadow:0 8px 22px rgba(0,0,0,.6);color:#111;overflow:hidden}
+.card.hidden{display:none}
+.frame{position:absolute;left:4.4cqw;top:4.4cqw;right:4.4cqw;bottom:7.2cqw;border-radius:1.8cqw;
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .28 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"),
+    radial-gradient(120% 90% at 50% 0%,rgba(255,255,255,.22),rgba(255,255,255,0) 60%),
+    var(--frame2);
+  box-shadow:inset 0 0 0 .5cqw rgba(0,0,0,.35)}
+.frame::before{content:"";position:absolute;inset:1.1cqw;border-radius:1.3cqw;background:var(--frame);opacity:.92;mix-blend-mode:screen;pointer-events:none}
+.frame::after{content:"";position:absolute;inset:1.1cqw;border-radius:1.3cqw;background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.55' numOctaves='4' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .22 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    mix-blend-mode:multiply;pointer-events:none}
+.frame > *{position:absolute;z-index:1}
+.titlebar,.typebar{left:2.6cqw;right:2.6cqw;display:flex;align-items:center;justify-content:space-between;gap:1.5cqw;padding:0 2.6cqw;
+  background:var(--box);border:.45cqw solid var(--pin);border-radius:1.2cqw;box-shadow:0 .4cqw .6cqw rgba(0,0,0,.45),inset 0 0 0 .3cqw rgba(255,255,255,.35)}
+.titlebar{top:2.4cqw;height:8.8cqw}
+.card.legendary .titlebar{border-radius:3.2cqw 3.2cqw 1.2cqw 1.2cqw;box-shadow:0 .4cqw .6cqw rgba(0,0,0,.45),inset 0 0 0 .3cqw rgba(255,255,255,.35),0 -.9cqw 0 -.2cqw var(--pin)}
+.name{font-family:"Beleren","Philosopher","Trajan Pro",Georgia,serif;font-weight:700;font-size:4.9cqw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.01em}
+.cost{display:flex;gap:.5cqw;flex-shrink:0}
+.card.longname .name{font-size:3.5cqw;letter-spacing:-.02em}
+.ms{width:4.7cqw;height:4.7cqw;border-radius:50%;box-shadow:-.25cqw .35cqw 0 rgba(0,0,0,.65);vertical-align:-.15em}
+.rules .ms{width:1.1em;height:1.1em;box-shadow:-.07em .1em 0 rgba(0,0,0,.65)}
+.art{top:11.9cqw;left:4.2cqw;right:4.2cqw;height:59.5cqw;background:#000;border:.45cqw solid var(--pin);overflow:hidden;display:flex;align-items:center;justify-content:center}
+.art img.fg{position:relative;width:100%;height:100%;object-fit:cover;display:block}
+.art.fit-contain img.fg{object-fit:contain;z-index:1}
+.art img.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(12px) brightness(.45) saturate(1.2);transform:scale(1.25)}
+.art.pixel img.fg{image-rendering:pixelated;object-fit:contain;width:60%;height:auto}
+.typebar{top:71.6cqw;height:8cqw}
+.type{font-family:"Beleren","Philosopher",Georgia,serif;font-weight:700;font-size:3.9cqw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card.longtype .type{font-size:3.5cqw;letter-spacing:-.01em}
+.card.xlongtype .type{font-size:3.2cqw;letter-spacing:-.015em}
+.card.xxlongtype .type{font-size:2.9cqw;letter-spacing:-.02em}
+.setsym{width:6.2cqw;height:6.2cqw;flex-shrink:0;filter:drop-shadow(0 .2cqw .2cqw rgba(0,0,0,.5))}
+.textbox{top:79.8cqw;left:4.2cqw;right:4.2cqw;bottom:3.6cqw;background:var(--text);border:.45cqw solid var(--pin);padding:2cqw 2.8cqw;
+  display:flex;flex-direction:column;gap:1.2cqw;overflow:hidden;font-family:"MPlantin","Crimson Text","EB Garamond",Georgia,serif;font-size:4.05cqw;line-height:1.22;
+  box-shadow:inset 0 0 1.5cqw rgba(0,0,0,.18)}
+.textbox::before{content:"";position:absolute;inset:0;pointer-events:none;background:
+  url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .07 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.rules{position:relative}
+.bigsym{display:flex;justify-content:center;align-items:center;padding-top:3cqw}
+.bigsym .ms{width:26cqw;height:26cqw;box-shadow:-.6cqw .8cqw 0 rgba(0,0,0,.55)}
+.basicflavor{text-align:center;font-size:.85em}
+.rules p{margin:0 0 .9cqw}
+.rules p:last-child{margin:0}
+.rem{color:#2c2c2c}
+.flavor{position:relative;font-style:italic;margin-top:auto;padding-top:1.4cqw;font-size:.96em;line-height:1.2}
+.flavor br+ br{display:none}
+.flavor::before{content:"";display:block;width:38%;height:.3cqw;margin:0 auto 1.4cqw;background:linear-gradient(90deg,transparent,rgba(0,0,0,.55),transparent)}
+.card.long .textbox{font-size:3.6cqw;line-height:1.18}
+.card.xlong .textbox{font-size:3.15cqw;line-height:1.15;padding:1.4cqw 2.2cqw}
+.card.xxlong .textbox{font-size:2.8cqw;line-height:1.12;padding:1.1cqw 1.8cqw}
+.card.xxlong .flavor{font-size:2.7cqw}
+.card.has-pt .textbox{padding-bottom:6cqw}
+.pt{right:3.2cqw;bottom:1.6cqw;min-width:19cqw;height:8.6cqw;padding:0 3cqw;display:flex;align-items:center;justify-content:center;
+  background:var(--box);border:.45cqw solid var(--pin);border-radius:1.4cqw;font-family:"Beleren","Philosopher",Georgia,serif;font-weight:700;font-size:5.2cqw;
+  box-shadow:0 .4cqw .7cqw rgba(0,0,0,.5),inset 0 0 0 .3cqw rgba(255,255,255,.35);z-index:2}
+.foot{position:absolute;left:5.2cqw;right:5.2cqw;bottom:1.6cqw;color:#f2f2f2;font-size:2.35cqw;line-height:1.25;display:flex;justify-content:space-between;align-items:flex-end;font-family:"Segoe UI",Arial,sans-serif}
+.foot .l{display:flex;flex-direction:column;gap:.1cqw}
+.foot .r{text-align:right;color:#cfcfcf}
+.empty{padding:40px;color:#9aa0ad;text-align:center;display:none}
+.deck-sec{padding:8px 32px 10px}.deck-sec h2{font-family:Cinzel,Georgia,serif;color:#f0c96a;font-size:20px;margin:18px 0 6px;letter-spacing:.06em}.deck-sec h2 small{color:#9aa0ad;font-size:13px;margin-left:8px}
+.deck-sec .grid{padding:10px 0 20px}
+.stack{position:relative}.stack .count{position:absolute;z-index:3;top:-10px;right:-8px;background:#f0c96a;color:#111;font-weight:800;border-radius:999px;padding:3px 9px;font-size:13px;box-shadow:0 2px 6px rgba(0,0,0,.6)}
+.curve{display:flex;gap:6px;align-items:flex-end;margin-top:18px;height:100px}.curve .bar{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;width:36px;gap:2px;font-size:11px;color:#9aa0ad}.curve .fill{width:22px;background:#f0c96a;border-radius:3px 3px 0 0}.curve b{color:#e8e6df}
+.meta .ms{width:14px;height:14px}
+@media print{
+  body{background:#fff}
+  header.page,.toolbar,.deck-sec h2{display:none}
+  .grid,.deck-sec .grid{display:grid;grid-template-columns:repeat(3,63mm);gap:3mm;padding:8mm}
+  .deck-sec{padding:0}
+  .card{width:63mm;height:88mm;aspect-ratio:auto;box-shadow:none;border-radius:3mm;break-inside:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .card.hidden{display:none}
+  .stack .count{display:none}
+}
+</style></head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="gC" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2a2a2a"/><stop offset="1" stop-color="#000"/></linearGradient><linearGradient id="gU" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e3e8ec"/><stop offset=".5" stop-color="#7f8c96"/><stop offset="1" stop-color="#d5dbe0"/></linearGradient><linearGradient id="gR" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f3dc85"/><stop offset=".5" stop-color="#a9812a"/><stop offset="1" stop-color="#ecd275"/></linearGradient><linearGradient id="gM" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff9a4d"/><stop offset=".5" stop-color="#c2320f"/><stop offset="1" stop-color="#ffb75c"/></linearGradient><path id="setsympath" d="M44.4 3.4 L52.2 3.2 L52.3 4.1 L41.9 36.5 L41.0 37.8 L39.9 38.1 L21.2 38.1 L19.4 37.8 L8.4 29.3 L8.4 28.2 L10.2 25.0 L14.5 19.2 L22.6 11.8 L26.6 9.3 L33.4 6.1 L39.2 4.3 L44.4 3.4 Z M56.3 4.1 L60.8 4.3 L67.6 6.4 L74.1 9.7 L80.3 14.0 L85.8 19.6 L90.5 26.0 L93.4 31.8 L95.2 37.2 L93.9 38.1 L60.1 38.1 L59.0 37.8 L58.1 36.5 L52.0 17.8 L56.3 4.1 Z M39.9 11.1 L34.5 12.9 L26.2 17.6 L18.8 24.6 L16.7 27.5 L16.0 29.3 L34.9 29.5 L35.4 28.9 L40.8 12.4 L40.8 11.6 L39.9 11.1 Z M59.7 11.1 L59.2 11.6 L59.5 13.4 L62.8 23.2 L63.5 26.8 L64.8 29.5 L84.0 29.3 L83.7 27.9 L79.7 22.8 L73.4 17.2 L67.3 13.6 L59.7 11.1 Z M6.2 33.6 L7.5 33.8 L35.8 54.5 L29.7 74.0 L17.6 83.1 L16.5 82.8 L13.1 79.0 L8.8 72.5 L6.2 67.1 L4.1 59.9 L3.4 55.9 L3.0 48.0 L4.4 38.3 L6.2 33.6 Z M80.8 42.3 L96.1 42.1 L97.0 46.6 L96.6 56.7 L94.1 66.4 L89.8 75.0 L85.5 80.8 L81.0 85.3 L77.4 88.2 L75.6 88.9 L72.9 82.2 L72.9 81.2 L67.5 65.7 L64.2 54.5 L80.8 42.3 Z M89.3 46.4 L75.6 56.1 L74.0 57.7 L79.4 74.7 L80.3 75.9 L81.2 75.4 L84.0 71.4 L88.4 62.4 L90.2 53.8 L90.2 46.9 L89.3 46.4 Z M10.4 46.8 L9.8 49.1 L10.2 55.6 L12.7 64.9 L17.0 72.9 L19.4 75.6 L20.1 75.6 L25.7 59.2 L25.7 57.4 L11.8 47.1 L10.4 46.8 Z M49.8 64.9 L50.4 64.8 L51.4 65.5 L67.5 77.6 L71.8 90.5 L71.2 91.8 L63.3 95.0 L56.8 96.1 L55.0 96.8 L45.0 96.8 L43.2 96.1 L38.1 95.4 L30.9 92.9 L25.5 90.0 L20.6 86.2 L25.1 82.4 L49.8 64.9 Z M49.6 75.2 L35.2 85.3 L34.3 86.2 L34.9 87.1 L38.8 88.5 L43.9 89.6 L53.6 90.0 L61.2 88.5 L65.3 86.9 L63.7 84.9 L60.8 82.8 L51.4 75.9 L49.6 75.2 Z" fill-rule="evenodd" stroke="#000" stroke-width="4" stroke-linejoin="round"/></defs></svg>
+<header class="page">
+  <h1>ENEMY TERRITORY: QUAKE WARS <small>A FAN-MADE MAGIC: THE GATHERING SET · 86 CARDS · SET CODE ETQ · <a href="../index.html">deck library</a></small></h1>
+  <div class="meta"><b>31</b> Common · <b>34</b> Uncommon · <b>18</b> Rare · <b>3</b> Mythic Rare<br><b>13</b> W · <b>6</b> U · <b>11</b> B · <b>0</b> R · <b>0</b> G · <b>5</b> Gold · <b>0</b> Hybrid · <b>36</b> Artifact · <b>15</b> Land<br>Class-based objective warfare. Two pillars nothing else in this library uses: <b>Deployable</b>, an artifact subtype for the turrets, radar, artillery and shield generators both armies build, and campaign <b>Objectives</b> written as Sagas — a fixed sequence of chapters, which is exactly how an ETQW map plays. Esper colours: white GDF infantry, blue GDF technology and vehicles, black the Strogg. Unofficial fan content. Enemy Territory: Quake Wars © id Software / Splash Damage; Magic © Wizards of the Coast.</div>
+</header>
+<div class="toolbar"><button data-f="color:W">White</button><button data-f="color:U">Blue</button><button data-f="color:B">Black</button><button data-f="color:R">Red</button><button data-f="color:G">Green</button><button data-f="color:M">Multicolor</button><button data-f="color:A">Artifact</button><button data-f="color:L">Land</button><span class="sep"></span><button data-f="rarity:C">Common</button><button data-f="rarity:U">Uncommon</button><button data-f="rarity:R">Rare</button><button data-f="rarity:M">Mythic</button><span class="sep"></span><button data-f="type:Creature">Creature</button><button data-f="type:Instant">Instant</button><button data-f="type:Sorcery">Sorcery</button><button data-f="type:Enchantment">Enchantment</button><button data-f="type:Artifact">Artifact</button><button data-f="type:Land">Land</button><span class="sep"></span><input id="q" placeholder="Search name / text…"><span id="count" style="color:#9aa0ad;font-size:12px;margin-left:auto"></span></div>
+<main class="grid">
+<article class="card long has-pt legendary" data-color="MWUB" data-rarity="M" data-type="Creature" data-name="gdf field commander" style="--frame:#d3b24c;--frame2:#a8862c;--box:#f4e8c2;--text:#f3e7c4;--pin:#8a6c1d;--pin2:#8a6c1d">
+  <div class="frame">
+    <div class="titlebar"><span class="name">GDF Field Commander</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"><img class="ms" src="../../common/symbols/B.svg" alt="{B}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/GDF_Marine.png" alt=""><img class="fg" loading="lazy" src="art/GDF_Marine.png" alt="GDF Field Commander"></div>
+    <div class="typebar"><span class="type">Legendary Creature — Human Soldier</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gM)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Vigilance</p><p>Whenever a Deployable you control enters, create a 1/1 white Soldier creature token.</p><p><img class="ms" src="../../common/symbols/2.svg" alt="{2}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Put a Deployable card from your hand onto the battlefield tapped.</p></div><div class="flavor">One voice on the net, deciding where the line is going to be.</div></div>
+    <div class="pt">3/4</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>001/086 M &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card has-pt" data-color="W" data-rarity="C" data-type="Creature" data-name="gdf soldier" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">GDF Soldier</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Soldier.png" alt=""><img class="fg" loading="lazy" src="art/Soldier.png" alt="GDF Soldier"></div>
+    <div class="typebar"><span class="type">Creature — Human Soldier</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Battle cry <i class="rem">(Whenever this creature attacks, each other attacking creature gets +1/+0 until end of turn.)</i></p></div><div class="flavor">Assault rifle, satchel charge, and whatever the objective needs blown up.</div></div>
+    <div class="pt">2/2</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>002/086 C &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card has-pt" data-color="W" data-rarity="U" data-type="Creature" data-name="gdf medic" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">GDF Medic</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Medic.png" alt=""><img class="fg" loading="lazy" src="art/Medic.png" alt="GDF Medic"></div>
+    <div class="typebar"><span class="type">Creature — Human Cleric</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Lifelink</p><p>When GDF Medic enters, return target creature card with mana value 2 or less from your graveyard to your hand.</p></div><div class="flavor">Nobody on this field stays dead if the corpsman reaches them in time.</div></div>
+    <div class="pt">2/3</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>003/086 U &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card long has-pt" data-color="W" data-rarity="R" data-type="Creature" data-name="gdf engineer" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">GDF Engineer</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Engineer.png" alt=""><img class="fg" loading="lazy" src="art/Engineer.png" alt="GDF Engineer"></div>
+    <div class="typebar"><span class="type">Creature — Human Artificer</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Fabricate 1 <i class="rem">(When this creature enters, put a +1/+1 counter on it or create a 1/1 colorless Servo artifact creature token.)</i></p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Untap target Deployable you control.</p></div><div class="flavor">The hammer is not a weapon. It is how anything on this map gets built.</div></div>
+    <div class="pt">2/2</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>004/086 R &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card has-pt" data-color="W" data-rarity="U" data-type="Creature" data-name="gdf field ops" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">GDF Field Ops</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Fieldops.png" alt=""><img class="fg" loading="lazy" src="art/Fieldops.png" alt="GDF Field Ops"></div>
+    <div class="typebar"><span class="type">Creature — Human Soldier</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">: GDF Field Ops deals 2 damage to target attacking or blocking creature.</p></div><div class="flavor">She does not carry the artillery. She carries the radio that owns it.</div></div>
+    <div class="pt">3/3</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>005/086 U &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="W" data-rarity="C" data-type="Sorcery" data-name="fireteam" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Fireteam</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-contain pixel"><img class="bg" aria-hidden="true" loading="lazy" src="art/Etqw-achievements-teamplayer.png" alt=""><img class="fg" loading="lazy" src="art/Etqw-achievements-teamplayer.png" alt="Fireteam"></div>
+    <div class="typebar"><span class="type">Sorcery</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Create two 1/1 white Soldier creature tokens.</p></div><div class="flavor">You do not push an objective alone. That is the whole lesson.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>006/086 C &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="W" data-rarity="U" data-type="Sorcery" data-name="reinforcement wave" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Reinforcement Wave</span><span class="cost"><img class="ms" src="../../common/symbols/4.svg" alt="{4}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/ETQW_GDF_Propaganda_4.png" alt=""><img class="fg" loading="lazy" src="art/ETQW_GDF_Propaganda_4.png" alt="Reinforcement Wave"></div>
+    <div class="typebar"><span class="type">Sorcery</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Create four 1/1 white Soldier creature tokens.</p></div><div class="flavor">The spawn timer is the only thing the GDF has more of than the Strogg.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>007/086 U &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="W" data-rarity="C" data-type="Instant" data-name="field promotion" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Field Promotion</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-contain pixel"><img class="bg" aria-hidden="true" loading="lazy" src="art/Etqw-achievements-commandoveteran.png" alt=""><img class="fg" loading="lazy" src="art/Etqw-achievements-commandoveteran.png" alt="Field Promotion"></div>
+    <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Put a +1/+1 counter on each of up to two target creatures. They gain vigilance until end of turn.</p></div><div class="flavor">Veteran status is not awarded. It is survived into.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>008/086 C &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="W" data-rarity="C" data-type="Instant" data-name="covering fire" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Covering Fire</span><span class="cost"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-contain pixel"><img class="bg" aria-hidden="true" loading="lazy" src="art/Etqw-achievements-munitionsexpert.png" alt=""><img class="fg" loading="lazy" src="art/Etqw-achievements-munitionsexpert.png" alt="Covering Fire"></div>
+    <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Target creature you control gets +1/+3 until end of turn. If you control a Deployable, it also gains vigilance until end of turn.</p></div><div class="flavor">Keep their heads down and the engineer gets the line built.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>009/086 C &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="W" data-rarity="C" data-type="Instant" data-name="corpsman&#x27;s kit" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Corpsman&#x27;s Kit</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-contain pixel"><img class="bg" aria-hidden="true" loading="lazy" src="art/Etqw-achievements-medicineman.png" alt=""><img class="fg" loading="lazy" src="art/Etqw-achievements-medicineman.png" alt="Corpsman&#x27;s Kit"></div>
+    <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>You gain 4 life. Draw a card.</p></div><div class="flavor">Stims, sealant, and a very short conversation about getting up.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>010/086 C &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="W" data-rarity="R" data-type="Enchantment" data-name="hold the line" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Hold the Line</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-contain pixel"><img class="bg" aria-hidden="true" loading="lazy" src="art/Etqw-achievements-fortifierexpert.png" alt=""><img class="fg" loading="lazy" src="art/Etqw-achievements-fortifierexpert.png" alt="Hold the Line"></div>
+    <div class="typebar"><span class="type">Enchantment</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Creatures you control get +0/+1.</p><p>Whenever one or more creatures you control block, you gain 1 life for each of those creatures.</p></div><div class="flavor">Territory is not taken. It is held, minute by minute, until somebody quits.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>011/086 R &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="W" data-rarity="U" data-type="Instant" data-name="sent them packing" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Sent Them Packing</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-contain pixel"><img class="bg" aria-hidden="true" loading="lazy" src="art/Etqw-achievements-sentthempacking.png" alt=""><img class="fg" loading="lazy" src="art/Etqw-achievements-sentthempacking.png" alt="Sent Them Packing"></div>
+    <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Exile target attacking or blocking creature. Its controller creates a 1/1 white Soldier creature token.</p></div><div class="flavor">The line moves back to where it was this morning.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>012/086 U &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card long has-pt" data-color="U" data-rarity="U" data-type="Creature" data-name="gdf covert ops" style="--frame:#1f6aa8;--frame2:#144d80;--box:#dfe9f3;--text:#dde7f0;--pin:#0e4678;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">GDF Covert Ops</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Covertops.png" alt=""><img class="fg" loading="lazy" src="art/Covertops.png" alt="GDF Covert Ops"></div>
+    <div class="typebar"><span class="type">Creature — Human Rogue</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Skulk <i class="rem">(This creature can&#x27;t be blocked by creatures with greater power.)</i></p><p>When GDF Covert Ops enters, look at target opponent&#x27;s hand, then scry 2.</p></div><div class="flavor">Wearing their uniform, standing in their spawn, calling the strike in.</div></div>
+    <div class="pt">2/2</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>013/086 U &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="U" data-rarity="C" data-type="Instant" data-name="intel uplink" style="--frame:#1f6aa8;--frame2:#144d80;--box:#dfe9f3;--text:#dde7f0;--pin:#0e4678;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Intel Uplink</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Class_covert_ops.png" alt=""><img class="fg" loading="lazy" src="art/Class_covert_ops.png" alt="Intel Uplink"></div>
+    <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Draw a card. If you control a Deployable, scry 2 first.</p></div><div class="flavor">The radar sweep is worth more than the rifle that carried it up the hill.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>014/086 C &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="U" data-rarity="C" data-type="Instant" data-name="deployment zone" style="--frame:#1f6aa8;--frame2:#144d80;--box:#dfe9f3;--text:#dde7f0;--pin:#0e4678;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Deployment Zone</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Etqw4.jpg" alt=""><img class="fg" loading="lazy" src="art/Etqw4.jpg" alt="Deployment Zone"></div>
+    <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Exile target creature you control, then return it to the battlefield under its owner&#x27;s control tapped. Draw a card.</p></div><div class="flavor">Die at the objective, respawn at the base, run back. That is the game.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>015/086 C &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="U" data-rarity="U" data-type="Sorcery" data-name="third eye scan" style="--frame:#1f6aa8;--frame2:#144d80;--box:#dfe9f3;--text:#dde7f0;--pin:#0e4678;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Third Eye Scan</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-contain pixel"><img class="bg" aria-hidden="true" loading="lazy" src="art/Etqw-achievements-commandoexpert.png" alt=""><img class="fg" loading="lazy" src="art/Etqw-achievements-commandoexpert.png" alt="Third Eye Scan"></div>
+    <div class="typebar"><span class="type">Sorcery</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Draw two cards. If you control three or more Deployables, draw three cards instead.</p></div><div class="flavor">Covert ops paints the map, and suddenly everyone knows where to shoot.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>016/086 U &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card xlong has-pt" data-color="A" data-rarity="R" data-type="Artifact" data-name="anansi helicopter" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Anansi Helicopter</span><span class="cost"><img class="ms" src="../../common/symbols/4.svg" alt="{4}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Anansi.png" alt=""><img class="fg" loading="lazy" src="art/Anansi.png" alt="Anansi Helicopter"></div>
+    <div class="typebar"><span class="type">Artifact — Vehicle</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Flying</p><p>Whenever Anansi Helicopter attacks, it deals 1 damage to each creature defending player controls.</p><p>Crew 2 <i class="rem">(Tap any number of creatures you control with total power 2 or more: This Vehicle becomes an artifact creature until end of turn.)</i></p></div><div class="flavor">Two rotors, two miniguns, and a pilot who has done this before.</div></div>
+    <div class="pt">4/4</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>017/086 R &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card has-pt" data-color="A" data-rarity="R" data-type="Artifact" data-name="titan tank" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Titan Tank</span><span class="cost"><img class="ms" src="../../common/symbols/5.svg" alt="{5}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Titan.png" alt=""><img class="fg" loading="lazy" src="art/Titan.png" alt="Titan Tank"></div>
+    <div class="typebar"><span class="type">Artifact — Vehicle</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Trample</p><p>Titan Tank has ward <img class="ms" src="../../common/symbols/2.svg" alt="{2}"> as long as it&#x27;s an artifact creature.</p><p>Crew 3</p></div><div class="flavor">The GDF&#x27;s answer to everything the Strogg have parked on the objective.</div></div>
+    <div class="pt">6/6</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>018/086 R &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card has-pt" data-color="A" data-rarity="C" data-type="Artifact" data-name="husky quad" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Husky Quad</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Husky.png" alt=""><img class="fg" loading="lazy" src="art/Husky.png" alt="Husky Quad"></div>
+    <div class="typebar"><span class="type">Artifact — Vehicle</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Haste</p><p>Crew 1</p></div><div class="flavor">No armour, no guns, and the fastest thing on the map.</div></div>
+    <div class="pt">2/1</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>019/086 C &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card has-pt" data-color="A" data-rarity="C" data-type="Artifact" data-name="platypus speedboat" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Platypus Speedboat</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Platypus.png" alt=""><img class="fg" loading="lazy" src="art/Platypus.png" alt="Platypus Speedboat"></div>
+    <div class="typebar"><span class="type">Artifact — Vehicle</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Platypus Speedboat can&#x27;t be blocked by creatures with power 2 or greater.</p><p>Crew 1</p></div><div class="flavor">The only way onto the Island that does not involve being shot at from the cliffs.</div></div>
+    <div class="pt">3/2</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>020/086 C &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card has-pt" data-color="A" data-rarity="U" data-type="Artifact" data-name="armadillo" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Armadillo</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Armadillo.png" alt=""><img class="fg" loading="lazy" src="art/Armadillo.png" alt="Armadillo"></div>
+    <div class="typebar"><span class="type">Artifact — Vehicle</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Whenever Armadillo becomes crewed, create a 1/1 white Soldier creature token.</p><p>Crew 2</p></div><div class="flavor">It carries the squad to the line and then sits on the line with them.</div></div>
+    <div class="pt">2/5</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>021/086 U &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card long has-pt legendary" data-color="A" data-rarity="M" data-type="Artifact" data-name="mobile command post" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Mobile Command Post</span><span class="cost"><img class="ms" src="../../common/symbols/4.svg" alt="{4}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/MCP.png" alt=""><img class="fg" loading="lazy" src="art/MCP.png" alt="Mobile Command Post"></div>
+    <div class="typebar"><span class="type">Legendary Artifact — Vehicle</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gM)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Vigilance</p><p>Whenever Mobile Command Post becomes crewed, put a Deployable card from your hand onto the battlefield.</p><p>Crew 3</p></div><div class="flavor">Escort it to the deployment point. Everything else on the map is a distraction from that.</div></div>
+    <div class="pt">4/6</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>022/086 M &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card has-pt" data-color="B" data-rarity="C" data-type="Creature" data-name="strogg aggressor" style="--frame:#2c2a28;--frame2:#171615;--box:#cfcbc5;--text:#d3cfc8;--pin:#0f0e0d;--pin2:#0f0e0d">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Strogg Aggressor</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/B.svg" alt="{B}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Aggressor.png" alt=""><img class="fg" loading="lazy" src="art/Aggressor.png" alt="Strogg Aggressor"></div>
+    <div class="typebar"><span class="type">Artifact Creature — Strogg Soldier</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Menace</p></div><div class="flavor">The Strogg answer to a rifleman, with the rifle grown into the arm.</div></div>
+    <div class="pt">3/2</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>023/086 C &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card long has-pt" data-color="B" data-rarity="R" data-type="Creature" data-name="strogg technician" style="--frame:#2c2a28;--frame2:#171615;--box:#cfcbc5;--text:#d3cfc8;--pin:#0f0e0d;--pin2:#0f0e0d">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Strogg Technician</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/B.svg" alt="{B}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Technician.png" alt=""><img class="fg" loading="lazy" src="art/Technician.png" alt="Strogg Technician"></div>
+    <div class="typebar"><span class="type">Artifact Creature — Strogg Cleric</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/B.svg" alt="{B}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">, Sacrifice another creature: Return target creature card with mana value 3 or less from your graveyard to the battlefield tapped. It&#x27;s a Strogg in addition to its other types.</p></div><div class="flavor">It does not heal the wounded. It harvests them and builds a spawn host.</div></div>
+    <div class="pt">2/2</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>024/086 R &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card long has-pt" data-color="B" data-rarity="U" data-type="Creature" data-name="strogg constructor" style="--frame:#2c2a28;--frame2:#171615;--box:#cfcbc5;--text:#d3cfc8;--pin:#0f0e0d;--pin2:#0f0e0d">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Strogg Constructor</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"><img class="ms" src="../../common/symbols/B.svg" alt="{B}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Constructor.png" alt=""><img class="fg" loading="lazy" src="art/Constructor.png" alt="Strogg Constructor"></div>
+    <div class="typebar"><span class="type">Artifact Creature — Strogg Artificer</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Fabricate 1 <i class="rem">(When this creature enters, put a +1/+1 counter on it or create a 1/1 colorless Servo artifact creature token.)</i></p><p>Deployables you control have ward <img class="ms" src="../../common/symbols/1.svg" alt="{1}">.</p></div><div class="flavor">It builds the emplacement while standing in the fire that made it necessary.</div></div>
+    <div class="pt">2/3</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>025/086 U &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card has-pt" data-color="B" data-rarity="U" data-type="Creature" data-name="strogg oppressor" style="--frame:#2c2a28;--frame2:#171615;--box:#cfcbc5;--text:#d3cfc8;--pin:#0f0e0d;--pin2:#0f0e0d">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Strogg Oppressor</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"><img class="ms" src="../../common/symbols/B.svg" alt="{B}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Oppressor.png" alt=""><img class="fg" loading="lazy" src="art/Oppressor.png" alt="Strogg Oppressor"></div>
+    <div class="typebar"><span class="type">Artifact Creature — Strogg Soldier</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>When Strogg Oppressor enters, you may put a Deployable card from your hand onto the battlefield tapped.</p></div><div class="flavor">It carries the dark matter gun, and it is the only thing that can.</div></div>
+    <div class="pt">3/3</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>026/086 U &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card has-pt" data-color="B" data-rarity="U" data-type="Creature" data-name="strogg infiltrator" style="--frame:#2c2a28;--frame2:#171615;--box:#cfcbc5;--text:#d3cfc8;--pin:#0f0e0d;--pin2:#0f0e0d">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Strogg Infiltrator</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/B.svg" alt="{B}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Infiltrator2.png" alt=""><img class="fg" loading="lazy" src="art/Infiltrator2.png" alt="Strogg Infiltrator"></div>
+    <div class="typebar"><span class="type">Artifact Creature — Strogg Rogue</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Deathtouch</p><p>Strogg Infiltrator can&#x27;t be blocked as long as you control a Deployable.</p></div><div class="flavor">It wears a dead marine&#x27;s face into the GDF spawn and waits.</div></div>
+    <div class="pt">2/2</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>027/086 U &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card long has-pt" data-color="A" data-rarity="R" data-type="Artifact" data-name="cyclops heavy walker" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Cyclops Heavy Walker</span><span class="cost"><img class="ms" src="../../common/symbols/5.svg" alt="{5}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Cyclops.png" alt=""><img class="fg" loading="lazy" src="art/Cyclops.png" alt="Cyclops Heavy Walker"></div>
+    <div class="typebar"><span class="type">Artifact — Vehicle</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Trample</p><p>Whenever Cyclops Heavy Walker attacks, destroy target artifact or enchantment defending player controls.</p><p>Crew 3</p></div><div class="flavor">Two legs, one gun, and a stride that steps over the trench line.</div></div>
+    <div class="pt">6/5</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>028/086 R &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card has-pt" data-color="A" data-rarity="U" data-type="Artifact" data-name="desecrator hovertank" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Desecrator Hovertank</span><span class="cost"><img class="ms" src="../../common/symbols/4.svg" alt="{4}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Desecrator.png" alt=""><img class="fg" loading="lazy" src="art/Desecrator.png" alt="Desecrator Hovertank"></div>
+    <div class="typebar"><span class="type">Artifact — Vehicle</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Whenever Desecrator Hovertank attacks, it deals 2 damage to target creature defending player controls.</p><p>Crew 2</p></div><div class="flavor">It does not touch the ground, so the mines the GDF buried are decoration.</div></div>
+    <div class="pt">5/4</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>029/086 U &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card has-pt" data-color="A" data-rarity="U" data-type="Artifact" data-name="tormentor attack craft" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Tormentor Attack Craft</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Tormentor.png" alt=""><img class="fg" loading="lazy" src="art/Tormentor.png" alt="Tormentor Attack Craft"></div>
+    <div class="typebar"><span class="type">Artifact — Vehicle</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Flying</p><p>Crew 2</p></div><div class="flavor">Strogg air superiority, in the shape of something that should not fly.</div></div>
+    <div class="pt">3/3</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>030/086 U &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="A" data-rarity="U" data-type="Artifact" data-name="icarus hover pack" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Icarus Hover Pack</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Icarus.png" alt=""><img class="fg" loading="lazy" src="art/Icarus.png" alt="Icarus Hover Pack"></div>
+    <div class="typebar"><span class="type">Artifact — Equipment</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Equipped creature gets +1/+0 and has flying.</p><p>Equip <img class="ms" src="../../common/symbols/2.svg" alt="{2}"></p></div><div class="flavor">A Strogg gets to the high ground first, every time.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>031/086 U &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="B" data-rarity="C" data-type="Instant" data-name="stroyent harvest" style="--frame:#2c2a28;--frame2:#171615;--box:#cfcbc5;--text:#d3cfc8;--pin:#0f0e0d;--pin2:#0f0e0d">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Stroyent Harvest</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/B.svg" alt="{B}"></span></div>
+    <div class="art fit-contain pixel"><img class="bg" aria-hidden="true" loading="lazy" src="art/Etqw-achievements-annihilator.png" alt=""><img class="fg" loading="lazy" src="art/Etqw-achievements-annihilator.png" alt="Stroyent Harvest"></div>
+    <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Target creature gets -2/-2 until end of turn. If it dies this turn, you gain 2 life.</p></div><div class="flavor">Everything that falls on this field is raw material to somebody.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>032/086 C &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card has-pt" data-color="B" data-rarity="U" data-type="Creature" data-name="spawn host" style="--frame:#2c2a28;--frame2:#171615;--box:#cfcbc5;--text:#d3cfc8;--pin:#0f0e0d;--pin2:#0f0e0d">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Spawn Host</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/B.svg" alt="{B}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Splash-damage-splash-damage-strogg-team-overview-front-rev09-cropped.jpg" alt="Spawn Host" style="object-position:38% 45%"></div>
+    <div class="typebar"><span class="type">Artifact Creature — Strogg Horror</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Defender</p><p>At the beginning of your end step, if a creature died this turn, create a 1/1 colorless Strogg artifact creature token.</p></div><div class="flavor">A body left where it fell, opened up and repurposed as a door.</div></div>
+    <div class="pt">0/4</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>033/086 U &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="B" data-rarity="C" data-type="Instant" data-name="dark matter strike" style="--frame:#2c2a28;--frame2:#171615;--box:#cfcbc5;--text:#d3cfc8;--pin:#0f0e0d;--pin2:#0f0e0d">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Dark Matter Strike</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/B.svg" alt="{B}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Strogg-DMC.png" alt=""><img class="fg" loading="lazy" src="art/Strogg-DMC.png" alt="Dark Matter Strike"></div>
+    <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Destroy target creature that was dealt damage this turn.</p></div><div class="flavor">Whatever it hits stops existing in roughly the shape it used to be.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>034/086 C &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="B" data-rarity="R" data-type="Sorcery" data-name="nexus assault" style="--frame:#2c2a28;--frame2:#171615;--box:#cfcbc5;--text:#d3cfc8;--pin:#0f0e0d;--pin2:#0f0e0d">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Nexus Assault</span><span class="cost"><img class="ms" src="../../common/symbols/4.svg" alt="{4}"><img class="ms" src="../../common/symbols/B.svg" alt="{B}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/ETQW_Nexus.png" alt="Nexus Assault"></div>
+    <div class="typebar"><span class="type">Sorcery</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Each opponent sacrifices a creature and an artifact. You create a 1/1 colorless Strogg artifact creature token for each permanent sacrificed this way.</p></div><div class="flavor">The Strogg do not capture a position. They digest it.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>035/086 R &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="MWB" data-rarity="R" data-type="Sorcery" data-name="battlefield triage" style="--frame:#d3b24c;--frame2:#a8862c;--box:#f4e8c2;--text:#f3e7c4;--pin:#8a6c1d;--pin2:#8a6c1d">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Battlefield Triage</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"><img class="ms" src="../../common/symbols/B.svg" alt="{B}"></span></div>
+    <div class="art fit-contain pixel"><img class="bg" aria-hidden="true" loading="lazy" src="art/Etqw-achievements-corpsmanexpert.png" alt=""><img class="fg" loading="lazy" src="art/Etqw-achievements-corpsmanexpert.png" alt="Battlefield Triage"></div>
+    <div class="typebar"><span class="type">Sorcery</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Return up to two target creature cards with mana value 3 or less from your graveyard to the battlefield tapped.</p></div><div class="flavor">GDF medics revive. Strogg technicians rebuild. The field does not care which.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>036/086 R &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="MWU" data-rarity="R" data-type="Enchantment" data-name="combined arms" style="--frame:#d3b24c;--frame2:#a8862c;--box:#f4e8c2;--text:#f3e7c4;--pin:#8a6c1d;--pin2:#8a6c1d">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Combined Arms</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/ETQW_Anansi_Training_Program.png" alt="Combined Arms"></div>
+    <div class="typebar"><span class="type">Enchantment</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Vehicles you control have crew 1.</p><p>Whenever a Vehicle you control becomes crewed, put a +1/+1 counter on it.</p></div><div class="flavor">Infantry without armour is a target. Armour without infantry is a bigger one.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>037/086 R &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="MUB" data-rarity="U" data-type="Instant" data-name="signal intercept" style="--frame:#d3b24c;--frame2:#a8862c;--box:#f4e8c2;--text:#f3e7c4;--pin:#8a6c1d;--pin2:#8a6c1d">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Signal Intercept</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"><img class="ms" src="../../common/symbols/B.svg" alt="{B}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/ETQW_GDF_Propaganda_2.png" alt=""><img class="fg" loading="lazy" src="art/ETQW_GDF_Propaganda_2.png" alt="Signal Intercept"></div>
+    <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Counter target activated or triggered ability. Draw a card.</p></div><div class="flavor">Their commander calls the strike. Yours hears it first.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>038/086 U &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card xxlong" data-color="W" data-rarity="R" data-type="Enchantment" data-name="objective: the ark" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Objective: The Ark</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/ETQW_Map_The_Ark.png" alt=""><img class="fg" loading="lazy" src="art/ETQW_Map_The_Ark.png" alt="Objective: The Ark"></div>
+    <div class="typebar"><span class="type">Enchantment — Saga</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><i class="rem">(As this Saga enters and after your draw step, add a lore counter. Sacrifice after III.)</i></p><p><i>I</i> — Create two 1/1 white Soldier creature tokens.</p><p><i>II</i> — Put a +1/+1 counter on each creature you control.</p><p><i>III</i> — Creatures you control gain vigilance and indestructible until end of turn.</p></div><div class="flavor">Take the beach. Breach the hull. Hold what is inside.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>039/086 R &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card xlong" data-color="B" data-rarity="R" data-type="Enchantment" data-name="objective: salvage" style="--frame:#2c2a28;--frame2:#171615;--box:#cfcbc5;--text:#d3cfc8;--pin:#0f0e0d;--pin2:#0f0e0d">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Objective: Salvage</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/B.svg" alt="{B}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/ETQW_Map_Salvage.png" alt=""><img class="fg" loading="lazy" src="art/ETQW_Map_Salvage.png" alt="Objective: Salvage"></div>
+    <div class="typebar"><span class="type">Enchantment — Saga</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><i class="rem">(As this Saga enters and after your draw step, add a lore counter. Sacrifice after III.)</i></p><p>I, II — Each opponent loses 2 life and you gain 2 life.</p><p><i>III</i> — Return target creature card from your graveyard to the battlefield.</p></div><div class="flavor">The Strogg came for the wreck. The GDF came to stop them opening it.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>040/086 R &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card xxlong" data-color="U" data-rarity="R" data-type="Enchantment" data-name="objective: slipgate" style="--frame:#1f6aa8;--frame2:#144d80;--box:#dfe9f3;--text:#dde7f0;--pin:#0e4678;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Objective: Slipgate</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/ETQW_Map_Slipgate_1.png" alt=""><img class="fg" loading="lazy" src="art/ETQW_Map_Slipgate_1.png" alt="Objective: Slipgate"></div>
+    <div class="typebar"><span class="type">Enchantment — Saga</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><i class="rem">(As this Saga enters and after your draw step, add a lore counter. Sacrifice after III.)</i></p><p><i>I</i> — Scry 2, then draw a card.</p><p><i>II</i> — Put a Deployable card from your hand onto the battlefield.</p><p><i>III</i> — Exile any number of target creatures you control, then return those cards to the battlefield under their owner&#x27;s control.</p></div><div class="flavor">Whoever holds the gate decides which army arrives next.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>041/086 R &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card xxlong" data-color="B" data-rarity="U" data-type="Enchantment" data-name="objective: refinery" style="--frame:#2c2a28;--frame2:#171615;--box:#cfcbc5;--text:#d3cfc8;--pin:#0f0e0d;--pin2:#0f0e0d">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Objective: Refinery</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/B.svg" alt="{B}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/ETQW_Map_Refinery.png" alt=""><img class="fg" loading="lazy" src="art/ETQW_Map_Refinery.png" alt="Objective: Refinery"></div>
+    <div class="typebar"><span class="type">Enchantment — Saga</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><i class="rem">(As this Saga enters and after your draw step, add a lore counter. Sacrifice after III.)</i></p><p><i>I</i> — Each player sacrifices a creature.</p><p><i>II</i> — Create a 1/1 colorless Strogg artifact creature token.</p><p><i>III</i> — Creatures you control get +1/+0 until end of turn.</p></div><div class="flavor">Stroyent in, soldiers out. The refinery does not stop for either army.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>042/086 U &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card xxlong" data-color="W" data-rarity="U" data-type="Enchantment" data-name="objective: volcano" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Objective: Volcano</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/ETQW_Map_Volcano.png" alt=""><img class="fg" loading="lazy" src="art/ETQW_Map_Volcano.png" alt="Objective: Volcano"></div>
+    <div class="typebar"><span class="type">Enchantment — Saga</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><i class="rem">(As this Saga enters and after your draw step, add a lore counter. Sacrifice after III.)</i></p><p><i>I</i> — Create a 1/1 white Soldier creature token.</p><p><i>II</i> — Deployables you control become 2/2 artifact creatures until end of turn. They gain haste.</p><p><i>III</i> — Draw a card for each Deployable you control.</p></div><div class="flavor">Nobody chose to fight here. The slipgate did.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>043/086 U &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="A" data-rarity="C" data-type="Artifact" data-name="anti-personnel turret" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Anti-Personnel Turret</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/GDF-APT.png" alt=""><img class="fg" loading="lazy" src="art/GDF-APT.png" alt="Anti-Personnel Turret"></div>
+    <div class="typebar"><span class="type">Artifact — Deployable</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Whenever a creature an opponent controls attacks, Anti-Personnel Turret deals 1 damage to it.</p></div><div class="flavor">Set it, cover it, and let it do the boring half of holding a position.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>044/086 C &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="A" data-rarity="U" data-type="Artifact" data-name="anti-vehicle turret" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Anti-Vehicle Turret</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/GDF-AVT.png" alt=""><img class="fg" loading="lazy" src="art/GDF-AVT.png" alt="Anti-Vehicle Turret"></div>
+    <div class="typebar"><span class="type">Artifact — Deployable</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Anti-Vehicle Turret deals 3 damage to target attacking creature. If that creature is an artifact, it deals 6 damage instead.</p></div><div class="flavor">It is not aimed at people. People are simply in the way.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>045/086 U &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card long" data-color="A" data-rarity="U" data-type="Artifact" data-name="artillery interceptor" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Artillery Interceptor</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/GDF-AMT.png" alt=""><img class="fg" loading="lazy" src="art/GDF-AMT.png" alt="Artillery Interceptor"></div>
+    <div class="typebar"><span class="type">Artifact — Deployable</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>If a source an opponent controls would deal noncombat damage to you or a permanent you control, prevent 1 of that damage.</p><p><img class="ms" src="../../common/symbols/2.svg" alt="{2}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Counter target activated ability of an artifact.</p></div><div class="flavor">It shoots the shells down before they land. Usually.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>046/086 U &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="A" data-rarity="C" data-type="Artifact" data-name="gdf radar" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">GDF Radar</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/GDF-Radar.png" alt=""><img class="fg" loading="lazy" src="art/GDF-Radar.png" alt="GDF Radar"></div>
+    <div class="typebar"><span class="type">Artifact — Deployable</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/2.svg" alt="{2}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Scry 1, then draw a card. Activate only if you control two or more Deployables.</p></div><div class="flavor">It sees the whole valley, which is the difference between a plan and a hope.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>047/086 C &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="A" data-rarity="R" data-type="Artifact" data-name="artillery gun" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Artillery Gun</span><span class="cost"><img class="ms" src="../../common/symbols/4.svg" alt="{4}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/GDF-Artillery.png" alt=""><img class="fg" loading="lazy" src="art/GDF-Artillery.png" alt="Artillery Gun"></div>
+    <div class="typebar"><span class="type">Artifact — Deployable</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/2.svg" alt="{2}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Artillery Gun deals 2 damage to any target.</p></div><div class="flavor">Field Ops paints a spot on the map. The gun is nine kilometres away and does not need to see it.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>048/086 R &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="A" data-rarity="U" data-type="Artifact" data-name="rocket artillery" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Rocket Artillery</span><span class="cost"><img class="ms" src="../../common/symbols/4.svg" alt="{4}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/GDF-Rockets.png" alt=""><img class="fg" loading="lazy" src="art/GDF-Rockets.png" alt="Rocket Artillery"></div>
+    <div class="typebar"><span class="type">Artifact — Deployable</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/3.svg" alt="{3}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Rocket Artillery deals 1 damage to each creature your opponents control.</p></div><div class="flavor">Not accurate. Not intended to be.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>049/086 U &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card legendary" data-color="A" data-rarity="M" data-type="Artifact" data-name="hammer launcher" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Hammer Launcher</span><span class="cost"><img class="ms" src="../../common/symbols/5.svg" alt="{5}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/GDF-SSM.png" alt=""><img class="fg" loading="lazy" src="art/GDF-SSM.png" alt="Hammer Launcher"></div>
+    <div class="typebar"><span class="type">Legendary Artifact — Deployable</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gM)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/4.svg" alt="{4}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Hammer Launcher deals 6 damage to any target. Activate only as a sorcery.</p></div><div class="flavor">A tactical strike from orbit, requested by one soldier with a laser designator.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>050/086 M &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card longname" data-color="A" data-rarity="C" data-type="Artifact" data-name="strogg anti-personnel turret" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Strogg Anti-Personnel Turret</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Strogg-APT.png" alt=""><img class="fg" loading="lazy" src="art/Strogg-APT.png" alt="Strogg Anti-Personnel Turret"></div>
+    <div class="typebar"><span class="type">Artifact — Deployable</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Whenever a creature an opponent controls attacks, Strogg Anti-Personnel Turret deals 1 damage to that creature&#x27;s controller.</p></div><div class="flavor">Grown, not built. It still needs bolting to the floor.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>051/086 C &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card longname" data-color="A" data-rarity="U" data-type="Artifact" data-name="strogg anti-vehicle turret" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Strogg Anti-Vehicle Turret</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Strogg-AVT.png" alt=""><img class="fg" loading="lazy" src="art/Strogg-AVT.png" alt="Strogg Anti-Vehicle Turret"></div>
+    <div class="typebar"><span class="type">Artifact — Deployable</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Strogg Anti-Vehicle Turret deals 2 damage to target creature. If that creature is an artifact, it deals 4 damage instead.</p></div><div class="flavor">The Strogg build their emplacements out of the last thing that attacked them.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>052/086 U &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="A" data-rarity="U" data-type="Artifact" data-name="plasma mortar" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Plasma Mortar</span><span class="cost"><img class="ms" src="../../common/symbols/4.svg" alt="{4}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Strogg-Plasma-Mortar.png" alt=""><img class="fg" loading="lazy" src="art/Strogg-Plasma-Mortar.png" alt="Plasma Mortar"></div>
+    <div class="typebar"><span class="type">Artifact — Deployable</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/2.svg" alt="{2}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Plasma Mortar deals 2 damage to target creature and 1 damage to each other creature that player controls.</p></div><div class="flavor">It lobs. You do not hear it coming and you do not need to.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>053/086 U &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="A" data-rarity="R" data-type="Artifact" data-name="rail howitzer" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Rail Howitzer</span><span class="cost"><img class="ms" src="../../common/symbols/4.svg" alt="{4}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Strogg-Railhowitzer.png" alt=""><img class="fg" loading="lazy" src="art/Strogg-Railhowitzer.png" alt="Rail Howitzer"></div>
+    <div class="typebar"><span class="type">Artifact — Deployable</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/3.svg" alt="{3}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Rail Howitzer deals 5 damage to target creature. That damage can&#x27;t be prevented.</p></div><div class="flavor">One slug, one line, and everything standing on that line.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>054/086 R &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="A" data-rarity="R" data-type="Artifact" data-name="shield generator" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Shield Generator</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Strogg-Shield-Generator.png" alt=""><img class="fg" loading="lazy" src="art/Strogg-Shield-Generator.png" alt="Shield Generator"></div>
+    <div class="typebar"><span class="type">Artifact — Deployable</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Permanents you control have ward <img class="ms" src="../../common/symbols/1.svg" alt="{1}">.</p><p><img class="ms" src="../../common/symbols/2.svg" alt="{2}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Prevent all damage that would be dealt to target permanent you control this turn.</p></div><div class="flavor">Until an engineer gets a hammer to it, nothing inside the dome can be touched.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>055/086 R &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="A" data-rarity="C" data-type="Artifact" data-name="psi radar" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Psi Radar</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
+    <div class="art fit-contain pixel"><img class="bg" aria-hidden="true" loading="lazy" src="art/Strogg-Radar.png" alt=""><img class="fg" loading="lazy" src="art/Strogg-Radar.png" alt="Psi Radar"></div>
+    <div class="typebar"><span class="type">Artifact — Deployable</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/C.svg" alt="{C}">.</p><p><img class="ms" src="../../common/symbols/3.svg" alt="{3}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Target creature can&#x27;t block this turn.</p></div><div class="flavor">It listens to the GDF net and the Strogg hear it as instructions.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>056/086 C &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="A" data-rarity="C" data-type="Artifact" data-name="lacerator" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Lacerator</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Lacerator.jpg" alt="Lacerator"></div>
+    <div class="typebar"><span class="type">Artifact — Equipment</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Equipped creature gets +2/+0.</p><p>Equip <img class="ms" src="../../common/symbols/2.svg" alt="{2}"></p></div><div class="flavor">The Strogg rifle. It does not have a safety.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>057/086 C &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="A" data-rarity="C" data-type="Artifact" data-name="supply crate" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Supply Crate</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Class_field_ops.png" alt=""><img class="fg" loading="lazy" src="art/Class_field_ops.png" alt="Supply Crate"></div>
+    <div class="typebar"><span class="type">Artifact</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/W.svg" alt="{W}">, <img class="ms" src="../../common/symbols/U.svg" alt="{U}">, or <img class="ms" src="../../common/symbols/B.svg" alt="{B}">.</p><p>When Supply Crate enters, you gain 1 life.</p></div><div class="flavor">Ammunition, armour plate and something hot to drink. In that order of importance.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>058/086 C &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="A" data-rarity="C" data-type="Artifact" data-name="field kit" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Field Kit</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"></span></div>
+    <div class="art fit-contain pixel"><img class="bg" aria-hidden="true" loading="lazy" src="art/Etqw-achievements-corpsmanrecruit.png" alt=""><img class="fg" loading="lazy" src="art/Etqw-achievements-corpsmanrecruit.png" alt="Field Kit"></div>
+    <div class="typebar"><span class="type">Artifact</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/C.svg" alt="{C}">.</p><p><img class="ms" src="../../common/symbols/2.svg" alt="{2}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">, Sacrifice Field Kit: You gain 3 life and draw a card.</p></div><div class="flavor">Everything a corpsman can carry and still run.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>059/086 C &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="A" data-rarity="U" data-type="Artifact" data-name="engineering tools" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Engineering Tools</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
+    <div class="art fit-contain pixel"><img class="bg" aria-hidden="true" loading="lazy" src="art/Etqw-achievements-handyman.png" alt=""><img class="fg" loading="lazy" src="art/Etqw-achievements-handyman.png" alt="Engineering Tools"></div>
+    <div class="typebar"><span class="type">Artifact</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Deployable spells you cast cost <img class="ms" src="../../common/symbols/1.svg" alt="{1}"> less to cast.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/C.svg" alt="{C}"><img class="ms" src="../../common/symbols/C.svg" alt="{C}">. Spend this mana only to cast Deployable spells.</p></div><div class="flavor">Hammer, plasma torch, and a very optimistic manual.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>060/086 U &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="A" data-rarity="U" data-type="Artifact" data-name="forward base" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Forward Base</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"></span></div>
+    <div class="art fit-contain pixel"><img class="bg" aria-hidden="true" loading="lazy" src="art/Etqw-achievements-groundwork.png" alt=""><img class="fg" loading="lazy" src="art/Etqw-achievements-groundwork.png" alt="Forward Base"></div>
+    <div class="typebar"><span class="type">Artifact</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>At the beginning of your end step, if you control three or more Deployables, create a 1/1 white Soldier creature token.</p></div><div class="flavor">Push the spawn point forward and the whole map moves with it.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>061/086 U &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="A" data-rarity="U" data-type="Artifact" data-name="munitions cache" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Munitions Cache</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"></span></div>
+    <div class="art fit-contain pixel"><img class="bg" aria-hidden="true" loading="lazy" src="art/Etqw-achievements-munitionsveteran.png" alt=""><img class="fg" loading="lazy" src="art/Etqw-achievements-munitionsveteran.png" alt="Munitions Cache"></div>
+    <div class="typebar"><span class="type">Artifact</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/C.svg" alt="{C}"><img class="ms" src="../../common/symbols/C.svg" alt="{C}">.</p><p><img class="ms" src="../../common/symbols/4.svg" alt="{4}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">, Sacrifice Munitions Cache: Destroy target Deployable or Vehicle.</p></div><div class="flavor">Both sides know where it is. Only one of them has to defend it.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>062/086 U &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="A" data-rarity="C" data-type="Artifact" data-name="stroyent cell" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Stroyent Cell</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
+    <div class="art fit-contain pixel"><img class="bg" aria-hidden="true" loading="lazy" src="art/Etqw-achievements-munitionsrecruit.png" alt=""><img class="fg" loading="lazy" src="art/Etqw-achievements-munitionsrecruit.png" alt="Stroyent Cell"></div>
+    <div class="typebar"><span class="type">Artifact — Ammo</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/C.svg" alt="{C}">.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/W.svg" alt="{W}">, <img class="ms" src="../../common/symbols/U.svg" alt="{U}">, or <img class="ms" src="../../common/symbols/B.svg" alt="{B}">. Stroyent Cell deals 1 damage to you.</p></div><div class="flavor">Refined from whatever the Strogg picked up off the field this morning.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>063/086 C &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="A" data-rarity="C" data-type="Artifact" data-name="base defense kit" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Base Defense Kit</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
+    <div class="art fit-contain pixel"><img class="bg" aria-hidden="true" loading="lazy" src="art/Etqw-achievements-fortifierrecruit.png" alt=""><img class="fg" loading="lazy" src="art/Etqw-achievements-fortifierrecruit.png" alt="Base Defense Kit"></div>
+    <div class="typebar"><span class="type">Artifact</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>When Base Defense Kit enters, you gain 2 life.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/C.svg" alt="{C}">.</p></div><div class="flavor">Sandbags, a spare hammer and enough plate for one more emplacement.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>064/086 C &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="A" data-rarity="C" data-type="Artifact" data-name="fuel depot" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Fuel Depot</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"></span></div>
+    <div class="art fit-contain pixel"><img class="bg" aria-hidden="true" loading="lazy" src="art/Etqw-achievements-hotshot.png" alt=""><img class="fg" loading="lazy" src="art/Etqw-achievements-hotshot.png" alt="Fuel Depot"></div>
+    <div class="typebar"><span class="type">Artifact</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Fuel Depot enters tapped.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/C.svg" alt="{C}"><img class="ms" src="../../common/symbols/C.svg" alt="{C}">.</p></div><div class="flavor">Every vehicle on the map is one convoy away from being scrap.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>065/086 C &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card has-pt" data-color="A" data-rarity="U" data-type="Artifact" data-name="trojan" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Trojan</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Trojan.png" alt=""><img class="fg" loading="lazy" src="art/Trojan.png" alt="Trojan"></div>
+    <div class="typebar"><span class="type">Artifact — Vehicle</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Whenever Trojan attacks, another target Vehicle you control becomes an artifact creature until end of turn.</p><p>Crew 2</p></div><div class="flavor">Strogg armour, built around a gun that was pointed the other way this morning.</div></div>
+    <div class="pt">4/3</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>066/086 U &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="MWB" data-rarity="R" data-type="Sorcery" data-name="orbital strike" style="--frame:#d3b24c;--frame2:#a8862c;--box:#f4e8c2;--text:#f3e7c4;--pin:#8a6c1d;--pin2:#8a6c1d">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Orbital Strike</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"><img class="ms" src="../../common/symbols/B.svg" alt="{B}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Etqwintro1.png" alt="Orbital Strike"></div>
+    <div class="typebar"><span class="type">Sorcery</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Orbital Strike deals 3 damage to each creature. You create a 1/1 white Soldier creature token for each creature that died this way that you controlled.</p></div><div class="flavor">Everyone in the grid square gets the same warning, which is none.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>067/086 R &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card xxlong" data-color="U" data-rarity="U" data-type="Enchantment" data-name="objective: outskirts" style="--frame:#1f6aa8;--frame2:#144d80;--box:#dfe9f3;--text:#dde7f0;--pin:#0e4678;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Objective: Outskirts</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/ETQW_Map_Outskirts.png" alt=""><img class="fg" loading="lazy" src="art/ETQW_Map_Outskirts.png" alt="Objective: Outskirts"></div>
+    <div class="typebar"><span class="type">Enchantment — Saga</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><i class="rem">(As this Saga enters and after your draw step, add a lore counter. Sacrifice after III.)</i></p><p><i>I</i> — Draw a card.</p><p><i>II</i> — Create a 1/1 white Soldier creature token.</p><p><i>III</i> — Untap each Deployable and each Vehicle you control. They become artifact creatures until end of turn.</p></div><div class="flavor">Take the town street by street, and then hold the street you took.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>068/086 U &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="A" data-rarity="C" data-type="Artifact" data-name="vehicle depot" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Vehicle Depot</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/ETQW_Armadillo_Poster.png" alt=""><img class="fg" loading="lazy" src="art/ETQW_Armadillo_Poster.png" alt="Vehicle Depot"></div>
+    <div class="typebar"><span class="type">Artifact</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/C.svg" alt="{C}">.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add one mana of any color. Spend this mana only to cast Vehicle or Deployable spells or to activate crew abilities.</p></div><div class="flavor">Fuel, spare track, and a mechanic who has not slept since the drop.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>069/086 C &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="A" data-rarity="U" data-type="Artifact" data-name="forward repair post" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Forward Repair Post</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"></span></div>
+    <div class="art fit-contain pixel"><img class="bg" aria-hidden="true" loading="lazy" src="art/Etqw-achievements-takecharge.png" alt=""><img class="fg" loading="lazy" src="art/Etqw-achievements-takecharge.png" alt="Forward Repair Post"></div>
+    <div class="typebar"><span class="type">Artifact</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/C.svg" alt="{C}"><img class="ms" src="../../common/symbols/C.svg" alt="{C}">.</p><p><img class="ms" src="../../common/symbols/2.svg" alt="{2}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Untap target Deployable or Vehicle you control.</p></div><div class="flavor">Everything the line needs to still be there tomorrow.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>070/086 U &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card has-pt" data-color="A" data-rarity="C" data-type="Artifact" data-name="hog" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Hog</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Hog.png" alt=""><img class="fg" loading="lazy" src="art/Hog.png" alt="Hog"></div>
+    <div class="typebar"><span class="type">Artifact — Vehicle</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Hog can&#x27;t be blocked by creatures with power 1 or less.</p><p>Crew 1</p></div><div class="flavor">Strogg transport. It was built to carry things that do not mind the ride.</div></div>
+    <div class="pt">3/2</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>071/086 C &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="LC" data-rarity="R" data-type="Land" data-name="deployment point" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:#ede3cf;--pin:#6f5b39;--pin2:#6f5b39">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Deployment Point</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Etqw3.jpg" alt="Deployment Point"></div>
+    <div class="typebar"><span class="type">Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add one mana of any color in your commander&#x27;s color identity.</p></div><div class="flavor">Where the war starts again, thirty seconds after it ends.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>072/086 R &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="LU" data-rarity="U" data-type="Land" data-name="area 22" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:linear-gradient(180deg,#ede3cf,#dde7f0);--pin:#6f5b39;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Area 22</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/ETQW_Area_22_IG.png" alt="Area 22"></div>
+    <div class="typebar"><span class="type">Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Area 22 enters tapped unless you control a Deployable.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/W.svg" alt="{W}"> or <img class="ms" src="../../common/symbols/U.svg" alt="{U}">.</p></div><div class="flavor">North America Campaign</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>073/086 U &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="LW" data-rarity="U" data-type="Land" data-name="the canyon" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:linear-gradient(180deg,#ede3cf,#f5f1e3);--pin:#6f5b39;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">The Canyon</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/ETQW_Canyon_IG.png" alt="The Canyon"></div>
+    <div class="typebar"><span class="type">Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>The Canyon enters tapped unless you control a Deployable.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/W.svg" alt="{W}"> or <img class="ms" src="../../common/symbols/B.svg" alt="{B}">.</p></div><div class="flavor">North America Campaign</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>074/086 U &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="LB" data-rarity="U" data-type="Land" data-name="the island" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:linear-gradient(180deg,#ede3cf,#d3cfc8);--pin:#6f5b39;--pin2:#0f0e0d">
+  <div class="frame">
+    <div class="titlebar"><span class="name">The Island</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/ETQW_Island_IG.png" alt="The Island"></div>
+    <div class="typebar"><span class="type">Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>The Island enters tapped unless you control a Deployable.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/U.svg" alt="{U}"> or <img class="ms" src="../../common/symbols/B.svg" alt="{B}">.</p></div><div class="flavor">Pacific Campaign</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>075/086 U &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="LB" data-rarity="C" data-type="Land" data-name="sewer" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:linear-gradient(180deg,#ede3cf,#d3cfc8);--pin:#6f5b39;--pin2:#0f0e0d">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Sewer</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/ETQW_Sewer_IG.png" alt="Sewer"></div>
+    <div class="typebar"><span class="type">Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Sewer enters tapped.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/U.svg" alt="{U}"> or <img class="ms" src="../../common/symbols/B.svg" alt="{B}">.</p></div><div class="flavor">Northern Europe Campaign</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>076/086 C &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="LW" data-rarity="C" data-type="Land" data-name="volcano" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:linear-gradient(180deg,#ede3cf,#f5f1e3);--pin:#6f5b39;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Volcano</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/ETQW_Volcano_IG.png" alt="Volcano"></div>
+    <div class="typebar"><span class="type">Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Volcano enters tapped.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/W.svg" alt="{W}"> or <img class="ms" src="../../common/symbols/B.svg" alt="{B}">.</p></div><div class="flavor">Pacific Campaign</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>077/086 C &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="LU" data-rarity="C" data-type="Land" data-name="the valley" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:linear-gradient(180deg,#ede3cf,#dde7f0);--pin:#6f5b39;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">The Valley</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/ETQW_The_Valley_IG.png" alt="The Valley"></div>
+    <div class="typebar"><span class="type">Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>The Valley enters tapped.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/W.svg" alt="{W}"> or <img class="ms" src="../../common/symbols/U.svg" alt="{U}">.</p></div><div class="flavor">Northern Europe Campaign</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>078/086 C &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="LC" data-rarity="U" data-type="Land" data-name="quarry" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:#ede3cf;--pin:#6f5b39;--pin2:#6f5b39">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Quarry</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/ETQW_Quarry_IG.png" alt="Quarry"></div>
+    <div class="typebar"><span class="type">Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/C.svg" alt="{C}">.</p><p><img class="ms" src="../../common/symbols/2.svg" alt="{2}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Target Deployable you control becomes a 2/2 artifact creature until end of turn.</p></div><div class="flavor">Africa Campaign</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>079/086 U &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="LC" data-rarity="U" data-type="Land" data-name="refinery" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:#ede3cf;--pin:#6f5b39;--pin2:#6f5b39">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Refinery</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/ETQW_Refinery_IG.png" alt="Refinery"></div>
+    <div class="typebar"><span class="type">Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/C.svg" alt="{C}">.</p><p><img class="ms" src="../../common/symbols/3.svg" alt="{3}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">: You gain 2 life and each opponent loses 1 life. Activate only if a creature died this turn.</p></div><div class="flavor">Africa Campaign</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>080/086 U &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card legendary" data-color="LC" data-rarity="R" data-type="Land" data-name="the slipgate" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:#ede3cf;--pin:#6f5b39;--pin2:#6f5b39">
+  <div class="frame">
+    <div class="titlebar"><span class="name">The Slipgate</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/ETQW_Slipgate_IG.png" alt="The Slipgate"></div>
+    <div class="typebar"><span class="type">Legendary Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/C.svg" alt="{C}">.</p><p><img class="ms" src="../../common/symbols/4.svg" alt="{4}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Create a 1/1 colorless Strogg artifact creature token. Activate only as a sorcery.</p></div><div class="flavor">Northern Europe Campaign — The hole the Strogg came through, and the one the GDF has to close.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>081/086 R &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="LC" data-rarity="U" data-type="Land" data-name="salvage yard" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:#ede3cf;--pin:#6f5b39;--pin2:#6f5b39">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Salvage Yard</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/ETQW_Salvage_IG.png" alt="Salvage Yard"></div>
+    <div class="typebar"><span class="type">Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/C.svg" alt="{C}">.</p><p><img class="ms" src="../../common/symbols/2.svg" alt="{2}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">, Sacrifice Salvage Yard: Return target artifact card from your graveyard to your hand.</p></div><div class="flavor">Africa Campaign</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>082/086 U &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="LW" data-rarity="C" data-type="Land" data-name="outskirts" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:linear-gradient(180deg,#ede3cf,#f5f1e3);--pin:#6f5b39;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Outskirts</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Outskirts.PNG" alt="Outskirts"></div>
+    <div class="typebar"><span class="type">Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Outskirts enters tapped.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/W.svg" alt="{W}"> or <img class="ms" src="../../common/symbols/U.svg" alt="{U}">.</p></div><div class="flavor">Northern Europe Campaign</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>083/086 C &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="LW" data-rarity="C" data-type="Land" data-name="plains" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:linear-gradient(180deg,#ede3cf,#f5f1e3);--pin:#6f5b39;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Plains</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/ETQW_The_Ark_IG.png" alt="Plains"></div>
+    <div class="typebar"><span class="type">Basic Land — Plains</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><div class="bigsym"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></div></div><div class="flavor basicflavor">North America Campaign</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>084/086 C &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="LU" data-rarity="C" data-type="Land" data-name="island" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:linear-gradient(180deg,#ede3cf,#dde7f0);--pin:#6f5b39;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Island</span><span class="cost"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/ETQW_Map_Island.png" alt=""><img class="fg" loading="lazy" src="art/ETQW_Map_Island.png" alt="Island"></div>
+    <div class="typebar"><span class="type">Basic Land — Island</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><div class="bigsym"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></div></div><div class="flavor basicflavor">Pacific Campaign</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>085/086 C &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="LB" data-rarity="C" data-type="Land" data-name="swamp" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:linear-gradient(180deg,#ede3cf,#d3cfc8);--pin:#6f5b39;--pin2:#0f0e0d">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Swamp</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Etqwintro2.png" alt="Swamp"></div>
+    <div class="typebar"><span class="type">Basic Land — Swamp</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><div class="bigsym"><img class="ms" src="../../common/symbols/B.svg" alt="{B}"></div></div><div class="flavor basicflavor">Northern Europe Campaign</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>086/086 C &nbsp;ETQ &bull; EN</span><span>&#128396; id Software / Splash Damage</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></main>
+<div class="empty" id="empty">No cards match.</div>
+<script>
+const state={color:null,rarity:null,type:null,q:""};
+function apply(){
+  let n=0;
+  document.querySelectorAll(".card").forEach(c=>{
+    const okC=!state.color||c.dataset.color.includes(state.color);
+    const okR=!state.rarity||c.dataset.rarity===state.rarity;
+    const okT=!state.type||c.dataset.type===state.type;
+    const okQ=!state.q||c.dataset.name.includes(state.q)||c.innerText.toLowerCase().includes(state.q);
+    const show=okC&&okR&&okT&&okQ; c.classList.toggle("hidden",!show); if(show)n++;
+  });
+  document.getElementById("count").textContent=n+" cards";
+  document.getElementById("empty").style.display=n?"none":"block";
+}
+document.querySelectorAll("[data-f]").forEach(b=>b.addEventListener("click",()=>{
+  const [k,v]=b.dataset.f.split(":");
+  const on=b.classList.contains("on");
+  document.querySelectorAll(`[data-f^="${k}:"]`).forEach(x=>x.classList.remove("on"));
+  state[k]=on?null:v; if(!on)b.classList.add("on"); apply();
+}));
+document.getElementById("q").addEventListener("input",e=>{state.q=e.target.value.toLowerCase();apply();});
+apply();
+</script>
+</body></html>
