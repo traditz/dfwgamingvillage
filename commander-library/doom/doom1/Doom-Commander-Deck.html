@@ -49,7 +49,7 @@ header.page a{color:#9aa0ad}
 .art img.fg{position:relative;width:100%;height:100%;object-fit:cover;display:block}
 .art.fit-contain img.fg{object-fit:contain;z-index:1}
 .art img.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(12px) brightness(.45) saturate(1.2);transform:scale(1.25)}
-.art.pixel img.fg{image-rendering:pixelated;object-fit:contain;width:60%;height:auto}
+.art.pixel img.fg{image-rendering:pixelated;object-fit:contain;width:auto;height:auto;max-width:60%;max-height:94%}
 .typebar{top:71.6cqw;height:8cqw}
 .type{font-family:"Beleren","Philosopher",Georgia,serif;font-weight:700;font-size:3.9cqw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .card.longtype .type{font-size:3.5cqw;letter-spacing:-.01em}
@@ -126,7 +126,7 @@ header.page a{color:#9aa0ad}
 <article class="card has-pt" data-color="B" data-rarity="C" data-type="Creature" data-name="former lab tech" style="--frame:#2c2a28;--frame2:#171615;--box:#cfcbc5;--text:#d3cfc8;--pin:#0f0e0d;--pin2:#0f0e0d">
   <div class="frame">
     <div class="titlebar"><span class="name">Former Lab Tech</span><span class="cost"><img class="ms" src="../../common/symbols/B.svg" alt="{B}"></span></div>
-    <div class="art fit-contain pixel"><img class="bg" aria-hidden="true" loading="lazy" src="art/Screenshot_Doom_20200819_170225.png" alt=""><img class="fg" loading="lazy" src="art/Screenshot_Doom_20200819_170225.png" alt="Former Lab Tech"></div>
+    <div class="art fit-cover pixel"><img class="fg" loading="lazy" src="art/Doom_E1M1_zombies.png" alt="Former Lab Tech"></div>
     <div class="typebar"><span class="type">Creature — Zombie</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
     <div class="textbox"><div class="rules"><p>When Former Lab Tech dies, each opponent loses 1 life.</p></div><div class="flavor">The badge still says UAC Research Division.</div></div>
     <div class="pt">1/1</div>
@@ -217,7 +217,7 @@ header.page a{color:#9aa0ad}
 <article class="card has-pt" data-color="R" data-rarity="U" data-type="Creature" data-name="alpha demon" style="--frame:#c2392d;--frame2:#8f241c;--box:#f3dcd3;--text:#f1d9cf;--pin:#7d1d15;--pin2:#7d1d15">
   <div class="frame">
     <div class="titlebar"><span class="name">Alpha Demon</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"><img class="ms" src="../../common/symbols/R.svg" alt="{R}"></span></div>
-    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Doom_pinky_2.jpg" alt=""><img class="fg" loading="lazy" src="art/Doom_pinky_2.jpg" alt="Alpha Demon"></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Demon2.png" alt=""><img class="fg" loading="lazy" src="art/Demon2.png" alt="Alpha Demon"></div>
     <div class="typebar"><span class="type">Creature — Demon</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
     <div class="textbox"><div class="rules"><p>Other Demons you control get +1/+0. <i class="rem">(The pack follows the loudest roar.)</i></p></div><div class="flavor">Even the mindless keep a pecking order.</div></div>
     <div class="pt">3/3</div>
@@ -477,7 +477,7 @@ header.page a{color:#9aa0ad}
 <article class="card" data-color="A" data-rarity="C" data-type="Artifact" data-name="exploding barrel" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
   <div class="frame">
     <div class="titlebar"><span class="name">Exploding Barrel</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"></span></div>
-    <div class="art fit-contain pixel"><img class="bg" aria-hidden="true" loading="lazy" src="art/Barrelpost.jpg" alt=""><img class="fg" loading="lazy" src="art/Barrelpost.jpg" alt="Exploding Barrel"></div>
+    <div class="art fit-contain pixel"><img class="bg" aria-hidden="true" loading="lazy" src="art/Barrelpre.jpg" alt=""><img class="fg" loading="lazy" src="art/Barrelpre.jpg" alt="Exploding Barrel"></div>
     <div class="typebar"><span class="type">Artifact</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
     <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/2.svg" alt="{2}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">, Sacrifice Exploding Barrel: It deals 3 damage to any target.</p></div><div class="flavor">Green drum, green flame, red room.</div></div>
     
@@ -503,7 +503,7 @@ header.page a{color:#9aa0ad}
 <article class="card" data-color="A" data-rarity="C" data-type="Artifact" data-name="blue keycard" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
   <div class="frame">
     <div class="titlebar"><span class="name">Blue Keycard</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
-    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Attack_blue_key.png" alt=""><img class="fg" loading="lazy" src="art/Attack_blue_key.png" alt="Blue Keycard"></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/E1M3_blue_key.png" alt="Blue Keycard"></div>
     <div class="typebar"><span class="type">Artifact</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
     <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/B.svg" alt="{B}">.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">, Sacrifice Blue Keycard: Draw a card. <i class="rem">(The armory is open.)</i></p></div><div class="flavor">Blue means somebody locked away something useful.</div></div>
     
@@ -516,7 +516,7 @@ header.page a{color:#9aa0ad}
 <article class="card" data-color="A" data-rarity="C" data-type="Artifact" data-name="cell pack" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
   <div class="frame">
     <div class="titlebar"><span class="name">Cell Pack</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
-    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Lost_episodes_of_doom_e1m2_plasma.png" alt="Cell Pack"></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/BulkCellE2M2.png" alt=""><img class="fg" loading="lazy" src="art/BulkCellE2M2.png" alt="Cell Pack"></div>
     <div class="typebar"><span class="type">Artifact</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
     <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add one mana of any color.</p></div><div class="flavor">Energy weapons don&#x27;t care what&#x27;s in the socket.</div></div>
     
@@ -529,7 +529,7 @@ header.page a{color:#9aa0ad}
 <article class="card" data-color="A" data-rarity="C" data-type="Artifact" data-name="red keycard" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
   <div class="frame">
     <div class="titlebar"><span class="name">Red Keycard</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
-    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Lost_episodes_of_doom_e1m2_red_key.png" alt="Red Keycard"></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Doom_E1M2_Red_Key.png" alt="Red Keycard"></div>
     <div class="typebar"><span class="type">Artifact</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
     <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/R.svg" alt="{R}">.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">, Sacrifice Red Keycard: Target creature can&#x27;t be blocked this turn. <i class="rem">(The door is open.)</i></p></div><div class="flavor">Red means the worst is behind it.</div></div>
     
@@ -555,7 +555,7 @@ header.page a{color:#9aa0ad}
 <article class="card" data-color="A" data-rarity="C" data-type="Artifact" data-name="yellow keycard" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
   <div class="frame">
     <div class="titlebar"><span class="name">Yellow Keycard</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
-    <div class="art fit-contain pixel"><img class="bg" aria-hidden="true" loading="lazy" src="art/Av_map02_yellow_card.png" alt=""><img class="fg" loading="lazy" src="art/Av_map02_yellow_card.png" alt="Yellow Keycard"></div>
+    <div class="art fit-contain pixel"><img class="bg" aria-hidden="true" loading="lazy" src="art/Doom2_yellow_skull.png" alt=""><img class="fg" loading="lazy" src="art/Doom2_yellow_skull.png" alt="Yellow Keycard"></div>
     <div class="typebar"><span class="type">Artifact</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
     <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/B.svg" alt="{B}"> or <img class="ms" src="../../common/symbols/R.svg" alt="{R}">.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">, Sacrifice Yellow Keycard: Target creature gets +2/+0 until end of turn. <i class="rem">(The weapon cache is open.)</i></p></div><div class="flavor">Yellow means you&#x27;re almost at the exit.</div></div>
     
@@ -581,7 +581,7 @@ header.page a{color:#9aa0ad}
 <article class="card" data-color="A" data-rarity="R" data-type="Artifact" data-name="demon spitter" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
   <div class="frame">
     <div class="titlebar"><span class="name">Demon Spitter</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"></span></div>
-    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/E1M8_trail_star_10oclock.png" alt=""><img class="fg" loading="lazy" src="art/E1M8_trail_star_10oclock.png" alt="Demon Spitter"></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Doom2_icon_of_sin.png" alt="Demon Spitter"></div>
     <div class="typebar"><span class="type">Artifact</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
     <div class="textbox"><div class="rules"><p>At the beginning of your end step, create a 1/1 black and red Demon creature token with haste. <i class="rem">(The cubes fly until something stops them. Nothing stops them.)</i></p></div><div class="flavor">The Icon&#x27;s mouth is a launcher.</div></div>
     
@@ -594,7 +594,7 @@ header.page a{color:#9aa0ad}
 <article class="card" data-color="A" data-rarity="R" data-type="Artifact" data-name="hell forge" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
   <div class="frame">
     <div class="titlebar"><span class="name">Hell Forge</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"></span></div>
-    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/E2M2_plasma_column.png" alt="Hell Forge"></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/E2M2_machinery.png" alt="Hell Forge"></div>
     <div class="typebar"><span class="type">Artifact</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
     <div class="textbox"><div class="rules"><p>Demon spells you cast cost <img class="ms" src="../../common/symbols/1.svg" alt="{1}"> less to cast.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/C.svg" alt="{C}">.</p></div><div class="flavor">Deep under Deimos, something manufactures teeth.</div></div>
     
@@ -620,7 +620,7 @@ header.page a{color:#9aa0ad}
 <article class="card" data-color="A" data-rarity="U" data-type="Artifact" data-name="weapons cache" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
   <div class="frame">
     <div class="titlebar"><span class="name">Weapons Cache</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"></span></div>
-    <div class="art fit-cover pixel"><img class="fg" loading="lazy" src="art/E1M1_shotgun.png" alt="Weapons Cache"></div>
+    <div class="art fit-cover pixel"><img class="fg" loading="lazy" src="art/E2M4_lowered_goodies.png" alt="Weapons Cache"></div>
     <div class="typebar"><span class="type">Artifact</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
     <div class="textbox"><div class="rules"><p>When Weapons Cache enters, you may search your library for an Equipment card, reveal it, put it into your hand, then shuffle.</p></div><div class="flavor">Behind the yellow door: everything you were promised.</div></div>
     
@@ -646,7 +646,7 @@ header.page a{color:#9aa0ad}
 <article class="card" data-color="B" data-rarity="U" data-type="Instant" data-name="unholy rites" style="--frame:#2c2a28;--frame2:#171615;--box:#cfcbc5;--text:#d3cfc8;--pin:#0f0e0d;--pin2:#0f0e0d">
   <div class="frame">
     <div class="titlebar"><span class="name">Unholy Rites</span><span class="cost"><img class="ms" src="../../common/symbols/B.svg" alt="{B}"></span></div>
-    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Pinky_render.png" alt=""><img class="fg" loading="lazy" src="art/Pinky_render.png" alt="Unholy Rites"></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/E3m5_hellspawn1.PNG" alt="Unholy Rites"></div>
     <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
     <div class="textbox"><div class="rules"><p>Add <img class="ms" src="../../common/symbols/B.svg" alt="{B}"><img class="ms" src="../../common/symbols/B.svg" alt="{B}"><img class="ms" src="../../common/symbols/B.svg" alt="{B}">. Spend this mana only to cast Demon spells or activate abilities of Demons.</p></div><div class="flavor">The blood was already on the altar when the marines arrived.</div></div>
     
@@ -672,7 +672,7 @@ header.page a{color:#9aa0ad}
 <article class="card" data-color="B" data-rarity="C" data-type="Instant" data-name="feed the horde" style="--frame:#2c2a28;--frame2:#171615;--box:#cfcbc5;--text:#d3cfc8;--pin:#0f0e0d;--pin2:#0f0e0d">
   <div class="frame">
     <div class="titlebar"><span class="name">Feed the Horde</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/B.svg" alt="{B}"></span></div>
-    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/MAP24_cacotrap.png" alt=""><img class="fg" loading="lazy" src="art/MAP24_cacotrap.png" alt="Feed the Horde"></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/DoomII_MAP23_Demons.png" alt="Feed the Horde"></div>
     <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
     <div class="textbox"><div class="rules"><p>Target opponent sacrifices a creature of their choice.</p></div><div class="flavor">Hell keeps no pets. Only rations.</div></div>
     
@@ -698,7 +698,7 @@ header.page a{color:#9aa0ad}
 <article class="card" data-color="B" data-rarity="C" data-type="Sorcery" data-name="kill tally" style="--frame:#2c2a28;--frame2:#171615;--box:#cfcbc5;--text:#d3cfc8;--pin:#0f0e0d;--pin2:#0f0e0d">
   <div class="frame">
     <div class="titlebar"><span class="name">Kill Tally</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/B.svg" alt="{B}"></span></div>
-    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/E1M8_end_room.png" alt="Kill Tally"></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Imscrn1p.png" alt=""><img class="fg" loading="lazy" src="art/Imscrn1p.png" alt="Kill Tally"></div>
     <div class="typebar"><span class="type">Sorcery</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
     <div class="textbox"><div class="rules"><p>You draw two cards and you lose 2 life. <i class="rem">(The intermission screen never lies.)</i></p></div><div class="flavor">KILLS: 104%. ITEMS: 100%. SECRETS: 66%.</div></div>
     
@@ -724,7 +724,7 @@ header.page a{color:#9aa0ad}
 <article class="card" data-color="R" data-rarity="C" data-type="Instant" data-name="up close and personal" style="--frame:#c2392d;--frame2:#8f241c;--box:#f3dcd3;--text:#f1d9cf;--pin:#7d1d15;--pin2:#7d1d15">
   <div class="frame">
     <div class="titlebar"><span class="name">Up Close and Personal</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/R.svg" alt="{R}"></span></div>
-    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/ClassicDoom-e1m7-chainsaw.png" alt=""><img class="fg" loading="lazy" src="art/ClassicDoom-e1m7-chainsaw.png" alt="Up Close and Personal"></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Chainsaw_Doom_II_MAP15.png" alt="Up Close and Personal"></div>
     <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
     <div class="textbox"><div class="rules"><p>Target creature you control fights target creature you don&#x27;t control. <i class="rem">(Chainsaw diplomacy.)</i></p></div><div class="flavor">Ammo is a luxury. Anger is renewable.</div></div>
     
@@ -750,7 +750,7 @@ header.page a{color:#9aa0ad}
 <article class="card" data-color="R" data-rarity="U" data-type="Instant" data-name="infighting" style="--frame:#c2392d;--frame2:#8f241c;--box:#f3dcd3;--text:#f1d9cf;--pin:#7d1d15;--pin2:#7d1d15">
   <div class="frame">
     <div class="titlebar"><span class="name">Infighting</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/R.svg" alt="{R}"></span></div>
-    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Baronsinfighting-Dawnofthedead-e1m8.png" alt="Infighting" style="object-position:50% 20%"></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Barons_of_Hell.png" alt="Infighting"></div>
     <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
     <div class="textbox"><div class="rules"><p>Target creature you don&#x27;t control deals damage equal to its power to another target creature you don&#x27;t control. <i class="rem">(One stray fireball and the horde turns on itself.)</i></p></div><div class="flavor">The best weapon in Hell is Hell.</div></div>
     
@@ -815,7 +815,7 @@ header.page a{color:#9aa0ad}
 <article class="card" data-color="R" data-rarity="R" data-type="Sorcery" data-name="demonic cube storm" style="--frame:#c2392d;--frame2:#8f241c;--box:#f3dcd3;--text:#f1d9cf;--pin:#7d1d15;--pin2:#7d1d15">
   <div class="frame">
     <div class="titlebar"><span class="name">Demonic Cube Storm</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"><img class="ms" src="../../common/symbols/R.svg" alt="{R}"><img class="ms" src="../../common/symbols/R.svg" alt="{R}"></span></div>
-    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/E1M8_trail_star_2oclock.png" alt=""><img class="fg" loading="lazy" src="art/E1M8_trail_star_2oclock.png" alt="Demonic Cube Storm"></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Spawn_cube_in_MAP30.png" alt="Demonic Cube Storm"></div>
     <div class="typebar"><span class="type">Sorcery</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
     <div class="textbox"><div class="rules"><p>Create three 1/1 black and red Demon creature tokens with haste. They attack this combat if able.</p></div><div class="flavor">The cubes scream as they fly.</div></div>
     
@@ -854,7 +854,7 @@ header.page a{color:#9aa0ad}
 <article class="card" data-color="MBR" data-rarity="M" data-type="Sorcery" data-name="all hell breaks loose" style="--frame:#d3b24c;--frame2:#a8862c;--box:#f4e8c2;--text:#f3e7c4;--pin:#8a6c1d;--pin2:#8a6c1d">
   <div class="frame">
     <div class="titlebar"><span class="name">All Hell Breaks Loose</span><span class="cost"><img class="ms" src="../../common/symbols/4.svg" alt="{4}"><img class="ms" src="../../common/symbols/B.svg" alt="{B}"><img class="ms" src="../../common/symbols/R.svg" alt="{R}"></span></div>
-    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/D229cgun.png" alt=""><img class="fg" loading="lazy" src="art/D229cgun.png" alt="All Hell Breaks Loose"></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Doom-e2m6-final-ambush.png" alt="All Hell Breaks Loose"></div>
     <div class="typebar"><span class="type">Sorcery</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gM)"/></svg></div>
     <div class="textbox"><div class="rules"><p>Destroy all non-Demon creatures.</p></div><div class="flavor">The invasion didn&#x27;t start with an army. It started with a door.</div></div>
     
