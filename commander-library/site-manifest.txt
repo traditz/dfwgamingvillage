@@ -392,7 +392,6 @@ doom/doom2016/art/Crucible_concept.png
 doom/doom2016/art/Cyberdemon2016_profile.png
 doom/doom2016/art/D16_ArgentBeam.png
 doom/doom2016/art/D16_ArgentCell.png
-doom/doom2016/art/D16_EliteGuard_B.png
 doom/doom2016/art/D16_EliteGuards.png
 doom/doom2016/art/D16_FieldDrone.png
 doom/doom2016/art/D16_GoreNests.png
@@ -405,6 +404,7 @@ doom/doom2016/art/D16_MarineTablet.png
 doom/doom2016/art/D16_MegaHealth.png
 doom/doom2016/art/D16_SurfaceBeacon.png
 doom/doom2016/art/D16_UAC_Security_Officer.png
+doom/doom2016/art/D16_UAC_Sergeant.png
 doom/doom2016/art/D16_UtilityDrone.png
 doom/doom2016/art/D16_Wraith1.png
 doom/doom2016/art/D16_Wraith3.png
