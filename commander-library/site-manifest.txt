@@ -412,6 +412,8 @@ doom/doom2016/art/D16_GoreNests.png
 doom/doom2016/art/D16_HealthStation.png
 doom/doom2016/art/D16_HellMaw.png
 doom/doom2016/art/D16_HellTablet.png
+doom/doom2016/art/D16_HellifiedSecurity.png
+doom/doom2016/art/D16_HellifiedSoldier.png
 doom/doom2016/art/D16_LazarusBay.png
 doom/doom2016/art/D16_MarineTablet.png
 doom/doom2016/art/D16_MegaHealth.png

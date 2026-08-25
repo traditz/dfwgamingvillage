@@ -5,19 +5,19 @@
 
 // Creatures (24)
 1 Unwilling
+1 Elite Guard
 1 Field Drone
+1 Hellified Soldier
 1 Leaping Imp
 1 Possessed Engineer
 1 Possessed Soldier
 1 Screeching Lost Soul
-1 UAC Marine Vanguard
-1 UAC Security Officer
 1 Argent Medic
-1 Breach Assault Team
 1 Dr. Samuel Hayden
+1 Elite Guard Commander
 1 Hell Razer
+1 Hellified Security
 1 Praetor-Clad Veteran
-1 UAC Sergeant
 1 Utility Drone
 1 Charging Pinky
 1 Jetpack Revenant
@@ -67,7 +67,7 @@
 1 Mission Debrief
 1 Purge the Corruption
 1 Containment Protocol
-1 Survivor Militia
+1 Elite Guard Muster
 1 Argent Cascade
 
 // Enchantments (4)
