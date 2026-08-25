@@ -401,11 +401,13 @@ doom/doom2016/art/D16_HellifiedSecurity.png
 doom/doom2016/art/D16_HellifiedSoldier.png
 doom/doom2016/art/D16_MarineTablet.png
 doom/doom2016/art/D16_MegaHealth.png
+doom/doom2016/art/D16_ResourceOperations.png
 doom/doom2016/art/D16_SurfaceBeacon.png
 doom/doom2016/art/D16_SurvivorMilitia.png
 doom/doom2016/art/D16_UAC_Security_Officer.png
 doom/doom2016/art/D16_UAC_Sergeant.png
 doom/doom2016/art/D16_UtilityDrone.png
+doom/doom2016/art/D16_VegaCentralProcessing.png
 doom/doom2016/art/D16_Wraith1.png
 doom/doom2016/art/D16_Wraith3.png
 doom/doom2016/art/D4Cyberdemon_Rev.jpg
@@ -413,7 +415,6 @@ doom/doom2016/art/DOOM_Crucible.png
 doom/doom2016/art/DOOMx64vk_23-6-2018_16_22_38.png
 doom/doom2016/art/DOOMx64vk_5-6-2018_17_21_05.png
 doom/doom2016/art/D_9opg8UYAAt2re.jpg
-doom/doom2016/art/D_9qlSVU8AAVOKk.jpg
 doom/doom2016/art/D_9qlSaU4AMzajR.jpg
 doom/doom2016/art/Doom-2016-cyber-demon.jpg
 doom/doom2016/art/Doom-codex-artifacts-berserk.jpg
@@ -452,7 +453,6 @@ doom/doom2016/art/Slayer-explosiveglorykill.png
 doom/doom2016/art/Slayer_RTX2.jpg
 doom/doom2016/art/Titans_realm.jpg
 doom/doom2016/art/Tumblr_f6f430bdfae68aedb65261a496178be5_4ee258e3_1280.png
-doom/doom2016/art/UACpanel.jpg
 doom/doom2016/art/UNWILLING.png
 doom/eternal/DoomEternal-Commander-Deck.html
 doom/eternal/DoomEternal-MTG-Set.html
