@@ -273,6 +273,7 @@ doom/doom3/art/3_infirmerie.jpg
 doom/doom3/art/3_miror_2.jpg
 doom/doom3/art/3_reception.jpg
 doom/doom3/art/9050_623.jpg
+doom/doom3/art/9050_626.jpg
 doom/doom3/art/9050_627.jpg
 doom/doom3/art/9050_636.jpg
 doom/doom3/art/9050_638.jpg
