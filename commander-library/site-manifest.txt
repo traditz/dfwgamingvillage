@@ -273,9 +273,14 @@ doom/doom3/art/3_infirmerie.jpg
 doom/doom3/art/3_miror_2.jpg
 doom/doom3/art/3_reception.jpg
 doom/doom3/art/9050_623.jpg
+doom/doom3/art/9050_627.jpg
 doom/doom3/art/9050_636.jpg
+doom/doom3/art/9050_638.jpg
 doom/doom3/art/9050_639.jpg
+doom/doom3/art/9050_640.jpg
+doom/doom3/art/9050_644.jpg
 doom/doom3/art/9050_648.jpg
+doom/doom3/art/9050_649.jpg
 doom/doom3/art/Artifactdoom3roe.JPG
 doom/doom3/art/Auto-turret.jpg
 doom/doom3/art/Batteling_the_cyberdemon__doom_3_.jpg
