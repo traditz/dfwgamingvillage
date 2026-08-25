@@ -67,7 +67,7 @@
 1 Mission Debrief
 1 Purge the Corruption
 1 Containment Protocol
-1 Elite Guard Muster
+1 Survivor Militia
 1 Argent Cascade
 
 // Enchantments (4)
