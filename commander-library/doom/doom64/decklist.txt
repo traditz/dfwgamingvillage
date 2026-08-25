@@ -6,10 +6,10 @@
 // Creatures (20)
 1 Brood Whelp
 1 Gnasher
-1 Cavern Stalker
 1 Nightmare Imp
 1 Phantom Soul
 1 Brood Carrier
+1 Cavern Stalker
 1 Citadel Wraith
 1 Nest Guardian
 1 Snarling Demon
@@ -41,20 +41,20 @@
 1 Power Coupling
 
 // Instants & Sorceries (30)
-1 Blade Trap
 1 Death Rattle
 1 Echoing Howl
 1 Hardened Hide
+1 Mother's Blessing
+1 Blade Trap
 1 Dig Through the Ruins
 1 Executioner's Dart
+1 Feed the Brood
 1 Mauling Frenzy
-1 Mother's Blessing
 1 Regenerative Burst
 1 Sacrificial Insight
 1 Vanish into the Dark
 1 Data Recovery
 1 Demonic Gestation
-1 Feed the Brood
 1 Hellbred Fury
 1 Inspired Mutation
 1 Midnight Reclamation
@@ -64,12 +64,12 @@
 1 Grave Tremor
 1 Hunger of the Brood
 1 Mother's Vengeance
-1 Rites of Resurrection
 1 Terraform
 1 Unholy Bloom
-1 Crushing Dark
-1 Staging Massacre
 1 Unmaking Ritual
+1 Crushing Dark
+1 Rites of Resurrection
+1 Staging Massacre
 1 The Absolution
 
 // Enchantments (3)

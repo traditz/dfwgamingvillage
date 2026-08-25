@@ -13,16 +13,16 @@
 1 Screeching Lost Soul
 1 UAC Security Officer
 1 Argent Medic
+1 Charging Pinky
 1 Dr. Samuel Hayden
 1 Hell Razer
 1 Hellified Security
+1 Pit Hell Knight
 1 Praetor-Clad Veteran
+1 Shimmering Spectre
 1 UAC Sergeant
 1 Utility Drone
-1 Charging Pinky
 1 Jetpack Revenant
-1 Pit Hell Knight
-1 Shimmering Spectre
 1 Frontline Mancubus
 1 Hell Guard
 1 Baron of the Breach
@@ -31,10 +31,10 @@
 
 // Equipment (8)
 1 Combat Shotgun
+1 Stun-Mod Plasma Rifle
 1 Heavy Assault Rifle
 1 Mobile Turret Chaingun
 1 Praetor Suit
-1 Stun-Mod Plasma Rifle
 1 Gauss Cannon
 1 Lock-On Rocket Launcher
 1 The Crucible
@@ -43,10 +43,10 @@
 1 Combat Rating Monitor
 1 Argent Accumulator
 1 Argent Cell
+1 Argent Conduit
 1 Supply Cache
 1 Vitality Rune
 1 Weapon Mod Station
-1 Argent Conduit
 1 Auto-Mapper
 1 VEGA, Sentient Intelligence
 
@@ -55,15 +55,15 @@
 1 Combat Support
 1 Field Triage
 1 Rip and Tear
+1 Argent Barrage
 1 Argent Judgment
 1 Chainsaw Fuel
 1 Combat Momentum
 1 Emergency Beacon
 1 Finishing Move
-1 Argent Barrage
+1 Gore Nest Purge
 1 Argent Surge
 1 Berserk Powerup
-1 Gore Nest Purge
 1 Mission Debrief
 1 Purge the Corruption
 1 Containment Protocol
@@ -71,9 +71,9 @@
 1 Argent Cascade
 
 // Enchantments (4)
+1 Trial of the Runes
 1 Argent Aegis
 1 Gore Nest
-1 Trial of the Runes
 1 Slayer's Testament
 
 // Lands (36)

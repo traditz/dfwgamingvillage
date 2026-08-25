@@ -13,12 +13,12 @@
 1 Spectre
 1 Alpha Demon
 1 Arachnotron
+1 Arch-vile
 1 Cacodemon
 1 Hell Knight
 1 Nightmare Spectre
 1 Pain Elemental
 1 Revenant
-1 Arch-vile
 1 Mancubus
 1 Spectre Pack
 1 Baron of Hell
@@ -41,12 +41,12 @@
 1 Cell Pack
 1 Red Keycard
 1 UAC Supply Drop
+1 Weapons Cache
 1 Yellow Keycard
 1 Ammo Stockpile
 1 Demon Spitter
 1 Hell Forge
 1 Invulnerability Sphere
-1 Weapons Cache
 
 // Instants & Sorceries (19)
 1 Scent of Blood

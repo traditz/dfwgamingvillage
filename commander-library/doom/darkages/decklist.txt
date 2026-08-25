@@ -48,10 +48,10 @@
 1 Bulwark Rite
 1 Dread Surge
 1 Rally the Watch
+1 Saw Toss
 1 Forge the Line
 1 Hold the Bulwark
 1 Maul the Invaders
-1 Saw Toss
 1 Shieldmaster's Grace
 1 Banish the Hellspawn
 1 Colossal Charge
@@ -65,8 +65,8 @@
 1 Wrath of the Unchained
 1 Break the Gates
 1 Cannonade
-1 Judgment of the Kings
 1 Wraithstone Bloom
+1 Judgment of the Kings
 1 Saw Cyclone
 1 Stampede Call
 

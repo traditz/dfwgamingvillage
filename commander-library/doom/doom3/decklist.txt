@@ -7,12 +7,12 @@
 1 Pistol Z-Sec
 1 Possessed Worker
 1 Trite
+1 Cherub
 1 Maggot
 1 Sentry Bot
 1 UAC Researcher
 1 Z-Sec Enforcer
 1 Chainsaw Zombie
-1 Cherub
 1 Imp Ambusher
 1 Machinegun Z-Sec
 1 Maintenance Bot
@@ -21,6 +21,7 @@
 1 Turret Emplacement
 1 Wraith
 1 Bloated Cacodemon
+1 Chaingun Commando
 1 Invulnerability Hunter
 1 Mechanized Pinky
 1 Tentacle Commando
@@ -28,7 +29,6 @@
 1 Archvile Summoner
 1 Berserk Hunter
 1 Cavern Mancubus
-1 Chaingun Commando
 1 Helltime Hunter
 1 Hulking Hell Knight
 1 Vagary
@@ -52,23 +52,23 @@
 
 // Instants & Sorceries (18)
 1 Emergency Teleport
-1 Neurotoxin
 1 Autopsy Report
 1 Bulkhead Seal
+1 Neurotoxin
 1 Video Log
 1 Betruger's Whisper
 1 Dark Dispatch
 1 Fed to the Pit
 1 Hallway Ambush
 1 Panic Broadcast
+1 Security Lockdown
 1 Teleport Ambush
 1 Research Findings
-1 Security Lockdown
 1 Terminate the Experiment
 1 The Devil's Bargain
 1 Trite Swarm
-1 Mind Static
 1 Hell's Breach
+1 Mind Static
 
 // Enchantments (2)
 1 Soul Siphon
