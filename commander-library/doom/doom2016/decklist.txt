@@ -5,13 +5,13 @@
 
 // Creatures (24)
 1 Unwilling
-1 Elite Guard
 1 Field Drone
 1 Hellified Soldier
 1 Leaping Imp
 1 Possessed Engineer
 1 Possessed Soldier
 1 Screeching Lost Soul
+1 UAC Security Officer
 1 Argent Medic
 1 Dr. Samuel Hayden
 1 Elite Guard Commander
