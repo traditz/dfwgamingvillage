@@ -833,6 +833,7 @@ quake/quake1/art/RangerQ1.jpg
 quake/quake1/art/Red_1.png
 quake/quake1/art/Ring.png
 quake/quake1/art/Rocket1_1.png
+quake/quake1/art/Rocket_Jump.png
 quake/quake1/art/Rotfish.PNG
 quake/quake1/art/Rottweiler_leap.jpg
 quake/quake1/art/SPIKES.png
