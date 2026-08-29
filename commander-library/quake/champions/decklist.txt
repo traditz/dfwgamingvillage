@@ -53,11 +53,11 @@
 1 Acid Spit
 1 Cemetery Gates
 1 Favor
+1 Feeding Frenzy
 1 Frag
 1 Ghost Walk
 1 Bargain with the Elder Gods
 1 Blood Covenant
-1 Feeding Frenzy
 1 Gibbed
 1 Returned to the Arena
 1 Rocket Splash

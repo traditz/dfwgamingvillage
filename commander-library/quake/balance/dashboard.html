@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Quake Commander</title></head><body><style>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Quake Commander Balance</title></head><body><style>
 :root{
   --page:#f9f9f7; --surface:#fcfcfb; --ink:#0b0b0b; --ink2:#52514e; --muted:#898781;
   --grid:#e1e0d9; --axisc:#c3c2b7; --bord:rgba(11,11,11,.10);
@@ -130,9 +130,9 @@ footer code{font-size:11px}
 <header>
 <h1>The Quake Collection — balance dashboard</h1>
 <p class="hs">Six custom Commander decks, validated by Monte Carlo simulation, real-precon calibration, Oracle templating lint,
-wiki theme audit and instrumented playtests. Sim run 2026-08-24 · dashboard generated 2026-08-24.</p>
+wiki theme audit and instrumented playtests. Sim run 2026-08-24 · dashboard generated 2026-08-27.</p>
 </header>
-<div class="kpis"><div class="tile"><div class="tl">Simulated games</div><div class="tv">100,005</div><div class="ts">0 engine errors · 1329 draws</div></div><div class="tile"><div class="tl">Win-rate spread</div><div class="tv">10.7 pts</div><div class="ts">30.1% top · 19.4% bottom · baseline 25%</div></div><div class="tile"><div class="tl">Precon band</div><div class="tv">3 of 6</div><div class="ts">in the 20–35% band · none above it</div></div><div class="tile"><div class="tl">Cards fully modelled</div><div class="tv">480/494</div><div class="ts">14 sentences skipped</div></div><div class="tile"><div class="tl">Table games logged</div><div class="tv">0</div><div class="ts">quake/balance/playtests/ · auto-ingested</div></div></div>
+<div class="kpis"><div class="tile"><div class="tl">Simulated games</div><div class="tv">100,005</div><div class="ts">0 engine errors · 1329 draws</div></div><div class="tile"><div class="tl">Win-rate spread</div><div class="tv">10.7 pts</div><div class="ts">30.1% top · 19.4% bottom · baseline 25%</div></div><div class="tile"><div class="tl">Precon band</div><div class="tv">3 of 6</div><div class="ts">in the 20–35% band · none above it</div></div><div class="tile"><div class="tl">Cards fully modelled</div><div class="tv">483/494</div><div class="ts">11 sentences skipped</div></div><div class="tile"><div class="tl">Table games logged</div><div class="tv">0</div><div class="ts">quake/balance/playtests/ · auto-ingested</div></div></div>
 <div class="grid">
 <div class="card wide">
 <h2>Deck win rates — 100,005 simulated games</h2>
@@ -627,7 +627,7 @@ gate: ρ ≥ 0.7"><i class="gline" style="left:25.00%"></i><i class="gline" styl
 <ol>
 <li>Copy <code>quake/balance/playtests/TEMPLATE.md</code> to a new file (one per game) and fill in winner, ending round, MVP and dead cards.</li>
 <li>Follow <code>quake/balance/playtests/SCHEDULE.md</code> so table time covers all 15 pod combinations.</li>
-<li>Run <code>python common/sim/run.py --ingest-playtests</code>, then <code>python common/sim/dashboard.py --collection quake</code> — the comparison table appears here.</li>
+<li>Run <code>python common/sim/run.py --ingest-playtests</code>, then <code>python common/sim/balance_dashboard.py --collection quake</code> — the comparison table appears here.</li>
 </ol>
 <p class="fine">For Arena Eternal A/B nights, QCH-ARENA-ETERNAL-V1 in TTS Saved Objects is the pre-balance version.</p>
 </div>
@@ -638,7 +638,7 @@ gate: ρ ≥ 0.7"><i class="gline" style="left:25.00%"></i><i class="gline" styl
 equipment, Sagas, commander tax/damage and every ability it could parse — but not the stack, counterspells or politics.
 Absolute win rates are not Magic; distances from baseline and side-by-side comparisons are the signal.
 Full methodology: <code>quake/balance/BALANCE_PASS.md</code> · raw numbers: <code>quake/balance/report.md</code>.</p>
-<p>Regenerate after any sim run or playtest ingest: <code>python common/sim/dashboard.py</code></p>
+<p>Regenerate after any sim run or playtest ingest: <code>python common/sim/balance_dashboard.py</code></p>
 </footer>
 </div>
 <script>

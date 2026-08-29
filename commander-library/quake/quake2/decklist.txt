@@ -30,10 +30,10 @@
 1 Machinegun
 1 Shotgun
 1 Grenade Launcher
+1 Hyperblaster
 1 Power Shield
 1 Super Shotgun
 1 Disruptor   [GZ]
-1 Hyperblaster
 1 Railgun
 1 Rocket Launcher
 1 Phalanx Particle Cannon   [TR]

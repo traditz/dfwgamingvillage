@@ -31,10 +31,10 @@
 1 Makron
 
 // Equipment (8)
+1 Hyperblaster
 1 Machine Gun
 1 Shotgun
 1 Grenade Launcher
-1 Hyperblaster
 1 Nailgun
 1 Railgun
 1 Rocket Launcher
