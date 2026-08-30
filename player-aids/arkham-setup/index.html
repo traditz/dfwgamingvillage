@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arkham Horror (2nd Edition) — Setup Utility</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=17">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <span class="sigil" aria-hidden="true">
+        <svg viewBox="0 0 100 100">
+          <defs>
+            <radialGradient id="sg-glow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#9fd45c" stop-opacity="0.55"/>
+              <stop offset="100%" stop-color="#9fd45c" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <circle cx="50" cy="50" r="46" fill="url(#sg-glow)"/>
+          <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.7"/>
+          <circle cx="50" cy="50" r="44" fill="none" stroke="currentColor" stroke-width="0.8" opacity="0.4"/>
+          <!-- elder-sign style five-point star -->
+          <path d="M50 12 L61 41 L92 41 L67 60 L77 90 L50 71 L23 90 L33 60 L8 41 L39 41 Z"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          <!-- watching eye -->
+          <ellipse cx="50" cy="52" rx="14" ry="8" fill="none" stroke="currentColor" stroke-width="1.6"/>
+          <circle cx="50" cy="52" r="4.4" fill="currentColor"/>
+        </svg>
+      </span>
+      <div class="brand">
+        <span class="brand-ah">Arkham Horror</span>
+        <span class="deco-rule"><i></i><b></b><i></i></span>
+        <span class="brand-sub">Setup &amp; Reference Almanac · Second Edition</span>
+      </div>
+      <p class="tagline">Choose your expansions &amp; modules — and receive clean setup rites, rules &amp; location references, and a searchable grimoire of the rulebooks. The FAQ always wins.</p>
+    </div>
+  </header>
+
+  <main>
+    <section class="config">
+      <div class="cfg-group grow">
+        <label class="cfg-label">Expansions on the table</label>
+        <div id="expansions" class="chips"></div>
+      </div>
+      <div class="cfg-group">
+        <label class="cfg-label">Investigators</label>
+        <div id="players" class="pbtns"></div>
+      </div>
+      <div class="cfg-group grow">
+        <label class="cfg-label">Optional modules <span class="hint">(Heralds, Guardians, Institutions &amp; variants — only selected ones appear in setup)</span></label>
+        <div id="modules" class="mods"></div>
+      </div>
+    </section>
+
+        <div class="teach-bar"><button id="teachBtn" type="button" title="A ~5 minute script to teach this exact setup aloud">📖 Teaching script</button></div>
+    <div id="teach" class="teach-panel" hidden></div>
+    <section id="detail" class="detail"></section>
+  </main>
+
+  <footer class="footer">
+    Setup content grounded in the official Arkham Horror (2nd Edition) rulebooks and the Complete FAQ &amp; Errata.
+    A fan-made play aid — not affiliated with the publisher.
+  </footer>
+
+  <script src="js/data.js?v=18"></script>
+  <script src="js/rules.js?v=17"></script>
+  <script src="js/app.js?v=17"></script>
+  <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
+  <script src="/site-analytics.js?v=20260607-analytics"></script>
+</body>
+</html>

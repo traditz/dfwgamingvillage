@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "username": "traditz",
+  "total": 15,
+  "games": {
+    "266192": { "id": "266192", "name": "Wingspan", "plays": 5, "comments": ["Great 4-player game, used the European Expansion this time", "Base game only, taught two new players"] },
+    "167791": { "id": "167791", "name": "Terraforming Mars", "plays": 4, "comments": ["Long game but worth it. Played with the Prelude expansion to speed up the opening."] },
+    "230802": { "id": "230802", "name": "Azul", "plays": 2, "comments": [] },
+    "342942": { "id": "342942", "name": "Ark Nova", "plays": 1, "comments": ["First play at game night"] },
+    "233078": { "id": "233078", "name": "Twilight Imperium: Fourth Edition", "plays": 2, "comments": ["Epic 9-hour session"] }
+  }
+}

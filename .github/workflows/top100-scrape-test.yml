@@ -1,0 +1,28 @@
+name: Top-100 scrape test
+
+# One-off diagnostic: can BGG's browse-page scrape run from GitHub's runners,
+# or does BGG's bot protection block datacenter IPs (as it does Cloudflare's)?
+# Run manually. If this succeeds we can automate the Top-100 refresh here too
+# (it would additionally need a CLOUDFLARE_API_TOKEN secret to redeploy the
+# worker); if it fails with 403s, keep the local scheduled task.
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Attempt the browse-page scrape
+        run: node scripts/refresh-top100.mjs
+
+      - name: Report
+        run: |
+          echo "Scrape succeeded — BGG allows GitHub runner IPs."
+          git diff --stat cloudflare/bgg-proxy/src/top100.json || true

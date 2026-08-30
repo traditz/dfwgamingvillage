@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dead of Winter — Setup &amp; Reference Utility</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=5">
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="snow s1" aria-hidden="true"></div>
+  <div class="snow s2" aria-hidden="true"></div>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <span class="sigil" aria-hidden="true">
+        <svg viewBox="0 0 100 100">
+          <defs>
+            <radialGradient id="sg-frost" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#8fd0e8" stop-opacity="0.5"/>
+              <stop offset="100%" stop-color="#8fd0e8" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <circle cx="50" cy="50" r="46" fill="url(#sg-frost)"/>
+          <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.6"/>
+          <!-- six-armed snowflake -->
+          <g stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none">
+            <g id="sf-arm">
+              <line x1="50" y1="50" x2="50" y2="12"/>
+              <line x1="50" y1="22" x2="43" y2="15"/>
+              <line x1="50" y1="22" x2="57" y2="15"/>
+              <line x1="50" y1="33" x2="44" y2="27"/>
+              <line x1="50" y1="33" x2="56" y2="27"/>
+            </g>
+            <use href="#sf-arm" transform="rotate(60 50 50)"/>
+            <use href="#sf-arm" transform="rotate(120 50 50)"/>
+            <use href="#sf-arm" transform="rotate(180 50 50)"/>
+            <use href="#sf-arm" transform="rotate(240 50 50)"/>
+            <use href="#sf-arm" transform="rotate(300 50 50)"/>
+          </g>
+          <circle cx="50" cy="50" r="4" fill="currentColor"/>
+        </svg>
+      </span>
+      <div class="brand">
+        <span class="brand-dw">Dead of Winter</span>
+        <span class="deco-rule"><i></i><b></b><i></i></span>
+        <span class="brand-sub">Setup &amp; Reference Journal · A Crossroads Game</span>
+      </div>
+      <p class="tagline">Choose your sets, modules &amp; variants — and get clean setup steps, a rules &amp; location reference, common rulings, and a searchable index of all three rulebooks. Trust no one.</p>
+    </div>
+  </header>
+
+  <main>
+    <section class="config">
+      <div class="cfg-group grow">
+        <label class="cfg-label">Sets on the table</label>
+        <div id="expansions" class="chips"></div>
+      </div>
+      <div class="cfg-group">
+        <label class="cfg-label">Players <span class="hint">(6+ needs the Warring Colonies variant)</span></label>
+        <div id="players" class="pbtns"></div>
+      </div>
+      <div class="cfg-group grow">
+        <label class="cfg-label">Modules &amp; variants <span class="hint">(only selected ones appear in setup)</span></label>
+        <div id="modules" class="mods"></div>
+      </div>
+    </section>
+
+        <div class="teach-bar"><button id="teachBtn" type="button" title="A ~5 minute script to teach this exact setup aloud">📖 Teaching script</button></div>
+    <div id="teach" class="teach-panel" hidden></div>
+    <section id="detail" class="detail"></section>
+  </main>
+
+  <footer class="footer">
+    Setup content grounded in the official Dead of Winter, The Long Night and Warring Colonies rulebooks.
+    A fan-made play aid — not affiliated with Plaid Hat Games.
+  </footer>
+
+  <script src="js/data.js?v=6"></script>
+  <script src="js/rules.js?v=5"></script>
+  <script src="js/app.js?v=5"></script>
+  <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
+  <script src="/site-analytics.js?v=20260607-analytics"></script>
+</body>
+</html>

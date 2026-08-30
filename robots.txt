@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://www.dfwgamingvillage.com/sitemap.xml
+
+User-agent: *
+Disallow: /library-admin.html

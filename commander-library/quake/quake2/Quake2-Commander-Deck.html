@@ -1,0 +1,1166 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BITTERMAN&#x27;S WAR — Commander Deck</title><style>@font-face{font-family:'Cinzel';font-style:normal;font-weight:700;src:url('../../common/fonts/Cinzel-700.woff2') format('woff2')}
+@font-face{font-family:'Crimson Text';font-style:italic;font-weight:400;src:url('../../common/fonts/CrimsonText-400-italic.woff2') format('woff2')}
+@font-face{font-family:'Crimson Text';font-style:normal;font-weight:400;src:url('../../common/fonts/CrimsonText-400.woff2') format('woff2')}
+@font-face{font-family:'Crimson Text';font-style:normal;font-weight:600;src:url('../../common/fonts/CrimsonText-600.woff2') format('woff2')}
+@font-face{font-family:'Philosopher';font-style:normal;font-weight:700;src:url('../../common/fonts/Philosopher-700.woff2') format('woff2')}
+</style><style>
+:root{--bg:#15161a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:#e8e6df;font-family:"Segoe UI",system-ui,Helvetica,Arial,sans-serif}
+header.page{padding:28px 32px 10px;border-bottom:1px solid #2a2c33}
+header.page h1{margin:0;font-size:30px;letter-spacing:.04em;color:#f0c96a;font-family:"Cinzel",Georgia,serif}
+header.page h1 small{display:block;font-size:13px;letter-spacing:.2em;color:#9aa0ad;font-family:"Segoe UI",system-ui,sans-serif;margin-top:4px}
+header.page a{color:#9aa0ad}
+.meta{color:#9aa0ad;font-size:13px;margin-top:10px;line-height:1.6}
+.meta b{color:#d8d4c8}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;padding:14px 32px;position:sticky;top:0;background:rgba(21,22,26,.96);backdrop-filter:blur(4px);z-index:5;border-bottom:1px solid #2a2c33;align-items:center}
+.toolbar button{background:#23252c;color:#d8d4c8;border:1px solid #3a3d47;border-radius:999px;padding:5px 12px;font-size:12px;cursor:pointer}
+.toolbar button.on{background:#f0c96a;color:#111;border-color:#f0c96a}
+.toolbar input{background:#23252c;color:#eee;border:1px solid #3a3d47;border-radius:8px;padding:6px 10px;font-size:13px;min-width:200px}
+.toolbar .sep{width:1px;height:22px;background:#3a3d47;margin:0 4px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:26px;padding:28px 32px 60px}
+
+/* ---------- the card ---------- */
+.card{container-type:inline-size;aspect-ratio:63/88;position:relative;background:#0b0b0b;border-radius:4.6%/3.3%;box-shadow:0 8px 22px rgba(0,0,0,.6);color:#111;overflow:hidden}
+.card.hidden{display:none}
+.frame{position:absolute;left:4.4cqw;top:4.4cqw;right:4.4cqw;bottom:7.2cqw;border-radius:1.8cqw;
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .28 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"),
+    radial-gradient(120% 90% at 50% 0%,rgba(255,255,255,.22),rgba(255,255,255,0) 60%),
+    var(--frame2);
+  box-shadow:inset 0 0 0 .5cqw rgba(0,0,0,.35)}
+.frame::before{content:"";position:absolute;inset:1.1cqw;border-radius:1.3cqw;background:var(--frame);opacity:.92;mix-blend-mode:screen;pointer-events:none}
+.frame::after{content:"";position:absolute;inset:1.1cqw;border-radius:1.3cqw;background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.55' numOctaves='4' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .22 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    mix-blend-mode:multiply;pointer-events:none}
+.frame > *{position:absolute;z-index:1}
+.titlebar,.typebar{left:2.6cqw;right:2.6cqw;display:flex;align-items:center;justify-content:space-between;gap:1.5cqw;padding:0 2.6cqw;
+  background:var(--box);border:.45cqw solid var(--pin);border-radius:1.2cqw;box-shadow:0 .4cqw .6cqw rgba(0,0,0,.45),inset 0 0 0 .3cqw rgba(255,255,255,.35)}
+.titlebar{top:2.4cqw;height:8.8cqw}
+.card.legendary .titlebar{border-radius:3.2cqw 3.2cqw 1.2cqw 1.2cqw;box-shadow:0 .4cqw .6cqw rgba(0,0,0,.45),inset 0 0 0 .3cqw rgba(255,255,255,.35),0 -.9cqw 0 -.2cqw var(--pin)}
+.name{font-family:"Beleren","Philosopher","Trajan Pro",Georgia,serif;font-weight:700;font-size:4.9cqw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.01em}
+.cost{display:flex;gap:.5cqw;flex-shrink:0}
+.card.longname .name{font-size:3.5cqw;letter-spacing:-.02em}
+.card.xlongname .name{font-size:2.9cqw;letter-spacing:-.03em}
+.ms{width:4.7cqw;height:4.7cqw;border-radius:50%;box-shadow:-.25cqw .35cqw 0 rgba(0,0,0,.65);vertical-align:-.15em}
+.rules .ms{width:1.1em;height:1.1em;box-shadow:-.07em .1em 0 rgba(0,0,0,.65)}
+.art{top:11.9cqw;left:4.2cqw;right:4.2cqw;height:59.5cqw;background:#000;border:.45cqw solid var(--pin);overflow:hidden;display:flex;align-items:center;justify-content:center}
+.art img.fg{position:relative;width:100%;height:100%;object-fit:cover;display:block}
+.art.fit-contain img.fg{object-fit:contain;z-index:1}
+.art img.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(12px) brightness(.45) saturate(1.2);transform:scale(1.25)}
+.art.pixel img.fg{image-rendering:pixelated;object-fit:contain;width:60%;height:94%;flex:none}
+.typebar{top:71.6cqw;height:8cqw}
+.type{font-family:"Beleren","Philosopher",Georgia,serif;font-weight:700;font-size:3.9cqw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card.longtype .type{font-size:3.5cqw;letter-spacing:-.01em}
+.card.xlongtype .type{font-size:3.2cqw;letter-spacing:-.015em}
+.card.xxlongtype .type{font-size:2.9cqw;letter-spacing:-.02em}
+.setsym{width:6.2cqw;height:6.2cqw;flex-shrink:0;filter:drop-shadow(0 .2cqw .2cqw rgba(0,0,0,.5))}
+.textbox{top:79.8cqw;left:4.2cqw;right:4.2cqw;bottom:3.6cqw;background:var(--text);border:.45cqw solid var(--pin);padding:2cqw 2.8cqw;
+  display:flex;flex-direction:column;gap:1.2cqw;overflow:hidden;font-family:"MPlantin","Crimson Text","EB Garamond",Georgia,serif;font-size:4.05cqw;line-height:1.22;
+  box-shadow:inset 0 0 1.5cqw rgba(0,0,0,.18)}
+.textbox::before{content:"";position:absolute;inset:0;pointer-events:none;background:
+  url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .07 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.rules{position:relative}
+.bigsym{display:flex;justify-content:center;align-items:center;padding-top:3cqw}
+.bigsym .ms{width:26cqw;height:26cqw;box-shadow:-.6cqw .8cqw 0 rgba(0,0,0,.55)}
+.basicflavor{text-align:center;font-size:.85em}
+.rules p{margin:0 0 .9cqw}
+.rules p:last-child{margin:0}
+.rem{color:#2c2c2c}
+.flavor{position:relative;font-style:italic;margin-top:auto;padding-top:1.4cqw;font-size:.96em;line-height:1.2}
+.flavor br+ br{display:none}
+.flavor::before{content:"";display:block;width:38%;height:.3cqw;margin:0 auto 1.4cqw;background:linear-gradient(90deg,transparent,rgba(0,0,0,.55),transparent)}
+.card.long .textbox{font-size:3.6cqw;line-height:1.18}
+.card.xlong .textbox{font-size:3.15cqw;line-height:1.15;padding:1.4cqw 2.2cqw}
+.card.xxlong .textbox{font-size:2.8cqw;line-height:1.12;padding:1.1cqw 1.8cqw}
+.card.xxlong .flavor{font-size:2.7cqw}
+.card.has-pt .textbox{padding-bottom:6cqw}
+.pt{right:3.2cqw;bottom:1.6cqw;min-width:19cqw;height:8.6cqw;padding:0 3cqw;display:flex;align-items:center;justify-content:center;
+  background:var(--box);border:.45cqw solid var(--pin);border-radius:1.4cqw;font-family:"Beleren","Philosopher",Georgia,serif;font-weight:700;font-size:5.2cqw;
+  box-shadow:0 .4cqw .7cqw rgba(0,0,0,.5),inset 0 0 0 .3cqw rgba(255,255,255,.35);z-index:2}
+.foot{position:absolute;left:5.2cqw;right:5.2cqw;bottom:1.6cqw;color:#f2f2f2;font-size:2.35cqw;line-height:1.25;display:flex;justify-content:space-between;align-items:flex-end;font-family:"Segoe UI",Arial,sans-serif}
+.foot .l{display:flex;flex-direction:column;gap:.1cqw}
+.foot .r{text-align:right;color:#cfcfcf}
+.empty{padding:40px;color:#9aa0ad;text-align:center;display:none}
+.deck-sec{padding:8px 32px 10px}.deck-sec h2{font-family:Cinzel,Georgia,serif;color:#f0c96a;font-size:20px;margin:18px 0 6px;letter-spacing:.06em}.deck-sec h2 small{color:#9aa0ad;font-size:13px;margin-left:8px}
+.deck-sec .grid{padding:10px 0 20px}
+.stack{position:relative}.stack .count{position:absolute;z-index:3;top:-10px;right:-8px;background:#f0c96a;color:#111;font-weight:800;border-radius:999px;padding:3px 9px;font-size:13px;box-shadow:0 2px 6px rgba(0,0,0,.6)}
+.curve{display:flex;gap:6px;align-items:flex-end;margin-top:18px;height:100px}.curve .bar{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;width:36px;gap:2px;font-size:11px;color:#9aa0ad}.curve .fill{width:22px;background:#f0c96a;border-radius:3px 3px 0 0}.curve b{color:#e8e6df}
+.meta .ms{width:14px;height:14px}
+.grid .card,.deck-sec .card{cursor:zoom-in}
+#zoomov{position:fixed;inset:0;z-index:99;display:none;align-items:center;justify-content:center;background:rgba(5,5,8,.9);cursor:zoom-out;padding:2vh}
+#zoomov.on{display:flex}
+#zoomov .zwrap{width:min(92vw,66vh)}
+#zoomov .card{width:100%;cursor:zoom-out;box-shadow:0 24px 70px rgba(0,0,0,.85)}
+@media print{
+  body{background:#fff}
+  header.page,.toolbar,.deck-sec h2,#zoomov{display:none}
+  .grid,.deck-sec .grid{display:grid;grid-template-columns:repeat(3,63mm);gap:3mm;padding:8mm}
+  .deck-sec{padding:0}
+  .card{width:63mm;height:88mm;aspect-ratio:auto;box-shadow:none;border-radius:3mm;break-inside:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .card.hidden{display:none}
+  .stack .count{display:none}
+}
+</style></head><body><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="gC" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2a2a2a"/><stop offset="1" stop-color="#000"/></linearGradient><linearGradient id="gU" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e3e8ec"/><stop offset=".5" stop-color="#7f8c96"/><stop offset="1" stop-color="#d5dbe0"/></linearGradient><linearGradient id="gR" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f3dc85"/><stop offset=".5" stop-color="#a9812a"/><stop offset="1" stop-color="#ecd275"/></linearGradient><linearGradient id="gM" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff9a4d"/><stop offset=".5" stop-color="#c2320f"/><stop offset="1" stop-color="#ffb75c"/></linearGradient><path id="setsympath" d="M64.5 3.2 L66.0 3.0 L68.6 4.3 L74.2 8.2 L78.6 13.3 L81.2 17.2 L84.1 24.4 L84.1 26.7 L85.1 28.9 L85.1 31.6 L85.7 32.2 L85.4 33.5 L85.7 37.1 L84.4 38.7 L84.8 41.7 L84.1 44.0 L83.1 45.3 L83.1 46.6 L78.2 54.7 L75.3 58.0 L74.2 58.8 L73.2 58.5 L72.7 59.0 L72.4 60.6 L68.9 63.1 L67.0 63.7 L63.7 65.7 L58.0 67.5 L57.7 68.1 L57.7 78.6 L56.7 83.1 L56.0 89.7 L55.4 91.3 L55.4 94.6 L54.9 96.7 L54.1 96.5 L52.8 91.0 L52.8 86.7 L51.1 76.9 L51.1 75.0 L51.8 74.0 L51.5 69.4 L50.7 68.0 L48.9 68.4 L48.5 69.4 L48.9 72.4 L48.2 74.0 L48.5 74.6 L48.5 79.5 L47.9 81.5 L47.9 83.8 L47.2 84.8 L47.6 85.7 L46.6 90.0 L46.2 95.9 L45.9 96.8 L45.1 97.0 L43.6 89.3 L43.0 80.8 L42.0 77.6 L42.0 75.6 L42.7 74.3 L42.0 73.0 L42.0 67.5 L41.5 67.0 L38.6 66.3 L37.3 64.7 L34.3 64.7 L30.4 62.4 L28.1 60.8 L27.0 58.6 L25.2 57.8 L21.4 54.1 L19.5 51.5 L18.2 48.9 L18.5 47.6 L16.5 45.9 L15.2 42.0 L14.9 35.8 L14.3 33.8 L14.3 32.9 L14.9 31.9 L14.9 28.0 L17.9 19.2 L19.8 15.6 L21.4 13.9 L23.1 11.3 L25.8 8.2 L28.8 6.6 L31.1 4.6 L33.7 3.3 L35.6 3.3 L35.8 4.1 L35.3 4.6 L32.0 6.3 L28.5 8.9 L25.4 12.3 L23.4 15.2 L20.5 22.4 L20.5 24.1 L19.5 27.6 L19.8 34.8 L19.2 35.8 L20.8 37.1 L20.8 38.4 L22.7 43.0 L26.0 48.2 L28.5 50.7 L32.4 53.6 L34.0 55.9 L35.6 55.9 L38.9 57.2 L40.2 59.1 L42.0 58.3 L42.7 56.4 L42.0 55.1 L42.0 49.5 L41.7 47.2 L40.5 46.1 L39.6 46.1 L38.1 45.3 L38.6 44.1 L44.5 44.1 L44.8 44.5 L46.7 44.5 L49.0 43.8 L50.3 44.1 L59.8 44.1 L60.8 43.8 L61.4 44.1 L61.9 45.3 L61.4 45.8 L60.1 45.8 L58.8 46.4 L58.0 47.6 L57.7 52.8 L57.3 53.1 L58.0 57.7 L58.8 58.2 L61.1 57.5 L61.8 56.9 L65.7 55.2 L68.9 52.9 L73.3 48.9 L73.7 47.9 L75.0 46.9 L76.9 44.3 L79.5 38.1 L79.9 34.2 L80.5 32.9 L80.5 30.6 L80.8 30.3 L80.5 26.0 L79.9 24.4 L79.5 21.4 L78.9 20.1 L78.9 18.5 L77.3 16.5 L76.9 15.2 L74.3 11.6 L70.9 8.2 L64.7 4.0 L64.5 3.2 Z M50.0 47.1 L49.2 47.9 L48.5 50.8 L48.9 52.1 L48.5 58.0 L49.0 58.8 L50.7 58.8 L51.5 57.7 L51.5 49.2 L51.1 47.9 L50.0 47.1 Z" fill-rule="evenodd" stroke="#000" stroke-width="4" stroke-linejoin="round"/></defs></svg>
+<header class="page">
+  <h1>BITTERMAN&#x27;S WAR <small>A 100-CARD COMMANDER DECK BUILT ENTIRELY FROM QUAKE II: OPERATION ALIEN OVERLORD · <a href="../index.html">deck library</a> · <a href="Quake2-MTG-Set.html">full set</a></small></h1>
+  <div class="meta"><b>Commander:</b> Bitterman, Lone Marine (<img class="ms" src="../../common/symbols/U.svg" alt="{U}"><img class="ms" src="../../common/symbols/R.svg" alt="{R}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}">) &nbsp;·&nbsp; <b>62</b> nonland + <b>37</b> lands + commander = 100 &nbsp;·&nbsp; colour pips <img class="ms" src="../../common/symbols/W.svg" alt="{W}"> 12 · <img class="ms" src="../../common/symbols/U.svg" alt="{U}"> 14 · <img class="ms" src="../../common/symbols/R.svg" alt="{R}"> 24<br>
+  Plan: Bitterman discounts every Strogg and weapon, and drops a free artifact from hand each time he connects. Power Cubes and Unit lands ramp; Medics bring the Strogg back; Tank Commander pumps the army; Railgun, BFG10K and Quad Damage close. Jorg dies and fetches the Makron — the real boss fight.<br>Singleton except basics. [TR] = The Reckoning, [GZ] = Ground Zero. Bracket 2–3 (Core/Upgraded).</div>
+  <div class="curve"><div class="bar"><div class="fill" style="height:0px"></div><span>0</span><b>0</b></div><div class="bar"><div class="fill" style="height:9px"></div><span>1</span><b>3</b></div><div class="bar"><div class="fill" style="height:60px"></div><span>2</span><b>21</b></div><div class="bar"><div class="fill" style="height:46px"></div><span>3</span><b>16</b></div><div class="bar"><div class="fill" style="height:31px"></div><span>4</span><b>11</b></div><div class="bar"><div class="fill" style="height:9px"></div><span>5</span><b>3</b></div><div class="bar"><div class="fill" style="height:9px"></div><span>6</span><b>3</b></div><div class="bar"><div class="fill" style="height:14px"></div><span>7+</span><b>5</b></div></div>
+</header>
+<section class="deck-sec"><h2>Commander</h2><div class="grid">
+<article class="card xlong has-pt legendary" data-color="MURW" data-rarity="M" data-type="Creature" data-name="bitterman, lone marine" style="--frame:#d3b24c;--frame2:#a8862c;--box:#f4e8c2;--text:#f3e7c4;--pin:#8a6c1d;--pin2:#8a6c1d">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Bitterman, Lone Marine</span><span class="cost"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"><img class="ms" src="../../common/symbols/R.svg" alt="{R}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Bitterman_in_Quake_2.jpg" alt="Bitterman, Lone Marine" style="object-position:50% 85%"></div>
+    <div class="typebar"><span class="type">Legendary Creature — Human Soldier</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gM)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>First strike</p><p>Artifact spells you cast cost <img class="ms" src="../../common/symbols/1.svg" alt="{1}"> less to cast.</p><p>Whenever Bitterman deals combat damage to a player, you may put an artifact card with mana value 5 or less from your hand onto the battlefield.</p></div><div class="flavor">Just overshot LZ Command. Command, you copy? Christ, this thing is a brick!<br>—Quake II intro</div></div>
+    <div class="pt">3/4</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>001/120 M &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div></section><section class="deck-sec"><h2>Creatures <small>20</small></h2><div class="grid"><div class="stack">
+<article class="card long has-pt" data-color="U" data-rarity="C" data-type="Creature" data-name="flyer" style="--frame:#1f6aa8;--frame2:#144d80;--box:#dfe9f3;--text:#dde7f0;--pin:#0e4678;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Flyer</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Q2-Flyer.png" alt=""><img class="fg" loading="lazy" src="art/Q2-Flyer.png" alt="Flyer"></div>
+    <div class="typebar"><span class="type">Artifact Creature — Strogg Drone</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Flying</p><p>Flyer can&#x27;t be blocked by creatures with power 3 or greater.</p></div><div class="flavor">A small two-winged monster: a controlling brain and a cyborg body that allows it to levitate.<br>—Quake II manual</div></div>
+    <div class="pt">1/2</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>023/120 C &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card has-pt" data-color="R" data-rarity="C" data-type="Creature" data-name="shotgun guard" style="--frame:#c2392d;--frame2:#8f241c;--box:#f3dcd3;--text:#f1d9cf;--pin:#7d1d15;--pin2:#7d1d15">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Shotgun Guard</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/R.svg" alt="{R}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Q2-Guard-Shotgun.png" alt=""><img class="fg" loading="lazy" src="art/Q2-Guard-Shotgun.png" alt="Shotgun Guard"></div>
+    <div class="typebar"><span class="type">Artifact Creature — Strogg Soldier</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>When Shotgun Guard enters, it deals 1 damage to any target.</p></div><div class="flavor">These loyal troops have an automatic scatter gun prosthetic.<br>—Quake II manual</div></div>
+    <div class="pt">2/2</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>005/120 C &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card long has-pt legendary" data-color="MRW" data-rarity="R" data-type="Creature" data-name="joker, reckoning marine" style="--frame:#d3b24c;--frame2:#a8862c;--box:#f4e8c2;--text:#f3e7c4;--pin:#8a6c1d;--pin2:#8a6c1d">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Joker, Reckoning Marine</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/R.svg" alt="{R}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Q2_Grunt_Skin.png" alt=""><img class="fg" loading="lazy" src="art/Q2_Grunt_Skin.png" alt="Joker, Reckoning Marine"></div>
+    <div class="typebar"><span class="type">Legendary Creature — Human Soldier</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Haste</p><p>Equip abilities you activate cost <img class="ms" src="../../common/symbols/1.svg" alt="{1}"> less to activate.</p><p>Whenever Joker attacks, Equipment attached to it gain &quot;Equipped creature has menace&quot; until end of turn.</p></div><div class="flavor">Moon base. Strogg fleet. One marine with a bad attitude.</div></div>
+    <div class="pt">3/2</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>002/120 R &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card long has-pt" data-color="W" data-rarity="R" data-type="Creature" data-name="medic" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Medic</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Q2-Medic.png" alt=""><img class="fg" loading="lazy" src="art/Q2-Medic.png" alt="Medic"></div>
+    <div class="typebar"><span class="type">Artifact Creature — Strogg Medic</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Return target artifact creature card with mana value 3 or less from your graveyard to the battlefield.</p></div><div class="flavor">This threatening organism has the ability to awaken dead Strogg from eternal sleep.<br>—Quake II manual</div></div>
+    <div class="pt">2/3</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>033/120 R &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card has-pt" data-color="A" data-rarity="C" data-type="Creature" data-name="parasite" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Parasite</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Q2-Parasite.png" alt=""><img class="fg" loading="lazy" src="art/Q2-Parasite.png" alt="Parasite"></div>
+    <div class="typebar"><span class="type">Artifact Creature — Strogg Beast</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Whenever Parasite deals combat damage to a creature, put a +1/+1 counter on Parasite. <i class="rem">(It feeds.)</i></p></div><div class="flavor">The Parasite makes Cujo look like Lassie on Prozac.<br>—Quake II manual</div></div>
+    <div class="pt">2/2</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>036/120 C &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card has-pt legendary longname" data-color="MWU" data-rarity="R" data-type="Creature" data-name="stepchild, ground zero marine" style="--frame:#d3b24c;--frame2:#a8862c;--box:#f4e8c2;--text:#f3e7c4;--pin:#8a6c1d;--pin2:#8a6c1d">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Stepchild, Ground Zero Marine</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Q2_prisoner_model.png" alt=""><img class="fg" loading="lazy" src="art/Q2_prisoner_model.png" alt="Stepchild, Ground Zero Marine"></div>
+    <div class="typebar"><span class="type">Legendary Creature — Human Soldier</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Vigilance</p><p>Whenever Stepchild attacks, tap target artifact an opponent controls. It doesn&#x27;t untap during its controller&#x27;s next untap step.</p></div><div class="flavor">The gravity well is holding the fleet. Go turn it off.</div></div>
+    <div class="pt">2/3</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>003/120 R &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card has-pt" data-color="U" data-rarity="U" data-type="Creature" data-name="technician" style="--frame:#1f6aa8;--frame2:#144d80;--box:#dfe9f3;--text:#dde7f0;--pin:#0e4678;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Technician</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Q2-Technician.png" alt=""><img class="fg" loading="lazy" src="art/Q2-Technician.png" alt="Technician"></div>
+    <div class="typebar"><span class="type">Artifact Creature — Strogg Drone</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Flying</p><p>When Technician enters, return target artifact card from your graveyard to your hand.</p></div><div class="flavor">It fixes things. Mostly things that want you dead.</div></div>
+    <div class="pt">1/3</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>025/120 U &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card long has-pt" data-color="U" data-rarity="U" data-type="Creature" data-name="brains" style="--frame:#1f6aa8;--frame2:#144d80;--box:#dfe9f3;--text:#dde7f0;--pin:#0e4678;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Brains</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Q2-Brains.png" alt=""><img class="fg" loading="lazy" src="art/Q2-Brains.png" alt="Brains"></div>
+    <div class="typebar"><span class="type">Artifact Creature — Strogg Horror</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Whenever Brains deals combat damage to a creature, you gain 2 life. <i class="rem">(Life-stealing tentacles.)</i></p><p>Brains has hexproof as long as it&#x27;s untapped.</p></div><div class="flavor">A vicious cyborg abomination with life-stealing tentacles protruding from its chest.<br>—Quake II manual</div></div>
+    <div class="pt">2/4</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>026/120 U &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card has-pt" data-color="R" data-rarity="C" data-type="Creature" data-name="enforcer" style="--frame:#c2392d;--frame2:#8f241c;--box:#f3dcd3;--text:#f1d9cf;--pin:#7d1d15;--pin2:#7d1d15">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Enforcer</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"><img class="ms" src="../../common/symbols/R.svg" alt="{R}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Q2-Infantry.png" alt=""><img class="fg" loading="lazy" src="art/Q2-Infantry.png" alt="Enforcer"></div>
+    <div class="typebar"><span class="type">Artifact Creature — Strogg Soldier</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Menace</p><p><img class="ms" src="../../common/symbols/R.svg" alt="{R}">: Enforcer gets +1/+0 until end of turn. <i class="rem">(The chaingun spins up.)</i></p></div><div class="flavor">Strong, muscle-bound warrior who dishes out chain gun speed damage.<br>—Quake II manual</div></div>
+    <div class="pt">3/3</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>007/120 C &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card has-pt" data-color="R" data-rarity="U" data-type="Creature" data-name="gunner" style="--frame:#c2392d;--frame2:#8f241c;--box:#f3dcd3;--text:#f1d9cf;--pin:#7d1d15;--pin2:#7d1d15">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Gunner</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"><img class="ms" src="../../common/symbols/R.svg" alt="{R}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Q2-Gunner.png" alt=""><img class="fg" loading="lazy" src="art/Q2-Gunner.png" alt="Gunner"></div>
+    <div class="typebar"><span class="type">Artifact Creature — Strogg Soldier</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Whenever Gunner attacks, it deals 2 damage to up to one target creature. <i class="rem">(Grenades arc over cover.)</i></p></div><div class="flavor">This cybernetic terror eats Mutants for breakfast before coming to work — on you.<br>—Quake II manual</div></div>
+    <div class="pt">3/2</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>008/120 U &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card has-pt" data-color="R" data-rarity="U" data-type="Creature" data-name="hyperblaster guard" style="--frame:#c2392d;--frame2:#8f241c;--box:#f3dcd3;--text:#f1d9cf;--pin:#7d1d15;--pin2:#7d1d15">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Hyperblaster Guard</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"><img class="ms" src="../../common/symbols/R.svg" alt="{R}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Q2-Guard-Hyperblaster.png" alt=""><img class="fg" loading="lazy" src="art/Q2-Guard-Hyperblaster.png" alt="Hyperblaster Guard"></div>
+    <div class="typebar"><span class="type">Artifact Creature — Strogg Soldier</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Hyperblaster Guard deals 1 damage to any target.</p></div><div class="flavor">Someone gave the infantry the good gun.</div></div>
+    <div class="pt">3/2</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>022/120 U &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card long has-pt" data-color="U" data-rarity="C" data-type="Creature" data-name="icarus" style="--frame:#1f6aa8;--frame2:#144d80;--box:#dfe9f3;--text:#dde7f0;--pin:#0e4678;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Icarus</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Q2-Icarus.png" alt=""><img class="fg" loading="lazy" src="art/Q2-Icarus.png" alt="Icarus"></div>
+    <div class="typebar"><span class="type">Artifact Creature — Strogg Drone</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Flying</p><p>Whenever Icarus deals combat damage to a player, you may draw a card. If you do, discard a card.</p></div><div class="flavor">A huge jet pack attached to its back, with laser blasters mounted into his shoulders.<br>—Quake II manual</div></div>
+    <div class="pt">2/3</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>024/120 C &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card long has-pt" data-color="R" data-rarity="R" data-type="Creature" data-name="gladiator" style="--frame:#c2392d;--frame2:#8f241c;--box:#f3dcd3;--text:#f1d9cf;--pin:#7d1d15;--pin2:#7d1d15">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Gladiator</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"><img class="ms" src="../../common/symbols/R.svg" alt="{R}"><img class="ms" src="../../common/symbols/R.svg" alt="{R}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Q2-Gladiator.png" alt=""><img class="fg" loading="lazy" src="art/Q2-Gladiator.png" alt="Gladiator"></div>
+    <div class="typebar"><span class="type">Artifact Creature — Strogg Warrior</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><i>Railgun</i> — Whenever Gladiator attacks, it deals 3 damage to target creature. That damage can&#x27;t be prevented.</p></div><div class="flavor">Two massively mechanized legs and one shoulder-mounted railgun: the daddy of all the adapted humanoids.<br>—Quake II manual</div></div>
+    <div class="pt">4/4</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>013/120 R &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card xlong has-pt" data-color="W" data-rarity="R" data-type="Creature" data-name="medic commander" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Medic Commander</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Q2-MedicCommander.png" alt=""><img class="fg" loading="lazy" src="art/Q2-MedicCommander.png" alt="Medic Commander"></div>
+    <div class="typebar"><span class="type">Artifact Creature — Strogg Medic</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>At the beginning of your end step, create a 1/1 red Strogg Soldier artifact creature token.</p><p><img class="ms" src="../../common/symbols/3.svg" alt="{3}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Return target artifact creature card from your graveyard to the battlefield.</p></div><div class="flavor">If re-animating dead comrades and creating new enemies were not enough, this guy also fires an upgraded Blaster.<br>—Ground Zero manual</div></div>
+    <div class="pt">3/4</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>034/120 R &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card long has-pt" data-color="R" data-rarity="R" data-type="Creature" data-name="tank" style="--frame:#c2392d;--frame2:#8f241c;--box:#f3dcd3;--text:#f1d9cf;--pin:#7d1d15;--pin2:#7d1d15">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Tank</span><span class="cost"><img class="ms" src="../../common/symbols/4.svg" alt="{4}"><img class="ms" src="../../common/symbols/R.svg" alt="{R}"><img class="ms" src="../../common/symbols/R.svg" alt="{R}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Q2-Tank.png" alt=""><img class="fg" loading="lazy" src="art/Q2-Tank.png" alt="Tank"></div>
+    <div class="typebar"><span class="type">Artifact Creature — Strogg Tank</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Trample</p><p>Whenever Tank attacks, it deals 3 damage divided as you choose among up to three targets.</p></div><div class="flavor">Get in, take your shot, and get out. Repeat as often as necessary.<br>—Quake II manual</div></div>
+    <div class="pt">6/6</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>015/120 R &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card xlong has-pt legendary xlongtype" data-color="MURW" data-rarity="M" data-type="Creature" data-name="black widow guardian" style="--frame:#d3b24c;--frame2:#a8862c;--box:#f4e8c2;--text:#f3e7c4;--pin:#8a6c1d;--pin2:#8a6c1d">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Black Widow Guardian</span><span class="cost"><img class="ms" src="../../common/symbols/4.svg" alt="{4}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"><img class="ms" src="../../common/symbols/R.svg" alt="{R}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Q2-BlackWidowF1Humanoid.png" alt=""><img class="fg" loading="lazy" src="art/Q2-BlackWidowF1Humanoid.png" alt="Black Widow Guardian"></div>
+    <div class="typebar"><span class="type">Legendary Artifact Creature — Strogg Spider</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gM)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Vigilance, menace</p><p>At the beginning of your end step, create a 2/2 blue Strogg Spider artifact creature token.</p><p>When Black Widow Guardian dies, it deals 4 damage divided as you choose among any number of targets.</p></div><div class="flavor">Keeper of the gravity well. Mother of every Stalker in the base.</div></div>
+    <div class="pt">6/6</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>035/120 M &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card long has-pt" data-color="MUR" data-rarity="R" data-type="Creature" data-name="carrier" style="--frame:#d3b24c;--frame2:#a8862c;--box:#f4e8c2;--text:#f3e7c4;--pin:#8a6c1d;--pin2:#8a6c1d">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Carrier</span><span class="cost"><img class="ms" src="../../common/symbols/5.svg" alt="{5}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"><img class="ms" src="../../common/symbols/R.svg" alt="{R}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Q2-Carrier.png" alt=""><img class="fg" loading="lazy" src="art/Q2-Carrier.png" alt="Carrier"></div>
+    <div class="typebar"><span class="type">Artifact Creature — Strogg Drone</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Flying</p><p>Whenever Carrier attacks, create a 1/1 blue Strogg Drone artifact creature token with flying that&#x27;s tapped and attacking.</p></div><div class="flavor">They don’t call this guy the Carrier for nothing. Concentrate your fire on it first.<br>—Ground Zero manual</div></div>
+    <div class="pt">5/5</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>030/120 R &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card long has-pt legendary longname" data-color="MUR" data-rarity="M" data-type="Creature" data-name="makron, leader of the strogg" style="--frame:#d3b24c;--frame2:#a8862c;--box:#f4e8c2;--text:#f3e7c4;--pin:#8a6c1d;--pin2:#8a6c1d">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Makron, Leader of the Strogg</span><span class="cost"><img class="ms" src="../../common/symbols/5.svg" alt="{5}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"><img class="ms" src="../../common/symbols/R.svg" alt="{R}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Q2-MakronF2Makron.png" alt=""><img class="fg" loading="lazy" src="art/Q2-MakronF2Makron.png" alt="Makron, Leader of the Strogg"></div>
+    <div class="typebar"><span class="type">Legendary Artifact Creature — Strogg</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gM)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Menace</p><p>This spell can&#x27;t be countered.</p><p>Makron has hexproof as long as you control another Strogg.</p><p><i>BFG10K</i> — At the beginning of your end step, Makron deals 3 damage to any target.</p></div><div class="flavor">The brain behind every gun on Stroggos.</div></div>
+    <div class="pt">6/6</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>032/120 M &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card long has-pt" data-color="R" data-rarity="M" data-type="Creature" data-name="tank commander" style="--frame:#c2392d;--frame2:#8f241c;--box:#f3dcd3;--text:#f1d9cf;--pin:#7d1d15;--pin2:#7d1d15">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Tank Commander</span><span class="cost"><img class="ms" src="../../common/symbols/5.svg" alt="{5}"><img class="ms" src="../../common/symbols/R.svg" alt="{R}"><img class="ms" src="../../common/symbols/R.svg" alt="{R}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Q2-Tank-Commander.png" alt=""><img class="fg" loading="lazy" src="art/Q2-Tank-Commander.png" alt="Tank Commander"></div>
+    <div class="typebar"><span class="type">Artifact Creature — Strogg Tank</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gM)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Trample</p><p>Other artifact creatures you control get +1/+1.</p><p>Whenever Tank Commander attacks, it deals 3 damage to target creature.</p></div><div class="flavor">A special class, designed to secure the Inner City from infiltrators.<br>—Quake II manual</div></div>
+    <div class="pt">7/7</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>016/120 M &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card xlong has-pt legendary xlongtype" data-color="R" data-rarity="M" data-type="Creature" data-name="jorg, the makron&#x27;s mech" style="--frame:#c2392d;--frame2:#8f241c;--box:#f3dcd3;--text:#f1d9cf;--pin:#7d1d15;--pin2:#7d1d15">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Jorg, the Makron&#x27;s Mech</span><span class="cost"><img class="ms" src="../../common/symbols/6.svg" alt="{6}"><img class="ms" src="../../common/symbols/R.svg" alt="{R}"><img class="ms" src="../../common/symbols/R.svg" alt="{R}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Q2-MakronF1Jorg.png" alt=""><img class="fg" loading="lazy" src="art/Q2-MakronF1Jorg.png" alt="Jorg, the Makron&#x27;s Mech"></div>
+    <div class="typebar"><span class="type">Legendary Artifact Creature — Strogg Mech</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gM)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Trample</p><p>Whenever Jorg attacks, it deals 1 damage to each creature defending player controls.</p><p>When Jorg dies, you may search your library and graveyard for a card named Makron, Leader of the Strogg, put it onto the battlefield, then shuffle.</p></div><div class="flavor">Kill the mech. Then the fight starts.</div></div>
+    <div class="pt">8/8</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>018/120 M &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div></div></section><section class="deck-sec"><h2>Equipment <small>12</small></h2><div class="grid"><div class="stack">
+<article class="card long" data-color="A" data-rarity="U" data-type="Artifact" data-name="chainfist" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Chainfist</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Q2R_Chainsaw.png" alt="Chainfist"></div>
+    <div class="typebar"><span class="type">Artifact — Equipment</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Equipped creature gets +1/+0 and has deathtouch.</p><p>Equip <img class="ms" src="../../common/symbols/2.svg" alt="{2}"></p></div><div class="flavor">An enormous arm-mounted chainsaw. Perfect when you need to “R.I.P.” a wide swath in a room full o’ baddies.<br>—Ground Zero manual</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>054/120 U &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card" data-color="A" data-rarity="U" data-type="Artifact" data-name="machinegun" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Machinegun</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Q2_Weapon_Machine_Gun.png" alt=""><img class="fg" loading="lazy" src="art/Q2_Weapon_Machine_Gun.png" alt="Machinegun"></div>
+    <div class="typebar"><span class="type">Artifact — Equipment</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Equipped creature gets +1/+0 and has &quot;<img class="ms" src="../../common/symbols/T.svg" alt="{T}">: This creature deals 1 damage to any target.&quot;</p><p>Equip <img class="ms" src="../../common/symbols/2.svg" alt="{2}"></p></div><div class="flavor">The recoil walks the barrel up. Aim low.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>042/120 U &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card long" data-color="A" data-rarity="C" data-type="Artifact" data-name="shotgun" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Shotgun</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Q2_Weapon_Shotgun.png" alt=""><img class="fg" loading="lazy" src="art/Q2_Weapon_Shotgun.png" alt="Shotgun"></div>
+    <div class="typebar"><span class="type">Artifact — Equipment</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Equipped creature gets +1/+0.</p><p>Whenever equipped creature attacks, it deals 1 damage to up to one target creature defending player controls.</p><p>Equip <img class="ms" src="../../common/symbols/1.svg" alt="{1}"></p></div><div class="flavor">Perfect for the less than proficient marksman.<br>—Quake II manual</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>040/120 C &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card xlong" data-color="A" data-rarity="U" data-type="Artifact" data-name="grenade launcher" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Grenade Launcher</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Q2_Weapon_Grenade_Launcher.png" alt=""><img class="fg" loading="lazy" src="art/Q2_Weapon_Grenade_Launcher.png" alt="Grenade Launcher"></div>
+    <div class="typebar"><span class="type">Artifact — Equipment</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Equipped creature gets +1/+0.</p><p>Whenever equipped creature attacks, it deals 1 damage to each creature defending player controls. <i class="rem">(Splash.)</i></p><p>Equip <img class="ms" src="../../common/symbols/2.svg" alt="{2}"></p></div><div class="flavor">Useful for delivering firepower into hard to reach areas. We do not recommend using it in confined areas.<br>—Quake II manual</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>044/120 U &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card" data-color="A" data-rarity="R" data-type="Artifact" data-name="hyperblaster" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Hyperblaster</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Q2_Weapon_Hyper_Blaster.png" alt=""><img class="fg" loading="lazy" src="art/Q2_Weapon_Hyper_Blaster.png" alt="Hyperblaster"></div>
+    <div class="typebar"><span class="type">Artifact — Equipment</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Equipped creature gets +2/+0 and has &quot;<img class="ms" src="../../common/symbols/T.svg" alt="{T}">: This creature deals 2 damage to any target.&quot;</p><p>Equip <img class="ms" src="../../common/symbols/3.svg" alt="{3}"></p></div><div class="flavor">An energy chain gun with no spin up delay.<br>—Quake II manual</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>046/120 R &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card long" data-color="A" data-rarity="U" data-type="Artifact" data-name="power shield" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Power Shield</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Energy_Armor.jpg" alt=""><img class="fg" loading="lazy" src="art/Energy_Armor.jpg" alt="Power Shield"></div>
+    <div class="typebar"><span class="type">Artifact — Equipment</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Equipped creature gets +0/+3 and has ward <img class="ms" src="../../common/symbols/2.svg" alt="{2}">. <i class="rem">(It burns cells to stop hits.)</i></p><p>Equip <img class="ms" src="../../common/symbols/2.svg" alt="{2}"></p></div><div class="flavor">Improved protection against energy weapons. It drains energy from your cells when damaged.<br>—Quake II manual</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>060/120 U &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card xlong" data-color="A" data-rarity="U" data-type="Artifact" data-name="super shotgun" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Super Shotgun</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Q2_Weapon_Super_Shotgun.png" alt=""><img class="fg" loading="lazy" src="art/Q2_Weapon_Super_Shotgun.png" alt="Super Shotgun"></div>
+    <div class="typebar"><span class="type">Artifact — Equipment</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Equipped creature gets +2/+0.</p><p>Whenever equipped creature attacks, it deals 2 damage to up to one target creature defending player controls.</p><p>Equip <img class="ms" src="../../common/symbols/2.svg" alt="{2}"></p></div><div class="flavor">The uncompromising big brother to the Shotgun. Choose your shots effectively.<br>—Quake II manual</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>041/120 U &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card long" data-color="A" data-rarity="R" data-type="Artifact" data-name="disruptor" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Disruptor</span><span class="cost"><img class="ms" src="../../common/symbols/4.svg" alt="{4}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Quake_II_Ground_Zero_Disintegrator.jpg" alt="Disruptor"></div>
+    <div class="typebar"><span class="type">Artifact — Equipment</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Equipped creature gets +2/+0.</p><p>Whenever equipped creature attacks, it deals 3 damage to target creature defending player controls. If that creature would die this turn, exile it instead.</p><p>Equip <img class="ms" src="../../common/symbols/3.svg" alt="{3}"></p></div><div class="flavor">It locks on. Then there&#x27;s nothing to lock on to.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>055/120 R &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card xlong legendary" data-color="A" data-rarity="M" data-type="Artifact" data-name="railgun" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Railgun</span><span class="cost"><img class="ms" src="../../common/symbols/4.svg" alt="{4}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Q2_Weapon_Rail_Gun.png" alt=""><img class="fg" loading="lazy" src="art/Q2_Weapon_Rail_Gun.png" alt="Railgun"></div>
+    <div class="typebar"><span class="type">Legendary Artifact — Equipment</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gM)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Equipped creature gets +2/+0.</p><p>Whenever equipped creature attacks, it deals 4 damage to target creature. That damage can&#x27;t be prevented. <i class="rem">(The slug goes through everything.)</i></p><p>Equip <img class="ms" src="../../common/symbols/3.svg" alt="{3}"></p></div><div class="flavor">Fires depleted uranium slugs at super high velocities. Note the distinctive blue corkscrew trail.<br>—Quake II manual</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>047/120 M &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card xlong" data-color="A" data-rarity="R" data-type="Artifact" data-name="rocket launcher" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Rocket Launcher</span><span class="cost"><img class="ms" src="../../common/symbols/4.svg" alt="{4}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Q2_Weapon_Rocket_Launcher.png" alt=""><img class="fg" loading="lazy" src="art/Q2_Weapon_Rocket_Launcher.png" alt="Rocket Launcher"></div>
+    <div class="typebar"><span class="type">Artifact — Equipment</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Equipped creature gets +3/+0 and has trample.</p><p>Whenever equipped creature attacks, it deals 2 damage to any target and 1 damage to you.</p><p>Equip <img class="ms" src="../../common/symbols/3.svg" alt="{3}"></p></div><div class="flavor">Delivers heavy fire power to your target. Be careful not to use this weapon in close combat.<br>—Quake II manual</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>045/120 R &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card xlong" data-color="A" data-rarity="R" data-type="Artifact" data-name="phalanx particle cannon" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Phalanx Particle Cannon</span><span class="cost"><img class="ms" src="../../common/symbols/5.svg" alt="{5}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Phalanx_Particle_Cannon.jpg" alt="Phalanx Particle Cannon"></div>
+    <div class="typebar"><span class="type">Artifact — Equipment</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Equipped creature gets +3/+0.</p><p>Whenever equipped creature attacks, it deals 3 damage divided as you choose among one or two targets.</p><p>Equip <img class="ms" src="../../common/symbols/3.svg" alt="{3}"></p></div><div class="flavor">Two quantum accelerated magnesium slugs. Use with extreme caution at close range.<br>—The Reckoning manual</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>050/120 R &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card long legendary" data-color="A" data-rarity="M" data-type="Artifact" data-name="bfg10k" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">BFG10K</span><span class="cost"><img class="ms" src="../../common/symbols/6.svg" alt="{6}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Q2_Weapon_BFG.png" alt=""><img class="fg" loading="lazy" src="art/Q2_Weapon_BFG.png" alt="BFG10K"></div>
+    <div class="typebar"><span class="type">Legendary Artifact — Equipment</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gM)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Equipped creature gets +4/+0.</p><p>Whenever equipped creature attacks, it deals 3 damage to each creature defending player controls.</p><p>Equip <img class="ms" src="../../common/symbols/4.svg" alt="{4}"></p></div><div class="flavor">Fifty cells. One green sun. Nothing left to argue with.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>048/120 M &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div></div></section><section class="deck-sec"><h2>Other Artifacts <small>14</small></h2><div class="grid"><div class="stack">
+<article class="card" data-color="A" data-rarity="C" data-type="Artifact" data-name="data cd" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Data CD</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Q2_Forcefield_green_datacd.png" alt="Data CD"></div>
+    <div class="typebar"><span class="type">Artifact — Ammo</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/1.svg" alt="{1}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">, Sacrifice Data CD: Draw a card.</p></div><div class="flavor">Whatever was on it, the computer wanted it badly.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>065/120 C &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card" data-color="A" data-rarity="U" data-type="Artifact" data-name="power cube" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Power Cube</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Power_Cube.png" alt=""><img class="fg" loading="lazy" src="art/Power_Cube.png" alt="Power Cube"></div>
+    <div class="typebar"><span class="type">Artifact — Ammo</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/C.svg" alt="{C}">. Spend this mana only to cast artifact spells or activate abilities of artifacts.</p></div><div class="flavor">Every door on Stroggos wants one. So does every gun.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>064/120 U &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card" data-color="A" data-rarity="C" data-type="Artifact" data-name="ammo pack" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Ammo Pack</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Backpack_2.png" alt=""><img class="fg" loading="lazy" src="art/Backpack_2.png" alt="Ammo Pack"></div>
+    <div class="typebar"><span class="type">Artifact — Ammo</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>When Ammo Pack enters, draw a card.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">, Sacrifice Ammo Pack: Add <img class="ms" src="../../common/symbols/C.svg" alt="{C}"><img class="ms" src="../../common/symbols/C.svg" alt="{C}">.</p></div><div class="flavor">This allows you to carry more ammo on your back.<br>—Quake II manual</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>063/120 C &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card" data-color="A" data-rarity="U" data-type="Artifact" data-name="bandolier" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Bandolier</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Bandolier_2.png" alt="Bandolier"></div>
+    <div class="typebar"><span class="type">Artifact — Ammo</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Equip abilities you activate cost <img class="ms" src="../../common/symbols/1.svg" alt="{1}"> less to activate.</p></div><div class="flavor">Increases your carrying capacity for all ammunition except grenades and rockets.<br>—Quake II manual</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>062/120 U &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card" data-color="A" data-rarity="U" data-type="Artifact" data-name="bullets" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Bullets</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Bullets_2.png" alt=""><img class="fg" loading="lazy" src="art/Bullets_2.png" alt="Bullets"></div>
+    <div class="typebar"><span class="type">Artifact — Ammo</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/C.svg" alt="{C}">.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/U.svg" alt="{U}"> or <img class="ms" src="../../common/symbols/R.svg" alt="{R}">. Bullets deals 1 damage to you.</p></div><div class="flavor">Fifty rounds. The Chaingun disagrees about how long that lasts.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>112/120 U &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card" data-color="A" data-rarity="U" data-type="Artifact" data-name="cells" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Cells</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Cell_2.png" alt=""><img class="fg" loading="lazy" src="art/Cell_2.png" alt="Cells"></div>
+    <div class="typebar"><span class="type">Artifact — Ammo</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/C.svg" alt="{C}">.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/W.svg" alt="{W}"> or <img class="ms" src="../../common/symbols/U.svg" alt="{U}">. Cells deals 1 damage to you.</p></div><div class="flavor">Power for the Hyperblaster, the BFG, and the shield. Pick one.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>113/120 U &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card" data-color="A" data-rarity="R" data-type="Artifact" data-name="field computer" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Field Computer</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Palace_Computer.jpg" alt="Field Computer"></div>
+    <div class="typebar"><span class="type">Artifact — Ammo</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Whenever an artifact you control is put into a graveyard from the battlefield, draw a card.</p></div><div class="flavor">Every dead Strogg is a data point.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>119/120 R &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card" data-color="A" data-rarity="U" data-type="Artifact" data-name="pyramid key" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Pyramid Key</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Pyramid_Key.jpg" alt=""><img class="fg" loading="lazy" src="art/Pyramid_Key.jpg" alt="Pyramid Key"></div>
+    <div class="typebar"><span class="type">Artifact — Ammo</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">, Sacrifice Pyramid Key: Search your library for a land card, put it onto the battlefield tapped, then shuffle.</p></div><div class="flavor">It opens the way to the Palace.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>067/120 U &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card" data-color="A" data-rarity="U" data-type="Artifact" data-name="shells" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Shells</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Shells_2.png" alt=""><img class="fg" loading="lazy" src="art/Shells_2.png" alt="Shells"></div>
+    <div class="typebar"><span class="type">Artifact — Ammo</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/C.svg" alt="{C}">.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/R.svg" alt="{R}"> or <img class="ms" src="../../common/symbols/W.svg" alt="{W}">. Shells deals 1 damage to you.</p></div><div class="flavor">Ten shells, and the Super Shotgun eats two at a time.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>111/120 U &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card" data-color="A" data-rarity="U" data-type="Artifact" data-name="trap" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Trap</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/The_Trap_in_action.jpg" alt=""><img class="fg" loading="lazy" src="art/The_Trap_in_action.jpg" alt="Trap"></div>
+    <div class="typebar"><span class="type">Artifact — Ammo</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/2.svg" alt="{2}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">, Sacrifice Trap: Exile target creature with mana value 3 or less. Create a Food token. <i class="rem">(It&#x27;s an artifact with &quot;<img class="ms" src="../../common/symbols/2.svg" alt="{2}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">, Sacrifice this artifact: You gain 3 life.&quot;)</i></p></div><div class="flavor">It pulls them in, and what comes out is lunch.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>070/120 U &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card legendary" data-color="A" data-rarity="R" data-type="Artifact" data-name="commander&#x27;s head" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Commander&#x27;s Head</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Comander_wounded.png" alt="Commander&#x27;s Head"></div>
+    <div class="typebar"><span class="type">Legendary Artifact</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Target artifact creature can&#x27;t block this turn. <i class="rem">(The scanners recognise him.)</i></p><p><img class="ms" src="../../common/symbols/3.svg" alt="{3}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">, Sacrifice Commander&#x27;s Head: Gain control of target artifact creature.</p></div><div class="flavor">The Strogg&#x27;s own security only checks the face.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>068/120 R &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card" data-color="A" data-rarity="U" data-type="Artifact" data-name="data spinner" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Data Spinner</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Item_data_spinner.jpg" alt="Data Spinner"></div>
+    <div class="typebar"><span class="type">Artifact — Ammo</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/2.svg" alt="{2}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Draw a card.</p></div><div class="flavor">Every spin is another Strogg secret.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>115/120 U &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card" data-color="A" data-rarity="U" data-type="Artifact" data-name="reactor core" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Reactor Core</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Q2_gridcontrol.png" alt="Reactor Core"></div>
+    <div class="typebar"><span class="type">Artifact — Ammo</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Reactor Core enters tapped.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/C.svg" alt="{C}"><img class="ms" src="../../common/symbols/C.svg" alt="{C}">.</p></div><div class="flavor">The Power Plant feeds the whole complex. Tap it and the lights go out somewhere else.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>114/120 U &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card" data-color="A" data-rarity="U" data-type="Artifact" data-name="strogg assembly line" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Strogg Assembly Line</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Q2_receiving_ctr.png" alt="Strogg Assembly Line"></div>
+    <div class="typebar"><span class="type">Artifact — Ammo</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Artifact spells you cast cost <img class="ms" src="../../common/symbols/1.svg" alt="{1}"> less to cast.</p></div><div class="flavor">The Factory never stops. Neither do the things that walk out of it.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>118/120 U &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div></div></section><section class="deck-sec"><h2>Instants & Sorceries <small>13</small></h2><div class="grid"><div class="stack">
+<article class="card" data-color="U" data-rarity="C" data-type="Instant" data-name="scanner sweep" style="--frame:#1f6aa8;--frame2:#144d80;--box:#dfe9f3;--text:#dde7f0;--pin:#0e4678;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Scanner Sweep</span><span class="cost"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Q2_security_complex.png" alt="Scanner Sweep"></div>
+    <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Scry 1, then draw a card.</p></div><div class="flavor">Motion on the tracker. Always motion on the tracker.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>120/120 C &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card long" data-color="R" data-rarity="U" data-type="Instant" data-name="double damage" style="--frame:#c2392d;--frame2:#8f241c;--box:#f3dcd3;--text:#f1d9cf;--pin:#7d1d15;--pin2:#7d1d15">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Double Damage</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/R.svg" alt="{R}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Ddamage.jpg" alt=""><img class="fg" loading="lazy" src="art/Ddamage.jpg" alt="Double Damage"></div>
+    <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Until end of turn, if a source you control would deal damage to a permanent or player, it deals double that damage instead.</p></div><div class="flavor">Like the Quad Damage, this item doubles the damage you inflict on your enemy.<br>—Ground Zero manual</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>088/120 U &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card" data-color="R" data-rarity="C" data-type="Instant" data-name="hand grenade" style="--frame:#c2392d;--frame2:#8f241c;--box:#f3dcd3;--text:#f1d9cf;--pin:#7d1d15;--pin2:#7d1d15">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Hand Grenade</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/R.svg" alt="{R}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Q2_Weapon_Hand_Grenade.png" alt=""><img class="fg" loading="lazy" src="art/Q2_Weapon_Hand_Grenade.png" alt="Hand Grenade"></div>
+    <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Hand Grenade deals 3 damage divided as you choose among one, two, or three targets.</p></div><div class="flavor">The longer you hold an active grenade, the farther you’ll throw it. Just remember to throw at some point.<br>—Quake II manual</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>089/120 C &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card" data-color="R" data-rarity="C" data-type="Instant" data-name="laser grid" style="--frame:#c2392d;--frame2:#8f241c;--box:#f3dcd3;--text:#f1d9cf;--pin:#7d1d15;--pin2:#7d1d15">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Laser Grid</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/R.svg" alt="{R}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Q2_Forcefield_red.png" alt="Laser Grid"></div>
+    <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Laser Grid deals 3 damage to target creature.</p></div><div class="flavor">Walk into it and you arrive in pieces.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>090/120 C &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card" data-color="W" data-rarity="C" data-type="Instant" data-name="medkit" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Medkit</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Small_2.png" alt=""><img class="fg" loading="lazy" src="art/Small_2.png" alt="Medkit"></div>
+    <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Target creature you control gets +2/+2 until end of turn. You gain 3 life.</p></div><div class="flavor">Twenty-five points between you and the floor.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>075/120 C &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card" data-color="U" data-rarity="C" data-type="Instant" data-name="strogg salvage" style="--frame:#1f6aa8;--frame2:#144d80;--box:#dfe9f3;--text:#dde7f0;--pin:#0e4678;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Strogg Salvage</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Q2_supplystat.png" alt="Strogg Salvage"></div>
+    <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Draw a card. If you control three or more artifacts, draw two cards instead.</p></div><div class="flavor">Nothing on Stroggos is wasted. Not even the dead.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>116/120 C &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card" data-color="U" data-rarity="C" data-type="Instant" data-name="strogg teleporter" style="--frame:#1f6aa8;--frame2:#144d80;--box:#dfe9f3;--text:#dde7f0;--pin:#0e4678;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Strogg Teleporter</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Pumping_Station_1_Teleporter.png" alt="Strogg Teleporter"></div>
+    <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Exile target creature. Return it to the battlefield under its owner&#x27;s control at the beginning of the next end step.</p></div><div class="flavor">Step on the pad. Arrive somewhere worse.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>082/120 C &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card" data-color="U" data-rarity="C" data-type="Instant" data-name="uplink" style="--frame:#1f6aa8;--frame2:#144d80;--box:#dfe9f3;--text:#dde7f0;--pin:#0e4678;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Uplink</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Q2_commsatellite.png" alt="Uplink"></div>
+    <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Scry 2, then draw a card.</p></div><div class="flavor">The satellite sees everything. You get the parts it chooses to share.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>117/120 C &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card" data-color="U" data-rarity="C" data-type="Instant" data-name="mission objective" style="--frame:#1f6aa8;--frame2:#144d80;--box:#dfe9f3;--text:#dde7f0;--pin:#0e4678;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Mission Objective</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Q2_commcent.png" alt="Mission Objective"></div>
+    <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Draw two cards.</p></div><div class="flavor">OBJECTIVE COMPLETE. New objective: keep breathing.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>083/120 C &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card" data-color="W" data-rarity="R" data-type="Instant" data-name="invulnerability" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Invulnerability</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Sss.jpg" alt="Invulnerability"></div>
+    <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Prevent all damage that would be dealt to you and permanents you control until your next turn.</p></div><div class="flavor">Renders you temporarily indestructible.<br>—Quake II manual</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>074/120 R &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card long" data-color="R" data-rarity="R" data-type="Instant" data-name="quad damage" style="--frame:#c2392d;--frame2:#8f241c;--box:#f3dcd3;--text:#f1d9cf;--pin:#7d1d15;--pin2:#7d1d15">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Quad Damage</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/R.svg" alt="{R}"><img class="ms" src="../../common/symbols/R.svg" alt="{R}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Quad_Damage_II.JPG" alt=""><img class="fg" loading="lazy" src="art/Quad_Damage_II.JPG" alt="Quad Damage"></div>
+    <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Until end of turn, if a source you control would deal damage to a permanent or player, it deals four times that much damage instead.</p></div><div class="flavor">The quad temporarily multiplies all your weapon’s strengths by four times. Let the gibbing begin!<br>—Quake II manual</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>087/120 R &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card long" data-color="MUR" data-rarity="R" data-type="Sorcery" data-name="stroggification" style="--frame:#d3b24c;--frame2:#a8862c;--box:#f4e8c2;--text:#f3e7c4;--pin:#8a6c1d;--pin2:#8a6c1d">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Stroggification</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"><img class="ms" src="../../common/symbols/R.svg" alt="{R}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Q2_processing_plant.png" alt="Stroggification"></div>
+    <div class="typebar"><span class="type">Sorcery</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Gain control of target creature. It becomes an artifact in addition to its other types, and it&#x27;s a Strogg in addition to its other types.</p></div><div class="flavor">They call this Stroggification? Looks more like mutilation to me.<br>—Marine medical team</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>086/120 R &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card" data-color="R" data-rarity="R" data-type="Sorcery" data-name="antimatter bomb" style="--frame:#c2392d;--frame2:#8f241c;--box:#f3dcd3;--text:#f1d9cf;--pin:#7d1d15;--pin2:#7d1d15">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Antimatter Bomb</span><span class="cost"><img class="ms" src="../../common/symbols/4.svg" alt="{4}"><img class="ms" src="../../common/symbols/R.svg" alt="{R}"><img class="ms" src="../../common/symbols/R.svg" alt="{R}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/A-M_Bomb.jpg" alt=""><img class="fg" loading="lazy" src="art/A-M_Bomb.jpg" alt="Antimatter Bomb"></div>
+    <div class="typebar"><span class="type">Sorcery</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Antimatter Bomb deals 4 damage to each creature and each player.</p></div><div class="flavor">You place it, activate it, and then… run for your freakin’ life!<br>—Ground Zero manual</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>091/120 R &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div></div></section><section class="deck-sec"><h2>Enchantments <small>3</small></h2><div class="grid"><div class="stack">
+<article class="card xxlong" data-color="W" data-rarity="U" data-type="Enchantment" data-name="megahealth" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Megahealth</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Mega_2.png" alt=""><img class="fg" loading="lazy" src="art/Mega_2.png" alt="Megahealth"></div>
+    <div class="typebar"><span class="type">Enchantment — Aura</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Enchant creature</p><p>Vanishing 3 <i class="rem">(This Aura enters with three time counters on it. At the beginning of your upkeep, remove a time counter from it. When the last is removed, sacrifice it.)</i></p><p>Enchanted creature gets +3/+3.</p><p>When Megahealth enters, you gain 3 life.</p></div><div class="flavor">A temporary but significant boost to your health. This will wear off after a minute or so.<br>—Quake II manual</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>078/120 U &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card" data-color="W" data-rarity="C" data-type="Enchantment" data-name="detained" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Detained</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Q2_torture_chambers.png" alt="Detained"></div>
+    <div class="typebar"><span class="type">Enchantment — Aura</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Enchant creature</p><p>Enchanted creature can&#x27;t attack or block, and its activated abilities can&#x27;t be activated.</p></div><div class="flavor">The Detention Center has room for one more.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>081/120 C &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card" data-color="W" data-rarity="R" data-type="Enchantment" data-name="force field" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Force Field</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Q2_Forcefield_blue.png" alt=""><img class="fg" loading="lazy" src="art/Q2_Forcefield_blue.png" alt="Force Field"></div>
+    <div class="typebar"><span class="type">Enchantment</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Creatures can&#x27;t attack you unless their controller pays <img class="ms" src="../../common/symbols/2.svg" alt="{2}"> for each creature they control that&#x27;s attacking you.</p></div><div class="flavor">Blue means closed. Find the Power Cube.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>080/120 R &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div></div></section><section class="deck-sec"><h2>Lands <small>37</small></h2><div class="grid"><div class="stack">
+<article class="card" data-color="LC" data-rarity="R" data-type="Land" data-name="big gun" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:#ede3cf;--pin:#6f5b39;--pin2:#6f5b39">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Big Gun</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/BigGunSkyBox2.jpg" alt="Big Gun"></div>
+    <div class="typebar"><span class="type">Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/C.svg" alt="{C}">.</p><p><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/R.svg" alt="{R}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">, Sacrifice Big Gun: It deals 4 damage to target creature.</p></div><div class="flavor">Unit 7 — Built to shoot ships out of orbit. Works fine on a Tank.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>104/120 R &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card" data-color="LU" data-rarity="U" data-type="Land" data-name="detention center" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:linear-gradient(180deg,#ede3cf,#dde7f0);--pin:#6f5b39;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Detention Center</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Q2_detention_center.png" alt="Detention Center"></div>
+    <div class="typebar"><span class="type">Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Detention Center enters tapped unless you control two or more artifacts.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/U.svg" alt="{U}"> or <img class="ms" src="../../common/symbols/R.svg" alt="{R}">.</p></div><div class="flavor">Unit 3 — Jail</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>097/120 U &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card" data-color="LC" data-rarity="R" data-type="Land" data-name="drop zone" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:#ede3cf;--pin:#6f5b39;--pin2:#6f5b39">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Drop Zone</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Q2_StroggOutpost.png" alt="Drop Zone"></div>
+    <div class="typebar"><span class="type">Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add one mana of any color in your commander&#x27;s color identity.</p></div><div class="flavor">Where the pod hit. Where the war starts.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>094/120 R &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card legendary" data-color="LC" data-rarity="R" data-type="Land" data-name="final showdown" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:#ede3cf;--pin:#6f5b39;--pin2:#6f5b39">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Final Showdown</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Q2_finalshowdown.png" alt="Final Showdown"></div>
+    <div class="typebar"><span class="type">Legendary Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/C.svg" alt="{C}">.</p><p><img class="ms" src="../../common/symbols/3.svg" alt="{3}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">, Sacrifice Final Showdown: Destroy target creature with power 5 or greater.</p></div><div class="flavor">Unit 10 — Boss fight.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>107/120 R &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card" data-color="LC" data-rarity="U" data-type="Land" data-name="hangars" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:#ede3cf;--pin:#6f5b39;--pin2:#6f5b39">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Hangars</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Q2_outerhangar.png" alt="Hangars"></div>
+    <div class="typebar"><span class="type">Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/C.svg" alt="{C}">.</p><p><img class="ms" src="../../common/symbols/3.svg" alt="{3}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Create a 1/1 blue Strogg Drone artifact creature token with flying.</p></div><div class="flavor">Unit 8</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>105/120 U &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card legendary" data-color="LC" data-rarity="R" data-type="Land" data-name="inner chamber" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:#ede3cf;--pin:#6f5b39;--pin2:#6f5b39">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Inner Chamber</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Q2_innerchamber.png" alt="Inner Chamber"></div>
+    <div class="typebar"><span class="type">Legendary Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/C.svg" alt="{C}">.</p><p><img class="ms" src="../../common/symbols/4.svg" alt="{4}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Return target artifact card from your graveyard to your hand.</p></div><div class="flavor">Follow me, human.<br>—the Makron</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>106/120 R &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card" data-color="LW" data-rarity="U" data-type="Land" data-name="installation" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:linear-gradient(180deg,#ede3cf,#f5f1e3);--pin:#6f5b39;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Installation</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Q2_installation.png" alt="Installation"></div>
+    <div class="typebar"><span class="type">Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Installation enters tapped unless you control two or more artifacts.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/W.svg" alt="{W}"> or <img class="ms" src="../../common/symbols/U.svg" alt="{U}">.</p></div><div class="flavor">Marines, we’re at 5% ground force operational status.<br>—TCM radio transmission</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>096/120 U &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack"><div class="count">×7</div>
+<article class="card" data-color="LU" data-rarity="C" data-type="Land" data-name="island" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:linear-gradient(180deg,#ede3cf,#dde7f0);--pin:#6f5b39;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Island</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Q2_coolingfactory.png" alt="Island"></div>
+    <div class="typebar"><span class="type">Basic Land — Island</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><div class="bigsym"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></div></div><div class="flavor basicflavor">Cooling Facility</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>109/120 C &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card" data-color="LR" data-rarity="U" data-type="Land" data-name="mine entrance" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:linear-gradient(180deg,#ede3cf,#f1d9cf);--pin:#6f5b39;--pin2:#7d1d15">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Mine Entrance</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Q2_mine_entrance.png" alt="Mine Entrance"></div>
+    <div class="typebar"><span class="type">Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Mine Entrance enters tapped unless you control two or more artifacts.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/R.svg" alt="{R}"> or <img class="ms" src="../../common/symbols/W.svg" alt="{W}">.</p></div><div class="flavor">Navigate mines. Find service entrance to factory.<br>—Mission briefing</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>098/120 U &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack"><div class="count">×9</div>
+<article class="card" data-color="LR" data-rarity="C" data-type="Land" data-name="mountain" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:linear-gradient(180deg,#ede3cf,#f1d9cf);--pin:#6f5b39;--pin2:#7d1d15">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Mountain</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Q2_lowermines.png" alt="Mountain"></div>
+    <div class="typebar"><span class="type">Basic Land — Mountain</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><div class="bigsym"><img class="ms" src="../../common/symbols/R.svg" alt="{R}"></div></div><div class="flavor basicflavor">Lower Mines</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>110/120 C &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card" data-color="LR" data-rarity="U" data-type="Land" data-name="outer base" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:linear-gradient(180deg,#ede3cf,#f1d9cf);--pin:#6f5b39;--pin2:#7d1d15">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Outer Base</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Q2_outrbase.png" alt="Outer Base"></div>
+    <div class="typebar"><span class="type">Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Outer Base enters tapped unless you control two or more artifacts.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/R.svg" alt="{R}"> or <img class="ms" src="../../common/symbols/W.svg" alt="{W}">.</p></div><div class="flavor">Reporting 80% failing vital sign track.<br>—TCM radio transmission</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>095/120 U &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack"><div class="count">×7</div>
+<article class="card" data-color="LW" data-rarity="C" data-type="Land" data-name="plains" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:linear-gradient(180deg,#ede3cf,#f5f1e3);--pin:#6f5b39;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Plains</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Q2_upperpalace.png" alt="Plains"></div>
+    <div class="typebar"><span class="type">Basic Land — Plains</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><div class="bigsym"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></div></div><div class="flavor basicflavor">Upper Palace</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>108/120 C &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card long" data-color="LU" data-rarity="U" data-type="Land" data-name="power plant" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:linear-gradient(180deg,#ede3cf,#dde7f0);--pin:#6f5b39;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Power Plant</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Q2_powerplant.png" alt="Power Plant"></div>
+    <div class="typebar"><span class="type">Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Power Plant enters tapped unless you control two or more artifacts.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/U.svg" alt="{U}"> or <img class="ms" src="../../common/symbols/R.svg" alt="{R}">.</p></div><div class="flavor">Proceed north to Big Gun area. Infiltrate and destroy Strogg main reactor.<br>—Mission briefing</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>100/120 U &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card long" data-color="LW" data-rarity="U" data-type="Land" data-name="processing plant" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:linear-gradient(180deg,#ede3cf,#f5f1e3);--pin:#6f5b39;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Processing Plant</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Q2_Reactor.png" alt="Processing Plant"></div>
+    <div class="typebar"><span class="type">Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Processing Plant enters tapped unless you control two or more artifacts.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/W.svg" alt="{W}"> or <img class="ms" src="../../common/symbols/U.svg" alt="{U}">.</p></div><div class="flavor">We have confirmed visual on troops being… being disassembled.<br>—TCM radio transmission</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>099/120 U &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card" data-color="LU" data-rarity="C" data-type="Land" data-name="the edge" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:linear-gradient(180deg,#ede3cf,#dde7f0);--pin:#6f5b39;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">The Edge</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Q2DM1_-_The_Edge.png" alt="The Edge"></div>
+    <div class="typebar"><span class="type">Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>The Edge enters tapped.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/U.svg" alt="{U}"> or <img class="ms" src="../../common/symbols/R.svg" alt="{R}">.</p></div><div class="flavor">Q2DM1</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>101/120 C &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card" data-color="LW" data-rarity="C" data-type="Land" data-name="the frag pipe" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:linear-gradient(180deg,#ede3cf,#f5f1e3);--pin:#6f5b39;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">The Frag Pipe</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Q2DM3_-_The_Frag_Pipe.png" alt="The Frag Pipe"></div>
+    <div class="typebar"><span class="type">Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>The Frag Pipe enters tapped.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/W.svg" alt="{W}"> or <img class="ms" src="../../common/symbols/U.svg" alt="{U}">.</p></div><div class="flavor">Q2DM3</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>103/120 C &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div><div class="stack">
+<article class="card" data-color="LR" data-rarity="C" data-type="Land" data-name="tokay&#x27;s towers" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:linear-gradient(180deg,#ede3cf,#f1d9cf);--pin:#6f5b39;--pin2:#7d1d15">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Tokay&#x27;s Towers</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Q2DM2_-_Tokay_s_Towers.png" alt="Tokay&#x27;s Towers"></div>
+    <div class="typebar"><span class="type">Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Tokay&#x27;s Towers enters tapped.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/R.svg" alt="{R}"> or <img class="ms" src="../../common/symbols/W.svg" alt="{W}">.</p></div><div class="flavor">Q2DM2</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>102/120 C &nbsp;QAO &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></div></div></section><script>
+const zov=document.createElement("div");zov.id="zoomov";
+const zwr=document.createElement("div");zwr.className="zwrap";zov.appendChild(zwr);document.body.appendChild(zov);
+function zclose(){zov.classList.remove("on");document.body.style.overflow="";}
+document.addEventListener("click",e=>{
+  const c=e.target.closest(".card");
+  if(c&&!zov.contains(c)){
+    zwr.innerHTML="";const k=c.cloneNode(true);k.classList.remove("hidden");
+    k.querySelectorAll("img[loading]").forEach(i=>i.removeAttribute("loading"));
+    zwr.appendChild(k);zov.classList.add("on");document.body.style.overflow="hidden";
+  }else if(zov.classList.contains("on"))zclose();
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")zclose();});
+</script></body></html>

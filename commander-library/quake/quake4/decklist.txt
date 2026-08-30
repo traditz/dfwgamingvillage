@@ -1,0 +1,96 @@
+// RHINO SQUAD — Quake IV: Stroggification Commander deck (100)
+
+// Commander
+1 Matthew Kane, Reactivated
+
+// Creatures (25)
+1 Cortez, Point Man
+1 Failed Transfer
+1 Repair Bot
+1 Shotgun Guard
+1 Strogg Flyer
+1 Strogg Grunt
+1 Anderson, Rhino Squad
+1 Bidwell, Squad Technician
+1 Morris, Convoy Driver
+1 Strauss, Squad Medic
+1 Strogg Scientist
+1 Voss, Rhino Squad Leader
+1 Berserker
+1 General Harper
+1 Iron Maiden
+1 Sledge, Heavy Weapons
+1 Stream Protector
+1 Strogg Gunner
+1 Teleport Dropper
+1 Hornet
+1 Strogg Gladiator
+1 Voss, Strogg Commander
+1 Harvester
+1 Heavy Hover Tank
+1 Makron
+
+// Equipment (8)
+1 Hyperblaster
+1 Machine Gun
+1 Shotgun
+1 Grenade Launcher
+1 Nailgun
+1 Railgun
+1 Rocket Launcher
+1 Dark Matter Gun
+
+// Other Artifacts (14)
+1 Armor Shard
+1 Battery
+1 Lightning Coil
+1 Marine Buggy
+1 Medkit
+1 Nail Magazine
+1 Rocket Case
+1 Shell Box
+1 Slug Pack
+1 Dark Matter Core
+1 Marine Dropship
+1 Stroyent Tank
+1 Quad Damage
+1 Strogg Convoy
+
+// Instants & Sorceries (14)
+1 Blaster Fire
+1 Stroyent Ration
+1 Putrification
+1 Recon
+1 Salvage Detail
+1 Strogg Gateway
+1 Air Strike
+1 Data Networking
+1 Stroggification
+1 Waste Disposal
+1 Orbital Dispersal
+1 Tetranode Override
+1 Nexus Awakening
+1 Recomposition
+
+// Enchantments (1)
+1 Rhino Squad
+
+// Lands (37)
+1 Air Defense Trenches
+1 Construction Zone
+1 Data Processing Security
+1 Data Storage Terminal
+1 Dispersal Facility
+1 Hangar Perimeter
+1 Interior Hangar
+7 Island
+1 MCC Landing Site
+7 Mountain
+1 Nexus Hub Tunnels
+1 Perimeter Defense Station
+1 Strogg Medical Facilities
+8 Swamp
+1 The Aqueducts
+1 The Canyon
+1 The Nexus Core
+1 Tram Hub Station

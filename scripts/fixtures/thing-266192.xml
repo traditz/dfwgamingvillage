@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items>
+  <item type="boardgame" id="266192">
+    <name type="primary" sortindex="1" value="Wingspan"/>
+    <link type="boardgameexpansion" id="290448" value="Wingspan: European Expansion"/>
+    <link type="boardgameexpansion" id="300580" value="Wingspan: Oceania Expansion"/>
+    <link type="boardgameexpansion" id="328054" value="Wingspan: Asia"/>
+  </item>
+</items>

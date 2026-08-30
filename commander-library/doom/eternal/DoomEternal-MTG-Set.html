@@ -1,0 +1,1258 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Doom Eternal: The Maykr Directive — Custom MTG Set</title><style>@font-face{font-family:'Cinzel';font-style:normal;font-weight:700;src:url('../../common/fonts/Cinzel-700.woff2') format('woff2')}
+@font-face{font-family:'Crimson Text';font-style:italic;font-weight:400;src:url('../../common/fonts/CrimsonText-400-italic.woff2') format('woff2')}
+@font-face{font-family:'Crimson Text';font-style:normal;font-weight:400;src:url('../../common/fonts/CrimsonText-400.woff2') format('woff2')}
+@font-face{font-family:'Crimson Text';font-style:normal;font-weight:600;src:url('../../common/fonts/CrimsonText-600.woff2') format('woff2')}
+@font-face{font-family:'Philosopher';font-style:normal;font-weight:700;src:url('../../common/fonts/Philosopher-700.woff2') format('woff2')}
+</style><style>
+:root{--bg:#15161a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:#e8e6df;font-family:"Segoe UI",system-ui,Helvetica,Arial,sans-serif}
+header.page{padding:28px 32px 10px;border-bottom:1px solid #2a2c33}
+header.page h1{margin:0;font-size:30px;letter-spacing:.04em;color:#f0c96a;font-family:"Cinzel",Georgia,serif}
+header.page h1 small{display:block;font-size:13px;letter-spacing:.2em;color:#9aa0ad;font-family:"Segoe UI",system-ui,sans-serif;margin-top:4px}
+header.page a{color:#9aa0ad}
+.meta{color:#9aa0ad;font-size:13px;margin-top:10px;line-height:1.6}
+.meta b{color:#d8d4c8}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;padding:14px 32px;position:sticky;top:0;background:rgba(21,22,26,.96);backdrop-filter:blur(4px);z-index:5;border-bottom:1px solid #2a2c33;align-items:center}
+.toolbar button{background:#23252c;color:#d8d4c8;border:1px solid #3a3d47;border-radius:999px;padding:5px 12px;font-size:12px;cursor:pointer}
+.toolbar button.on{background:#f0c96a;color:#111;border-color:#f0c96a}
+.toolbar input{background:#23252c;color:#eee;border:1px solid #3a3d47;border-radius:8px;padding:6px 10px;font-size:13px;min-width:200px}
+.toolbar .sep{width:1px;height:22px;background:#3a3d47;margin:0 4px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:26px;padding:28px 32px 60px}
+
+/* ---------- the card ---------- */
+.card{container-type:inline-size;aspect-ratio:63/88;position:relative;background:#0b0b0b;border-radius:4.6%/3.3%;box-shadow:0 8px 22px rgba(0,0,0,.6);color:#111;overflow:hidden}
+.card.hidden{display:none}
+.frame{position:absolute;left:4.4cqw;top:4.4cqw;right:4.4cqw;bottom:7.2cqw;border-radius:1.8cqw;
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .28 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"),
+    radial-gradient(120% 90% at 50% 0%,rgba(255,255,255,.22),rgba(255,255,255,0) 60%),
+    var(--frame2);
+  box-shadow:inset 0 0 0 .5cqw rgba(0,0,0,.35)}
+.frame::before{content:"";position:absolute;inset:1.1cqw;border-radius:1.3cqw;background:var(--frame);opacity:.92;mix-blend-mode:screen;pointer-events:none}
+.frame::after{content:"";position:absolute;inset:1.1cqw;border-radius:1.3cqw;background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.55' numOctaves='4' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .22 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    mix-blend-mode:multiply;pointer-events:none}
+.frame > *{position:absolute;z-index:1}
+.titlebar,.typebar{left:2.6cqw;right:2.6cqw;display:flex;align-items:center;justify-content:space-between;gap:1.5cqw;padding:0 2.6cqw;
+  background:var(--box);border:.45cqw solid var(--pin);border-radius:1.2cqw;box-shadow:0 .4cqw .6cqw rgba(0,0,0,.45),inset 0 0 0 .3cqw rgba(255,255,255,.35)}
+.titlebar{top:2.4cqw;height:8.8cqw}
+.card.legendary .titlebar{border-radius:3.2cqw 3.2cqw 1.2cqw 1.2cqw;box-shadow:0 .4cqw .6cqw rgba(0,0,0,.45),inset 0 0 0 .3cqw rgba(255,255,255,.35),0 -.9cqw 0 -.2cqw var(--pin)}
+.name{font-family:"Beleren","Philosopher","Trajan Pro",Georgia,serif;font-weight:700;font-size:4.9cqw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.01em}
+.cost{display:flex;gap:.5cqw;flex-shrink:0}
+.card.longname .name{font-size:3.5cqw;letter-spacing:-.02em}
+.card.xlongname .name{font-size:2.9cqw;letter-spacing:-.03em}
+.ms{width:4.7cqw;height:4.7cqw;border-radius:50%;box-shadow:-.25cqw .35cqw 0 rgba(0,0,0,.65);vertical-align:-.15em}
+.rules .ms{width:1.1em;height:1.1em;box-shadow:-.07em .1em 0 rgba(0,0,0,.65)}
+.art{top:11.9cqw;left:4.2cqw;right:4.2cqw;height:59.5cqw;background:#000;border:.45cqw solid var(--pin);overflow:hidden;display:flex;align-items:center;justify-content:center}
+.art img.fg{position:relative;width:100%;height:100%;object-fit:cover;display:block}
+.art.fit-contain img.fg{object-fit:contain;z-index:1}
+.art img.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(12px) brightness(.45) saturate(1.2);transform:scale(1.25)}
+.art.pixel img.fg{image-rendering:pixelated;object-fit:contain;width:60%;height:94%;flex:none}
+.typebar{top:71.6cqw;height:8cqw}
+.type{font-family:"Beleren","Philosopher",Georgia,serif;font-weight:700;font-size:3.9cqw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card.longtype .type{font-size:3.5cqw;letter-spacing:-.01em}
+.card.xlongtype .type{font-size:3.2cqw;letter-spacing:-.015em}
+.card.xxlongtype .type{font-size:2.9cqw;letter-spacing:-.02em}
+.setsym{width:6.2cqw;height:6.2cqw;flex-shrink:0;filter:drop-shadow(0 .2cqw .2cqw rgba(0,0,0,.5))}
+.textbox{top:79.8cqw;left:4.2cqw;right:4.2cqw;bottom:3.6cqw;background:var(--text);border:.45cqw solid var(--pin);padding:2cqw 2.8cqw;
+  display:flex;flex-direction:column;gap:1.2cqw;overflow:hidden;font-family:"MPlantin","Crimson Text","EB Garamond",Georgia,serif;font-size:4.05cqw;line-height:1.22;
+  box-shadow:inset 0 0 1.5cqw rgba(0,0,0,.18)}
+.textbox::before{content:"";position:absolute;inset:0;pointer-events:none;background:
+  url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .07 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.rules{position:relative}
+.bigsym{display:flex;justify-content:center;align-items:center;padding-top:3cqw}
+.bigsym .ms{width:26cqw;height:26cqw;box-shadow:-.6cqw .8cqw 0 rgba(0,0,0,.55)}
+.basicflavor{text-align:center;font-size:.85em}
+.rules p{margin:0 0 .9cqw}
+.rules p:last-child{margin:0}
+.rem{color:#2c2c2c}
+.flavor{position:relative;font-style:italic;margin-top:auto;padding-top:1.4cqw;font-size:.96em;line-height:1.2}
+.flavor br+ br{display:none}
+.flavor::before{content:"";display:block;width:38%;height:.3cqw;margin:0 auto 1.4cqw;background:linear-gradient(90deg,transparent,rgba(0,0,0,.55),transparent)}
+.card.long .textbox{font-size:3.6cqw;line-height:1.18}
+.card.xlong .textbox{font-size:3.15cqw;line-height:1.15;padding:1.4cqw 2.2cqw}
+.card.xxlong .textbox{font-size:2.8cqw;line-height:1.12;padding:1.1cqw 1.8cqw}
+.card.xxlong .flavor{font-size:2.7cqw}
+.card.has-pt .textbox{padding-bottom:6cqw}
+.pt{right:3.2cqw;bottom:1.6cqw;min-width:19cqw;height:8.6cqw;padding:0 3cqw;display:flex;align-items:center;justify-content:center;
+  background:var(--box);border:.45cqw solid var(--pin);border-radius:1.4cqw;font-family:"Beleren","Philosopher",Georgia,serif;font-weight:700;font-size:5.2cqw;
+  box-shadow:0 .4cqw .7cqw rgba(0,0,0,.5),inset 0 0 0 .3cqw rgba(255,255,255,.35);z-index:2}
+.foot{position:absolute;left:5.2cqw;right:5.2cqw;bottom:1.6cqw;color:#f2f2f2;font-size:2.35cqw;line-height:1.25;display:flex;justify-content:space-between;align-items:flex-end;font-family:"Segoe UI",Arial,sans-serif}
+.foot .l{display:flex;flex-direction:column;gap:.1cqw}
+.foot .r{text-align:right;color:#cfcfcf}
+.empty{padding:40px;color:#9aa0ad;text-align:center;display:none}
+.deck-sec{padding:8px 32px 10px}.deck-sec h2{font-family:Cinzel,Georgia,serif;color:#f0c96a;font-size:20px;margin:18px 0 6px;letter-spacing:.06em}.deck-sec h2 small{color:#9aa0ad;font-size:13px;margin-left:8px}
+.deck-sec .grid{padding:10px 0 20px}
+.stack{position:relative}.stack .count{position:absolute;z-index:3;top:-10px;right:-8px;background:#f0c96a;color:#111;font-weight:800;border-radius:999px;padding:3px 9px;font-size:13px;box-shadow:0 2px 6px rgba(0,0,0,.6)}
+.curve{display:flex;gap:6px;align-items:flex-end;margin-top:18px;height:100px}.curve .bar{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;width:36px;gap:2px;font-size:11px;color:#9aa0ad}.curve .fill{width:22px;background:#f0c96a;border-radius:3px 3px 0 0}.curve b{color:#e8e6df}
+.meta .ms{width:14px;height:14px}
+.grid .card,.deck-sec .card{cursor:zoom-in}
+#zoomov{position:fixed;inset:0;z-index:99;display:none;align-items:center;justify-content:center;background:rgba(5,5,8,.9);cursor:zoom-out;padding:2vh}
+#zoomov.on{display:flex}
+#zoomov .zwrap{width:min(92vw,66vh)}
+#zoomov .card{width:100%;cursor:zoom-out;box-shadow:0 24px 70px rgba(0,0,0,.85)}
+@media print{
+  body{background:#fff}
+  header.page,.toolbar,.deck-sec h2,#zoomov{display:none}
+  .grid,.deck-sec .grid{display:grid;grid-template-columns:repeat(3,63mm);gap:3mm;padding:8mm}
+  .deck-sec{padding:0}
+  .card{width:63mm;height:88mm;aspect-ratio:auto;box-shadow:none;border-radius:3mm;break-inside:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .card.hidden{display:none}
+  .stack .count{display:none}
+}
+</style></head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="gC" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2a2a2a"/><stop offset="1" stop-color="#000"/></linearGradient><linearGradient id="gU" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e3e8ec"/><stop offset=".5" stop-color="#7f8c96"/><stop offset="1" stop-color="#d5dbe0"/></linearGradient><linearGradient id="gR" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f3dc85"/><stop offset=".5" stop-color="#a9812a"/><stop offset="1" stop-color="#ecd275"/></linearGradient><linearGradient id="gM" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff9a4d"/><stop offset=".5" stop-color="#c2320f"/><stop offset="1" stop-color="#ffb75c"/></linearGradient><path id="setsympath" d="M3.0 19.3 L25.4 19.1 L27.3 20.7 L28.6 21.0 L30.8 19.1 L46.9 19.1 L49.5 21.0 L50.2 21.0 L52.7 19.1 L68.8 19.1 L71.4 21.0 L71.9 20.5 L72.1 19.1 L79.8 19.1 L81.2 21.2 L81.9 24.4 L82.7 25.5 L83.2 25.1 L83.2 24.1 L84.9 19.1 L96.5 19.1 L97.0 19.6 L97.0 20.5 L93.8 23.4 L93.8 66.6 L94.1 66.9 L93.5 68.2 L92.3 68.3 L85.4 63.0 L85.1 62.4 L85.1 52.4 L84.6 51.3 L83.8 52.7 L83.8 53.7 L82.7 55.2 L81.9 54.0 L81.9 53.1 L81.2 51.4 L80.6 51.1 L80.6 57.6 L79.8 58.7 L72.1 53.2 L71.4 52.3 L70.4 52.3 L58.7 61.1 L58.9 61.6 L60.8 61.6 L63.7 63.2 L66.6 63.2 L67.9 64.2 L78.2 64.2 L78.3 63.4 L77.4 61.8 L75.9 60.3 L74.5 59.5 L74.6 58.7 L75.9 58.7 L77.8 59.7 L80.4 61.9 L91.4 70.0 L92.2 70.8 L91.8 71.7 L90.4 72.9 L88.8 73.5 L86.9 76.1 L83.3 77.7 L63.4 77.7 L61.8 78.7 L59.2 78.7 L55.6 80.3 L51.4 79.9 L50.5 80.9 L49.8 80.9 L48.9 79.9 L47.9 80.3 L44.0 79.9 L42.1 78.7 L39.2 78.7 L37.6 77.7 L17.6 77.7 L12.8 75.4 L12.3 74.0 L11.5 73.2 L8.6 71.9 L7.8 70.8 L23.1 59.0 L25.1 58.4 L25.5 59.2 L23.9 60.5 L22.6 62.4 L22.0 63.7 L22.5 64.2 L32.1 64.2 L33.4 63.2 L36.3 63.2 L39.2 61.6 L41.8 61.6 L42.0 61.1 L31.2 52.9 L30.2 52.3 L29.2 52.3 L27.3 54.2 L8.3 68.3 L6.9 68.2 L6.9 24.1 L6.5 23.1 L3.3 20.5 L3.0 19.3 Z M16.0 29.1 L15.2 30.2 L15.2 47.6 L15.7 48.1 L16.7 47.7 L19.7 45.3 L19.7 29.6 L19.3 29.1 L16.0 29.1 Z M37.9 29.1 L37.1 29.9 L37.1 45.7 L41.1 48.7 L41.6 48.2 L41.6 29.9 L41.1 29.1 L37.9 29.1 Z M59.5 29.1 L58.7 29.9 L58.9 48.1 L59.5 48.1 L60.5 47.4 L63.2 45.0 L63.2 29.6 L62.7 29.1 L59.5 29.1 Z M50.2 55.8 L44.4 60.0 L42.9 61.4 L43.4 61.9 L44.4 61.9 L45.7 60.6 L46.9 60.0 L47.9 60.0 L48.1 60.8 L46.8 62.4 L47.6 62.6 L48.7 61.8 L49.4 59.5 L50.2 59.0 L50.6 59.5 L51.3 61.8 L53.7 63.8 L54.2 63.7 L53.9 62.7 L51.9 60.8 L52.1 60.0 L53.7 60.3 L56.0 62.2 L57.2 61.6 L57.4 61.1 L56.6 60.3 L50.2 55.8 Z" fill-rule="evenodd" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/></defs></svg>
+<header class="page">
+  <h1>DOOM ETERNAL: THE MAYKR DIRECTIVE <small>A FAN-MADE MAGIC: THE GATHERING SET · 79 CARDS · SET CODE DET · <a href="../index.html">deck library</a></small></h1>
+  <div class="meta"><b>35</b> Common · <b>25</b> Uncommon · <b>16</b> Rare · <b>3</b> Mythic Rare<br><b>25</b> W · <b>18</b> U · <b>0</b> B · <b>0</b> R · <b>0</b> G · <b>8</b> Gold · <b>0</b> Hybrid · <b>16</b> Artifact · <b>12</b> Land<br>Doom Eternal from Urdak's side of the ledger: Azorius flyers and control built on the printed <b>energy</b> mechanic — every death feeds the Khan Maykr's turbines, and the turbines pay for drones, judgment and divinity. With the Marauder, the Doom Hunter and the BFG-10000. Unofficial fan content. DOOM © id Software/Bethesda; Magic: The Gathering © Wizards of the Coast.</div>
+</header>
+<div class="toolbar"><button data-f="color:W">White</button><button data-f="color:U">Blue</button><button data-f="color:B">Black</button><button data-f="color:R">Red</button><button data-f="color:G">Green</button><button data-f="color:M">Multicolor</button><button data-f="color:A">Artifact</button><button data-f="color:L">Land</button><span class="sep"></span><button data-f="rarity:C">Common</button><button data-f="rarity:U">Uncommon</button><button data-f="rarity:R">Rare</button><button data-f="rarity:M">Mythic</button><span class="sep"></span><button data-f="type:Creature">Creature</button><button data-f="type:Instant">Instant</button><button data-f="type:Sorcery">Sorcery</button><button data-f="type:Enchantment">Enchantment</button><button data-f="type:Artifact">Artifact</button><button data-f="type:Land">Land</button><span class="sep"></span><input id="q" placeholder="Search name / text…"><span id="count" style="color:#9aa0ad;font-size:12px;margin-left:auto"></span></div>
+<main class="grid">
+<article class="card has-pt" data-color="W" data-rarity="C" data-type="Creature" data-name="maykr drone" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Maykr Drone</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Maykr_Drone.png" alt=""><img class="fg" loading="lazy" src="art/Maykr_Drone.png" alt="Maykr Drone"></div>
+    <div class="typebar"><span class="type">Creature — Maykr</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Flying</p><p>When Maykr Drone dies, you get <img class="ms" src="../../common/symbols/E.svg" alt="{E}"> <i class="rem">(an energy counter)</i>.</p></div><div class="flavor">Its face is a mask. Under the mask, another mask.</div></div>
+    <div class="pt">1/1</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>001/079 C &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="W" data-rarity="C" data-type="Sorcery" data-name="drone choir" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Drone Choir</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Maykr_concept_3.jpg" alt="Drone Choir"></div>
+    <div class="typebar"><span class="type">Sorcery</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Create three 1/1 white Maykr creature tokens with flying named Maykr Drone.</p></div><div class="flavor">Urdak sings in perfect, interchangeable voices.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>002/079 C &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card has-pt" data-color="W" data-rarity="R" data-type="Creature" data-name="blood maykr" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Blood Maykr</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Blood_Maykr.png" alt=""><img class="fg" loading="lazy" src="art/Blood_Maykr.png" alt="Blood Maykr"></div>
+    <div class="typebar"><span class="type">Creature — Maykr</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Flying, first strike, ward <img class="ms" src="../../common/symbols/2.svg" alt="{2}"></p><p>Whenever Blood Maykr attacks, you get <img class="ms" src="../../common/symbols/E.svg" alt="{E}"> <i class="rem">(an energy counter)</i>.</p></div><div class="flavor">The judges of Urdak descend on gilded threads.</div></div>
+    <div class="pt">4/3</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>003/079 R &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card has-pt legendary longname" data-color="W" data-rarity="R" data-type="Creature" data-name="gladiator of the blood arena" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Gladiator of the Blood Arena</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Doom_eternal_gladiator.png" alt="Gladiator of the Blood Arena"></div>
+    <div class="typebar"><span class="type">Legendary Creature — Demon Knight</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Whenever Gladiator of the Blood Arena blocks, it gets +2/+0 until end of turn. <i class="rem">(The shield watches you with its own eyes.)</i></p></div><div class="flavor">Sentinel champion, demon prize.</div></div>
+    <div class="pt">3/5</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>004/079 R &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card has-pt" data-color="W" data-rarity="C" data-type="Creature" data-name="carcass" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Carcass</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Carcass_concept_art_1.jpg" alt="Carcass"></div>
+    <div class="typebar"><span class="type">Creature — Demon</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Defender, reach</p><p><i class="rem">(A wall of sinew that Urdak finds useful.)</i></p></div><div class="flavor">The Maykrs do not waste meat.</div></div>
+    <div class="pt">0/5</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>005/079 C &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="W" data-rarity="U" data-type="Enchantment" data-name="urdak&#x27;s toll" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Urdak&#x27;s Toll</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Urdak_concept_art_7.jpg" alt="Urdak&#x27;s Toll"></div>
+    <div class="typebar"><span class="type">Enchantment</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Whenever a creature an opponent controls dies, you gain 1 life and you get <img class="ms" src="../../common/symbols/E.svg" alt="{E}"> <i class="rem">(an energy counter)</i>.</p></div><div class="flavor">Every soul that falls anywhere falls through Urdak first.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>006/079 U &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="W" data-rarity="R" data-type="Sorcery" data-name="celestial judgment" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Celestial Judgment</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/KM1TT.png" alt=""><img class="fg" loading="lazy" src="art/KM1TT.png" alt="Celestial Judgment"></div>
+    <div class="typebar"><span class="type">Sorcery</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Destroy all creatures with power 4 or greater.</p></div><div class="flavor">The Khan does not tolerate rivals of scale.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>007/079 R &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="W" data-rarity="C" data-type="Instant" data-name="maykr decree" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Maykr Decree</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Kahn_Makyr__.jpg" alt=""><img class="fg" loading="lazy" src="art/Kahn_Makyr__.jpg" alt="Maykr Decree"></div>
+    <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Exile target attacking creature. Its controller gains 3 life. <i class="rem">(Ascension, whether you asked or not.)</i></p></div><div class="flavor">The decree arrives mid-lunge.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>008/079 C &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="W" data-rarity="C" data-type="Instant" data-name="argent tithe" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Argent Tithe</span><span class="cost"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/CultistBase2TT.jpg" alt=""><img class="fg" loading="lazy" src="art/CultistBase2TT.jpg" alt="Argent Tithe"></div>
+    <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>You gain 3 life and you get <img class="ms" src="../../common/symbols/E.svg" alt="{E}"> <i class="rem">(an energy counter)</i>.</p></div><div class="flavor">The collection plate is a turbine.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>009/079 C &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="W" data-rarity="C" data-type="Instant" data-name="wings of the choir" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Wings of the Choir</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/93E3EA1A-92AF-4190-A76D-F08BB45BF891.jpeg" alt="Wings of the Choir"></div>
+    <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Target creature gets +1/+1 and gains flying until end of turn.</p></div><div class="flavor">Urdak lends. Urdak never gives.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>010/079 C &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="W" data-rarity="U" data-type="Enchantment" data-name="sentinel oath" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Sentinel Oath</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/NS_Statue.jpg" alt="Sentinel Oath"></div>
+    <div class="typebar"><span class="type">Enchantment</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Whenever a creature you control with flying attacks, it gets +1/+0 until end of turn. <i class="rem">(The old alliance, still binding.)</i></p></div><div class="flavor">Night Sentinels swore to the Maykrs before they knew the price.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>011/079 U &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card has-pt" data-color="W" data-rarity="C" data-type="Creature" data-name="sentinel guardian" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Sentinel Guardian</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Sentinel.jpg" alt="Sentinel Guardian"></div>
+    <div class="typebar"><span class="type">Creature — Human Knight</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>First strike</p><p>Whenever Sentinel Guardian blocks, you get <img class="ms" src="../../common/symbols/E.svg" alt="{E}"> <i class="rem">(an energy counter)</i>.</p></div><div class="flavor">The order died twice and kept its posture.</div></div>
+    <div class="pt">2/2</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>012/079 C &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card has-pt" data-color="W" data-rarity="C" data-type="Creature" data-name="ascendant acolyte" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Ascendant Acolyte</span><span class="cost"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Sentinels_npc.png" alt="Ascendant Acolyte"></div>
+    <div class="typebar"><span class="type">Creature — Human Cleric</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>When Ascendant Acolyte dies, you gain 2 life.</p></div><div class="flavor">Every rung of Nekravol is a promotion.</div></div>
+    <div class="pt">1/1</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>013/079 C &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card has-pt" data-color="W" data-rarity="C" data-type="Creature" data-name="argent shieldbearer" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Argent Shieldbearer</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Argentian.jpg" alt=""><img class="fg" loading="lazy" src="art/Argentian.jpg" alt="Argent Shieldbearer"></div>
+    <div class="typebar"><span class="type">Creature — Human Soldier</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>When Argent Shieldbearer enters, you gain 2 life.</p></div><div class="flavor">The shield is borrowed. The scars are his.</div></div>
+    <div class="pt">1/3</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>014/079 C &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="W" data-rarity="U" data-type="Sorcery" data-name="consecrate the harvest" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Consecrate the Harvest</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Nekravol2TT.jpg" alt="Consecrate the Harvest"></div>
+    <div class="typebar"><span class="type">Sorcery</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Put a +1/+1 counter on each Maykr you control.</p></div><div class="flavor">The choir grows louder by the soul.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>015/079 U &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card has-pt legendary" data-color="W" data-rarity="U" data-type="Creature" data-name="deag nilox, hell priest" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Deag Nilox, Hell Priest</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Doom_Eternal_Deag_Nilox_Codex.png" alt="Deag Nilox, Hell Priest"></div>
+    <div class="typebar"><span class="type">Legendary Creature — Human Cleric</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>When Deag Nilox, Hell Priest dies, each opponent loses 2 life.</p></div><div class="flavor">The first to fall, and the loudest about it.</div></div>
+    <div class="pt">0/4</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>016/079 U &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card long has-pt legendary" data-color="W" data-rarity="R" data-type="Creature" data-name="deag ranak, hell priest" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Deag Ranak, Hell Priest</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/619BF505-9CFE-42AC-8567-DB2C185639D9.jpeg" alt="Deag Ranak, Hell Priest"></div>
+    <div class="typebar"><span class="type">Legendary Creature — Human Cleric</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>When Deag Ranak, Hell Priest enters, you get <img class="ms" src="../../common/symbols/E.svg" alt="{E}"><img class="ms" src="../../common/symbols/E.svg" alt="{E}"> <i class="rem">(two energy counters)</i>.</p><p><i>Ascension</i> — <img class="ms" src="../../common/symbols/2.svg" alt="{2}">, Pay <img class="ms" src="../../common/symbols/E.svg" alt="{E}"><img class="ms" src="../../common/symbols/E.svg" alt="{E}"><img class="ms" src="../../common/symbols/E.svg" alt="{E}">: Return target creature card from your graveyard to your hand. Activate only once each turn.</p></div><div class="flavor">I thought you&#x27;d appreciate the sentry I chose.<br>—Deag Ranak</div></div>
+    <div class="pt">2/3</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>017/079 R &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card has-pt legendary" data-color="W" data-rarity="R" data-type="Creature" data-name="deag grav, hell priest" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Deag Grav, Hell Priest</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Deag_Grav.png" alt="Deag Grav, Hell Priest"></div>
+    <div class="typebar"><span class="type">Legendary Creature — Human Cleric</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>When Deag Grav, Hell Priest enters, create a 1/1 white Maykr creature token with flying named Maykr Drone.</p></div><div class="flavor">He held the arena. The arena did not hold the Slayer.</div></div>
+    <div class="pt">1/3</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>018/079 R &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="W" data-rarity="C" data-type="Instant" data-name="ascend the unworthy" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Ascend the Unworthy</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Exultia1TT.jpg" alt="Ascend the Unworthy"></div>
+    <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Exile target tapped creature.</p></div><div class="flavor">The lattice lifts. The lattice does not return.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>019/079 C &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="W" data-rarity="C" data-type="Instant" data-name="emergency choir" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Emergency Choir</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Maykr_Drone_Codex.PNG" alt=""><img class="fg" loading="lazy" src="art/Maykr_Drone_Codex.PNG" alt="Emergency Choir"></div>
+    <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Create a 1/1 white Maykr creature token with flying named Maykr Drone.</p></div><div class="flavor">Replacements arrive mid-hymn.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>020/079 C &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="W" data-rarity="C" data-type="Instant" data-name="halo strike" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Halo Strike</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/BloodMaykrTT.jpg" alt=""><img class="fg" loading="lazy" src="art/BloodMaykrTT.jpg" alt="Halo Strike"></div>
+    <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Destroy target creature with power 4 or greater.</p></div><div class="flavor">The bigger the soul, the brighter the receipt.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>021/079 C &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card long has-pt legendary" data-color="U" data-rarity="M" data-type="Creature" data-name="marauder" style="--frame:#1f6aa8;--frame2:#144d80;--box:#dfe9f3;--text:#dde7f0;--pin:#0e4678;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Marauder</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Marauder_concept_art_1.jpg" alt="Marauder"></div>
+    <div class="typebar"><span class="type">Legendary Creature — Demon Soldier</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gM)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Flash, ward <img class="ms" src="../../common/symbols/2.svg" alt="{2}"></p><p>Marauder can block an additional creature each combat. <i class="rem">(Attack when the eyes flash green.)</i></p></div><div class="flavor">You were never one of us. You were nothing but a usurper, a false idol.<br>—a Marauder, to the Slayer</div></div>
+    <div class="pt">4/4</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>022/079 M &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card has-pt" data-color="U" data-rarity="C" data-type="Creature" data-name="prowler" style="--frame:#1f6aa8;--frame2:#144d80;--box:#dfe9f3;--text:#dde7f0;--pin:#0e4678;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Prowler</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Prowler_concept.png" alt=""><img class="fg" loading="lazy" src="art/Prowler_concept.png" alt="Prowler"></div>
+    <div class="typebar"><span class="type">Creature — Demon</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Flash, menace <i class="rem">(It arrives mid-pounce, from a direction that shouldn&#x27;t exist.)</i></p></div><div class="flavor">The teleport flash is the only warning you get.</div></div>
+    <div class="pt">2/2</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>023/079 C &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card xlong has-pt" data-color="U" data-rarity="C" data-type="Creature" data-name="whiplash" style="--frame:#1f6aa8;--frame2:#144d80;--box:#dfe9f3;--text:#dde7f0;--pin:#0e4678;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Whiplash</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Whiplash_0.jpg" alt=""><img class="fg" loading="lazy" src="art/Whiplash_0.jpg" alt="Whiplash"></div>
+    <div class="typebar"><span class="type">Creature — Demon</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Skulk <i class="rem">(This creature can&#x27;t be blocked by creatures with greater power.)</i></p><p>Whenever Whiplash attacks, you get <img class="ms" src="../../common/symbols/E.svg" alt="{E}"> <i class="rem">(an energy counter)</i>.</p><p><i>Ascension</i> — Pay <img class="ms" src="../../common/symbols/E.svg" alt="{E}"><img class="ms" src="../../common/symbols/E.svg" alt="{E}">: Whiplash gets +2/+0 until end of turn. Activate only once each turn.</p></div><div class="flavor">It moves like a whip that resents being held.</div></div>
+    <div class="pt">3/2</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>024/079 C &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card has-pt" data-color="U" data-rarity="C" data-type="Creature" data-name="gargoyle skirmisher" style="--frame:#1f6aa8;--frame2:#144d80;--box:#dfe9f3;--text:#dde7f0;--pin:#0e4678;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Gargoyle Skirmisher</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Gargoyle_Eternal.png" alt=""><img class="fg" loading="lazy" src="art/Gargoyle_Eternal.png" alt="Gargoyle Skirmisher"></div>
+    <div class="typebar"><span class="type">Creature — Demon</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Flying</p><p>Gargoyle Skirmisher can&#x27;t block.</p><p>Whenever Gargoyle Skirmisher attacks, you get <img class="ms" src="../../common/symbols/E.svg" alt="{E}"> <i class="rem">(an energy counter)</i>.</p></div><div class="flavor">The cliffs of Nekravol shed them like flies.</div></div>
+    <div class="pt">2/1</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>025/079 C &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card long has-pt" data-color="U" data-rarity="U" data-type="Creature" data-name="maykr overseer" style="--frame:#1f6aa8;--frame2:#144d80;--box:#dfe9f3;--text:#dde7f0;--pin:#0e4678;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Maykr Overseer</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/MaykrAngel.jpg" alt=""><img class="fg" loading="lazy" src="art/MaykrAngel.jpg" alt="Maykr Overseer"></div>
+    <div class="typebar"><span class="type">Creature — Maykr</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Flying</p><p>When Maykr Overseer enters, you get <img class="ms" src="../../common/symbols/E.svg" alt="{E}"><img class="ms" src="../../common/symbols/E.svg" alt="{E}"> <i class="rem">(two energy counters)</i>.</p><p><i>Ascension</i> — <img class="ms" src="../../common/symbols/2.svg" alt="{2}">, Pay <img class="ms" src="../../common/symbols/E.svg" alt="{E}"><img class="ms" src="../../common/symbols/E.svg" alt="{E}"><img class="ms" src="../../common/symbols/E.svg" alt="{E}">: Draw a card. Activate only once each turn.</p></div><div class="flavor">It audits the harvest in real time.</div></div>
+    <div class="pt">2/3</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>026/079 U &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="U" data-rarity="C" data-type="Sorcery" data-name="transmit the directive" style="--frame:#1f6aa8;--frame2:#144d80;--box:#dfe9f3;--text:#dde7f0;--pin:#0e4678;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Transmit the Directive</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Maykr_concept_4.jpg" alt="Transmit the Directive"></div>
+    <div class="typebar"><span class="type">Sorcery</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Draw a card. You get <img class="ms" src="../../common/symbols/E.svg" alt="{E}"> <i class="rem">(an energy counter)</i>.</p><p>If you control three or more Maykrs, draw a card.</p></div><div class="flavor">The Khan&#x27;s word travels the argent lattice faster than doubt.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>027/079 C &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="U" data-rarity="U" data-type="Sorcery" data-name="harvest analysis" style="--frame:#1f6aa8;--frame2:#144d80;--box:#dfe9f3;--text:#dde7f0;--pin:#0e4678;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Harvest Analysis</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Drone_Codex_Image_Full.PNG" alt="Harvest Analysis"></div>
+    <div class="typebar"><span class="type">Sorcery</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Draw two cards.</p></div><div class="flavor">Souls per cycle, cycles per epoch, epochs until divinity.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>028/079 U &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="U" data-rarity="C" data-type="Instant" data-name="recall to urdak" style="--frame:#1f6aa8;--frame2:#144d80;--box:#dfe9f3;--text:#dde7f0;--pin:#0e4678;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Recall to Urdak</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/2hy85bfcx7831.jpg" alt="Recall to Urdak"></div>
+    <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Return target creature to its owner&#x27;s hand. Draw a card. You get <img class="ms" src="../../common/symbols/E.svg" alt="{E}"> <i class="rem">(an energy counter)</i>.</p></div><div class="flavor">Ascension in reverse.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>029/079 C &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="U" data-rarity="U" data-type="Instant" data-name="stasis bomb" style="--frame:#1f6aa8;--frame2:#144d80;--box:#dfe9f3;--text:#dde7f0;--pin:#0e4678;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Stasis Bomb</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/CultistBase3TT.jpg" alt="Stasis Bomb"></div>
+    <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Tap up to two target creatures. You get <img class="ms" src="../../common/symbols/E.svg" alt="{E}"> <i class="rem">(an energy counter)</i>.</p></div><div class="flavor">The ice bomb holds them still. The turbine takes their heat.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>030/079 U &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="U" data-rarity="R" data-type="Enchantment" data-name="doctrine of ascendance" style="--frame:#1f6aa8;--frame2:#144d80;--box:#dfe9f3;--text:#dde7f0;--pin:#0e4678;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Doctrine of Ascendance</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Maykr_concept.png" alt="Doctrine of Ascendance"></div>
+    <div class="typebar"><span class="type">Enchantment</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>When Doctrine of Ascendance enters, you get <img class="ms" src="../../common/symbols/E.svg" alt="{E}"><img class="ms" src="../../common/symbols/E.svg" alt="{E}"> <i class="rem">(two energy counters)</i>.</p><p>At the beginning of your end step, you get <img class="ms" src="../../common/symbols/E.svg" alt="{E}"> <i class="rem">(an energy counter)</i>.</p></div><div class="flavor">Heaven runs on a meter.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>031/079 R &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="U" data-rarity="U" data-type="Sorcery" data-name="silence the priests" style="--frame:#1f6aa8;--frame2:#144d80;--box:#dfe9f3;--text:#dde7f0;--pin:#0e4678;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Silence the Priests</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Hell_priests.png" alt="Silence the Priests"></div>
+    <div class="typebar"><span class="type">Sorcery</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Tap all creatures target opponent controls. You get <img class="ms" src="../../common/symbols/E.svg" alt="{E}"><img class="ms" src="../../common/symbols/E.svg" alt="{E}"><img class="ms" src="../../common/symbols/E.svg" alt="{E}"> <i class="rem">(three energy counters)</i>.</p></div><div class="flavor">The Hell priests stopped mid-sermon, all three at once.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>032/079 U &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card has-pt" data-color="U" data-rarity="C" data-type="Creature" data-name="codex custodian" style="--frame:#1f6aa8;--frame2:#144d80;--box:#dfe9f3;--text:#dde7f0;--pin:#0e4678;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Codex Custodian</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Maykr_concept_1.jpg" alt="Codex Custodian"></div>
+    <div class="typebar"><span class="type">Creature — Maykr</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Flying</p><p>When Codex Custodian enters, draw a card, then discard a card.</p></div><div class="flavor">It curates what mortals are allowed to remember.</div></div>
+    <div class="pt">1/2</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>033/079 C &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card has-pt" data-color="U" data-rarity="C" data-type="Creature" data-name="argent scholar" style="--frame:#1f6aa8;--frame2:#144d80;--box:#dfe9f3;--text:#dde7f0;--pin:#0e4678;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Argent Scholar</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Sentinels_npc_3.png" alt="Argent Scholar"></div>
+    <div class="typebar"><span class="type">Creature — Human Scientist</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>When Argent Scholar enters, you get <img class="ms" src="../../common/symbols/E.svg" alt="{E}"> <i class="rem">(an energy counter)</i>.</p></div><div class="flavor">Grant applications in Urdak are written in watt-hours.</div></div>
+    <div class="pt">2/2</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>034/079 C &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card has-pt" data-color="U" data-rarity="U" data-type="Creature" data-name="lattice skimmer" style="--frame:#1f6aa8;--frame2:#144d80;--box:#dfe9f3;--text:#dde7f0;--pin:#0e4678;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Lattice Skimmer</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Ship_concept.png" alt="Lattice Skimmer"></div>
+    <div class="typebar"><span class="type">Creature — Maykr</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Flying, vigilance</p><p>Whenever Lattice Skimmer attacks, you get <img class="ms" src="../../common/symbols/E.svg" alt="{E}"> <i class="rem">(an energy counter)</i>.</p></div><div class="flavor">It patrols the seams between worlds.</div></div>
+    <div class="pt">2/1</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>035/079 U &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="U" data-rarity="C" data-type="Instant" data-name="null wind" style="--frame:#1f6aa8;--frame2:#144d80;--box:#dfe9f3;--text:#dde7f0;--pin:#0e4678;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Null Wind</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Urdak_concept_art_9.jpg" alt=""><img class="fg" loading="lazy" src="art/Urdak_concept_art_9.jpg" alt="Null Wind"></div>
+    <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Return target attacking creature to its owner&#x27;s hand.</p></div><div class="flavor">The lattice disagrees with your trajectory.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>036/079 C &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="U" data-rarity="U" data-type="Sorcery" data-name="temporal sink" style="--frame:#1f6aa8;--frame2:#144d80;--box:#dfe9f3;--text:#dde7f0;--pin:#0e4678;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Temporal Sink</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/ContinuumGateTT.jpg" alt="Temporal Sink"></div>
+    <div class="typebar"><span class="type">Sorcery</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Draw two cards. You get <img class="ms" src="../../common/symbols/E.svg" alt="{E}"><img class="ms" src="../../common/symbols/E.svg" alt="{E}"> <i class="rem">(two energy counters)</i>.</p></div><div class="flavor">Somewhere in Urdak, your next five seconds are in a jar.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>037/079 U &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card has-pt" data-color="U" data-rarity="R" data-type="Creature" data-name="maykr ascendant" style="--frame:#1f6aa8;--frame2:#144d80;--box:#dfe9f3;--text:#dde7f0;--pin:#0e4678;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Maykr Ascendant</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Maykr_concept_art.jpg" alt="Maykr Ascendant"></div>
+    <div class="typebar"><span class="type">Creature — Maykr</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Flying</p><p>When Maykr Ascendant enters, return up to one target creature to its owner&#x27;s hand.</p></div><div class="flavor">Promotion, in Urdak, displaces someone.</div></div>
+    <div class="pt">4/4</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>038/079 R &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="U" data-rarity="R" data-type="Sorcery" data-name="wrath of the khan" style="--frame:#1f6aa8;--frame2:#144d80;--box:#dfe9f3;--text:#dde7f0;--pin:#0e4678;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Wrath of the Khan</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/KhanMaykrTT.jpg" alt=""><img class="fg" loading="lazy" src="art/KhanMaykrTT.jpg" alt="Wrath of the Khan"></div>
+    <div class="typebar"><span class="type">Sorcery</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Tap all creatures your opponents control. Draw a card. You get <img class="ms" src="../../common/symbols/E.svg" alt="{E}"><img class="ms" src="../../common/symbols/E.svg" alt="{E}"> <i class="rem">(two energy counters)</i>.</p></div><div class="flavor">She raised one hand and the war held its breath.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>039/079 R &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card xxlong has-pt legendary" data-color="MWU" data-rarity="M" data-type="Creature" data-name="the khan maykr" style="--frame:#d3b24c;--frame2:#a8862c;--box:#f4e8c2;--text:#f3e7c4;--pin:#8a6c1d;--pin2:#8a6c1d">
+  <div class="frame">
+    <div class="titlebar"><span class="name">The Khan Maykr</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/KhanMaykrRender.png" alt=""><img class="fg" loading="lazy" src="art/KhanMaykrRender.png" alt="The Khan Maykr"></div>
+    <div class="typebar"><span class="type">Legendary Creature — Maykr Noble</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gM)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Flying, ward <img class="ms" src="../../common/symbols/2.svg" alt="{2}"></p><p>Other Maykr creatures you control get +1/+1.</p><p>Whenever another creature dies, you get <img class="ms" src="../../common/symbols/E.svg" alt="{E}"> <i class="rem">(an energy counter)</i>.</p><p><img class="ms" src="../../common/symbols/1.svg" alt="{1}">, Pay <img class="ms" src="../../common/symbols/E.svg" alt="{E}">: Create a 1/1 white Maykr creature token with flying named Maykr Drone.</p></div><div class="flavor">For millennia we have survived. Made others sacrifice in the name of our prosperity.<br>—the Khan Maykr</div></div>
+    <div class="pt">4/4</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>040/079 M &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card has-pt legendary" data-color="MWU" data-rarity="R" data-type="Creature" data-name="the seraphim" style="--frame:#d3b24c;--frame2:#a8862c;--box:#f4e8c2;--text:#f3e7c4;--pin:#8a6c1d;--pin2:#8a6c1d">
+  <div class="frame">
+    <div class="titlebar"><span class="name">The Seraphim</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Samur_maykr.png" alt=""><img class="fg" loading="lazy" src="art/Samur_maykr.png" alt="The Seraphim"></div>
+    <div class="typebar"><span class="type">Legendary Creature — Maykr Scientist</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>When The Seraphim enters, scry 3, then draw a card. <i class="rem">(He has worn many names. He is wearing one now.)</i></p></div><div class="flavor">The plan was always longer than any one body.</div></div>
+    <div class="pt">2/3</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>041/079 R &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="MWU" data-rarity="U" data-type="Instant" data-name="judgment of the khan" style="--frame:#d3b24c;--frame2:#a8862c;--box:#f4e8c2;--text:#f3e7c4;--pin:#8a6c1d;--pin2:#8a6c1d">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Judgment of the Khan</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Kahn_Makyr__1.jpg" alt=""><img class="fg" loading="lazy" src="art/Kahn_Makyr__1.jpg" alt="Judgment of the Khan"></div>
+    <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Exile target creature with power 4 or greater. You get <img class="ms" src="../../common/symbols/E.svg" alt="{E}"> <i class="rem">(an energy counter)</i>.</p></div><div class="flavor">Large souls burn longest.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>042/079 U &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="MWU" data-rarity="R" data-type="Enchantment" data-name="the directive" style="--frame:#d3b24c;--frame2:#a8862c;--box:#f4e8c2;--text:#f3e7c4;--pin:#8a6c1d;--pin2:#8a6c1d">
+  <div class="frame">
+    <div class="titlebar"><span class="name">The Directive</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/43FD2CE3-11BF-4C72-97AD-9ED39501920F.jpeg" alt="The Directive"></div>
+    <div class="typebar"><span class="type">Enchantment</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Whenever a creature an opponent controls dies, create a 1/1 white Maykr creature token with flying named Maykr Drone. <i class="rem">(The harvest restaffs itself.)</i></p></div><div class="flavor">Mortal grief is a renewable resource.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>043/079 R &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="MWU" data-rarity="C" data-type="Instant" data-name="argent transfusion" style="--frame:#d3b24c;--frame2:#a8862c;--box:#f4e8c2;--text:#f3e7c4;--pin:#8a6c1d;--pin2:#8a6c1d">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Argent Transfusion</span><span class="cost"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Nekravol_p1_icon.png" alt=""><img class="fg" loading="lazy" src="art/Nekravol_p1_icon.png" alt="Argent Transfusion"></div>
+    <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>You gain 2 life and draw a card.</p></div><div class="flavor">One soul in, one certainty out.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>044/079 C &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card long has-pt" data-color="MWU" data-rarity="C" data-type="Creature" data-name="emissary of the khan" style="--frame:#d3b24c;--frame2:#a8862c;--box:#f4e8c2;--text:#f3e7c4;--pin:#8a6c1d;--pin2:#8a6c1d">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Emissary of the Khan</span><span class="cost"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Jellyfish.jpg" alt=""><img class="fg" loading="lazy" src="art/Jellyfish.jpg" alt="Emissary of the Khan"></div>
+    <div class="typebar"><span class="type">Creature — Maykr</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Flying</p><p>When Emissary of the Khan enters, you get <img class="ms" src="../../common/symbols/E.svg" alt="{E}"> <i class="rem">(an energy counter)</i>.</p><p>Whenever Emissary of the Khan deals combat damage to a player, you get <img class="ms" src="../../common/symbols/E.svg" alt="{E}"><img class="ms" src="../../common/symbols/E.svg" alt="{E}"> <i class="rem">(two energy counters)</i>.</p></div><div class="flavor">Its greeting is an invoice.</div></div>
+    <div class="pt">2/2</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>045/079 C &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card has-pt" data-color="MWU" data-rarity="U" data-type="Creature" data-name="argent reaper" style="--frame:#d3b24c;--frame2:#a8862c;--box:#f4e8c2;--text:#f3e7c4;--pin:#8a6c1d;--pin2:#8a6c1d">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Argent Reaper</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Maykr_archangel_concept_art.jpg" alt=""><img class="fg" loading="lazy" src="art/Maykr_archangel_concept_art.jpg" alt="Argent Reaper"></div>
+    <div class="typebar"><span class="type">Creature — Maykr</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Flying, lifelink</p><p><i>Ascension</i> — <img class="ms" src="../../common/symbols/1.svg" alt="{1}">, Pay <img class="ms" src="../../common/symbols/E.svg" alt="{E}"><img class="ms" src="../../common/symbols/E.svg" alt="{E}">: Put a +1/+1 counter on Argent Reaper. Activate only once each turn.</p></div><div class="flavor">It harvests gently. The ledgers insist on it.</div></div>
+    <div class="pt">2/3</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>046/079 U &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card legendary" data-color="A" data-rarity="M" data-type="Artifact" data-name="the divinity machine" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">The Divinity Machine</span><span class="cost"><img class="ms" src="../../common/symbols/4.svg" alt="{4}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Maxsnapshot.jpg" alt="The Divinity Machine"></div>
+    <div class="typebar"><span class="type">Legendary Artifact</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gM)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">, Pay <img class="ms" src="../../common/symbols/E.svg" alt="{E}"><img class="ms" src="../../common/symbols/E.svg" alt="{E}"><img class="ms" src="../../common/symbols/E.svg" alt="{E}">: Put three +1/+1 counters on target creature you control. It gains flying until end of turn.</p></div><div class="flavor">It made a god out of a man once. The Maykrs never forgave the precedent.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>047/079 M &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="A" data-rarity="R" data-type="Artifact" data-name="soul turbine" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Soul Turbine</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/SoulEnergyTT.jpg" alt="Soul Turbine"></div>
+    <div class="typebar"><span class="type">Artifact</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Whenever a creature dies, you get <img class="ms" src="../../common/symbols/E.svg" alt="{E}"> <i class="rem">(an energy counter)</i>.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/C.svg" alt="{C}">.</p></div><div class="flavor">Nekravol&#x27;s chimneys never cool.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>048/079 R &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="A" data-rarity="U" data-type="Artifact" data-name="argent distillery" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Argent Distillery</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/ChainedTitanTT.jpg" alt=""><img class="fg" loading="lazy" src="art/ChainedTitanTT.jpg" alt="Argent Distillery"></div>
+    <div class="typebar"><span class="type">Artifact</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/W.svg" alt="{W}"> or <img class="ms" src="../../common/symbols/U.svg" alt="{U}">.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">, Pay <img class="ms" src="../../common/symbols/E.svg" alt="{E}"><img class="ms" src="../../common/symbols/E.svg" alt="{E}">: Add <img class="ms" src="../../common/symbols/W.svg" alt="{W}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"> or <img class="ms" src="../../common/symbols/U.svg" alt="{U}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}">. <i class="rem">(The refined product burns cleaner.)</i></p></div><div class="flavor">Sorrow in, sunlight out.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>049/079 U &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="A" data-rarity="C" data-type="Artifact" data-name="lattice node" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Lattice Node</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Urdak_concept_art_5.jpg" alt="Lattice Node"></div>
+    <div class="typebar"><span class="type">Artifact</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/W.svg" alt="{W}"> or <img class="ms" src="../../common/symbols/U.svg" alt="{U}">.</p></div><div class="flavor">Urdak&#x27;s power grid has opinions about trespassers.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>050/079 C &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card long" data-color="A" data-rarity="U" data-type="Artifact" data-name="meat hook" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Meat Hook</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/ObtainingSuperShotgunTT.png" alt=""><img class="fg" loading="lazy" src="art/ObtainingSuperShotgunTT.png" alt="Meat Hook"></div>
+    <div class="typebar"><span class="type">Artifact — Equipment</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Equipped creature gets +2/+0 and has menace.</p><p>Whenever equipped creature deals combat damage to a creature, you get <img class="ms" src="../../common/symbols/E.svg" alt="{E}"> <i class="rem">(an energy counter)</i>. You gain 2 life.</p><p>Equip <img class="ms" src="../../common/symbols/1.svg" alt="{1}"></p></div><div class="flavor">The super shotgun&#x27;s best argument.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>051/079 U &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="A" data-rarity="C" data-type="Artifact" data-name="sentinel blade" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Sentinel Blade</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Betrayer_Doom_eternal.png" alt=""><img class="fg" loading="lazy" src="art/Betrayer_Doom_eternal.png" alt="Sentinel Blade"></div>
+    <div class="typebar"><span class="type">Artifact — Equipment</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Equipped creature gets +2/+1.</p><p>Equip <img class="ms" src="../../common/symbols/1.svg" alt="{1}"></p></div><div class="flavor">Argent steel, Sentinel temper.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>052/079 C &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card has-pt" data-color="A" data-rarity="R" data-type="Creature" data-name="doom hunter sled" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Doom Hunter Sled</span><span class="cost"><img class="ms" src="../../common/symbols/4.svg" alt="{4}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/DoomHunter_1.jpg" alt="Doom Hunter Sled"></div>
+    <div class="typebar"><span class="type">Artifact Creature — Demon Construct</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Haste, ward <img class="ms" src="../../common/symbols/2.svg" alt="{2}"> <i class="rem">(The sled soaks the first answer; the rider keeps coming.)</i></p></div><div class="flavor">I thought you&#x27;d appreciate the sentry I chose — the great Agaddon Hunters.<br>—Deag Ranak</div></div>
+    <div class="pt">4/4</div>
+  </div>
+  <div class="foot">
+    <div class="l"><span>053/079 R &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="A" data-rarity="U" data-type="Artifact" data-name="harvest ledger" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Harvest Ledger</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Hub_Red.png" alt=""><img class="fg" loading="lazy" src="art/Hub_Red.png" alt="Harvest Ledger"></div>
+    <div class="typebar"><span class="type">Artifact</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: You get <img class="ms" src="../../common/symbols/E.svg" alt="{E}"> <i class="rem">(an energy counter)</i>.</p><p><i>Ascension</i> — <img class="ms" src="../../common/symbols/1.svg" alt="{1}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">, Pay <img class="ms" src="../../common/symbols/E.svg" alt="{E}"><img class="ms" src="../../common/symbols/E.svg" alt="{E}"><img class="ms" src="../../common/symbols/E.svg" alt="{E}">: Draw a card.</p></div><div class="flavor">Every entry is a name that used to answer to it.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>054/079 U &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card long legendary" data-color="A" data-rarity="R" data-type="Artifact" data-name="the bfg-10000" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">The BFG-10000</span><span class="cost"><img class="ms" src="../../common/symbols/5.svg" alt="{5}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Doom_Eternal_BFG_10k.png" alt="The BFG-10000"></div>
+    <div class="typebar"><span class="type">Legendary Artifact</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>When The BFG-10000 enters, you get <img class="ms" src="../../common/symbols/E.svg" alt="{E}"><img class="ms" src="../../common/symbols/E.svg" alt="{E}"> <i class="rem">(two energy counters)</i>.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: You get <img class="ms" src="../../common/symbols/E.svg" alt="{E}"> <i class="rem">(an energy counter)</i>.</p><p><i>Ascension</i> — <img class="ms" src="../../common/symbols/2.svg" alt="{2}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">, Pay <img class="ms" src="../../common/symbols/E.svg" alt="{E}"><img class="ms" src="../../common/symbols/E.svg" alt="{E}"><img class="ms" src="../../common/symbols/E.svg" alt="{E}">: The BFG-10000 deals 5 damage to target creature.</p></div><div class="flavor">The UAC drilled a hole through a planet to mount it. Priorities.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>055/079 R &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="A" data-rarity="U" data-type="Artifact" data-name="celestial compass" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Celestial Compass</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Fortress_mobile_platform_concept_2.jpg" alt="Celestial Compass"></div>
+    <div class="typebar"><span class="type">Artifact</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>When Celestial Compass enters, draw a card.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/W.svg" alt="{W}"> or <img class="ms" src="../../common/symbols/U.svg" alt="{U}">.</p></div><div class="flavor">It points to the nearest unpaid debt.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>056/079 U &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="A" data-rarity="R" data-type="Artifact" data-name="drone foundry" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Drone Foundry</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Urdak_concept_art_6.jpg" alt="Drone Foundry"></div>
+    <div class="typebar"><span class="type">Artifact</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/2.svg" alt="{2}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Create a 1/1 white Maykr creature token with flying named Maykr Drone.</p></div><div class="flavor">Quality control is a theological position.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>057/079 R &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="A" data-rarity="C" data-type="Artifact" data-name="argent battery" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Argent Battery</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/E56E3DB6-D25D-4838-945D-A48B46C37528.jpeg" alt="Argent Battery"></div>
+    <div class="typebar"><span class="type">Artifact</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">, Sacrifice Argent Battery: You get <img class="ms" src="../../common/symbols/E.svg" alt="{E}"><img class="ms" src="../../common/symbols/E.svg" alt="{E}"> <i class="rem">(two energy counters)</i>.</p></div><div class="flavor">Stored screaming, ready to pour.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>058/079 C &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="A" data-rarity="U" data-type="Artifact" data-name="sentinel crystal" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Sentinel Crystal</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Doom_Eternal_sentinel_crystal.png" alt=""><img class="fg" loading="lazy" src="art/Doom_Eternal_sentinel_crystal.png" alt="Sentinel Crystal"></div>
+    <div class="typebar"><span class="type">Artifact</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add two mana in any combination of <img class="ms" src="../../common/symbols/W.svg" alt="{W}"> and/or <img class="ms" src="../../common/symbols/U.svg" alt="{U}">.</p></div><div class="flavor">Argent D&#x27;Nur&#x27;s heart, cut and set.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>059/079 U &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="A" data-rarity="C" data-type="Artifact" data-name="wraith crystal shard" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Wraith Crystal Shard</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/3F46E62A-E509-4AF8-AE51-89E9C86B96AB.jpeg" alt=""><img class="fg" loading="lazy" src="art/3F46E62A-E509-4AF8-AE51-89E9C86B96AB.jpeg" alt="Wraith Crystal Shard"></div>
+    <div class="typebar"><span class="type">Artifact</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/W.svg" alt="{W}"> or <img class="ms" src="../../common/symbols/U.svg" alt="{U}">.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">, Sacrifice Wraith Crystal Shard: You gain 2 life.</p></div><div class="flavor">The Wraiths power everything, including regrets.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>060/079 C &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="W" data-rarity="C" data-type="Instant" data-name="excommunicate the beast" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Excommunicate the Beast</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Urdak_Door.png" alt="Excommunicate the Beast"></div>
+    <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Destroy target attacking or blocking creature.</p></div><div class="flavor">Urdak&#x27;s paperwork is lethal when expedited.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>061/079 C &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="W" data-rarity="C" data-type="Instant" data-name="argent lance" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Argent Lance</span><span class="cost"><img class="ms" src="../../common/symbols/1.svg" alt="{1}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Seraphim_concept_art.jpg" alt=""><img class="fg" loading="lazy" src="art/Seraphim_concept_art.jpg" alt="Argent Lance"></div>
+    <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Argent Lance deals 3 damage to target attacking or blocking creature.</p></div><div class="flavor">A spear of harvested light.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>062/079 C &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="W" data-rarity="U" data-type="Instant" data-name="forced ascension" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Forced Ascension</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Urdak_concept_1.png" alt="Forced Ascension"></div>
+    <div class="typebar"><span class="type">Instant</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Exile target creature. Its controller gains 3 life.</p></div><div class="flavor">Congratulations. You have been selected.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>063/079 U &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="W" data-rarity="U" data-type="Sorcery" data-name="judgment volley" style="--frame:#e6e0c8;--frame2:#cfc7a6;--box:#f8f5e9;--text:#f5f1e3;--pin:#a79b68;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Judgment Volley</span><span class="cost"><img class="ms" src="../../common/symbols/3.svg" alt="{3}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/20200321205606_1.jpg" alt="Judgment Volley"></div>
+    <div class="typebar"><span class="type">Sorcery</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Destroy target tapped creature. You gain 2 life.</p></div><div class="flavor">Rest is heresy.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>064/079 U &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="MWU" data-rarity="R" data-type="Sorcery" data-name="dissolution beam" style="--frame:#d3b24c;--frame2:#a8862c;--box:#f4e8c2;--text:#f3e7c4;--pin:#8a6c1d;--pin2:#8a6c1d">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Dissolution Beam</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/PhobosBaseDoomEternal.jpg" alt="Dissolution Beam"></div>
+    <div class="typebar"><span class="type">Sorcery</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Exile target creature. You get <img class="ms" src="../../common/symbols/E.svg" alt="{E}"> <i class="rem">(an energy counter)</i>.</p></div><div class="flavor">Matter to light, light to the lattice, the lattice to the Khan.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>065/079 R &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="A" data-rarity="C" data-type="Artifact" data-name="choir anchor" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Choir Anchor</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/Urdak_concept_art_8.jpg" alt=""><img class="fg" loading="lazy" src="art/Urdak_concept_art_8.jpg" alt="Choir Anchor"></div>
+    <div class="typebar"><span class="type">Artifact</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/C.svg" alt="{C}">.</p><p><img class="ms" src="../../common/symbols/4.svg" alt="{4}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">, Sacrifice Choir Anchor: Draw two cards.</p></div><div class="flavor">It keeps a hymn from drifting between dimensions.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>066/079 C &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="A" data-rarity="C" data-type="Artifact" data-name="priest&#x27;s signet" style="--frame:#a9b4bc;--frame2:#7e8b95;--box:#e6ebef;--text:#e4e9ed;--pin:#5e6c77;--pin2:#5e6c77">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Priest&#x27;s Signet</span><span class="cost"><img class="ms" src="../../common/symbols/2.svg" alt="{2}"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/66592BD2-FD27-4A3A-AD8D-CC92A035333A.jpeg" alt="Priest&#x27;s Signet"></div>
+    <div class="typebar"><span class="type">Artifact</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>When Priest&#x27;s Signet enters, scry 1.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/W.svg" alt="{W}"> or <img class="ms" src="../../common/symbols/U.svg" alt="{U}">.</p></div><div class="flavor">Three were forged. One still answers.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>067/079 C &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="LW" data-rarity="R" data-type="Land" data-name="urdak" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:linear-gradient(180deg,#ede3cf,#f5f1e3);--pin:#6f5b39;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Urdak</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Urdak_concept.png" alt="Urdak"></div>
+    <div class="typebar"><span class="type">Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gR)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Urdak enters tapped.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/W.svg" alt="{W}"> or <img class="ms" src="../../common/symbols/U.svg" alt="{U}">.</p><p><img class="ms" src="../../common/symbols/4.svg" alt="{4}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">: You get <img class="ms" src="../../common/symbols/E.svg" alt="{E}"> <i class="rem">(an energy counter)</i>.</p></div><div class="flavor">Heaven, per the licensing agreement.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>068/079 R &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="LU" data-rarity="U" data-type="Land" data-name="the fortress of doom" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:linear-gradient(180deg,#ede3cf,#dde7f0);--pin:#6f5b39;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">The Fortress of Doom</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/FoDTT.png" alt="The Fortress of Doom"></div>
+    <div class="typebar"><span class="type">Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>The Fortress of Doom enters tapped.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/W.svg" alt="{W}"> or <img class="ms" src="../../common/symbols/U.svg" alt="{U}">.</p><p>When The Fortress of Doom enters, scry 1.</p></div><div class="flavor">One tenant. Extensive armory. Excellent view of everything burning.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>069/079 U &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="LW" data-rarity="U" data-type="Land" data-name="sentinel prime" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:linear-gradient(180deg,#ede3cf,#f5f1e3);--pin:#6f5b39;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Sentinel Prime</span><span class="cost"></span></div>
+    <div class="art fit-contain"><img class="bg" aria-hidden="true" loading="lazy" src="art/FB7FF8F1-1BD7-4717-8FC4-AD0380094DA2.jpeg" alt=""><img class="fg" loading="lazy" src="art/FB7FF8F1-1BD7-4717-8FC4-AD0380094DA2.jpeg" alt="Sentinel Prime"></div>
+    <div class="typebar"><span class="type">Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Sentinel Prime enters tapped.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/W.svg" alt="{W}"> or <img class="ms" src="../../common/symbols/U.svg" alt="{U}">.</p></div><div class="flavor">The arena where kings are judged.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>070/079 U &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="LW" data-rarity="U" data-type="Land" data-name="taras nabad" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:linear-gradient(180deg,#ede3cf,#f5f1e3);--pin:#6f5b39;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Taras Nabad</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Taras_Nabad.jpg" alt="Taras Nabad"></div>
+    <div class="typebar"><span class="type">Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/C.svg" alt="{C}">.</p><p><img class="ms" src="../../common/symbols/1.svg" alt="{1}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/W.svg" alt="{W}"> or <img class="ms" src="../../common/symbols/U.svg" alt="{U}">.</p></div><div class="flavor">The old capital drowned standing up.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>071/079 U &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="LU" data-rarity="U" data-type="Land" data-name="nekravol" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:linear-gradient(180deg,#ede3cf,#dde7f0);--pin:#6f5b39;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Nekravol</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/8D3B4E5D-139A-4BED-8CAA-CC456224A6F9.jpeg" alt="Nekravol"></div>
+    <div class="typebar"><span class="type">Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Nekravol enters tapped unless a creature died this turn.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/W.svg" alt="{W}"> or <img class="ms" src="../../common/symbols/U.svg" alt="{U}">.</p></div><div class="flavor">The factory at the end of every soul&#x27;s commute.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>072/079 U &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="LU" data-rarity="U" data-type="Land" data-name="super gore nest" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:linear-gradient(180deg,#ede3cf,#dde7f0);--pin:#6f5b39;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Super Gore Nest</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/SGN1TT.png" alt="Super Gore Nest"></div>
+    <div class="typebar"><span class="type">Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Super Gore Nest enters tapped.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/W.svg" alt="{W}"> or <img class="ms" src="../../common/symbols/U.svg" alt="{U}">.</p><p><img class="ms" src="../../common/symbols/2.svg" alt="{2}">, <img class="ms" src="../../common/symbols/T.svg" alt="{T}">, Sacrifice Super Gore Nest: You gain 3 life.</p></div><div class="flavor">Earth&#x27;s newest landmark, regrettably load-bearing.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>073/079 U &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="LU" data-rarity="C" data-type="Land" data-name="shattered mars" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:linear-gradient(180deg,#ede3cf,#dde7f0);--pin:#6f5b39;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Shattered Mars</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Shattered_Mars_DoomEternal.jpeg" alt="Shattered Mars" style="object-position:50% 40%"></div>
+    <div class="typebar"><span class="type">Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Shattered Mars enters tapped.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/W.svg" alt="{W}"> or <img class="ms" src="../../common/symbols/U.svg" alt="{U}">.</p></div><div class="flavor">The BFG-10000 filed its objection straight through the crust.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>074/079 C &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="LW" data-rarity="C" data-type="Land" data-name="reclaimed earth" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:linear-gradient(180deg,#ede3cf,#f5f1e3);--pin:#6f5b39;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Reclaimed Earth</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/EarthEternal.png" alt="Reclaimed Earth"></div>
+    <div class="typebar"><span class="type">Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Reclaimed Earth enters tapped.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/W.svg" alt="{W}"> or <img class="ms" src="../../common/symbols/U.svg" alt="{U}">.</p></div><div class="flavor">The survivors came back up singing.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>075/079 C &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="LU" data-rarity="C" data-type="Land" data-name="hebeth" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:linear-gradient(180deg,#ede3cf,#dde7f0);--pin:#6f5b39;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Hebeth</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/20200408112408_1.jpg" alt="Hebeth"></div>
+    <div class="typebar"><span class="type">Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>Hebeth enters tapped.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/W.svg" alt="{W}"> or <img class="ms" src="../../common/symbols/U.svg" alt="{U}">.</p></div><div class="flavor">The city inside Mars, patient as bedrock.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>076/079 C &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="LW" data-rarity="U" data-type="Land" data-name="the blood arena" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:linear-gradient(180deg,#ede3cf,#f5f1e3);--pin:#6f5b39;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">The Blood Arena</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Gladiator_3.jpg" alt="The Blood Arena"></div>
+    <div class="typebar"><span class="type">Land</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gU)"/></svg></div>
+    <div class="textbox"><div class="rules"><p>The Blood Arena enters tapped.</p><p><img class="ms" src="../../common/symbols/T.svg" alt="{T}">: Add <img class="ms" src="../../common/symbols/W.svg" alt="{W}"> or <img class="ms" src="../../common/symbols/U.svg" alt="{U}">.</p><p>When The Blood Arena enters, you gain 1 life.</p></div><div class="flavor">Win, and the crowd of the dead approves.</div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>077/079 U &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="LW" data-rarity="C" data-type="Land" data-name="plains" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:linear-gradient(180deg,#ede3cf,#f5f1e3);--pin:#6f5b39;--pin2:#a79b68">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Plains</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/1500px-Night_Sentinels_Ending.jpg" alt="Plains"></div>
+    <div class="typebar"><span class="type">Basic Land — Plains</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><div class="bigsym"><img class="ms" src="../../common/symbols/W.svg" alt="{W}"></div></div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>078/079 C &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article>
+
+<article class="card" data-color="LU" data-rarity="C" data-type="Land" data-name="island" style="--frame:#bba886;--frame2:#8e7a58;--box:#efe6d2;--text:linear-gradient(180deg,#ede3cf,#dde7f0);--pin:#6f5b39;--pin2:#0e4678">
+  <div class="frame">
+    <div class="titlebar"><span class="name">Island</span><span class="cost"></span></div>
+    <div class="art fit-cover"><img class="fg" loading="lazy" src="art/Atmosphere.jpg" alt="Island"></div>
+    <div class="typebar"><span class="type">Basic Land — Island</span><svg viewBox="0 0 100 100" class="setsym"><use href="#setsympath" fill="url(#gC)"/></svg></div>
+    <div class="textbox"><div class="rules"><div class="bigsym"><img class="ms" src="../../common/symbols/U.svg" alt="{U}"></div></div></div>
+    
+  </div>
+  <div class="foot">
+    <div class="l"><span>079/079 C &nbsp;DET &bull; EN</span><span>&#128396; id Software</span></div>
+    <div class="r"><span>&trade; &amp; &copy; id Software &middot; Fan proxy &middot; not for sale</span></div>
+  </div>
+</article></main>
+<div class="empty" id="empty">No cards match.</div>
+<script>
+const state={color:null,rarity:null,type:null,q:""};
+function apply(){
+  let n=0;
+  document.querySelectorAll(".card").forEach(c=>{
+    const okC=!state.color||c.dataset.color.includes(state.color);
+    const okR=!state.rarity||c.dataset.rarity===state.rarity;
+    const okT=!state.type||c.dataset.type===state.type;
+    const okQ=!state.q||c.dataset.name.includes(state.q)||c.innerText.toLowerCase().includes(state.q);
+    const show=okC&&okR&&okT&&okQ; c.classList.toggle("hidden",!show); if(show)n++;
+  });
+  document.getElementById("count").textContent=n+" cards";
+  document.getElementById("empty").style.display=n?"none":"block";
+}
+document.querySelectorAll("[data-f]").forEach(b=>b.addEventListener("click",()=>{
+  const [k,v]=b.dataset.f.split(":");
+  const on=b.classList.contains("on");
+  document.querySelectorAll(`[data-f^="${k}:"]`).forEach(x=>x.classList.remove("on"));
+  state[k]=on?null:v; if(!on)b.classList.add("on"); apply();
+}));
+document.getElementById("q").addEventListener("input",e=>{state.q=e.target.value.toLowerCase();apply();});
+apply();
+</script>
+<script>
+const zov=document.createElement("div");zov.id="zoomov";
+const zwr=document.createElement("div");zwr.className="zwrap";zov.appendChild(zwr);document.body.appendChild(zov);
+function zclose(){zov.classList.remove("on");document.body.style.overflow="";}
+document.addEventListener("click",e=>{
+  const c=e.target.closest(".card");
+  if(c&&!zov.contains(c)){
+    zwr.innerHTML="";const k=c.cloneNode(true);k.classList.remove("hidden");
+    k.querySelectorAll("img[loading]").forEach(i=>i.removeAttribute("loading"));
+    zwr.appendChild(k);zov.classList.add("on");document.body.style.overflow="hidden";
+  }else if(zov.classList.contains("on"))zclose();
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")zclose();});
+</script>
+</body></html>

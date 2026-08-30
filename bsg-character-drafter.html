@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BSG Character Draft</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Remap Tailwind's palette onto the BSG Setup Utility theme so the
+        // existing utility classes (bg-gray-*, text-blue-*, etc.) render in the
+        // same dark sci-fi tones used across the rest of the site.
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'Segoe UI', 'system-ui', '-apple-system', 'sans-serif'] },
+                    colors: {
+                        gray: {
+                            300: '#c3cdda', 400: '#94a3ba', 500: '#65738d',
+                            600: '#2f3a4f', 700: '#1f2839', 800: '#161d2c', 900: '#0b0e16'
+                        },
+                        blue:   { 400: '#5cb0ea', 500: '#5cb0ea', 600: '#3f7fb0', 700: '#356a93', 800: '#1d3a57' },
+                        red:    { 400: '#ff7a6f', 500: '#ef4a3d', 600: '#cf382c', 700: '#a82a20' },
+                        green:  { 400: '#5fd29a', 500: '#3fb07a', 600: '#2f7d55', 700: '#27684a' },
+                        yellow: { 400: '#e3c074', 500: '#d4a94e' },
+                        purple: { 400: '#b79bf0' },
+                        orange: { 400: '#ffa24d' },
+                        cyan:   { 400: '#5cb0ea' }
+                    }
+                }
+            }
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* ===== BSG theme — shared with the Setup Utility ===================== */
+        :root{
+            --bg:#0b0e16; --bg2:#101623;
+            --panel:rgba(22,29,44,.9); --panel2:rgba(30,39,56,.86); --panel-solid:#161d2c;
+            --line:rgba(150,172,214,.14); --line2:rgba(150,172,214,.24);
+            --text:#e4e9f2; --muted:#94a3ba; --dim:#65738d;
+            --accent:#ef4a3d; --accent-soft:#ff6f62; --accent2:#ffa24d;
+            --gold:#e3c074; --blue:#5cb0ea; --green:#5fd29a;
+            --radius:16px; --radius-sm:10px;
+            --shadow:0 10px 34px rgba(0,0,0,.34);
+            --shadow-lift:0 20px 54px rgba(0,0,0,.5);
+            --ease:cubic-bezier(.2,.7,.2,1);
+        }
+        html,body{margin:0}
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: var(--text);
+            background: linear-gradient(180deg, var(--bg), var(--bg2));
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Static ambient depth: soft aurora + starfield (rasterized once, cheap) */
+        body::before{
+            content:""; position:fixed; inset:-12%; z-index:-2; pointer-events:none;
+            background:
+                radial-gradient(38% 40% at 22% 22%, rgba(239,74,61,.20), transparent 70%),
+                radial-gradient(42% 46% at 82% 18%, rgba(92,176,234,.17), transparent 72%),
+                radial-gradient(50% 52% at 66% 96%, rgba(227,192,116,.11), transparent 70%),
+                radial-gradient(30% 34% at 46% 58%, rgba(95,210,154,.08), transparent 70%);
+        }
+        body::after{
+            content:""; position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:.6;
+            background-image:
+                radial-gradient(1.2px 1.2px at 26px 38px, rgba(255,255,255,1), transparent 60%),
+                radial-gradient(1.5px 1.5px at 134px 92px, rgba(192,216,255,.95), transparent 60%),
+                radial-gradient(1px 1px at 82px 172px, rgba(255,255,255,.85), transparent 60%),
+                radial-gradient(1px 1px at 170px 40px, rgba(255,230,225,.8), transparent 60%);
+            background-size:188px 224px, 262px 262px, 206px 244px, 150px 300px;
+        }
+
+        /* Cylon scanner sweep across the top of the viewport */
+        @keyframes cylonScan{0%{transform:translateX(-130%)}100%{transform:translateX(840%)}}
+        body > #app::before{
+            content:""; position:fixed; left:0; top:0; width:13%; height:2px; z-index:40; pointer-events:none;
+            background:linear-gradient(90deg, transparent, var(--accent-soft), #fff, var(--accent-soft), transparent);
+            box-shadow:0 0 16px 3px rgba(239,74,61,.6); border-radius:2px;
+            animation:cylonScan 5.5s ease-in-out infinite alternate;
+        }
+
+        /* Brand title treatment for the home-screen heading */
+        .brand-title{
+            font-weight:800; letter-spacing:.16em;
+            background:linear-gradient(180deg,#fff,#d4dcea);
+            -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+            filter:drop-shadow(0 0 18px rgba(239,74,61,.5));
+        }
+
+        /* Glassy panels (used for screens, lobby, cards) */
+        .card {
+            background: linear-gradient(180deg, var(--panel), rgba(16,22,35,.78));
+            border-width: 1px;
+            border-color: var(--line);
+            box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,.06);
+            transition: transform .24s var(--ease), box-shadow .24s, border-color .24s, filter .24s;
+        }
+        .card:not(.disabled):hover {
+            transform: translateY(-4px);
+            border-color: rgba(92,176,234,.45);
+            box-shadow: var(--shadow-lift), inset 0 1px 0 rgba(255,255,255,.09);
+        }
+        .card.disabled {
+            filter: grayscale(100%);
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(180deg, var(--accent), #cf382c);
+            color: white; border: 1px solid rgba(239,74,61,.7);
+            box-shadow: 0 6px 18px rgba(239,74,61,.3);
+            transition: transform .18s var(--ease), box-shadow .18s, filter .18s;
+        }
+        .btn-primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
+        .btn-primary:active { transform: scale(.98); }
+        .btn-primary:disabled {
+            background: var(--panel2); color: var(--muted);
+            border-color: var(--line2); box-shadow: none;
+            opacity: 0.7; cursor: not-allowed; transform: none; filter: none;
+        }
+        .btn-secondary {
+            background: var(--panel2); color: var(--text);
+            border: 1px solid var(--line2);
+            transition: transform .18s var(--ease), border-color .18s, background .18s;
+        }
+        .btn-secondary:hover { border-color: var(--blue); transform: translateY(-1px); }
+        .btn-secondary:active { transform: scale(.98); }
+
+        .modal {
+            background-color: rgba(5, 7, 11, 0.86);
+            backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+        }
+        .modal-content {
+            background: linear-gradient(180deg, var(--panel-solid), #12172250);
+            border: 1px solid var(--line2);
+            box-shadow: 0 24px 70px rgba(0,0,0,.7);
+        }
+        .highlight-turn {
+            background: linear-gradient(180deg, rgba(239,74,61,.30), rgba(239,74,61,.14));
+            border: 1px solid rgba(239,74,61,.6);
+            color: #fff; box-shadow: 0 0 0 1px rgba(239,74,61,.35) inset;
+        }
+        .cylon-leader-text {
+            color: #d1d5db;
+            text-shadow: 0 0 4px var(--accent), 0 0 6px var(--accent);
+        }
+
+        /* +/- skill stepper buttons */
+        .skill-btn { transition: transform .15s var(--ease), filter .15s; }
+        .skill-btn:not(:disabled):hover { filter: brightness(1.15); transform: translateY(-1px); }
+        .skill-btn:not(:disabled):active { transform: scale(.94); }
+        .skill-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* Themed scrollbar */
+        *{ scrollbar-width: thin; scrollbar-color: var(--line2) transparent; }
+        *::-webkit-scrollbar{ width:10px; height:10px; }
+        *::-webkit-scrollbar-thumb{ background:var(--line2); border-radius:8px; }
+        *::-webkit-scrollbar-track{ background:transparent; }
+
+        @media (prefers-reduced-motion:reduce){
+            body > #app::before{ animation:none; }
+        }
+    </style>
+    <link rel="icon" href="favicon.ico">
+</head>
+<body class="antialiased">
+    <div id="app" class="min-h-screen flex flex-col items-center justify-center p-4">
+    </div>
+
+    <div id="modal-container" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal">
+        <div id="modal-content" class="modal-content rounded-lg shadow-2xl w-full max-w-4xl p-6 relative border border-gray-700">
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, updateDoc, collection, serverTimestamp, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- DATA: Character Information with Skills ---
+        const characters = [
+            // Political Leaders
+            { id: 2, name: "Laura Roslin", type: "Political Leader", skills: ['Politics', 'Leadership'], imageUrl: "https://www.dfwgamingvillage.com/images/Laura%20Roslin.png" },
+            { id: 30, name: "Lee Adama (alt)", type: "Political Leader", skills: ['Politics', 'Leadership', 'Tactics', 'Piloting'], imageUrl: "https://www.dfwgamingvillage.com/images/Lee%20Adama%20(Political%20Leader).png" },
+            { id: 4, name: "Tom Zarek", type: "Political Leader", skills: ['Politics', 'Leadership', 'Tactics'], imageUrl: "https://www.dfwgamingvillage.com/images/Tom%20Zarek%20(Political%20Leader).png" },
+            { id: 14, name: "Ellen Tigh", type: "Political Leader", skills: ['Politics', 'Leadership', 'Treachery'], imageUrl: "https://www.dfwgamingvillage.com/images/Ellen%20Tigh.png" },
+            { id: 27, name: "Romo Lampkin", type: "Political Leader", skills: ['Politics', 'Tactics'], imageUrl: "https://www.dfwgamingvillage.com/images/Romo%20Lampkin.png" },
+            { id: 18, name: "Tory Foster", type: "Political Leader", skills: ['Politics', 'Leadership', 'Tactics'], imageUrl: "https://www.dfwgamingvillage.com/images/Tory%20Foster.png" },
+            { id: 35, name: "Gaius Baltar (alt)", type: "Political Leader", skills: ['Politics', 'Leadership', 'Engineering'], imageUrl: "https://www.dfwgamingvillage.com/images/Gaius%20Baltar%20(Political%20Leader).png" },
+            // Military Leaders
+            { id: 1, name: "William Adama", type: "Military Leader", skills: ['Leadership', 'Tactics'], imageUrl: "https://www.dfwgamingvillage.com/images/William%20Adama.png" },
+            { id: 8, name: "Saul Tigh", type: "Military Leader", skills: ['Leadership', 'Tactics'], imageUrl: "https://www.dfwgamingvillage.com/images/Saul%20Tigh.png" },
+            { id: 13, name: "Helena Cain", type: "Military Leader", skills: ['Leadership', 'Tactics'], imageUrl: "https://www.dfwgamingvillage.com/images/Helena%20Cain.png" },
+            { id: 7, name: "Karl Agathon", type: "Military Leader", skills: ['Leadership', 'Tactics', 'Piloting'], imageUrl: "https://www.dfwgamingvillage.com/images/Karl%20Helo%20Agathon.png" },
+            { id: 19, name: "Felix Gaeta", type: "Military Leader", skills: ['Politics', 'Leadership', 'Tactics', 'Engineering'], imageUrl: "https://www.dfwgamingvillage.com/images/Felix%20Gaeta.png" },
+            { id: 33, name: "Tom Zarek (alt)", type: "Military Leader", skills: ['Politics', 'Leadership', 'Tactics'], imageUrl: "https://www.dfwgamingvillage.com/images/Tom%20Zarek%20(Military%20Leader).png" },
+            { id: 36, name: "Louis Hoshi", type: "Military Leader", skills: ['Leadership', 'Tactics', 'Engineering'], imageUrl: "https://www.dfwgamingvillage.com/images/Louis%20Hoshi.png" },
+            // Pilots
+            { id: 6, name: "Kara Thrace", type: "Pilot", skills: ['Tactics', 'Piloting', 'Leadership', 'Engineering'], imageUrl: "https://www.dfwgamingvillage.com/images/Kara%20Starbuck%20Thrace.png" },
+            { id: 5, name: "Lee Adama", type: "Pilot", skills: ['Tactics', 'Piloting', 'Leadership', 'Politics'], imageUrl: "https://www.dfwgamingvillage.com/images/Lee%20Apollo%20Adama%20(Pilot).png" },
+            { id: 10, name: "Sharon Valerii", type: "Pilot", skills: ['Tactics', 'Piloting', 'Engineering'], imageUrl: "https://www.dfwgamingvillage.com/images/Sharon%20Boomer%20Valerii.png" },
+            { id: 16, name: "Louanne Katraine", type: "Pilot", skills: ['Leadership', 'Tactics', 'Piloting'], imageUrl: "https://www.dfwgamingvillage.com/images/Louanne%20Kat%20Katraine.png" },
+            { id: 20, name: "Brendan Costanza", type: "Pilot", skills: ['Leadership', 'Engineering', 'Tactics', 'Piloting'], imageUrl: "https://www.dfwgamingvillage.com/images/Brendan%20Hot%20Dog%20Costanza.png" },
+            { id: 21, name: "Samuel Anders", type: "Pilot", skills: ['Leadership', 'Tactics', 'Piloting'], imageUrl: "https://www.dfwgamingvillage.com/images/Samuel%20T.%20Anders.png" },
+            { id: 32, name: "Karl Agathon (alt)", type: "Pilot", skills: ['Leadership', 'Tactics', 'Piloting'], imageUrl: "https://www.dfwgamingvillage.com/images/Karl%20Helo%20Agathon%20(Pilot).png" },
+            // Support
+            { id: 9, name: "Galen Tyrol", type: "Support", skills: ['Politics', 'Leadership', 'Engineering'], imageUrl: "https://www.dfwgamingvillage.com/images/Chief%20Galen%20Tyrol.png" },
+            { id: 15, name: "Anastasia Dualla", type: "Support", skills: ['Leadership', 'Tactics', 'Engineering'], imageUrl: "https://www.dfwgamingvillage.com/images/Anastasia%20Dee%20Dualla.png" },
+            { id: 17, name: "Cally Tyrol", type: "Support", skills: ['Politics', 'Engineering', 'Leadership', 'Tactics'], imageUrl: "https://www.dfwgamingvillage.com/images/Callandra%20Cally%20Tyrol.png" },
+            { id: 26, name: "Sherman Cottle", type: "Support", skills: ['Politics', 'Tactics', 'Engineering'], imageUrl: "https://www.dfwgamingvillage.com/images/Sherman%20Doc%20Cottle.png" },
+            { id: 3, name: "Gaius Baltar", type: "Support", skills: ['Politics', 'Leadership', 'Engineering'], imageUrl: "https://www.dfwgamingvillage.com/images/Gaius%20Baltar.png" },
+            // Cylon Leaders
+            { id: 11, name: "'Caprica' Six", type: "Cylon Leader", skills: ['Leadership', 'Treachery', 'Engineering'], imageUrl: "https://www.dfwgamingvillage.com/images/Caprica%20Six.png" },
+            { id: 12, name: "Leoben Conoy", type: "Cylon Leader", skills: ['Politics', 'Treachery', 'Engineering'], imageUrl: "https://www.dfwgamingvillage.com/images/Leoben%20Conoy.png" },
+            { id: 22, name: "Sharon Agathon (Athena)", type: "Cylon Leader", skills: ['Tactics', 'Leadership', 'Engineering'], imageUrl: "https://www.dfwgamingvillage.com/images/Sharon%20Athena%20Agathon%20(Cylon%20Leader).png" },
+            { id: 23, name: "Aaron Doral", type: "Cylon Leader", skills: ['Treachery', 'Politics', 'Tactics'], imageUrl: "https://www.dfwgamingvillage.com/images/Aaron%20Doral.png" },
+            { id: 24, name: "Simon O'Neill", type: "Cylon Leader", skills: ['Engineering', 'Treachery', 'Tactics'], imageUrl: "https://www.dfwgamingvillage.com/images/Simon%20O'Neill.png" },
+            { id: 25, name: "D'Anna Biers", type: "Cylon Leader", skills: ['Leadership', 'Politics', 'Treachery', 'Engineering'], imageUrl: "https://www.dfwgamingvillage.com/images/D'Anna%20Biers.png" },
+            { id: 34, name: "Cavil", type: "Cylon Leader", skills: ['Tactics', 'Treachery', 'Engineering'], imageUrl: "https://www.dfwgamingvillage.com/images/Cavil.png" },
+        ];
+
+        // --- Alternate Character Pairs ---
+        const alternateCharacterPairs = [
+            [5, 30],  // Lee Adama (Pilot, Political)
+            [4, 33],  // Tom Zarek (Political, Military)
+            [7, 32],  // Karl Agathon (Military, Pilot)
+            [3, 35]   // Gaius Baltar (Support, Political)
+        ];
+
+        // --- Firebase Configuration ---
+        let db, auth;
+        let userId;
+        let gameUnsubscribe = null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        // --- App State ---
+        let appState = {
+            gameId: null,
+            playerName: localStorage.getItem('bsgPlayerName') || '',
+            gameData: null,
+        };
+
+        // Holds the in-progress skill-card counts so they survive re-renders
+        // (e.g. when a bot auto-selects and triggers a Firestore snapshot).
+        let pendingSkillCounts = null;
+        
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+         apiKey: "AIzaSyC73JtYpZC-PIiQCQVubVIENAd2brZSES4",
+         authDomain: "bsg-character-draft.firebaseapp.com",
+         projectId: "bsg-character-draft",
+         storageBucket: "bsg-character-draft.firebasestorage.app",
+         messagingSenderId: "1023995706387",
+         appId: "1:1023995706387:web:ecea10d5e19b2db736d3e6",
+         measurementId: "G-NN96MHGDJH"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
+        
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                userId = user.uid;
+                init();
+            } else {
+                 try {
+                      if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                          await signInWithCustomToken(auth, __initial_auth_token);
+                      } else {
+                          await signInAnonymously(auth);
+                      }
+                 } catch (error) {
+                      console.error("Authentication failed:", error);
+                 }
+            }
+        });
+
+        // --- Main Initialization ---
+        function init() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const gameIdFromUrl = urlParams.get('game');
+            if (gameIdFromUrl) {
+                appState.gameId = gameIdFromUrl;
+                joinGame();
+            } else {
+                renderHomeScreen();
+            }
+        }
+
+        // --- Rendering Functions ---
+        const AppContainer = document.getElementById('app');
+
+        function renderHomeScreen() {
+            AppContainer.innerHTML = `
+                <div class="text-center p-8 rounded-lg shadow-2xl max-w-md w-full card">
+                    <h1 class="brand-title text-2xl mb-1">BATTLESTAR GALACTICA</h1>
+                    <p class="text-red-400 tracking-[0.25em] uppercase text-sm font-semibold mb-5">Character Draft</p>
+                    <div class="space-y-4">
+                        <input id="playerName" type="text" placeholder="Enter Your Name" value="${escapeHtml(appState.playerName)}" class="w-full px-4 py-2 rounded-md bg-gray-800 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input id="playerCount" type="number" min="3" max="7" placeholder="Number of Players (3-7)" class="w-full px-4 py-2 rounded-md bg-gray-800 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button id="createGameBtn" class="w-full py-2 px-4 rounded-md font-semibold btn-primary">Create New Game</button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('createGameBtn').addEventListener('click', createGame);
+            document.getElementById('playerName').addEventListener('input', (e) => {
+                appState.playerName = e.target.value;
+                localStorage.setItem('bsgPlayerName', appState.playerName);
+            });
+        }
+        
+        function renderJoinScreen() {
+             AppContainer.innerHTML = `
+                <div class="text-center p-8 rounded-lg shadow-2xl max-w-md w-full card">
+                    <h2 class="text-2xl font-bold mb-4">Joining Game</h2>
+                    <p class="text-gray-400 mb-6">Enter your name to join, or enter a Rejoin Code to sync with an existing spot.</p>
+                    <div id="joinError" class="text-red-400 mb-4 hidden"></div>
+                    <div class="space-y-4">
+                        <input id="joinInput" type="text" placeholder="Your Name or Rejoin Code" class="w-full px-4 py-2 rounded-md bg-gray-800 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button id="joinGameBtn" class="w-full py-2 px-4 rounded-md font-semibold btn-primary">Join Game</button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('joinGameBtn').addEventListener('click', handleJoinAttempt);
+        }
+
+        function renderLobbyScreen() {
+            const { players = [], playerCount = 0, admin = '' } = appState.gameData;
+            const isFull = players.length >= playerCount;
+            const isAdmin = userId === admin;
+            const fullGameUrl = `${window.location.origin}${window.location.pathname}?game=${appState.gameId}`;
+
+            AppContainer.innerHTML = `
+                <div class="text-center p-8 rounded-lg shadow-2xl max-w-2xl w-full card">
+                    <h2 class="text-2xl font-bold mb-4">Game Lobby</h2>
+                    <p class="text-gray-400 mb-6">Share this link with other players to join.</p>
+                    
+                    <div class="text-left bg-gray-800 p-4 rounded-lg border border-gray-700">
+                        <p class="font-bold text-lg mb-2">Game Link</p>
+                        <div class="flex items-center">
+                            <input id="shareUrl" type="text" readonly value="${fullGameUrl}" class="w-full px-4 py-2 text-center rounded-l-md bg-gray-900 border border-gray-600 cursor-pointer" onclick="this.select()">
+                            <button id="copyUrlBtn" class="py-2 px-4 rounded-r-md btn-secondary whitespace-nowrap">Copy Link</button>
+                        </div>
+                    </div>
+
+                    <h3 class="text-xl mb-2 mt-6">${players.length} / ${playerCount} Players Joined</h3>
+                    <div id="playerList" class="space-y-2 mb-6">
+                        ${players.map(p => {
+                            const kickButton = isAdmin && p.uid !== admin ? `<button onclick="kickPlayer('${p.uid}')" class="text-xs bg-red-600 hover:bg-red-700 px-2 py-1 rounded">Kick</button>` : '';
+                            const changeNameButton = p.uid === userId ? `<button onclick="changePlayerName()" class="text-xs bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded">Change Name</button>` : '';
+                            const playerTag = p.uid === admin ? '(Admin)' : (p.uid === userId ? '(You)' : '');
+                            const rejoinCodeDisplay = p.uid === userId && p.rejoinCode ? `<div class="text-xs text-cyan-400 mt-1">Rejoin Code: <strong class="tracking-widest">${p.rejoinCode}</strong></div>` : '';
+
+                            return `
+                                <div class="flex justify-between items-center p-2 rounded bg-gray-700 text-left">
+                                    <div>
+                                        <span>${escapeHtml(p.name)} <span class="text-gray-400 text-sm">${playerTag}</span></span>
+                                        ${rejoinCodeDisplay}
+                                    </div>
+                                    <div class="space-x-2">
+                                        ${changeNameButton}
+                                        ${kickButton}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                    <div class="flex space-x-2">
+                        ${isAdmin && isFull ? `<button id="startGameBtn" class="w-full py-2 px-4 rounded-md font-semibold btn-primary">Start Draft</button>` : ''}
+                        ${isAdmin && !isFull ? `<button id="addBotsBtn" class="w-full py-2 px-4 rounded-md font-semibold btn-secondary">Fill with Bots & Start</button>` : ''}
+                    </div>
+                    ${isAdmin && !isFull ? `<p class="text-yellow-400 mt-4">Waiting for ${playerCount - players.length} more player(s)...</p>` : ''}
+                    ${!isAdmin && isFull ? `<p class="text-green-400 mt-4">Lobby is full! Waiting for Admin to start the game.</p>` : ''}
+                </div>
+            `;
+            if(document.getElementById('startGameBtn')) {
+                document.getElementById('startGameBtn').addEventListener('click', startDraft);
+            }
+            if(document.getElementById('addBotsBtn')) {
+                document.getElementById('addBotsBtn').addEventListener('click', fillWithBotsAndStart);
+            }
+            document.getElementById('copyUrlBtn').addEventListener('click', () => {
+                 const urlField = document.getElementById('shareUrl');
+                 urlField.select();
+                 try {
+                     document.execCommand('copy');
+                     alert('Game link copied to clipboard!');
+                 } catch (err) {
+                     console.error('Failed to copy text: ', err);
+                 }
+            });
+        }
+
+        function renderDraftScreen() {
+            const { players, draftOrder, currentPlayerIndex, draftedCharacters, admin } = appState.gameData;
+            if (!players || !draftOrder || currentPlayerIndex === undefined) return;
+            
+            const currentPlayerUid = draftOrder[currentPlayerIndex];
+            const currentPlayer = players.find(p => p.uid === currentPlayerUid);
+            const isMyTurn = userId === currentPlayerUid;
+            
+            const isAdmin = userId === admin;
+            const isBotTurn = currentPlayerUid && currentPlayerUid.startsWith('bot-');
+            if (isAdmin && isBotTurn) {
+                setTimeout(simulateBotPick, 1500);
+            }
+
+            const validDraftableCharacters = getValidCharacters();
+            const validTypesForDraft = new Set(validDraftableCharacters.map(c => c.type));
+
+            const draftedIds = Object.values(draftedCharacters);
+            const allUnavailableIds = new Set(draftedIds);
+            draftedIds.forEach(id => {
+                const pair = alternateCharacterPairs.find(p => p.includes(id));
+                if (pair) {
+                    pair.forEach(altId => allUnavailableIds.add(altId));
+                }
+            });
+
+            const groupedCharacters = characters.reduce((acc, char) => {
+                const type = char.type;
+                if (!acc[type]) {
+                    acc[type] = [];
+                }
+                acc[type].push(char);
+                return acc;
+            }, {});
+
+            const characterOrder = ['Political Leader', 'Military Leader', 'Pilot', 'Support', 'Cylon Leader'];
+
+            AppContainer.innerHTML = `
+                <div class="w-full max-w-7xl">
+                    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                        <div class="lg:col-span-1 p-4 rounded-lg card">
+                            <h2 class="text-xl font-bold mb-4 border-b border-gray-600 pb-2">Draft Order</h2>
+                            <div class="space-y-3">
+                                ${draftOrder.map((uid, index) => {
+                                    const player = players.find(p => p.uid === uid);
+                                    const characterId = draftedCharacters[uid];
+                                    const character = characterId ? characters.find(c => c.id === characterId) : null;
+                                    const rejoinCodeDisplay = uid === userId && player.rejoinCode ? `<div class="text-xs text-cyan-400 mt-1">Rejoin Code: <strong class="tracking-widest">${player.rejoinCode}</strong></div>` : '';
+                                    const draftedCardHtml = character ? `
+                                        <div class="flex items-center space-x-2 mt-1 cursor-pointer" onclick="showCharacterDetails(${character.id})">
+                                            <img src="${character.imageUrl}" class="w-10 h-auto rounded-sm"/>
+                                            <div>
+                                                <p class="text-sm text-gray-300">${character.name}</p>
+                                                <p class="text-xs ${getCharacterTypeColor(character.type)}">${character.type}</p>
+                                            </div>
+                                        </div>
+                                    ` : `<p class="text-sm text-gray-400 italic">Picking...</p>`;
+                                    return `
+                                        <div class="p-3 rounded-md ${index === currentPlayerIndex ? 'highlight-turn' : 'bg-gray-700'}">
+                                            <p class="font-semibold">${index + 1}. ${escapeHtml(player?.name || '...')} ${uid === userId ? '(You)' : ''}</p>
+                                            ${rejoinCodeDisplay}
+                                            ${draftedCardHtml}
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+
+                        <div class="lg:col-span-3">
+                            <div class="text-center mb-6">
+                                <h1 class="text-3xl font-bold">${isMyTurn ? "Your Turn to Draft!" : `Waiting for ${currentPlayer?.name || '...'}...`}</h1>
+                            </div>
+                            <div class="space-y-8">
+                                ${characterOrder.map(type => {
+                                    if (!validTypesForDraft.has(type) && isMyTurn) return '';
+                                    if (!groupedCharacters[type]) return '';
+
+                                    return `
+                                        <div>
+                                            <h2 class="text-2xl font-bold mb-4 ${getCharacterTypeColor(type)}">${type}s</h2>
+                                            <hr class="border-gray-700 mb-4"/>
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                ${groupedCharacters[type].map(char => {
+                                                    const isActuallyDrafted = draftedIds.includes(char.id);
+                                                    const isUnavailable = allUnavailableIds.has(char.id);
+                                                    return `
+                                                        <div 
+                                                            class="card rounded-lg cursor-pointer border-2 ${isUnavailable ? 'border-gray-600' : getCharacterTypeBorderColor(char.type)} ${isUnavailable ? 'disabled' : ''}"
+                                                            onclick="showCharacterDetails(${char.id})">
+                                                            <div class="relative">
+                                                                <img src="${char.imageUrl}" alt="${char.name}" class="w-full h-auto rounded-md">
+                                                                ${isActuallyDrafted ? `
+                                                                    <div class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center rounded-md">
+                                                                        <p class="text-red-500 text-2xl font-bold tracking-widest -rotate-12">DRAFTED</p>
+                                                                    </div>
+                                                                ` : ''}
+                                                                ${isUnavailable && !isActuallyDrafted ? `
+                                                                    <div class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center rounded-md">
+                                                                        <p class="text-yellow-500 text-2xl font-bold tracking-widest -rotate-12">UNAVAILABLE</p>
+                                                                    </div>
+                                                                ` : ''}
+                                                            </div>
+                                                        </div>
+                                                    `;
+                                                }).join('')}
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSkillSelectionScreen() {
+            const { players, draftOrder, draftedCharacters, skillSelections = {}, admin } = appState.gameData;
+            
+            const myCharacterId = draftedCharacters[userId];
+            const myCharacter = characters.find(c => c.id === myCharacterId);
+            const isFirstPlayer = userId === draftOrder[0];
+            const hasSelected = !!skillSelections[userId];
+            
+            const cardsToDraw = (myCharacter && myCharacter.type === 'Cylon Leader' && myCharacter.name !== 'Sharon Agathon (Athena)') ? 2 : 3;
+
+            let mySelectionUI = '';
+            if (isFirstPlayer) {
+                mySelectionUI = `<p class="text-lg text-yellow-400">As the first player, you do not select starting skill cards. Waiting for other players...</p>`;
+            } else if (hasSelected) {
+                mySelectionUI = `<p class="text-lg text-green-400">You have selected your skills. Waiting for other players...</p>`;
+            } else if (myCharacter) {
+                mySelectionUI = `
+                    <div class="text-center">
+                        <img src="${myCharacter.imageUrl}" class="w-full max-w-sm mx-auto rounded-lg mb-4 border-2 ${getCharacterTypeBorderColor(myCharacter.type)}">
+                        <p id="skill-selection-feedback" class="text-lg text-gray-300 mb-4">Select <span class="font-bold text-white">0 / ${cardsToDraw}</span> skill cards from your available skills:</p>
+                        <div id="skill-options" class="flex flex-wrap justify-center items-center gap-4 mb-6">
+                            ${myCharacter.skills.map(skill => `
+                                <div class="flex flex-col items-center p-3 rounded-lg bg-gray-800 border border-gray-700 min-w-[120px]">
+                                    <span class="font-semibold ${getSkillColor(skill)} mb-2">${skill}</span>
+                                    <div class="flex items-center space-x-3">
+                                        <button data-skill="${skill}" class="skill-btn skill-decrement bg-gray-600 hover:bg-gray-500 rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold">-</button>
+                                        <span id="skill-count-${skill}" class="text-xl font-bold w-6 text-center">0</span>
+                                        <button data-skill="${skill}" class="skill-btn skill-increment bg-gray-600 hover:bg-gray-500 rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold">+</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <button id="confirmSkillsBtn" class="py-2 px-6 rounded-md font-semibold btn-primary" disabled>Confirm Selection</button>
+                    </div>
+                `;
+            }
+
+            const allPlayersStatus = draftOrder.map(uid => {
+                const player = players.find(p => p.uid === uid);
+                const character = characters.find(c => c.id === draftedCharacters[uid]);
+                let status;
+                if (uid === draftOrder[0]) {
+                    status = `<span class="text-gray-400">First Player</span>`;
+                } else if (skillSelections[uid]) {
+                    status = `<span class="text-green-400">Skills Selected</span>`;
+                } else {
+                    status = `<span class="text-yellow-400">Selecting...</span>`;
+                }
+                return `
+                    <div class="p-4 rounded-lg bg-gray-800 border border-gray-700 text-left flex items-center space-x-4">
+                        <img src="${character.imageUrl}" alt="${character.name}" class="w-16 h-auto rounded-md">
+                        <div>
+                            <p class="text-lg font-semibold">${escapeHtml(player.name)}</p>
+                            <h3 class="text-md font-bold ${getCharacterTypeColor(character.type)}">${character.name}</h3>
+                            ${status}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            AppContainer.innerHTML = `
+                <div class="max-w-4xl w-full">
+                    <div class="text-center p-8 rounded-lg shadow-2xl w-full card mb-6">
+                        <h1 class="text-3xl font-bold text-blue-400 mb-4">Skill Card Selection</h1>
+                        ${mySelectionUI}
+                    </div>
+                    <div class="p-8 rounded-lg shadow-2xl w-full card">
+                        <h2 class="text-2xl font-bold mb-4">Player Status</h2>
+                        <div class="space-y-4">${allPlayersStatus}</div>
+                    </div>
+                </div>
+            `;
+            
+            if (userId === admin) {
+                setTimeout(simulateBotSkillSelections, 1500);
+            }
+
+            if (!isFirstPlayer && !hasSelected && myCharacter) {
+                const skillCounts = {};
+                myCharacter.skills.forEach(skill => {
+                    // Restore any in-progress selection so a mid-pick re-render
+                    // (e.g. a bot auto-selecting) doesn't reset the player's counts.
+                    const restored = pendingSkillCounts && typeof pendingSkillCounts[skill] === 'number'
+                        ? pendingSkillCounts[skill] : 0;
+                    skillCounts[skill] = restored;
+                    const countEl = document.getElementById(`skill-count-${skill}`);
+                    if (countEl) countEl.textContent = restored;
+                });
+                pendingSkillCounts = skillCounts;
+
+                const confirmBtn = document.getElementById('confirmSkillsBtn');
+                const feedbackEl = document.getElementById('skill-selection-feedback');
+
+                const updateTotal = () => {
+                    const total = Object.values(skillCounts).reduce((sum, count) => sum + count, 0);
+                    
+                    feedbackEl.innerHTML = `Select <span class="font-bold text-white">${total} / ${cardsToDraw}</span> skill cards from your available skills:`;
+
+                    const incrementBtns = document.querySelectorAll('.skill-increment');
+                    incrementBtns.forEach(btn => {
+                        btn.disabled = total >= cardsToDraw;
+                    });
+
+                    const decrementBtns = document.querySelectorAll('.skill-decrement');
+                    decrementBtns.forEach(btn => {
+                        const skill = btn.dataset.skill;
+                        btn.disabled = skillCounts[skill] <= 0;
+                    });
+
+                    confirmBtn.disabled = total !== cardsToDraw;
+                };
+
+                document.querySelectorAll('.skill-btn').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const skill = button.dataset.skill;
+                        if (button.classList.contains('skill-increment')) {
+                            skillCounts[skill]++;
+                        } else if (button.classList.contains('skill-decrement')) {
+                            skillCounts[skill]--;
+                        }
+                        document.getElementById(`skill-count-${skill}`).textContent = skillCounts[skill];
+                        updateTotal();
+                    });
+                });
+                
+                confirmBtn.addEventListener('click', () => selectSkillCards(skillCounts));
+                updateTotal();
+            }
+        }
+        
+        function renderSummaryScreen() {
+             const { players, draftOrder, draftedCharacters, skillSelections = {} } = appState.gameData;
+             AppContainer.innerHTML = `
+                  <div class="text-center p-8 rounded-lg shadow-2xl max-w-3xl w-full card">
+                       <h1 class="text-3xl font-bold text-green-500 mb-4">Setup Complete!</h1>
+                       <p class="text-gray-400 mb-6">Review the final results and prepare for the game.</p>
+                       <div class="space-y-4">
+                            ${draftOrder.map((uid, index) => {
+                                 const player = players.find(p => p.uid === uid);
+                                 const characterId = draftedCharacters[uid];
+                                 const character = characters.find(c => c.id === characterId);
+                                 const skills = skillSelections[uid];
+                                 
+                                 let skillsHtml = '';
+                                 if (index === 0) {
+                                      skillsHtml = `<p class="text-sm text-gray-400 italic mt-2">No starting skills (First Player)</p>`;
+                                 } else if (skills) {
+                                      skillsHtml = `<div class="mt-2">
+                                           <span class="font-semibold text-gray-300">Skills: </span>
+                                           ${skills.map(s => `<span class="font-bold ${getSkillColor(s)}">${s}</span>`).join(', ')}
+                                      </div>`;
+                                 }
+
+                                 return `
+                                      <div class="p-4 rounded-lg bg-gray-800 border border-gray-700 text-left flex items-center space-x-4">
+                                           <img src="${character.imageUrl}" alt="${character.name}" class="w-24 h-auto rounded-md">
+                                           <div>
+                                                <p class="text-xl font-semibold">${escapeHtml(player.name)} drafted:</p>
+                                                <h3 class="text-2xl font-bold ${getCharacterTypeColor(character.type)}">${character.name} <span class="text-lg font-normal text-gray-400">(${character.type})</span></h3>
+                                                ${skillsHtml}
+                                           </div>
+                                      </div>
+                                 `;
+                            }).join('')}
+                       </div>
+                       <button onclick="startNewDraft()" class="mt-8 py-2 px-6 rounded-md font-semibold btn-secondary">Start New Draft</button>
+                  </div>
+              `;
+        }
+        
+        // --- Game Logic Functions ---
+        
+        function getGameDocRef(gameId) {
+            return doc(db, `artifacts/${appId}/public/data/bsg-drafts`, gameId);
+        }
+
+        async function createGame() {
+            const createButton = document.getElementById('createGameBtn');
+            const playerName = document.getElementById('playerName').value;
+            const playerCount = parseInt(document.getElementById('playerCount').value);
+
+            if (!playerName || !playerCount || playerCount < 3 || playerCount > 7) {
+                alert("Please enter your name and a valid player count (3-7).");
+                return;
+            }
+
+            createButton.disabled = true;
+            createButton.textContent = 'Creating...';
+
+            const gameId = 'bsg-' + Math.random().toString(36).substring(2, 9);
+            
+            const rejoinCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+            const adminPlayer = { 
+                name: playerName, 
+                uid: userId, 
+                rejoinCode: rejoinCode 
+            };
+            
+            const newGameData = {
+                admin: userId,
+                playerCount: playerCount,
+                players: [adminPlayer],
+                gameState: 'lobby',
+                createdAt: serverTimestamp(),
+            };
+
+            try {
+                const gameRef = getGameDocRef(gameId);
+                await setDoc(gameRef, newGameData);
+                
+                appState.gameId = gameId;
+                appState.gameData = newGameData;
+                window.history.pushState({}, '', `?game=${gameId}`);
+                joinGame();
+
+            } catch (error) {
+                console.error("Error creating game:", error);
+                alert("Could not create the game. Please check your connection and try again.");
+                createButton.disabled = false;
+                createButton.textContent = 'Create New Game';
+            }
+        }
+
+        async function verifyGameExistsWithRetries(gameId) {
+            const gameRef = getGameDocRef(gameId);
+            let retries = 5;
+            while (retries > 0) {
+                const docSnap = await getDoc(gameRef);
+                if (docSnap.exists()) {
+                    return true;
+                }
+                await new Promise(resolve => setTimeout(resolve, 500)); 
+                retries--;
+            }
+            return false;
+        }
+
+        function joinGame() {
+            if (gameUnsubscribe) gameUnsubscribe();
+
+            let hasCheckedForGame = false; 
+
+            gameUnsubscribe = onSnapshot(getGameDocRef(appState.gameId), async (docSnap) => {
+                if (docSnap.exists()) {
+                    const oldGameState = appState.gameData ? appState.gameData.gameState : null;
+                    appState.gameData = docSnap.data();
+                    
+                    const playerExistsByUID = appState.gameData.players.some(p => p.uid === userId);
+
+                    if (playerExistsByUID) {
+                        // Player is already in the game, update their local name state and render
+                        const me = appState.gameData.players.find(p => p.uid === userId);
+                        if (me) {
+                            appState.playerName = me.name;
+                            localStorage.setItem('bsgPlayerName', me.name);
+                        }
+                        renderCurrentGameState();
+                    } else {
+                        // New connection: show the join screen. The actual joining is handled by handleJoinAttempt
+                        renderJoinScreen();
+                    }
+                    
+                    // Check if the skill selection phase is complete to move to the finished screen
+                    if (appState.gameData.gameState === 'skillSelection' && oldGameState !== 'finished') {
+                        const { draftOrder, skillSelections = {} } = appState.gameData;
+                        // The first drafter draws no starting skills. Only subtract them from the
+                        // eligible count when that first drafter is a human (it can be a bot).
+                        const humanPlayers = draftOrder.filter(uid => !uid.startsWith('bot-')).length;
+                        const firstPlayerIsHuman = draftOrder.length > 0 && !draftOrder[0].startsWith('bot-');
+                        const eligiblePlayers = humanPlayers - (firstPlayerIsHuman ? 1 : 0);
+                        const selectedPlayers = Object.keys(skillSelections).filter(uid => !uid.startsWith('bot-')).length;
+                        if (selectedPlayers >= eligiblePlayers) {
+                            await updateDoc(getGameDocRef(appState.gameId), { gameState: 'finished' });
+                            return; 
+                        }
+                    }
+
+                } else if (!hasCheckedForGame) {
+                    hasCheckedForGame = true;
+                    const gameExists = await verifyGameExistsWithRetries(appState.gameId);
+                    if (!gameExists) {
+                        console.error("Game not found after retries.");
+                        alert("Game not found! Returning to home screen.");
+                        window.location.href = window.location.href.split('?')[0];
+                    }
+                }
+            });
+        }
+        
+        async function handleJoinAttempt() {
+            const joinButton = document.getElementById('joinGameBtn');
+            const userInput = document.getElementById('joinInput').value.trim();
+            const errorDiv = document.getElementById('joinError');
+
+            joinButton.disabled = true;
+            joinButton.textContent = 'Joining...';
+            errorDiv.classList.add('hidden');
+
+            if (!userInput) {
+                errorDiv.textContent = 'Please enter a name or code.';
+                errorDiv.classList.remove('hidden');
+                joinButton.disabled = false;
+                joinButton.textContent = 'Join Game';
+                return;
+            }
+
+            const playerByCode = appState.gameData.players.find(p => p.rejoinCode && p.rejoinCode === userInput.toUpperCase());
+
+            if (playerByCode) {
+                const originalUid = playerByCode.uid;
+                const isAdminRejoining = originalUid === appState.gameData.admin;
+
+                const updatedPlayers = appState.gameData.players.map(p => 
+                    p.rejoinCode === userInput.toUpperCase() ? { ...p, uid: userId } : p
+                );
+                
+                const updatePayload = { players: updatedPlayers };
+                if (isAdminRejoining) {
+                    updatePayload.admin = userId;
+                }
+                
+                await updateDoc(getGameDocRef(appState.gameId), updatePayload);
+
+            } else {
+                // User is joining with a name. This is only allowed in the lobby.
+                if (appState.gameData.gameState !== 'lobby') {
+                    errorDiv.textContent = 'Game has started. You can only join with a valid Rejoin Code.';
+                    errorDiv.classList.remove('hidden');
+                    joinButton.disabled = false;
+                    joinButton.textContent = 'Join Game';
+                    return;
+                }
+
+                if (appState.gameData.players.length >= appState.gameData.playerCount) {
+                    errorDiv.textContent = 'This lobby is full.';
+                    errorDiv.classList.remove('hidden');
+                    joinButton.disabled = false;
+                    joinButton.textContent = 'Join Game';
+                    return;
+                }
+
+                const newPlayerName = userInput;
+                const existingPlayerByName = appState.gameData.players.find(p => p.name.toLowerCase() === newPlayerName.toLowerCase());
+
+                if (existingPlayerByName) {
+                    // A different player already has this name
+                    errorDiv.textContent = 'This name is already taken.';
+                    errorDiv.classList.remove('hidden');
+                    joinButton.disabled = false;
+                    joinButton.textContent = 'Join Game';
+                } else {
+                    // It's a new player. Generate code and add them.
+                    const rejoinCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+                    const newPlayer = { 
+                        name: newPlayerName, 
+                        uid: userId, 
+                        rejoinCode: rejoinCode 
+                    };
+                    const updatedPlayers = [...appState.gameData.players, newPlayer];
+                    await updateDoc(getGameDocRef(appState.gameId), { players: updatedPlayers });
+                }
+            }
+        }
+        
+        async function startDraft() {
+            const { players } = appState.gameData;
+            const draftOrder = [...players].sort(() => Math.random() - 0.5).map(p => p.uid);
+            
+            await updateDoc(getGameDocRef(appState.gameId), {
+                gameState: 'drafting',
+                draftOrder,
+                currentPlayerIndex: 0,
+                draftedCharacters: {},
+            });
+        }
+        
+        async function fillWithBotsAndStart() {
+            const { players, playerCount } = appState.gameData;
+            const botsNeeded = playerCount - players.length;
+            if (botsNeeded <= 0) return;
+
+            const botPlayers = Array.from({ length: botsNeeded }, (_, i) => ({
+                name: `Bot ${i + 1}`,
+                uid: `bot-${crypto.randomUUID()}`
+            }));
+
+            const allPlayers = [...players, ...botPlayers];
+            const draftOrder = allPlayers.sort(() => Math.random() - 0.5).map(p => p.uid);
+
+            await updateDoc(getGameDocRef(appState.gameId), {
+                players: allPlayers,
+                gameState: 'drafting',
+                draftOrder,
+                currentPlayerIndex: 0,
+                draftedCharacters: {},
+            });
+        }
+        
+        async function kickPlayer(playerUidToKick) {
+            if (userId !== appState.gameData.admin) return;
+            const updatedPlayers = appState.gameData.players.filter(p => p.uid !== playerUidToKick);
+            try {
+                await updateDoc(getGameDocRef(appState.gameId), { players: updatedPlayers });
+            } catch (error) {
+                console.error("Error kicking player:", error);
+                alert("Failed to kick player.");
+            }
+        }
+
+        async function changePlayerName() {
+            const currentName = appState.playerName;
+            const newName = prompt("Enter your new name:", currentName);
+
+            if (newName && newName.trim() !== '' && newName !== currentName) {
+                const isNameTaken = appState.gameData.players.some(p => p.name.toLowerCase() === newName.trim().toLowerCase() && p.uid !== userId);
+                if (isNameTaken) {
+                    alert("This name is already taken by another player.");
+                    return;
+                }
+
+                appState.playerName = newName.trim();
+                localStorage.setItem('bsgPlayerName', newName.trim());
+
+                const updatedPlayers = appState.gameData.players.map(p => {
+                    if (p.uid === userId) {
+                        return { ...p, name: newName.trim() };
+                    }
+                    return p;
+                });
+
+                try {
+                    await updateDoc(getGameDocRef(appState.gameId), { players: updatedPlayers });
+                } catch (error) {
+                    console.error("Error changing name:", error);
+                    alert("Failed to change name. Reverting.");
+                    appState.playerName = currentName;
+                    localStorage.setItem('bsgPlayerName', currentName);
+                }
+            }
+        }
+
+        function simulateBotPick() {
+            const { draftedCharacters } = appState.gameData;
+            const validForBot = getValidCharacters();
+
+            const draftedIds = Object.values(draftedCharacters);
+            const allUnavailableIds = new Set(draftedIds);
+            draftedIds.forEach(id => {
+                const pair = alternateCharacterPairs.find(p => p.includes(id));
+                if (pair) {
+                    pair.forEach(altId => allUnavailableIds.add(altId));
+                }
+            });
+
+            const trulyAvailable = validForBot.filter(c => !allUnavailableIds.has(c.id));
+
+            if (trulyAvailable.length > 0) {
+                const pick = trulyAvailable[Math.floor(Math.random() * trulyAvailable.length)];
+                draftCharacter(pick.id);
+            }
+        }
+        
+        async function simulateBotSkillSelections() {
+            const { draftOrder, draftedCharacters, skillSelections = {}, admin } = appState.gameData;
+            if (userId !== admin) return;
+
+            const updates = {};
+            let needsUpdate = false;
+
+            for (let i = 1; i < draftOrder.length; i++) {
+                const playerUid = draftOrder[i];
+                if (playerUid.startsWith('bot-') && !skillSelections[playerUid]) {
+                    const characterId = draftedCharacters[playerUid];
+                    const character = characters.find(c => c.id === characterId);
+                    if (!character) continue;
+
+                    const cardsToDraw = (character.type === 'Cylon Leader' && character.name !== 'Sharon Agathon (Athena)') ? 2 : 3;
+                    
+                    const selectedSkills = [];
+                    for (let j = 0; j < cardsToDraw; j++) {
+                        selectedSkills.push(character.skills[Math.floor(Math.random() * character.skills.length)]);
+                    }
+                    updates[`skillSelections.${playerUid}`] = selectedSkills;
+                    needsUpdate = true;
+                }
+            }
+
+            if (needsUpdate) {
+                try {
+                    await updateDoc(getGameDocRef(appState.gameId), updates);
+                } catch (error) {
+                    console.error("Bot failed to select skills:", error);
+                }
+            }
+        }
+
+        async function draftCharacter(characterId) {
+            const { currentPlayerIndex, draftOrder, draftedCharacters, admin } = appState.gameData;
+            const currentPlayerUid = draftOrder[currentPlayerIndex];
+
+            const isBotTurn = currentPlayerUid.startsWith('bot-');
+            const isAdmin = userId === admin;
+            if (userId !== currentPlayerUid && !(isAdmin && isBotTurn)) {
+                console.warn("Not your turn!");
+                return;
+            }
+            
+            const newDraftedCharacters = { ...draftedCharacters, [currentPlayerUid]: characterId };
+            const nextPlayerIndex = currentPlayerIndex + 1;
+            
+            if (nextPlayerIndex >= draftOrder.length) {
+                await updateDoc(getGameDocRef(appState.gameId), {
+                    gameState: 'skillSelection',
+                    draftedCharacters: newDraftedCharacters,
+                    currentPlayerIndex: nextPlayerIndex,
+                    skillSelections: {}
+                });
+            } else {
+                 await updateDoc(getGameDocRef(appState.gameId), {
+                       draftedCharacters: newDraftedCharacters,
+                       currentPlayerIndex: nextPlayerIndex,
+                  });
+            }
+        }
+
+        async function selectSkillCards(skillCounts) {
+            const selectedSkills = [];
+            for (const skill in skillCounts) {
+                for (let i = 0; i < skillCounts[skill]; i++) {
+                    selectedSkills.push(skill);
+                }
+            }
+
+            if(selectedSkills.length === 0) return;
+
+            const updates = {};
+            updates[`skillSelections.${userId}`] = selectedSkills;
+
+            try {
+                await updateDoc(getGameDocRef(appState.gameId), updates);
+                pendingSkillCounts = null;
+            } catch (error) {
+                console.error("Error saving skill selection:", error);
+                alert("Could not save your selection. Please try again.");
+            }
+        }
+        
+        function getValidCharacters() {
+            const { draftedCharacters, playerCount } = appState.gameData;
+            const draftedIds = Object.values(draftedCharacters);
+            let availablePool = characters.filter(c => !draftedIds.includes(c.id));
+            
+            if (playerCount < 4) {
+                availablePool = availablePool.filter(c => c.type !== 'Cylon Leader');
+            }
+
+            const isCylonDrafted = Object.values(draftedCharacters).some(id => {
+                const char = characters.find(c => c.id === id);
+                return char && char.type === 'Cylon Leader';
+            });
+            
+            const numDrafted = Object.values(draftedCharacters).length;
+            const isLastPlayerTurn = numDrafted === playerCount - 1;
+
+            if (playerCount === 7 && isLastPlayerTurn && !isCylonDrafted) {
+                return availablePool.filter(char => char.type === 'Cylon Leader');
+            }
+
+            if (isCylonDrafted) {
+                availablePool = availablePool.filter(c => c.type !== 'Cylon Leader');
+            }
+
+            const counts = availablePool.reduce((acc, char) => {
+                if (['Military Leader', 'Political Leader', 'Pilot', 'Support'].includes(char.type)) {
+                    acc[char.type] = (acc[char.type] || 0) + 1;
+                }
+                return acc;
+            }, {});
+            
+            const maxCount = Math.max(0, ...Object.values(counts));
+            
+            const validTypes = Object.keys(counts).filter(type => counts[type] === maxCount);
+
+            if (!validTypes.includes('Support')) {
+                 validTypes.push('Support');
+            }
+            if (playerCount >= 4 && !validTypes.includes('Cylon Leader') && !isCylonDrafted) {
+                validTypes.push('Cylon Leader');
+            }
+            
+            return availablePool.filter(char => validTypes.includes(char.type));
+        }
+
+        function renderCurrentGameState() {
+            if (!appState.gameData) return;
+            switch (appState.gameData.gameState) {
+                case 'lobby':
+                    renderLobbyScreen();
+                    break;
+                case 'drafting':
+                    renderDraftScreen();
+                    break;
+                case 'skillSelection':
+                    renderSkillSelectionScreen();
+                    break;
+                case 'finished':
+                    renderSummaryScreen();
+                    break;
+                default:
+                    renderHomeScreen();
+            }
+        }
+        
+        // --- Helper & Modal Functions ---
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function getCharacterTypeColor(type) {
+            switch (type) {
+                case 'Military Leader': return 'text-green-400';
+                case 'Political Leader': return 'text-yellow-400';
+                case 'Pilot': return 'text-red-400';
+                case 'Support': return 'text-blue-400';
+                case 'Cylon Leader': return 'cylon-leader-text';
+                default: return 'text-gray-300';
+            }
+        }
+
+        function getCharacterTypeBorderColor(type) {
+             switch (type) {
+                  case 'Military Leader': return 'border-green-500';
+                  case 'Political Leader': return 'border-yellow-500';
+                  case 'Pilot': return 'border-red-500';
+                  case 'Support': return 'border-blue-500';
+                  case 'Cylon Leader': return 'border-gray-500';
+                  default: return 'border-gray-700';
+             }
+        }
+        
+        function getSkillColor(skill) {
+            switch (skill) {
+                case 'Politics': return 'text-yellow-400';
+                case 'Leadership': return 'text-green-400';
+                case 'Tactics': return 'text-purple-400';
+                case 'Piloting': return 'text-red-400';
+                case 'Engineering': return 'text-blue-400';
+                case 'Treachery': return 'text-orange-400';
+                default: return 'text-white';
+            }
+        }
+
+        function startNewDraft() {
+            window.location.href = window.location.href.split('?')[0];
+        }
+
+        function showCharacterDetails(characterId) {
+            const character = characters.find(c => c.id === characterId);
+            if (!character) return;
+
+            const modalContent = document.getElementById('modal-content');
+            const modalContainer = document.getElementById('modal-container');
+            
+            if(appState.gameData.gameState !== 'drafting') {
+                modalContent.innerHTML = `
+                    <button onclick="hideCharacterDetails()" class="absolute top-2 right-3 text-2xl font-bold text-gray-500 hover:text-white">&times;</button>
+                    <div class="text-center">
+                        <img src="${character.imageUrl}" alt="${character.name}" class="w-full h-auto rounded-lg mb-4">
+                    </div>`;
+                modalContainer.classList.remove('hidden');
+                modalContainer.classList.add('flex');
+                return;
+            }
+
+            const { draftOrder, currentPlayerIndex, draftedCharacters } = appState.gameData;
+            const currentPlayerUid = draftOrder ? draftOrder[currentPlayerIndex] : null;
+            const isMyTurn = userId === currentPlayerUid;
+            
+            const draftedIds = draftedCharacters ? Object.values(draftedCharacters) : [];
+            const allUnavailableIds = new Set(draftedIds);
+            draftedIds.forEach(id => {
+                const pair = alternateCharacterPairs.find(p => p.includes(id));
+                if (pair) {
+                    pair.forEach(altId => allUnavailableIds.add(altId));
+                }
+            });
+            const isUnavailable = allUnavailableIds.has(character.id);
+            const isCharacterTypeValid = getValidCharacters().some(c => c.id === characterId);
+            
+            const draftButtonHtml = isMyTurn && !isUnavailable && isCharacterTypeValid
+                ? `<button onclick="draftCharacterAndCloseModal(${character.id})" class="py-2 px-6 rounded-md font-semibold btn-primary">Draft this Character</button>`
+                : '';
+
+            modalContent.innerHTML = `
+                <button onclick="hideCharacterDetails()" class="absolute top-2 right-3 text-2xl font-bold text-gray-500 hover:text-white">&times;</button>
+                <div class="text-center">
+                    <img src="${character.imageUrl}" alt="${character.name}" class="w-full h-auto rounded-lg mb-4">
+                    <div class="flex space-x-4 justify-center">
+                        <button onclick="hideCharacterDetails()" class="py-2 px-6 rounded-md font-semibold btn-secondary">Cancel</button>
+                        ${draftButtonHtml}
+                    </div>
+                </div>
+            `;
+
+            modalContainer.classList.remove('hidden');
+            modalContainer.classList.add('flex');
+        }
+
+        function hideCharacterDetails() {
+            const modalContainer = document.getElementById('modal-container');
+            modalContainer.classList.add('hidden');
+            modalContainer.classList.remove('flex');
+        }
+        
+        function draftCharacterAndCloseModal(characterId) {
+            draftCharacter(characterId);
+            hideCharacterDetails();
+        }
+
+        window.draftCharacter = draftCharacter; 
+        window.startNewDraft = startNewDraft;
+        window.showCharacterDetails = showCharacterDetails;
+        window.hideCharacterDetails = hideCharacterDetails;
+        window.draftCharacterAndCloseModal = draftCharacterAndCloseModal;
+        window.fillWithBotsAndStart = fillWithBotsAndStart;
+        window.selectSkillCards = selectSkillCards;
+        window.simulateBotSkillSelections = simulateBotSkillSelections;
+        window.kickPlayer = kickPlayer;
+        window.changePlayerName = changePlayerName;
+
+    </script>
+    <script src="site-analytics.js?v=20260607-analytics"></script>
+</body>
+</html>

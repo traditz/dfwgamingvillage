@@ -1,0 +1,27 @@
+name = "dfwgv-bgg-proxy"
+main = "src/worker.js"
+compatibility_date = "2025-01-01"
+workers_dev = true
+
+[[d1_databases]]
+binding = "ANALYTICS_DB"
+database_name = "dfwgv-analytics"
+database_id = "36785673-2da0-44ba-bc96-18482a742f95"
+
+# Daily BGG Hotness snapshots (see the scheduled handler in worker.js).
+[[kv_namespaces]]
+binding = "HOT_HISTORY"
+id = "0c0b7bc80e824c35926a8fe63e360bc2"
+
+[triggers]
+crons = [
+  "0 */6 * * *", # every 6h — snapshot Hotness + check watchlist prices
+  "0 14 * * *"   # daily 14:00 UTC — AI pricing/procurement digest to Discord
+]
+
+# Self-binding: chained jobs (price slices, intel hops, auctions) invoke the
+# worker itself as a fresh invocation with its own subrequest budget. A plain
+# fetch() to our own workers.dev hostname is blocked by Cloudflare (1042).
+[[services]]
+binding = "SELF"
+service = "dfwgv-bgg-proxy"

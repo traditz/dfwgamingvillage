@@ -1,0 +1,759 @@
+import { firebaseConfig } from "../firebase-config.js";
+import * as appConfig from "../app-config.js";
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import {
+  getFirestore,
+  collection,
+  onSnapshot,
+  orderBy,
+  query,
+  where
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js";
+
+import { esc, asDate, fmtDate, fmtEventWhen, centralDateKey, fmtCentralDatetimeValue, parseDatetimeLocalToISO, confirmDialog, toast, unwrapCallableError } from "../shared.js?v=20260817-p35";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const functions = getFunctions(app, appConfig.FUNCTIONS_REGION);
+
+const fnCreateGameDay = httpsCallable(functions, "createGameDay");
+const fnUpdateGameDay = httpsCallable(functions, "updateGameDay");
+const fnDeleteGameDay = httpsCallable(functions, "deleteGameDay");
+const fnListHostAdmin = httpsCallable(functions, "listHostAdmin");
+const fnManageHost = httpsCallable(functions, "manageHost");
+const fnGetMyPlannerRole = httpsCallable(functions, "getMyPlannerRole");
+const fnListAuditLog = httpsCallable(functions, "listAuditLog");
+
+const authStatus = document.querySelector("#authStatus");
+const adminLinks = document.querySelectorAll("[data-admin-link]");
+const blockedState = document.querySelector("#blockedState");
+const adminApp = document.querySelector("#adminApp");
+const eventRows = document.querySelector("#eventRows");
+const tableRows = document.querySelector("#tableRows");
+const btnNewEvent = document.querySelector("#btnNewEvent");
+const eventForm = document.querySelector("#eventForm");
+const eventId = document.querySelector("#eventId");
+const eventTitle = document.querySelector("#eventTitle");
+const eventStart = document.querySelector("#eventStart");
+const eventStatus = document.querySelector("#eventStatus");
+const eventVisibility = document.querySelector("#eventVisibility");
+const eventEndDate = document.querySelector("#eventEndDate");
+const eventLocation = document.querySelector("#eventLocation");
+const eventLibraryConventionId = document.querySelector("#eventLibraryConventionId");
+const btnDeleteEvent = document.querySelector("#btnDeleteEvent");
+const publicLink = document.querySelector("#publicLink");
+const discordStatusValue = document.querySelector("#discordStatusValue");
+const discordHelp = document.querySelector("#discordHelp");
+const discordCommand = document.querySelector("#discordCommand");
+const discordChannelList = document.querySelector("#discordChannelList");
+const activityList = document.querySelector("#activityList");
+const activityHint = document.querySelector("#activityHint");
+const activityFilter = document.querySelector("#activityFilter");
+const btnRefreshActivity = document.querySelector("#btnRefreshActivity");
+const btnMoreActivity = document.querySelector("#btnMoreActivity");
+const btnCopyBindCommand = document.querySelector("#btnCopyBindCommand");
+const statusBox = document.querySelector("#statusBox");
+const errorBox = document.querySelector("#errorBox");
+
+let currentUser = null;
+let events = [];
+let selectedId = "";
+let unsubEvents = null;
+let unsubTables = null;
+// Role resolved server-side: owner sees everything; hosts see their own events.
+let myRole = { owner: false, host: false };
+
+function isAdmin(user) {
+  if (!user) return false;
+  const owner = appConfig.OWNER_UID;
+  return user.uid === owner || user.uid === `discord:${owner}`;
+}
+
+function setAdminNavVisibility(user) {
+  adminLinks.forEach((link) => {
+    link.hidden = !isAdmin(user);
+  });
+}
+
+async function displayNameForUser(user) {
+  if (!user) return "";
+  try {
+    const token = await user.getIdTokenResult();
+    const claims = token?.claims || {};
+    return (
+      claims.discordDisplayName ||
+      claims.discordUsername ||
+      user.displayName ||
+      user.email ||
+      (user.uid?.startsWith("discord:") ? "Discord user" : user.uid)
+    );
+  } catch {
+    return user.displayName || user.email || (user.uid?.startsWith("discord:") ? "Discord user" : user.uid);
+  }
+}
+
+function showStatus(msg) {
+  statusBox.textContent = msg || "";
+  statusBox.style.display = msg ? "" : "none";
+  if (msg) showError("");
+}
+
+function showError(msg) {
+  errorBox.textContent = msg || "";
+  errorBox.style.display = msg ? "" : "none";
+}
+
+function selectEvent(id) {
+  selectedId = id;
+  const gd = events.find((item) => item.id === id);
+  if (!gd) return;
+
+  eventId.value = gd.id;
+  eventTitle.value = gd.title || "";
+  // Prefill in CENTRAL wall clock — the submit path parses as Central.
+  eventStart.value = fmtCentralDatetimeValue(gd.startsAt);
+  eventStatus.value = gd.status || "draft";
+  if (eventVisibility) eventVisibility.value = gd.visibility === "private" ? "private" : "public";
+  if (eventEndDate) eventEndDate.value = gd.endsAt ? fmtCentralDatetimeValue(gd.endsAt) : "";
+  eventLocation.value = gd.location || "";
+  if (eventLibraryConventionId) eventLibraryConventionId.value = gd.libraryConventionId || "";
+  publicLink.href = `../events/?id=${encodeURIComponent(gd.id)}`;
+  renderDiscordBinding(gd);
+  loadActivity();
+  renderEvents();
+  subscribeTables(gd.id);
+}
+
+function newEvent() {
+  // Stop the previous event's tables listener so its next snapshot can't
+  // overwrite the "save first" placeholder below.
+  if (unsubTables) {
+    unsubTables();
+    unsubTables = null;
+  }
+  selectedId = "";
+  eventId.value = "";
+  eventTitle.value = "";
+  eventStart.value = "";
+  eventStatus.value = "draft";
+  if (eventVisibility) eventVisibility.value = "public";
+  if (eventEndDate) eventEndDate.value = "";
+  eventLocation.value = "";
+  if (eventLibraryConventionId) eventLibraryConventionId.value = "";
+  publicLink.href = "../events/";
+  renderDiscordBinding(null);
+  loadActivity();
+  tableRows.innerHTML = `<div class="muted">Save the event before managing tables.</div>`;
+  renderEvents();
+}
+
+// An event can post its board in many channels across many servers. The
+// gameday's `discordChannels` array is the full picture; `discord` only ever
+// held whichever channel was bound most recently, so it's the fallback for
+// events bound before multi-channel existed.
+function discordBindings(gd) {
+  const list = Array.isArray(gd?.discordChannels) ? gd.discordChannels : [];
+  if (list.length) {
+    return list
+      .map((c) => ({
+        channelId: String(c?.channelId || "").trim(),
+        channelName: String(c?.channelName || "").trim(),
+        guildId: String(c?.guildId || "").trim(),
+        guildName: String(c?.guildName || "").trim(),
+        messageId: String(c?.plannerMessageId || "").trim(),
+        lastSyncedAt: c?.lastSyncedAt || null
+      }))
+      .filter((c) => c.channelId);
+  }
+
+  const discord = gd?.discord && typeof gd.discord === "object" ? gd.discord : {};
+  const channelId = String(discord.channelId || "").trim();
+  if (!channelId) return [];
+  return [{
+    channelId,
+    channelName: String(discord.channelName || "").trim(),
+    guildId: String(discord.guildId || "").trim(),
+    guildName: String(discord.guildName || "").trim(),
+    messageId: String(discord.plannerMessageId || "").trim(),
+    lastSyncedAt: discord.lastSyncedAt || null
+  }];
+}
+
+// Group by server so "posted in two different Discords" is obvious at a glance.
+function groupBindingsByServer(bindings) {
+  const byServer = new Map();
+  for (const b of bindings) {
+    const key = b.guildId || "unknown";
+    if (!byServer.has(key)) {
+      byServer.set(key, { guildId: b.guildId, guildName: b.guildName, channels: [] });
+    }
+    const entry = byServer.get(key);
+    if (!entry.guildName && b.guildName) entry.guildName = b.guildName;
+    entry.channels.push(b);
+  }
+  return [...byServer.values()];
+}
+
+function bindCommand(gamedayId) {
+  return `/planner_bind gameday_id:${gamedayId}`;
+}
+
+function renderDiscordBinding(gd) {
+  if (!discordStatusValue || !discordHelp || !discordCommand || !btnCopyBindCommand) return;
+
+  if (!gd?.id) {
+    discordStatusValue.textContent = "Save or select an event first.";
+    discordStatusValue.className = "discordStatus";
+    discordHelp.textContent = "Create events here, then bind one to the desired Discord channel with the bot.";
+    discordCommand.textContent = "/planner_bind gameday_id:<event id>";
+    btnCopyBindCommand.disabled = true;
+    return;
+  }
+
+  const bindings = discordBindings(gd);
+  discordCommand.textContent = bindCommand(gd.id);
+  btnCopyBindCommand.disabled = false;
+
+  if (!bindings.length) {
+    discordStatusValue.textContent = "Not linked to Discord";
+    discordStatusValue.className = "discordStatus is-unlinked";
+    discordHelp.textContent = "Run this in the Discord channel that should host the planner board.";
+    if (discordChannelList) discordChannelList.innerHTML = "";
+    return;
+  }
+
+  const servers = groupBindingsByServer(bindings);
+  const chanWord = bindings.length === 1 ? "channel" : "channels";
+  const srvWord = servers.length === 1 ? "server" : "servers";
+  discordStatusValue.textContent =
+    `Live in ${bindings.length} ${chanWord} across ${servers.length} ${srvWord}`;
+  discordStatusValue.className = "discordStatus is-linked";
+  discordHelp.textContent =
+    "Every board below shows the same event and updates together. Run /planner_bind in "
+    + "another channel to add one, or /planner_unbind in a channel to drop just that one.";
+
+  if (discordChannelList) {
+    discordChannelList.innerHTML = servers.map((s) => `
+      <div class="bindServer">
+        <div class="bindServerName">${esc(s.guildName || `Server ${s.guildId || "unknown"}`)}</div>
+        <ul class="bindChannels">
+          ${s.channels.map((c) => `
+            <li>
+              <span class="bindChannelName">#${esc(c.channelName || c.channelId)}</span>
+              <span class="bindSync muted">${c.lastSyncedAt ? `synced ${esc(fmtDate(c.lastSyncedAt))}` : "not synced yet"}</span>
+            </li>
+          `).join("")}
+        </ul>
+      </div>
+    `).join("");
+  }
+}
+
+// ---------------------------------------------------------------- activity
+// Each audit action becomes one plain sentence. Anything unrecognised still
+// renders (as its raw action name) rather than vanishing from the log.
+const AUDIT_ACTIONS = {
+  "table.create":       { icon: "\u2795", group: "table",  text: (e) => `hosted ${e.payload?.gameName || "a table"}` },
+  "table.update":       { icon: "\u270f\ufe0f", group: "table",  text: (e) => `edited a table${e.payload?.fields?.length ? ` (${e.payload.fields.join(", ")})` : ""}` },
+  "table.delete":       { icon: "\ud83d\uddd1\ufe0f", group: "table",  text: () => "deleted a table" },
+  "table.join":         { icon: "\u2705", group: "signup", text: (e) => `joined ${e.payload?.gameName || "a table"}` },
+  "table.waitlist":     { icon: "\u23f3", group: "signup", text: (e) => `joined the waitlist for ${e.payload?.gameName || "a table"}` },
+  "table.leave":        { icon: "\u21a9\ufe0f", group: "signup", text: (e) => e.payload?.promotedName
+                            ? `left a table \u2014 ${e.payload.promotedName} moved up from the waitlist`
+                            : (e.payload?.tableDeleted ? "left a table, which removed it" : "left a table") },
+  "want.restore":       { icon: "↩️", group: "table",  text: (e) => `closed a table, putting the ${e.payload?.gameName || "game"} request back` },
+  "want.interest":      { icon: "🙋", group: "signup", text: (e) => e.payload?.on === false
+                            ? `withdrew interest in ${e.payload?.gameName || "a request"}`
+                            : `would play ${e.payload?.gameName || "a requested game"}` },
+  "gameday.create":     { icon: "\ud83d\udcc5", group: "event",  text: (e) => `created the event${e.payload?.title ? ` \u201c${e.payload.title}\u201d` : ""}` },
+  "gameday.update":     { icon: "\u2699\ufe0f", group: "event",  text: (e) => `updated the event${e.payload?.fields?.length ? ` (${e.payload.fields.join(", ")})` : ""}` },
+  "gameday.delete":     { icon: "\ud83d\uddd1\ufe0f", group: "event",  text: () => "deleted the event" },
+  "invite.request":     { icon: "\ud83d\udd11", group: "access", text: () => "requested an invite" },
+  "invite.redeem":      { icon: "\ud83d\udd11", group: "access", text: () => "joined via an invite link" },
+  "invite.approve":     { icon: "\ud83d\udc4d", group: "access", text: () => "approved an invite request" },
+  "invite.deny":        { icon: "\ud83d\udc4e", group: "access", text: () => "denied an invite request" },
+  "invite.rotate":      { icon: "\ud83d\udd04", group: "access", text: () => "reset the invite link" },
+  "invite.remove":      { icon: "\u274c", group: "access", text: () => "removed someone's access" }
+};
+
+let activityEntries = [];
+let activityCursor = null;
+let activityLoading = false;
+
+function auditActorLabel(entry) {
+  if (entry.actorName) return entry.actorName;
+  const uid = String(entry.actorUid || "");
+  if (!uid) return "Someone";
+  // Older rows predate the name snapshot; a Discord uid is at least a hint.
+  return uid.startsWith("discord:") ? "A Discord user" : "Someone";
+}
+
+function renderActivity() {
+  if (!activityList) return;
+  const want = activityFilter?.value || "";
+  const rows = activityEntries.filter((e) => {
+    if (!want) return true;
+    return (AUDIT_ACTIONS[e.action]?.group || "") === want;
+  });
+
+  if (!rows.length) {
+    activityList.innerHTML = `<li class="auditEmpty muted">${
+      activityEntries.length ? "Nothing matches this filter." : "No activity recorded for this event yet."
+    }</li>`;
+    return;
+  }
+
+  activityList.innerHTML = rows.map((e) => {
+    const def = AUDIT_ACTIONS[e.action];
+    const what = def ? def.text(e) : esc(e.action);
+    return `
+      <li class="auditRow">
+        <span class="auditIcon" aria-hidden="true">${def ? def.icon : "\u2022"}</span>
+        <div class="auditBody">
+          <div class="auditText"><b>${esc(auditActorLabel(e))}</b> ${what}</div>
+          <div class="auditWhen muted">${e.createdAt ? esc(fmtDate(e.createdAt)) : "unknown time"}</div>
+        </div>
+      </li>
+    `;
+  }).join("");
+}
+
+async function loadActivity({ append = false } = {}) {
+  if (!activityList || activityLoading) return;
+  if (!selectedId) {
+    activityEntries = [];
+    activityCursor = null;
+    activityList.innerHTML = "";
+    if (activityHint) activityHint.textContent = "Select an event to see who did what.";
+    if (btnMoreActivity) btnMoreActivity.style.display = "none";
+    return;
+  }
+
+  activityLoading = true;
+  if (activityHint) activityHint.textContent = "Loading activity\u2026";
+
+  try {
+    const res = await fnListAuditLog({
+      gamedayId: selectedId,
+      limit: 50,
+      ...(append && activityCursor ? { before: activityCursor } : {})
+    });
+    const batch = res?.data?.entries || [];
+    activityEntries = append ? [...activityEntries, ...batch] : batch;
+    const last = batch[batch.length - 1];
+    activityCursor = last?.createdAt ? new Date(last.createdAt).getTime() : null;
+
+    if (activityHint) {
+      activityHint.textContent = activityEntries.length
+        ? `${activityEntries.length} event${activityEntries.length === 1 ? "" : "s"} shown, newest first.`
+        : "No activity recorded for this event yet.";
+    }
+    if (btnMoreActivity) {
+      btnMoreActivity.style.display = res?.data?.hasMore ? "" : "none";
+    }
+    renderActivity();
+  } catch (err) {
+    activityEntries = [];
+    activityList.innerHTML = "";
+    if (activityHint) activityHint.textContent = unwrapCallableError(err);
+    if (btnMoreActivity) btnMoreActivity.style.display = "none";
+  } finally {
+    activityLoading = false;
+  }
+}
+
+btnRefreshActivity?.addEventListener("click", () => loadActivity());
+btnMoreActivity?.addEventListener("click", () => loadActivity({ append: true }));
+activityFilter?.addEventListener("change", renderActivity);
+
+function renderEvents() {
+  eventRows.innerHTML = "";
+  if (!events.length) {
+    eventRows.innerHTML = `<div class="muted">No events yet.</div>`;
+    return;
+  }
+
+  for (const gd of events) {
+    const row = document.createElement("button");
+    row.type = "button";
+    row.className = `adminRow ${gd.id === selectedId ? "is-active" : ""}`;
+    // One channel names it; several just get a count, since the full list is
+    // in the Discord Channels card for whichever event is selected.
+    const bound = discordBindings(gd);
+    const discordLabel = !bound.length
+      ? "Discord: Not linked"
+      : bound.length === 1
+        ? `Discord: ${esc(bound[0].channelName ? `#${bound[0].channelName}` : bound[0].channelId)}`
+        : `Discord: ${bound.length} channels`;
+    row.innerHTML = `
+      <div>
+        <div class="rowTitle">${esc(gd.title || "Game Day")}</div>
+        <div class="rowMeta">${esc(fmtEventWhen(gd.startsAt, gd.endsAt))}${gd.location ? ` - ${esc(gd.location)}` : ""}</div>
+        <div class="rowMeta">${discordLabel}</div>
+      </div>
+      <span class="statusPill ${esc(gd.status || "draft")}">${esc(gd.status || "draft")}</span>
+    `;
+    row.addEventListener("click", () => selectEvent(gd.id));
+    eventRows.appendChild(row);
+  }
+}
+
+function renderTables(items) {
+  tableRows.innerHTML = "";
+  if (!items.length) {
+    tableRows.innerHTML = `<div class="muted">No hosted tables for this event.</div>`;
+    return;
+  }
+
+  for (const table of items) {
+    const row = document.createElement("div");
+    row.className = "adminRow";
+    row.innerHTML = `
+      <div>
+        <div class="rowTitle">${esc(table.gameName || "Game")}</div>
+        <div class="rowMeta">Host: ${esc(table.hostDisplayName || "Unknown")} - Seats ${Number(table.confirmedCount || 0)}/${Number(table.capacity || 0)}</div>
+      </div>
+      <span class="statusPill">${Number(table.waitlistCount || 0)} wait</span>
+    `;
+    tableRows.appendChild(row);
+  }
+}
+
+function subscribeEvents() {
+  if (unsubEvents) unsubEvents();
+  // Owner reads everything (rules allow admins); hosts query only their own
+  // events — under the private-events rules an unfiltered query would be denied.
+  const q = myRole.owner
+    ? query(collection(db, "gamedays"), orderBy("startsAt", "desc"))
+    : query(collection(db, "gamedays"), where("createdBy", "==", currentUser.uid), orderBy("startsAt", "desc"));
+  unsubEvents = onSnapshot(q, (snap) => {
+    const all = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    // Hosts only see (and manage) the events they created; owner sees all.
+    events = myRole.owner ? all : all.filter((gd) => currentUser && gd.createdBy === currentUser.uid);
+    renderEvents();
+    renderReadiness();
+    if (!selectedId && events.length) selectEvent(events[0].id);
+    // A just-created event: populate the form once its doc arrives, but never
+    // clobber a form the user is already editing (guarded by the id check).
+    else if (selectedId && eventId.value === selectedId && events.some((e) => e.id === selectedId)) {
+      const currentTitle = eventTitle.value;
+      const gd = events.find((e) => e.id === selectedId);
+      if (gd && (!currentTitle || currentTitle === gd.title)) selectEvent(selectedId);
+    }
+  }, (err) => showError(err.message || String(err)));
+}
+
+function subscribeTables(gamedayId) {
+  if (unsubTables) unsubTables();
+  const q = query(collection(db, "gamedays", gamedayId, "tables"), orderBy("startTime", "asc"));
+  unsubTables = onSnapshot(q, (snap) => {
+    renderTables(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+  }, (err) => showError(err.message || String(err)));
+}
+
+btnNewEvent?.addEventListener("click", newEvent);
+
+eventForm?.addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  showStatus("Saving...");
+  showError("");
+
+  const payload = {
+    title: eventTitle.value.trim(),
+    // Parse the field as CENTRAL wall clock (matches the planner's create modal).
+    startsAt: eventStart.value ? parseDatetimeLocalToISO(eventStart.value) : "",
+    location: eventLocation.value.trim(),
+    libraryConventionId: eventLibraryConventionId ? eventLibraryConventionId.value.trim() : "",
+    status: eventStatus.value,
+    visibility: eventVisibility ? eventVisibility.value : "public",
+    // Blank clears it (back to a single-day event).
+    endsAt: (eventEndDate && eventEndDate.value)
+      ? parseDatetimeLocalToISO(eventEndDate.value)
+      : null
+  };
+
+  try {
+    if (eventId.value) {
+      await fnUpdateGameDay({ gamedayId: eventId.value, ...payload });
+      showStatus("Event updated.");
+    } else {
+      const result = await fnCreateGameDay(payload);
+      // Bind the form to the new event immediately — leaving eventId empty
+      // made a second Save create a duplicate event.
+      selectedId = result.data.gamedayId;
+      eventId.value = selectedId;
+      showStatus("Event created.");
+    }
+  } catch (e) {
+    showStatus("");
+    showError(e?.message || String(e));
+  }
+});
+
+btnDeleteEvent?.addEventListener("click", async () => {
+  if (!eventId.value) return;
+  const ok = await confirmDialog({
+    title: "Delete this event?",
+    message: "This deletes the event and ALL of its tables and signups. This cannot be undone.",
+    confirmLabel: "Delete Event",
+    danger: true
+  });
+  if (!ok) return;
+  showStatus("Deleting...");
+  showError("");
+  try {
+    await fnDeleteGameDay({ gamedayId: eventId.value });
+    newEvent();
+    showStatus("");
+    toast("Event deleted.", "success");
+  } catch (e) {
+    showStatus("");
+    showError(e?.message || String(e));
+  }
+});
+
+btnCopyBindCommand?.addEventListener("click", async () => {
+  if (!eventId.value) return;
+  const command = bindCommand(eventId.value);
+  try {
+    await navigator.clipboard.writeText(command);
+    showStatus("Discord bind command copied.");
+  } catch {
+    showError(command);
+  }
+});
+
+async function resolveAccess() {
+  const user = currentUser;
+  myRole = { owner: false, host: false };
+  let roleError = false;
+
+  if (user) {
+    try {
+      const r = await fnGetMyPlannerRole({});
+      myRole = { owner: false, host: false, ...(r.data || {}) };
+    } catch {
+      // A transient failure must not read as "your access was removed" —
+      // fall back to the owner check, otherwise offer a Retry.
+      const owner = isAdmin(user);
+      if (owner) myRole = { owner: true, host: true };
+      else roleError = true;
+    }
+  }
+
+  const access = myRole.owner || myRole.host;
+  adminLinks.forEach((link) => {
+    link.hidden = !access;
+    if (access) link.textContent = myRole.owner ? "Admin" : "Manage Events";
+  });
+
+  const blockedRetry = document.querySelector("#blockedRetry");
+  if (!access) {
+    authStatus.textContent = user
+      ? (roleError ? "Signed in — couldn't verify access." : "Signed in — host access required.")
+      : "Not signed in.";
+    if (blockedRetry) blockedRetry.style.display = roleError ? "" : "none";
+    blockedState.style.display = "";
+    adminApp.style.display = "none";
+    return;
+  }
+  if (blockedRetry) blockedRetry.style.display = "none";
+
+  const name = myRole.nickname || await displayNameForUser(user);
+  authStatus.textContent = `${myRole.owner ? "Admin" : "Host"}: ${name}`;
+
+  // Owner-only panels
+  const hostsCard = document.querySelector("#hostsCard");
+  const readinessCard = document.querySelector("#readinessCard");
+  if (hostsCard) hostsCard.style.display = myRole.owner ? "" : "none";
+  if (readinessCard) readinessCard.style.display = myRole.owner ? "" : "none";
+
+  blockedState.style.display = "none";
+  adminApp.style.display = "";
+  subscribeEvents();
+  if (myRole.owner) loadHosts();
+}
+
+onAuthStateChanged(auth, async (user) => {
+  currentUser = user || null;
+  await resolveAccess();
+});
+
+document.querySelector("#btnRetryAccess")?.addEventListener("click", resolveAccess);
+
+// Live counts for the At a Glance card (owner-only card; data already loaded).
+function renderReadiness() {
+  const set = (sel, v) => {
+    const el = document.querySelector(sel);
+    if (el) el.textContent = String(v);
+  };
+  set("#statPublished", events.filter((e) => e.status === "published").length);
+  set("#statDraft", events.filter((e) => e.status === "draft").length);
+  set("#statHosts", (hostData.hosts || []).length);
+  set("#statRequests", (hostData.requests || []).length);
+}
+
+// ----------------------------
+// Hosts panel
+// ----------------------------
+const hostRequestRows = document.querySelector("#hostRequestRows");
+const hostSearch = document.querySelector("#hostSearch");
+const hostSearchRows = document.querySelector("#hostSearchRows");
+const hostInviteEmail = document.querySelector("#hostInviteEmail");
+const btnInviteHost = document.querySelector("#btnInviteHost");
+const hostInviteRows = document.querySelector("#hostInviteRows");
+const hostRows = document.querySelector("#hostRows");
+const hostStatusBox = document.querySelector("#hostStatusBox");
+const hostErrorBox = document.querySelector("#hostErrorBox");
+
+let hostData = { hosts: [], requests: [], users: [], invites: [] };
+
+function showHostStatus(msg) {
+  hostStatusBox.textContent = msg || "";
+  hostStatusBox.style.display = msg ? "" : "none";
+  if (msg) showHostError("");
+}
+
+function showHostError(msg) {
+  hostErrorBox.textContent = msg || "";
+  hostErrorBox.style.display = msg ? "" : "none";
+}
+
+async function loadHosts() {
+  if (!hostRequestRows) return;
+  try {
+    hostData = (await fnListHostAdmin({})).data || { hosts: [], requests: [], users: [], invites: [] };
+    renderHostsPanel();
+    renderReadiness();
+  } catch (e) {
+    showHostError(e?.message || String(e));
+  }
+}
+
+function userLabel(u) {
+  const name = u.nickname || u.displayName || u.authDisplayName || u.uid;
+  const provider = String(u.uid || "").startsWith("discord:") ? "Discord" : "Google";
+  const email = u.email ? ` · ${u.email}` : "";
+  return { name, meta: `${provider}${email}` };
+}
+
+function hostActionRow(title, meta, buttons) {
+  const row = document.createElement("div");
+  row.className = "adminRow";
+  row.innerHTML = `
+    <div style="flex:1; min-width:0;">
+      <div class="rowTitle">${esc(title)}</div>
+      <div class="rowMeta">${esc(meta)}</div>
+    </div>
+  `;
+  for (const b of buttons) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = `btn ${b.danger ? "btn-danger" : b.primary ? "btn-primary" : ""}`;
+    btn.textContent = b.label;
+    btn.addEventListener("click", async () => {
+      btn.disabled = true;
+      try {
+        await fnManageHost(b.payload);
+        showHostStatus(b.done);
+        await loadHosts();
+      } catch (e) {
+        btn.disabled = false;
+        showHostError(e?.message || String(e));
+      }
+    });
+    row.appendChild(btn);
+  }
+  return row;
+}
+
+function renderHostsPanel() {
+  const hostUids = new Set((hostData.hosts || []).map((h) => h.uid));
+
+  hostRequestRows.innerHTML = "";
+  const requests = hostData.requests || [];
+  if (!requests.length) {
+    hostRequestRows.innerHTML = `<div class="muted">No pending requests.</div>`;
+  } else {
+    for (const r of requests) {
+      const { name, meta } = userLabel(r);
+      hostRequestRows.appendChild(hostActionRow(name, meta, [
+        { label: "Approve", primary: true, payload: { uid: r.uid, action: "approve" }, done: "Host approved." },
+        { label: "Deny", payload: { uid: r.uid, action: "deny" }, done: "Request denied." },
+      ]));
+    }
+  }
+
+  hostRows.innerHTML = "";
+  const hosts = hostData.hosts || [];
+  if (!hosts.length) {
+    hostRows.innerHTML = `<div class="muted">No approved hosts yet.</div>`;
+  } else {
+    for (const h of hosts) {
+      const { name, meta } = userLabel(h);
+      hostRows.appendChild(hostActionRow(name, meta, [
+        { label: "Remove", danger: true, payload: { uid: h.uid, action: "remove" }, done: "Host removed." },
+      ]));
+    }
+  }
+
+  hostInviteRows.innerHTML = "";
+  for (const inv of hostData.invites || []) {
+    hostInviteRows.appendChild(hostActionRow(inv.email, "Pending email invite — becomes a host on first sign-in", [
+      { label: "Cancel", payload: { email: inv.email, action: "uninvite" }, done: "Invite cancelled." },
+    ]));
+  }
+
+  renderHostSearch(hostUids);
+}
+
+function renderHostSearch(hostUids) {
+  const q = String(hostSearch?.value || "").trim().toLowerCase();
+  hostSearchRows.innerHTML = "";
+  if (!q) {
+    hostSearchRows.innerHTML = `<div class="muted">Type to search everyone who has signed in to the planner.</div>`;
+    return;
+  }
+
+  const matches = (hostData.users || []).filter((u) => {
+    if (hostUids.has(u.uid)) return false;
+    const hay = `${u.nickname || ""} ${u.authDisplayName || ""} ${u.email || ""} ${u.uid}`.toLowerCase();
+    return hay.includes(q);
+  }).slice(0, 12);
+
+  if (!matches.length) {
+    hostSearchRows.innerHTML = `<div class="muted">No matches. They may need to sign in to the planner once first — or use an email invite below.</div>`;
+    return;
+  }
+
+  for (const u of matches) {
+    const { name, meta } = userLabel(u);
+    hostSearchRows.appendChild(hostActionRow(name, meta, [
+      { label: "Make Host", primary: true, payload: { uid: u.uid, action: "approve", displayName: u.nickname || u.authDisplayName || "" }, done: "Host added." },
+    ]));
+  }
+}
+
+hostSearch?.addEventListener("input", () => {
+  renderHostsPanel();
+});
+
+btnInviteHost?.addEventListener("click", async () => {
+  const email = String(hostInviteEmail?.value || "").trim().toLowerCase();
+  if (!email || !email.includes("@")) return showHostError("Enter a valid email address.");
+  btnInviteHost.disabled = true;
+  try {
+    await fnManageHost({ email, action: "invite" });
+    hostInviteEmail.value = "";
+    showHostStatus(`Invited ${email} — they become a host when they sign in with that email.`);
+    await loadHosts();
+  } catch (e) {
+    showHostError(e?.message || String(e));
+  } finally {
+    btnInviteHost.disabled = false;
+  }
+});

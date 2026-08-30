@@ -1,0 +1,89 @@
+// AGE OF DREAD — DOOM: The Dark Ages Commander deck (100)
+
+// Commander
+1 The Slayer, Unchained
+
+// Creatures (22)
+1 Dread Imp
+1 Holt Acolyte
+1 Holt Scout
+1 Night Sentinel
+1 Sentinel Outrider
+1 Komodo Lancer
+1 Mechanized Ballista
+1 Sentinel Shieldwall
+1 Dread Arachnotron
+1 Dread Knight of Hell
+1 Hellbeast of the Moors
+1 Hybrid Cacodemon
+1 King Novik
+1 Moor Oracle
+1 Siege Revenant
+1 Agaddon Hunter
+1 Armored Mancubus
+1 Serrat, the Slayer's Dragon
+1 Vagary of the Old War
+1 Titanic Sentinel Beast
+1 Ironclad Cyberdemon
+1 Prince Ahzrak
+
+// Equipment (5)
+1 Chainshot
+1 Impaler
+1 Shield Saw
+1 Ravager
+1 Skullcrusher
+
+// Other Artifacts (8)
+1 Siege Supplies
+1 Supply Wagon
+1 War Ledger
+1 Wraith Crystal
+1 Battle Standard of D'Nur
+1 Campaign Map
+1 Sentinel Forge
+1 Atlan
+
+// Instants & Sorceries (24)
+1 Bulwark Rite
+1 Dread Surge
+1 Rally the Watch
+1 Saw Toss
+1 Forge the Line
+1 Hold the Bulwark
+1 Maul the Invaders
+1 Shieldmaster's Grace
+1 Banish the Hellspawn
+1 Colossal Charge
+1 Dragon Dive
+1 Dread Rampage
+1 Primeval Vigor
+1 Sentinel Muster
+1 Sentinel War Council
+1 Siege Volley
+1 Wraith Communion
+1 Wrath of the Unchained
+1 Break the Gates
+1 Cannonade
+1 Wraithstone Bloom
+1 Judgment of the Kings
+1 Saw Cyclone
+1 Stampede Call
+
+// Enchantments (3)
+1 Overgrown Battleground
+1 Sentinel Standard
+1 Age of Dread
+
+// Lands (37)
+1 Argent D'Nur
+1 Battlefield of the Old War
+1 Dragon Roost
+9 Forest
+1 Immora
+10 Mountain
+10 Plains
+1 Sentinel Barracks
+1 Siegeworks of Hell
+1 The Holt
+1 The Proving Grounds

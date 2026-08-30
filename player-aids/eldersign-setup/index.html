@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Elder Sign — Setup &amp; Reference Utility</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=4">
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <span class="sigil" aria-hidden="true">
+      <!-- the Elder Sign: a five-pointed star with a burning eye -->
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" stroke-width="1" opacity="0.45"/>
+        <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-width="0.6" opacity="0.3"/>
+        <g stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" fill="none">
+          <path d="M50 10 L59.4 37.2 L88.1 37.8 L65.2 55.1 L73.5 82.6 L50 66.2 L26.5 82.6 L34.8 55.1 L11.9 37.8 L40.6 37.2 Z"/>
+        </g>
+        <ellipse cx="50" cy="50" rx="11" ry="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/>
+        <circle cx="50" cy="50" r="2.8" fill="currentColor"/>
+        <path d="M50 41.5 q3 3.5 0 5" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.8"/>
+      </svg>
+    </span>
+    <div class="brand-title">Elder Sign</div>
+    <div class="deco-rule" aria-hidden="true"><i></i><b></b><i></i></div>
+    <div class="brand-sub">Setup &amp; Reference Utility</div>
+    <p class="tagline" style="margin-top:10px">
+      Choose your expansions and game mode below for exact setup steps, a full rules reference with
+      official FAQ rulings baked in, and a searchable index of every rulebook. The clock is ticking.
+    </p>
+  </header>
+
+  <main>
+    <section aria-label="Configuration">
+      <h2>The Collection</h2>
+      <p class="sec-note">Select the sets on the table. Every step and ruling below adapts to your choices.</p>
+      <div class="cfg">
+        <div>
+          <label class="cfg-label">Sets in play</label>
+          <div id="expansions" class="chips"></div>
+        </div>
+        <div>
+          <label class="cfg-label">Game mode <span class="hint">— each big-box expansion adds one</span></label>
+          <div id="modes" class="mode-grid"></div>
+        </div>
+        <div>
+          <label class="cfg-label">Investigators <span class="hint">(1–8 players)</span></label>
+          <div id="players" class="pbtns"></div>
+        </div>
+        <div id="modules-group">
+          <label class="cfg-label">Modules &amp; variants <span class="hint">— optional; full setup details appear when enabled</span></label>
+          <div id="modules" class="mods"></div>
+        </div>
+      </div>
+    </section>
+
+    <section aria-label="Setup">
+      <h2>Setup</h2>
+      <p class="sec-note">Follow the steps in order. Each cites its official source; where rulings conflict, the FAQ v2.0 (July 2018) wording is used.</p>
+      <div class="teach-bar"><button id="teachBtn" type="button" title="A ~5 minute script to teach this exact setup aloud">📖 Teaching script</button></div>
+      <div id="teach" class="teach-panel" hidden></div>
+      <div id="setup"></div>
+    </section>
+
+    <section aria-label="Reference">
+      <h2>Rules Reference</h2>
+      <p class="sec-note">Tap a heading to open it. Contents adapt to your sets and mode; FAQ corrections are already applied.</p>
+      <div id="reference"></div>
+    </section>
+
+    <section aria-label="Rulebook search">
+      <h2>Search the Rulebooks</h2>
+      <p class="sec-note">Full-text search across the Rules of Play, all selected expansion rulebooks, and the FAQ.</p>
+      <div class="rsearch-wrap">
+        <input id="rsearch" type="search" placeholder="e.g. locked die, terror effect, membership, storm marker…" aria-label="Search the rulebooks">
+      </div>
+      <div id="rresults"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    Setup and reference content grounded in the official Elder Sign Rules of Play, the six expansion
+    rulebooks, and FAQ v2.0 (25 July 2018). A fan-made play aid — not affiliated with Fantasy Flight Games.
+  </footer>
+
+  <script src="js/data.js?v=4"></script>
+  <script src="js/rules.js?v=1"></script>
+  <script src="js/app.js?v=4"></script>
+  <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
+  <script src="/site-analytics.js?v=20260607-analytics"></script>
+</body>
+</html>

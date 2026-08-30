@@ -1,0 +1,98 @@
+// ARENA ETERNAL — Quake Champions Commander deck (100)
+
+// Commander
+1 The Vadrigar, Arena Masters
+
+// Creatures (21)
+1 Anarki, Ascendant Junkie
+1 Athena, Coalition Ranger
+1 Nyx, Fathom Agent
+1 Ranger, Slipgate Marine
+1 Slash, Bloodfire Skater
+1 B.J. Blazkowicz, Terror Billy
+1 Clutch, Reclamation Unit
+1 Eisen, Space Trucker
+1 Galena, Priestess of Ithagnal
+1 Keel, Vindictive Bruiser
+1 Strogg & Peeker
+1 Visor, Aggressive Vengeance
+1 Death Knight, Sign of the Doomed
+1 Doom Slayer, Hell Walker
+1 Scalebearer, Galactic Warlord
+1 Sorlag, Sorg-Class Warrior
+1 Cthalha, the Sunken Eye
+1 Gug of the Lockbox
+1 Ithagnal, the Whispered Name
+1 Volkerh, the Green Rot
+1 The Lurching King
+
+// Equipment (7)
+1 Anarki's Jacket
+1 Heavy Armor
+1 Lightning Gun
+1 Rocket Launcher
+1 Super Nailgun
+1 Super Shotgun
+1 Railgun
+
+// Other Artifacts (12)
+1 Daisy's Foot
+1 Eisen's Hex Nut
+1 Visor's Manual
+1 Galena's Ragdoll
+1 Ranger's Photograph
+1 Reliquary
+1 Scalebearer's Medal
+1 Shadowpetals
+1 Slash's Music Box
+1 Sorlag's Talisman
+1 Mega Health
+1 Quad Damage
+
+// Instants & Sorceries (18)
+1 Acid Spit
+1 Cemetery Gates
+1 Favor
+1 Feeding Frenzy
+1 Frag
+1 Ghost Walk
+1 Bargain with the Elder Gods
+1 Blood Covenant
+1 Gibbed
+1 Returned to the Arena
+1 Rocket Splash
+1 Telefrag
+1 Instagib
+1 Nodens' Greatsword
+1 Rune Challenge
+1 Soul Harvest
+1 Deathmatch
+1 The Final Arena
+
+// Enchantments (6)
+1 Effigy of Myriah
+1 Ember of Cthugha
+1 Kill Streak
+1 Overgrown Sanctum
+1 Roster Call
+1 Trophy Room
+
+// Lands (35)
+1 Awoken
+1 Blood Covenant Arena
+1 Blood Run
+1 Burial Chamber
+1 Church of Azathoth
+1 Citadel
+1 Corrupted Keep
+1 Crucible
+1 Deep Embrace
+6 Forest
+1 Lockbox
+7 Mountain
+1 Ruins of Sarnath
+7 Swamp
+1 The Longest Yard
+1 The Molten Falls
+1 Vale of Pnath
+1 Vestibule of Exile

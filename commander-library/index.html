@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Custom Commander Deck Library</title><style>@font-face{font-family:'Cinzel';font-style:normal;font-weight:700;src:url('common/fonts/Cinzel-700.woff2') format('woff2')}
+@font-face{font-family:'Crimson Text';font-style:italic;font-weight:400;src:url('common/fonts/CrimsonText-400-italic.woff2') format('woff2')}
+@font-face{font-family:'Crimson Text';font-style:normal;font-weight:400;src:url('common/fonts/CrimsonText-400.woff2') format('woff2')}
+@font-face{font-family:'Crimson Text';font-style:normal;font-weight:600;src:url('common/fonts/CrimsonText-600.woff2') format('woff2')}
+@font-face{font-family:'Philosopher';font-style:normal;font-weight:700;src:url('common/fonts/Philosopher-700.woff2') format('woff2')}
+</style><style>
+:root{--bg:#15161a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:#e8e6df;font-family:"Segoe UI",system-ui,Helvetica,Arial,sans-serif}
+header.page{padding:28px 32px 10px;border-bottom:1px solid #2a2c33}
+header.page h1{margin:0;font-size:30px;letter-spacing:.04em;color:#f0c96a;font-family:"Cinzel",Georgia,serif}
+header.page h1 small{display:block;font-size:13px;letter-spacing:.2em;color:#9aa0ad;font-family:"Segoe UI",system-ui,sans-serif;margin-top:4px}
+header.page a{color:#9aa0ad}
+.meta{color:#9aa0ad;font-size:13px;margin-top:10px;line-height:1.6}
+.meta b{color:#d8d4c8}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;padding:14px 32px;position:sticky;top:0;background:rgba(21,22,26,.96);backdrop-filter:blur(4px);z-index:5;border-bottom:1px solid #2a2c33;align-items:center}
+.toolbar button{background:#23252c;color:#d8d4c8;border:1px solid #3a3d47;border-radius:999px;padding:5px 12px;font-size:12px;cursor:pointer}
+.toolbar button.on{background:#f0c96a;color:#111;border-color:#f0c96a}
+.toolbar input{background:#23252c;color:#eee;border:1px solid #3a3d47;border-radius:8px;padding:6px 10px;font-size:13px;min-width:200px}
+.toolbar .sep{width:1px;height:22px;background:#3a3d47;margin:0 4px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:26px;padding:28px 32px 60px}
+
+/* ---------- the card ---------- */
+.card{container-type:inline-size;aspect-ratio:63/88;position:relative;background:#0b0b0b;border-radius:4.6%/3.3%;box-shadow:0 8px 22px rgba(0,0,0,.6);color:#111;overflow:hidden}
+.card.hidden{display:none}
+.frame{position:absolute;left:4.4cqw;top:4.4cqw;right:4.4cqw;bottom:7.2cqw;border-radius:1.8cqw;
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .28 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"),
+    radial-gradient(120% 90% at 50% 0%,rgba(255,255,255,.22),rgba(255,255,255,0) 60%),
+    var(--frame2);
+  box-shadow:inset 0 0 0 .5cqw rgba(0,0,0,.35)}
+.frame::before{content:"";position:absolute;inset:1.1cqw;border-radius:1.3cqw;background:var(--frame);opacity:.92;mix-blend-mode:screen;pointer-events:none}
+.frame::after{content:"";position:absolute;inset:1.1cqw;border-radius:1.3cqw;background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.55' numOctaves='4' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .22 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    mix-blend-mode:multiply;pointer-events:none}
+.frame > *{position:absolute;z-index:1}
+.titlebar,.typebar{left:2.6cqw;right:2.6cqw;display:flex;align-items:center;justify-content:space-between;gap:1.5cqw;padding:0 2.6cqw;
+  background:var(--box);border:.45cqw solid var(--pin);border-radius:1.2cqw;box-shadow:0 .4cqw .6cqw rgba(0,0,0,.45),inset 0 0 0 .3cqw rgba(255,255,255,.35)}
+.titlebar{top:2.4cqw;height:8.8cqw}
+.card.legendary .titlebar{border-radius:3.2cqw 3.2cqw 1.2cqw 1.2cqw;box-shadow:0 .4cqw .6cqw rgba(0,0,0,.45),inset 0 0 0 .3cqw rgba(255,255,255,.35),0 -.9cqw 0 -.2cqw var(--pin)}
+.name{font-family:"Beleren","Philosopher","Trajan Pro",Georgia,serif;font-weight:700;font-size:4.9cqw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.01em}
+.cost{display:flex;gap:.5cqw;flex-shrink:0}
+.card.longname .name{font-size:3.5cqw;letter-spacing:-.02em}
+.card.xlongname .name{font-size:2.9cqw;letter-spacing:-.03em}
+.ms{width:4.7cqw;height:4.7cqw;border-radius:50%;box-shadow:-.25cqw .35cqw 0 rgba(0,0,0,.65);vertical-align:-.15em}
+.rules .ms{width:1.1em;height:1.1em;box-shadow:-.07em .1em 0 rgba(0,0,0,.65)}
+.art{top:11.9cqw;left:4.2cqw;right:4.2cqw;height:59.5cqw;background:#000;border:.45cqw solid var(--pin);overflow:hidden;display:flex;align-items:center;justify-content:center}
+.art img.fg{position:relative;width:100%;height:100%;object-fit:cover;display:block}
+.art.fit-contain img.fg{object-fit:contain;z-index:1}
+.art img.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(12px) brightness(.45) saturate(1.2);transform:scale(1.25)}
+.art.pixel img.fg{image-rendering:pixelated;object-fit:contain;width:60%;height:94%;flex:none}
+.typebar{top:71.6cqw;height:8cqw}
+.type{font-family:"Beleren","Philosopher",Georgia,serif;font-weight:700;font-size:3.9cqw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card.longtype .type{font-size:3.5cqw;letter-spacing:-.01em}
+.card.xlongtype .type{font-size:3.2cqw;letter-spacing:-.015em}
+.card.xxlongtype .type{font-size:2.9cqw;letter-spacing:-.02em}
+.setsym{width:6.2cqw;height:6.2cqw;flex-shrink:0;filter:drop-shadow(0 .2cqw .2cqw rgba(0,0,0,.5))}
+.textbox{top:79.8cqw;left:4.2cqw;right:4.2cqw;bottom:3.6cqw;background:var(--text);border:.45cqw solid var(--pin);padding:2cqw 2.8cqw;
+  display:flex;flex-direction:column;gap:1.2cqw;overflow:hidden;font-family:"MPlantin","Crimson Text","EB Garamond",Georgia,serif;font-size:4.05cqw;line-height:1.22;
+  box-shadow:inset 0 0 1.5cqw rgba(0,0,0,.18)}
+.textbox::before{content:"";position:absolute;inset:0;pointer-events:none;background:
+  url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .07 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.rules{position:relative}
+.bigsym{display:flex;justify-content:center;align-items:center;padding-top:3cqw}
+.bigsym .ms{width:26cqw;height:26cqw;box-shadow:-.6cqw .8cqw 0 rgba(0,0,0,.55)}
+.basicflavor{text-align:center;font-size:.85em}
+.rules p{margin:0 0 .9cqw}
+.rules p:last-child{margin:0}
+.rem{color:#2c2c2c}
+.flavor{position:relative;font-style:italic;margin-top:auto;padding-top:1.4cqw;font-size:.96em;line-height:1.2}
+.flavor br+ br{display:none}
+.flavor::before{content:"";display:block;width:38%;height:.3cqw;margin:0 auto 1.4cqw;background:linear-gradient(90deg,transparent,rgba(0,0,0,.55),transparent)}
+.card.long .textbox{font-size:3.6cqw;line-height:1.18}
+.card.xlong .textbox{font-size:3.15cqw;line-height:1.15;padding:1.4cqw 2.2cqw}
+.card.xxlong .textbox{font-size:2.8cqw;line-height:1.12;padding:1.1cqw 1.8cqw}
+.card.xxlong .flavor{font-size:2.7cqw}
+.card.has-pt .textbox{padding-bottom:6cqw}
+.pt{right:3.2cqw;bottom:1.6cqw;min-width:19cqw;height:8.6cqw;padding:0 3cqw;display:flex;align-items:center;justify-content:center;
+  background:var(--box);border:.45cqw solid var(--pin);border-radius:1.4cqw;font-family:"Beleren","Philosopher",Georgia,serif;font-weight:700;font-size:5.2cqw;
+  box-shadow:0 .4cqw .7cqw rgba(0,0,0,.5),inset 0 0 0 .3cqw rgba(255,255,255,.35);z-index:2}
+.foot{position:absolute;left:5.2cqw;right:5.2cqw;bottom:1.6cqw;color:#f2f2f2;font-size:2.35cqw;line-height:1.25;display:flex;justify-content:space-between;align-items:flex-end;font-family:"Segoe UI",Arial,sans-serif}
+.foot .l{display:flex;flex-direction:column;gap:.1cqw}
+.foot .r{text-align:right;color:#cfcfcf}
+.empty{padding:40px;color:#9aa0ad;text-align:center;display:none}
+.deck-sec{padding:8px 32px 10px}.deck-sec h2{font-family:Cinzel,Georgia,serif;color:#f0c96a;font-size:20px;margin:18px 0 6px;letter-spacing:.06em}.deck-sec h2 small{color:#9aa0ad;font-size:13px;margin-left:8px}
+.deck-sec .grid{padding:10px 0 20px}
+.stack{position:relative}.stack .count{position:absolute;z-index:3;top:-10px;right:-8px;background:#f0c96a;color:#111;font-weight:800;border-radius:999px;padding:3px 9px;font-size:13px;box-shadow:0 2px 6px rgba(0,0,0,.6)}
+.curve{display:flex;gap:6px;align-items:flex-end;margin-top:18px;height:100px}.curve .bar{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;width:36px;gap:2px;font-size:11px;color:#9aa0ad}.curve .fill{width:22px;background:#f0c96a;border-radius:3px 3px 0 0}.curve b{color:#e8e6df}
+.meta .ms{width:14px;height:14px}
+.grid .card,.deck-sec .card{cursor:zoom-in}
+#zoomov{position:fixed;inset:0;z-index:99;display:none;align-items:center;justify-content:center;background:rgba(5,5,8,.9);cursor:zoom-out;padding:2vh}
+#zoomov.on{display:flex}
+#zoomov .zwrap{width:min(92vw,66vh)}
+#zoomov .card{width:100%;cursor:zoom-out;box-shadow:0 24px 70px rgba(0,0,0,.85)}
+@media print{
+  body{background:#fff}
+  header.page,.toolbar,.deck-sec h2,#zoomov{display:none}
+  .grid,.deck-sec .grid{display:grid;grid-template-columns:repeat(3,63mm);gap:3mm;padding:8mm}
+  .deck-sec{padding:0}
+  .card{width:63mm;height:88mm;aspect-ratio:auto;box-shadow:none;border-radius:3mm;break-inside:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .card.hidden{display:none}
+  .stack .count{display:none}
+}
+
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(400px,1fr));gap:24px;padding:28px 32px}
+.tile{background:#1c1e24;border:1px solid #2a2c33;border-radius:14px;overflow:hidden;color:#e8e6df;box-shadow:0 8px 22px rgba(0,0,0,.5)}
+.tile:hover{border-color:#f0c96a}
+.tile .cover{display:block;position:relative;height:250px;background:#000;overflow:hidden}
+.tile .cover img.fg{position:relative;width:100%;height:100%;object-fit:cover;z-index:1}
+.tile .cover.fit-contain img.fg{object-fit:contain}
+.tile .cover img.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(14px) brightness(.45) saturate(1.2);transform:scale(1.25)}
+.tile .body{padding:16px 18px 18px}.tile h2{margin:0;font-family:Cinzel,Georgia,serif;font-size:22px;letter-spacing:.05em}.tile h2 a{color:#f0c96a;text-decoration:none}
+.tile .sub{color:#9aa0ad;font-size:12px;letter-spacing:.12em;text-transform:uppercase;margin:4px 0 10px}
+.tile p{color:#b9bcc6;font-size:13px;line-height:1.5;margin:0 0 12px}
+.tile .links{font-size:12px;color:#9aa0ad}.tile .links a{color:#f0c96a}
+</style></head><body>
+<header class="page"><h1>CUSTOM COMMANDER DECK LIBRARY <small>COLLECTIONS OF FAN-MADE COMMANDER DECKS, EACH BUILT FROM ITS OWN CUSTOM SET</small></h1>
+<div class="meta">Decks are organized into collections, one per franchise or theme. Every deck is a complete custom Magic: The Gathering set plus a legal 100-card Commander list drawn from it. Unofficial fan content.</div></header>
+<main class="tiles"><div class="tile"><a class="cover fit-contain" href="doom/index.html"><img class="bg" aria-hidden="true" src="doom/doom1/art/Doomguy_original.jpg" alt=""><img class="fg" src="doom/doom1/art/Doomguy_original.jpg" alt="" style="object-position:50% 50%"></a>
+<div class="body"><h2><a href="doom/index.html">The Doom Collection</a></h2><div class="sub">SIX DECKS ACROSS THE HELLISH HISTORY OF DOOM — 1993 TO THE DARK AGES</div>
+<p>One Commander deck per era of Doom: the Icon of Sin's classic legions, Doom 64's resurrecting brood, the Mars horror of Doom 3, the Slayer's glory kills, the Khan Maykr's argent harvest, and the medieval siege of the Dark Ages. Every deck is a complete custom set, balance-tested by simulation against real WotC precons.</p><div class="links"><a href="doom/index.html">6 decks</a> · <a href="doom/balance/dashboard.html">Balance dashboard</a></div></div></div><div class="tile"><a class="cover fit-contain" href="halflife/index.html"><img class="bg" aria-hidden="true" src="halflife/hl1/art/Player_hl01.png" alt=""><img class="fg" src="halflife/hl1/art/Player_hl01.png" alt="" style="object-position:50% 50%"></a>
+<div class="body"><h2><a href="halflife/index.html">The Half-Life Collection</a></h2><div class="sub">THE BLACK MESA INCIDENT — ONE DECK PER VALVE RELEASE, STARTING IN 1998</div>
+<p>Commander decks built from the Half-Life games, beginning with the original 1998 Black Mesa Incident: Gordon Freeman's teleport-lab blink engine, the Xen fauna the resonance cascade let in, the HECU cleanup crew, and the whole armory from crowbar to gluon gun. Every deck is a complete custom set with rules enforced in MTG Forge.</p><div class="links"><a href="halflife/index.html">1 decks</a> · <a href="halflife/balance/dashboard.html">Balance dashboard</a></div></div></div><div class="tile"><a class="cover fit-contain" href="quake/index.html"><img class="bg" aria-hidden="true" src="quake/cover.jpg" alt=""><img class="fg" src="quake/cover.jpg" alt="" style="object-position:50% 50%"></a>
+<div class="body"><h2><a href="quake/index.html">The Quake Collection</a></h2><div class="sub">SIX DECKS, ONE PER ID SOFTWARE RELEASE — 1996 TO QUAKE CHAMPIONS</div>
+<p>One Commander deck per Quake game: Ranger's five-colour voltron, the Strogg artifact war machines of Quake II and 4, the Arena Eternal's legendary Champions, and the GDF's objective warfare. Every deck is a complete custom set, balance-tested by simulation against real WotC precons.</p><div class="links"><a href="quake/index.html">6 decks</a> · <a href="quake/balance/dashboard.html">Balance dashboard</a></div></div></div></main></body></html>

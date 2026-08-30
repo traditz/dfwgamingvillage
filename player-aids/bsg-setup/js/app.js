@@ -1,0 +1,774 @@
+/* =============================================================================
+   BSG Setup Utility — application logic
+   Configurator -> generates every valid setup "module" -> gallery -> detail.
+   ============================================================================= */
+
+const state = {
+  expansions: new Set(["base"]),   // base always on
+  players: 5,
+  options: new Set(),              // toggled options that act as gallery filters
+  selected: null                   // currently opened configuration key
+};
+
+const $ = (sel, root = document) => root.querySelector(sel);
+const el = (tag, cls, html) => { const n = document.createElement(tag); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; };
+
+/* ---- Validity helpers ---------------------------------------------------- */
+function expEnabled(id) { return id === "base" || state.expansions.has(id); }
+
+/* Seven-player game is only possible when a Cylon Leader exists — i.e. Pegasus
+   or Daybreak is in play (Pegasus p.18, extended by Exodus p.22 / Daybreak p.16). */
+function canSeven() { return expEnabled("pegasus") || expEnabled("daybreak"); }
+function maxPlayers() { return canSeven() ? 7 : 6; }
+function sevenForced() { return state.players === 7; }   // Cylon Leader mandatory
+
+function availableObjectives() {
+  return BSG.objectives.filter(o => {
+    if (!expEnabled(o.requires)) return false;
+    const max = canSeven() ? 7 : o.players[1];
+    return state.players >= o.players[0] && state.players <= max;
+  });
+}
+
+// `requires` may be one expansion id or a list (any-of). e.g. Cylon Leaders = Pegasus OR Daybreak.
+function requiresMet(req) {
+  return Array.isArray(req) ? req.some(expEnabled) : expEnabled(req);
+}
+
+function availableOptions() {
+  // A 7-player game forces a Cylon Leader even if not explicitly selected.
+  const clInPlay = state.options.has("cylonLeaders") || sevenForced();
+  return BSG.options.filter(o =>
+    requiresMet(o.requires) &&
+    (!o.minPlayers || state.players >= o.minPlayers) &&
+    (!o.onlyPlayers || o.onlyPlayers.includes(state.players)) &&
+    !(o.disabledBy && expEnabled(o.disabledBy)) &&   // e.g. Daybreak disables Sympathetic Cylon
+    !(o.disabledByOption === "cylonLeaders" && clInPlay));   // Sympathetic Cylon can't coexist with a Cylon Leader
+}
+
+/* Enumerate valid configurations. The selected optional modules are exactly
+   the modules included in every generated setup — an unselected module never
+   appears. The gallery therefore shows one card per valid objective for the
+   currently-selected module set. (A 7-player game always includes a Cylon Leader.) */
+function enumerateConfigs() {
+  const objs = availableObjectives();
+  const selected = availableOptions()
+    .filter(o => state.options.has(o.id))
+    .map(o => o.id);
+  if (sevenForced() && !selected.includes("cylonLeaders")) selected.push("cylonLeaders");
+  return objs.map(obj => ({ objective: obj.id, options: new Set(selected) }));
+}
+
+function configKey(c) { return c.objective + "|" + [...c.options].sort().join(","); }
+
+function configTitle(c) {
+  const obj = BSG.objectives.find(o => o.id === c.objective);
+  const tags = [...c.options].map(id => BSG.options.find(o => o.id === id).name);
+  return { name: obj.name, tags };
+}
+
+/* ---- Rendering: configurator -------------------------------------------- */
+function renderConfigurator() {
+  const ex = $("#expansions"); ex.innerHTML = "";
+  BSG.expansions.forEach(e => {
+    const on = expEnabled(e.id);
+    const chip = el("button", "chip" + (on ? " on" : "") + (e.always ? " locked" : ""));
+    chip.innerHTML = `<span class="chip-name">${e.name}</span>`;
+    chip.title = e.blurb;
+    if (!e.always) chip.onclick = () => {
+      on ? state.expansions.delete(e.id) : state.expansions.add(e.id);
+      // drop options/players that became invalid
+      pruneState(); renderAll();
+    };
+    ex.appendChild(chip);
+  });
+
+  const pl = $("#players"); pl.innerHTML = "";
+  for (let p = 3; p <= maxPlayers(); p++) {
+    const b = el("button", "pbtn" + (state.players === p ? " on" : ""), String(p));
+    if (p === 7) b.title = BSG.sevenPlayer.note;
+    b.onclick = () => { state.players = p; pruneState(); renderAll(); };
+    pl.appendChild(b);
+  }
+
+  const op = $("#options"); op.innerHTML = "";
+  const opts = availableOptions();
+  if (!opts.length) { op.appendChild(el("p", "muted", "Enable an expansion to unlock optional modules.")); }
+  opts.forEach(o => {
+    // A 7-player game forces a Cylon Leader — show it locked-on.
+    const forced = o.id === "cylonLeaders" && sevenForced();
+    const on = state.options.has(o.id) || forced;
+    const chip = el("button", "chip small" + (on ? " on" : "") + (forced ? " locked" : ""));
+    chip.innerHTML = `<span class="chip-name">${o.name}${forced ? " ·  required at 7" : ""}</span>`;
+    chip.title = forced ? "Required: a 7-player game must include a Cylon Leader." : o.description;
+    if (!forced) chip.onclick = () => { on ? state.options.delete(o.id) : state.options.add(o.id); pruneState(); renderAll(); };
+    op.appendChild(chip);
+  });
+  if (sevenForced()) op.appendChild(el("p", "muted seven-note", BSG.sevenPlayer.note));
+}
+
+function pruneState() {
+  if (state.players > maxPlayers()) state.players = 6;
+  [...state.options].forEach(id => {
+    const o = BSG.options.find(x => x.id === id);
+    if (!o || !requiresMet(o.requires) || (o.minPlayers && state.players < o.minPlayers) ||
+        (o.onlyPlayers && !o.onlyPlayers.includes(state.players)) ||
+        (o.disabledBy && expEnabled(o.disabledBy)) ||
+        (o.disabledByOption && state.options.has(o.disabledByOption))) state.options.delete(id);
+  });
+  if (state.selected) {
+    const stillValid = enumerateConfigs().some(c => configKey(c) === state.selected);
+    if (!stillValid) state.selected = null;
+  }
+}
+
+/* ---- Rendering: gallery -------------------------------------------------- */
+function renderGallery() {
+  const grid = $("#gallery"); grid.innerHTML = "";
+  const configs = enumerateConfigs();
+  $("#galleryCount").textContent = `${configs.length} setup${configs.length === 1 ? "" : "s"}`;
+  if (!configs.length) {
+    grid.appendChild(el("p", "muted", "No valid setups for this player count. Adjust expansions or players."));
+    return;
+  }
+  configs.forEach(c => {
+    const { name, tags } = configTitle(c);
+    const card = el("button", "card" + (state.selected === configKey(c) ? " active" : ""));
+    const obj = BSG.objectives.find(o => o.id === c.objective);
+    card.innerHTML = `
+      <div class="card-mode">${name}</div>
+      <div class="card-sum">${obj.summary}</div>
+      <div class="card-tags">${tags.length ? tags.map(t => `<span class="tag">${t}</span>`).join("") : `<span class="tag base">Core only</span>`}</div>`;
+    card.onclick = () => { state.selected = configKey(c); renderAll(); $("#detail").scrollIntoView({behavior:"smooth", block:"start"}); };
+    grid.appendChild(card);
+  });
+}
+
+/* ---- Rendering: detail (full setup) -------------------------------------- */
+function renderDetail() {
+  const wrap = $("#detail");
+  if (!state.selected) {
+    wrap.innerHTML = `<div class="placeholder"><h2>Select a setup</h2>
+      <p>Pick a mode card above to see clean, step-by-step setup instructions and the rule diagrams for that exact configuration.</p></div>`;
+    return;
+  }
+  const config = enumerateConfigs().find(c => configKey(c) === state.selected);
+  const obj = BSG.objectives.find(o => o.id === config.objective);
+  const { tags } = configTitle(config);
+
+  // Compose the ordered setup procedure for this configuration.
+  const headHtml = `<div class="detail-head">
+      <button class="share-btn" onclick="copyShareLink(this)" title="Copy a link that reopens this exact setup">🔗 Copy setup link</button>
+      <button class="share-btn teach-btn" onclick="toggleTeach()" title="A ~5 minute script to teach this exact setup aloud">📖 Teaching script</button>
+      <div class="dh-mode">${obj.name}</div>
+      <p class="dh-desc">${obj.description}</p>
+      <div class="dh-meta">
+        <span class="meta-pill">${state.players} players</span>
+        ${tags.map(t => `<span class="meta-pill opt">${t}</span>`).join("")}
+      </div>
+    </div>`;
+
+  // Condition context for resolving the unified setup sequence.
+  // cyl = a Cylon Leader is in play (selected, or mandatory in a 7-player game).
+  const cylonLeaderInPlay = config.options.has("cylonLeaders") || state.players === 7;
+  const c = {
+    has: e => expEnabled(e),
+    p: state.players,
+    obj: config.objective,
+    opt: id => config.options.has(id),
+    cyl: cylonLeaderInPlay
+  };
+
+  // Active rulebooks for this setup (drives the search scope + suppression).
+  BSG._searchCtx = { exps: ["base", "pegasus", "exodus", "daybreak"].filter(expEnabled) };
+
+  // --- Config-aware section list for the jump-nav ---
+  const faqItems = BSG.faq.filter(f => !f.when || f.when(c));
+  const hasReckless = BSG.reckless.when(c);
+  const hasSetupDiag = BSG.diagrams.some(d => d.group === "setup" && d.when(c));
+  const navItems = [
+    ["sec-search", "🔍 Search"],
+    ["sec-setup", "Setup Steps"],
+    ["sec-loyalty", "Loyalty Deck"],
+    ["sec-howto", "How to Play"],
+    hasReckless ? ["sec-reckless", "Reckless"] : null,
+    ["sec-locations", "Locations"],
+    faqItems.length ? ["sec-faq", "FAQ"] : null,
+    hasSetupDiag ? ["sec-setupdiag", "Setup Diagrams"] : null,
+    ["sec-charts", "Reference Charts"]
+  ].filter(Boolean);
+  const navHtml = `<nav class="jump-nav" aria-label="Jump to section">${
+    navItems.map(([id, label]) => `<a href="#${id}" class="jn">${label}</a>`).join("")
+  }</nav>`;
+  const searchHtml = buildSearchPanel(c);
+
+  let html = "";
+
+  // Resolve the merged, precedence-aware step list (only applicable rulings).
+  const steps = BSG.setup.filter(s => !s.when || s.when(c));
+
+  // Render as ONE continuous numbered list, grouped by phase, each step tagged.
+  let n = 0, blocks = "";
+  BSG.phases.forEach((phaseName, pi) => {
+    const phaseSteps = steps.filter(s => s.ph === pi);
+    if (!phaseSteps.length) return;
+    blocks += `<section class="setup-block">
+        <h3>${phaseName}</h3>
+        <ol class="ustep">${phaseSteps.map(s => {
+          n++;
+          const m = BSG.expMeta[s.exp];
+          return `<li><span class="snum">${n}</span>
+            <div class="sbody"><span class="st">${s.t}</span> <span class="etag ${m.cls}">${m.name}</span>
+            <div class="sd">${s.d}</div>${s.src ? `<div class="ssrc">${s.src}</div>` : ""}</div></li>`;
+        }).join("")}</ol>
+      </section>`;
+  });
+  html += `<div class="legend" id="sec-setup">Each step is tagged with the expansion it comes from and cites its rulebook source (official page · v4.4 reference page). Where a newer expansion supersedes an older rule, only the newest version is shown.</div>`;
+  html += `<div class="steps">${blocks}</div>`;
+
+  // Loyalty deck panel — exact composition for THIS setup.
+  const L = BSG.loyalty.compute(c);
+  const gm = BSG.expMeta[L.gov];
+  const cards = [];
+  cards.push(`<span class="loy-card cyl">${L.cylon}× You Are a Cylon</span>`);
+  const notBreakdown = L.extras.length ? ` <span class="loy-math">(${L.notBase}+${L.not - L.notBase})</span>` : "";
+  cards.push(`<span class="loy-card not">${L.not}× You Are Not a Cylon${notBreakdown}</span>`);
+  if (L.mutineer)    cards.push(`<span class="loy-card mut">1× You Are a Mutineer</span>`);
+  const sympVariant = config.options.has("sympatheticCylon");
+  if (L.sympathizer) cards.push(`<span class="loy-card sym">1× You Are a ${sympVariant ? "Sympathetic Cylon" : "Sympathizer"}</span>`);
+  const sympNote = L.sympathizer
+    ? `<b>Timing:</b> the ${sympVariant ? "Sympathetic Cylon" : "Sympathizer"} card is <b>not</b> shuffled in before the starting deal — deal each player their first Loyalty card, <i>then</i> add it to the remaining deck and shuffle (it arrives with the Sleeper-phase deal).`
+    : "";
+  const cylNote =
+    L.gov === "daybreak"
+      ? (L.mutineer
+          ? `The <b>Mutineer is REQUIRED</b> in this setup (Daybreak chart).`
+          : `The Mutineer is <b>not</b> included in this setup — set it aside.`)
+      : "";
+  const leaderNote = L.cl
+      ? (L.motive ? `Cylon Leader in play: they draw <b>Motive cards</b> (no Agenda, no Sympathizer).`
+                  : L.agenda ? `Cylon Leader in play: deal one random <b>${L.agenda} Agenda</b> card (no Sympathizer).` : "")
+      : "";
+  html += `<div class="panel loyalty" id="sec-loyalty">
+      <h3>Loyalty Deck — ${state.players} players${L.cl ? " + Cylon Leader" : ""}
+          <span class="etag ${gm.cls}">${gm.name} chart</span></h3>
+      ${L.valid ? `<div class="loy-total">Deal a <b>${L.total}-card</b> Loyalty deck:</div>
+      <div class="loy-cards">${cards.join("")}</div>` : `<div class="loy-total">No standard composition for this player count.</div>`}
+      ${L.extras.length ? `<p class="note2"><b>${L.not}× You Are Not a Cylon</b> = ${L.notBase} from the chart (${state.players} players${L.cl ? " + Cylon Leader" : ""}) + ${L.not - L.notBase} for ${L.extras.join(" & ")}. The chart's asterisk (*) is the Exodus +1.</p>` : ""}
+      ${cylNote ? `<p class="note2 ${L.mutineer ? "req" : ""}">${cylNote}</p>` : ""}
+      ${sympNote ? `<p class="note2">${sympNote}</p>` : ""}
+      ${leaderNote ? `<p class="note2">${leaderNote}</p>` : ""}
+      <ul class="loy-adj">${BSG.loyalty.charNotes(c).map(x => `<li>${x}</li>`).join("")}</ul>
+      ${config.options.has("conflictedLoyalties") ? `<p class="note2"><b>Conflicted Loyalties:</b> shuffle the chosen Personal Goal / Final Five cards into the ‘You Are Not a Cylon’ pile before dealing — the counts above don't change; some ‘Not a Cylon’ cards are now secretly those cards.</p>` : ""}
+      <div class="src">${L.src}</div>
+      ${L.gov === "daybreak"
+          ? `<figure class="loy-fig"><img loading="lazy" src="images/loyalty-chart-daybreak.png" alt="Daybreak Loyalty Deck Chart"><figcaption>Daybreak ‘Creating the Loyalty Deck’ Chart (p.7)</figcaption></figure>`
+          : (L.cl && L.gov === "pegasus"
+              ? `<figure class="loy-fig"><img loading="lazy" src="images/loyalty-chart-pegasus-leader.png" alt="Pegasus Cylon Leader Loyalty chart"><figcaption>Pegasus — Loyalty Deck with a Cylon Leader (p.11)</figcaption></figure>`
+              : "")}
+    </div>`;
+
+  // How to Play — rules reference for this mode + active modules.
+  html += `<div id="sec-howto">${buildHowToPlay(c, obj)}</div>`;
+
+  // Reckless skill checks (Daybreak) — focused rules reference.
+  if (hasReckless) html += buildReckless(c);
+
+  // Location reference (boards in play) + contextual FAQ.
+  html += `<div id="sec-locations">${buildLocations(c)}</div>`;
+  if (faqItems.length) html += `<div id="sec-faq">${buildFaq(c)}</div>`;
+
+  // Diagrams & charts relevant to THIS setup only.
+  const relevant = BSG.diagrams.filter(d => d.when(c));
+  const figHtml = list => list.map(d =>
+    `<figure class="${d.tall ? "tall" : ""}"><img loading="lazy" src="${d.src}" alt="${d.caption}"><figcaption>${d.caption}</figcaption></figure>`).join("");
+  const setupD = relevant.filter(d => d.group === "setup");
+  const refD   = relevant.filter(d => d.group === "reference");
+  if (setupD.length)
+    html += `<div class="diagrams" id="sec-setupdiag"><h3>Setup Diagrams</h3><div class="diag-grid">${figHtml(setupD)}</div></div>`;
+
+  // Combined combat reference (always) + other reference charts.
+  html += `<div class="diagrams" id="sec-charts"><h3>Reference Charts</h3>`;
+  html += buildCombatChart(c);
+  if (refD.length) html += `<div class="diag-grid">${figHtml(refD)}</div>`;
+  html += `</div>`;
+
+  wrap.innerHTML = headHtml + buildTeachPanel(c) + navHtml + searchHtml + html;
+  syncTopbarHeight();   // dock the new sticky nav + set section scroll offsets
+}
+
+/* Reckless skill checks (Daybreak) — focused rules reference. */
+function buildReckless(c) {
+  const r = BSG.reckless;
+  return `<section class="panel reckless" id="sec-reckless">
+      <h3>Reckless Skill Checks <span class="etag e-day">Daybreak</span></h3>
+      <p class="rk-intro">${r.intro}</p>
+      <ul class="rk-outcomes">${r.outcomes.map(o =>
+        `<li><span class="rk-k">${o.k}</span><span class="rk-t">${o.t}</span></li>`).join("")}</ul>
+      <ul class="rk-notes">${r.notes.map(n => `<li>${n}</li>`).join("")}</ul>
+      <div class="src">${r.src}</div>
+    </section>`;
+}
+
+/* Rulebook search panel — the input + (initially empty) results area. */
+function buildSearchPanel(c) {
+  const books = ["base", "pegasus", "exodus", "daybreak"].filter(expEnabled).map(e => BSG.expMeta[e].name);
+  return `<section class="rules-search" id="sec-search">
+      <h3>Search the Rulebooks</h3>
+      <p class="rs-sub">Searches the ${books.join(", ")} rulebook${books.length > 1 ? "s" : ""}, the official FFG <b>FAQ &amp; Errata</b>, and a community <b>Unofficial FAQ</b> — scoped to this setup. Each result cites its source; newer expansions supersede older rules, official sources rank above unofficial, and you can expand any result for the full passage. (The v4.4 combined reference is intentionally excluded.)</p>
+      <input type="search" id="rules-q" class="rs-input" placeholder="Ask a question or search a rule — e.g. “how do I win as a Cylon?”" oninput="bsgSearch(this.value)" autocomplete="off" spellcheck="false">
+      <div id="rules-results" class="rs-results"><p class="rs-hint">Type at least 2 characters to search.</p></div>
+    </section>`;
+}
+
+/* ---- Live rulebook search -------------------------------------------------
+   Scopes to the rulebooks in play, suppresses superseded versions of curated
+   conflict topics (newest in-play book governs), cites book + page. --------- */
+function _escHtml(s) { return s.replace(/[&<>]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[ch])); }
+function _escReg(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+
+/* ---- Smart search: BM25 relevance + stop-words + light stemming + synonyms.
+   Fully client-side (no API): handles natural-language questions while keeping
+   precise multi-word term matching. ----------------------------------------- */
+const _STOP = new Set(("a an the and or but if then of to in on for from with as at by be is are was were " +
+  "do does did can could should would will may might must have has had this that these those it its it's i you " +
+  "he she they we me my your our their what when where which who whom why how whats hows than into over under " +
+  "about your yours during while there here not no yes get got make use using used such per each any all some " +
+  "you're i'm we're they're").split(" "));
+
+/* Small BSG vocabulary map so questions hit the right rules. Keys and values
+   are in the same (plural-normalised) form the stemmer below produces. */
+const _SYN = {
+  win: ["winning", "victory", "objective", "distance"], winning: ["win", "victory", "objective"],
+  victory: ["win", "objective"], lose: ["losing", "defeat", "destroyed"], losing: ["lose", "defeat"],
+  jump: ["ftl"], ftl: ["jump"], nuke: ["nuclear", "basestar"],
+  centurion: ["boarding", "party"], boarding: ["centurion"], cylon: ["raider", "basestar"],
+  reveal: ["sleeper", "revealed", "revealing"], revealed: ["reveal", "revealing"], revealing: ["reveal", "revealed"], sleeper: ["reveal", "loyalty"],
+  loyalty: ["sleeper", "cylon"], morale: ["resource"], food: ["resource"], fuel: ["resource"],
+  population: ["resource"], brig: ["detention"], skill: ["check"], check: ["skill"],
+  president: ["quorum", "title"], admiral: ["nuke", "title"], mutineer: ["mutiny"], mutiny: ["mutineer"]
+};
+
+/* Plural-only stemmer: safe normalisation (raiders->raider, checks->check)
+   without the over-stemming that breaks pairs like win / winning. */
+function _stem(w) {
+  if (w.length <= 3) return w;
+  w = w.replace(/('s|s')$/, "");
+  if (/ies$/.test(w) && w.length > 4) return w.slice(0, -3) + "y";
+  if (/(ches|shes|sses|xes|zes)$/.test(w)) return w.slice(0, -2);
+  if (/s$/.test(w) && !/(ss|us|is|as|os)$/.test(w)) return w.slice(0, -1);
+  return w;
+}
+/* Content tokens (lowercased, stop-words removed, stemmed). */
+function _tok(text) {
+  const out = [];
+  (text.toLowerCase().match(/[a-z0-9]+/g) || []).forEach(w => {
+    if (_STOP.has(w) || w.length < 2) return;
+    const s = _stem(w);
+    if (s.length >= 2) out.push(s);
+  });
+  return out;
+}
+
+/* Build the inverted index once (lazily, on first search). */
+function _buildSearchIndex() {
+  if (BSG._si) return BSG._si;
+  const docs = [], inv = new Map();
+  let total = 0;
+  BSG.rulesIndex.forEach((e, idx) => {
+    const flat = e.t.replace(/\n/g, " ");
+    const toks = _tok(flat);
+    const tf = new Map();
+    toks.forEach(t => tf.set(t, (tf.get(t) || 0) + 1));
+    tf.forEach((c, t) => { (inv.get(t) || inv.set(t, []).get(t)).push([idx, c]); });
+    docs.push({ len: toks.length || 1, flatLower: flat.toLowerCase() });
+    total += toks.length;
+  });
+  BSG._si = { docs, inv, N: docs.length, avgdl: total / Math.max(1, docs.length) };
+  return BSG._si;
+}
+
+/* Highlight every query-term occurrence (prefix match) in an HTML-escaped string. */
+function _hlTerms(text, terms) {
+  let s = _escHtml(text);
+  const alt = terms.filter(t => t.length >= 3).map(t => _escReg(t) + "\\w*");
+  if (alt.length) s = s.replace(new RegExp("\\b(" + alt.join("|") + ")", "gi"), "<mark>$1</mark>");
+  return s;
+}
+/* Char index of the tightest window that covers the most distinct query terms,
+   so the snippet centres on the passage that's actually about the question. */
+function _bestPos(lt, qterms) {
+  const occ = [];
+  qterms.forEach((t, ti) => {
+    if (t.length < 3) return;
+    const re = new RegExp("\\b" + _escReg(t) + "\\w*", "g");
+    let m, n = 0;
+    while ((m = re.exec(lt)) !== null && n < 200) { occ.push([m.index, ti]); n++; }
+  });
+  if (!occ.length) return -1;
+  if (occ.length === 1) return occ[0][0];
+  occ.sort((a, b) => a[0] - b[0]);
+  const count = new Map();
+  let distinct = 0, l = 0, best = 0, bestSpan = 1e9, mid = occ[0][0];
+  for (let r = 0; r < occ.length; r++) {
+    const tr = occ[r][1];
+    count.set(tr, (count.get(tr) || 0) + 1);
+    if (count.get(tr) === 1) distinct++;
+    while (count.get(occ[l][1]) > 1) { count.set(occ[l][1], count.get(occ[l][1]) - 1); l++; }
+    const span = occ[r][0] - occ[l][0];
+    if (distinct > best || (distinct === best && span < bestSpan)) { best = distinct; bestSpan = span; mid = (occ[l][0] + occ[r][0]) >> 1; }
+  }
+  return mid;
+}
+function _snip(text, terms, phrase) {
+  const lt = text.toLowerCase();
+  let pos = phrase && phrase.includes(" ") && lt.includes(phrase) ? lt.indexOf(phrase) : _bestPos(lt, terms);
+  if (pos < 0) pos = 0;
+  const start = Math.max(0, pos - 115), end = Math.min(text.length, pos + 160);
+  const s = (start > 0 ? "… " : "") + text.slice(start, end) + (end < text.length ? " …" : "");
+  return _hlTerms(s, terms);
+}
+function _fullPassage(text, terms) {
+  return text.split("\n").map(p => `<p>${_hlTerms(p, terms)}</p>`).join("");
+}
+
+/* Proximity score: how tightly the distinct query terms cluster in the passage.
+   Returns ~(#distinct terms in the tightest window) scaled by closeness — a
+   passage that says "reveal … cylon … player" in one sentence scores far higher
+   than one that scatters those words across the page. */
+function _proximity(lt, qterms) {
+  if (qterms.length < 2) return 0;
+  const occ = [];
+  qterms.forEach((t, ti) => {
+    if (t.length < 3) return;
+    const re = new RegExp("\\b" + _escReg(t) + "\\w*", "g");
+    let m, n = 0;
+    while ((m = re.exec(lt)) !== null && n < 200) { occ.push([m.index, ti]); n++; }
+  });
+  if (occ.length < 2) return 0;
+  occ.sort((a, b) => a[0] - b[0]);
+  // Sliding window: most distinct terms within the smallest character span.
+  const count = new Map();
+  let distinct = 0, l = 0, best = 0, bestSpan = 1e9;
+  for (let r = 0; r < occ.length; r++) {
+    const tr = occ[r][1];
+    count.set(tr, (count.get(tr) || 0) + 1);
+    if (count.get(tr) === 1) distinct++;
+    while (count.get(occ[l][1]) > 1) { count.set(occ[l][1], count.get(occ[l][1]) - 1); l++; }
+    const span = occ[r][0] - occ[l][0];
+    if (distinct > best || (distinct === best && span < bestSpan)) { best = distinct; bestSpan = span; }
+  }
+  if (best < 2) return 0;
+  return (best - 1) * (1 / (1 + bestSpan / 140));   // ~140 chars ≈ one sentence
+}
+
+function bsgSearch(q) {
+  const box = document.getElementById("rules-results");
+  if (!box) return;
+  const phrase = (q || "").trim().toLowerCase().replace(/\s+/g, " ");
+  if (phrase.length < 2) { box.innerHTML = `<p class="rs-hint">Type at least 2 characters, or ask a question.</p>`; return; }
+  if (!BSG.rulesIndex) { box.innerHTML = `<p class="rs-hint">Loading rulebook index…</p>`; return; }
+  const si = _buildSearchIndex();
+
+  const rawWords = phrase.match(/[a-z0-9]+/g) || [];
+  let qterms = [...new Set(rawWords.filter(w => !_STOP.has(w)).map(_stem).filter(s => s.length >= 2))];
+  if (!qterms.length) qterms = [...new Set(rawWords.map(_stem).filter(s => s.length >= 2))];
+  if (!qterms.length) { box.innerHTML = `<p class="rs-hint">Try a more specific word.</p>`; return; }
+  // Question vs. exact-term mode (the latter requires every term, as before).
+  const isQuestion = /\b(how|what|why|when|where|who|which|can|do|does|should|is|are|will|if)\b/.test(phrase) || phrase.includes("?");
+  const termMode = !isQuestion && qterms.length <= 3;
+  // Synonyms are optional, lower-weighted extra terms.
+  const synTerms = [];
+  qterms.forEach(t => (_SYN[t] || []).forEach(s => { if (!qterms.includes(s) && !synTerms.includes(s)) synTerms.push(s); }));
+  const allTerms = qterms.concat(synTerms);
+
+  const active = new Set((BSG._searchCtx || { exps: ["base"] }).exps);
+  const gov = BSG.rulesSuppress.map(s => { const ip = s.chain.filter(e => active.has(e)); return ip.length ? ip[ip.length - 1] : null; });
+  const prec = BSG.precedence, k1 = 1.5, b = 0.75;
+
+  // BM25 accumulation over candidate docs (union of postings).
+  const acc = new Map();
+  allTerms.forEach((t, ti) => {
+    const post = si.inv.get(t); if (!post) return;
+    const idf = Math.log(1 + (si.N - post.length + 0.5) / (post.length + 0.5));
+    const w = ti < qterms.length ? 1 : 0.45;
+    post.forEach(([idx, tf]) => {
+      const dl = si.docs[idx].len;
+      const s = idf * (tf * (k1 + 1)) / (tf + k1 * (1 - b + b * dl / si.avgdl)) * w;
+      let cur = acc.get(idx); if (!cur) { cur = { score: 0, hits: new Set() }; acc.set(idx, cur); }
+      cur.score += s; if (ti < qterms.length) cur.hits.add(t);
+    });
+  });
+
+  // Candidate gather: BM25 weighted by how many distinct query terms a passage
+  // covers (so a passage matching ALL of "reveal/cylon/player" beats one with
+  // just a common word).
+  const cand = [];
+  for (const [idx, info] of acc) {
+    const e = BSG.rulesIndex[idx];
+    if (!active.has(e.x)) continue;
+    if (termMode && info.hits.size < qterms.length) continue;       // require all terms in term mode
+    const lt = si.docs[idx].flatLower;
+    if (!e.s) {  // suppress superseded rulebook passages only
+      let sup = false;
+      for (let k = 0; k < BSG.rulesSuppress.length; k++) {
+        const s = BSG.rulesSuppress[k], g = gov[k];
+        if (g && e.x !== g && s.chain.includes(e.x) && s.kw.some(kw => lt.includes(kw))) { sup = true; break; }
+      }
+      if (sup) continue;
+    }
+    const coverage = info.hits.size / qterms.length;
+    cand.push({ e, lt, base: info.score * (0.25 + 0.75 * coverage * coverage) });
+  }
+  // Re-rank each source tier's strongest candidates with proximity (query words
+  // near each other) + an exact-phrase boost — this is where the full-question
+  // context pays off — then keep the most relevant of each tier.
+  const tier = e => (e.s === "u" ? 2 : e.s === "f" ? 1 : 0);
+  const byTier = [[], [], []];
+  cand.forEach(r => byTier[tier(r.e)].push(r));
+  const rankTier = (list, cap) => {
+    list.sort((a, b) => b.base - a.base);
+    const sub = list.slice(0, 40);
+    sub.forEach(r => {
+      let s = r.base;
+      if (phrase.length >= 3 && r.lt.includes(phrase)) s *= 2.4;
+      s *= 1 + _proximity(r.lt, qterms) * 0.7;
+      s += (prec[r.e.x] || 0) * 0.003;
+      r.score = s;
+    });
+    sub.sort((a, b) => b.score - a.score);
+    return sub.slice(0, cap);
+  };
+  // Rulebooks for this setup first, then official FAQ, then the unofficial FAQ.
+  const groups = [
+    { label: "From the rulebooks", items: rankTier(byTier[0], 22) },
+    { label: "Official FAQ &amp; Errata", items: rankTier(byTier[1], 12) },
+    { label: "Community Unofficial FAQ", items: rankTier(byTier[2], 8) }
+  ].filter(g => g.items.length);
+  const shown = groups.reduce((n, g) => n + g.items.length, 0);
+
+  if (!shown) { box.innerHTML = `<p class="rs-hint">No matches in the rulebooks or FAQ for this setup. Try different words.</p>`; return; }
+  const item = e => {
+    const m = BSG.expMeta[e.x];
+    const loc = e.s === "u" ? e.sec : "p." + e.p;
+    const badge = e.s === "u" ? `<span class="rs-badge rs-unofficial">Unofficial</span>`
+                : e.s === "f" ? `<span class="rs-badge rs-faq">FAQ · Errata</span>` : "";
+    return `<details class="rs-item${e.s === "u" ? " is-unofficial" : ""}">
+        <summary class="rs-sum">
+          <div class="rs-meta"><span class="etag ${m.cls}">${m.name}</span>${badge} <span class="rs-page">${e.b} · ${loc}</span><span class="rs-toggle">Full passage</span></div>
+          <div class="rs-snip">${_snip(e.t.replace(/\n/g, " "), qterms, phrase)}</div>
+        </summary>
+        <div class="rs-full">${_fullPassage(e.t, qterms)}</div>
+      </details>`;
+  };
+  box.innerHTML =
+    `<div class="rs-count">${cand.length} result${cand.length > 1 ? "s" : ""}${cand.length > shown ? ` · showing ${shown}` : ""}</div>` +
+    groups.map(g => `<div class="rs-group">${g.label}</div>` + g.items.map(r => item(r.e)).join("")).join("");
+}
+
+/* How to Play — mode rules + core loop + active-module rules.
+   Items may be strings or { t, when?, tag?, src? }. A `tag` (expansion id or a
+   function (c)=>id) marks which expansion's version of an overlapping rule applies. */
+function buildHowToPlay(c, obj) {
+  const tagHtml = tag => {
+    const id = typeof tag === "function" ? tag(c) : tag;
+    const m = BSG.expMeta[id];
+    return m ? `<span class="etag ${m.cls}">${m.name}</span> ` : "";
+  };
+  const block = (title, items, cls = "") => {
+    const lis = items
+      .filter(i => typeof i === "string" || !i.when || i.when(c))
+      .map(i => typeof i === "string"
+        ? `<li>${i}</li>`
+        : `<li>${i.tag ? tagHtml(i.tag) : ""}${i.t}${i.src ? ` <span class="htp-src">${i.src}</span>` : ""}</li>`)
+      .join("");
+    return lis ? `<section class="htp-sec ${cls}"><h5>${title}</h5><ul>${lis}</ul></section>` : "";
+  };
+
+  let body = "";
+  // 1) This mode
+  const mode = BSG.howToPlay.modes[obj.id];
+  if (mode) body += block(`${obj.name} — How This Mode Plays`, mode.items, "mode");
+  // 2) Core gameplay topics (always; conditional items inside)
+  BSG.howToPlay.core.forEach(g => { body += block(g.h, g.items); });
+  // 3) Active modules
+  BSG.howToPlay.modules.filter(m => m.when(c)).forEach(m => { body += block(m.h, m.items, "mod"); });
+
+  return `<div class="howto">
+      <h3>How to Play — Rules Reference</h3>
+      <div class="legend">These rules match your exact setup. A coloured tag marks which expansion's version governs where rules overlap (e.g. <span class="etag e-day">Daybreak</span> Treachery replaces <span class="etag e-peg">Pegasus</span> Treachery).</div>
+      <div class="htp-grid">${body}</div>
+    </div>`;
+}
+
+/* Location reference — only the boards in play; overlay-specific entries via `when`. */
+function buildLocations(c) {
+  const tagHtml = tag => { const m = BSG.expMeta[typeof tag === "function" ? tag(c) : tag]; return m ? ` <span class="etag ${m.cls}">${m.name}</span>` : ""; };
+  let blocks = "";
+  BSG.locationBoards.filter(b => b.when(c)).forEach(board => {
+    const locs = BSG.locations.filter(l => l.b === board.id && (!l.when || l.when(c)));
+    if (!locs.length) return;
+    blocks += `<section class="loc-board"><h5>${board.name}</h5><ul>${
+      locs.map(l => `<li><b>${l.n}</b>${l.tag ? tagHtml(l.tag) : ""} — ${l.a}</li>`).join("")
+    }</ul></section>`;
+  });
+  return `<div class="locations"><h3>Location Reference</h3>
+      <div class="legend">What each location does — only the boards in your setup. Where the Daybreak overlays change a location, the revised version is shown.</div>
+      <div class="loc-grid">${blocks}</div></div>`;
+}
+
+/* Contextual FAQ — official rulings relevant to this setup. */
+function buildFaq(c) {
+  const items = BSG.faq.filter(f => !f.when || f.when(c));
+  if (!items.length) return "";
+  return `<div class="faq"><h3>FAQ — Rulings for This Setup</h3>
+      <p class="faq-note">Key rulings for this configuration are below. The complete official FFG <b>FAQ &amp; Errata</b> (updated 3-5-15) and a community <b>Unofficial FAQ</b> are fully searchable in <a href="#sec-search">Search the Rulebooks</a> above.</p>
+      <div class="faq-list">${
+        items.map(f => `<details class="faq-item"><summary>${f.q}</summary><div class="faq-a">${f.a}</div></details>`).join("")
+      }</div></div>`;
+}
+
+/* Combined combat reference: merged text (v4.4 p.6 + p.14) + p.14 Attack Table image. */
+function buildCombatChart(c) {
+  const fleet = c.opt("cylonFleet");   // Cylon Fleet board only with the Exodus Cylon Fleet option
+  const secHtml = BSG.combat.sections
+    .filter(s => !s.fleet || fleet)   // hide Cylon-Fleet-only sections when no fleet board
+    .map(s => {
+      const li = i => typeof i === "string"
+        ? `<li>${i}</li>`
+        : i.icon
+          ? `<li class="ic"><img class="li-icon" loading="lazy" src="images/charts/icn/${i.icon}.png" alt=""><span>${i.t}</span></li>`
+          : `<li>${i.t}</li>`;
+      const items = s.items.filter(i => typeof i === "string" || !i.fleet || fleet);  // per-item fleet gating
+      const body = `<ul>${items.map(li).join("")}</ul>`;
+      return `<section class="cc-sec${s.fleet ? " fleet" : ""}">
+        <h5>${s.h}${s.fleet ? ` <span class="cc-flag">Cylon Fleet</span>` : ""}</h5>
+        ${body}
+      </section>`;
+    }).join("");
+  return `<div class="combat-chart">
+      <div class="cc-head">Combat Reference <span class="cc-src">combined from v4.4 p.6 &amp; p.14</span></div>
+      <div class="cc-grid">
+        <div class="cc-text">${secHtml}</div>
+        <figure class="cc-table">
+          <img loading="lazy" src="${BSG.combat.attackTableImg}" alt="Attack Table (D8)">
+          <figcaption>${BSG.combat.attackTableNote}</figcaption>
+        </figure>
+      </div>
+    </div>`;
+}
+
+/* ---- Lightbox for diagrams ----------------------------------------------- */
+function initLightbox() {
+  const lb = el("div", "lightbox");
+  lb.innerHTML = `<img alt="">`;
+  lb.onclick = () => lb.classList.remove("show");
+  document.body.appendChild(lb);
+  document.addEventListener("click", e => {
+    if (e.target.tagName === "IMG" && e.target.closest("figure")) {
+      $("img", lb).src = e.target.src;
+      lb.classList.add("show");
+    }
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") lb.classList.remove("show"); });
+}
+
+/* ---- Boot ---------------------------------------------------------------- */
+/* ---- Shareable / bookmarkable setup (URL hash) --------------------------- */
+function encodeState() {
+  const p = new URLSearchParams();
+  const exps = [...state.expansions].filter(e => e !== "base");
+  if (exps.length) p.set("e", exps.join(","));
+  p.set("p", state.players);
+  if (state.options.size) p.set("m", [...state.options].join(","));
+  if (state.selected) p.set("s", state.selected.split("|")[0]);   // selected objective id
+  return p.toString();
+}
+function syncUrl() {
+  const q = encodeState();
+  history.replaceState(null, "", location.pathname + (q ? "#" + q : ""));
+}
+function decodeState() {
+  const h = location.hash.replace(/^#/, "");
+  if (!h) return false;
+  const p = new URLSearchParams(h);
+  state.expansions = new Set(["base", ...(p.get("e") ? p.get("e").split(",") : [])].filter(Boolean));
+  const pl = parseInt(p.get("p"), 10);
+  if (pl >= 3 && pl <= 7) state.players = pl;
+  state.options = new Set(p.get("m") ? p.get("m").split(",").filter(Boolean) : []);
+  pruneState();
+  const objId = p.get("s");
+  if (objId) {
+    const cfg = enumerateConfigs().find(x => x.objective === objId);
+    if (cfg) state.selected = configKey(cfg);
+  }
+  return true;
+}
+function copyShareLink(btn) {
+  const txt = btn.textContent;
+  navigator.clipboard.writeText(location.href).then(
+    () => { btn.textContent = "✓ Link copied"; setTimeout(() => { btn.textContent = txt; }, 1600); },
+    () => { btn.textContent = "Copy failed"; setTimeout(() => { btn.textContent = txt; }, 1600); }
+  );
+}
+
+/* ---- Teaching script ------------------------------------------------------
+   Assembles BSG.teach for the active configuration into a read-aloud panel,
+   and keeps a plain-text rendering for the copy button. */
+function teachSections(c) {
+  return BSG.teach.sections
+    .filter(s => !s.when || s.when(c))
+    .map(s => ({ h: s.h, html: s.body(c) }))
+    .filter(s => s.html);
+}
+function buildTeachPanel(c) {
+  const secs = teachSections(c);
+  // Plain-text version for the clipboard (kept for copyTeachScript).
+  BSG._teachText = secs.map(s =>
+    s.h.toUpperCase() + "\n" +
+    s.html.replace(/<li>/g, "• ").replace(/<\/p>\s*<p>/g, "\n\n")
+          .replace(/<[^>]+>/g, "").replace(/\n{3,}/g, "\n\n").trim()
+  ).join("\n\n");
+  return `<section class="panel teach-panel" id="teachPanel" hidden aria-label="Teaching script">
+      <div class="teach-head">
+        <h3>📖 Teaching Script — this setup</h3>
+        <button class="share-btn" onclick="copyTeachScript(this)" title="Copy the script as plain text">📋 Copy script</button>
+      </div>
+      <p class="teach-note">${BSG.teach.intro}</p>
+      ${secs.map(s => `<h4>${s.h}</h4>${s.html}`).join("")}
+    </section>`;
+}
+function toggleTeach() {
+  const p = $("#teachPanel");
+  if (!p) return;
+  p.hidden = !p.hidden;
+  if (!p.hidden) p.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+function copyTeachScript(btn) {
+  const txt = btn.textContent;
+  navigator.clipboard.writeText(BSG._teachText || "").then(
+    () => { btn.textContent = "✓ Script copied"; setTimeout(() => { btn.textContent = txt; }, 1600); },
+    () => { btn.textContent = "Copy failed"; setTimeout(() => { btn.textContent = txt; }, 1600); }
+  );
+}
+
+function renderAll() { renderConfigurator(); renderGallery(); renderDetail(); syncUrl(); }
+
+/* Dock the sticky jump-nav just under the (variable-height) topbar, and offset
+   anchored sections so the topbar + nav never cover their heading. Concrete px
+   values are applied directly (more reliable than a CSS var across engines). */
+function syncTopbarHeight() {
+  const bar = document.querySelector(".topbar");
+  if (!bar) return;
+  const h = bar.offsetHeight;
+  document.documentElement.style.setProperty("--topbar-h", h + "px");
+  const nav = document.querySelector(".jump-nav");
+  if (nav) nav.style.top = h + "px";
+  const off = h + (nav ? nav.offsetHeight : 56) + 12;
+  document.querySelectorAll('[id^="sec-"]').forEach(s => { s.style.scrollMarginTop = off + "px"; });
+}
+document.addEventListener("DOMContentLoaded", () => {
+  decodeState(); renderAll(); initLightbox();
+  syncTopbarHeight();
+  window.addEventListener("resize", syncTopbarHeight, { passive: true });
+});

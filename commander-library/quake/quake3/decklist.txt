@@ -1,0 +1,96 @@
+// THE FINAL TIER — Quake III: Arena Eternal Commander deck (100)
+
+// Commander
+1 Xaero, Undefeated
+
+// Creatures (20)
+1 Crash, Training Bot
+1 Grunt, Arena Fodder
+1 Bones, Rattling Champion
+1 Mynx, Quick Blade
+1 Slash, Sparking Skater
+1 Anarki, Cyber Skater
+1 Bitterman, Arena Veteran
+1 Cadaver, Rotting Contender
+1 Daemia, Chained Fury
+1 Orbb, All-Seeing
+1 Phobos, Fear of Mars
+1 Ranger, Arena Legend
+1 Sarge, Drill Instructor
+1 Visor, Faceless Veteran
+1 Doom, Hell Walker
+1 Hunter, Lord of Battle
+1 Major, Squad Leader
+1 Razor, Blade Runner
+1 Uriel, Fallen Judge
+1 Tank Jr., Little Brother
+
+// Equipment (12)
+1 Gauntlet
+1 Grappling Hook   [QL]
+1 Guard   [TA]
+1 Invisibility
+1 Machinegun
+1 Scout   [TA]
+1 Shotgun
+1 Grenade Launcher
+1 Lightning Gun
+1 Railgun
+1 Rocket Launcher
+1 BFG10K
+
+// Other Artifacts (14)
+1 Armor Shard
+1 Ammo Regen   [TA]
+1 Haste
+1 Item Respawn
+1 Scoreboard
+1 Weapons Locker
+1 Yellow Armor
+1 Ammo Depot
+1 Base Obelisk   [TA]
+1 Doubler   [TA]
+1 Frag Counter
+1 Harvester   [TA]
+1 Quad Damage
+1 Kamikaze   [TA]
+
+// Instants & Sorceries (11)
+1 Excellent!
+1 Humiliation
+1 Personal Teleporter
+1 Splash Damage
+1 Out of the Arena
+1 Rail Shot
+1 Telefragged
+1 Invulnerability   [TA]
+1 Sudden Death
+1 The Vadrigar's Bargain
+1 Apocalypse Void
+
+// Enchantments (6)
+1 Regeneration
+1 Capture the Flag   [TA]
+1 Frag Limit
+1 Kill Feed
+1 Killing Spree
+1 Respawn Protocol
+
+// Lands (36)
+1 Arena Gate
+1 Arena of Death
+1 Brimstone Abbey
+1 Fatal Instinct
+1 Grim Dungeons
+1 Hell's Gate
+1 House of Pain
+1 Lost World
+8 Mountain
+7 Plains
+7 Swamp
+1 Temple of Retribution
+1 The Camping Grounds
+1 The Longest Yard
+1 The Place of Many Deaths
+1 The Very End of You
+1 Vertical Vengeance

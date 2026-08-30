@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Discord Sign-in</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding:24px}
+    .muted{opacity:.75}
+  </style>
+</head>
+<body>
+  <h2>Discord Sign-in</h2>
+  <div class="muted">Completing login and redirecting back to the planner…</div>
+
+  <script>
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get("code");
+      const state = params.get("state");
+      const oauthError = params.get("error");
+
+      // User cancelled (or Discord errored): explain instead of silently bouncing.
+      if (oauthError && !code) {
+        document.querySelector(".muted").innerHTML =
+          'Sign-in was cancelled — no worries. <a href="/planner/">Back to the planner</a>.';
+        return;
+      }
+
+      // Enforce same-origin on the stored return URL. new URL(absolute, base)
+      // ignores the base, so the origin must be checked explicitly.
+      const returnToRaw = sessionStorage.getItem("discord_return_to") || "/planner/";
+      let returnTo = new URL(returnToRaw, window.location.origin);
+      if (returnTo.origin !== window.location.origin) {
+        returnTo = new URL("/planner/", window.location.origin);
+      }
+
+      if (code) returnTo.searchParams.set("code", code);
+      if (state) returnTo.searchParams.set("state", state);
+
+      // Hand off to app.js on the planner page
+      window.location.replace(returnTo.toString());
+    })();
+  </script>
+</body>
+</html>

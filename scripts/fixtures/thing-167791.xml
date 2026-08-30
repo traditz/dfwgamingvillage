@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items>
+  <item type="boardgame" id="167791">
+    <name type="primary" sortindex="1" value="Terraforming Mars"/>
+    <link type="boardgameexpansion" id="232331" value="Terraforming Mars: Prelude"/>
+    <link type="boardgameexpansion" id="218127" value="Terraforming Mars: Hellas &amp; Elysium"/>
+    <link type="boardgameexpansion" id="259227" value="Terraforming Mars: Venus Next"/>
+  </item>
+</items>

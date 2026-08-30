@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <title>DFWGV Planner</title>
+  <meta name="title" content="DFWGV Planner" />
+  <meta name="description" content="DFW Gaming Village game day planning. Host tables, join games, and manage waitlists across Discord and the web." />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://dfwgamingvillage.com/planner/" />
+  <meta property="og:title" content="DFWGV Planner" />
+  <meta property="og:description" content="DFW Gaming Village game day planning. Host tables, join games, and manage waitlists across Discord and the web." />
+  <meta property="og:image" content="https://dfwgamingvillage.com/planner/banner2.png" />
+
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:url" content="https://dfwgamingvillage.com/planner/" />
+  <meta property="twitter:title" content="DFWGV Planner" />
+  <meta property="twitter:description" content="DFW Gaming Village game day planning. Host tables, join games, and manage waitlists across Discord and the web." />
+  <meta property="twitter:image" content="https://dfwgamingvillage.com/planner/banner2.png" />
+
+  <meta name="theme-color" content="#d71920" />
+
+  <link rel="icon" href="./dfwgv-icon.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" />
+
+  <link rel="stylesheet" href="./styles.css?v=20260817-p35" />
+</head>
+<body>
+  <a class="skipLink" href="#gamedayList">Skip to game days</a>
+  <header class="topbar">
+    <div class="brand">
+      <a class="logo" href="https://www.dfwgamingvillage.com/" aria-label="Go to DFW Gaming Village home">
+        <img src="./dfwgv-icon.png" alt="DFW Gaming Village logo" />
+      </a>
+      <div>
+        <h1 class="title">DFWGV Planner</h1>
+        <div class="subtitle">Game day planning for DFW Gaming Village</div>
+      </div>
+      <button class="btn" id="btnHostGuide" style="display:none;">📖 Host Guide</button>
+    </div>
+
+    <nav class="topnav" aria-label="Planner navigation">
+      <a href="./">Planner</a>
+      <a href="./events/">Events</a>
+      <a href="./admin/" data-admin-link hidden>Admin</a>
+    </nav>
+
+    <div class="authbar" id="authbar">
+      <div class="auth-status" id="authStatus">Loading auth...</div>
+      <button class="btn btn-primary" id="btnSignIn" style="display:none;">Sign In</button>
+      <button class="btn bellBtn" id="btnInbox" style="display:none;" aria-label="Notifications">
+        🔔<span class="bellBadge" id="inboxBadge" hidden>0</span>
+      </button>
+      <button class="btn" id="btnMyEvents" style="display:none;">📅 My Profile and Events</button>
+      <button class="btn" id="btnNickname" style="display:none;">✏️ Nickname</button>
+      <button class="btn btn-danger" id="btnSignOut" style="display:none;">Sign out</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="plannerHero plannerBanner" aria-label="DFW Gaming Village">
+      <img src="./banner2.png" alt="" fetchpriority="high" />
+    </section>
+
+    <section class="grid">
+      <section class="card">
+        <div class="cardhead">
+          <h2>Upcoming Game Days</h2>
+          <div class="cardActions">
+            <button class="btn" id="btnPastEvents">Past Events</button>
+            <button class="btn" id="btnBecomeHost" style="display:none;">Request Organizer Access</button>
+            <button class="btn btn-primary" id="btnCreateGameDay" style="display:none;">Create Game Day</button>
+          </div>
+        </div>
+        <div class="muted">Choose a game day to see and join its tables.</div>
+        <div id="gamedayList" class="list">
+          <div class="skeletonCard" aria-hidden="true"></div>
+          <div class="skeletonCard" aria-hidden="true"></div>
+        </div>
+        <div id="pastEventsPanel" class="pastEventsPanel" style="display:none;">
+          <div class="pastEventsLabel">Past Events</div>
+          <div id="pastGamedayList" class="list"></div>
+        </div>
+      </section>
+
+      <section class="card" id="gamedayCard" style="display:none;">
+        <div class="cardhead">
+          <h2 id="gamedayTitle">Game Day</h2>
+          <button class="btn" id="btnBack">Back</button>
+        </div>
+
+        <div class="gamedayMeta" id="gamedayMeta"></div>
+
+        <div class="actions">
+          <button class="btn btn-primary" id="btnHostTable">Host a Table</button>
+          <button class="btn" id="btnWantToPlay">Request a Game</button>
+        </div>
+
+        <div class="split">
+          <div>
+            <h3>Hosted Tables</h3>
+            <div class="pager" id="tablePager" style="display:none;">
+              <button class="btn" id="btnPrev">Prev</button>
+              <div class="muted" id="pageInfo"></div>
+              <button class="btn" id="btnNext">Next</button>
+            </div>
+            <div id="tablesList" class="tables"></div>
+            <div class="pager" id="tablePagerBottom" style="display:none;">
+              <button class="btn" id="btnPrevBottom">Prev</button>
+              <div class="muted" id="pageInfoBottom"></div>
+              <button class="btn" id="btnNextBottom">Next</button>
+            </div>
+          </div>
+
+          <div>
+            <h3>Game Requests</h3>
+            <div id="wantsList" class="list"></div>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <div class="modal" id="modal" style="display:none;">
+    <div class="modalCard" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modalHead">
+        <h3 id="modalTitle">Modal</h3>
+        <button class="btn" id="btnModalClose" aria-label="Close modal">Close</button>
+      </div>
+      <div class="modalBody" id="modalBody"></div>
+    </div>
+  </div>
+
+  <script type="module" src="./app.js?v=20260817-p35"></script>
+  <script src="../site-analytics.js?v=20260611-planner"></script>
+</body>
+</html>
