@@ -1,3 +1,0 @@
-.wrangler/
-cloudflare/**/.wrangler/
-scripts/top100-update.log
