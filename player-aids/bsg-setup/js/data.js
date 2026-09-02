@@ -484,7 +484,10 @@ BSG.howToPlay = {
       "Played with the <b>New Caprica Objective card</b> (Pegasus). Mid-game the fleet can be forced down to New Caprica: characters move to the New Caprica board for the occupation phase, which uses its own New Caprica Crisis deck.",
       "Cylons hold humanity prisoner (Occupation Forces, Detention) while humans run a resistance; the Pegasus President & Admiral titles gain occupation-phase abilities. During the phase, players move between New Caprica and Galactica/Pegasus by discarding a Skill card.",
       "Once Galactica returns to orbit and resumes jumping, the Admiral may (as an action) <b>order Galactica to leave</b>, ending the game.",
-      "<b>Humans win</b> if — after destroying civilian ships still on New Caprica and executing humans left there — no resource is at 0. <b>Cylons win</b> if a resource hits 0 or at least 6 Galactica locations are damaged."
+      "<b>Humans win</b> if — after destroying civilian ships still on New Caprica and executing humans left there — no resource is at 0. <b>Cylons win</b> if a resource hits 0 or at least 6 Galactica locations are damaged.",
+      "<b>Occupation-phase rules (Pegasus p.13–14):</b> when the phase begins, all humans (including anyone in the Brig) move to <b>Resistance HQ</b>, Cylons to <b>Occupation Authority</b>, and all surviving civilian ships stack on the <b>Locked Civilian Ships</b> box.",
+      "Until Galactica returns to orbit, anyone who would go to the <b>Resurrection Ship</b> (revealing or executed) goes to the <b>Medical Center</b> instead; anything that would send a character on New Caprica to the <b>Brig</b> sends them to <b>Detention</b> instead (Brig-related abilities and Quorum effects apply to Detention there).",
+      "In <b>Detention</b> you may not use Loyalty-card reveal actions (as in the Brig) — but an Admiral sent to Detention <i>keeps</i> the title. When the President plays a Quorum card while on New Caprica, roll a die: on <b>3 or less</b> the President goes to Detention."
     ]},
     ionianNebula: { items: [
       "Played with the <b>Ionian Nebula Objective card</b> (Exodus). Characters accumulate <b>Trauma tokens</b> (benevolent, antagonistic, or disaster symbols) from locations, Allies and events.",
@@ -565,6 +568,9 @@ BSG.faq = [
   { q: "An unrevealed Cylon receives the Sympathizer card?",
     a: "They follow the card. If it sends them to the Brig they stay an unrevealed Cylon (and may reveal later); otherwise they may pass their other Loyalty cards.",
     when: c => BSG.loyalty.compute(c).sympathizer },
+  { q: "What exactly happens when a human receives the Sympathizer card?",
+    a: "Reveal it immediately. If <b>any</b> resource is in the red zone (half or lower) you go to the <b>Brig</b> and the card counts as ‘You Are Not a Cylon.’ If every resource is above half, you become a <b>revealed Cylon</b> for the rest of the game — but you get <b>no Super Crisis card</b> and may <b>never activate the ‘Cylon Fleet’ location</b> or play Super Crisis cards.",
+    when: c => BSG.loyalty.compute(c).sympathizer && !c.opt("sympatheticCylon") },
   { q: "How many Skill cards does a Cylon Leader draw at the start of the game?",
     a: "Two — they can never exceed their skill set. (Three if they begin the game Infiltrating, like Athena.)",
     when: c => c.opt("cylonLeaders"), tag: "pegasus" },
@@ -608,13 +614,13 @@ BSG.locations = [
   { b: "galactica", n: "Weapons Control", a: "Attack one Cylon ship with Galactica. Roll to hit:<ul class=\"loc-sub rolls\"><li>Raider — hit on <b>3–8</b></li><li>Heavy raider — hit on <b>7–8</b></li><li>Basestar — hit on <b>5–8</b></li></ul>" },
   { b: "galactica", n: "Command", a: "Activate up to two unmanned vipers. Each activation can:<ul class=\"loc-sub\"><li>Launch a viper from a launch zone, or</li><li>Move an unmanned viper to an adjacent area, or</li><li>Fire its weapons (raider <b>3–8</b>, heavy raider <b>7–8</b>, basestar <b>8</b>).</li></ul>" },
   { b: "galactica", n: "Communications", a: "Look at the backs of 2 civilian ships; you may then move them to adjacent area(s). Only you may look." },
-  { b: "galactica", n: "Admiral's Quarters", a: "Choose a character; pass the listed skill check to send them to the Brig. (Brigged characters add only 1 card to checks, and a Cylon there does no damage when revealed.)" },
+  { b: "galactica", n: "Admiral's Quarters", a: "Choose a character; pass a <b>7</b> (Leadership/Tactics) skill check to send them to the Brig. (Brigged characters add only 1 card to checks, and a Cylon there does no damage when revealed.)" },
   { b: "galactica", n: "Research Lab", a: "Draw 1 Engineering or 1 Tactics Skill card." },
   { b: "galactica", n: "Research Lab", a: "Variant: instead, pass a 10 (Purple/Blue) check to gain a Miracle Token.", when: c => c.has("daybreak"), tag: "daybreak" },
   { b: "galactica", n: "Hangar Deck", a: "Launch yourself in a viper, then take 1 more action. You must be here to use a 'Repair' Skill-card action on damaged vipers." },
   { b: "galactica", n: "Armory", a: "Attack a Centurion on the Boarding Party track (destroyed on 7–8)." },
   { b: "galactica", n: "Sickbay", a: "Draw only 1 Skill card at your Receive Skills step. A character can (and should) move out of Sickbay during their Movement step." },
-  { b: "galactica", n: "Brig", a: "You may not move, draw Crisis cards, or add more than 1 card to skill checks. Action: pass the listed skill check to move to any location." },
+  { b: "galactica", n: "Brig", a: "You may not move, draw Crisis cards, or add more than 1 card to skill checks. Action: pass a <b>7</b> (Politics/Tactics) skill check to move to any location on Galactica." },
 
   /* ---- COLONIAL ONE — ORIGINAL (no Mutiny cards) ---- */
   { b: "colonial", n: "Press Room", a: "Draw 2 Politics Skill cards.", when: c => !c.has("daybreak") },
@@ -718,7 +724,7 @@ BSG.teach = {
       const L = BSG.loyalty.compute(c);
       let out = `<p>In a moment everyone gets a facedown <b>Loyalty card</b>: “You Are Not a Cylon” — or “You Are a Cylon.” You never show it. Halfway through the game comes the <b>Sleeper Agent phase</b>: everyone gets a <b>second</b> Loyalty card. So even if you're loyal now, you might wake up a Cylon later — which means <i>nobody</i> stays above suspicion.</p>`;
       const bits = [];
-      if (L.sympathizer) bits.push("this player count also includes the <b>Sympathizer</b> — dealt in the Sleeper phase and revealed immediately: if any resource is already in the red zone they go to the Brig but stay human; if the fleet is healthy they defect and finish the game as a revealed Cylon");
+      if (L.sympathizer) bits.push("this player count also includes the <b>Sympathizer</b> — dealt in the Sleeper phase and revealed immediately: if any resource is already in the red zone they go to the Brig but stay human; if the fleet is healthy they defect and finish the game as a revealed Cylon — though a weaker one: no Super Crisis card and no use of the Cylon Fleet location");
       if (L.mutineer) bits.push("this player count includes the <b>Mutineer</b> — a human who reveals immediately, works against the fleet's leadership with Mutiny cards, but still wins with the humans");
       if (bits.length) out += `<p>One wrinkle: ${bits.join("; ")}.</p>`;
       return out;
