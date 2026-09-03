@@ -1757,6 +1757,7 @@ async function postWeeklyDigest(env) {
     const staged = stagedLive[g.id] || {};
     if (staged.retail) lm.retail = staged.retail;
     if (staged.ebayLive) lm.ebayLive = staged.ebayLive;
+    if (staged.chart && staged.chart.url) lm.chartUrl = staged.chart.url;
     if (ebaySoldStage[g.id]) lm.ebaySold = ebaySoldStage[g.id];
     const gi = stagedIntel[g.id] || {};
     if (gi.chatter && gi.chatter.length) lm.chatter = gi.chatter;
@@ -2213,7 +2214,8 @@ Data guidance:
         description: `${body}${buzzLine}`.slice(0, 1000),
         fields: w ? gameCardFields(w) : [],
         color: VERDICT_COLORS[verdict],
-        thumbnail: (liveMarket[sec.id] && liveMarket[sec.id].thumb) ? { url: liveMarket[sec.id].thumb } : undefined
+        thumbnail: (liveMarket[sec.id] && liveMarket[sec.id].thumb) ? { url: liveMarket[sec.id].thumb } : undefined,
+        image: (liveMarket[sec.id] && liveMarket[sec.id].chartUrl) ? { url: liveMarket[sec.id].chartUrl } : undefined
       });
     }
     // GUARANTEE: every spotlighted game gets a card. If the model omitted
@@ -2231,7 +2233,8 @@ Data guidance:
           : "Today's market snapshot:",
         fields: gameCardFields(w),
         color: VERDICT_COLORS.watch,
-        thumbnail: lm2.thumb ? { url: lm2.thumb } : undefined
+        thumbnail: lm2.thumb ? { url: lm2.thumb } : undefined,
+        image: lm2.chartUrl ? { url: lm2.chartUrl } : undefined
       });
     }
     if (parsed.extra) {
@@ -2584,11 +2587,14 @@ Max 900 characters, bullet lines: real sold prices FIRST — ebaySoldHistory (no
     let posted = false;
     if (env.ALERT_WEBHOOK) {
       const thumbs = await fetchThumbnails(env, [id]);
+      const chartCfg = buildPriceChart(name, gh, watched ? watched.target : null);
+      const chartUrl = chartCfg ? await createChartUrl(chartCfg) : null;
       const VERDICT_COLORS = { buy: 0x2ECC71, wait: 0xE67E22, watch: 0xF5C542 };
       const embed = {
         title: `📊 Price Analysis — ${name}`,
         url: `https://boardgamegeek.com/boardgame/${id}`,
         thumbnail: thumbs[id] ? { url: thumbs[id] } : undefined,
+        image: chartUrl ? { url: chartUrl } : undefined,
         color: structured ? VERDICT_COLORS[verdict] : 0x6EA8FF,
         footer: { text: "DFWGV Librarian · on-demand price analysis" },
         timestamp: new Date().toISOString()
@@ -2943,10 +2949,20 @@ async function checkWatchedPrices(env, ctx, start = 0) {
     }
     // Stage the fresh market snapshot for the digest (which must stay cheap
     // in subrequests, so it assembles from KV instead of re-fetching).
+    // Daily chart refresh: one QuickChart render per game (1 subrequest,
+    // at most once per 20h) so the digest can show the picture for free.
+    const prevStage = liveCache[g.id] || {};
+    let chart = prevStage.chart || null;
+    if (!chart || !chart.at || Date.now() - chart.at > 20 * 3600e3) {
+      const cfg = buildPriceChart(g.name, gh, g.target);
+      const url = cfg ? await createChartUrl(cfg) : null;
+      if (url) chart = { url, at: Date.now() };
+    }
     liveCache[g.id] = {
       t: Date.now(),
       retail: snap.r ? { usInStockOffers: snap.rCount, lowItem: snap.r, lowDelivered: snap.rDeliv || null, storeListUrl: snap.rUrl } : null,
-      ebayLive: snap.e ? { liveListings: snap.eCount, avgAsk: snap.eAvg, cheapest: { price: snap.e, condition: snap.eCond, url: snap.eLink } } : null
+      ebayLive: snap.e ? { liveListings: snap.eCount, avgAsk: snap.eAvg, cheapest: { price: snap.e, condition: snap.eCond, url: snap.eLink } } : null,
+      ...(chart ? { chart } : {})
     };
     const dates = Object.keys(gh).filter((d) => /^\d{4}-/.test(d)).sort();
     for (const d of dates.slice(0, Math.max(0, dates.length - PRICE_HISTORY_DAYS))) delete gh[d];
@@ -2982,6 +2998,50 @@ async function handleCronPrices(request, env, ctx, cors) {
   const start = parseInt(new URL(request.url).searchParams.get("start") || "0", 10) || 0;
   ctx.waitUntil(checkWatchedPrices(env, ctx, start).catch(() => { /* next sweep retries */ }));
   return jsonResponse({ ok: true, started: start }, 200, cors);
+}
+
+/** Chart.js config (QuickChart JS-literal form) for the last CHART_DAYS of a
+ *  game's price history: retail vs pre-owned lines, eBay when present, and the
+ *  admin's target as a dashed line. Returns null with too little history. */
+const CHART_DAYS = 60;
+function buildPriceChart(name, gh, target) {
+  const dates = Object.keys(gh || {}).filter((d) => /^\d{4}-/.test(d)).sort().slice(-CHART_DAYS);
+  const pick = (k) => dates.map((d) => (gh[d] && gh[d][k] != null ? Math.round(gh[d][k] * 100) / 100 : null));
+  const r = pick("r"), m = pick("m"), e = pick("e");
+  const points = dates.filter((d, i) => r[i] != null || m[i] != null || e[i] != null).length;
+  if (points < 3) return null;
+  const ds = (label, data, color, dash) =>
+    `{label:${JSON.stringify(label)},data:${JSON.stringify(data)},borderColor:${JSON.stringify(color)},fill:false,pointRadius:0,borderWidth:2,spanGaps:true${dash ? ",borderDash:[6,4]" : ""}}`;
+  const has = (arr) => arr.some((v) => v != null);
+  const sets = [
+    ds(has(r) ? "Retail (new)" : "Retail (new) — no US stock found", r, "#6EA8FF"),
+    ds(has(m) ? "Pre-owned (BGG)" : "Pre-owned (BGG) — no listings", m, "#35B8A6")
+  ];
+  if (has(e)) sets.push(ds("eBay (live)", e, "#F5C542"));
+  if (target > 0) sets.push(ds("Target", dates.map(() => target), "#E67E22", true));
+  // Pad the y-axis so a flat line doesn't become a $149.2/$149.4 ruler.
+  const vals = r.concat(m, e, target > 0 ? [target] : []).filter((v) => v != null);
+  const yMin = Math.max(0, Math.floor(Math.min(...vals) * 0.85));
+  const yMax = Math.ceil(Math.max(...vals) * 1.15);
+  const labels = JSON.stringify(dates.map((d) => `${parseInt(d.slice(5, 7), 10)}/${parseInt(d.slice(8, 10), 10)}`));
+  const title = JSON.stringify(`${name} — ${dates.length}-day price history`);
+  return `{type:"line",data:{labels:${labels},datasets:[${sets.join(",")}]},options:{title:{display:true,text:${title},fontColor:"#ddd"},legend:{labels:{fontColor:"#ddd"}},scales:{xAxes:[{ticks:{fontColor:"#aaa",maxTicksLimit:8},gridLines:{color:"#3a3c42"}}],yAxes:[{ticks:{fontColor:"#aaa",precision:0,suggestedMin:${yMin},suggestedMax:${yMax},callback:function(v){return "$"+v}},gridLines:{color:"#3a3c42"}}]}}}`;
+}
+
+/** Render a chart config to a short QuickChart URL (free, keyless). Discord
+ *  fetches the PNG itself when it displays the embed, so this is the only
+ *  subrequest the chart ever costs us. */
+async function createChartUrl(config) {
+  try {
+    const res = await fetch("https://quickchart.io/chart/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ version: "2", width: 700, height: 260, backgroundColor: "#2b2d31", format: "png", chart: config })
+    });
+    if (!res.ok) return null;
+    const j = await res.json();
+    return j && j.success && j.url ? j.url : null;
+  } catch { return null; }
 }
 
 /** Box art thumbnails for a set of BGG ids — one batched thing call. */

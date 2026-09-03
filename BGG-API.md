@@ -72,6 +72,14 @@ all admin endpoints are token-gated with the same admin token as the rest.
   (deliberately terse on quiet days), and posts it via `ALERT_WEBHOOK`.
   Manual trigger: `POST /api/digest` (the dashboard's "Post AI digest now"
   button); `GET /api/digest` returns the last digest.
+  Every game card carries a **60-day price-history chart** (retail vs
+  pre-owned lines, eBay when keyed, dashed target line). Charts are rendered
+  by QuickChart (free, keyless): the 6-hourly price job builds a Chart.js
+  config from the game's stored history and posts it once per ~20h to
+  `quickchart.io/chart/create`, storing the short render URL on the game's
+  `live-market-cache` entry; the digest and the on-demand Analyze embed just
+  attach that URL as the embed image, so the picture costs the digest zero
+  subrequests and scales to 100+ games. Discord fetches the PNG itself.
 - **Publisher donation letters** — `POST /api/draft-letter`: the dashboard
   sends the game, its publisher, and which of that publisher's titles the
   library owns (with play counts); Claude drafts a tailored 220–320-word
