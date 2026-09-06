@@ -89,6 +89,8 @@ a:hover { text-decoration: underline; }
   font-size: 22px; text-decoration: none;
 }
 .title { margin: 0; font-size: 18px; font-weight: 800; letter-spacing: -.01em; }
+.titleLink { color: var(--text); }
+.titleLink:hover { text-decoration: none; color: #f87171; }
 .subtitle { color: var(--muted); font-size: 12.5px; }
 
 .topnav { display: flex; gap: 6px; justify-content: center; }
