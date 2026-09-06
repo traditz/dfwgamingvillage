@@ -1,0 +1,53 @@
+/* PATH: site/admin/admin.css — layout for the owner dashboard, on top of ../styles.css */
+
+.card {
+  padding: 18px 20px; border: 1px solid var(--line); border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, var(--card), var(--panel)); box-shadow: var(--shadow);
+}
+.card h2 { margin: 0; font-size: 18px; font-weight: 800; letter-spacing: -.01em; }
+.card h3 { margin: 0 0 6px; font-size: 15px; font-weight: 800; }
+.cardhead { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; }
+
+.adminGrid { display: grid; grid-template-columns: minmax(280px, 1fr) minmax(0, 1.4fr); gap: 16px; align-items: start; }
+.fullWidth { grid-column: 1 / -1; }
+
+.adminRows { display: flex; flex-direction: column; gap: 6px; max-height: 70vh; overflow: auto; }
+.adminRow {
+  display: block; width: 100%; text-align: left; padding: 10px 12px; cursor: pointer;
+  border: 1px solid var(--line); border-radius: var(--radius-sm); background: rgba(255, 255, 255, .03);
+  color: var(--text); font: inherit;
+}
+.adminRow:hover { border-color: rgba(255, 255, 255, .3); }
+.adminRow.is-selected { border-color: var(--accent-2); background: rgba(220, 38, 38, .1); }
+.adminRow.is-past { opacity: .6; }
+.adminRowTitle { font-weight: 700; }
+.adminRowMeta { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+.adminRowBadge {
+  display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: var(--radius-pill);
+  font-size: 11px; font-weight: 700; background: rgba(34, 197, 94, .16); color: #7ee2a3; vertical-align: middle;
+}
+
+.adminForm { display: grid; gap: 14px; }
+
+.discordBlock { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
+.cmdRow { display: flex; gap: 8px; align-items: center; margin: 8px 0 12px; }
+.cmd {
+  flex: 1; min-width: 0; padding: 10px 12px; border-radius: var(--radius-sm);
+  background: var(--bg-2); border: 1px solid var(--line-strong); color: var(--gold);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13.5px;
+  overflow-wrap: anywhere; user-select: all;
+}
+
+.bindingList { display: flex; flex-direction: column; gap: 8px; }
+.bindingRow {
+  display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px;
+  padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: rgba(255, 255, 255, .03);
+  font-size: 13.5px;
+}
+.bindingRow .muted { font-size: 12.5px; }
+.bindingRow.is-orphan { border-color: rgba(245, 158, 11, .5); }
+.bindingEmpty { color: var(--muted); font-size: 13.5px; }
+
+@media (max-width: 900px) {
+  .adminGrid { grid-template-columns: 1fr; }
+}

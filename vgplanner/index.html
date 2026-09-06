@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <title>DFWGV Video Game Planner</title>
+  <meta name="description" content="DFW Gaming Village video game nights. Organizers create events, hosts pick a PC game and launcher inside them, and players grab a slot." />
+  <meta name="theme-color" content="#d71920" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" />
+
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <a class="skipLink" href="#view">Skip to content</a>
+
+  <header class="topbar">
+    <div class="brand">
+      <a class="logo" href="https://www.dfwgamingvillage.com/" aria-label="Go to DFW Gaming Village home">🎮</a>
+      <div>
+        <h1 class="title">DFWGV Video Game Planner</h1>
+        <div class="subtitle">PC game nights for DFW Gaming Village</div>
+      </div>
+    </div>
+
+    <nav class="topnav" aria-label="Planner navigation">
+      <a href="./" data-nav="events" aria-current="page">Events</a>
+      <a href="/planner/">Board games</a>
+      <a href="./admin/" data-admin-link hidden>Admin</a>
+    </nav>
+
+    <div class="authbar">
+      <span class="authStatus" id="authStatus">Loading…</span>
+      <button class="btn btn-primary btn-small" id="btnSignIn" hidden>Sign in</button>
+      <button class="btn btn-small" id="btnSignOut" hidden>Sign out</button>
+      <span class="statusPill" id="proxyStatus" title="API status">Checking API…</span>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="notice" id="storageNotice" hidden></div>
+    <div class="pageStatus" id="pageStatus" hidden></div>
+    <div id="view" aria-live="polite"></div>
+  </main>
+
+  <div id="modalRoot"></div>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

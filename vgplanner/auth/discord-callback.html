@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Discord Sign-in</title>
+  <style>
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; padding: 24px; }
+    .muted { opacity: .75; }
+  </style>
+</head>
+<body>
+  <h2>Discord Sign-in</h2>
+  <div class="muted">Completing login and redirecting back to the planner…</div>
+
+  <script>
+    // Mirrors the board-game planner's callback: Discord redirects here, and we
+    // hand the code back to whichever planner page started the flow. Keeping the
+    // token exchange in the app (not here) means this page holds no secrets.
+    (function () {
+      // Published under /vgplanner/, but served from the root in local dev.
+      var HOME = location.pathname.indexOf("/vgplanner/") === 0 ? "/vgplanner/" : "/";
+      var params = new URLSearchParams(window.location.search);
+      var code = params.get("code");
+      var state = params.get("state");
+      var oauthError = params.get("error");
+
+      if (oauthError && !code) {
+        document.querySelector(".muted").innerHTML =
+          'Sign-in was cancelled — no worries. <a href="' + HOME + '">Back to the planner</a>.';
+        return;
+      }
+
+      // Enforce same-origin on the stored return URL. new URL(absolute, base)
+      // ignores the base, so the origin has to be checked explicitly — otherwise
+      // a poisoned sessionStorage value could bounce the code off-site.
+      var raw = sessionStorage.getItem("discord_return_to") || HOME;
+      var returnTo = new URL(raw, window.location.origin);
+      if (returnTo.origin !== window.location.origin) {
+        returnTo = new URL(HOME, window.location.origin);
+      }
+
+      if (code) returnTo.searchParams.set("code", code);
+      if (state) returnTo.searchParams.set("state", state);
+
+      window.location.replace(returnTo.toString());
+    })();
+  </script>
+</body>
+</html>
