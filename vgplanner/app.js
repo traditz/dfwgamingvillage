@@ -209,12 +209,12 @@ function openCreateEventModal() {
       <div class="modalError" id="modalError" hidden></div>
       <div class="modalFoot">
         <span></span>
-        <button type="button" class="btn btn-primary" id="btnCreateEvent">Create event</button>
+        <button type="button" class="btn btn-primary" id="btnCreateEventSubmit">Create event</button>
       </div>
     </div>`);
   qs("#evTitle", m.el).focus();
 
-  qs("#btnCreateEvent", m.el).addEventListener("click", async () => {
+  qs("#btnCreateEventSubmit", m.el).addEventListener("click", async () => {
     const title = qs("#evTitle", m.el).value.trim();
     if (title.length < 3) { setModalStatus(m, "Give the event a title.", true); return; }
     const startsAt = fromDatetimeLocalValue(qs("#evStart", m.el).value);
