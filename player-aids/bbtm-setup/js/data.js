@@ -598,3 +598,45 @@ BBTM.reference = {
     ]
   }
 };
+
+/* ---- TEACHING SCRIPT (read aloud, ~5 min; every claim checked against the
+   BBTM rulebook, Sudden Death, Foul Play and the FAQ — see the setup citations) -- */
+BBTM.teach = {
+  intro: "Read this aloud — about five minutes. No peeking at the Highlight Reel.",
+  sections: [
+    { h: "The pitch — and how you win", body: (c) => {
+      const len = c.season === "twoPlayer" ? (c.has("sudden") ? "five weeks (the two-manager Sudden Death schedule)" : "four weeks (the two-manager schedule)")
+                : c.season === "abbrev" ? "an abbreviated four weeks"
+                : c.season === "extended" ? "an extended six weeks" : "five weeks";
+      return `
+<p>We are Blood Bowl <b>team managers</b>, and nothing on this table matters except <b>fans</b>. The season runs ${len}, capped by the Blood Bowl tournament itself — when the dust settles, the manager with the most fans lifts the trophy. (Tied? The most improved roster wins.) Touchdowns are nice. Ratings are everything.</p>`; } },
+
+    { h: "The week — one round of the season", body: (c) => `
+<p>Each week: flip the <b>Spike! Magazine</b> card — a <b>headline</b> that bends this week's rules, or a <b>tournament</b> with a big pot — then roll the <b>Highlight Reel</b>: one matchup card per manager, each printing what each side takes home and a central prize for the winner. Then the heart of it, the <b>Matchup phase</b>: we take turns committing <b>one player card at a time</b> from hand to a side of a highlight (or to the tournament), resolving his ability and skills as he lands. Only two teams can meet at a highlight, so claiming a side is claiming a fight. When you're done — or done for — you <b>pass</b>, and can bin the cards you don't want to keep. Once everyone has passed, the <b>Scoreboard phase</b> pays out: at each matchup compare total <b>Star Power</b> — each side keeps its own zone's payout, and the winner also grabs the central pot. Then draw back up to six and do it again, one week older.</p>` },
+
+    { h: "Star Power & skills — the actual football", body: (c) => `
+<p>Every player card has <b>Star Power</b> — his weight on the scale — and <b>skills</b> that fire left-to-right when he's committed. <b>Passing</b> is the ball skill: take the ball from midfield, or knock it out of an opponent's hands — the ball is worth <b>two Star Power</b> and breaks ties. <b>Sprinting</b> digs for talent: draw a card, ditch a card. <b>Tackling</b> tries to knock an opposing player <b>down</b> — a downed player's Star Power drops to his weaker number and he drops the ball — but tackle a bigger man and the dice may put <i>you</i> on the turf instead. <b>Cheating</b> is mandatory: slide a facedown token onto that player — when it flips it might be extra Star Power, might be fans, might be the ref's whistle and an <b>ejection</b>. Committing second means committing informed: going last at a highlight is power.</p>` },
+
+    { h: "Payouts — how a team gets better", body: (c) => `
+<p>Matchups pay <b>fans</b> — but also <b>Star Players</b> (legends who join your deck), <b>Team Upgrades</b> and <b>Staff Upgrades</b> that thicken your roster and bend the rules; everything you win is revealed together at the end of the week. The engine matters more than any single week: early weeks buy the machine, late weeks cash it in. On tournament weeks any number of managers can pile onto the tournament — winner and runner-up get paid, everyone else at it takes the <b>LOSE!</b> payout.</p>` },
+
+    { h: "Sudden Death teams", when: (c) => c.has("sudden"), body: (c) => `
+<p>The <b>Dark Sorcery Syndicate</b> is in the league: undead and sorcerous teams with <b>Regeneration</b> (a downed player rolls to get back on his feet), <b>downed skills</b> that fire the moment a player hits the turf, facedown <b>Contracts</b> that only score at the end of the season, and the Black Fangs' Blood tokens.${c.opt && c.opt("enchanted") ? " We're also playing with <b>Enchanted Balls</b> — every ball carries its own printed magic, so possession is worth even more than usual." : ""}</p>` },
+
+    { h: "Foul Play teams", when: (c) => c.has("foul"), body: (c) => `
+<p>The <b>Putrid Players' Guild</b> is in the league: Nurgle's own, whose <b>Disease</b> tokens sap the Star Power of <i>anyone</i> who steps into a diseased matchup — yours included — plus the <b>Fouling</b> skill (a peek at, and maybe a bin for, a card from an opponent's hand) and <b>Penalties</b>: facedown cards you're forced to draw and resolve at the end of the week. A fifth manager can also join the season.${c.opt && c.opt("corruptRef") ? " The <b>Corrupt Ref</b> is roaming — everyone who commits where he stands gets a faceup cheating token, a team without one there eats a penalty, and then he wanders on." : ""}${c.opt && c.opt("stadiums") ? " And every highlight is played in a <b>Stadium</b> with its own house rule — a banned skill, a player limit, or a Star Power band — and bonus payouts. Read the venue before you commit." : ""}</p>` },
+
+    { h: "Legendary leagues", when: (c) => c.has("legendary"), body: () => `
+<p>We're using the <b>Legendary</b> fan expansion: the teams are reorganised into themed leagues, and each team has its own signature mechanic — Veteran upgrades, Food tokens, Warpstone, Moon phases, Mutations and more. Your team's page in the Legendary rulebook (and the Teams tab on this site) explains yours. Read it with your team.</p>` },
+
+    { h: "Table rules in play", when: (c) => c.opt && (c.opt("noSalary") || c.opt("scheduling")), body: (c) => {
+      const bits = [];
+      if (c.opt("noSalary")) bits.push("<b>No Salary Cap</b> — every Staff Upgrade, premium ones included, is in the deck");
+      if (c.opt("scheduling")) bits.push("<b>Scheduling Limitations</b> — on tournament weeks we roll one fewer highlight, so every matchup is a knife fight");
+      return `<p>Also agreed: ${bits.join("; ")}.</p>`;
+    }},
+
+    { h: "Don't worry about these yet", body: (c) => `
+<p>Individual team gimmicks come alive on their own cards — read yours before we start. Opening advice: don't fight every highlight; <b>concede the small pots to dominate the big ones</b>, and remember a cheating token you can't read is exactly as scary as your opponent wants it to be.</p>` }
+  ]
+};
