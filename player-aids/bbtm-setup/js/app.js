@@ -137,7 +137,7 @@ function renderSetup() {
 /* ---- Reference ----------------------------------------------------------- */
 function renderReference() {
   const R = BBTM.reference;
-  const order = [R.rounds, R.skills, R.tackle, R.winner, R.mechanics, R.abilities, R.winning, R.faq];
+  const order = [R.rounds, R.skills, R.tackle, R.cheating, R.winner, R.mechanics, R.abilities, R.extra, R.winning, R.faq];
 
   $("#refNav").innerHTML = order.map(s => `<a href="#${s.id}" class="jn">${s.title}</a>`).join("");
 
@@ -169,6 +169,13 @@ function renderReference() {
       <div><h4>Player States</h4><ul class="def-list">${R.tackle.states.map(r => `<li><span class="dk">${esc(r.k)}</span><span class="dt">${esc(r.t)}</span></li>`).join("")}</ul></div>
     </div></section>`;
 
+  // Cheating tokens — reveal order + pool composition
+  h += `<section class="ref-card" id="${R.cheating.id}"><h2>${R.cheating.title}</h2><p class="ref-intro">${esc(R.cheating.intro)}</p>
+    <ul class="def-list">${R.cheating.order.map(o => `<li><span class="dk">${esc(o.k)}</span><span class="dt">${esc(o.t)}</span></li>`).join("")}</ul>
+    <h4>Token pool</h4><ul class="def-list">${R.cheating.pool.map(p =>
+      `<li>${srcTag(p.src)}<span class="dk">${esc(p.h)}</span><span class="dt">${esc(p.t)}</span></li>`).join("")}</ul>
+    <ul class="bullet" style="margin-top:12px">${R.cheating.notes.map(n => `<li>${esc(n)}</li>`).join("")}</ul></section>`;
+
   // Winner & payouts
   h += `<section class="ref-card" id="${R.winner.id}"><h2>${R.winner.title}</h2><p class="ref-intro">${R.winner.intro}</p>
     <ul class="bullet">${R.winner.bullets.map(b => `<li>${esc(b)}</li>`).join("")}</ul>
@@ -187,6 +194,10 @@ function renderReference() {
   // Abilities
   h += `<section class="ref-card" id="${R.abilities.id}"><h2>${R.abilities.title}</h2><p class="ref-intro">${R.abilities.intro}</p>
     <ul class="def-list cols">${R.abilities.items.map(a => `<li><span class="dk">${esc(a[0])}</span><span class="dt">${esc(a[1])}</span></li>`).join("")}</ul></section>`;
+
+  // Additional rulings
+  h += `<section class="ref-card" id="${R.extra.id}"><h2>${R.extra.title}</h2><p class="ref-intro">${esc(R.extra.intro)}</p>
+    <ul class="def-list">${R.extra.items.map(x => `<li><span class="dk">${esc(x.h)}</span><span class="dt">${esc(x.t)}</span></li>`).join("")}</ul></section>`;
 
   // Winning
   h += `<section class="ref-card" id="${R.winning.id}"><h2>${R.winning.title}</h2><p class="ref-intro">${R.winning.intro}</p>
@@ -280,7 +291,7 @@ function teamCard(t) {
 }
 
 /* ---- Tabs & boot --------------------------------------------------------- */
-function renderAll() { renderConfig(); renderSetup(); renderTeach(); }
+function renderAll() { renderConfig(); renderSetup(); }
 
 function switchTab(tab) {
   state.tab = tab;
@@ -297,37 +308,3 @@ document.addEventListener("DOMContentLoaded", () => {
   const ts = $("#teamSearch");
   ts.addEventListener("input", () => { state.teamQuery = ts.value.trim(); renderTeams(); });
 });
-
-
-/* ---- Teaching script panel ------------------------------------------------ */
-function renderTeach() {
-  const box = document.getElementById("teach");
-  if (!box || !BBTM.teach) return;
-  const c = ctx();
-  const secs = BBTM.teach.sections
-    .filter(s => !s.when || s.when(c))
-    .map(s => ({ h: (typeof s.h === "function" ? s.h(c) : s.h), html: (typeof s.body === "function" ? s.body(c) : s.body) }))
-    .filter(s => s.html);
-  BBTM._teachText = secs.map(s =>
-    s.h.toUpperCase() + "\n" +
-    s.html.replace(/<li>/g, "\u2022 ").replace(/<\/p>\s*<p>/g, "\n\n")
-          .replace(/<[^>]+>/g, "").replace(/\n{3,}/g, "\n\n").trim()
-  ).join("\n\n");
-  box.innerHTML = "<div class='teach-top'><h3>\uD83D\uDCD6 Teaching Script \u2014 this setup</h3><button type='button' class='teach-copy' id='teachCopy'>\uD83D\uDCCB Copy script</button></div>" +
-    "<p class='teach-note'>" + BBTM.teach.intro + "</p>" +
-    secs.map(s => "<h4>" + s.h + "</h4>" + s.html).join("");
-  document.getElementById("teachCopy").addEventListener("click", () => {
-    const b = document.getElementById("teachCopy"), t = b.textContent;
-    navigator.clipboard.writeText(BBTM._teachText || "").then(
-      () => { b.textContent = "\u2713 Script copied"; setTimeout(() => { b.textContent = t; }, 1600); },
-      () => { b.textContent = "Copy failed"; setTimeout(() => { b.textContent = t; }, 1600); });
-  });
-}
-(function () {
-  const b = document.getElementById("teachBtn");
-  if (b) b.addEventListener("click", () => {
-    const p = document.getElementById("teach");
-    p.hidden = !p.hidden;
-    if (!p.hidden) p.scrollIntoView({ behavior: "smooth", block: "start" });
-  });
-})();

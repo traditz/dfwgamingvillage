@@ -328,7 +328,7 @@ BBTM.setup = [
         if (c.has("sudden")) return "Two managers: shuffle together all Tournament cards from the Sudden Death expansion to form the deck — the game lasts 5 rounds. (Remove all Headlines.)"+gtl;
         return "Two managers: remove all Headline cards. Set aside “The Blood Bowl”, shuffle the other three Tournament cards, then place “The Blood Bowl” on the bottom — a 2-manager game lasts 4 rounds."+gtl;
       }
-      if (c.season==="abbrev") return "Abbreviated season (4 weeks): set aside “The Blood Bowl”. Draw 1 Tournament card and 2 Headline cards, shuffle them, place “The Blood Bowl” on the bottom.";
+      if (c.season==="abbrev") return "Abbreviated season (4 weeks): set aside “The Blood Bowl”. Draw 1 Tournament card and 2 Headline cards, shuffle them, place “The Blood Bowl” on the bottom — a 4-card deck, 4 weeks. Note: the rulebook’s “two Headline cards (instead of three)” is a misprint; the standard deck already uses two Headlines, so the abbreviated season simply drops one Tournament.";
       if (c.season==="extended") return "Extended season (6 weeks): set aside “The Blood Bowl”. Draw 2 Tournament cards and 3 Headline cards, shuffle them, place “The Blood Bowl” on the bottom.";
       return "Standard season (5 weeks): set aside “The Blood Bowl”. Draw 2 of the 3 remaining Tournament cards and 2 of the Headline cards, shuffle the four together, then place “The Blood Bowl” facedown on the bottom. Place the deck at the opposite end from the Highlight deck.";
     },
@@ -387,7 +387,7 @@ BBTM.setup = [
   { order:8.1, ph:2, src:"core", page:"Rulebook p.17",
     when:c=>c.season==="abbrev",
     t:"Distribute starting improvements (Abbreviated season)",
-    d:"Each manager: draw 4 Star Players from their subdivision and draft 2; take 1 Team Upgrade; draw 3 Staff Upgrades and keep 1. Place these in the improvement pile, then reveal them as usual." },
+    d:"Each manager: draw 4 Star Players from their subdivision’s deck and draft 2 (the rest go to the bottom of that deck); take 1 Team Upgrade; draw 3 Staff Upgrades and keep 1 (the rest go to the bottom). Place these in the improvement pile, then reveal them in the normal order — Staff Upgrades, Team Upgrades, Freebooters, other Star Players. Freebooters are shuffled into your Team deck; the other Star Players go on top of it, so they will be in your opening hand when you replenish to six in the first Maintenance phase." },
 
   { order:8.2, ph:2, src:"sudden", page:"Sudden Death p.4",
     when:c=>c.opt("enchanted"),
@@ -411,7 +411,7 @@ BBTM.setup = [
 BBTM.setupCallouts = [
   { when:c=>c.p===2, src:"core",
     t:"Two-manager game",
-    d:"When rolling the Highlights, reveal four; after two highlights each have a committed player, return the other two to the box. There is no runner-up payout — the winner takes the trophy payout and the loser takes the LOSE! payout." },
+    d:"When rolling the Highlights, reveal four; after two highlights each have a committed player, return the other two to the box. There is no runner-up payout — the winner takes the trophy payout and the loser takes the LOSE! payout. A team alone at a tournament collects the winner’s and the LOSE! payouts (not the runner-up’s)." },
   { when:c=>c.opt("scheduling"), src:"core",
     t:"Scheduling Limitations (optional)",
     d:"When rolling the Highlight reel, reveal only as many highlights as needed for the total number of matchups (highlights + any tournament) to equal the number of managers." },
@@ -485,6 +485,25 @@ BBTM.reference = {
     ]
   },
 
+  cheating: {
+    id:"sec-cheat", title:"Cheating Tokens",
+    intro:"Cheating tokens are drawn blind from the pool and stay facedown on the player until the Scoreboard phase. When a matchup is resolved, the first manager flips every assigned token at that matchup and applies them in this order:",
+    order:[
+      { k:"1 · Ejection (whistle)", t:"The ref caught him: remove the player from the matchup to his manager’s discard pile and discard his other cheating tokens without resolving them. An ejected ball carrier drops the ball to midfield." },
+      { k:"2 · Fan Frenzy (flag)", t:"For each flag icon, that player’s manager immediately gains one fan." },
+      { k:"3 · Star Power (star)", t:"Star-Power tokens are cumulative and count toward the team’s total in the Determine Winner step." }
+    ],
+    pool:[
+      { src:"core", h:"Base pool (30 tokens)", t:"6× whistle (ejection) · 4× ★0 · 9× ★+1 · 4× ★+2 · 2× ★+3 · 4× one flag (+1 fan) · 1× two flags (+2 fans)." },
+      { src:"foul", h:"Foul Play adds 8", t:"4× Penalty (the player’s manager takes a penalty, applied at the end of the Reveal step) · 2× ★+1 · 1× ★+2 · 1× ★+3." }
+    ],
+    notes:[
+      "No one may look at a facedown token unless a card ability allows it.",
+      "Downed players keep their assigned tokens; injured or ejected players discard theirs.",
+      "“Discarded” tokens are set aside — they only return to the pool when the first manager restocks it in the next Maintenance phase."
+    ]
+  },
+
   winner: {
     id:"sec-winner", title:"Determine the Winner & Payouts",
     intro:"Total each team’s Star Power at the matchup: standing players use standing SP, downed players use downed SP, cheating tokens add their SP, and the ball carrier’s team gets +2.",
@@ -495,7 +514,8 @@ BBTM.reference = {
       "Highlight: each manager collects their team-zone payout; the winner also takes the central payout.",
       "Tournament: winner takes the trophy payout, runner-up the ribbon payout, everyone else with a player there takes the LOSE! payout. (At tournaments both winner and runner-up count as ‘winners’.)",
       "Alone at a matchup → you collect every payout shown on the card.",
-      "Fans are gained immediately; cards go facedown into your improvement pile."
+      "Fans are gained immediately; cards go facedown into your improvement pile.",
+      "Sudden Death / Foul Play clarification: Scoreboard-phase abilities that score fans for winning or losing a matchup are resolved after the Determine Winner step."
     ],
     icons:[
       { k:"Fan", icon:"fan", t:"Gain one fan per icon (turn the scoreboard dials)." },
@@ -543,6 +563,19 @@ BBTM.reference = {
     ]
   },
 
+  extra: {
+    id:"sec-extra", title:"Additional Rulings",
+    intro:"The rulebook’s ‘Additional Rules’ — the ones that come up mid-game.",
+    items:[
+      { h:"Ability timing", t:"Abilities only interact with players at the same matchup unless they say otherwise. If two abilities occur in the same phase, resolve them in turn order starting with the manager holding the golden coin." },
+      { h:"Contradicting responses", t:"If two Response abilities contradict each other, the last one used takes effect and the earlier one is ignored." },
+      { h:"Upgrade abilities", t:"Matchup Actions are used on your turn; Responses when their trigger occurs; Scoreboard-phase abilities during the Scoreboard phase; End-of-Game abilities after the final week. An upgrade you must exhaust is rotated 90°, usable once per round, and refreshes in Maintenance." },
+      { h:"Winning & losing", t:"‘Win’ / ‘lose’ abilities need you to have committed at least one player to that matchup. At a tournament the winner and runner-up both count as winners; LOSE! collectors are losers. A manager alone at a matchup is its winner." },
+      { h:"Moving a committed player", t:"A player relocated by an ability is ‘moved’, not ‘committed’, so he can’t use his skills at the new matchup. He may go to any matchup with an open team zone, or one where a friendly player already is. If the ball carrier is moved, give the ball to a friendly player of your choice at the original matchup." },
+      { h:"Fans", t:"The scoreboard’s left dial is tens and the right is ones; your fan total can never drop below 00." }
+    ]
+  },
+
   winning: {
     id:"sec-win", title:"Winning the Season",
     intro:"The season culminates in The Blood Bowl tournament and ends after the final round. After ‘End of Game’ abilities (and revealing Contract tokens, if any), the manager with the most fans wins the “Manager of the Year” award.",
@@ -564,42 +597,4 @@ BBTM.reference = {
       { q:"Collecting a payout I can’t fulfil?", a:"If no components of that type are available, you earn nothing for that payout." }
     ]
   }
-};
-
-/* ---- TEACHING SCRIPT (read aloud, ~5 min; content per the BBTM rulebook and
-   expansion rulebooks — see the setup citations above) ----------------------- */
-BBTM.teach = {
-  intro: "Read this aloud — about five minutes. No peeking at the Highlight Reel.",
-  sections: [
-    { h: "The pitch — and how you win", body: (c) => `
-<p>We are Blood Bowl <b>team managers</b>, and nothing on this table matters except <b>fans</b>. The season runs ${c.season === "twoPlayer" ? "its two-manager schedule" : c.season === "abbrev" ? "an abbreviated four weeks" : "five weeks"}, capped by the Blood Bowl tournament itself — when the dust settles, the manager with the most fans lifts the trophy. Touchdowns are nice. Ratings are everything.</p>` },
-
-    { h: "The week — one round of the season", body: (c) => `
-<p>Each week: flip the <b>Highlight Reel</b> — a row of matchup cards, each showing what the winner and loser take home. Then the heart of it, the <b>Matchup phase</b>: we take turns committing <b>one player card at a time</b> from hand to either side of a highlight, resolving that player's abilities as he lands. When everyone's spent their hand, the <b>Scoreboard phase</b> pays out: compare total <b>Star Power</b> at each highlight — winner takes the top payout, loser takes the scraps. Then draw back up and do it again, one week older.</p>` },
-
-    { h: "Star Power & skills — the actual football", body: (c) => `
-<p>Every player card has <b>Star Power</b> — his weight on the scale — and <b>skills</b> that fire when he's committed: <b>Sprinting</b> steals the ball (the ball is worth Star Power, and possession swings), <b>Tackling</b> knocks an opposing player <b>down</b> — a downed player's Star Power drops to his weaker number — <b>Passing</b> sets up teammates, and <b>Cheating</b> slides a facedown token onto the matchup that might be gold or might be a red card when it flips. Committing second means committing informed: going last at a highlight is power.</p>` },
-
-    { h: "Payouts — how a team gets better", body: (c) => `
-<p>Winning highlights pays <b>fans</b> — but also <b>Star Players</b> (mercenary legends who join your deck), <b>Team Upgrades</b> and <b>Staff Upgrades</b> that thicken your roster and bend the rules. The engine matters more than any single week: early weeks buy the machine, late weeks cash it in. The <b>tournament</b> card each week is the big pot everyone can dogpile onto.</p>` },
-
-    { h: "Sudden Death teams", when: (c) => c.has("sudden"), body: (c) => `
-<p>The <b>Dark Sorcery Syndicate</b> is in the league: undead and sorcerous teams with <b>Regeneration</b> (their downed players don't stay down), <b>Contracts</b>, and Blood tokens.${c.opt && c.opt("enchanted") ? " We're also playing with <b>Enchanted Balls</b> — every ball carries its own magic, so possession is worth even more than usual." : ""}</p>` },
-
-    { h: "Foul Play teams", when: (c) => c.has("foul"), body: (c) => `
-<p>The <b>Putrid Players' Guild</b> is in the league: Nurgle's own, with <b>Disease</b> tokens that rot opposing rosters, <b>Fouling</b> and <b>Penalties</b>. A fifth manager can also join the season.${c.opt && c.opt("corruptRef") ? " The <b>Corrupt Ref</b> is roaming — cheating tokens get flipped faceup wherever he lingers, and he hands out penalties." : ""}${c.opt && c.opt("stadiums") ? " And every highlight is played in a <b>Stadium</b> with its own house rules and bonus payouts — read the venue before you commit." : ""}</p>` },
-
-    { h: "Legendary leagues", when: (c) => c.has("legendary"), body: () => `
-<p>We're using the <b>Legendary</b> fan expansion: the teams are reorganised into themed leagues, each league with its own signature mechanic — your team's league card explains yours. Read it with your team.</p>` },
-
-    { h: "Table rules in play", when: (c) => c.opt && (c.opt("noSalary") || c.opt("scheduling")), body: (c) => {
-      const bits = [];
-      if (c.opt("noSalary")) bits.push("<b>No Salary Cap</b> — every Staff Upgrade, premium ones included, is in the deck");
-      if (c.opt("scheduling")) bits.push("<b>Scheduling Limitations</b> — fewer highlights each week, so every matchup is a knife fight");
-      return `<p>Also agreed: ${bits.join("; ")}.</p>`;
-    }},
-
-    { h: "Don't worry about these yet", body: (c) => `
-<p>Individual team gimmicks come alive on their own cards — read yours before we start. Opening advice: don't fight every highlight; <b>concede the small pots to dominate the big ones</b>, and remember a cheating token you can't read is exactly as scary as your opponent wants it to be.</p>` }
-  ]
 };
