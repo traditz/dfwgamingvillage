@@ -1,8 +1,13 @@
 /* The DFWGV Arena page. A static page on GitHub Pages talking to the arena's web service
    (tools/arena_web/arena_web.py in the mod repository), which is another front end on the
-   same accounts the Discord and Twitch bots use: a Discord sign-in yields the Discord user
-   id, and that id is the account key. Every action becomes a chat command the agent answers,
-   so the rules live in one place. `?api=http://localhost:8090` points the page at a local service. */
+   same accounts the Discord and Twitch bots use. Sign-in is the planners' Discord sign-in
+   (vgplanner/auth.js: Discord PKCE through Firebase, uid "discord:<id>"), one session shared
+   with the planners; the service verifies the Firebase token and that Discord id is the
+   account key. Every action becomes a chat command the agent answers, so the rules live in
+   one place. `?api=http://localhost:8090` points the page at a local service; on localhost
+   the planner's dev identity works too: localStorage.setItem("vgplanner.devUser", "discord:123:Joe"). */
+import { signInWithDiscord, signOutUser, getIdToken, handleDiscordRedirect, onUser } from "../vgplanner/auth.js";
+
 (function () {
   "use strict";
   const params = new URLSearchParams(location.search);
@@ -17,7 +22,7 @@
   const STRENGTHS = [50, 75, 100, 125, 150, 200];
 
   const S = {
-    token: null, me: null, cat: null, best: {}, byName: {}, order: [], live: null, config: null,
+    viewer: null, me: null, cat: null, best: {}, byName: {}, order: [], live: null, config: null,
     view: "watch", args: [], log: [], tree: null, treeName: null, profile: null, profileId: null, board: null, boardPeriod: "all",
     form: { name: "", count: 1, door: 0, strength: 100, variant: "", vanilla: false }, filter: { q: "", shelf: "", attack: "", threat: "", owned: false },
     busy: false, apiDown: false, target: null,
@@ -29,7 +34,7 @@
   // ------------------------------------------------------------------ the service
   async function api(path, opts) {
     const o = Object.assign({ headers: {} }, opts || {});
-    if (S.token) o.headers.Authorization = "Bearer " + S.token;
+    if (S.viewer) { const t = await getIdToken(); if (t) { o.headers.Authorization = "Bearer " + t; o.headers["X-Arena-Name"] = S.viewer.name || ""; } }
     if (o.body && typeof o.body !== "string") { o.body = JSON.stringify(o.body); o.headers["Content-Type"] = "application/json"; }
     // a service that is down must fail fast, not leave the page on "loading" for a minute
     const ctl = new AbortController();
@@ -39,14 +44,15 @@
     try { r = await fetch(API + path, o); } catch (e) { S.apiDown = true; throw new Error("the arena's service is not reachable"); }
     finally { clearTimeout(timer); }
     S.apiDown = false;
-    if (r.status === 401) { setToken(null); S.me = null; throw new Error("sign in first"); }
+    if (r.status === 401) { S.me = null; throw new Error((await r.text()) || "sign in with Discord first"); }
     if (!r.ok) throw new Error((await r.text()) || ("error " + r.status));
     return r.json();
   }
-  function setToken(t) { S.token = t; try { t ? localStorage.setItem("arena_token", t) : localStorage.removeItem("arena_token"); } catch (e) {} }
+  // S.viewer is the planner session ({uid, name, provider}); S.me is the arena's view of it
   async function loadMe() {
-    if (!S.token) { S.me = null; return; }
-    try { S.me = await api("/api/me"); } catch (e) { S.me = null; }
+    if (!S.viewer) { S.me = null; return; }
+    if (!String(S.viewer.uid || "").startsWith("discord:")) { S.me = null; notice("The arena follows Discord accounts: sign out and sign in with Discord to play."); return; }
+    try { S.me = await api("/api/me"); } catch (e) { S.me = null; if (!S.apiDown) notice(e.message); }
   }
 
   // ------------------------------------------------------------------ data
@@ -73,8 +79,6 @@
   // ------------------------------------------------------------------ routing and rendering
   function route() {
     const h = location.hash.replace(/^#/, "");
-    if (h.startsWith("token=")) { setToken(h.slice(6)); history.replaceState(null, "", location.pathname + location.search + "#watch"); return route(); }
-    if (h.startsWith("error=")) { notice(decodeURIComponent(h.slice(6))); history.replaceState(null, "", location.pathname + location.search + "#watch"); return route(); }
     const parts = h.split("/").map(decodeURIComponent);
     S.view = parts[0] || "watch"; S.args = parts.slice(1);
     if (!["watch", "bestiary", "profile", "top"].includes(S.view)) S.view = "watch";
@@ -84,12 +88,13 @@
     const u = $("#arena-user");
     if (S.me) {
       const a = S.me.account, lvl = a ? a.level : 1;
-      u.innerHTML = (S.me.user.avatar ? '<img src="' + esc(S.me.user.avatar) + '" alt="">' : "") +
-        '<div class="who"><b>' + esc(S.me.user.name) + '</b><small>level ' + lvl + (a ? " · " + num(a.essence) + "/" + a.cap + " essence · " + num(a.souls) + " souls" : " · new here") + "</small></div>" +
+      u.innerHTML = '<div class="who"><b>' + esc(S.me.user.name) + '</b><small>level ' + lvl + (a ? " · " + num(a.essence) + "/" + a.cap + " essence · " + num(a.souls) + " souls" : " · new here") + "</small></div>" +
+        '<button class="small" data-act="logout">Sign out</button>';
+    } else if (S.viewer) {
+      u.innerHTML = '<div class="who"><b>' + esc(S.viewer.name || "signed in") + '</b><small>' + (String(S.viewer.uid || "").startsWith("discord:") ? "checking with the arena…" : "signed in with Google; the arena needs Discord") + "</small></div>" +
         '<button class="small" data-act="logout">Sign out</button>';
     } else {
-      u.innerHTML = '<button class="discord" data-act="login">Sign in with Discord</button>' +
-        (S.config && S.config.dev ? ' <button class="small" data-act="devlogin" title="a development service: signs anyone in as any id">Dev sign-in</button>' : "");
+      u.innerHTML = '<button class="discord" data-act="login">Sign in with Discord</button>';
     }
   }
   function render() {
@@ -360,14 +365,8 @@
     const el = ev.target.closest("[data-act]");
     if (!el) return;
     const act = el.dataset.act;
-    if (act === "login") { ev.preventDefault(); location.href = API + "/api/auth/discord"; return; }
-    if (act === "devlogin") {
-      const id = prompt("Sign in as which account id? (a Discord user id, or anything on a development service)", "424242");
-      if (!id) return;
-      try { const r = await api("/api/dev-login", { method: "POST", body: { id: id, name: "dev " + id } }); setToken(r.token); await loadMe(); S.profile = null; render(); } catch (e) { notice(e.message); }
-      return;
-    }
-    if (act === "logout") { try { await api("/api/logout", { method: "POST", body: {} }); } catch (e) {} setToken(null); S.me = null; S.profile = null; S.tree = null; render(); return; }
+    if (act === "login") { ev.preventDefault(); try { await signInWithDiscord(); } catch (e) { notice("Sign-in could not start: " + e.message); } return; }
+    if (act === "logout") { S.me = null; S.viewer = null; S.profile = null; S.tree = null; render(); try { await signOutUser(); } catch (e) {} return; }
     if (act === "pick") { S.form.name = el.dataset.name; S.form.variant = ""; render(); return; }
     if (act === "open") { location.hash = "#bestiary/" + el.dataset.key; window.scrollTo({ top: 0, behavior: "smooth" }); return; }
     if (act === "period") { S.boardPeriod = el.dataset.period; S.board = null; render(); return; }
@@ -435,15 +434,22 @@
 
   // ------------------------------------------------------------------ start
   (async function start() {
-    try { S.token = localStorage.getItem("arena_token"); } catch (e) {}
     route();
+    // the Discord return leg lands here with ?code=&state= (the planner's callback page bounces
+    // back to whichever page started the sign-in); completing it signs into the shared session
+    try { const r = await handleDiscordRedirect(); if (r.handled && !r.ok) notice(r.error); } catch (e) { notice("Sign-in did not complete: " + e.message); }
     let bestiary = [];
     try { bestiary = await (await fetch("arena/bestiary.json")).json(); } catch (e) {}
     try { S.config = await api("/api/config"); S.cat = await api("/api/catalogue"); } catch (e) { S.cat = null; notice("The arena's service is not reachable right now; the bestiary still works, signing in and playing will not."); }
     if (!S.cat) S.cat = { monsters: bestiary.map((b) => Object.assign({}, b, { id: 0 })), variants: [], shelves: [["Quake", ["quake"]], ["Quake mission packs and episodes", ["hipnotic", "rogue", "mg3"]], ["Quake 2", ["quake2"]], ["Hexen II", ["hexen2"]], ["Arena originals", ["original"]], ["Arena kin", ["kin"]]].map(([l, s]) => ({ label: l, sources: s })), costs: {} };
     mergeData(bestiary, S.cat);
-    await loadMe();
-    if (S.me && S.me.account && !S.form.name) S.form.name = "";
     render();
+    // the shared planner session: fires with the restored sign-in on load and on every change
+    onUser(async (who) => {
+      S.viewer = who ? { uid: who.uid, name: who.name, provider: who.provider } : null;
+      S.me = null; S.profile = null; S.tree = null;
+      await loadMe();
+      render();
+    });
   })();
 })();
