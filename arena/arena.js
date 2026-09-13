@@ -31,8 +31,13 @@
     const o = Object.assign({ headers: {} }, opts || {});
     if (S.token) o.headers.Authorization = "Bearer " + S.token;
     if (o.body && typeof o.body !== "string") { o.body = JSON.stringify(o.body); o.headers["Content-Type"] = "application/json"; }
+    // a service that is down must fail fast, not leave the page on "loading" for a minute
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), path === "/api/command" ? 16000 : 8000);
+    o.signal = ctl.signal;
     let r;
     try { r = await fetch(API + path, o); } catch (e) { S.apiDown = true; throw new Error("the arena's service is not reachable"); }
+    finally { clearTimeout(timer); }
     S.apiDown = false;
     if (r.status === 401) { setToken(null); S.me = null; throw new Error("sign in first"); }
     if (!r.ok) throw new Error((await r.text()) || ("error " + r.status));
