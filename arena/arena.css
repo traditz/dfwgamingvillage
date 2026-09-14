@@ -31,6 +31,7 @@
 .arena-app button.red { background: var(--red-dark); border-color: var(--red); }
 .arena-app button.small { padding: 4px 9px; font-size: .9em; }
 .arena-app button.discord { background: #5865f2; border-color: #4752c4; color: #fff; font-weight: 700; }
+.arena-app [hidden] { display: none !important; }
 .arena-app .grid2 { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(320px, 1fr); gap: 18px; }
 @media (max-width: 900px) { .arena-app .grid2 { grid-template-columns: 1fr; } }
 .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; }

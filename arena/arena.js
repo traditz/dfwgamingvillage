@@ -132,25 +132,38 @@ import { getFirestore, collection, doc, addDoc, getDoc, onSnapshot, serverTimest
     document.querySelectorAll("#arena-tabs a").forEach((a) => a.classList.toggle("on", a.dataset.tab === S.view));
     renderUser();
     const app = $("#app");
-    if (S.view === "watch") app.innerHTML = viewWatch();
-    else if (S.view === "bestiary") app.innerHTML = viewBestiary();
-    else if (S.view === "profile") app.innerHTML = viewProfile();
-    else app.innerHTML = viewTop();
+    // the stream is built once and only ever shown or hidden: redrawing it would reload the
+    // player (and mute it); everything around it is redrawn freely
+    if (!$("#watch-root")) {
+      app.innerHTML = '<div id="watch-root" class="grid2"><div><div class="stream"><iframe src="https://player.twitch.tv/?channel=' + CHANNEL + PARENTS.map((p) => "&parent=" + p).join("") + '" allowfullscreen title="The arena stream"></iframe></div>' +
+        '<div id="watch-status"></div><div class="panel" style="margin-top:14px"><h3>What just happened</h3><div id="watch-feed"></div></div></div><div id="watch-panel"></div></div><div id="view-root"></div>';
+    }
+    const wroot = $("#watch-root"), vroot = $("#view-root");
+    if (S.view === "watch") {
+      wroot.hidden = false; vroot.hidden = true;
+      const st = S.live, mons = (st && st.monsters) || [];
+      $("#watch-status").innerHTML = statusLine(st);
+      $("#watch-feed").innerHTML = feedList(st);
+      $("#watch-panel").innerHTML = panel(mons);
+    } else {
+      wroot.hidden = true; vroot.hidden = false;
+      if (S.view === "bestiary") vroot.innerHTML = viewBestiary();
+      else if (S.view === "profile") vroot.innerHTML = viewProfile();
+      else vroot.innerHTML = viewTop();
+    }
     watchState(S.view === "watch" && !document.hidden);
     if (S.view === "profile") ensureProfile();
     if (S.view === "top") ensureBoard();
   }
 
   // ------------------------------------------------------------------ watch & play
-  function viewWatch() {
-    const st = S.live, on = !!(st && st.online);
-    const mons = (st && st.monsters) || [];
-    const rounds = st && st.rounds;
-    const status = '<div class="status"><span><i class="dot' + (on ? " on" : "") + '"></i>' + (on ? "live" : "the arena is offline right now") + "</span>" +
+  function statusLine(st) {
+    const on = !!(st && st.online), mons = (st && st.monsters) || [], rounds = st && st.rounds;
+    return '<div class="status"><span><i class="dot' + (on ? " on" : "") + '"></i>' + (on ? "live" : "the arena is offline right now") + "</span>" +
       (on ? "<span>" + esc(st.mode || "") + " mode</span><span>round " + esc(st.round || "") + (rounds && rounds.phase ? " · " + esc(rounds.phase) + (rounds.seconds != null ? " " + Math.floor(rounds.seconds / 60) + ":" + String(rounds.seconds % 60).padStart(2, "0") : "") : "") + "</span><span>" + mons.length + " alive</span>" : "") + "</div>";
-    const feed = '<ul class="feed">' + ((st && st.feed) || []).slice().reverse().map((e) => '<li class="' + esc(e.kind) + '"><b>' + esc(e.kind) + "</b> " + esc(e.text) + "</li>").join("") + "</ul>";
-    const player = '<div class="stream"><iframe src="https://player.twitch.tv/?channel=' + CHANNEL + PARENTS.map((p) => "&parent=" + p).join("") + '&muted=false" allowfullscreen title="The arena stream"></iframe></div>';
-    return '<div class="grid2"><div>' + player + status + '<div class="panel" style="margin-top:14px"><h3>What just happened</h3>' + feed + "</div></div><div>" + panel(mons) + "</div></div>";
+  }
+  function feedList(st) {
+    return '<ul class="feed">' + ((st && st.feed) || []).slice().reverse().map((e) => '<li class="' + esc(e.kind) + '"><b>' + esc(e.kind) + "</b> " + esc(e.text) + "</li>").join("") + "</ul>";
   }
   function panel(mons) {
     if (!S.me) {
