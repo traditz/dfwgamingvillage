@@ -29,7 +29,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
   const S = {
     viewer: null, me: null, cat: null, byName: {}, order: [], live: null,
     view: "watch", args: [], log: [], tree: null, treeName: null, profile: null, profileId: null, board: null, boardPeriod: "all",
-    form: { name: "", count: 1, door: 0, strength: 100, variant: "", vanilla: false }, filter: { q: "", shelf: "", attack: "", threat: "", owned: false },
+    form: { name: "", count: 1, door: 0, strength: 100, variant: "", vanilla: false, onlyOwned: (function () { try { return localStorage.getItem("arena_only_owned") === "1"; } catch (e) { return false; } })() }, filter: { q: "", shelf: "", attack: "", threat: "", owned: false },
     busy: false, target: null, unsub: { state: null, profile: null, mine: null }, refreshed: {}, layout: "side",
   };
   try { if (localStorage.getItem("arena_layout") === "theatre") S.layout = "theatre"; } catch (e) {}
@@ -284,7 +284,8 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     const f = S.form;
     const owned = S.order.filter((m) => ownsType(m.name));
     const m = S.byName[f.name] || null;
-    const tiles = S.order.map((x) => {
+    const only = !!S.form.onlyOwned;
+    const tiles = S.order.filter((x) => !only || ownsType(x.name)).map((x) => {
       const ok = ownsType(x.name);
       return '<div class="tile' + (ok ? "" : " locked") + (x.name === f.name ? " on" : "") + '" data-act="pick" data-name="' + esc(x.name) + '" title="' + esc(x.name + (ok ? "" : " · locked, " + x.unlock + " souls")) + '"><img src="' + esc(x.img) + '" alt="" loading="lazy">' + (ok ? "" : '<span class="lock">' + x.unlock + "</span>") + '<span class="n">' + esc(x.name) + "</span></div>";
     }).join("");
@@ -294,7 +295,8 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     const home = (S.me.account && S.me.account.home_door) || 0;
     const seg = (label, field, options, current) => '<div class="segrow"><span class="segl">' + label + '</span><div class="seg" role="group">' +
       options.map((o) => '<button type="button" class="segb' + (String(o.v) === String(current) ? " on" : "") + '" data-act="set" data-field="' + field + '" data-value="' + esc(o.v) + '">' + esc(o.t) + "</button>").join("") + "</div></div>";
-    return '<div class="panel"><h3>Send in a monster</h3><p class="sub">' + owned.length + " of " + S.order.length + ' types unlocked · <a href="#bestiary">the bestiary</a> sells the rest for souls</p>' +
+    return '<div class="panel"><h3>Send in a monster</h3><p class="sub">' + owned.length + " of " + S.order.length + ' types unlocked · <a href="#bestiary">the bestiary</a> sells the rest for souls' +
+      '<label class="check"><input type="checkbox" data-act="only-owned"' + (only ? " checked" : "") + "> only unlocked</label></p>" +
       '<div class="picker">' + tiles + "</div>" +
       (m ? '<div class="form-row" style="margin-top:10px"><b>' + esc(m.name) + '</b><span class="inline-note">threat ' + m.threat + " · " + esc(m.notes) + "</span></div>" : '<p class="inline-note">Pick a monster above.</p>') +
       (m && ownsType(m.name) ? groupAddRow(m) : "") +
@@ -561,6 +563,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
       const f = S.form, d = f.door || (S.me.account && S.me.account.home_door) || 0;
       await send("!group send " + el.dataset.name + (d ? " " + d + " " + f.strength : (f.strength !== 100 ? " " + f.strength : ""))); return;
     }
+    if (act === "only-owned") { S.form.onlyOwned = !!el.checked; try { localStorage.setItem("arena_only_owned", el.checked ? "1" : "0"); } catch (e) {} render(); return; }
     if (act === "group-delete") { await send("!group delete " + el.dataset.name); return; }
     if (act === "group-add") {
       const a = S.me && S.me.account, m = S.byName[el.dataset.name];
