@@ -337,7 +337,7 @@ import { getFirestore, collection, doc, addDoc, getDoc, onSnapshot, serverTimest
         '<p class="inline-note">Ranks cost souls (tier one 20/25/30, tier two 35/40/45, tier three 50/60, the capstone 80); tiers open at 0, 3, 6 and 9 points; a build holds ten points, so no tree can be filled.</p><div class="tree">' +
         t.tiers.map((tier, i) => {
           const open = points >= TIER_UNLOCK[i];
-          return '<div class="tier' + (open ? "" : " shut") + '"><h4><span>' + names[i] + "</span><span>" + (open ? "open" : "opens at " + TIER_UNLOCK[i] + " points") + '</span></h4><div class="talents">' + tier.map((tal) => {
+          return '<div class="tier' + (open ? "" : " shut") + '"><h4><span>' + names[i] + "</span><span>" + (open ? "open" : "opens at " + TIER_UNLOCK[i] + " points") + '</span></h4><div class="talents">' + (tier.talents || []).map((tal) => {
             const r = ranks[tal.key] || 0, max = tal.ranks.length, can = canSpend(t, ranks, tal, points, p.souls);
             const cls = "talent" + (r >= max ? " maxed" : "") + (i === 3 ? " cap" : "");
             const btn = mine ? (can.cost != null ? '<button class="small gold" data-act="spend" data-build="' + esc(build) + '" data-key="' + esc(tal.key) + '">Buy rank ' + (r + 1) + " · " + can.cost + " souls</button>" : '<span class="why">' + esc(can.why || "") + "</span>") : "";
