@@ -14,7 +14,6 @@ import { getFirestore, collection, doc, addDoc, getDoc, onSnapshot, serverTimest
   const db = getFirestore(auth.app);
   const P = "arena";                      // the collections: arena_commands, arena_requests, arena_public, arena_profiles, arena_trees
   const CHANNEL = "dfwgv_arena";
-  const PARENTS = ["www.dfwgamingvillage.com", "dfwgamingvillage.com", "localhost", "127.0.0.1"];
   const DISCORD = document.querySelector(".arena-discord") ? document.querySelector(".arena-discord").href : "https://discord.gg/eShZjbqeZy";
   const ATTACK_WORD = { melee: "melee", ranged: "ranged", both: "both" };
   const ORDERS = [["hunt", "Hunt"], ["rage", "Rage"], ["coward", "Coward"], ["normal", "Calm"], ["revive", "Revive"], ["burn", "Burn"], ["poison", "Poison"],
@@ -33,6 +32,7 @@ import { getFirestore, collection, doc, addDoc, getDoc, onSnapshot, serverTimest
     busy: false, target: null, unsub: { state: null, profile: null, mine: null }, refreshed: {},
   };
   const $ = (sel) => document.querySelector(sel);
+  if (new URLSearchParams(location.search).get("debug") === "1") window.arena = { S: S, render: () => render() };
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const num = (n) => (n == null ? "?" : Number(n).toLocaleString());
   const myId = () => (S.viewer && String(S.viewer.uid || "").startsWith("discord:") ? S.viewer.uid.slice(8) : null);
@@ -132,11 +132,11 @@ import { getFirestore, collection, doc, addDoc, getDoc, onSnapshot, serverTimest
     document.querySelectorAll("#arena-tabs a").forEach((a) => a.classList.toggle("on", a.dataset.tab === S.view));
     renderUser();
     const app = $("#app");
-    // the stream is built once and only ever shown or hidden: redrawing it would reload the
-    // player (and mute it); everything around it is redrawn freely
+    // the player is static markup in arena.html, outside everything the script redraws; the
+    // body's view class only makes it small on the other tabs
+    document.body.className = "view-" + S.view;
     if (!$("#watch-root")) {
-      app.innerHTML = '<div id="watch-root" class="grid2"><div><div class="stream"><iframe src="https://player.twitch.tv/?channel=' + CHANNEL + PARENTS.map((p) => "&parent=" + p).join("") + '" allowfullscreen title="The arena stream"></iframe></div>' +
-        '<div id="watch-status"></div><div class="panel" style="margin-top:14px"><h3>What just happened</h3><div id="watch-feed"></div></div></div><div id="watch-panel"></div></div><div id="view-root"></div>';
+      app.innerHTML = '<div id="watch-root" class="grid2"><div class="watch-side"><div id="watch-status"></div><div class="panel" style="margin-top:14px"><h3>What just happened</h3><div id="watch-feed"></div></div></div><div id="watch-panel"></div></div><div id="view-root"></div>';
     }
     const wroot = $("#watch-root"), vroot = $("#view-root");
     if (S.view === "watch") {
@@ -187,16 +187,17 @@ import { getFirestore, collection, doc, addDoc, getDoc, onSnapshot, serverTimest
     const cost = m ? releaseCost(m, f.strength, f.count, f.variant, f.door || 1) : 0;
     const talents = m && S.me.account && S.me.account.talents && S.me.account.talents[f.variant ? affix(f.variant) + " " + m.name : m.name];
     const home = (S.me.account && S.me.account.home_door) || 0;
+    const seg = (label, field, options, current) => '<div class="segrow"><span class="segl">' + label + '</span><div class="seg" role="group">' +
+      options.map((o) => '<button type="button" class="segb' + (String(o.v) === String(current) ? " on" : "") + '" data-act="set" data-field="' + field + '" data-value="' + esc(o.v) + '">' + esc(o.t) + "</button>").join("") + "</div></div>";
     return '<div class="panel"><h3>Send in a monster</h3><p class="sub">' + owned.length + " of " + S.order.length + ' types unlocked · <a href="#bestiary">the bestiary</a> sells the rest for souls</p>' +
       '<div class="picker">' + tiles + "</div>" +
       (m ? '<div class="form-row" style="margin-top:10px"><b>' + esc(m.name) + '</b><span class="inline-note">threat ' + m.threat + " · " + esc(m.notes) + "</span></div>" : '<p class="inline-note">Pick a monster above.</p>') +
-      '<div class="form-row"><label>How many<select data-bind="count">' + [1, 2, 3, 4, 5].map((n) => '<option value="' + n + '"' + (n === f.count ? " selected" : "") + ">" + n + "</option>").join("") + "</select></label>" +
-      '<label>Door<select data-bind="door"><option value="0"' + (f.door === 0 ? " selected" : "") + ">" + (home ? "your door " + home : "the emptiest") + "</option>" + [1, 2, 3, 4, 5, 6, 7, 8].map((d) => '<option value="' + d + '"' + (d === f.door ? " selected" : "") + ">door " + d + "</option>").join("") + '<option value="9"' + (f.door === 9 ? " selected" : "") + ">every door (level 6)</option></select></label>" +
-      '<label>Strength<select data-bind="strength">' + STRENGTHS.map((s) => '<option value="' + s + '"' + (s === f.strength ? " selected" : "") + ">" + s + "%</option>").join("") + "</select></label>" +
-      (variants.length ? '<label>Variant<select data-bind="variant"><option value="">plain</option>' + variants.map((v) => '<option value="' + esc(v) + '"' + (v === f.variant ? " selected" : "") + ">" + esc(affix(v)) + "</option>").join("") + "</select></label>" : "") +
-      (talents ? '<label>Build<select data-bind="vanilla"><option value="0"' + (!f.vanilla ? " selected" : "") + ">your " + talents.points + "-point build</option><option value=\"1\"" + (f.vanilla ? " selected" : "") + ">vanilla</option></select></label>" : "") +
-      "</div>" +
-      '<div class="form-row"><button class="gold" data-act="release"' + (m ? "" : " disabled") + ">Send in" + (m ? " · " + cost + " essence" : "") + "</button>" +
+      seg("How many", "count", [1, 2, 3, 4, 5].map((n) => ({ v: n, t: String(n) })), f.count) +
+      seg("Door", "door", [{ v: 0, t: home ? "yours (" + home + ")" : "emptiest" }].concat([1, 2, 3, 4, 5, 6, 7, 8].map((d) => ({ v: d, t: String(d) })), [{ v: 9, t: "all (lv 6)" }]), f.door) +
+      seg("Strength", "strength", STRENGTHS.map((s) => ({ v: s, t: s + "%" })), f.strength) +
+      (variants.length ? seg("Variant", "variant", [{ v: "", t: "plain" }].concat(variants.map((v) => ({ v: v, t: affix(v) }))), f.variant) : "") +
+      (talents ? seg("Build", "vanilla", [{ v: "0", t: "your " + talents.points + "-point build" }, { v: "1", t: "vanilla" }], f.vanilla ? "1" : "0") : "") +
+      '<div class="form-row"><button class="gold big" data-act="release"' + (m ? "" : " disabled") + ">Send in" + (m ? " · " + cost + " essence" : "") + "</button>" +
       (m && !ownsType(m.name) ? '<span class="inline-note">locked: ' + m.unlock + ' souls in <a href="#bestiary/' + esc(m.key) + '">the bestiary</a></span>' : "") + "</div></div>";
   }
   function ordersPanel(mons) {
@@ -386,14 +387,14 @@ import { getFirestore, collection, doc, addDoc, getDoc, onSnapshot, serverTimest
   async function send(text) {
     if (!S.me) { notice("Sign in with Discord first.", false, true); return null; }
     if (S.busy) return null;
-    S.busy = true; $("#app").classList.add("busy");
+    S.busy = true; document.querySelectorAll("#watch-panel, #view-root").forEach((el) => el.classList.add("busy"));
     const entry = { text: text, reply: null, ack: null, note: null };
     S.log.push(entry);
     const r = await ask("_commands", { text: text });
     entry.reply = r.reply || null; entry.ack = r.ack || null; entry.note = r.note || null;
     if (r.account && S.me) S.me.account = r.account;
     notice(r.reply || (r.ack ? "✓ " + r.ack : r.note), !!(r.reply || r.ack), r.note && /Discord/.test(r.note));
-    S.busy = false; $("#app").classList.remove("busy");
+    S.busy = false; document.querySelectorAll("#watch-panel, #view-root").forEach((el) => el.classList.remove("busy"));
     S.treeName = null;                       // the tree redraws from the refreshed profile
     render();
     return entry;
@@ -407,6 +408,15 @@ import { getFirestore, collection, doc, addDoc, getDoc, onSnapshot, serverTimest
     if (act === "login") { ev.preventDefault(); try { await signInWithDiscord(); } catch (e) { notice("Sign-in could not start: " + e.message); } return; }
     if (act === "logout") { S.me = null; S.viewer = null; S.profile = null; S.tree = null; watchMine(null); render(); try { await signOutUser(); } catch (e) {} return; }
     if (act === "pick") { S.form.name = el.dataset.name; S.form.variant = ""; render(); return; }
+    if (act === "set") {
+      const v = el.dataset.value, f = el.dataset.field;
+      if (f === "count") S.form.count = parseInt(v, 10) || 1;
+      else if (f === "door") S.form.door = parseInt(v, 10) || 0;
+      else if (f === "strength") S.form.strength = parseInt(v, 10) || 100;
+      else if (f === "variant") S.form.variant = v;
+      else if (f === "vanilla") S.form.vanilla = v === "1";
+      render(); return;
+    }
     if (act === "open") { location.hash = "#bestiary/" + el.dataset.key; window.scrollTo({ top: 0, behavior: "smooth" }); return; }
     if (act === "period") { S.boardPeriod = el.dataset.period; render(); return; }
     if (act === "untarget") { S.target = null; render(); return; }
@@ -446,12 +456,7 @@ import { getFirestore, collection, doc, addDoc, getDoc, onSnapshot, serverTimest
     if (!el) return;
     if (el.dataset.act === "weapon") { if (el.value) send("!weapon " + el.dataset.id + " " + el.value); return; }
     const b = el.dataset.bind;
-    if (b === "count") S.form.count = parseInt(el.value, 10) || 1;
-    else if (b === "door") S.form.door = parseInt(el.value, 10) || 0;
-    else if (b === "strength") S.form.strength = parseInt(el.value, 10) || 100;
-    else if (b === "variant") S.form.variant = el.value;
-    else if (b === "vanilla") S.form.vanilla = el.value === "1";
-    else if (b === "shelf") S.filter.shelf = el.value;
+    if (b === "shelf") S.filter.shelf = el.value;
     else if (b === "attack") S.filter.attack = el.value;
     else if (b === "threat") S.filter.threat = el.value;
     else if (b === "owned") S.filter.owned = el.checked;

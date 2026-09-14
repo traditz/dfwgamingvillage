@@ -147,3 +147,12 @@
 .sign-card p { color: var(--muted); max-width: 46ch; margin: 8px auto 14px; }
 .inline-note { color: var(--muted); font-size: .9em; }
 .busy { opacity: .6; pointer-events: none; }
+#arena-stream { margin: 6px 0 10px; max-width: 1280px; transition: max-width .25s; }
+body.view-bestiary #arena-stream, body.view-profile #arena-stream, body.view-top #arena-stream { max-width: 360px; margin-left: auto; }
+.segrow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 8px 0; }
+.segl { font-size: .85em; color: var(--muted); min-width: 72px; }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.arena-app .segb { min-height: 40px; min-width: 44px; padding: 6px 12px; font-weight: 600; }
+.arena-app .segb.on { border-color: var(--gold); color: var(--gold); background: #2a2110; }
+.arena-app button.big { min-height: 46px; padding: 10px 20px; font-size: 1.05em; }
+@media (max-width: 900px) { .arena-app .grid2 > .watch-side { order: 2; } }
