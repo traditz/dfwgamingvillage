@@ -199,7 +199,11 @@ import { getFirestore, collection, doc, addDoc, getDoc, onSnapshot, serverTimest
       $("#watch-status").innerHTML = statusLine(st);
       $("#watch-feed").innerHTML = feedList(st);
       app.innerHTML = panel(mons);
-    } else if (S.view === "bestiary") app.innerHTML = viewBestiary();
+    } else if (S.view === "bestiary") {
+      app.innerHTML = viewBestiary();
+      const m = S.args[0] && S.order.find((x) => x.key === S.args[0]);
+      if (m) ensureTree(S.args[1] || m.name);
+    }
     else if (S.view === "profile") app.innerHTML = viewProfile();
     else app.innerHTML = viewTop();
     watchState(S.view === "watch" && !document.hidden);
@@ -314,16 +318,18 @@ import { getFirestore, collection, doc, addDoc, getDoc, onSnapshot, serverTimest
     const vs = (S.cat && S.cat.variants) || [];
     const variants = vs.map((v) => {
       const have = ownsVariant(m.name, v.key);
-      const btn = !signed ? "" : have ? '<a href="#profile/' + esc(S.me.user.id) + "/" + esc(v.affix + " " + m.name) + '"><button class="small">Build</button></a>' :
+      const btn = !signed ? "" : have ? '<a href="#bestiary/' + esc(m.key) + "/" + esc(v.affix + " " + m.name) + '"><button class="small">Build</button></a>' :
         '<button class="small" data-act="unlock" data-name="' + esc(m.name) + '" data-variant="' + esc(v.key) + '"' + (owned ? "" : ' disabled title="unlock the ' + esc(m.name) + ' first"') + ">Unlock · " + m.variant + " souls</button>";
       return '<div class="variant' + (have ? " owned" : "") + '"><span class="vn">' + esc(v.affix + " " + m.name) + '</span><span class="vb">' + esc(v.blurb) + "</span>" + (have ? '<span class="inline-note">owned · </span>' : "") + btn + "</div>";
     }).join("");
-    const unlockBtn = !signed ? '<button class="discord" data-act="login">Sign in to unlock</button>' : m.starter ? '<span class="chip">starter, always yours</span>' : owned ? '<span class="chip">unlocked for good</span> <a href="#profile/' + esc(S.me.user.id) + "/" + esc(m.name) + '"><button class="small">Talent tree</button></a>' :
+    const unlockBtn = !signed ? '<button class="discord" data-act="login">Sign in to unlock</button>' : m.starter ? '<span class="chip">starter, always yours</span>' : owned ? '<span class="chip">unlocked for good</span>' :
       '<button class="gold" data-act="unlock" data-name="' + esc(m.name) + '">Unlock for ' + m.unlock + " souls</button>" + (a ? '<span class="inline-note"> you have ' + num(a.souls) + "</span>" : "");
     return '<div class="panel detail' + (signed && !owned ? " locked" : "") + '"><div><img src="' + esc(m.img) + '" alt="' + esc(m.name) + '"></div><div><h2>' + esc(m.name) + ' <small class="inline-note">' + esc(m.source_label || m.source) + "</small></h2><p>" + esc(m.notes) + "</p>" +
       '<div class="stats"><div class="stat"><div class="k">Threat</div><div class="v">' + m.threat + '</div></div><div class="stat"><div class="k">Fights</div><div class="v">' + ATTACK_WORD[m.attack] + (m.fly ? ", flies" : "") + '</div></div><div class="stat"><div class="k">Health</div><div class="v">' + (m.health || "?") + '</div></div><div class="stat"><div class="k">Hardest hit</div><div class="v">' + m.hit + '</div></div><div class="stat"><div class="k">Unlock</div><div class="v gold">' + (m.starter ? "free" : m.unlock + " souls") + '</div></div><div class="stat"><div class="k">Each variant</div><div class="v gold">' + m.variant + " souls</div></div></div>" +
       '<div class="form-row">' + unlockBtn + ' <a href="#bestiary"><button class="small">Close</button></a></div>' +
-      "<h3>Variants</h3><p class=\"sub\">Eight variants of every type, each with its own talent tree. The base monster comes first.</p><div class=\"variants\">" + variants + "</div></div></div>";
+      "<h3>Variants</h3><p class=\"sub\">Eight variants of every type, each with its own talent tree. The base monster comes first.</p><div class=\"variants\">" + variants + "</div></div></div>" +
+      buildPanel((S.me && S.me.account) || { id: "", unlocked: [], variants: {}, talents: {}, souls: null }, S.args[1] || m.name, !!(S.me && S.me.account),
+                 { preview: true, link: (name) => "#bestiary/" + esc(m.key) + "/" + esc(name) });
   }
 
   // ------------------------------------------------------------------ profile
@@ -331,13 +337,13 @@ import { getFirestore, collection, doc, addDoc, getDoc, onSnapshot, serverTimest
     const id = S.args[0] || myId();
     if (!id) return;
     if (S.profileId !== id || !S.unsub.profile) watchProfile(id);
-    const build = S.args[1];
-    if (build && S.treeName !== build) {
-      S.treeName = build; S.tree = null;
-      const t = await readDoc(doc(db, P + "_trees", build));
-      S.tree = t || { error: "no such build" };
-      if (S.treeName === build) render();
-    }
+    ensureTree(S.args[1]);
+  }
+  async function ensureTree(build) {
+    if (!build || S.treeName === build) return;
+    S.treeName = build; S.tree = null;
+    const t = await readDoc(doc(db, P + "_trees", build));
+    if (S.treeName === build) { S.tree = t || { error: "no such build" }; render(); }
   }
   function viewProfile() {
     const id = S.args[0] || myId();
@@ -375,11 +381,15 @@ import { getFirestore, collection, doc, addDoc, getDoc, onSnapshot, serverTimest
     if (souls != null && souls < cost) return { why: cost + " souls; you have " + souls };
     return { cost: cost };
   }
-  function buildPanel(p, build, mine) {
+  function buildPanel(p, build, mine, opts) {
+    opts = opts || {};
+    const link = opts.link || ((name) => "#profile/" + esc(p.id) + "/" + esc(name));
     const parts = splitBuild(build);
     if (!parts) return "";
     const base = S.byName[parts.base], vkey = parts.vkey;
     const own = base.starter || (p.unlocked || []).includes(base.name);
+    const haveVariant = !vkey || ((p.variants || {})[base.name] || []).includes(vkey);
+    const canBuild = mine && own && haveVariant;
     const vs = (S.cat && S.cat.variants) || [];
     const selector = '<div class="variants">' + [{ key: "", affix: "" }].concat(vs).map((v) => {
       const have = v.key ? ((p.variants || {})[base.name] || []).includes(v.key) : own;
@@ -387,7 +397,8 @@ import { getFirestore, collection, doc, addDoc, getDoc, onSnapshot, serverTimest
       const pts = ((p.talents || {})[name] || {}).points || 0;
       const inner = '<span class="vn">' + esc(name) + "</span>" + (v.blurb ? '<span class="vb">' + esc(v.blurb) + "</span>" : '<span class="vb">the base monster</span>') +
         (have ? '<span class="inline-note">' + (pts ? pts + "-point build" : "no points yet") + "</span>" : (mine && v.key ? '<button class="small" data-act="unlock" data-name="' + esc(base.name) + '" data-variant="' + esc(v.key) + '"' + (own ? "" : ' disabled title="unlock the base monster first"') + ">Unlock · " + base.variant + " souls</button>" : '<span class="inline-note">locked</span>'));
-      return have ? '<a class="variant owned' + (name === build ? " on" : "") + '" href="#profile/' + esc(p.id) + "/" + esc(name) + '">' + inner + "</a>" : '<div class="variant' + (name === build ? " on" : "") + '">' + inner + "</div>";
+      const clickable = have || opts.preview;
+      return clickable ? '<a class="variant' + (have ? " owned" : "") + (name === build ? " on" : "") + '" href="' + link(name) + '">' + inner + "</a>" : '<div class="variant' + (name === build ? " on" : "") + '">' + inner + "</div>";
     }).join("") + "</div>";
     let tree = "";
     const t = S.tree;
@@ -399,19 +410,20 @@ import { getFirestore, collection, doc, addDoc, getDoc, onSnapshot, serverTimest
     else {
       const names = ["Tier one", "Tier two", "Tier three", "Capstone"];
       tree = '<div class="build-bar"><span class="pts"><b>' + points + "</b> of " + BUDGET + " points</span>" + (summary ? '<span class="inline-note">' + esc(summary) + "</span>" : '<span class="inline-note">no points spent yet</span>') +
-        (mine ? '<button class="small" data-act="respec" data-build="' + esc(build) + '"' + (points ? "" : " disabled") + ">Reset the build · " + RESPEC + " souls</button>" : "") + "</div>" +
+        (canBuild ? '<button class="small" data-act="respec" data-build="' + esc(build) + '"' + (points ? "" : " disabled") + ">Reset the build · " + RESPEC + " souls</button>" : "") + "</div>" +
         '<p class="inline-note">Ranks cost souls (tier one 20/25/30, tier two 35/40/45, tier three 50/60, the capstone 80); tiers open at 0, 3, 6 and 9 points; a build holds ten points, so no tree can be filled.</p><div class="tree">' +
         t.tiers.map((tier, i) => {
           const open = points >= TIER_UNLOCK[i];
           return '<div class="tier' + (open ? "" : " shut") + '"><h4><span>' + names[i] + "</span><span>" + (open ? "open" : "opens at " + TIER_UNLOCK[i] + " points") + '</span></h4><div class="talents">' + (tier.talents || []).map((tal) => {
             const r = ranks[tal.key] || 0, max = tal.ranks.length, can = canSpend(t, ranks, tal, points, p.souls);
             const cls = "talent" + (r >= max ? " maxed" : "") + (i === 3 ? " cap" : "");
-            const btn = mine ? (can.cost != null ? '<button class="small gold" data-act="spend" data-build="' + esc(build) + '" data-key="' + esc(tal.key) + '">Buy rank ' + (r + 1) + " · " + can.cost + " souls</button>" : '<span class="why">' + esc(can.why || "") + "</span>") : "";
+            const btn = canBuild ? (can.cost != null ? '<button class="small gold" data-act="spend" data-build="' + esc(build) + '" data-key="' + esc(tal.key) + '">Buy rank ' + (r + 1) + " · " + can.cost + " souls</button>" : '<span class="why">' + esc(can.why || "") + "</span>") : "";
             return '<div class="' + cls + '"><div class="tn"><span>' + esc(tal.name) + "</span><small>" + r + "/" + max + '</small></div><span class="tb">' + esc(tal.blurb) + "</span>" + btn + "</div>";
           }).join("") + "</div></div>";
         }).join("") + "</div>";
     }
-    return '<div class="panel"><h3>' + esc(build) + '</h3><p class="sub">' + (own ? "Pick the base or a variant; each has its own ten-point build." : "This monster is locked: unlock it in the bestiary first.") + "</p>" + selector + (own && (!vkey || ((p.variants || {})[base.name] || []).includes(vkey)) ? tree : (own ? '<p class="inline-note">Unlock this variant to build it.</p>' : "")) +
+    const intro = !mine ? "Sign in to build it; here is the tree as it stands." : !own ? "This monster is locked; here is the tree it would have. Unlock it to build it." : !haveVariant ? "You do not own this variant yet; here is its tree. Unlock it to build it." : "Pick the base or a variant; each has its own ten-point build.";
+    return '<div class="panel"><h3>' + esc(build) + '</h3><p class="sub">' + intro + "</p>" + selector + ((canBuild || opts.preview) ? tree : (own ? '<p class="inline-note">Unlock this variant to build it.</p>' : "")) +
       (mine && own ? '<div class="form-row"><a href="#watch"><button data-act="send-build" data-name="' + esc(base.name) + '" data-variant="' + esc(vkey || "") + '">Send this one in</button></a></div>' : "") + "</div>";
   }
   function splitBuild(build) {
