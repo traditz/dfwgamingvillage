@@ -1,17 +1,18 @@
 /* The DFWGV Arena page. A static page on GitHub Pages whose back end is the arena's Discord
-   bot (tools/arena_ai/web_bridge.py in the mod repository), reached through the site's own
-   Firestore, so nothing on the arena machine listens for connections. Sign-in is the
-   planners' Discord sign-in (vgplanner/auth.js: Discord PKCE through Firebase, uid
-   "discord:<id>", one session shared across the site). The page writes a command document,
-   the bot drops it into the agent's inbox as the chat line it already understands and writes
-   the agent's reply back; profiles, the catalogue, the live state, the leaderboard and every
-   talent tree are documents the bot publishes and anyone may read. */
-import { signInWithDiscord, signOutUser, handleDiscordRedirect, onUser, auth } from "../vgplanner/auth.js";
-import { getFirestore, collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+   bot (tools/arena_ai/web_bridge.py in the mod repository), reached through the arena's own
+   Firebase project, so nothing on the arena machine listens for connections and nothing here
+   touches the site's planners. Sign-in is the arena's own Discord sign-in (arena/auth.js:
+   Discord PKCE, the code exchanged and the token minted by the bot, uid "discord:<id>").
+   The page writes a command document, the bot drops it into the agent's inbox as the chat
+   line it already understands and writes the agent's reply back; profiles, the catalogue,
+   the live state, the leaderboard and every talent tree are documents the bot publishes and
+   anyone may read. */
+import { signInWithDiscord, signOutUser, handleDiscordRedirect, onUser, ready as authReady, db as arenaDb } from "./auth.js";
+import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 (function () {
   "use strict";
-  const db = getFirestore(auth.app);
+  const db = arenaDb;                     // null until arena/firebase-config.js is filled in
   const P = "arena";                      // the collections: arena_commands, arena_requests, arena_public, arena_profiles, arena_trees
   const CHANNEL = "dfwgv_arena";
   const DISCORD = document.querySelector(".arena-discord") ? document.querySelector(".arena-discord").href : "https://discord.gg/eShZjbqeZy";
@@ -39,13 +40,14 @@ import { getFirestore, collection, doc, addDoc, getDoc, onSnapshot, serverTimest
   const myId = () => (S.viewer && String(S.viewer.uid || "").startsWith("discord:") ? S.viewer.uid.slice(8) : null);
 
   // ------------------------------------------------------------------ Firestore
-  function pub(name) { return doc(db, P + "_public", name); }
-  async function readDoc(ref) { try { const s = await getDoc(ref); return s.exists() ? s.data() : null; } catch (e) { return null; } }
+  function pub(name) { return db ? doc(db, P + "_public", name) : null; }
+  async function readDoc(ref) { if (!ref) return null; try { const s = await getDoc(ref); return s.exists() ? s.data() : null; } catch (e) { return null; } }
   /** A document the bot answers: written pending, watched until it is not. */
   function ask(col, data, wait) {
     return new Promise(async (resolve) => {
       let ref, un = null, done = false;
       const finish = (v) => { if (done) return; done = true; if (un) un(); resolve(v); };
+      if (!db) return finish({ status: "failed", note: "the arena's sign-in is not set up yet" });
       try {
         ref = await addDoc(collection(db, P + col), Object.assign({}, data, { uid: S.viewer.uid, status: "pending", created: serverTimestamp() }));
       } catch (e) { return finish({ status: "failed", note: /permission/i.test(e.message) ? "The arena is for members of the DFWGV Arena Discord. Join it, then sign in again; it can take a minute after joining." : e.message }); }
@@ -54,19 +56,21 @@ import { getFirestore, collection, doc, addDoc, getDoc, onSnapshot, serverTimest
     });
   }
   function watchState(on) {
+    if (!db) return;
     if (on && !S.unsub.state) {
       S.unsub.state = onSnapshot(pub("state"), (snap) => { S.live = snap.exists() ? snap.data() : null; if (S.view === "watch" && !(document.activeElement && document.activeElement.closest(".console"))) render(); }, () => { S.live = null; });
     } else if (!on && S.unsub.state) { S.unsub.state(); S.unsub.state = null; }
   }
   function watchProfile(id) {
     if (S.unsub.profile) { S.unsub.profile(); S.unsub.profile = null; }
+    if (!db) { S.profile = { missing: true, error: "the arena's service is not set up yet" }; return; }
     S.profileId = id; S.profile = null;
     S.unsub.profile = onSnapshot(doc(db, P + "_profiles", id), (snap) => { S.profile = snap.exists() ? snap.data() : { missing: true }; if (S.view === "profile") render(); }, () => { S.profile = { missing: true, error: "the profile could not be read" }; render(); });
     if (S.viewer && myId() && !S.refreshed[id]) { S.refreshed[id] = true; ask("_requests", { kind: "profile", key: id }, 15000); }
   }
   function watchMine(id) {
     if (S.unsub.mine) { S.unsub.mine(); S.unsub.mine = null; }
-    if (!id) return;
+    if (!id || !db) return;
     S.unsub.mine = onSnapshot(doc(db, P + "_profiles", id), (snap) => { if (S.me) { S.me.account = snap.exists() ? snap.data() : null; renderUser(); if (S.view === "watch") render(); } });
   }
   async function signedIn() {
@@ -469,7 +473,7 @@ import { getFirestore, collection, doc, addDoc, getDoc, onSnapshot, serverTimest
     const el = ev.target.closest("[data-act]");
     if (!el) return;
     const act = el.dataset.act;
-    if (act === "login") { ev.preventDefault(); try { await signInWithDiscord(); } catch (e) { notice("Sign-in could not start: " + e.message); } return; }
+    if (act === "login") { ev.preventDefault(); try { await signInWithDiscord(S.config && S.config.discord_client_id, S.config && S.config.redirect); } catch (e) { notice("Sign-in could not start: " + e.message); } return; }
     if (act === "logout") { S.me = null; S.viewer = null; S.profile = null; S.tree = null; watchMine(null); render(); try { await signOutUser(); } catch (e) {} return; }
     if (act === "pick") { S.form.name = el.dataset.name; S.form.variant = ""; render(); return; }
     if (act === "layout") { S.layout = S.layout === "side" ? "theatre" : "side"; try { localStorage.setItem("arena_layout", S.layout); } catch (e) {} render(); return; }
@@ -545,7 +549,10 @@ import { getFirestore, collection, doc, addDoc, getDoc, onSnapshot, serverTimest
   // ------------------------------------------------------------------ start
   (async function start() {
     route();
-    try { const r = await handleDiscordRedirect(); if (r.handled && !r.ok) notice(r.error); } catch (e) { notice("Sign-in did not complete: " + e.message); }
+    // the bot publishes the Discord application id and the registered redirect
+    S.config = await readDoc(pub("config"));
+    try { const r = await handleDiscordRedirect(S.config && S.config.redirect); if (r.handled && !r.ok) notice(r.error); } catch (e) { notice("Sign-in did not complete: " + e.message); }
+    if (!authReady) notice("The arena's sign-in is not set up yet: the bestiary works, playing from here does not.");
     let bestiary = [];
     try { bestiary = await (await fetch("arena/bestiary.json")).json(); } catch (e) {}
     S.cat = await readDoc(pub("catalogue"));
