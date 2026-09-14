@@ -4,7 +4,10 @@
 .arena-page h1, .arena-page h2 { text-align: left; }
 .arena-top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; margin-bottom: 10px; }
 .arena-top h1 { margin: 0 0 4px; }
-.arena-tag { margin: 0; color: var(--muted); max-width: 60ch; }
+.arena-tag { margin: 0; color: var(--muted); max-width: 70ch; }
+.arena-discord { display: inline-block; margin-left: 6px; padding: 3px 10px; border-radius: 999px; background: #5865f2; color: #fff; text-decoration: none; font-weight: 700; font-size: .9em; }
+.arena-discord:hover { background: #4752c4; }
+.arena-page { padding-top: 22px; }
 .arena-user { display: flex; align-items: center; gap: 10px; }
 .arena-user img { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line); }
 .arena-user .who { display: flex; flex-direction: column; line-height: 1.2; }

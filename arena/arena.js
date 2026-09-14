@@ -1,64 +1,90 @@
-/* The DFWGV Arena page. A static page on GitHub Pages talking to the arena's web service
-   (tools/arena_web/arena_web.py in the mod repository), which is another front end on the
-   same accounts the Discord and Twitch bots use. Sign-in is the planners' Discord sign-in
-   (vgplanner/auth.js: Discord PKCE through Firebase, uid "discord:<id>"), one session shared
-   with the planners; the service verifies the Firebase token and that Discord id is the
-   account key. Every action becomes a chat command the agent answers, so the rules live in
-   one place. `?api=http://localhost:8090` points the page at a local service; on localhost
-   the planner's dev identity works too: localStorage.setItem("vgplanner.devUser", "discord:123:Joe"). */
-import { signInWithDiscord, signOutUser, getIdToken, handleDiscordRedirect, onUser } from "../vgplanner/auth.js";
+/* The DFWGV Arena page. A static page on GitHub Pages whose back end is the arena's Discord
+   bot (tools/arena_ai/web_bridge.py in the mod repository), reached through the site's own
+   Firestore, so nothing on the arena machine listens for connections. Sign-in is the
+   planners' Discord sign-in (vgplanner/auth.js: Discord PKCE through Firebase, uid
+   "discord:<id>", one session shared across the site). The page writes a command document,
+   the bot drops it into the agent's inbox as the chat line it already understands and writes
+   the agent's reply back; profiles, the catalogue, the live state, the leaderboard and every
+   talent tree are documents the bot publishes and anyone may read. */
+import { signInWithDiscord, signOutUser, handleDiscordRedirect, onUser, auth } from "../vgplanner/auth.js";
+import { getFirestore, collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 (function () {
   "use strict";
-  const params = new URLSearchParams(location.search);
-  const API = (params.get("api") || "https://129-146-77-26.sslip.io").replace(/\/$/, "");
+  const db = getFirestore(auth.app);
+  const P = "arena";                      // the collections: arena_commands, arena_requests, arena_public, arena_profiles, arena_trees
   const CHANNEL = "dfwgv_arena";
   const PARENTS = ["www.dfwgamingvillage.com", "dfwgamingvillage.com", "localhost", "127.0.0.1"];
+  const DISCORD = document.querySelector(".arena-discord") ? document.querySelector(".arena-discord").href : "https://discord.gg/BMYyM88Shs";
   const ATTACK_WORD = { melee: "melee", ranged: "ranged", both: "both" };
-  const ORDERS = [["hunt", "Hunt", "a target"], ["rage", "Rage", null], ["coward", "Coward", null], ["normal", "Calm", null], ["revive", "Revive", null],
-                  ["burn", "Burn", null], ["poison", "Poison", null], ["freeze", "Freeze", null], ["haste", "Haste", null], ["regen", "Regen", null],
-                  ["shield", "Shield", null], ["grow", "Grow", null], ["shrink", "Shrink", null]];
+  const ORDERS = [["hunt", "Hunt"], ["rage", "Rage"], ["coward", "Coward"], ["normal", "Calm"], ["revive", "Revive"], ["burn", "Burn"], ["poison", "Poison"],
+                  ["freeze", "Freeze"], ["haste", "Haste"], ["regen", "Regen"], ["shield", "Shield"], ["grow", "Grow"], ["shrink", "Shrink"]];
   const WEAPONS = ["rockets", "grenades", "lasers", "shards", "pods", "lightning", "nails", "own"];
   const STRENGTHS = [50, 75, 100, 125, 150, 200];
+  const TIER_COSTS = [[20, 25, 30], [35, 40, 45], [50, 60], [80]];
+  const TIER_UNLOCK = [0, 3, 6, 9];
+  const BUDGET = 10, RESPEC = 50;
+  const COMMAND_WAIT = 25000;
 
   const S = {
-    viewer: null, me: null, cat: null, best: {}, byName: {}, order: [], live: null, config: null,
+    viewer: null, me: null, cat: null, byName: {}, order: [], live: null,
     view: "watch", args: [], log: [], tree: null, treeName: null, profile: null, profileId: null, board: null, boardPeriod: "all",
     form: { name: "", count: 1, door: 0, strength: 100, variant: "", vanilla: false }, filter: { q: "", shelf: "", attack: "", threat: "", owned: false },
-    busy: false, apiDown: false, target: null,
+    busy: false, target: null, unsub: { state: null, profile: null, mine: null }, refreshed: {},
   };
   const $ = (sel) => document.querySelector(sel);
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const num = (n) => (n == null ? "?" : Number(n).toLocaleString());
+  const myId = () => (S.viewer && String(S.viewer.uid || "").startsWith("discord:") ? S.viewer.uid.slice(8) : null);
 
-  // ------------------------------------------------------------------ the service
-  async function api(path, opts) {
-    const o = Object.assign({ headers: {} }, opts || {});
-    if (S.viewer) { const t = await getIdToken(); if (t) { o.headers.Authorization = "Bearer " + t; o.headers["X-Arena-Name"] = S.viewer.name || ""; } }
-    if (o.body && typeof o.body !== "string") { o.body = JSON.stringify(o.body); o.headers["Content-Type"] = "application/json"; }
-    // a service that is down must fail fast, not leave the page on "loading" for a minute
-    const ctl = new AbortController();
-    const timer = setTimeout(() => ctl.abort(), path === "/api/command" ? 16000 : 8000);
-    o.signal = ctl.signal;
-    let r;
-    try { r = await fetch(API + path, o); } catch (e) { S.apiDown = true; throw new Error("the arena's service is not reachable"); }
-    finally { clearTimeout(timer); }
-    S.apiDown = false;
-    if (r.status === 401) { S.me = null; throw new Error((await r.text()) || "sign in with Discord first"); }
-    if (!r.ok) throw new Error((await r.text()) || ("error " + r.status));
-    return r.json();
+  // ------------------------------------------------------------------ Firestore
+  function pub(name) { return doc(db, P + "_public", name); }
+  async function readDoc(ref) { try { const s = await getDoc(ref); return s.exists() ? s.data() : null; } catch (e) { return null; } }
+  /** A document the bot answers: written pending, watched until it is not. */
+  function ask(col, data, wait) {
+    return new Promise(async (resolve) => {
+      let ref, un = null, done = false;
+      const finish = (v) => { if (done) return; done = true; if (un) un(); resolve(v); };
+      try {
+        ref = await addDoc(collection(db, P + col), Object.assign({}, data, { uid: S.viewer.uid, status: "pending", created: serverTimestamp() }));
+      } catch (e) { return finish({ status: "failed", note: /permission/i.test(e.message) ? "the arena refused that (sign in with Discord?)" : e.message }); }
+      un = onSnapshot(ref, (snap) => { const d = snap.data(); if (d && d.status && d.status !== "pending" && d.status !== "sent") finish(d); }, (e) => finish({ status: "failed", note: e.message }));
+      setTimeout(() => finish({ status: "failed", note: "the arena did not answer in time" }), wait || COMMAND_WAIT);
+    });
   }
-  // S.viewer is the planner session ({uid, name, provider}); S.me is the arena's view of it
-  async function loadMe() {
-    if (!S.viewer) { S.me = null; return; }
-    if (!String(S.viewer.uid || "").startsWith("discord:")) { S.me = null; notice("The arena follows Discord accounts: sign out and sign in with Discord to play."); return; }
-    try { S.me = await api("/api/me"); } catch (e) { S.me = null; if (!S.apiDown) notice(e.message); }
+  function watchState(on) {
+    if (on && !S.unsub.state) {
+      S.unsub.state = onSnapshot(pub("state"), (snap) => { S.live = snap.exists() ? snap.data() : null; if (S.view === "watch" && !(document.activeElement && document.activeElement.closest(".console"))) render(); }, () => { S.live = null; });
+    } else if (!on && S.unsub.state) { S.unsub.state(); S.unsub.state = null; }
+  }
+  function watchProfile(id) {
+    if (S.unsub.profile) { S.unsub.profile(); S.unsub.profile = null; }
+    S.profileId = id; S.profile = null;
+    S.unsub.profile = onSnapshot(doc(db, P + "_profiles", id), (snap) => { S.profile = snap.exists() ? snap.data() : { missing: true }; if (S.view === "profile") render(); }, () => { S.profile = { missing: true, error: "the profile could not be read" }; render(); });
+    if (S.viewer && myId() && !S.refreshed[id]) { S.refreshed[id] = true; ask("_requests", { kind: "profile", key: id }, 15000); }
+  }
+  function watchMine(id) {
+    if (S.unsub.mine) { S.unsub.mine(); S.unsub.mine = null; }
+    if (!id) return;
+    S.unsub.mine = onSnapshot(doc(db, P + "_profiles", id), (snap) => { if (S.me) { S.me.account = snap.exists() ? snap.data() : null; renderUser(); if (S.view === "watch") render(); } });
+  }
+  async function signedIn() {
+    const id = myId();
+    if (!id) { S.me = null; if (S.viewer) notice("The arena follows Discord accounts: sign out and sign in with Discord to play."); return; }
+    const r = await ask("_requests", { kind: "me" }, 15000);
+    if (r.status !== "done") {
+      S.me = null;
+      notice(r.note || "The arena could not confirm your account.", false, r.note && /Discord/.test(r.note));
+      return;
+    }
+    S.me = { user: { id: id, name: r.result.name || S.viewer.name }, admin: !!r.result.admin, account: null };
+    watchMine(id);
+    notice("");
   }
 
   // ------------------------------------------------------------------ data
-  function ownsType(name) { const a = S.me && S.me.account; const m = S.byName[name]; return !!(m && (m.starter || (a && a.unlocked.includes(name)))); }
-  function ownsVariant(name, key) { const a = S.me && S.me.account; return !!(a && a.variants[name] && a.variants[name].includes(key)); }
-  function shelfOf(m) { const sh = (S.cat && S.cat.shelves) || []; for (const s of sh) if (s.sources.includes(m.source)) return s.label; return "Other"; }
+  function ownsType(name) { const a = S.me && S.me.account; const m = S.byName[name]; return !!(m && (m.starter || (a && (a.unlocked || []).includes(name)))); }
+  function ownsVariant(name, key) { const a = S.me && S.me.account; return !!(a && a.variants && a.variants[name] && a.variants[name].includes(key)); }
   function mergeData(bestiary, cat) {
     S.byName = {}; S.order = [];
     const rows = (cat && cat.monsters) || bestiary;
@@ -72,18 +98,23 @@ import { signInWithDiscord, signOutUser, getIdToken, handleDiscordRedirect, onUs
     const f = (S.cat && S.cat.costs && S.cat.costs.strength && S.cat.costs.strength[String(strength)]) || 1;
     let c = Math.max(1, Math.floor(2 * m.threat * f + 0.5));
     if (door === 9) c *= 3;
-    if (variant) c += (S.cat && S.cat.costs.variant_surcharge) || 2;
+    if (variant) c += (S.cat && S.cat.costs && S.cat.costs.variant_surcharge) || 2;
     return c * count;
   }
+  function affix(vkey) { const v = ((S.cat && S.cat.variants) || []).find((x) => x.key === vkey); return v ? v.affix : vkey; }
 
   // ------------------------------------------------------------------ routing and rendering
   function route() {
-    const h = location.hash.replace(/^#/, "");
-    const parts = h.split("/").map(decodeURIComponent);
+    const parts = location.hash.replace(/^#/, "").split("/").map(decodeURIComponent);
     S.view = parts[0] || "watch"; S.args = parts.slice(1);
     if (!["watch", "bestiary", "profile", "top"].includes(S.view)) S.view = "watch";
   }
-  function notice(text, ok) { const n = $("#arena-notice"); if (!text) { n.hidden = true; return; } n.hidden = false; n.textContent = text; n.className = "arena-notice" + (ok ? " ok" : ""); }
+  function notice(text, ok, discord) {
+    const n = $("#arena-notice");
+    if (!text) { n.hidden = true; return; }
+    n.hidden = false; n.className = "arena-notice" + (ok ? " ok" : "");
+    n.innerHTML = esc(text) + (discord ? ' <a href="' + esc(DISCORD) + '" target="_blank" rel="noopener">Join the Discord</a>' : "");
+  }
   function renderUser() {
     const u = $("#arena-user");
     if (S.me) {
@@ -91,7 +122,7 @@ import { signInWithDiscord, signOutUser, getIdToken, handleDiscordRedirect, onUs
       u.innerHTML = '<div class="who"><b>' + esc(S.me.user.name) + '</b><small>level ' + lvl + (a ? " · " + num(a.essence) + "/" + a.cap + " essence · " + num(a.souls) + " souls" : " · new here") + "</small></div>" +
         '<button class="small" data-act="logout">Sign out</button>';
     } else if (S.viewer) {
-      u.innerHTML = '<div class="who"><b>' + esc(S.viewer.name || "signed in") + '</b><small>' + (String(S.viewer.uid || "").startsWith("discord:") ? "checking with the arena…" : "signed in with Google; the arena needs Discord") + "</small></div>" +
+      u.innerHTML = '<div class="who"><b>' + esc(S.viewer.name || "signed in") + '</b><small>' + (myId() ? "checking with the arena…" : "signed in with Google; the arena needs Discord") + "</small></div>" +
         '<button class="small" data-act="logout">Sign out</button>';
     } else {
       u.innerHTML = '<button class="discord" data-act="login">Sign in with Discord</button>';
@@ -105,29 +136,26 @@ import { signInWithDiscord, signOutUser, getIdToken, handleDiscordRedirect, onUs
     else if (S.view === "bestiary") app.innerHTML = viewBestiary();
     else if (S.view === "profile") app.innerHTML = viewProfile();
     else app.innerHTML = viewTop();
-    if (S.view === "watch") ensureLive();
+    watchState(S.view === "watch" && !document.hidden);
     if (S.view === "profile") ensureProfile();
     if (S.view === "top") ensureBoard();
   }
 
   // ------------------------------------------------------------------ watch & play
   function viewWatch() {
-    const st = S.live && S.live.state, on = S.live && S.live.online;
+    const st = S.live, on = !!(st && st.online);
     const mons = (st && st.monsters) || [];
     const rounds = st && st.rounds;
-    const status = '<div class="status"><span><i class="dot' + (on ? " on" : "") + '"></i>' + (on ? "live" : (S.apiDown ? "the arena's service is not reachable" : "the arena is offline right now")) + "</span>" +
-      (st ? "<span>" + esc(st.mode || "") + " mode</span><span>round " + esc(st.round || "") + (rounds && rounds.phase ? " · " + esc(rounds.phase) + (rounds.seconds != null ? " " + Math.floor(rounds.seconds / 60) + ":" + String(rounds.seconds % 60).padStart(2, "0") : "") : "") + "</span><span>" + mons.length + " alive</span>" : "") + "</div>";
-    const feed = '<ul class="feed">' + ((S.live && S.live.feed) || []).slice().reverse().map((e) => {
-      const t = e.caption || e.text || e.label || (e.kind === "round" ? "round " + e.number + ": " + e.phase : "");
-      return t ? '<li class="' + esc(e.kind) + '"><b>' + esc(e.kind) + "</b> " + esc(t) + "</li>" : "";
-    }).join("") + "</ul>";
+    const status = '<div class="status"><span><i class="dot' + (on ? " on" : "") + '"></i>' + (on ? "live" : "the arena is offline right now") + "</span>" +
+      (on ? "<span>" + esc(st.mode || "") + " mode</span><span>round " + esc(st.round || "") + (rounds && rounds.phase ? " · " + esc(rounds.phase) + (rounds.seconds != null ? " " + Math.floor(rounds.seconds / 60) + ":" + String(rounds.seconds % 60).padStart(2, "0") : "") : "") + "</span><span>" + mons.length + " alive</span>" : "") + "</div>";
+    const feed = '<ul class="feed">' + ((st && st.feed) || []).slice().reverse().map((e) => '<li class="' + esc(e.kind) + '"><b>' + esc(e.kind) + "</b> " + esc(e.text) + "</li>").join("") + "</ul>";
     const player = '<div class="stream"><iframe src="https://player.twitch.tv/?channel=' + CHANNEL + PARENTS.map((p) => "&parent=" + p).join("") + '&muted=false" allowfullscreen title="The arena stream"></iframe></div>';
     return '<div class="grid2"><div>' + player + status + '<div class="panel" style="margin-top:14px"><h3>What just happened</h3>' + feed + "</div></div><div>" + panel(mons) + "</div></div>";
   }
   function panel(mons) {
     if (!S.me) {
-      return '<div class="panel sign-card"><h2>Play from here</h2><p>Sign in with Discord and your arena account comes with you: essence to send monsters in, souls to unlock the bestiary and build talent trees, and every kill your monsters make counts.</p>' +
-        '<button class="discord" data-act="login">Sign in with Discord</button><p class="inline-note">Not on the Discord yet? <a href="https://discord.gg/BMYyM88Shs" target="_blank" rel="noopener">Join the DFWGV server</a>.</p></div>';
+      return '<div class="panel sign-card"><h2>Play from here</h2><p>Sign in with Discord and your arena account comes with you: essence to send monsters in, souls to unlock the bestiary and build talent trees, and every kill your monsters make counts. You need to be a member of the DFWGV Arena Discord.</p>' +
+        '<button class="discord" data-act="login">Sign in with Discord</button><p class="inline-note">Not on the Discord yet? <a href="' + esc(DISCORD) + '" target="_blank" rel="noopener">Join the DFWGV Arena Discord</a>.</p></div>';
     }
     const a = S.me.account;
     const wallet = a ? '<div class="chips"><span class="chip">level <b>' + a.level + "</b></span><span class=\"chip\">essence <b>" + num(a.essence) + "</b>/" + a.cap + '</span><span class="chip">souls <b>' + num(a.souls) + "</b></span>" + (a.home_door ? '<span class="chip">door <b>' + a.home_door + "</b></span>" : "") + "</div>" :
@@ -142,9 +170,9 @@ import { signInWithDiscord, signOutUser, getIdToken, handleDiscordRedirect, onUs
       const ok = ownsType(x.name);
       return '<div class="tile' + (ok ? "" : " locked") + (x.name === f.name ? " on" : "") + '" data-act="pick" data-name="' + esc(x.name) + '" title="' + esc(x.name + (ok ? "" : " · locked, " + x.unlock + " souls")) + '"><img src="' + esc(x.img) + '" alt="" loading="lazy">' + (ok ? "" : '<span class="lock">' + x.unlock + "</span>") + '<span class="n">' + esc(x.name) + "</span></div>";
     }).join("");
-    const variants = m ? ((S.me.account && S.me.account.variants[m.name]) || []) : [];
+    const variants = m ? ((S.me.account && S.me.account.variants && S.me.account.variants[m.name]) || []) : [];
     const cost = m ? releaseCost(m, f.strength, f.count, f.variant, f.door || 1) : 0;
-    const talents = m && S.me.account && S.me.account.talents[f.variant ? affix(f.variant) + " " + m.name : m.name];
+    const talents = m && S.me.account && S.me.account.talents && S.me.account.talents[f.variant ? affix(f.variant) + " " + m.name : m.name];
     const home = (S.me.account && S.me.account.home_door) || 0;
     return '<div class="panel"><h3>Send in a monster</h3><p class="sub">' + owned.length + " of " + S.order.length + ' types unlocked · <a href="#bestiary">the bestiary</a> sells the rest for souls</p>' +
       '<div class="picker">' + tiles + "</div>" +
@@ -158,7 +186,6 @@ import { signInWithDiscord, signOutUser, getIdToken, handleDiscordRedirect, onUs
       '<div class="form-row"><button class="gold" data-act="release"' + (m ? "" : " disabled") + ">Send in" + (m ? " · " + cost + " essence" : "") + "</button>" +
       (m && !ownsType(m.name) ? '<span class="inline-note">locked: ' + m.unlock + ' souls in <a href="#bestiary/' + esc(m.key) + '">the bestiary</a></span>' : "") + "</div></div>";
   }
-  function affix(vkey) { const v = (S.cat && S.cat.variants || []).find((x) => x.key === vkey); return v ? v.affix : vkey; }
   function ordersPanel(mons) {
     if (!mons.length) return '<div class="panel"><h3>Orders</h3><p class="inline-note">Nothing is alive on the floor right now.</p></div>';
     const costs = (S.cat && S.cat.costs && S.cat.costs.order) || {};
@@ -177,7 +204,7 @@ import { signInWithDiscord, signOutUser, getIdToken, handleDiscordRedirect, onUs
       '<div class="form-row"><label>Seal a door<select data-bind="sealDoor">' + [1, 2, 3, 4, 5, 6, 7, 8].map((d) => '<option value="' + d + '">door ' + d + "</option>").join("") + '</select></label><button data-act="seal">Seal · ' + hz.seal + "</button></div></div>";
   }
   function roundsPanel() {
-    const st = S.live && S.live.state, r = st && st.rounds;
+    const st = S.live, r = st && st.rounds;
     const bets = (S.cat && S.cat.costs && S.cat.costs.bet) || [2, 5, 10, 20];
     return '<div class="panel"><h3>Rounds</h3><p class="sub">' + (r && r.phase ? "Round " + esc(st.round) + " is in the " + esc(r.phase) + ". " : "") + "Join a door and its kills are yours; bet on the door you think takes the round.</p>" +
       '<div class="form-row"><label>Door<select data-bind="joinDoor">' + [1, 2, 3, 4, 5, 6, 7, 8].map((d) => '<option value="' + d + '">door ' + d + "</option>").join("") + '</select></label><button data-act="join">Join this door</button></div>' +
@@ -186,16 +213,6 @@ import { signInWithDiscord, signOutUser, getIdToken, handleDiscordRedirect, onUs
   function consolePanel() {
     const log = S.log.slice(-12).reverse().map((l) => '<li><span class="cmd">' + esc(l.text) + "</span>" + (l.reply ? '<span class="rep">' + esc(l.reply) + "</span>" : "") + (l.ack && !l.reply ? '<span class="rep">✓ ' + esc(l.ack) + "</span>" : "") + (l.note ? '<span class="rep warn">' + esc(l.note) + "</span>" : "") + "</li>").join("");
     return '<div class="panel"><h3>Console</h3><p class="sub">Any chat command works here: <code>!help</code> lists them. Plain text goes to the director.</p><form class="console" data-act="console"><input type="text" name="cmd" placeholder="!release Ogre 3 150" maxlength="200" autocomplete="off"><button class="gold" type="submit">Send</button></form><ul class="log">' + log + "</ul></div>";
-  }
-  let liveTimer = null;
-  function ensureLive() {
-    if (liveTimer) return;
-    const tick = async () => {
-      if (S.view !== "watch") { clearInterval(liveTimer); liveTimer = null; return; }
-      try { S.live = await api("/api/state"); } catch (e) { S.live = null; }
-      if (S.view === "watch" && !document.activeElement.closest?.(".console")) render();
-    };
-    tick(); liveTimer = setInterval(tick, 6000);
   }
 
   // ------------------------------------------------------------------ bestiary
@@ -245,80 +262,90 @@ import { signInWithDiscord, signOutUser, getIdToken, handleDiscordRedirect, onUs
 
   // ------------------------------------------------------------------ profile
   async function ensureProfile() {
-    const id = S.args[0] || (S.me && S.me.user.id);
+    const id = S.args[0] || myId();
     if (!id) return;
-    if (S.profileId !== id || !S.profile) {
-      S.profileId = id; S.profile = null;
-      try { S.profile = await api("/api/profile/" + encodeURIComponent(id)); } catch (e) { S.profile = { missing: true, error: e.message }; }
-      render();
-    }
+    if (S.profileId !== id || !S.unsub.profile) watchProfile(id);
     const build = S.args[1];
-    if (build && (S.treeName !== build || !S.tree || S.tree.forId !== id)) {
+    if (build && S.treeName !== build) {
       S.treeName = build; S.tree = null;
-      try { S.tree = await api("/api/tree?name=" + encodeURIComponent(build) + "&key=" + encodeURIComponent(id)); S.tree.forId = id; } catch (e) { S.tree = { error: e.message }; }
-      render();
+      const t = await readDoc(doc(db, P + "_trees", build));
+      S.tree = t || { error: "no such build" };
+      if (S.treeName === build) render();
     }
   }
   function viewProfile() {
-    const id = S.args[0] || (S.me && S.me.user.id);
+    const id = S.args[0] || myId();
     if (!id) return '<div class="panel sign-card"><h2>Your profile</h2><p>Sign in with Discord to see your stats, the monsters you have unlocked and their talent trees.</p><button class="discord" data-act="login">Sign in with Discord</button></div>';
-    const p = S.profile, mine = S.me && S.me.user.id === id;
+    const p = S.profile, mine = myId() === id;
     if (!p) return '<p class="arena-muted">Loading the profile…</p>';
-    if (p.missing) return '<div class="panel"><h2>' + (mine ? "You have no arena account yet" : "No such account") + "</h2><p>" + (mine ? "It starts the moment you send a monster in or press anything on the Watch page." : esc(p.error)) + "</p></div>";
+    if (p.missing) return '<div class="panel"><h2>' + (mine ? "You have no arena account yet" : "No such account") + "</h2><p>" + (mine ? "It starts the moment you send a monster in or press anything on the Watch page." : esc(p.error || "Nobody has played under that id.")) + "</p></div>";
     const pct = Math.min(100, Math.round(100 * (p.glory - glory(p.level)) / Math.max(1, p.next_level_glory - glory(p.level))));
-    const head = '<div class="panel profile-head">' + (mine && S.me.user.avatar ? '<img src="' + esc(S.me.user.avatar) + '" alt="">' : "") + '<div class="ph"><h2>' + (p.title ? '<span class="title">' + esc(p.title) + "</span>" : "") + esc(p.name) + '</h2><div class="inline-note">level ' + p.level + " · " + num(p.glory) + " glory · " + (p.next_level_glory - p.glory) + " to level " + (p.level + 1) + '</div><div class="level"><i style="width:' + pct + '%"></i></div>' +
+    const head = '<div class="panel profile-head"><div class="ph"><h2>' + (p.title ? '<span class="title">' + esc(p.title) + "</span>" : "") + esc(p.name) + '</h2><div class="inline-note">level ' + p.level + " · " + num(p.glory) + " glory · " + (p.next_level_glory - p.glory) + " to level " + (p.level + 1) + '</div><div class="level"><i style="width:' + pct + '%"></i></div>' +
       '<div class="chips" style="margin-top:8px"><span class="chip">essence <b>' + num(p.essence) + "</b>/" + p.cap + '</span><span class="chip">souls <b>' + num(p.souls) + "</b></span>" + (p.home_door ? '<span class="chip">door <b>' + p.home_door + "</b></span>" : "") + (p.streak ? '<span class="chip">streak <b>' + p.streak + "</b></span>" : "") + "</div></div>" +
       (mine ? '<div class="inline-note">Share this page: <code>' + esc(location.origin + location.pathname + "#profile/" + id) + "</code></div>" : "") + "</div>";
     const stats = '<div class="panel"><h3>Record</h3><div class="stats">' + [["Sent in", p.releases], ["Kills", p.kills], ["Lost", p.deaths], ["Orders", p.orders], ["Hazards", p.hazards], ["Champion kills", p.champion_kills], ["Boss kills", p.boss_kills], ["Round wins", p.round_wins], ["Bets won", p.bets_won], ["Upsets", p.upsets]].map(([k, v]) => '<div class="stat"><div class="k">' + k + '</div><div class="v">' + num(v) + "</div></div>").join("") + "</div>" +
-      (p.daily && p.daily.glory || p.weekly && p.weekly.glory ? '<p class="inline-note">today: ' + num(p.daily.glory) + " glory, " + num(p.daily.kills) + " kills · this week: " + num(p.weekly.glory) + " glory, " + num(p.weekly.kills) + " kills</p>" : "") +
+      ((p.daily && p.daily.glory) || (p.weekly && p.weekly.glory) ? '<p class="inline-note">today: ' + num(p.daily.glory) + " glory, " + num(p.daily.kills) + " kills · this week: " + num(p.weekly.glory) + " glory, " + num(p.weekly.kills) + " kills</p>" : "") +
       (p.best && p.best.kills ? '<p class="inline-note">best monster: ' + esc(p.best.name) + " with " + p.best.kills + " kills</p>" : "") +
-      (p.favourites.length ? '<p class="inline-note">favourites: ' + p.favourites.map((f) => esc(f.name) + " ×" + f.count).join(", ") + "</p>" : "") +
-      (!p.title ? '<p class="inline-note">titles: ' + p.titles.map((t) => esc(t.title) + " for " + esc(t.for) + " (" + t.have + "/" + t.need + ")").join("; ") + "</p>" : "") + "</div>";
+      ((p.favourites || []).length ? '<p class="inline-note">favourites: ' + p.favourites.map((f) => esc(f.name) + " ×" + f.count).join(", ") + "</p>" : "") +
+      (!p.title && p.titles ? '<p class="inline-note">titles: ' + p.titles.map((t) => esc(t.title) + " for " + esc(t.for) + " (" + t.have + "/" + t.need + ")").join("; ") + "</p>" : "") + "</div>";
     const build = S.args[1];
     const tiles = S.order.map((m) => {
-      const own = m.starter || p.unlocked.includes(m.name);
-      const pts = (p.talents[m.name] || {}).points || 0;
-      const vs = (p.variants[m.name] || []).length;
+      const own = m.starter || (p.unlocked || []).includes(m.name);
+      const pts = ((p.talents || {})[m.name] || {}).points || 0;
+      const vs = ((p.variants || {})[m.name] || []).length;
       return '<a class="tile' + (own ? "" : " locked") + (build && build.endsWith(m.name) ? " on" : "") + '" href="#profile/' + esc(id) + "/" + esc(m.name) + '" title="' + esc(m.name + (own ? (pts ? " · " + pts + "-point build" : "") + (vs ? " · " + vs + " variants" : "") : " · locked, " + m.unlock + " souls")) + '"><img src="' + esc(m.img) + '" alt="" loading="lazy">' + (own ? (pts ? pips(Math.min(5, Math.ceil(pts / 2))) : "") : '<span class="lock">' + m.unlock + "</span>") + '<span class="n">' + esc(m.name) + "</span></a>";
     }).join("");
-    const monsters = '<div class="panel"><h3>' + (mine ? "Your monsters" : "Monsters") + '</h3><p class="sub">' + p.unlocked.length + " unlocked beyond the four starters · locked ones are greyed with their price · " + Object.keys(p.talents).length + " builds. Click one for its talent tree and variants.</p><div class=\"picker\" style=\"max-height:none\">" + tiles + "</div></div>";
+    const monsters = '<div class="panel"><h3>' + (mine ? "Your monsters" : "Monsters") + '</h3><p class="sub">' + (p.unlocked || []).length + " unlocked beyond the four starters · locked ones are greyed with their price · " + Object.keys(p.talents || {}).length + " builds. Click one for its talent tree and variants.</p><div class=\"picker\" style=\"max-height:none\">" + tiles + "</div></div>";
     return head + stats + monsters + (build ? buildPanel(p, build, mine) : "");
   }
   function glory(level) { return 30 * (level - 1) * (level - 1); }
+  /** What the agent would say about buying the next rank: the same rules, for the display. */
+  function canSpend(tree, ranks, tal, points, souls) {
+    const r = ranks[tal.key] || 0;
+    if (r >= tal.ranks.length) return { why: "maxed" };
+    if (points >= BUDGET) return { why: "the build holds " + BUDGET + " points" };
+    if (points < TIER_UNLOCK[tal.tier]) return { why: "tier " + (tal.tier + 1) + " opens at " + TIER_UNLOCK[tal.tier] + " points" };
+    const cost = TIER_COSTS[tal.tier][Math.min(r, TIER_COSTS[tal.tier].length - 1)];
+    if (souls != null && souls < cost) return { why: cost + " souls; you have " + souls };
+    return { cost: cost };
+  }
   function buildPanel(p, build, mine) {
     const parts = splitBuild(build);
     if (!parts) return "";
     const base = S.byName[parts.base], vkey = parts.vkey;
-    const own = base.starter || p.unlocked.includes(base.name);
+    const own = base.starter || (p.unlocked || []).includes(base.name);
     const vs = (S.cat && S.cat.variants) || [];
     const selector = '<div class="variants">' + [{ key: "", affix: "" }].concat(vs).map((v) => {
-      const have = v.key ? (p.variants[base.name] || []).includes(v.key) : own;
+      const have = v.key ? ((p.variants || {})[base.name] || []).includes(v.key) : own;
       const name = v.key ? v.affix + " " + base.name : base.name;
-      const pts = (p.talents[name] || {}).points || 0;
+      const pts = ((p.talents || {})[name] || {}).points || 0;
       const inner = '<span class="vn">' + esc(name) + "</span>" + (v.blurb ? '<span class="vb">' + esc(v.blurb) + "</span>" : '<span class="vb">the base monster</span>') +
         (have ? '<span class="inline-note">' + (pts ? pts + "-point build" : "no points yet") + "</span>" : (mine && v.key ? '<button class="small" data-act="unlock" data-name="' + esc(base.name) + '" data-variant="' + esc(v.key) + '"' + (own ? "" : ' disabled title="unlock the base monster first"') + ">Unlock · " + base.variant + " souls</button>" : '<span class="inline-note">locked</span>'));
       return have ? '<a class="variant owned' + (name === build ? " on" : "") + '" href="#profile/' + esc(p.id) + "/" + esc(name) + '">' + inner + "</a>" : '<div class="variant' + (name === build ? " on" : "") + '">' + inner + "</div>";
     }).join("") + "</div>";
     let tree = "";
     const t = S.tree;
-    if (!t || t.forId !== p.id) tree = '<p class="arena-muted">Loading the tree…</p>';
+    const ranks = ((p.talents || {})[build] || {}).ranks || {};
+    const points = Object.values(ranks).reduce((a, b) => a + (parseInt(b, 10) || 0), 0);
+    const summary = ((p.talents || {})[build] || {}).summary || "";
+    if (!t || S.treeName !== build) tree = '<p class="arena-muted">Loading the tree…</p>';
     else if (t.error) tree = '<p class="arena-muted">' + esc(t.error) + "</p>";
     else {
       const names = ["Tier one", "Tier two", "Tier three", "Capstone"];
-      tree = '<div class="build-bar"><span class="pts"><b>' + t.points + "</b> of " + t.budget + " points" + (t.word ? " · " + esc(t.word) : "") + "</span>" + (t.summary ? '<span class="inline-note">' + esc(t.summary) + "</span>" : '<span class="inline-note">no points spent yet</span>') +
-        (mine ? '<button class="small" data-act="respec" data-build="' + esc(build) + '"' + (t.points ? "" : " disabled") + ">Reset the build · " + t.respec + " souls</button>" : "") + "</div>" +
+      tree = '<div class="build-bar"><span class="pts"><b>' + points + "</b> of " + BUDGET + " points</span>" + (summary ? '<span class="inline-note">' + esc(summary) + "</span>" : '<span class="inline-note">no points spent yet</span>') +
+        (mine ? '<button class="small" data-act="respec" data-build="' + esc(build) + '"' + (points ? "" : " disabled") + ">Reset the build · " + RESPEC + " souls</button>" : "") + "</div>" +
         '<p class="inline-note">Ranks cost souls (tier one 20/25/30, tier two 35/40/45, tier three 50/60, the capstone 80); tiers open at 0, 3, 6 and 9 points; a build holds ten points, so no tree can be filled.</p><div class="tree">' +
         t.tiers.map((tier, i) => {
-          const open = t.points >= t.tier_unlock[i];
-          return '<div class="tier' + (open ? "" : " shut") + '"><h4><span>' + names[i] + "</span><span>" + (open ? "open" : "opens at " + t.tier_unlock[i] + " points") + '</span></h4><div class="talents">' + tier.map((tal) => {
-            const r = t.ranks[tal.key] || 0, max = tal.ranks.length, can = t.can[tal.key] || {};
+          const open = points >= TIER_UNLOCK[i];
+          return '<div class="tier' + (open ? "" : " shut") + '"><h4><span>' + names[i] + "</span><span>" + (open ? "open" : "opens at " + TIER_UNLOCK[i] + " points") + '</span></h4><div class="talents">' + tier.map((tal) => {
+            const r = ranks[tal.key] || 0, max = tal.ranks.length, can = canSpend(t, ranks, tal, points, p.souls);
             const cls = "talent" + (r >= max ? " maxed" : "") + (i === 3 ? " cap" : "");
-            const btn = mine ? (r >= max ? '<span class="why">maxed</span>' : (can.cost != null ? '<button class="small gold" data-act="spend" data-build="' + esc(build) + '" data-key="' + esc(tal.key) + '">Buy rank ' + (r + 1) + " · " + can.cost + " souls</button>" : '<span class="why">' + esc(can.why || "") + "</span>")) : "";
+            const btn = mine ? (can.cost != null ? '<button class="small gold" data-act="spend" data-build="' + esc(build) + '" data-key="' + esc(tal.key) + '">Buy rank ' + (r + 1) + " · " + can.cost + " souls</button>" : '<span class="why">' + esc(can.why || "") + "</span>") : "";
             return '<div class="' + cls + '"><div class="tn"><span>' + esc(tal.name) + "</span><small>" + r + "/" + max + '</small></div><span class="tb">' + esc(tal.blurb) + "</span>" + btn + "</div>";
           }).join("") + "</div></div>";
         }).join("") + "</div>";
     }
-    return '<div class="panel"><h3>' + esc(build) + '</h3><p class="sub">' + (own ? "Pick the base or a variant; each has its own ten-point build." : "This monster is locked: unlock it in the bestiary first.") + "</p>" + selector + (own && (!vkey || (p.variants[base.name] || []).includes(vkey)) ? tree : (own ? '<p class="inline-note">Unlock this variant to build it.</p>' : "")) +
+    return '<div class="panel"><h3>' + esc(build) + '</h3><p class="sub">' + (own ? "Pick the base or a variant; each has its own ten-point build." : "This monster is locked: unlock it in the bestiary first.") + "</p>" + selector + (own && (!vkey || ((p.variants || {})[base.name] || []).includes(vkey)) ? tree : (own ? '<p class="inline-note">Unlock this variant to build it.</p>' : "")) +
       (mine && own ? '<div class="form-row"><a href="#watch"><button data-act="send-build" data-name="' + esc(base.name) + '" data-variant="' + esc(vkey || "") + '">Send this one in</button></a></div>' : "") + "</div>";
   }
   function splitBuild(build) {
@@ -329,33 +356,32 @@ import { signInWithDiscord, signOutUser, getIdToken, handleDiscordRedirect, onUs
 
   // ------------------------------------------------------------------ leaderboard
   async function ensureBoard() {
-    if (S.board && S.board.period === (S.boardPeriod === "all" ? "all" : S.boardPeriod)) return;
-    try { S.board = await api("/api/leaderboard" + (S.boardPeriod === "all" ? "" : "?period=" + S.boardPeriod)); } catch (e) { S.board = { period: S.boardPeriod, rows: [], error: e.message }; }
+    if (S.board) return;
+    const b = await readDoc(pub("leaderboard"));
+    S.board = b || { all: [], day: [], week: [], error: "the leaderboard is not published yet" };
     render();
   }
   function viewTop() {
     const b = S.board;
     const tabs = '<div class="tabs2">' + [["all", "All time"], ["day", "Today"], ["week", "This week"]].map(([k, l]) => '<button class="' + (S.boardPeriod === k ? "on" : "") + '" data-act="period" data-period="' + k + '">' + l + "</button>").join("") + "</div>";
     if (!b) return '<div class="panel">' + tabs + '<p class="arena-muted">Loading…</p></div>';
-    const rows = b.rows.map((r) => "<tr><td class=\"num\">" + r.rank + "</td><td>" + (r.id ? '<a href="#profile/' + esc(r.id) + '">' : "") + (r.title ? '<span class="title">' + esc(r.title) + "</span> " : "") + esc(r.name) + (r.id ? "</a>" : "") + '</td><td class="num">' + r.level + '</td><td class="num">' + num(r.glory) + '</td><td class="num">' + num(r.kills) + '</td><td class="num">' + num(r.releases) + "</td></tr>").join("");
+    const rows = (b[S.boardPeriod] || []).map((r) => "<tr><td class=\"num\">" + r.rank + "</td><td>" + (r.id ? '<a href="#profile/' + esc(r.id) + '">' : "") + (r.title ? '<span class="title">' + esc(r.title) + "</span> " : "") + esc(r.name) + (r.id ? "</a>" : "") + '</td><td class="num">' + r.level + '</td><td class="num">' + num(r.glory) + '</td><td class="num">' + num(r.kills) + '</td><td class="num">' + num(r.releases) + "</td></tr>").join("");
     return '<div class="panel"><h2>Leaderboard</h2>' + tabs + (b.error ? '<p class="arena-muted">' + esc(b.error) + "</p>" : rows ? '<table class="top-table"><thead><tr><th></th><th>Player</th><th>Level</th><th>Glory</th><th>Kills</th><th>Sent in</th></tr></thead><tbody>' + rows + "</tbody></table>" : '<p class="arena-muted">Nobody on the board yet.</p>') + "</div>";
   }
 
   // ------------------------------------------------------------------ commands
   async function send(text) {
-    if (!S.me) { notice("Sign in with Discord first."); return null; }
+    if (!S.me) { notice("Sign in with Discord first.", false, true); return null; }
     if (S.busy) return null;
     S.busy = true; $("#app").classList.add("busy");
     const entry = { text: text, reply: null, ack: null, note: null };
     S.log.push(entry);
-    try {
-      const r = await api("/api/command", { method: "POST", body: { text: text } });
-      entry.reply = r.reply; entry.ack = r.ack; entry.note = r.note;
-      notice(r.reply || (r.ack ? "✓ " + r.ack : r.note), !!(r.reply || r.ack));
-    } catch (e) { entry.note = e.message; notice(e.message); }
+    const r = await ask("_commands", { text: text });
+    entry.reply = r.reply || null; entry.ack = r.ack || null; entry.note = r.note || null;
+    if (r.account && S.me) S.me.account = r.account;
+    notice(r.reply || (r.ack ? "✓ " + r.ack : r.note), !!(r.reply || r.ack), r.note && /Discord/.test(r.note));
     S.busy = false; $("#app").classList.remove("busy");
-    await loadMe();
-    S.profile = null; S.tree = null;
+    S.treeName = null;                       // the tree redraws from the refreshed profile
     render();
     return entry;
   }
@@ -366,10 +392,10 @@ import { signInWithDiscord, signOutUser, getIdToken, handleDiscordRedirect, onUs
     if (!el) return;
     const act = el.dataset.act;
     if (act === "login") { ev.preventDefault(); try { await signInWithDiscord(); } catch (e) { notice("Sign-in could not start: " + e.message); } return; }
-    if (act === "logout") { S.me = null; S.viewer = null; S.profile = null; S.tree = null; render(); try { await signOutUser(); } catch (e) {} return; }
+    if (act === "logout") { S.me = null; S.viewer = null; S.profile = null; S.tree = null; watchMine(null); render(); try { await signOutUser(); } catch (e) {} return; }
     if (act === "pick") { S.form.name = el.dataset.name; S.form.variant = ""; render(); return; }
     if (act === "open") { location.hash = "#bestiary/" + el.dataset.key; window.scrollTo({ top: 0, behavior: "smooth" }); return; }
-    if (act === "period") { S.boardPeriod = el.dataset.period; S.board = null; render(); return; }
+    if (act === "period") { S.boardPeriod = el.dataset.period; render(); return; }
     if (act === "untarget") { S.target = null; render(); return; }
     if (act === "send-build") { S.form.name = el.dataset.name; S.form.variant = el.dataset.variant || ""; S.form.vanilla = false; return; }
     if (act === "release") {
@@ -400,7 +426,7 @@ import { signInWithDiscord, signOutUser, getIdToken, handleDiscordRedirect, onUs
     if (act === "bet") { await send("!bet " + bound("betDoor") + " " + bound("betAmt")); return; }
     if (act === "unlock") { await send("!unlock " + el.dataset.name + (el.dataset.variant ? " " + el.dataset.variant : "")); return; }
     if (act === "spend") { await send("!talent " + el.dataset.build + " " + el.dataset.key); return; }
-    if (act === "respec") { if (confirm("Reset every point in " + el.dataset.build + " for " + ((S.tree && S.tree.respec) || 50) + " souls? Nothing is refunded.")) await send("!respec " + el.dataset.build); return; }
+    if (act === "respec") { if (confirm("Reset every point in " + el.dataset.build + " for " + RESPEC + " souls? Nothing is refunded.")) await send("!respec " + el.dataset.build); return; }
   });
   document.addEventListener("change", (ev) => {
     const el = ev.target.closest("[data-bind], [data-act=weapon]");
@@ -431,24 +457,23 @@ import { signInWithDiscord, signOutUser, getIdToken, handleDiscordRedirect, onUs
     if (text) { f.cmd.value = ""; await send(text); }
   });
   window.addEventListener("hashchange", () => { route(); render(); });
+  document.addEventListener("visibilitychange", () => { watchState(S.view === "watch" && !document.hidden); });
 
   // ------------------------------------------------------------------ start
   (async function start() {
     route();
-    // the Discord return leg lands here with ?code=&state= (the planner's callback page bounces
-    // back to whichever page started the sign-in); completing it signs into the shared session
     try { const r = await handleDiscordRedirect(); if (r.handled && !r.ok) notice(r.error); } catch (e) { notice("Sign-in did not complete: " + e.message); }
     let bestiary = [];
     try { bestiary = await (await fetch("arena/bestiary.json")).json(); } catch (e) {}
-    try { S.config = await api("/api/config"); S.cat = await api("/api/catalogue"); } catch (e) { S.cat = null; notice("The arena's service is not reachable right now; the bestiary still works, signing in and playing will not."); }
+    S.cat = await readDoc(pub("catalogue"));
     if (!S.cat) S.cat = { monsters: bestiary.map((b) => Object.assign({}, b, { id: 0 })), variants: [], shelves: [["Quake", ["quake"]], ["Quake mission packs and episodes", ["hipnotic", "rogue", "mg3"]], ["Quake 2", ["quake2"]], ["Hexen II", ["hexen2"]], ["Arena originals", ["original"]], ["Arena kin", ["kin"]]].map(([l, s]) => ({ label: l, sources: s })), costs: {} };
     mergeData(bestiary, S.cat);
     render();
-    // the shared planner session: fires with the restored sign-in on load and on every change
     onUser(async (who) => {
       S.viewer = who ? { uid: who.uid, name: who.name, provider: who.provider } : null;
-      S.me = null; S.profile = null; S.tree = null;
-      await loadMe();
+      S.me = null; S.tree = null; watchMine(null);
+      render();
+      if (S.viewer) await signedIn();
       render();
     });
   })();
