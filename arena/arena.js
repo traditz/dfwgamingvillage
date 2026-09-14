@@ -182,6 +182,19 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     }
     return total;
   }
+  function memberWord(m) { const f = S.form; return (f.variant ? affix(f.variant) + " " : "") + m.name; }
+  function groupAddRow(m) {
+    // under the picked monster: put it (its count and variant as picked) into one of your groups, or a new one
+    const a = S.me.account, groups = Object.keys((a && a.groups) || {});
+    const max = (S.cat && S.cat.costs && S.cat.costs.group_max) || 6;
+    const pick = S.form.group && groups.includes(S.form.group) ? S.form.group : (groups.length && S.form.group !== "*new" ? groups[0] : "*new");
+    const opts = groups.map((n) => '<option value="' + esc(n) + '"' + (pick === n ? " selected" : "") + ">" + esc(n) + "</option>").join("") +
+      (groups.length < max ? '<option value="*new"' + (pick === "*new" ? " selected" : "") + ">a new group…</option>" : "");
+    const n = Math.max(1, S.form.count || 1);
+    return '<div class="form-row group-add"><span class="segl">Group</span><select class="small" data-bind="groupPick" data-act="group-pick">' + opts + "</select>" +
+      '<input type="text" data-bind="groupNewName" placeholder="name for a new group" maxlength="16" style="max-width:150px"' + (pick === "*new" ? "" : " hidden") + ">" +
+      '<button class="small" data-act="group-add" data-name="' + esc(m.name) + '">Add ' + (n > 1 ? n + " × " : "") + esc(memberWord(m)) + "</button></div>";
+  }
   function groupsPanel() {
     const a = S.me.account, groups = (a && a.groups) || {}, f = S.form;
     const door = f.door || (a && a.home_door) || 1;
@@ -284,6 +297,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     return '<div class="panel"><h3>Send in a monster</h3><p class="sub">' + owned.length + " of " + S.order.length + ' types unlocked · <a href="#bestiary">the bestiary</a> sells the rest for souls</p>' +
       '<div class="picker">' + tiles + "</div>" +
       (m ? '<div class="form-row" style="margin-top:10px"><b>' + esc(m.name) + '</b><span class="inline-note">threat ' + m.threat + " · " + esc(m.notes) + "</span></div>" : '<p class="inline-note">Pick a monster above.</p>') +
+      (m && ownsType(m.name) ? groupAddRow(m) : "") +
       seg("How many", "count", [1, 2, 3, 4, 5].map((n) => ({ v: n, t: String(n) })), f.count) +
       '<p class="inline-note">Copies of one kind cost ' + Math.round(((S.cat && S.cat.costs && S.cat.costs.multi_step) || 0.1) * 100) + '% more each for a minute and a half; the crowd sends one boss every ' + ((S.cat && S.cat.costs && S.cat.costs.boss_cooldown) || 30) + ' s.</p>' +
       seg("Door", "door", [{ v: 0, t: home ? "yours (" + home + ")" : "emptiest" }].concat([1, 2, 3, 4, 5, 6, 7, 8].map((d) => ({ v: d, t: String(d) })), [{ v: 9, t: "all (lv 6)" }]), f.door) +
@@ -502,6 +516,13 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
   }
   function bound(name) { const el = document.querySelector('[data-bind="' + name + '"]'); return el ? el.value : ""; }
 
+  document.addEventListener("change", (ev) => {
+    const el = ev.target.closest('[data-act="group-pick"]');
+    if (!el) return;
+    S.form.group = el.value;
+    const box = document.querySelector('[data-bind="groupNewName"]');
+    if (box) box.hidden = el.value !== "*new";
+  });
   document.addEventListener("click", async (ev) => {
     const el = ev.target.closest("[data-act]");
     if (!el) return;
@@ -541,6 +562,19 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
       await send("!group send " + el.dataset.name + (d ? " " + d + " " + f.strength : (f.strength !== 100 ? " " + f.strength : ""))); return;
     }
     if (act === "group-delete") { await send("!group delete " + el.dataset.name); return; }
+    if (act === "group-add") {
+      const a = S.me && S.me.account, m = S.byName[el.dataset.name];
+      if (!a || !m) return;
+      const groups = a.groups || {}, max = (S.cat && S.cat.costs && S.cat.costs.group_members) || 8;
+      const pick = bound("groupPick"), n = Math.max(1, S.form.count || 1);
+      let name = pick, members = [];
+      if (!pick || pick === "*new" || !groups[pick]) { name = bound("groupNewName").trim().replace(/[^A-Za-z0-9_-]/g, "").slice(0, 16); if (!name) { notice("Name the new group first."); return; } }
+      else members = groups[pick].slice();
+      for (let i = 0; i < n; i++) members.push(memberWord(m));
+      if (members.length > max) { notice("A group holds " + max + " monsters at most; " + name + " would have " + members.length + "."); return; }
+      S.form.group = name;
+      await send("!group save " + name + " " + groupWords(members)); return;
+    }
     if (act === "group-save") {
       const n = bound("groupName").trim(), ms = bound("groupMembers").trim();
       if (!n || !ms) { notice("Give the group a name and its monsters, like: Ogre x2, Grunt x3, Frost Knight"); return; }
