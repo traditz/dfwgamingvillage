@@ -159,7 +159,39 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     let c = Math.max(1, Math.floor(2 * m.threat * f + 0.5));
     if (door === 9) c *= 3;
     if (variant) c += (S.cat && S.cat.costs && S.cat.costs.variant_surcharge) || 2;
-    return c * count;
+    // copies of one kind cost a tenth more each: the k-th copy is c * (1 + step * (k - 1))
+    const step = (S.cat && S.cat.costs && S.cat.costs.multi_step) || 0.1;
+    let total = 0;
+    for (let k = 1; k <= count; k++) total += c * (1 + step * (k - 1));
+    return Math.round(total);
+  }
+  function groupWords(members) {
+    const seen = [];
+    members.forEach((d) => { if (!seen.includes(d)) seen.push(d); });
+    return seen.map((d) => { const n = members.filter((x) => x === d).length; return n > 1 ? d + " x" + n : d; }).join(", ");
+  }
+  function groupCost(members, strength, door) {
+    const counts = {};
+    members.forEach((dn) => { counts[dn] = (counts[dn] || 0) + 1; });
+    let total = 0;
+    for (const dn of Object.keys(counts)) {
+      const parts = dn.split(" ");
+      let m = S.byName[dn], variant = "";
+      if (!m && parts.length > 1) { m = S.byName[parts.slice(1).join(" ")]; variant = parts[0]; }
+      if (m) total += releaseCost(m, strength, counts[dn], variant, door);
+    }
+    return total;
+  }
+  function groupsPanel() {
+    const a = S.me.account, groups = (a && a.groups) || {}, f = S.form;
+    const door = f.door || (a && a.home_door) || 1;
+    const max = (S.cat && S.cat.costs && S.cat.costs.group_members) || 8;
+    const rows = Object.keys(groups).map((n) => '<div class="form-row"><b>' + esc(n) + '</b><span class="inline-note">' + esc(groupWords(groups[n])) + "</span>" +
+      '<button class="small gold" data-act="group-send" data-name="' + esc(n) + '">Send · ' + groupCost(groups[n], f.strength, door) + " essence</button>" +
+      '<button class="small" data-act="group-delete" data-name="' + esc(n) + '">Forget</button></div>').join("");
+    return '<div class="panel"><h3>Groups</h3><p class="sub">Several monsters under one name, sent in together from the door and strength picked above. Up to ' + max + ' a group, a variant by its word (Frost Ogre), one boss to a group.</p>' +
+      (rows || '<p class="inline-note">No groups yet.</p>') +
+      '<div class="form-row"><input type="text" data-bind="groupName" placeholder="name" maxlength="16" style="max-width:120px"><input type="text" data-bind="groupMembers" placeholder="Ogre x2, Grunt x3, Frost Knight" maxlength="200" style="flex:1;min-width:200px"><button class="small gold" data-act="group-save">Save group</button></div></div>';
   }
   function affix(vkey) { const v = ((S.cat && S.cat.variants) || []).find((x) => x.key === vkey); return v ? v.affix : vkey; }
 
@@ -233,7 +265,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     const a = S.me.account;
     const wallet = a ? '<div class="chips"><span class="chip">level <b>' + a.level + "</b></span><span class=\"chip\">essence <b>" + num(a.essence) + "</b>/" + a.cap + '</span><span class="chip">souls <b>' + num(a.souls) + "</b></span>" + (a.home_door ? '<span class="chip">door <b>' + a.home_door + "</b></span>" : "") + "</div>" :
       '<p class="inline-note">Your account starts the moment you send something in: 25 essence, the four starter monsters.</p>';
-    return '<div class="panel"><h3>Your arena</h3>' + wallet + "</div>" + releaseForm() + ordersPanel(mons) + hazardsPanel(mons) + roundsPanel() + consolePanel();
+    return '<div class="panel"><h3>Your arena</h3>' + wallet + "</div>" + releaseForm() + groupsPanel() + ordersPanel(mons) + hazardsPanel(mons) + roundsPanel() + consolePanel();
   }
   function releaseForm() {
     const f = S.form;
@@ -253,6 +285,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
       '<div class="picker">' + tiles + "</div>" +
       (m ? '<div class="form-row" style="margin-top:10px"><b>' + esc(m.name) + '</b><span class="inline-note">threat ' + m.threat + " · " + esc(m.notes) + "</span></div>" : '<p class="inline-note">Pick a monster above.</p>') +
       seg("How many", "count", [1, 2, 3, 4, 5].map((n) => ({ v: n, t: String(n) })), f.count) +
+      '<p class="inline-note">Copies of one kind cost ' + Math.round(((S.cat && S.cat.costs && S.cat.costs.multi_step) || 0.1) * 100) + '% more each for a minute and a half; the crowd sends one boss every ' + ((S.cat && S.cat.costs && S.cat.costs.boss_cooldown) || 30) + ' s.</p>' +
       seg("Door", "door", [{ v: 0, t: home ? "yours (" + home + ")" : "emptiest" }].concat([1, 2, 3, 4, 5, 6, 7, 8].map((d) => ({ v: d, t: String(d) })), [{ v: 9, t: "all (lv 6)" }]), f.door) +
       seg("Strength", "strength", STRENGTHS.map((s) => ({ v: s, t: s + "%" })), f.strength) +
       (variants.length ? seg("Variant", "variant", [{ v: "", t: "plain" }].concat(variants.map((v) => ({ v: v, t: affix(v) }))), f.variant) : "") +
@@ -502,6 +535,16 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
       if (f.variant) text += " " + f.variant;
       if (f.vanilla) text += " vanilla";
       await send(text); return;
+    }
+    if (act === "group-send") {
+      const f = S.form, d = f.door || (S.me.account && S.me.account.home_door) || 0;
+      await send("!group send " + el.dataset.name + (d ? " " + d + " " + f.strength : (f.strength !== 100 ? " " + f.strength : ""))); return;
+    }
+    if (act === "group-delete") { await send("!group delete " + el.dataset.name); return; }
+    if (act === "group-save") {
+      const n = bound("groupName").trim(), ms = bound("groupMembers").trim();
+      if (!n || !ms) { notice("Give the group a name and its monsters, like: Ogre x2, Grunt x3, Frost Knight"); return; }
+      await send("!group save " + n + " " + ms); return;
     }
     if (act === "order") {
       const k = el.dataset.order, id = el.dataset.id;
