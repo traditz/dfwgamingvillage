@@ -147,12 +147,25 @@
 .sign-card p { color: var(--muted); max-width: 46ch; margin: 8px auto 14px; }
 .inline-note { color: var(--muted); font-size: .9em; }
 .busy { opacity: .6; pointer-events: none; }
-#arena-stream { margin: 6px 0 10px; max-width: 1280px; transition: max-width .25s; }
-body.view-bestiary #arena-stream, body.view-profile #arena-stream, body.view-top #arena-stream { max-width: 360px; margin-left: auto; }
 .segrow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 8px 0; }
 .segl { font-size: .85em; color: var(--muted); min-width: 72px; }
 .seg { display: flex; flex-wrap: wrap; gap: 6px; }
 .arena-app .segb { min-height: 40px; min-width: 44px; padding: 6px 12px; font-weight: 600; }
 .arena-app .segb.on { border-color: var(--gold); color: var(--gold); background: #2a2110; }
 .arena-app button.big { min-height: 46px; padding: 10px 20px; font-size: 1.05em; }
-@media (max-width: 900px) { .arena-app .grid2 > .watch-side { order: 2; } }
+/* the Watch layout: a grid of the stream, the commands (#app) and the feed. Side by side by
+   default (stream and feed left, commands right); "theatre" stacks a full-width stream, the
+   commands, then the feed; the other tabs keep a small player at the top right */
+.arena-layout { display: grid; gap: 18px; align-items: start; grid-template-columns: minmax(0, 1fr); grid-template-areas: "stream" "app" "feed"; }
+#arena-stream { grid-area: stream; width: 100%; min-width: 0; }
+#app { grid-area: app; min-width: 0; }
+#col-feed { grid-area: feed; min-width: 0; }
+body.view-watch.layout-side .arena-layout { grid-template-columns: minmax(0, 1.55fr) minmax(340px, 1fr); grid-template-rows: auto 1fr; grid-template-areas: "stream app" "feed app"; }
+body:not(.view-watch) #col-feed { display: none; }
+body:not(.view-watch) #arena-stream { max-width: 360px; justify-self: end; }
+.layout-toggle { margin-left: auto; align-self: center; font: inherit; font-size: .9em; color: var(--muted); background: var(--panel-strong); border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+.layout-toggle:hover { color: var(--gold); border-color: var(--gold); }
+@media (max-width: 900px) {
+  body.view-watch.layout-side .arena-layout { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto; grid-template-areas: "stream" "app" "feed"; }
+  .layout-toggle { display: none; }
+}

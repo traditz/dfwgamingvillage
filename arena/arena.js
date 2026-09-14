@@ -29,8 +29,9 @@ import { getFirestore, collection, doc, addDoc, getDoc, onSnapshot, serverTimest
     viewer: null, me: null, cat: null, byName: {}, order: [], live: null,
     view: "watch", args: [], log: [], tree: null, treeName: null, profile: null, profileId: null, board: null, boardPeriod: "all",
     form: { name: "", count: 1, door: 0, strength: 100, variant: "", vanilla: false }, filter: { q: "", shelf: "", attack: "", threat: "", owned: false },
-    busy: false, target: null, unsub: { state: null, profile: null, mine: null }, refreshed: {},
+    busy: false, target: null, unsub: { state: null, profile: null, mine: null }, refreshed: {}, layout: "side",
   };
+  try { if (localStorage.getItem("arena_layout") === "theatre") S.layout = "theatre"; } catch (e) {}
   const $ = (sel) => document.querySelector(sel);
   if (new URLSearchParams(location.search).get("debug") === "1") window.arena = { S: S, render: () => render() };
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -131,26 +132,21 @@ import { getFirestore, collection, doc, addDoc, getDoc, onSnapshot, serverTimest
   function render() {
     document.querySelectorAll("#arena-tabs a").forEach((a) => a.classList.toggle("on", a.dataset.tab === S.view));
     renderUser();
+    // the player is static markup in a grid cell beside #app; the body's classes pick the
+    // layout (side by side, or a bigger stream with the commands under it) and shrink the
+    // player on the other tabs. Nothing here ever redraws it.
+    document.body.className = "view-" + S.view + " layout-" + S.layout;
+    const toggle = $("#layout-toggle");
+    if (toggle) { toggle.textContent = S.layout === "side" ? "Bigger stream" : "Commands beside the stream"; toggle.hidden = S.view !== "watch"; }
     const app = $("#app");
-    // the player is static markup in arena.html, outside everything the script redraws; the
-    // body's view class only makes it small on the other tabs
-    document.body.className = "view-" + S.view;
-    if (!$("#watch-root")) {
-      app.innerHTML = '<div id="watch-root" class="grid2"><div class="watch-side"><div id="watch-status"></div><div class="panel" style="margin-top:14px"><h3>What just happened</h3><div id="watch-feed"></div></div></div><div id="watch-panel"></div></div><div id="view-root"></div>';
-    }
-    const wroot = $("#watch-root"), vroot = $("#view-root");
+    const st = S.live, mons = (st && st.monsters) || [];
     if (S.view === "watch") {
-      wroot.hidden = false; vroot.hidden = true;
-      const st = S.live, mons = (st && st.monsters) || [];
       $("#watch-status").innerHTML = statusLine(st);
       $("#watch-feed").innerHTML = feedList(st);
-      $("#watch-panel").innerHTML = panel(mons);
-    } else {
-      wroot.hidden = true; vroot.hidden = false;
-      if (S.view === "bestiary") vroot.innerHTML = viewBestiary();
-      else if (S.view === "profile") vroot.innerHTML = viewProfile();
-      else vroot.innerHTML = viewTop();
-    }
+      app.innerHTML = panel(mons);
+    } else if (S.view === "bestiary") app.innerHTML = viewBestiary();
+    else if (S.view === "profile") app.innerHTML = viewProfile();
+    else app.innerHTML = viewTop();
     watchState(S.view === "watch" && !document.hidden);
     if (S.view === "profile") ensureProfile();
     if (S.view === "top") ensureBoard();
@@ -387,14 +383,14 @@ import { getFirestore, collection, doc, addDoc, getDoc, onSnapshot, serverTimest
   async function send(text) {
     if (!S.me) { notice("Sign in with Discord first.", false, true); return null; }
     if (S.busy) return null;
-    S.busy = true; document.querySelectorAll("#watch-panel, #view-root").forEach((el) => el.classList.add("busy"));
+    S.busy = true; $("#app").classList.add("busy");
     const entry = { text: text, reply: null, ack: null, note: null };
     S.log.push(entry);
     const r = await ask("_commands", { text: text });
     entry.reply = r.reply || null; entry.ack = r.ack || null; entry.note = r.note || null;
     if (r.account && S.me) S.me.account = r.account;
     notice(r.reply || (r.ack ? "✓ " + r.ack : r.note), !!(r.reply || r.ack), r.note && /Discord/.test(r.note));
-    S.busy = false; document.querySelectorAll("#watch-panel, #view-root").forEach((el) => el.classList.remove("busy"));
+    S.busy = false; $("#app").classList.remove("busy");
     S.treeName = null;                       // the tree redraws from the refreshed profile
     render();
     return entry;
@@ -408,6 +404,7 @@ import { getFirestore, collection, doc, addDoc, getDoc, onSnapshot, serverTimest
     if (act === "login") { ev.preventDefault(); try { await signInWithDiscord(); } catch (e) { notice("Sign-in could not start: " + e.message); } return; }
     if (act === "logout") { S.me = null; S.viewer = null; S.profile = null; S.tree = null; watchMine(null); render(); try { await signOutUser(); } catch (e) {} return; }
     if (act === "pick") { S.form.name = el.dataset.name; S.form.variant = ""; render(); return; }
+    if (act === "layout") { S.layout = S.layout === "side" ? "theatre" : "side"; try { localStorage.setItem("arena_layout", S.layout); } catch (e) {} render(); return; }
     if (act === "set") {
       const v = el.dataset.value, f = el.dataset.field;
       if (f === "count") S.form.count = parseInt(v, 10) || 1;

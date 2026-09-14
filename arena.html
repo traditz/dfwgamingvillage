@@ -11,7 +11,7 @@
     <meta property="og:type" content="website">
     <title>DFWGV Arena</title>
     <link rel="stylesheet" href="community.css?v=20260622-cleanup">
-    <link rel="stylesheet" href="arena/arena.css?v=20260914d">
+    <link rel="stylesheet" href="arena/arena.css?v=20260914e">
     <link rel="icon" href="favicon.ico">
 </head>
 <body data-page="arena">
@@ -24,20 +24,24 @@
             </div>
             <div id="arena-user" class="arena-user"></div>
         </header>
-        <div id="arena-stream" class="stream"><iframe src="https://player.twitch.tv/?channel=dfwgv_arena&amp;parent=www.dfwgamingvillage.com&amp;parent=dfwgamingvillage.com&amp;parent=localhost&amp;parent=127.0.0.1" allowfullscreen allow="autoplay; fullscreen" title="The arena stream"></iframe></div>
         <nav class="arena-tabs" id="arena-tabs">
             <a href="#watch" data-tab="watch">Watch &amp; play</a>
             <a href="#bestiary" data-tab="bestiary">Bestiary</a>
             <a href="#profile" data-tab="profile">Profile</a>
             <a href="#top" data-tab="top">Leaderboard</a>
+            <button type="button" class="layout-toggle" id="layout-toggle" data-act="layout" title="Stream and commands side by side, or a bigger stream with the commands under it">Bigger stream</button>
         </nav>
         <div id="arena-notice" class="arena-notice" hidden></div>
-        <div id="app" class="arena-app"><p class="arena-muted">Loading the arena…</p></div>
+        <div id="layout" class="arena-layout">
+            <div id="arena-stream" class="stream"><iframe src="https://player.twitch.tv/?channel=dfwgv_arena&amp;parent=www.dfwgamingvillage.com&amp;parent=dfwgamingvillage.com&amp;parent=localhost&amp;parent=127.0.0.1" allowfullscreen allow="autoplay; fullscreen" title="The arena stream"></iframe></div>
+            <div id="app" class="arena-app"><p class="arena-muted">Loading the arena…</p></div>
+            <div id="col-feed"><div id="watch-status"></div><div class="panel" style="margin-top:14px"><h3>What just happened</h3><div id="watch-feed"></div></div></div>
+        </div>
     </main>
 
     <footer class="footer">
         <p>&copy; 2026 DFW Gaming Village. All Rights Reserved.</p>
     </footer>
-    <script type="module" src="arena/arena.js?v=20260914d"></script>
+    <script type="module" src="arena/arena.js?v=20260914e"></script>
 </body>
 </html>
