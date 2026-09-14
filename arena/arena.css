@@ -47,7 +47,7 @@
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: var(--panel-strong); border: 1px solid var(--line); font-size: .9em; }
 .chip b { color: var(--gold); }
-.feed { list-style: none; margin: 10px 0 0; padding: 0; max-height: 260px; overflow: auto; font-size: .92em; }
+.feed { list-style: none; margin: 10px 0 0; padding: 0; height: 320px; overflow: auto; font-size: .92em; }
 .feed li { padding: 4px 0; border-bottom: 1px solid var(--line-soft); color: var(--muted); }
 .feed li b { color: var(--text); font-weight: 600; }
 .feed li.kill b { color: var(--red); }
@@ -169,3 +169,15 @@ body:not(.view-watch) #arena-stream { max-width: 360px; justify-self: end; }
   body.view-watch.layout-side .arena-layout { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto; grid-template-areas: "stream" "app" "feed"; }
   .layout-toggle { display: none; }
 }
+/* under the stream: the feed and the Twitch chat side by side */
+#col-feed .under { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+@media (max-width: 700px) { #col-feed .under { grid-template-columns: 1fr; } }
+.chat-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.chat-head a { font-size: .75em; letter-spacing: 0; text-transform: none; color: var(--muted); font-weight: 400; white-space: nowrap; }
+.chat { list-style: none; margin: 10px 0 0; padding: 0; height: 320px; overflow: auto; font-size: .92em; overflow-wrap: anywhere; }
+.chat li { padding: 3px 0; border-bottom: 1px solid var(--line-soft); }
+.chat .cn { font-weight: 700; }
+.chat .emote { height: 22px; vertical-align: middle; }
+.chat .b { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+.chat .bc { background: var(--gold); }
+.chat .bm { background: var(--teal); }

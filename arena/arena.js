@@ -33,7 +33,7 @@ import { getFirestore, collection, doc, addDoc, getDoc, onSnapshot, serverTimest
   };
   try { if (localStorage.getItem("arena_layout") === "theatre") S.layout = "theatre"; } catch (e) {}
   const $ = (sel) => document.querySelector(sel);
-  if (new URLSearchParams(location.search).get("debug") === "1") window.arena = { S: S, render: () => render() };
+  if (new URLSearchParams(location.search).get("debug") === "1") window.arena = { S: S, render: () => render(), chat: () => chat };
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const num = (n) => (n == null ? "?" : Number(n).toLocaleString());
   const myId = () => (S.viewer && String(S.viewer.uid || "").startsWith("discord:") ? S.viewer.uid.slice(8) : null);
@@ -81,6 +81,61 @@ import { getFirestore, collection, doc, addDoc, getDoc, onSnapshot, serverTimest
     S.me = { user: { id: id, name: r.result.name || S.viewer.name }, admin: !!r.result.admin, account: null };
     watchMine(id);
     notice("");
+  }
+
+  // ------------------------------------------------------------------ Twitch chat, read from the public chat stream, without the bot
+  const CHAT_HIDE = ["dfwgv_arena"];          // logins whose lines stay out: the arena's own bot, already in the feed
+  const chat = { ws: null, want: false, lines: [], timer: null, tries: 0 };
+  function chatWant(on) { chat.want = on; if (on) chatConnect(); else chatClose(); }
+  function chatConnect() {
+    if (!chat.want || chat.ws) return;
+    let ws;
+    try { ws = new WebSocket("wss://irc-ws.chat.twitch.tv:443"); } catch (e) { return; }
+    chat.ws = ws;
+    ws.onopen = () => { chat.tries = 0; ws.send("CAP REQ :twitch.tv/tags twitch.tv/commands"); ws.send("NICK justinfan" + Math.floor(10000 + Math.random() * 89999)); ws.send("JOIN #" + CHANNEL); };
+    ws.onmessage = (ev) => { for (const line of String(ev.data).split("\r\n")) if (line) chatLine(line); };
+    ws.onclose = () => { if (chat.ws === ws) chat.ws = null; if (chat.want) { chat.tries++; clearTimeout(chat.timer); chat.timer = setTimeout(chatConnect, Math.min(30000, 1000 * Math.pow(2, chat.tries))); } };
+    ws.onerror = () => { try { ws.close(); } catch (e) {} };
+  }
+  function chatClose() { clearTimeout(chat.timer); if (chat.ws) { const w = chat.ws; chat.ws = null; try { w.close(); } catch (e) {} } }
+  function parseIrc(line) {
+    let tags = {}, prefix = "", rest = line;
+    if (rest.startsWith("@")) { const sp = rest.indexOf(" "); for (const kv of rest.slice(1, sp).split(";")) { const i = kv.indexOf("="); tags[kv.slice(0, i)] = kv.slice(i + 1); } rest = rest.slice(sp + 1); }
+    if (rest.startsWith(":")) { const sp = rest.indexOf(" "); prefix = rest.slice(1, sp); rest = rest.slice(sp + 1); }
+    const ci = rest.indexOf(" :");
+    const params = (ci >= 0 ? rest.slice(0, ci) : rest).split(" ");
+    return { tags, prefix, cmd: params[0], params: params.slice(1), trailing: ci >= 0 ? rest.slice(ci + 2) : "" };
+  }
+  function chatLine(line) {
+    if (line.startsWith("PING")) { if (chat.ws) chat.ws.send("PONG :tmi.twitch.tv"); return; }
+    const m = parseIrc(line);
+    if (m.cmd === "PRIVMSG") {
+      const login = m.prefix.split("!")[0].toLowerCase();
+      if (CHAT_HIDE.includes(login)) return;
+      chat.lines.push({ id: m.tags.id, login, name: m.tags["display-name"] || login, color: m.tags.color || "", badges: m.tags.badges || "", text: m.trailing, emotes: m.tags.emotes || "" });
+      if (chat.lines.length > 150) chat.lines.splice(0, chat.lines.length - 150);
+      chatRender();
+    } else if (m.cmd === "ROOMSTATE" || m.cmd === "JOIN") { chat.joined = true; if (!chat.lines.length) chatRender(); }
+    else if (m.cmd === "CLEARCHAT") { const who = m.trailing.toLowerCase(); chat.lines = who ? chat.lines.filter((l) => l.login !== who) : []; chatRender(); }
+    else if (m.cmd === "CLEARMSG") { const id = m.tags["target-msg-id"]; chat.lines = chat.lines.filter((l) => l.id !== id); chatRender(); }
+  }
+  function chatHtml(l) {
+    // Twitch's emotes tag gives code point ranges into the text; those become images
+    const cps = Array.from(l.text), spans = [];
+    if (l.emotes) for (const part of l.emotes.split("/")) { const [id, ranges] = part.split(":"); if (!ranges) continue; for (const r of ranges.split(",")) { const [a, b] = r.split("-").map(Number); if (!isNaN(a) && !isNaN(b)) spans.push([a, b, id]); } }
+    spans.sort((x, y) => x[0] - y[0]);
+    let out = "", i = 0;
+    for (const [a, b, id] of spans) { if (a < i) continue; out += esc(cps.slice(i, a).join("")); out += '<img class="emote" src="https://static-cdn.jtvnw.net/emoticons/v2/' + encodeURIComponent(id) + '/default/dark/1.0" alt="' + esc(cps.slice(a, b + 1).join("")) + '">'; i = b + 1; }
+    out += esc(cps.slice(i).join(""));
+    const badge = /broadcaster/.test(l.badges) ? '<i class="b bc" title="the streamer"></i>' : /moderator/.test(l.badges) ? '<i class="b bm" title="a moderator"></i>' : "";
+    return '<li>' + badge + '<span class="cn" style="color:' + esc(/^#[0-9a-fA-F]{6}$/.test(l.color) ? l.color : "#c8c8d0") + '">' + esc(l.name) + '</span> ' + out + "</li>";
+  }
+  function chatRender() {
+    const ul = $("#twitch-chat");
+    if (!ul) return;
+    const stick = ul.scrollHeight - ul.scrollTop - ul.clientHeight < 60;
+    ul.innerHTML = chat.lines.map(chatHtml).join("") || '<li class="arena-muted">' + (chat.joined ? "Connected. Nobody has said anything since you arrived." : "Connecting to the chat…") + "</li>";
+    if (stick) ul.scrollTop = ul.scrollHeight;
   }
 
   // ------------------------------------------------------------------ data
@@ -148,6 +203,7 @@ import { getFirestore, collection, doc, addDoc, getDoc, onSnapshot, serverTimest
     else if (S.view === "profile") app.innerHTML = viewProfile();
     else app.innerHTML = viewTop();
     watchState(S.view === "watch" && !document.hidden);
+    chatWant(S.view === "watch" && !document.hidden);
     if (S.view === "profile") ensureProfile();
     if (S.view === "top") ensureBoard();
   }
@@ -472,7 +528,7 @@ import { getFirestore, collection, doc, addDoc, getDoc, onSnapshot, serverTimest
     if (text) { f.cmd.value = ""; await send(text); }
   });
   window.addEventListener("hashchange", () => { route(); render(); });
-  document.addEventListener("visibilitychange", () => { watchState(S.view === "watch" && !document.hidden); });
+  document.addEventListener("visibilitychange", () => { watchState(S.view === "watch" && !document.hidden); chatWant(S.view === "watch" && !document.hidden); });
 
   // ------------------------------------------------------------------ start
   (async function start() {
