@@ -15,7 +15,7 @@ import { getFirestore, collection, doc, addDoc, getDoc, onSnapshot, serverTimest
   const P = "arena";                      // the collections: arena_commands, arena_requests, arena_public, arena_profiles, arena_trees
   const CHANNEL = "dfwgv_arena";
   const PARENTS = ["www.dfwgamingvillage.com", "dfwgamingvillage.com", "localhost", "127.0.0.1"];
-  const DISCORD = document.querySelector(".arena-discord") ? document.querySelector(".arena-discord").href : "https://discord.gg/BMYyM88Shs";
+  const DISCORD = document.querySelector(".arena-discord") ? document.querySelector(".arena-discord").href : "https://discord.gg/eShZjbqeZy";
   const ATTACK_WORD = { melee: "melee", ranged: "ranged", both: "both" };
   const ORDERS = [["hunt", "Hunt"], ["rage", "Rage"], ["coward", "Coward"], ["normal", "Calm"], ["revive", "Revive"], ["burn", "Burn"], ["poison", "Poison"],
                   ["freeze", "Freeze"], ["haste", "Haste"], ["regen", "Regen"], ["shield", "Shield"], ["grow", "Grow"], ["shrink", "Shrink"]];
