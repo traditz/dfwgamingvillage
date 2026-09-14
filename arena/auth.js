@@ -88,8 +88,18 @@ export async function handleDiscordRedirect(redirect) {
   } catch (e) {
     clearParams();
     try { if (auth.currentUser && auth.currentUser.isAnonymous) await signOut(auth); } catch (e2) {}
-    return { handled: true, ok: false, error: e && e.message ? e.message : String(e) };
+    return { handled: true, ok: false, error: explain(e) };
   }
+}
+
+/** Firebase's error codes in the arena's words. */
+function explain(e) {
+  const code = (e && e.code) || "";
+  if (code === "auth/admin-restricted-operation") return "The arena's Firebase project has Anonymous sign-in turned off (Authentication -> Sign-in method); the sign-in handshake needs it.";
+  if (code === "auth/network-request-failed") return "Could not reach Firebase; check the connection and try again.";
+  if (code === "permission-denied") return "Firestore refused the sign-in handshake: the arena's rules are not published, or the wrong ones are.";
+  if (code === "auth/invalid-custom-token" || code === "auth/custom-token-mismatch") return "The token the arena minted is not for this project: the bot's key and the page's config name different projects.";
+  return e && e.message ? e.message : String(e);
 }
 
 /** Calls back with { uid, name, provider } for a Discord sign-in, or null (anonymous sessions count as nobody). */

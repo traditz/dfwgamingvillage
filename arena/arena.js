@@ -7,7 +7,7 @@
    line it already understands and writes the agent's reply back; profiles, the catalogue,
    the live state, the leaderboard and every talent tree are documents the bot publishes and
    anyone may read. */
-import { signInWithDiscord, signOutUser, handleDiscordRedirect, onUser, ready as authReady, db as arenaDb } from "./auth.js?v=20260915b";
+import { signInWithDiscord, signOutUser, handleDiscordRedirect, onUser, ready as authReady, db as arenaDb } from "./auth.js?v=20260915c";
 import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 (function () {
