@@ -48,7 +48,7 @@ import { getFirestore, collection, doc, addDoc, getDoc, onSnapshot, serverTimest
       const finish = (v) => { if (done) return; done = true; if (un) un(); resolve(v); };
       try {
         ref = await addDoc(collection(db, P + col), Object.assign({}, data, { uid: S.viewer.uid, status: "pending", created: serverTimestamp() }));
-      } catch (e) { return finish({ status: "failed", note: /permission/i.test(e.message) ? "the arena refused that (sign in with Discord?)" : e.message }); }
+      } catch (e) { return finish({ status: "failed", note: /permission/i.test(e.message) ? "The arena is for members of the DFWGV Arena Discord. Join it, then sign in again; it can take a minute after joining." : e.message }); }
       un = onSnapshot(ref, (snap) => { const d = snap.data(); if (d && d.status && d.status !== "pending" && d.status !== "sent") finish(d); }, (e) => finish({ status: "failed", note: e.message }));
       setTimeout(() => finish({ status: "failed", note: "the arena did not answer in time" }), wait || COMMAND_WAIT);
     });
