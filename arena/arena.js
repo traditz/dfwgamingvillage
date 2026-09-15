@@ -154,15 +154,21 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
       S.byName[m.name] = row; S.order.push(row);
     }
   }
+  function recentCount(kind) {
+    // copies of this kind the viewer sent within the window (the profile carries them, the director prices by them)
+    const a = S.me && S.me.account, win = (S.cat && S.cat.costs && S.cat.costs.multi_window) || 90, now = Date.now() / 1000;
+    return ((a && a.recent) || []).filter((r) => r[1] === kind && now - r[0] <= win).length;
+  }
   function releaseCost(m, strength, count, variant, door) {
     const f = (S.cat && S.cat.costs && S.cat.costs.strength && S.cat.costs.strength[String(strength)]) || 1;
     let c = Math.max(1, Math.floor(2 * m.threat * f + 0.5));
     if (door === 9) c *= 3;
     if (variant) c += (S.cat && S.cat.costs && S.cat.costs.variant_surcharge) || 2;
-    // copies of one kind cost a tenth more each: the k-th copy is c * (1 + step * (k - 1))
+    // copies of one kind cost a tenth more each, the ones sent of late counted: the k-th copy is c * (1 + step * (k - 1))
     const step = (S.cat && S.cat.costs && S.cat.costs.multi_step) || 0.1;
+    const already = recentCount((variant ? affix(variant) + " " : "") + m.name);
     let total = 0;
-    for (let k = 1; k <= count; k++) total += c * (1 + step * (k - 1));
+    for (let k = already + 1; k <= already + count; k++) total += c * (1 + step * (k - 1));
     return Math.round(total);
   }
   function groupWords(members) {
@@ -326,8 +332,10 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
         seg("Strength", "strength", STRENGTHS.map((s) => ({ v: s, t: s + "%" })), f.strength, "150% and up is a champion") +
         (variants.length ? seg("Variant", "variant", [{ v: "", t: "plain" }].concat(variants.map((v) => ({ v: v, t: affix(v) }))), f.variant) : "") +
         (talents ? seg("Build", "vanilla", [{ v: "0", t: "your " + talents.points + "-point build" }, { v: "1", t: "vanilla" }], f.vanilla ? "1" : "0") : "");
+      const lately = recentCount((f.variant ? affix(f.variant) + " " : "") + m.name);
       const summary = (f.count > 1 ? f.count + " × " : "") + (f.variant ? affix(f.variant) + " " : "") + m.name + " at " + f.strength + "%" +
-        (f.door === 9 ? " from every door" : f.door ? " from door " + f.door : home ? " from door " + home : " from the emptiest door");
+        (f.door === 9 ? " from every door" : f.door ? " from door " + f.door : home ? " from door " + home : " from the emptiest door") +
+        (lately ? " · " + lately + " sent lately, so each copy costs " + (step * lately) + "% more" : "");
       foot = '<div class="summon-foot"><div class="cost"><span class="k">Cost</span><b>' + cost + '</b><span class="unit">essence</span><small>' + esc(summary) + "</small></div>" +
         '<div class="actions"><button class="gold big" data-act="release"' + (ok ? "" : " disabled") + ">Send in</button>" + walletChip(cost) + "</div>" +
         '<p class="fine">The crowd sends one boss every ' + bossWait + " s; copies of a kind cost " + step + "% more each for a minute and a half.</p>" +
