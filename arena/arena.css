@@ -47,6 +47,10 @@
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: var(--panel-strong); border: 1px solid var(--line); font-size: .9em; }
 .chip b { color: var(--gold); }
+.chip.wallet { border-color: var(--gold-dark, var(--gold)); font-size: 1em; }
+.chip.wallet b { font-size: 1.15em; }
+.chip.wallet.low { border-color: var(--red); }
+.chip.wallet.low b { color: var(--red); }
 .feed { list-style: none; margin: 10px 0 0; padding: 0; height: 320px; overflow: auto; font-size: .92em; }
 .feed li { padding: 4px 0; border-bottom: 1px solid var(--line-soft); color: var(--muted); }
 .feed li b { color: var(--text); font-weight: 600; }

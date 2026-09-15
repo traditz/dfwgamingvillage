@@ -202,9 +202,16 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     const rows = Object.keys(groups).map((n) => '<div class="form-row"><b>' + esc(n) + '</b><span class="inline-note">' + esc(groupWords(groups[n])) + "</span>" +
       '<button class="small gold" data-act="group-send" data-name="' + esc(n) + '">Send · ' + groupCost(groups[n], f.strength, door) + " essence</button>" +
       '<button class="small" data-act="group-delete" data-name="' + esc(n) + '">Forget</button></div>').join("");
-    return '<div class="panel"><h3>Groups</h3><p class="sub">Several monsters under one name, sent in together from the door and strength picked above. Up to ' + max + ' a group, a variant by its word (Frost Ogre), one boss to a group.</p>' +
+    return '<div class="panel"><h3>Groups</h3><p class="sub">Several monsters under one name, sent in together from the door and strength picked above. Up to ' + max + ' a group, a variant by its word (Frost Ogre), one boss to a group.</p><div class="form-row">' + walletChip(null) + '</div>' +
       (rows || '<p class="inline-note">No groups yet.</p>') +
       '<div class="form-row"><input type="text" data-bind="groupName" placeholder="name" maxlength="16" style="max-width:120px"><input type="text" data-bind="groupMembers" placeholder="Ogre x2, Grunt x3, Frost Knight" maxlength="200" style="flex:1;min-width:200px"><button class="small gold" data-act="group-save">Save group</button></div></div>';
+  }
+  function walletChip(cost) {
+    // the essence in hand, right where it is spent; red when the pick costs more than that
+    const a = S.me && S.me.account;
+    if (!a) return '<span class="chip wallet" title="a new account starts with 25 essence">💧 <b>25</b> essence to start</span>';
+    const low = cost != null && a.essence < cost;
+    return '<span class="chip wallet' + (low ? " low" : "") + '" title="one back every minute; all of it back at each draft in rounds mode; a little with every kill">💧 <b>' + num(a.essence) + "</b>/" + a.cap + " essence" + (low ? " · not enough" : "") + "</span>";
   }
   function affix(vkey) { const v = ((S.cat && S.cat.variants) || []).find((x) => x.key === vkey); return v ? v.affix : vkey; }
 
@@ -306,7 +313,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
       seg("Strength", "strength", STRENGTHS.map((s) => ({ v: s, t: s + "%" })), f.strength) +
       (variants.length ? seg("Variant", "variant", [{ v: "", t: "plain" }].concat(variants.map((v) => ({ v: v, t: affix(v) }))), f.variant) : "") +
       (talents ? seg("Build", "vanilla", [{ v: "0", t: "your " + talents.points + "-point build" }, { v: "1", t: "vanilla" }], f.vanilla ? "1" : "0") : "") +
-      '<div class="form-row"><button class="gold big" data-act="release"' + (m ? "" : " disabled") + ">Send in" + (m ? " · " + cost + " essence" : "") + "</button>" +
+      '<div class="form-row"><button class="gold big" data-act="release"' + (m ? "" : " disabled") + ">Send in" + (m ? " · " + cost + " essence" : "") + "</button>" + walletChip(m ? cost : null) +
       (m && !ownsType(m.name) ? '<span class="inline-note">locked: ' + m.unlock + ' souls in <a href="#bestiary/' + esc(m.key) + '">the bestiary</a></span>' : "") + "</div></div>";
   }
   function ordersPanel(mons) {
@@ -317,7 +324,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
         '<select class="small" data-act="weapon" data-id="' + x.id + '" title="' + (costs.weapon || 3) + ' essence, level 3"><option value="">weapon…</option>' + WEAPONS.map((w) => '<option value="' + w + '">' + w + "</option>").join("") + "</select>";
       return '<div class="mon"><b>' + esc(x.name) + "</b> #" + x.id + ' <span class="inline-note">door ' + x.door + (x.fx ? " · " + esc(x.fx) : "") + '</span><div class="hp"><i style="width:' + Math.max(0, Math.min(100, x.hp || 0)) + '%"></i></div><div class="acts">' + acts + "</div></div>";
     }).join("");
-    return '<div class="panel"><h3>Orders</h3><p class="sub">Orders cost essence (' + Object.entries(costs).map(([k, v]) => k + " " + v).join(", ") + '). Hunt asks for a target next.</p>' +
+    return '<div class="panel"><h3>Orders</h3><p class="sub">Orders cost essence (' + Object.entries(costs).map(([k, v]) => k + " " + v).join(", ") + '). Hunt asks for a target next.</p>' + (S.me ? '<div class="form-row">' + walletChip(null) + '</div>' : '') +
       (S.target ? '<p class="inline-note">Hunt with #' + S.target + ": click the target below, or <button class=\"small\" data-act=\"untarget\">cancel</button></p>" : "") + '<div class="mon-list">' + list + "</div></div>";
   }
   function hazardsPanel(mons) {
