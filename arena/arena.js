@@ -29,7 +29,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
   const S = {
     viewer: null, me: null, cat: null, byName: {}, order: [], live: null,
     view: "watch", args: [], log: [], tree: null, treeName: null, profile: null, profileId: null, board: null, boardPeriod: "all",
-    form: { name: "", count: 1, door: 0, strength: 100, variant: "", vanilla: false, onlyOwned: (function () { try { return localStorage.getItem("arena_only_owned") === "1"; } catch (e) { return false; } })() }, filter: { q: "", shelf: "", attack: "", threat: "", owned: false },
+    form: { name: "", count: 1, door: 0, strength: 100, variant: "", vanilla: false, q: "", shelf: "", onlyOwned: (function () { try { return localStorage.getItem("arena_only_owned") === "1"; } catch (e) { return false; } })() }, filter: { q: "", shelf: "", attack: "", threat: "", owned: false },
     busy: false, target: null, unsub: { state: null, profile: null, mine: null }, refreshed: {}, layout: "side",
   };
   try { if (localStorage.getItem("arena_layout") === "theatre") S.layout = "theatre"; } catch (e) {}
@@ -287,34 +287,54 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
       '<p class="inline-note">Your account starts the moment you send something in: 25 essence, the four starter monsters.</p>';
     return '<div class="panel"><h3>Your arena</h3>' + wallet + "</div>" + releaseForm() + groupsPanel() + ordersPanel(mons) + hazardsPanel(mons) + roundsPanel() + consolePanel();
   }
+  function tileHtml(x, picked) {
+    const ok = ownsType(x.name);
+    return '<div class="tile' + (ok ? "" : " locked") + (x.name === picked ? " on" : "") + '" data-act="pick" data-name="' + esc(x.name) + '" title="' + esc(x.name + (ok ? "" : " · locked, " + x.unlock + " souls")) + '"><img src="' + esc(x.img) + '" alt="" loading="lazy">' + (ok ? "" : '<span class="lock">' + x.unlock + "</span>") + '<span class="n">' + esc(x.name) + "</span></div>";
+  }
   function releaseForm() {
-    const f = S.form;
-    const owned = S.order.filter((m) => ownsType(m.name));
+    // a toolbar (search, shelf, only unlocked), the shelf of tiles, and beside it the summon card: the
+    // chosen monster, its options as pill rows, the cost, the Send in button with the essence in hand
+    const f = S.form, a = S.me.account;
+    const owned = S.order.filter((x) => ownsType(x.name));
     const m = S.byName[f.name] || null;
-    const only = !!S.form.onlyOwned;
-    const tiles = S.order.filter((x) => !only || ownsType(x.name)).map((x) => {
-      const ok = ownsType(x.name);
-      return '<div class="tile' + (ok ? "" : " locked") + (x.name === f.name ? " on" : "") + '" data-act="pick" data-name="' + esc(x.name) + '" title="' + esc(x.name + (ok ? "" : " · locked, " + x.unlock + " souls")) + '"><img src="' + esc(x.img) + '" alt="" loading="lazy">' + (ok ? "" : '<span class="lock">' + x.unlock + "</span>") + '<span class="n">' + esc(x.name) + "</span></div>";
-    }).join("");
-    const variants = m ? ((S.me.account && S.me.account.variants && S.me.account.variants[m.name]) || []) : [];
+    const only = !!f.onlyOwned, q = (f.q || "").trim().toLowerCase();
+    const shelves = (S.cat && S.cat.shelves) || [];
+    const shelf = shelves.find((s) => s.label === f.shelf) || null;
+    const list = S.order.filter((x) => (!only || ownsType(x.name)) && (!shelf || (shelf.sources || []).includes(x.source)) && (!q || x.name.toLowerCase().includes(q)));
+    const toolbar = '<div class="send-tools"><input type="search" placeholder="Find a monster" value="' + esc(f.q || "") + '" data-bind="sendq" aria-label="Find a monster">' +
+      '<select data-bind="sendShelf" aria-label="Shelf"><option value="">Every shelf</option>' + shelves.map((s) => '<option value="' + esc(s.label) + '"' + (f.shelf === s.label ? " selected" : "") + ">" + esc(s.label) + "</option>").join("") + "</select>" +
+      '<label class="check"><input type="checkbox" data-act="only-owned"' + (only ? " checked" : "") + "> only unlocked</label></div>";
+    const tiles = list.length ? list.map((x) => tileHtml(x, f.name)).join("") : '<p class="inline-note empty">Nothing matches. Clear the search or pick another shelf.</p>';
+    const variants = m ? ((a && a.variants && a.variants[m.name]) || []) : [];
     const cost = m ? releaseCost(m, f.strength, f.count, f.variant, f.door || 1) : 0;
-    const talents = m && S.me.account && S.me.account.talents && S.me.account.talents[f.variant ? affix(f.variant) + " " + m.name : m.name];
-    const home = (S.me.account && S.me.account.home_door) || 0;
-    const seg = (label, field, options, current) => '<div class="segrow"><span class="segl">' + label + '</span><div class="seg" role="group">' +
+    const talents = m && a && a.talents && a.talents[f.variant ? affix(f.variant) + " " + m.name : m.name];
+    const home = (a && a.home_door) || 0;
+    const seg = (label, field, options, current, hint) => '<div class="opt"><span class="segl">' + label + (hint ? "<small>" + hint + "</small>" : "") + '</span><div class="seg" role="group">' +
       options.map((o) => '<button type="button" class="segb' + (String(o.v) === String(current) ? " on" : "") + '" data-act="set" data-field="' + field + '" data-value="' + esc(o.v) + '">' + esc(o.t) + "</button>").join("") + "</div></div>";
-    return '<div class="panel"><h3>Send in a monster</h3><p class="sub">' + owned.length + " of " + S.order.length + ' types unlocked · <a href="#bestiary">the bestiary</a> sells the rest for souls' +
-      '<label class="check"><input type="checkbox" data-act="only-owned"' + (only ? " checked" : "") + "> only unlocked</label></p>" +
-      '<div class="picker">' + tiles + "</div>" +
-      (m ? '<div class="form-row" style="margin-top:10px"><b>' + esc(m.name) + '</b><span class="inline-note">threat ' + m.threat + " · " + esc(m.notes) + "</span></div>" : '<p class="inline-note">Pick a monster above.</p>') +
-      (m && ownsType(m.name) ? groupAddRow(m) : "") +
-      seg("How many", "count", [1, 2, 3, 4, 5].map((n) => ({ v: n, t: String(n) })), f.count) +
-      '<p class="inline-note">Copies of one kind cost ' + Math.round(((S.cat && S.cat.costs && S.cat.costs.multi_step) || 0.1) * 100) + '% more each for a minute and a half; the crowd sends one boss every ' + ((S.cat && S.cat.costs && S.cat.costs.boss_cooldown) || 30) + ' s.</p>' +
-      seg("Door", "door", [{ v: 0, t: home ? "yours (" + home + ")" : "emptiest" }].concat([1, 2, 3, 4, 5, 6, 7, 8].map((d) => ({ v: d, t: String(d) })), [{ v: 9, t: "all (lv 6)" }]), f.door) +
-      seg("Strength", "strength", STRENGTHS.map((s) => ({ v: s, t: s + "%" })), f.strength) +
-      (variants.length ? seg("Variant", "variant", [{ v: "", t: "plain" }].concat(variants.map((v) => ({ v: v, t: affix(v) }))), f.variant) : "") +
-      (talents ? seg("Build", "vanilla", [{ v: "0", t: "your " + talents.points + "-point build" }, { v: "1", t: "vanilla" }], f.vanilla ? "1" : "0") : "") +
-      '<div class="form-row"><button class="gold big" data-act="release"' + (m ? "" : " disabled") + ">Send in" + (m ? " · " + cost + " essence" : "") + "</button>" + walletChip(m ? cost : null) +
-      (m && !ownsType(m.name) ? '<span class="inline-note">locked: ' + m.unlock + ' souls in <a href="#bestiary/' + esc(m.key) + '">the bestiary</a></span>' : "") + "</div></div>";
+    const step = Math.round(((S.cat && S.cat.costs && S.cat.costs.multi_step) || 0.1) * 100), bossWait = (S.cat && S.cat.costs && S.cat.costs.boss_cooldown) || 30;
+    let card, opts = "", foot = "";
+    if (!m) {
+      card = '<div class="summon-card empty"><div class="portrait ghost"></div><div class="who"><h4>Pick a monster</h4><p class="notes">Choose one from the shelf. ' + owned.length + " of " + S.order.length +
+        ' types are unlocked; <a href="#bestiary">the bestiary</a> sells the rest for souls.</p></div></div>';
+    } else {
+      const ok = ownsType(m.name);
+      card = '<div class="summon-card"><img class="portrait" src="' + esc(m.img) + '" alt=""><div class="who"><h4>' + esc(m.name) + "</h4>" +
+        '<div class="meta">' + pips(m.threat) + "<span>threat " + m.threat + "</span><span>" + (ATTACK_WORD[m.attack] || "") + (m.fly ? ", flies" : "") + "</span><span>" + esc(m.source_label || m.source || "") + "</span></div>" +
+        '<p class="notes">' + esc(m.notes) + "</p>" + (ok ? "" : '<p class="locked-note">Locked: ' + m.unlock + ' souls in <a href="#bestiary/' + esc(m.key) + '">the bestiary</a>.</p>') + "</div></div>";
+      opts = seg("How many", "count", [1, 2, 3, 4, 5].map((n) => ({ v: n, t: String(n) })), f.count, "copies cost " + step + "% more each") +
+        seg("Door", "door", [{ v: 0, t: home ? "yours · " + home : "emptiest" }].concat([1, 2, 3, 4, 5, 6, 7, 8].map((d) => ({ v: d, t: String(d) })), [{ v: 9, t: "all · lv 6" }]), f.door) +
+        seg("Strength", "strength", STRENGTHS.map((s) => ({ v: s, t: s + "%" })), f.strength, "150% and up is a champion") +
+        (variants.length ? seg("Variant", "variant", [{ v: "", t: "plain" }].concat(variants.map((v) => ({ v: v, t: affix(v) }))), f.variant) : "") +
+        (talents ? seg("Build", "vanilla", [{ v: "0", t: "your " + talents.points + "-point build" }, { v: "1", t: "vanilla" }], f.vanilla ? "1" : "0") : "");
+      const summary = (f.count > 1 ? f.count + " × " : "") + (f.variant ? affix(f.variant) + " " : "") + m.name + " at " + f.strength + "%" +
+        (f.door === 9 ? " from every door" : f.door ? " from door " + f.door : home ? " from door " + home : " from the emptiest door");
+      foot = '<div class="summon-foot"><div class="cost"><span class="k">Cost</span><b>' + cost + '</b><span class="unit">essence</span><small>' + esc(summary) + "</small></div>" +
+        '<div class="actions"><button class="gold big" data-act="release"' + (ok ? "" : " disabled") + ">Send in</button>" + walletChip(cost) + "</div>" +
+        '<p class="fine">The crowd sends one boss every ' + bossWait + " s; copies of a kind cost " + step + "% more each for a minute and a half.</p>" +
+        (ok ? groupAddRow(m) : "") + "</div>";
+    }
+    return '<div class="panel send"><div class="send-head"><h3>Send in a monster</h3><span class="count">' + owned.length + " of " + S.order.length + " unlocked</span></div>" + toolbar +
+      '<div class="send-body"><div class="picker-col"><div class="picker">' + tiles + '</div></div><div class="summon">' + card + opts + foot + "</div></div></div>";
   }
   function ordersPanel(mons) {
     if (!mons.length) return '<div class="panel"><h3>Orders</h3><p class="inline-note">Nothing is alive on the floor right now.</p></div>';
@@ -517,6 +537,9 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     const r = await ask("_commands", { text: text });
     entry.reply = r.reply || null; entry.ack = r.ack || null; entry.note = r.note || null;
     if (r.account && S.me) S.me.account = r.account;
+    const em = /(\d+)\/(\d+) essence left/.exec(r.reply || "");
+    if (em && S.me && S.me.account) { S.me.account.essence = parseInt(em[1], 10); S.me.account.cap = parseInt(em[2], 10); }
+    renderUser();
     notice(r.reply || (r.ack ? "✓ " + r.ack : r.note), !!(r.reply || r.ack), r.note && /Discord/.test(r.note));
     S.busy = false; $("#app").classList.remove("busy");
     S.treeName = null;                       // the tree redraws from the refreshed profile
@@ -616,12 +639,14 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     else if (b === "attack") S.filter.attack = el.value;
     else if (b === "threat") S.filter.threat = el.value;
     else if (b === "owned") S.filter.owned = el.checked;
+    else if (b === "sendShelf") S.form.shelf = el.value;
     else return;
     render();
   });
   document.addEventListener("input", (ev) => {
     const el = ev.target;
     if (el.dataset && el.dataset.bind === "q") { S.filter.q = el.value; const pos = el.selectionStart; render(); const n = document.querySelector('[data-bind="q"]'); if (n) { n.focus(); n.setSelectionRange(pos, pos); } }
+    if (el.dataset && el.dataset.bind === "sendq") { S.form.q = el.value; const pos = el.selectionStart; render(); const n = document.querySelector('[data-bind="sendq"]'); if (n) { n.focus(); n.setSelectionRange(pos, pos); } }
   });
   document.addEventListener("submit", async (ev) => {
     const f = ev.target.closest('[data-act="console"]');
