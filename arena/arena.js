@@ -21,7 +21,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
                   ["freeze", "Freeze"], ["haste", "Haste"], ["regen", "Regen"], ["shield", "Shield"], ["grow", "Grow"], ["shrink", "Shrink"]];
   const WEAPONS = ["rockets", "grenades", "lasers", "shards", "pods", "lightning", "nails", "own"];
   const STRENGTHS = [50, 75, 100, 125, 150, 200];
-  const TIER_COSTS_FALLBACK = [[80, 100, 120], [140, 160, 180], [200, 240], [320]];   // the catalogue's tier_costs win (the bridge publishes the agent's)
+  const TIER_COSTS_FALLBACK = [[12000, 15000, 18000], [21000, 24000, 27000], [30000, 36000], [48000]];   // damage from the monster's own pool; the catalogue's tier_costs win
   const TIER_UNLOCK = [0, 3, 6, 9];
   const BUDGET_FALLBACK = 10, RESPEC_FALLBACK = 200;
   const LADDER_FALLBACK = [[1, "Initiate", 125, ""], [2, "Handler", 375, ""], [3, "Adept", 875, ""], [4, "Expert", 1750, ""], [5, "Specialist", 3250, ""],
@@ -228,6 +228,17 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
   function tierCosts() { const t = costs().tier_costs; return t && t.tier1 ? [t.tier1, t.tier2, t.tier3, t.tier4] : TIER_COSTS_FALLBACK; }
   function respecCost() { return costs().respec || RESPEC_FALLBACK; }
   function baseBudget() { return costs().budget || BUDGET_FALLBACK; }
+  // the damage pool of one of the account's monsters (a type or a variant, by its name): what its copies dealt and did not spend
+  function poolOf(p, build) { const d = ((p && p.damage) || {})[build]; return d ? (d.available != null ? d.available : Math.max(0, (d.earned || 0) - (d.spent || 0))) : 0; }
+  function poolChip(p, build) {
+    const parts = splitBuild(build), forVariants = parts && !parts.vkey;
+    return '<span class="chip pool" title="the damage your ' + esc(build) + 's have dealt and not yet spent: it buys their talents' + (forVariants ? " and the variants of the type" : "") + '">💥 <b>' + num(poolOf(p, build)) + "</b> " + esc(build) + " damage</span>";
+  }
+  function poolChips(p) {
+    const pools = Object.entries((p && p.damage) || {}).map(([b, d]) => [b, d && d.available != null ? d.available : Math.max(0, ((d || {}).earned || 0) - ((d || {}).spent || 0))]).sort((x, y) => y[1] - x[1]).slice(0, 3);
+    return pools.map(([b, v]) => '<span class="chip" title="damage this monster dealt, unspent: it buys its talents and variants">💥 ' + esc(b) + " <b>" + num(v) + "</b></span>").join("");
+  }
+  function variantDamage(m) { return m.variant_damage != null ? m.variant_damage : m.variant; }
   function progressionLive() { return !!(S.cat && S.cat.progression); }
 
   // ------------------------------------------------------------------ mastery and achievements (the ladder and the badges come with the catalogue)
@@ -366,7 +377,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
   }
   function panel(mons) {
     if (!S.me) {
-      return '<div class="panel sign-card"><h2>Play from here</h2><p>Sign in with Discord and your arena account comes with you: essence to send monsters in, souls to unlock the bestiary and build talent trees, and every kill your monsters make counts. You need to be a member of the DFWGV Arena Discord.</p>' +
+      return '<div class="panel sign-card"><h2>Play from here</h2><p>Sign in with Discord and your arena account comes with you: essence to send monsters in, souls to unlock the bestiary, the damage your monsters deal to build their talents and variants, and every kill counts. You need to be a member of the DFWGV Arena Discord.</p>' +
         '<button class="discord" data-act="login">Sign in with Discord</button><p class="inline-note">Not on the Discord yet? <a href="' + esc(DISCORD) + '" target="_blank" rel="noopener">Join the DFWGV Arena Discord</a>.</p></div>';
     }
     const a = S.me.account;
@@ -491,16 +502,16 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     const variants = vs.map((v) => {
       const have = ownsVariant(m.name, v.key);
       const btn = !signed ? "" : have ? '<a href="#bestiary/' + esc(m.key) + "/" + esc(v.affix + " " + m.name) + '"><button class="small">Build</button></a>' :
-        '<button class="small" data-act="unlock" data-name="' + esc(m.name) + '" data-variant="' + esc(v.key) + '"' + (owned ? "" : ' disabled title="unlock the ' + esc(m.name) + ' first"') + ">Unlock · " + m.variant + " souls</button>";
+        '<button class="small" data-act="unlock" data-name="' + esc(m.name) + '" data-variant="' + esc(v.key) + '"' + (owned ? "" : ' disabled title="unlock the ' + esc(m.name) + ' first"') + ">Unlock · " + num(variantDamage(m)) + " damage</button>";
       return '<div class="variant' + (have ? " owned" : "") + '"><span class="vn">' + esc(v.affix + " " + m.name) + '</span><span class="vb">' + esc(v.blurb) + "</span>" + (have ? '<span class="inline-note">owned · </span>' : "") + btn + "</div>";
     }).join("");
     const unlockBtn = !signed ? '<button class="discord" data-act="login">Sign in to unlock</button>' : m.starter ? '<span class="chip">starter, always yours</span>' : owned ? '<span class="chip">unlocked for good</span>' :
       '<button class="gold" data-act="unlock" data-name="' + esc(m.name) + '">Unlock for ' + m.unlock + " souls</button>" + (a ? '<span class="inline-note"> you have ' + num(a.souls) + "</span>" : "");
     return '<div class="panel detail' + (signed && !owned ? " locked" : "") + '"><div><img src="' + esc(m.img) + '" alt="' + esc(m.name) + '"></div><div><h2>' + esc(m.name) + ' <small class="inline-note">' + esc(m.source_label || m.source) + "</small></h2><p>" + esc(m.notes) + "</p>" +
-      '<div class="stats"><div class="stat"><div class="k">Threat</div><div class="v">' + m.threat + '</div></div><div class="stat"><div class="k">Fights</div><div class="v">' + ATTACK_WORD[m.attack] + (m.fly ? ", flies" : "") + '</div></div><div class="stat"><div class="k">Health</div><div class="v">' + (m.health || "?") + '</div></div><div class="stat"><div class="k">Hardest hit</div><div class="v">' + m.hit + '</div></div><div class="stat"><div class="k">Unlock</div><div class="v gold">' + (m.starter ? "free" : m.unlock + " souls") + '</div></div><div class="stat"><div class="k">Each variant</div><div class="v gold">' + m.variant + " souls</div></div></div>" +
+      '<div class="stats"><div class="stat"><div class="k">Threat</div><div class="v">' + m.threat + '</div></div><div class="stat"><div class="k">Fights</div><div class="v">' + ATTACK_WORD[m.attack] + (m.fly ? ", flies" : "") + '</div></div><div class="stat"><div class="k">Health</div><div class="v">' + (m.health || "?") + '</div></div><div class="stat"><div class="k">Hardest hit</div><div class="v">' + m.hit + '</div></div><div class="stat"><div class="k">Unlock</div><div class="v gold">' + (m.starter ? "free" : m.unlock + " souls") + '</div></div><div class="stat"><div class="k">Each variant</div><div class="v gold">' + num(variantDamage(m)) + " damage</div></div></div>" +
       (a && a.progression ? masteryBlock(a, m.name) : "") +
       '<div class="form-row">' + unlockBtn + ' <a href="#bestiary"><button class="small">Close</button></a></div>' +
-      "<h3>Variants</h3><p class=\"sub\">Eight variants of every type, each with its own talent tree. The base monster comes first.</p><div class=\"variants\">" + variants + "</div></div></div>" +
+      "<h3>Variants</h3><p class=\"sub\">Eight variants of every type, each with a talent tree and a damage pool of its own. The base monster comes first; a variant is bought with the damage your " + esc(m.name) + "s have dealt" + (a ? " (" + num(poolOf(a, m.name)) + " unspent so far)" : "") + ".</p><div class=\"variants\">" + variants + "</div></div></div>" +
       buildPanel((S.me && S.me.account) || { id: "", unlocked: [], variants: {}, talents: {}, souls: null }, S.args[1] || m.name, !!(S.me && S.me.account),
                  { preview: true, link: (name) => "#bestiary/" + esc(m.key) + "/" + esc(name) });
   }
@@ -526,7 +537,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     if (p.missing) return '<div class="panel"><h2>' + (mine ? "You have no arena account yet" : "No such account") + "</h2><p>" + (mine ? "It starts the moment you send a monster in or press anything on the Watch page." : esc(p.error || "Nobody has played under that id.")) + "</p></div>";
     const pct = Math.min(100, Math.round(100 * (p.glory - glory(p.level)) / Math.max(1, p.next_level_glory - glory(p.level))));
     const head = '<div class="panel profile-head"><div class="ph"><h2>' + (p.title ? '<span class="title">' + esc(p.title) + "</span>" : "") + esc(p.name) + '</h2><div class="inline-note">level ' + p.level + " · " + num(p.glory) + " glory · " + (p.next_level_glory - p.glory) + " to level " + (p.level + 1) + '</div><div class="level"><i style="width:' + pct + '%"></i></div>' +
-      '<div class="chips" style="margin-top:8px"><span class="chip">essence <b>' + num(p.essence) + "</b>/" + p.cap + '</span><span class="chip">souls <b>' + num(p.souls) + "</b></span>" + (p.home_door ? '<span class="chip">door <b>' + p.home_door + "</b></span>" : "") + (p.streak ? '<span class="chip">streak <b>' + p.streak + "</b></span>" : "") + badgeChip(p.badge) + "</div></div>" +
+      '<div class="chips" style="margin-top:8px"><span class="chip">essence <b>' + num(p.essence) + "</b>/" + p.cap + '</span><span class="chip">souls <b>' + num(p.souls) + "</b></span>" + (p.home_door ? '<span class="chip">door <b>' + p.home_door + "</b></span>" : "") + (p.streak ? '<span class="chip">streak <b>' + p.streak + "</b></span>" : "") + badgeChip(p.badge) + poolChips(p) + "</div></div>" +
       (mine ? '<div class="inline-note">Share this page: <code>' + esc(location.origin + location.pathname + "#profile/" + id) + "</code></div>" : "") + "</div>";
     const stats = '<div class="panel"><h3>Record</h3><div class="stats">' + [["Sent in", p.releases], ["Kills", p.kills], ["Lost", p.deaths], ["Orders", p.orders], ["Hazards", p.hazards], ["Champion kills", p.champion_kills], ["Boss kills", p.boss_kills], ["Round wins", p.round_wins], ["Bets won", p.bets_won], ["Upsets", p.upsets]].map(([k, v]) => '<div class="stat"><div class="k">' + k + '</div><div class="v">' + num(v) + "</div></div>").join("") + "</div>" +
       ((p.daily && p.daily.glory) || (p.weekly && p.weekly.glory) ? '<p class="inline-note">today: ' + num(p.daily.glory) + " glory, " + num(p.daily.kills) + " kills · this week: " + num(p.weekly.glory) + " glory, " + num(p.weekly.kills) + " kills</p>" : "") +
@@ -544,14 +555,14 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     return head + stats + masteryPanel(p, id, mine) + badgePanel(p) + monsters + (build ? buildPanel(p, build, mine) : "");
   }
   function glory(level) { return 30 * (level - 1) * (level - 1); }
-  /** What the agent would say about buying the next rank: the same rules, for the display. */
-  function canSpend(tree, ranks, tal, points, souls, budget) {
+  /** What the agent would say about buying the next rank: the same rules, for the display; pool is the build's unspent damage (null: no test). */
+  function canSpend(tree, ranks, tal, points, pool, budget) {
     const r = ranks[tal.key] || 0, cap = budget || baseBudget(), tc = tierCosts();
     if (r >= tal.ranks.length) return { why: "maxed" };
     if (points >= cap) return { why: "the build holds " + cap + " points" };
     if (points < TIER_UNLOCK[tal.tier]) return { why: "tier " + (tal.tier + 1) + " opens at " + TIER_UNLOCK[tal.tier] + " points" };
     const cost = tc[tal.tier][Math.min(r, tc[tal.tier].length - 1)];
-    if (souls != null && souls < cost) return { why: cost + " souls; you have " + souls };
+    if (pool != null && pool < cost) return { why: num(cost) + " damage; the pool holds " + num(pool) };
     return { cost: cost };
   }
   function buildPanel(p, build, mine, opts) {
@@ -569,7 +580,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
       const name = v.key ? v.affix + " " + base.name : base.name;
       const pts = ((p.talents || {})[name] || {}).points || 0;
       const inner = '<span class="vn">' + esc(name) + "</span>" + (v.blurb ? '<span class="vb">' + esc(v.blurb) + "</span>" : '<span class="vb">the base monster</span>') +
-        (have ? '<span class="inline-note">' + (pts ? pts + "-point build" : "no points yet") + "</span>" : (mine && v.key ? '<button class="small" data-act="unlock" data-name="' + esc(base.name) + '" data-variant="' + esc(v.key) + '"' + (own ? "" : ' disabled title="unlock the base monster first"') + ">Unlock · " + base.variant + " souls</button>" : '<span class="inline-note">locked</span>'));
+        (have ? '<span class="inline-note">' + (pts ? pts + "-point build" : "no points yet") + "</span>" : (mine && v.key ? '<button class="small" data-act="unlock" data-name="' + esc(base.name) + '" data-variant="' + esc(v.key) + '"' + (own ? "" : ' disabled title="unlock the base monster first"') + ">Unlock · " + num(variantDamage(base)) + " damage</button>" : '<span class="inline-note">locked</span>'));
       const clickable = have || opts.preview;
       return clickable ? '<a class="variant' + (have ? " owned" : "") + (name === build ? " on" : "") + '" href="' + link(name) + '">' + inner + "</a>" : '<div class="variant' + (name === build ? " on" : "") + '">' + inner + "</div>";
     }).join("") + "</div>";
@@ -579,20 +590,21 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     const points = Object.values(ranks).reduce((a, b) => a + (parseInt(b, 10) || 0), 0);
     const summary = ((p.talents || {})[build] || {}).summary || "";
     const budget = budgetFor(p, build), tc = tierCosts();
+    const pool = p && p.id ? poolOf(p, build) : null;          // the bestiary's preview stub has no account: no affordability test
     if (!t || S.treeName !== build) tree = '<p class="arena-muted">Loading the tree…</p>';
     else if (t.error) tree = '<p class="arena-muted">' + esc(t.error) + "</p>";
     else {
       const names = ["Tier one", "Tier two", "Tier three", "Capstone"];
-      tree = '<div class="build-bar"><span class="pts"><b>' + points + "</b> of " + budget + " points</span>" + (summary ? '<span class="inline-note">' + esc(summary) + "</span>" : '<span class="inline-note">no points spent yet</span>') +
+      tree = '<div class="build-bar"><span class="pts"><b>' + points + "</b> of " + budget + " points</span>" + (mine && p.id ? poolChip(p, build) : "") + (summary ? '<span class="inline-note">' + esc(summary) + "</span>" : '<span class="inline-note">no points spent yet</span>') +
         (canBuild ? '<button class="small" data-act="respec" data-build="' + esc(build) + '"' + (points ? "" : " disabled") + ">Reset the build · " + respecCost() + " souls</button>" : "") + "</div>" +
-        '<p class="inline-note">Ranks cost souls (tier one ' + tc[0].join("/") + ", tier two " + tc[1].join("/") + ", tier three " + tc[2].join("/") + ", the capstone " + tc[3].join("/") +
+        '<p class="inline-note">Ranks cost damage your ' + esc(build) + 's deal (tier one ' + tc[0].map(num).join("/") + ", tier two " + tc[1].map(num).join("/") + ", tier three " + tc[2].map(num).join("/") + ", the capstone " + tc[3].map(num).join("/") +
         "); tiers open at 0, 3, 6 and 9 points; a build holds " + baseBudget() + " points" + (progressionLive() ? ", up to " + (baseBudget() + 3) + " with its monster's mastery" : "") + ', so no tree can be filled.</p><div class="tree">' +
         t.tiers.map((tier, i) => {
           const open = points >= TIER_UNLOCK[i];
           return '<div class="tier' + (open ? "" : " shut") + '"><h4><span>' + names[i] + "</span><span>" + (open ? "open" : "opens at " + TIER_UNLOCK[i] + " points") + '</span></h4><div class="talents">' + (tier.talents || []).map((tal) => {
-            const r = ranks[tal.key] || 0, max = tal.ranks.length, can = canSpend(t, ranks, tal, points, p.souls, budget);
+            const r = ranks[tal.key] || 0, max = tal.ranks.length, can = canSpend(t, ranks, tal, points, pool, budget);
             const cls = "talent" + (r >= max ? " maxed" : "") + (i === 3 ? " cap" : "");
-            const btn = canBuild ? (can.cost != null ? '<button class="small gold" data-act="spend" data-build="' + esc(build) + '" data-key="' + esc(tal.key) + '">Buy rank ' + (r + 1) + " · " + can.cost + " souls</button>" : '<span class="why">' + esc(can.why || "") + "</span>") : "";
+            const btn = canBuild ? (can.cost != null ? '<button class="small gold" data-act="spend" data-build="' + esc(build) + '" data-key="' + esc(tal.key) + '">Buy rank ' + (r + 1) + " · " + num(can.cost) + " damage</button>" : '<span class="why">' + esc(can.why || "") + "</span>") : "";
             return '<div class="' + cls + '"><div class="tn"><span>' + esc(tal.name) + "</span><small>" + r + "/" + max + '</small></div><span class="tb">' + esc(tal.blurb) + "</span>" + btn + "</div>";
           }).join("") + "</div></div>";
         }).join("") + "</div>";
@@ -646,6 +658,11 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     if (r.account && S.me) S.me.account = r.account;
     const em = /(\d+)\/(\d+) essence left/.exec(r.reply || "");
     if (em && S.me && S.me.account) { S.me.account.essence = parseInt(em[1], 10); S.me.account.cap = parseInt(em[2], 10); }
+    const dm = /([\d,]+) damage left in the (.+?) pool/.exec(r.reply || "");
+    if (dm && S.me && S.me.account) {
+      const d = (S.me.account.damage = S.me.account.damage || {});
+      d[dm[2]] = Object.assign({}, d[dm[2]] || {}, { available: parseInt(dm[1].replace(/,/g, ""), 10) });
+    }
     renderUser();
     notice(r.reply || (r.ack ? "✓ " + r.ack : r.note), !!(r.reply || r.ack), r.note && /Discord/.test(r.note));
     S.busy = false; $("#app").classList.remove("busy");
