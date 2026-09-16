@@ -21,9 +21,12 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
                   ["freeze", "Freeze"], ["haste", "Haste"], ["regen", "Regen"], ["shield", "Shield"], ["grow", "Grow"], ["shrink", "Shrink"]];
   const WEAPONS = ["rockets", "grenades", "lasers", "shards", "pods", "lightning", "nails", "own"];
   const STRENGTHS = [50, 75, 100, 125, 150, 200];
-  const TIER_COSTS = [[20, 25, 30], [35, 40, 45], [50, 60], [80]];
+  const TIER_COSTS_FALLBACK = [[80, 100, 120], [140, 160, 180], [200, 240], [320]];   // the catalogue's tier_costs win (the bridge publishes the agent's)
   const TIER_UNLOCK = [0, 3, 6, 9];
-  const BUDGET = 10, RESPEC = 50;
+  const BUDGET_FALLBACK = 10, RESPEC_FALLBACK = 200;
+  const LADDER_FALLBACK = [[1, "Initiate", 125, ""], [2, "Handler", 375, ""], [3, "Adept", 875, ""], [4, "Expert", 1750, ""], [5, "Specialist", 3250, ""],
+                           [6, "Master", 5750, ""], [7, "Grandmaster", 10000, ""], [8, "Paragon", 17500, ""], [9, "Legend", 30000, ""], [10, "Mythic", 55000, ""]];
+  const GROUPS_FALLBACK = [{ key: "mastery", label: "Mastery milestones" }, { key: "combat", label: "Combat and rounds" }, { key: "collection", label: "Collection" }, { key: "feats", label: "Feats" }];
   const COMMAND_WAIT = 25000;
 
   const S = {
@@ -169,7 +172,8 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     const already = recentCount((variant ? affix(variant) + " " : "") + m.name);
     let total = 0;
     for (let k = already + 1; k <= already + count; k++) total += c * (1 + step * (k - 1));
-    return Math.round(total);
+    // the viewer's mastery of the type takes its share off the total, rounded the way the agent rounds
+    return Math.floor(total * (1 - discountFor(S.me && S.me.account, m.name)) + 0.5);
   }
   function groupWords(members) {
     const seen = [];
@@ -220,6 +224,83 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     return '<span class="chip wallet' + (low ? " low" : "") + '" title="one back every minute; all of it back at each draft in rounds mode; a little with every kill">💧 <b>' + num(a.essence) + "</b>/" + a.cap + " essence" + (low ? " · not enough" : "") + "</span>";
   }
   function affix(vkey) { const v = ((S.cat && S.cat.variants) || []).find((x) => x.key === vkey); return v ? v.affix : vkey; }
+  function costs() { return (S.cat && S.cat.costs) || {}; }
+  function tierCosts() { const t = costs().tier_costs; return t && t.tier1 ? [t.tier1, t.tier2, t.tier3, t.tier4] : TIER_COSTS_FALLBACK; }
+  function respecCost() { return costs().respec || RESPEC_FALLBACK; }
+  function baseBudget() { return costs().budget || BUDGET_FALLBACK; }
+  function progressionLive() { return !!(S.cat && S.cat.progression); }
+
+  // ------------------------------------------------------------------ mastery and achievements (the ladder and the badges come with the catalogue)
+  function masteryOf(p, name) {
+    const sb = name && !S.byName[name] ? splitBuild(name) : null;
+    return (p && p.mastery && p.mastery[sb ? sb.base : name]) || null;
+  }
+  function discountFor(p, name) { const m = masteryOf(p, name); return (m && m.discount) || 0; }
+  function budgetFor(p, build) {
+    const b = p && p.talents && p.talents[build];
+    if (b && b.budget) return b.budget;
+    const m = masteryOf(p, build);
+    return baseBudget() + ((m && m.talent_bonus) || 0);
+  }
+  function ladder() { const r = S.cat && S.cat.mastery && S.cat.mastery.ranks; return r ? r.map((x) => [x.rank, x.name, x.xp, x.perk || ""]) : LADDER_FALLBACK; }
+  function starText(stars) { return stars ? (stars <= 3 ? "\u2605".repeat(stars) : "\u2605" + stars) : ""; }
+  function rankPill(m) {
+    if (!m || !m.rank) return "";
+    return '<span class="mrank r' + Math.min(10, m.rank) + '" title="' + esc((m.name || "") + (m.stars ? " " + starText(m.stars) : "")) + '">' + (m.rank >= 10 ? "M" : m.rank) + "</span>" +
+      (m.stars ? '<span class="stars">' + starText(m.stars) + "</span>" : "");
+  }
+  function badgeChip(b) { return b ? '<span class="chip badge-chip">' + rankPill(b) + " " + esc(b.type + " " + b.name) + "</span>" : ""; }
+  function xpBar(m) {
+    const span = Math.max(1, (m.next || 0) - (m.floor || 0));
+    return '<div class="xpbar"><i style="width:' + Math.max(0, Math.min(100, Math.round(100 * ((m.xp || 0) - (m.floor || 0)) / span))) + '%"></i></div>';
+  }
+  function perkWords(m) {
+    const out = [];
+    if (m.discount) out.push("sends " + Math.round(m.discount * 100) + "% cheaper");
+    if (m.talent_bonus) out.push("builds hold " + (baseBudget() + m.talent_bonus) + " points");
+    if (m.soul_bonus) out.push("+" + m.soul_bonus + " soul a kill");
+    if (m.sparkle) out.push(m.sparkle > 1 ? "Mythic sparkles" : "gold sparkles");
+    return out;
+  }
+  function masteryBlock(p, name) {
+    const m = masteryOf(p, name), lad = ladder();
+    if (!m) return '<div class="mastery-block"><h3>Your mastery</h3><p class="inline-note">No XP with the ' + esc(name) + " yet. The essence you spend sending it in (its variants count) and every kill it makes earn XP; Initiate at " + num(lad[0][2]) + " XP.</p></div>";
+    const next = lad.find((r) => r[0] === m.rank + 1), perks = perkWords(m);
+    return '<div class="mastery-block"><h3>Your mastery</h3><div class="mhead">' + rankPill(m) + " <b>" + esc(m.name || "no rank yet") + '</b> <span class="inline-note">' + num(m.xp) + " XP · " + num(m.kills) + " kills</span></div>" + xpBar(m) +
+      '<p class="inline-note">' + num(Math.max(0, m.next - m.xp)) + " XP to " + esc(m.next_name) + (next && next[3] ? ": " + esc(next[3]) : "") + "</p>" +
+      (perks.length ? '<p class="perks">' + perks.map(esc).join(" · ") + "</p>" : "") + "</div>";
+  }
+  function masteryPanel(p, id, mine) {
+    if (!p.progression) return "";
+    const rows = Object.entries(p.mastery || {}).sort((a, b) => b[1].xp - a[1].xp);
+    const tiles = rows.map(([t, m]) => {
+      const mon = S.byName[t], isBadge = !!(p.badge && p.badge.type === t);
+      return '<div class="mtile' + (isBadge ? " on" : "") + '">' + (mon ? '<img src="' + esc(mon.img) + '" alt="" loading="lazy">' : '<div class="noimg"></div>') +
+        '<div class="mbody"><div class="mt"><b>' + esc(t) + "</b><span>" + rankPill(m) + '</span></div><div class="inline-note">' + esc(m.name || "unranked") + " · " + num(m.xp) + " XP · " + num(m.kills) + " kills</div>" + xpBar(m) +
+        '<div class="inline-note">' + num(Math.max(0, m.next - m.xp)) + " to " + esc(m.next_name) + "</div>" +
+        (mine && m.rank ? (isBadge ? '<span class="chip">your badge</span>' : '<button class="small" data-act="badge" data-name="' + esc(t) + '">Show as badge</button>') : "") + "</div></div>";
+    }).join("");
+    return '<div class="panel"><h3>Mastery</h3><p class="sub">' + (mine ? "Your" : "Their") + " rank with each monster, from the essence spent sending it in and the kills it makes; a variant counts for its monster. Ranks bring cheaper sends, more talent points, a soul more a kill and gold sparkles; past Mythic, stars." +
+      (mine && p.badge && p.badge.picked ? ' <button class="small" data-act="badge-best">Use my best</button>' : "") + "</p>" +
+      (tiles ? '<div class="mastery-grid">' + tiles + "</div>" : '<p class="inline-note">No mastery yet: every monster sent in starts one.</p>') + "</div>";
+  }
+  function badgePanel(p) {
+    const cat = (S.cat && S.cat.achievements) || [], a = p.achievements;
+    if (!cat.length || !a) return "";
+    const earned = a.earned || {}, prog = a.progress || {}, hidden = a.hidden || {};
+    const groups = (S.cat && S.cat.achievement_groups) || GROUPS_FALLBACK;
+    const html = groups.map((g) => {
+      const items = cat.filter((x) => x.group === g.key);
+      return '<div class="badge-group"><h4>' + esc(g.label) + " <small>" + items.filter((x) => earned[x.id]).length + " of " + items.length + '</small></h4><div class="badge-case">' + items.map((x) => {
+        const on = !!earned[x.id], h = hidden[x.id], pr = prog[x.id];
+        const name = on && h ? h.name : x.name, blurb = on && h ? h.blurb : x.blurb;
+        const pct = pr ? Math.max(0, Math.min(100, Math.round(100 * pr[0] / Math.max(1, pr[1])))) : 0;
+        return '<div class="ach ' + esc(x.tier) + (on ? "" : " locked") + (x.hidden && !on ? " hidden" : "") + '"><div class="medal">' + x.points + '</div><div class="ab"><b>' + esc(name) + "</b><small>" + esc(x.tier) + " · " + esc(blurb) + "</small>" +
+          (on ? '<small class="when">earned ' + new Date(earned[x.id] * 1000).toLocaleDateString() + "</small>" : pr ? '<div class="prog"><i style="width:' + pct + '%"></i></div><small>' + num(pr[0]) + " / " + num(pr[1]) + "</small>" : "") + "</div></div>";
+      }).join("") + "</div></div>";
+    }).join("");
+    return '<div class="panel"><h3>Achievements <small class="inline-note">' + num(a.points) + " points · " + num(a.count) + " of " + cat.length + " badges</small></h3>" + html + "</div>";
+  }
 
   // ------------------------------------------------------------------ routing and rendering
   function route() {
@@ -237,7 +318,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     const u = $("#arena-user");
     if (S.me) {
       const a = S.me.account, lvl = a ? a.level : 1;
-      u.innerHTML = '<div class="who"><b>' + esc(S.me.user.name) + '</b><small>level ' + lvl + (a ? " · " + num(a.essence) + "/" + a.cap + " essence · " + num(a.souls) + " souls" : " · new here") + "</small></div>" +
+      u.innerHTML = '<div class="who"><b>' + esc(S.me.user.name) + (a && a.badge ? " " + rankPill(a.badge) : "") + '</b><small>level ' + lvl + (a ? " · " + num(a.essence) + "/" + a.cap + " essence · " + num(a.souls) + " souls" : " · new here") + "</small></div>" +
         '<button class="small" data-act="logout">Sign out</button>';
     } else if (S.viewer) {
       u.innerHTML = '<div class="who"><b>' + esc(S.viewer.name || "signed in") + '</b><small>' + (myId() ? "checking with the arena…" : "signed in with Google; the arena needs Discord") + "</small></div>" +
@@ -289,7 +370,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
         '<button class="discord" data-act="login">Sign in with Discord</button><p class="inline-note">Not on the Discord yet? <a href="' + esc(DISCORD) + '" target="_blank" rel="noopener">Join the DFWGV Arena Discord</a>.</p></div>';
     }
     const a = S.me.account;
-    const wallet = a ? '<div class="chips"><span class="chip">level <b>' + a.level + "</b></span><span class=\"chip\">essence <b>" + num(a.essence) + "</b>/" + a.cap + '</span><span class="chip">souls <b>' + num(a.souls) + "</b></span>" + (a.home_door ? '<span class="chip">door <b>' + a.home_door + "</b></span>" : "") + "</div>" :
+    const wallet = a ? '<div class="chips"><span class="chip">level <b>' + a.level + "</b></span><span class=\"chip\">essence <b>" + num(a.essence) + "</b>/" + a.cap + '</span><span class="chip">souls <b>' + num(a.souls) + "</b></span>" + (a.home_door ? '<span class="chip">door <b>' + a.home_door + "</b></span>" : "") + badgeChip(a.badge) + "</div>" :
       '<p class="inline-note">Your account starts the moment you send something in: 25 essence, the four starter monsters.</p>';
     return '<div class="panel"><h3>Your arena</h3>' + wallet + "</div>" + releaseForm() + groupsPanel() + ordersPanel(mons) + hazardsPanel(mons) + roundsPanel() + consolePanel();
   }
@@ -313,6 +394,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     const tiles = list.length ? list.map((x) => tileHtml(x, f.name)).join("") : '<p class="inline-note empty">Nothing matches. Clear the search or pick another shelf.</p>';
     const variants = m ? ((a && a.variants && a.variants[m.name]) || []) : [];
     const cost = m ? releaseCost(m, f.strength, f.count, f.variant, f.door || 1) : 0;
+    const mm = m && a ? masteryOf(a, m.name) : null;
     const talents = m && a && a.talents && a.talents[f.variant ? affix(f.variant) + " " + m.name : m.name];
     const home = (a && a.home_door) || 0;
     const seg = (label, field, options, current, hint) => '<div class="opt"><span class="segl">' + label + (hint ? "<small>" + hint + "</small>" : "") + '</span><div class="seg" role="group">' +
@@ -326,7 +408,9 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
       const ok = ownsType(m.name);
       card = '<div class="summon-card"><img class="portrait" src="' + esc(m.img) + '" alt=""><div class="who"><h4>' + esc(m.name) + "</h4>" +
         '<div class="meta">' + pips(m.threat) + "<span>threat " + m.threat + "</span><span>" + (ATTACK_WORD[m.attack] || "") + (m.fly ? ", flies" : "") + "</span><span>" + esc(m.source_label || m.source || "") + "</span></div>" +
-        '<p class="notes">' + esc(m.notes) + "</p>" + (ok ? "" : '<p class="locked-note">Locked: ' + m.unlock + ' souls in <a href="#bestiary/' + esc(m.key) + '">the bestiary</a>.</p>') + "</div></div>";
+        '<p class="notes">' + esc(m.notes) + "</p>" + (ok ? "" : '<p class="locked-note">Locked: ' + m.unlock + ' souls in <a href="#bestiary/' + esc(m.key) + '">the bestiary</a>.</p>') +
+        (a && a.progression ? '<p class="mastery-line">' + (mm && mm.rank ? rankPill(mm) + " " + esc(m.name + " " + mm.name) + " · " : "") + num(mm ? mm.xp : 0) + " XP" +
+          (mm && mm.discount ? " · " + Math.round(mm.discount * 100) + "% off every send" : "") + "</p>" : "") + "</div></div>";
       opts = seg("How many", "count", [1, 2, 3, 4, 5].map((n) => ({ v: n, t: String(n) })), f.count, "copies cost " + step + "% more each") +
         seg("Door", "door", [{ v: 0, t: home ? "yours · " + home : "emptiest" }].concat([1, 2, 3, 4, 5, 6, 7, 8].map((d) => ({ v: d, t: String(d) })), [{ v: 9, t: "all · lv 6" }]), f.door) +
         seg("Strength", "strength", STRENGTHS.map((s) => ({ v: s, t: s + "%" })), f.strength, "150% and up is a champion") +
@@ -414,6 +498,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
       '<button class="gold" data-act="unlock" data-name="' + esc(m.name) + '">Unlock for ' + m.unlock + " souls</button>" + (a ? '<span class="inline-note"> you have ' + num(a.souls) + "</span>" : "");
     return '<div class="panel detail' + (signed && !owned ? " locked" : "") + '"><div><img src="' + esc(m.img) + '" alt="' + esc(m.name) + '"></div><div><h2>' + esc(m.name) + ' <small class="inline-note">' + esc(m.source_label || m.source) + "</small></h2><p>" + esc(m.notes) + "</p>" +
       '<div class="stats"><div class="stat"><div class="k">Threat</div><div class="v">' + m.threat + '</div></div><div class="stat"><div class="k">Fights</div><div class="v">' + ATTACK_WORD[m.attack] + (m.fly ? ", flies" : "") + '</div></div><div class="stat"><div class="k">Health</div><div class="v">' + (m.health || "?") + '</div></div><div class="stat"><div class="k">Hardest hit</div><div class="v">' + m.hit + '</div></div><div class="stat"><div class="k">Unlock</div><div class="v gold">' + (m.starter ? "free" : m.unlock + " souls") + '</div></div><div class="stat"><div class="k">Each variant</div><div class="v gold">' + m.variant + " souls</div></div></div>" +
+      (a && a.progression ? masteryBlock(a, m.name) : "") +
       '<div class="form-row">' + unlockBtn + ' <a href="#bestiary"><button class="small">Close</button></a></div>' +
       "<h3>Variants</h3><p class=\"sub\">Eight variants of every type, each with its own talent tree. The base monster comes first.</p><div class=\"variants\">" + variants + "</div></div></div>" +
       buildPanel((S.me && S.me.account) || { id: "", unlocked: [], variants: {}, talents: {}, souls: null }, S.args[1] || m.name, !!(S.me && S.me.account),
@@ -441,7 +526,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     if (p.missing) return '<div class="panel"><h2>' + (mine ? "You have no arena account yet" : "No such account") + "</h2><p>" + (mine ? "It starts the moment you send a monster in or press anything on the Watch page." : esc(p.error || "Nobody has played under that id.")) + "</p></div>";
     const pct = Math.min(100, Math.round(100 * (p.glory - glory(p.level)) / Math.max(1, p.next_level_glory - glory(p.level))));
     const head = '<div class="panel profile-head"><div class="ph"><h2>' + (p.title ? '<span class="title">' + esc(p.title) + "</span>" : "") + esc(p.name) + '</h2><div class="inline-note">level ' + p.level + " · " + num(p.glory) + " glory · " + (p.next_level_glory - p.glory) + " to level " + (p.level + 1) + '</div><div class="level"><i style="width:' + pct + '%"></i></div>' +
-      '<div class="chips" style="margin-top:8px"><span class="chip">essence <b>' + num(p.essence) + "</b>/" + p.cap + '</span><span class="chip">souls <b>' + num(p.souls) + "</b></span>" + (p.home_door ? '<span class="chip">door <b>' + p.home_door + "</b></span>" : "") + (p.streak ? '<span class="chip">streak <b>' + p.streak + "</b></span>" : "") + "</div></div>" +
+      '<div class="chips" style="margin-top:8px"><span class="chip">essence <b>' + num(p.essence) + "</b>/" + p.cap + '</span><span class="chip">souls <b>' + num(p.souls) + "</b></span>" + (p.home_door ? '<span class="chip">door <b>' + p.home_door + "</b></span>" : "") + (p.streak ? '<span class="chip">streak <b>' + p.streak + "</b></span>" : "") + badgeChip(p.badge) + "</div></div>" +
       (mine ? '<div class="inline-note">Share this page: <code>' + esc(location.origin + location.pathname + "#profile/" + id) + "</code></div>" : "") + "</div>";
     const stats = '<div class="panel"><h3>Record</h3><div class="stats">' + [["Sent in", p.releases], ["Kills", p.kills], ["Lost", p.deaths], ["Orders", p.orders], ["Hazards", p.hazards], ["Champion kills", p.champion_kills], ["Boss kills", p.boss_kills], ["Round wins", p.round_wins], ["Bets won", p.bets_won], ["Upsets", p.upsets]].map(([k, v]) => '<div class="stat"><div class="k">' + k + '</div><div class="v">' + num(v) + "</div></div>").join("") + "</div>" +
       ((p.daily && p.daily.glory) || (p.weekly && p.weekly.glory) ? '<p class="inline-note">today: ' + num(p.daily.glory) + " glory, " + num(p.daily.kills) + " kills · this week: " + num(p.weekly.glory) + " glory, " + num(p.weekly.kills) + " kills</p>" : "") +
@@ -456,16 +541,16 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
       return '<a class="tile' + (own ? "" : " locked") + (build && build.endsWith(m.name) ? " on" : "") + '" href="#profile/' + esc(id) + "/" + esc(m.name) + '" title="' + esc(m.name + (own ? (pts ? " · " + pts + "-point build" : "") + (vs ? " · " + vs + " variants" : "") : " · locked, " + m.unlock + " souls")) + '"><img src="' + esc(m.img) + '" alt="" loading="lazy">' + (own ? (pts ? pips(Math.min(5, Math.ceil(pts / 2))) : "") : '<span class="lock">' + m.unlock + "</span>") + '<span class="n">' + esc(m.name) + "</span></a>";
     }).join("");
     const monsters = '<div class="panel"><h3>' + (mine ? "Your monsters" : "Monsters") + '</h3><p class="sub">' + (p.unlocked || []).length + " unlocked beyond the four starters · locked ones are greyed with their price · " + Object.keys(p.talents || {}).length + " builds. Click one for its talent tree and variants.</p><div class=\"picker\" style=\"max-height:none\">" + tiles + "</div></div>";
-    return head + stats + monsters + (build ? buildPanel(p, build, mine) : "");
+    return head + stats + masteryPanel(p, id, mine) + badgePanel(p) + monsters + (build ? buildPanel(p, build, mine) : "");
   }
   function glory(level) { return 30 * (level - 1) * (level - 1); }
   /** What the agent would say about buying the next rank: the same rules, for the display. */
-  function canSpend(tree, ranks, tal, points, souls) {
-    const r = ranks[tal.key] || 0;
+  function canSpend(tree, ranks, tal, points, souls, budget) {
+    const r = ranks[tal.key] || 0, cap = budget || baseBudget(), tc = tierCosts();
     if (r >= tal.ranks.length) return { why: "maxed" };
-    if (points >= BUDGET) return { why: "the build holds " + BUDGET + " points" };
+    if (points >= cap) return { why: "the build holds " + cap + " points" };
     if (points < TIER_UNLOCK[tal.tier]) return { why: "tier " + (tal.tier + 1) + " opens at " + TIER_UNLOCK[tal.tier] + " points" };
-    const cost = TIER_COSTS[tal.tier][Math.min(r, TIER_COSTS[tal.tier].length - 1)];
+    const cost = tc[tal.tier][Math.min(r, tc[tal.tier].length - 1)];
     if (souls != null && souls < cost) return { why: cost + " souls; you have " + souls };
     return { cost: cost };
   }
@@ -493,24 +578,26 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     const ranks = ((p.talents || {})[build] || {}).ranks || {};
     const points = Object.values(ranks).reduce((a, b) => a + (parseInt(b, 10) || 0), 0);
     const summary = ((p.talents || {})[build] || {}).summary || "";
+    const budget = budgetFor(p, build), tc = tierCosts();
     if (!t || S.treeName !== build) tree = '<p class="arena-muted">Loading the tree…</p>';
     else if (t.error) tree = '<p class="arena-muted">' + esc(t.error) + "</p>";
     else {
       const names = ["Tier one", "Tier two", "Tier three", "Capstone"];
-      tree = '<div class="build-bar"><span class="pts"><b>' + points + "</b> of " + BUDGET + " points</span>" + (summary ? '<span class="inline-note">' + esc(summary) + "</span>" : '<span class="inline-note">no points spent yet</span>') +
-        (canBuild ? '<button class="small" data-act="respec" data-build="' + esc(build) + '"' + (points ? "" : " disabled") + ">Reset the build · " + RESPEC + " souls</button>" : "") + "</div>" +
-        '<p class="inline-note">Ranks cost souls (tier one 20/25/30, tier two 35/40/45, tier three 50/60, the capstone 80); tiers open at 0, 3, 6 and 9 points; a build holds ten points, so no tree can be filled.</p><div class="tree">' +
+      tree = '<div class="build-bar"><span class="pts"><b>' + points + "</b> of " + budget + " points</span>" + (summary ? '<span class="inline-note">' + esc(summary) + "</span>" : '<span class="inline-note">no points spent yet</span>') +
+        (canBuild ? '<button class="small" data-act="respec" data-build="' + esc(build) + '"' + (points ? "" : " disabled") + ">Reset the build · " + respecCost() + " souls</button>" : "") + "</div>" +
+        '<p class="inline-note">Ranks cost souls (tier one ' + tc[0].join("/") + ", tier two " + tc[1].join("/") + ", tier three " + tc[2].join("/") + ", the capstone " + tc[3].join("/") +
+        "); tiers open at 0, 3, 6 and 9 points; a build holds " + baseBudget() + " points" + (progressionLive() ? ", up to " + (baseBudget() + 3) + " with its monster's mastery" : "") + ', so no tree can be filled.</p><div class="tree">' +
         t.tiers.map((tier, i) => {
           const open = points >= TIER_UNLOCK[i];
           return '<div class="tier' + (open ? "" : " shut") + '"><h4><span>' + names[i] + "</span><span>" + (open ? "open" : "opens at " + TIER_UNLOCK[i] + " points") + '</span></h4><div class="talents">' + (tier.talents || []).map((tal) => {
-            const r = ranks[tal.key] || 0, max = tal.ranks.length, can = canSpend(t, ranks, tal, points, p.souls);
+            const r = ranks[tal.key] || 0, max = tal.ranks.length, can = canSpend(t, ranks, tal, points, p.souls, budget);
             const cls = "talent" + (r >= max ? " maxed" : "") + (i === 3 ? " cap" : "");
             const btn = canBuild ? (can.cost != null ? '<button class="small gold" data-act="spend" data-build="' + esc(build) + '" data-key="' + esc(tal.key) + '">Buy rank ' + (r + 1) + " · " + can.cost + " souls</button>" : '<span class="why">' + esc(can.why || "") + "</span>") : "";
             return '<div class="' + cls + '"><div class="tn"><span>' + esc(tal.name) + "</span><small>" + r + "/" + max + '</small></div><span class="tb">' + esc(tal.blurb) + "</span>" + btn + "</div>";
           }).join("") + "</div></div>";
         }).join("") + "</div>";
     }
-    const intro = !mine ? "Sign in to build it; here is the tree as it stands." : !own ? "This monster is locked; here is the tree it would have. Unlock it to build it." : !haveVariant ? "You do not own this variant yet; here is its tree. Unlock it to build it." : "Pick the base or a variant; each has its own ten-point build.";
+    const intro = !mine ? "Sign in to build it; here is the tree as it stands." : !own ? "This monster is locked; here is the tree it would have. Unlock it to build it." : !haveVariant ? "You do not own this variant yet; here is its tree. Unlock it to build it." : "Pick the base or a variant; each has its own build (" + budget + " points for this one).";
     return '<div class="panel"><h3>' + esc(build) + '</h3><p class="sub">' + intro + "</p>" + selector + ((canBuild || opts.preview) ? tree : (own ? '<p class="inline-note">Unlock this variant to build it.</p>' : "")) +
       (mine && own ? '<div class="form-row"><a href="#watch"><button data-act="send-build" data-name="' + esc(base.name) + '" data-variant="' + esc(vkey || "") + '">Send this one in</button></a></div>' : "") + "</div>";
   }
@@ -529,10 +616,22 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
   }
   function viewTop() {
     const b = S.board;
-    const tabs = '<div class="tabs2">' + [["all", "All time"], ["day", "Today"], ["week", "This week"]].map(([k, l]) => '<button class="' + (S.boardPeriod === k ? "on" : "") + '" data-act="period" data-period="' + k + '">' + l + "</button>").join("") + "</div>";
+    const kinds = [["all", "All time"], ["day", "Today"], ["week", "This week"]].concat(progressionLive() ? [["masters", "Masters"], ["achievements", "Achievements"]] : []);
+    const tabs = '<div class="tabs2">' + kinds.map(([k, l]) => '<button class="' + (S.boardPeriod === k ? "on" : "") + '" data-act="period" data-period="' + k + '">' + l + "</button>").join("") + "</div>";
     if (!b) return '<div class="panel">' + tabs + '<p class="arena-muted">Loading…</p></div>';
-    const rows = (b[S.boardPeriod] || []).map((r) => "<tr><td class=\"num\">" + r.rank + "</td><td>" + (r.id ? '<a href="#profile/' + esc(r.id) + '">' : "") + (r.title ? '<span class="title">' + esc(r.title) + "</span> " : "") + esc(r.name) + (r.id ? "</a>" : "") + '</td><td class="num">' + r.level + '</td><td class="num">' + num(r.glory) + '</td><td class="num">' + num(r.kills) + '</td><td class="num">' + num(r.releases) + "</td></tr>").join("");
-    return '<div class="panel"><h2>Leaderboard</h2>' + tabs + (b.error ? '<p class="arena-muted">' + esc(b.error) + "</p>" : rows ? '<table class="top-table"><thead><tr><th></th><th>Player</th><th>Level</th><th>Glory</th><th>Kills</th><th>Sent in</th></tr></thead><tbody>' + rows + "</tbody></table>" : '<p class="arena-muted">Nobody on the board yet.</p>') + "</div>";
+    const who = (r, extra) => (r.id ? '<a href="#profile/' + esc(r.id) + '">' : "") + (r.title ? '<span class="title">' + esc(r.title) + "</span> " : "") + esc(r.name) + (r.id ? "</a>" : "") + (extra || "");
+    let table;
+    if (S.boardPeriod === "masters") {
+      const rows = (b.masters || []).map((r) => '<tr><td class="num">' + r.rank + "</td><td>" + who(r) + "</td><td>" + rankPill({ rank: r.mastery_rank, stars: r.stars, name: r.rank_name }) + " " + esc(r.type + " " + r.rank_name) + '</td><td class="num">' + num(r.xp) + "</td></tr>").join("");
+      table = rows ? '<table class="top-table"><thead><tr><th></th><th>Player</th><th>Best mastery</th><th>XP</th></tr></thead><tbody>' + rows + "</tbody></table>" : '<p class="arena-muted">Nobody holds a mastery rank yet.</p>';
+    } else if (S.boardPeriod === "achievements") {
+      const rows = (b.achievements || []).map((r) => '<tr><td class="num">' + r.rank + "</td><td>" + who(r) + '</td><td class="num">' + num(r.points) + '</td><td class="num">' + num(r.count) + "</td></tr>").join("");
+      table = rows ? '<table class="top-table"><thead><tr><th></th><th>Player</th><th>Points</th><th>Badges</th></tr></thead><tbody>' + rows + "</tbody></table>" : '<p class="arena-muted">Nobody has earned a badge yet.</p>';
+    } else {
+      const rows = (b[S.boardPeriod] || []).map((r) => '<tr><td class="num">' + r.rank + "</td><td>" + who(r, r.badge ? " " + rankPill(r.badge) : "") + '</td><td class="num">' + r.level + '</td><td class="num">' + num(r.glory) + '</td><td class="num">' + num(r.kills) + '</td><td class="num">' + num(r.releases) + "</td></tr>").join("");
+      table = rows ? '<table class="top-table"><thead><tr><th></th><th>Player</th><th>Level</th><th>Glory</th><th>Kills</th><th>Sent in</th></tr></thead><tbody>' + rows + "</tbody></table>" : '<p class="arena-muted">Nobody on the board yet.</p>';
+    }
+    return '<div class="panel"><h2>Leaderboard</h2>' + tabs + (b.error ? '<p class="arena-muted">' + esc(b.error) + "</p>" : table) + "</div>";
   }
 
   // ------------------------------------------------------------------ commands
@@ -636,7 +735,9 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     if (act === "bet") { await send("!bet " + bound("betDoor") + " " + bound("betAmt")); return; }
     if (act === "unlock") { await send("!unlock " + el.dataset.name + (el.dataset.variant ? " " + el.dataset.variant : "")); return; }
     if (act === "spend") { await send("!talent " + el.dataset.build + " " + el.dataset.key); return; }
-    if (act === "respec") { if (confirm("Reset every point in " + el.dataset.build + " for " + RESPEC + " souls? Nothing is refunded.")) await send("!respec " + el.dataset.build); return; }
+    if (act === "respec") { if (confirm("Reset every point in " + el.dataset.build + " for " + respecCost() + " souls? Nothing is refunded.")) await send("!respec " + el.dataset.build); return; }
+    if (act === "badge") { await send("!badge " + el.dataset.name); return; }
+    if (act === "badge-best") { await send("!badge best"); return; }
   });
   document.addEventListener("change", (ev) => {
     const el = ev.target.closest("[data-bind], [data-act=weapon]");
