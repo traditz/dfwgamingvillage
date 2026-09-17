@@ -277,5 +277,23 @@ body:not(.view-watch) #arena-stream { max-width: 360px; justify-self: end; }
 .ach.hidden .ab b { letter-spacing: .2em; }
 .prog { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; margin: 5px 0 2px; }
 .prog i { display: block; height: 100%; background: var(--teal); }
+.hunt-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 6px; margin-bottom: 10px; }
+.hcell { padding: 6px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel-strong); text-align: center; min-width: 0; }
+.hcell img, .hcell .noimg { width: 48px; height: 48px; object-fit: cover; border-radius: 6px; border: 1px solid var(--line); background: #0a0908; display: block; margin: 0 auto 4px; }
+.hcell b { display: block; font-size: .78em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hcell small { display: block; color: var(--muted); font-size: .72em; font-variant-numeric: tabular-nums; }
+.hcell.on { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(245, 197, 66, .14); }
+.hcell.on small { color: var(--gold); }
+.hcell.on .prog i { background: var(--gold); }
+.hcell.none { opacity: .5; }
+.hrow { display: flex; gap: 10px; padding: 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel-strong); margin-bottom: 8px; }
+.hrow img, .hrow .noimg { width: 56px; height: 56px; flex: 0 0 56px; object-fit: cover; border-radius: 6px; border: 1px solid var(--line); background: #0a0908; }
+.hrow .hbody { flex: 1; min-width: 0; }
+.hrow .mt { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; flex-wrap: wrap; }
+.hrow .mt span { color: var(--muted); font-size: .88em; }
+.hrow .chips { margin-top: 4px; }
+.hrow details { margin-top: 4px; font-size: .9em; }
+.hrow summary { cursor: pointer; color: var(--teal); }
+.hunt-line { margin: 0 0 8px; }
 .feed li.mastery b { color: var(--gold); }
 .feed li.achievement b { color: var(--teal); }

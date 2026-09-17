@@ -26,7 +26,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
   const BUDGET_FALLBACK = 10, RESPEC_FALLBACK = 200;
   const LADDER_FALLBACK = [[1, "Initiate", 125, ""], [2, "Handler", 375, ""], [3, "Adept", 875, ""], [4, "Expert", 1750, ""], [5, "Specialist", 3250, ""],
                            [6, "Master", 5750, ""], [7, "Grandmaster", 10000, ""], [8, "Paragon", 17500, ""], [9, "Legend", 30000, ""], [10, "Mythic", 55000, ""]];
-  const GROUPS_FALLBACK = [{ key: "mastery", label: "Mastery milestones" }, { key: "combat", label: "Combat and rounds" }, { key: "collection", label: "Collection" }, { key: "feats", label: "Feats" }];
+  const GROUPS_FALLBACK = [{ key: "mastery", label: "Mastery milestones" }, { key: "combat", label: "Combat and rounds" }, { key: "collection", label: "Collection" }, { key: "feats", label: "Feats" }, { key: "hunts", label: "Hunts" }];
   const COMMAND_WAIT = 25000;
 
   const S = {
@@ -295,6 +295,27 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
       (mine && p.badge && p.badge.picked ? ' <button class="small" data-act="badge-best">Use my best</button>' : "") + "</p>" +
       (tiles ? '<div class="mastery-grid">' + tiles + "</div>" : '<p class="inline-note">No mastery yet: every monster sent in starts one.</p>') + "</div>";
   }
+  function achCard(x, earned, prog, hidden) {
+    const on = !!earned[x.id], h = hidden[x.id], pr = prog[x.id];
+    const name = on && h ? h.name : x.name, blurb = on && h ? h.blurb : x.blurb;
+    const pct = pr ? Math.max(0, Math.min(100, Math.round(100 * pr[0] / Math.max(1, pr[1])))) : 0;
+    return '<div class="ach ' + esc(x.tier) + (on ? "" : " locked") + (x.hidden && !on ? " hidden" : "") + '"><div class="medal">' + x.points + '</div><div class="ab"><b>' + esc(name) + "</b><small>" + esc(x.tier) + " · " + esc(blurb) + "</small>" +
+      (on ? '<small class="when">earned ' + new Date(earned[x.id] * 1000).toLocaleDateString() + "</small>" : pr ? '<div class="prog"><i style="width:' + pct + '%"></i></div><small>' + num(pr[0]) + " / " + num(pr[1]) + "</small>" : "") + "</div></div>";
+  }
+  function huntBadges(p, items, earned, prog, hidden) {
+    // one cell per monster type (its progress comes from the prey totals, not the progress list), then the tallies as ordinary cards
+    const prey = p.prey || {};
+    const cells = items.filter((x) => x.type).map((x) => {
+      const have = Number(prey[x.type] || 0), on = !!earned[x.id];
+      return { x: x, have: have, on: on, pct: on ? 100 : Math.max(0, Math.min(100, Math.round(100 * have / Math.max(1, x.need)))), mon: S.byName[x.type] };
+    }).sort((a, b) => (b.on - a.on) || (b.pct - a.pct) || a.x.type.localeCompare(b.x.type));
+    const got = cells.filter((c) => c.on).length, hunted = Object.values(prey).filter((n) => n > 0).length, needs = cells.map((c) => c.x.need);
+    const grid = cells.map((c) => '<div class="hcell' + (c.on ? " on" : c.have ? "" : " none") + '" title="' + esc(c.x.name + ": " + c.x.blurb) + '">' + (c.mon ? '<img src="' + esc(c.mon.img) + '" alt="" loading="lazy">' : '<div class="noimg"></div>') +
+      "<b>" + esc(c.x.type) + "</b><small>" + (c.on ? "earned" : num(c.have) + " / " + num(c.x.need)) + '</small><div class="prog"><i style="width:' + c.pct + '%"></i></div></div>').join("");
+    return '<div class="badge-group hunts"><h4>Hunts <small>' + got + " of " + cells.length + " badges · " + hunted + ' types hunted</small></h4>' +
+      '<p class="inline-note">A Hunter badge for every monster type your monsters kill enough of, from ' + num(Math.max.apply(null, needs)) + " of the weakest types down to " + num(Math.min.apply(null, needs)) + " of a boss (a variant killed counts for its type). The tallies below reward the breadth of the hunt.</p>" +
+      '<div class="hunt-grid">' + grid + '</div><div class="badge-case">' + items.filter((x) => !x.type).map((x) => achCard(x, earned, prog, hidden)).join("") + "</div></div>";
+  }
   function badgePanel(p) {
     const cat = (S.cat && S.cat.achievements) || [], a = p.achievements;
     if (!cat.length || !a) return "";
@@ -302,15 +323,30 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     const groups = (S.cat && S.cat.achievement_groups) || GROUPS_FALLBACK;
     const html = groups.map((g) => {
       const items = cat.filter((x) => x.group === g.key);
-      return '<div class="badge-group"><h4>' + esc(g.label) + " <small>" + items.filter((x) => earned[x.id]).length + " of " + items.length + '</small></h4><div class="badge-case">' + items.map((x) => {
-        const on = !!earned[x.id], h = hidden[x.id], pr = prog[x.id];
-        const name = on && h ? h.name : x.name, blurb = on && h ? h.blurb : x.blurb;
-        const pct = pr ? Math.max(0, Math.min(100, Math.round(100 * pr[0] / Math.max(1, pr[1])))) : 0;
-        return '<div class="ach ' + esc(x.tier) + (on ? "" : " locked") + (x.hidden && !on ? " hidden" : "") + '"><div class="medal">' + x.points + '</div><div class="ab"><b>' + esc(name) + "</b><small>" + esc(x.tier) + " · " + esc(blurb) + "</small>" +
-          (on ? '<small class="when">earned ' + new Date(earned[x.id] * 1000).toLocaleDateString() + "</small>" : pr ? '<div class="prog"><i style="width:' + pct + '%"></i></div><small>' + num(pr[0]) + " / " + num(pr[1]) + "</small>" : "") + "</div></div>";
-      }).join("") + "</div></div>";
+      if (g.key === "hunts") return huntBadges(p, items, earned, prog, hidden);
+      return '<div class="badge-group"><h4>' + esc(g.label) + " <small>" + items.filter((x) => earned[x.id]).length + " of " + items.length + '</small></h4><div class="badge-case">' + items.map((x) => achCard(x, earned, prog, hidden)).join("") + "</div></div>";
     }).join("");
     return '<div class="panel"><h3>Achievements <small class="inline-note">' + num(a.points) + " points · " + num(a.count) + " of " + cat.length + " badges</small></h3>" + html + "</div>";
+  }
+  function huntsPanel(p, id, mine) {
+    // the prey log: one row per build that has killed, the busiest first, its victims by type
+    if (!p.progression) return "";
+    const rows = Object.entries(p.hunts || {}).map(([b, v]) => [b, v || {}, Object.values(v || {}).reduce((s, n) => s + (Number(n) || 0), 0)]).filter((r) => r[2] > 0).sort((a, b) => b[2] - a[2]);
+    const body = rows.map(([b, v, total]) => {
+      const sb = splitBuild(b), mon = sb && S.byName[sb.base];
+      const victims = Object.entries(v).filter(([t]) => t !== "other").sort((x, y) => y[1] - x[1]);
+      const chips = victims.slice(0, 6).map(([t, n]) => '<span class="chip">' + esc(t) + " ×" + num(n) + "</span>").join("");
+      const all = victims.map(([t, n]) => esc(t) + " ×" + num(n)).join(" · ") + (v.other ? " · +" + num(v.other) + " of other types" : "");
+      return '<div class="hrow">' + (mon ? '<img src="' + esc(mon.img) + '" alt="" loading="lazy">' : '<div class="noimg"></div>') + '<div class="hbody"><div class="mt"><b>' + esc(b) + "</b><span>" + num(total) + " kills · " + victims.length + (v.other ? "+" : "") + ' types</span></div><div class="chips">' + chips + "</div>" +
+        (victims.length > 6 || v.other ? '<details><summary>all of them</summary><div class="inline-note">' + all + "</div></details>" : "") + "</div></div>";
+    }).join("");
+    return '<div class="panel"><h3>Prey</h3><p class="sub">' + (mine ? "What your monsters have killed" : "What their monsters have killed") + ", by the monster that made the kill (a variant keeps its own log) and the type it killed; a Frost Ogre killed counts as an Ogre. Every type has a hunt badge in the badge case below." +
+      (p.hunts_more ? " " + p.hunts_more + " more builds with fewer kills are not shown." : "") + "</p>" + (body || '<p class="inline-note">Nothing yet: the log starts with the first kill.</p>') + "</div>";
+  }
+  function huntLine(a, name) {
+    const have = Number((a.prey || {})[name] || 0), row = ((S.cat && S.cat.achievements) || []).find((x) => x.type === name);
+    const on = !!(row && a.achievements && a.achievements.earned && a.achievements.earned[row.id]);
+    return '<p class="inline-note hunt-line">Hunted: your monsters have killed ' + num(have) + " of these" + (row ? (on ? " · " + esc(row.name) + " earned" : " · " + esc(row.name) + " at " + num(row.need)) : "") + "</p>";
   }
 
   // ------------------------------------------------------------------ routing and rendering
@@ -509,7 +545,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
       '<button class="gold" data-act="unlock" data-name="' + esc(m.name) + '">Unlock for ' + m.unlock + " souls</button>" + (a ? '<span class="inline-note"> you have ' + num(a.souls) + "</span>" : "");
     return '<div class="panel detail' + (signed && !owned ? " locked" : "") + '"><div><img src="' + esc(m.img) + '" alt="' + esc(m.name) + '"></div><div><h2>' + esc(m.name) + ' <small class="inline-note">' + esc(m.source_label || m.source) + "</small></h2><p>" + esc(m.notes) + "</p>" +
       '<div class="stats"><div class="stat"><div class="k">Threat</div><div class="v">' + m.threat + '</div></div><div class="stat"><div class="k">Fights</div><div class="v">' + ATTACK_WORD[m.attack] + (m.fly ? ", flies" : "") + '</div></div><div class="stat"><div class="k">Health</div><div class="v">' + (m.health || "?") + '</div></div><div class="stat"><div class="k">Hardest hit</div><div class="v">' + m.hit + '</div></div><div class="stat"><div class="k">Unlock</div><div class="v gold">' + (m.starter ? "free" : m.unlock + " souls") + '</div></div><div class="stat"><div class="k">Each variant</div><div class="v gold">' + num(variantDamage(m)) + " damage</div></div></div>" +
-      (a && a.progression ? masteryBlock(a, m.name) : "") +
+      (a && a.progression ? masteryBlock(a, m.name) + huntLine(a, m.name) : "") +
       '<div class="form-row">' + unlockBtn + ' <a href="#bestiary"><button class="small">Close</button></a></div>' +
       "<h3>Variants</h3><p class=\"sub\">Eight variants of every type, each with a talent tree and a damage pool of its own. The base monster comes first; a variant is bought with the damage your " + esc(m.name) + "s have dealt" + (a ? " (" + num(poolOf(a, m.name)) + " unspent so far)" : "") + ".</p><div class=\"variants\">" + variants + "</div></div></div>" +
       buildPanel((S.me && S.me.account) || { id: "", unlocked: [], variants: {}, talents: {}, souls: null }, S.args[1] || m.name, !!(S.me && S.me.account),
@@ -552,7 +588,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
       return '<a class="tile' + (own ? "" : " locked") + (build && build.endsWith(m.name) ? " on" : "") + '" href="#profile/' + esc(id) + "/" + esc(m.name) + '" title="' + esc(m.name + (own ? (pts ? " · " + pts + "-point build" : "") + (vs ? " · " + vs + " variants" : "") : " · locked, " + m.unlock + " souls")) + '"><img src="' + esc(m.img) + '" alt="" loading="lazy">' + (own ? (pts ? pips(Math.min(5, Math.ceil(pts / 2))) : "") : '<span class="lock">' + m.unlock + "</span>") + '<span class="n">' + esc(m.name) + "</span></a>";
     }).join("");
     const monsters = '<div class="panel"><h3>' + (mine ? "Your monsters" : "Monsters") + '</h3><p class="sub">' + (p.unlocked || []).length + " unlocked beyond the four starters · locked ones are greyed with their price · " + Object.keys(p.talents || {}).length + " builds. Click one for its talent tree and variants.</p><div class=\"picker\" style=\"max-height:none\">" + tiles + "</div></div>";
-    return head + stats + masteryPanel(p, id, mine) + badgePanel(p) + monsters + (build ? buildPanel(p, build, mine) : "");
+    return head + stats + masteryPanel(p, id, mine) + huntsPanel(p, id, mine) + badgePanel(p) + monsters + (build ? buildPanel(p, build, mine) : "");
   }
   function glory(level) { return 30 * (level - 1) * (level - 1); }
   /** What the agent would say about buying the next rank: the same rules, for the display; pool is the build's unspent damage (null: no test). */
