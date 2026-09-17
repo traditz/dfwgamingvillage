@@ -175,6 +175,14 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     // the viewer's mastery of the type takes its share off the total, rounded the way the agent rounds
     return Math.floor(total * (1 - discountFor(S.me && S.me.account, m.name)) + 0.5);
   }
+  function affordableCount(m, strength, variant, door) {
+    // "send all": the most copies the essence in hand buys at once, the copy tax and the mastery discount counted
+    const a = S.me && S.me.account, max = costs().release_all_max || 20;
+    if (!a || a.essence == null) return 0;
+    let n = 0;
+    while (n < max && releaseCost(m, strength, n + 1, variant, door) <= a.essence) n++;
+    return n;
+  }
   function groupWords(members) {
     const seen = [];
     members.forEach((d) => { if (!seen.includes(d)) seen.push(d); });
@@ -467,8 +475,11 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
       const summary = (f.count > 1 ? f.count + " × " : "") + (f.variant ? affix(f.variant) + " " : "") + m.name + " at " + f.strength + "%" +
         (f.door === 9 ? " from every door" : f.door ? " from door " + f.door : home ? " from door " + home : " from the emptiest door") +
         (lately ? " · " + lately + " sent lately, so each copy costs " + (step * lately) + "% more" : "");
+      const allN = ok && a ? affordableCount(m, f.strength, f.variant, f.door) : 0;
+      const allBtn = ok && a ? '<button class="big" data-act="release-all"' + (allN ? "" : " disabled") + ' title="as many as your essence buys at once, the copy tax counted; ' + ((costs().release_all_max || 20)) + ' at most">Send all I can' +
+        (allN ? " · " + allN + " for " + releaseCost(m, f.strength, allN, f.variant, f.door) : "") + "</button>" : "";
       foot = '<div class="summon-foot"><div class="cost"><span class="k">Cost</span><b>' + cost + '</b><span class="unit">essence</span><small>' + esc(summary) + "</small></div>" +
-        '<div class="actions"><button class="gold big" data-act="release"' + (ok ? "" : " disabled") + ">Send in</button>" + walletChip(cost) + "</div>" +
+        '<div class="actions"><button class="gold big" data-act="release"' + (ok ? "" : " disabled") + ">Send in</button>" + allBtn + walletChip(cost) + "</div>" +
         '<p class="fine">The crowd sends one boss every ' + bossWait + " s; copies of a kind cost " + step + "% more each for a minute and a half.</p>" +
         (ok ? groupAddRow(m) : "") + "</div>";
     }
@@ -736,15 +747,17 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     if (act === "period") { S.boardPeriod = el.dataset.period; render(); return; }
     if (act === "untarget") { S.target = null; render(); return; }
     if (act === "send-build") { S.form.name = el.dataset.name; S.form.variant = el.dataset.variant || ""; S.form.vanilla = false; return; }
-    if (act === "release") {
+    if (act === "release" || act === "release-all") {
       const f = S.form, m = S.byName[f.name];
       if (!m) return;
-      // "!release Name [door] [strength] [xN] [variant] [vanilla]": the agent reads two trailing
-      // numbers as door and strength, and a lone number of fifty or more as the strength
+      // "!release Name [door] [strength] [xN|all] [variant] [vanilla]": the agent reads two trailing
+      // numbers as door and strength, and a lone number of fifty or more as the strength; "all" sends as
+      // many as the essence buys at once (the agent settles the count with the copy tax)
       let text = "!release " + m.name;
       if (f.door) text += " " + f.door + " " + f.strength;
       else if (f.strength !== 100) text += " " + f.strength;
-      if (f.count > 1) text += " x" + f.count;
+      if (act === "release-all") text += " all";
+      else if (f.count > 1) text += " x" + f.count;
       if (f.variant) text += " " + f.variant;
       if (f.vanilla) text += " vanilla";
       await send(text); return;
