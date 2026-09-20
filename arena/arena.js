@@ -61,7 +61,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
   function watchState(on) {
     if (!db) return;
     if (on && !S.unsub.state) {
-      S.unsub.state = onSnapshot(pub("state"), (snap) => { S.live = snap.exists() ? snap.data() : null; if (S.view === "watch" && !(document.activeElement && document.activeElement.closest(".console"))) render(); }, () => { S.live = null; });
+      S.unsub.state = onSnapshot(pub("state"), (snap) => { S.live = snap.exists() ? snap.data() : null; if ((S.view === "watch" || S.view === "admin") && !(document.activeElement && document.activeElement.closest(".console, .adm-row"))) render(); }, () => { S.live = null; });
     } else if (!on && S.unsub.state) { S.unsub.state(); S.unsub.state = null; }
   }
   function watchProfile(id) {
@@ -361,7 +361,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
   function route() {
     const parts = location.hash.replace(/^#/, "").split("/").map(decodeURIComponent);
     S.view = parts[0] || "watch"; S.args = parts.slice(1);
-    if (!["watch", "bestiary", "profile", "top"].includes(S.view)) S.view = "watch";
+    if (!["watch", "bestiary", "profile", "top", "admin"].includes(S.view)) S.view = "watch";
   }
   function notice(text, ok, discord) {
     const n = $("#arena-notice");
@@ -384,6 +384,8 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
   }
   function render() {
     document.querySelectorAll("#arena-tabs a").forEach((a) => a.classList.toggle("on", a.dataset.tab === S.view));
+    const admTab = document.querySelector('#arena-tabs a[data-tab="admin"]');
+    if (admTab) admTab.hidden = !(S.me && S.me.admin);       // the link is a convenience: the arena itself checks who may use what it leads to
     renderUser();
     // the player is static markup in a grid cell beside #app; the body's classes pick the
     // layout (side by side, or a bigger stream with the commands under it) and shrink the
@@ -394,7 +396,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     const app = $("#app");
     const st = S.live, mons = (st && st.monsters) || [];
     if (S.view === "watch") {
-      $("#watch-status").innerHTML = statusLine(st);
+      $("#watch-status").innerHTML = statusLine(st) + specialBanner(st);
       $("#watch-feed").innerHTML = feedList(st);
       app.innerHTML = panel(mons);
     } else if (S.view === "bestiary") {
@@ -403,8 +405,9 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
       if (m) ensureTree(S.args[1] || m.name);
     }
     else if (S.view === "profile") app.innerHTML = viewProfile();
+    else if (S.view === "admin") app.innerHTML = viewAdmin();
     else app.innerHTML = viewTop();
-    watchState(S.view === "watch" && !document.hidden);
+    watchState((S.view === "watch" || S.view === "admin") && !document.hidden);
     chatWant(S.view === "watch" && !document.hidden);
     if (S.view === "profile") ensureProfile();
     if (S.view === "top") ensureBoard();
@@ -415,6 +418,20 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     const on = !!(st && st.online), mons = (st && st.monsters) || [], rounds = st && st.rounds;
     return '<div class="status"><span><i class="dot' + (on ? " on" : "") + '"></i>' + (on ? "live" : "the arena is offline right now") + "</span>" +
       (on ? "<span>" + esc(st.mode || "") + " mode</span><span>round " + esc(st.round || "") + (rounds && rounds.phase ? " · " + esc(rounds.phase) + (rounds.seconds != null ? " " + Math.floor(rounds.seconds / 60) + ":" + String(rounds.seconds % 60).padStart(2, "0") : "") : "") + "</span><span>" + mons.length + " alive</span>" : "") + "</div>";
+  }
+  function specialBanner(st) {
+    const r = st && st.online && st.rounds;
+    if (!r) return "";
+    let h = "";
+    if (r.special) {
+      const s = r.special, score = s.score ? " · " + esc(s.a) + " " + s.score[0] + " : " + s.score[1] + " " + esc(s.b) : "";
+      h += '<div class="special"><b>Special round · ' + esc(s.title) + "</b><span>" + esc(s.blurb) + score + "</span></div>";
+    }
+    if (r.vote && r.vote.options) {
+      h += '<div class="special vote"><b>Vote the next round</b><span>' + (r.vote.seconds ? r.vote.seconds + " s left · " : "") + (S.me ? "pick one" : "sign in to vote, or type !vote 1, 2 or 3 in chat") + '</span><div class="vote-row">' +
+        r.vote.options.map((o) => '<button data-act="vote" data-n="' + o.n + '" title="' + esc(o.blurb) + '"' + (S.me ? "" : " disabled") + ">" + o.n + " · " + esc(o.title) + " <i>" + o.votes + "</i></button>").join("") + "</div></div>";
+    }
+    return h;
   }
   function feedList(st) {
     return '<ul class="feed">' + ((st && st.feed) || []).slice().reverse().map((e) => '<li class="' + esc(e.kind) + '"><b>' + esc(e.kind) + "</b> " + esc(e.text) + "</li>").join("") + "</ul>";
@@ -675,7 +692,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
   }
   function viewTop() {
     const b = S.board;
-    const kinds = [["all", "All time"], ["day", "Today"], ["week", "This week"]].concat(progressionLive() ? [["masters", "Masters"], ["achievements", "Achievements"]] : []);
+    const kinds = [["all", "All time"], ["day", "Today"], ["week", "This week"]].concat(progressionLive() ? [["masters", "Masters"], ["achievements", "Achievements"]] : []).concat([["doors", "Doors"], ["games", "Games"]]);
     const tabs = '<div class="tabs2">' + kinds.map(([k, l]) => '<button class="' + (S.boardPeriod === k ? "on" : "") + '" data-act="period" data-period="' + k + '">' + l + "</button>").join("") + "</div>";
     if (!b) return '<div class="panel">' + tabs + '<p class="arena-muted">Loading…</p></div>';
     const who = (r, extra) => (r.id ? '<a href="#profile/' + esc(r.id) + '">' : "") + (r.title ? '<span class="title">' + esc(r.title) + "</span> " : "") + esc(r.name) + (r.id ? "</a>" : "") + (extra || "");
@@ -683,6 +700,19 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     if (S.boardPeriod === "masters") {
       const rows = (b.masters || []).map((r) => '<tr><td class="num">' + r.rank + "</td><td>" + who(r) + "</td><td>" + rankPill({ rank: r.mastery_rank, stars: r.stars, name: r.rank_name }) + " " + esc(r.type + " " + r.rank_name) + '</td><td class="num">' + num(r.xp) + "</td></tr>").join("");
       table = rows ? '<table class="top-table"><thead><tr><th></th><th>Player</th><th>Best mastery</th><th>XP</th></tr></thead><tbody>' + rows + "</tbody></table>" : '<p class="arena-muted">Nobody holds a mastery rank yet.</p>';
+    } else if (S.boardPeriod === "doors") {
+      const w = b.door_wars;
+      const wars = w ? '<p class="sub">Door Wars, week ' + esc(w.week) + ": " + (w.leader ? "door " + w.leader.door + " leads with " + num(w.leader.kills) + " kills" : "no kills yet this week") +
+        (w.last_winner ? " · last week went to door " + w.last_winner.door + " with " + num(w.last_winner.kills) : "") + ". The week's winning door pays its regulars.</p>" : "";
+      const rows = (b.doors || []).map((r) => '<tr><td class="num">' + r.rank + "</td><td>Door " + r.door + (r.weeks_won ? ' <span class="title">' + r.weeks_won + "× week</span>" : "") + '</td><td class="num">' + num(r.today) +
+        '</td><td class="num">' + num(r.week) + '</td><td class="num">' + num(r.all) + '</td><td class="num">' + num(r.wins) + '</td><td class="num">' + (r.best ? num(r.best) + " <small>round " + r.best_round + "</small>" : "–") + "</td></tr>").join("");
+      table = (b.doors || []).some((r) => r.all) ? wars + '<div class="table-wrap"><table class="top-table"><thead><tr><th></th><th>Door</th><th>Today</th><th>This week</th><th>All time</th><th>Rounds won</th><th>Best round</th></tr></thead><tbody>' + rows + "</tbody></table></div>" :
+        '<p class="arena-muted">No door has a kill on the board yet.</p>';
+    } else if (S.boardPeriod === "games") {
+      const rows = (b.games || []).map((r) => '<tr><td class="num">' + r.rank + "</td><td>" + esc(r.name) + '</td><td class="num">' + num(r.today) + '</td><td class="num">' + num(r.week) + '</td><td class="num">' + num(r.all) +
+        '</td><td class="num">' + num(r.clash_wins) + "</td></tr>").join("");
+      table = rows ? '<p class="sub">Every kill counts for the game its killer comes from. Clash wins are crossover rounds a game has taken.</p><div class="table-wrap"><table class="top-table"><thead><tr><th></th><th>Game</th><th>Today</th><th>This week</th><th>All time</th><th>Clash wins</th></tr></thead><tbody>' + rows + "</tbody></table></div>" :
+        '<p class="arena-muted">No kills on the board yet.</p>';
     } else if (S.boardPeriod === "achievements") {
       const rows = (b.achievements || []).map((r) => '<tr><td class="num">' + r.rank + "</td><td>" + who(r) + '</td><td class="num">' + num(r.points) + '</td><td class="num">' + num(r.count) + "</td></tr>").join("");
       table = rows ? '<table class="top-table"><thead><tr><th></th><th>Player</th><th>Points</th><th>Badges</th></tr></thead><tbody>' + rows + "</tbody></table>" : '<p class="arena-muted">Nobody has earned a badge yet.</p>';
@@ -691,6 +721,38 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
       table = rows ? '<table class="top-table"><thead><tr><th></th><th>Player</th><th>Level</th><th>Glory</th><th>Kills</th><th>Sent in</th></tr></thead><tbody>' + rows + "</tbody></table>" : '<p class="arena-muted">Nobody on the board yet.</p>';
     }
     return '<div class="panel"><h2>Leaderboard</h2>' + tabs + (b.error ? '<p class="arena-muted">' + esc(b.error) + "</p>" : table) + "</div>";
+  }
+
+  // ------------------------------------------------------------------ admin: the rare rounds and events
+  // Every control sends an admin command through the same path as the console; the arena checks the sender, so the page
+  // only decides what to show. What it shows comes from the live state (the switches, the chances, the queue).
+  function viewAdmin() {
+    if (!(S.me && S.me.admin)) return '<div class="panel"><h2>Admin</h2><p class="arena-muted">This page is for the arena\'s admins. Sign in with an admin\'s Discord account.</p></div>';
+    const st = S.live, sp = st && st.specials, r = st && st.rounds;
+    if (!st || !st.online || !sp) return '<div class="panel"><h2>Admin</h2><p class="arena-muted">The arena is not reporting its specials right now (offline, or not in rounds mode).</p></div>';
+    const sw = (flag, label, cmd) => '<button class="switch' + (sp.flags[flag] ? " on" : "") + '" data-act="adm" data-cmd="' + esc(cmd + (sp.flags[flag] ? " off" : " on")) + '">' + esc(label) + " <b>" + (sp.flags[flag] ? "ON" : "OFF") + "</b></button>";
+    const q = sp.queue || {};
+    const now = '<p class="sub">' + (r && r.phase ? "Round " + esc(st.round) + ", " + esc(r.phase) + ". " : "") + "This round: <b>" + esc(r && r.special ? r.special.title : "ordinary") + "</b>" + (r && r.vote ? " · a vote is open" : "") +
+      " · next round: <b>" + esc(q.round || "left to chance") + "</b> · next battle's event: <b>" + esc(q.event || "left to chance") + "</b> · " + sp.since + " ordinary rounds since the last special.</p>";
+    const switches = '<div class="panel"><h3>Switches</h3><p class="sub">Off means off at once: no rolls, no votes, the queue dropped. A special already running ends with its round.</p><div class="adm-switches">' +
+      sw("enabled", "Everything", "!specials") + sw("mutators", "Mutators", "!specials mutators") + sw("clashes", "Crossover clashes", "!specials clashes") + sw("events", "Mid-round events", "!specials events") + sw("doorwars", "Door Wars", "!specials doorwars") + "</div>" +
+      '<div class="form-row adm-row"><label>Special round, % of rounds<input type="number" id="adm-cr" min="0" max="100" step="1" value="' + sp.chance_round + '"></label><label>Event, % of rounds<input type="number" id="adm-ce" min="0" max="100" step="1" value="' + sp.chance_event +
+      '"></label><button data-act="adm-chance">Set the chances</button><span class="arena-muted">at least ' + sp.cooldown + " ordinary rounds between special ones</span></div></div>";
+    const item = (x, buttons) => '<li><div><b>' + esc(x.title) + "</b><span>" + esc(x.blurb) + '</span></div><div class="adm-btns">' + buttons + "</div></li>";
+    const muts = (sp.catalogue.mutators || []).map((x) => item(x, '<button class="small" data-act="adm" data-cmd="!next ' + esc(x.name) + '">Next round</button>')).join("");
+    const evs = (sp.catalogue.events || []).map((x) => item(x, '<button class="small" data-act="adm" data-cmd="!next ' + esc(x.name) + '">Next battle</button><button class="small red" data-act="adm" data-cmd="!event ' + esc(x.name) + '">Now</button>')).join("");
+    // the clash picks live in the page's state: a state snapshot redraws this view, and the selects must not fall back
+    const names = sp.catalogue.shelves || [], adm = S.adm || (S.adm = {});
+    const pickA = names.includes(adm.a) ? adm.a : names[0], pickB = names.includes(adm.b) && adm.b !== pickA ? adm.b : names.find((s) => s !== pickA);
+    const opts = (pick) => names.map((s) => "<option" + (s === pick ? " selected" : "") + ">" + esc(s) + "</option>").join("");
+    const queue ='<div class="panel"><h3>Next round</h3>' + now + '<div class="form-row adm-row"><button data-act="adm" data-cmd="!next vote">Let the viewers vote</button><button data-act="adm" data-cmd="!next clear">Clear the queue</button></div>' +
+      '<h4>Mutators</h4><ul class="adm-list">' + muts + "</ul>" +
+      '<h4>Crossover clash</h4><div class="form-row adm-row"><label>Doors 1-4<select id="adm-ca" data-bind="admA">' + opts(pickA) + '</select></label><label>Doors 5-8<select id="adm-cb" data-bind="admB">' + opts(pickB) + '</select></label>' +
+      '<button data-act="adm-clash">Queue this clash</button><button data-act="adm" data-cmd="!next clash">A random clash</button></div>' +
+      '<h4>Mid-round events</h4><ul class="adm-list">' + evs + "</ul></div>";
+    const pc = (v) => Math.round(v * 10) / 10 + "%";
+    return '<div class="panel"><h2>Admin</h2><p class="sub">Rare rounds and events: left to chance, a special round comes up in about ' + pc(sp.chance_round) + " of rounds and never within " + sp.cooldown +
+      " rounds of the last one, a mid-round event in about " + pc(sp.chance_event) + ". Queue anything for the next round here, or switch it all off.</p></div>" + switches + queue;
   }
 
   // ------------------------------------------------------------------ commands
@@ -745,6 +807,14 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     }
     if (act === "open") { location.hash = "#bestiary/" + el.dataset.key; window.scrollTo({ top: 0, behavior: "smooth" }); return; }
     if (act === "period") { S.boardPeriod = el.dataset.period; render(); return; }
+    if (act === "vote") { await send("!vote " + el.dataset.n); return; }
+    if (act === "adm") { await send(el.dataset.cmd); return; }
+    if (act === "adm-chance") { await send("!specials chance " + (parseFloat($("#adm-cr").value) || 0) + " " + (parseFloat($("#adm-ce").value) || 0)); return; }
+    if (act === "adm-clash") {
+      const a = $("#adm-ca").value, c = $("#adm-cb").value;
+      if (a === c) { notice("Pick two different games for a clash.", false); return; }
+      await send("!next " + a + " vs " + c); return;
+    }
     if (act === "untarget") { S.target = null; render(); return; }
     if (act === "send-build") { S.form.name = el.dataset.name; S.form.variant = el.dataset.variant || ""; S.form.vanilla = false; return; }
     if (act === "release" || act === "release-all") {
@@ -815,6 +885,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     else if (b === "threat") S.filter.threat = el.value;
     else if (b === "owned") S.filter.owned = el.checked;
     else if (b === "sendShelf") S.form.shelf = el.value;
+    else if (b === "admA" || b === "admB") { (S.adm || (S.adm = {}))[b === "admA" ? "a" : "b"] = el.value; return; }   // kept for the next redraw; nothing to redraw now
     else return;
     render();
   });
