@@ -816,7 +816,13 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
         '<p class="sub">The director\'s fill keeps both sides at a number alive, the same kinds for both. Now: <b>' +
         (st.ctf.fill ? esc(st.ctf.fill) + " a side, one every " + esc(Math.round(st.ctf.fill_every || 8)) + " s" : "off") + "</b></p>" +
         '<div class="adm-switches">' + [["off", "Off", 0], ["6", "6 a side", 6], ["10", "10 a side", 10], ["aggressive", "Aggressive: 14, one every 3 s", 14]].map(([arg, label, n]) =>
-          '<button class="switch' + ((st.ctf.fill || 0) === n ? " on" : "") + '" data-act="adm" data-cmd="!ctf fill ' + arg + '">' + label + "</button>").join("") + "</div>" : "") + "</div>" : "";
+          '<button class="switch' + ((st.ctf.fill || 0) === n ? " on" : "") + '" data-act="adm" data-cmd="!ctf fill ' + arg + '">' + label + "</button>").join("") + "</div>" +
+        // nobody playing: the director fields both sides by itself until a viewer sends a monster
+        '<p class="sub">While nobody plays (no viewer\'s monster for two minutes) the director fields both sides by itself: <b>' +
+        (st.ctf.idle_fill ? esc(st.ctf.idle_fill) + " a side, one every " + esc(Math.round(st.ctf.idle_fill_every || 3)) + " s" : "off") + "</b>" +
+        (st.ctf.idle ? " · <b>filling now</b>" : "") + "</p>" +
+        '<div class="adm-switches"><button class="switch' + (st.ctf.idle_fill ? " on" : "") + '" data-act="adm" data-cmd="!ctf idle on">On: 14 a side</button>' +
+        '<button class="switch' + (st.ctf.idle_fill ? "" : " on") + '" data-act="adm" data-cmd="!ctf idle off">Off</button></div>' : "") + "</div>" : "";
     if (st && st.online && !sp) return '<div class="panel"><h2>Admin</h2></div>' + modePanel;
     if (!st || !st.online || !sp) return '<div class="panel"><h2>Admin</h2><p class="arena-muted">The arena is not reporting its specials right now (offline, or not in rounds mode).</p></div>';
     const sw = (flag, label, cmd) => '<button class="switch' + (sp.flags[flag] ? " on" : "") + '" data-act="adm" data-cmd="' + esc(cmd + (sp.flags[flag] ? " off" : " on")) + '">' + esc(label) + " <b>" + (sp.flags[flag] ? "ON" : "OFF") + "</b></button>";
