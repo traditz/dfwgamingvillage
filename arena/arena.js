@@ -811,7 +811,12 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
       '<div class="adm-switches">' + modeBtn("rounds", "The coliseum: rounds") + modeBtn("ctf", "Capture the Flag") + "</div>" +
       (st.ctf ? '<div class="form-row adm-row"><button data-act="adm" data-cmd="!match end">End this match now</button><label>Call a play for<select data-bind="admPlayTeam"><option value="red">Red</option><option value="blue">Blue</option></select></label>' +
         '<label>the play<select data-bind="admPlayCall"><option value="allin">all in</option><option value="turtle">turtle</option><option value="upper">over the bridge, the long way down</option><option value="lower">through the moat, the short way down</option></select></label>' +
-        '<button data-act="adm-play">Call it (90 s)</button></div>' : "") + "</div>" : "";
+        '<button data-act="adm-play">Call it (90 s)</button></div>' +
+        // the director's fill: it keeps both sides at so many alive (the same kinds for both), for testing and for quiet hours
+        '<p class="sub">The director\'s fill keeps both sides at a number alive, the same kinds for both. Now: <b>' +
+        (st.ctf.fill ? esc(st.ctf.fill) + " a side, one every " + esc(Math.round(st.ctf.fill_every || 8)) + " s" : "off") + "</b></p>" +
+        '<div class="adm-switches">' + [["off", "Off", 0], ["6", "6 a side", 6], ["10", "10 a side", 10], ["aggressive", "Aggressive: 14, one every 3 s", 14]].map(([arg, label, n]) =>
+          '<button class="switch' + ((st.ctf.fill || 0) === n ? " on" : "") + '" data-act="adm" data-cmd="!ctf fill ' + arg + '">' + label + "</button>").join("") + "</div>" : "") + "</div>" : "";
     if (st && st.online && !sp) return '<div class="panel"><h2>Admin</h2></div>' + modePanel;
     if (!st || !st.online || !sp) return '<div class="panel"><h2>Admin</h2><p class="arena-muted">The arena is not reporting its specials right now (offline, or not in rounds mode).</p></div>';
     const sw = (flag, label, cmd) => '<button class="switch' + (sp.flags[flag] ? " on" : "") + '" data-act="adm" data-cmd="' + esc(cmd + (sp.flags[flag] ? " off" : " on")) + '">' + esc(label) + " <b>" + (sp.flags[flag] ? "ON" : "OFF") + "</b></button>";
