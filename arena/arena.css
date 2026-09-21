@@ -303,6 +303,40 @@ body:not(.view-watch) #arena-stream { max-width: 360px; justify-self: end; }
 .special b { color: var(--gold); letter-spacing: .03em; text-transform: uppercase; font-size: .92em; }
 .special span { color: var(--muted); font-size: .95em; }
 .special.vote { border-color: var(--teal); }
+/* Capture the Flag: the match banner and the live map of the forts */
+.special.ctf { border-color: var(--line); flex-direction: column; align-items: stretch; gap: 8px; }
+.special.ctf b.side { color: var(--text); text-transform: none; letter-spacing: 0; font-size: 1em; }
+.ctf-score { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-basis: 100%; }
+.ctf-score span { display: flex; align-items: baseline; gap: 8px; font-weight: 700; font-size: 1.05em; }
+.ctf-score span i { font-style: normal; font-size: 1.9em; line-height: 1; font-variant-numeric: tabular-nums; color: var(--text); }
+.ctf-score span small { font-weight: 400; font-size: .8em; color: var(--muted); }
+.ctf-score .red { color: #e8685c; }
+.ctf-score .blue { color: #7aa5f0; }
+.ctf-score .to { color: var(--muted); font-weight: 400; font-size: .85em; }
+.ctf-map { margin: 10px 0 0; padding: 12px 14px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; }
+.ctf-map-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 14px; margin-bottom: 8px; }
+.ctf-map-head h3 { margin: 0; font-size: 1.05em; color: var(--gold); letter-spacing: .03em; text-transform: uppercase; }
+.ctf-map-head .legend { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; color: var(--muted); font-size: .85em; }
+.ctf-map-head .legend .mdot { position: static; transform: none; display: inline-block; margin-right: -4px; }
+.ctf-map-box { position: relative; border-radius: 6px; overflow: hidden; border: 1px solid var(--line); background: #141317; }
+.ctf-map-box img { display: block; width: 100%; height: auto; }
+.ctf-map-box .layer { position: absolute; inset: 0; }
+.mdot, .mflag { position: absolute; transform: translate(-50%, -50%); transition: left 8s linear, top 8s linear; }
+.mdot { width: 9px; height: 9px; border-radius: 50%; border: 1px solid rgba(0, 0, 0, .6); }
+.mdot.red { background: #ff7b6e; }
+.mdot.blue { background: #8db6ff; }
+.mdot.low { background: transparent; border-width: 2px; }
+.mdot.red.low { border-color: #ff7b6e; }
+.mdot.blue.low { border-color: #8db6ff; }
+.mdot.high { box-shadow: 0 0 0 2px rgba(255, 255, 255, .35); }
+.mdot.mine { outline: 2px solid var(--gold); outline-offset: 1px; }
+.mdot.carry { width: 13px; height: 13px; box-shadow: 0 0 0 3px var(--gold); z-index: 2; }
+.mflag { width: 0; height: 0; border-left: 7px solid transparent; border-right: 7px solid transparent; border-bottom: 13px solid #ff7b6e; z-index: 1; filter: drop-shadow(0 0 2px #000); }
+.mflag.blue { border-bottom-color: #8db6ff; }
+.mflag.out { opacity: 0; }
+.mflag.down { animation: mflag-blink 1s steps(2) infinite; }
+@keyframes mflag-blink { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .mdot, .mflag { transition: none; } .mflag.down { animation: none; } }
 .special.vote b { color: var(--teal); }
 .vote-row { display: flex; flex-wrap: wrap; gap: 8px; flex-basis: 100%; margin-top: 4px; }
 .vote-row button { font: inherit; color: var(--text); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 7px 12px; cursor: pointer; }

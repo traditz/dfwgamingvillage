@@ -32,7 +32,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
   const S = {
     viewer: null, me: null, cat: null, byName: {}, order: [], live: null,
     view: "watch", args: [], log: [], tree: null, treeName: null, profile: null, profileId: null, board: null, boardPeriod: "all",
-    form: { name: "", count: 1, door: 0, strength: 100, variant: "", vanilla: false, q: "", shelf: "", onlyOwned: (function () { try { return localStorage.getItem("arena_only_owned") === "1"; } catch (e) { return false; } })() }, filter: { q: "", shelf: "", attack: "", threat: "", owned: false },
+    form: { name: "", count: 1, door: 0, strength: 100, variant: "", vanilla: false, role: "", q: "", shelf: "", onlyOwned: (function () { try { return localStorage.getItem("arena_only_owned") === "1"; } catch (e) { return false; } })() }, filter: { q: "", shelf: "", attack: "", threat: "", owned: false },
     busy: false, target: null, unsub: { state: null, profile: null, mine: null }, refreshed: {}, layout: "side",
   };
   try { if (localStorage.getItem("arena_layout") === "theatre") S.layout = "theatre"; } catch (e) {}
@@ -396,7 +396,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     const app = $("#app");
     const st = S.live, mons = (st && st.monsters) || [];
     if (S.view === "watch") {
-      $("#watch-status").innerHTML = statusLine(st) + specialBanner(st);
+      $("#watch-status").innerHTML = statusLine(st) + ctfBanner(st) + specialBanner(st);
       $("#watch-feed").innerHTML = feedList(st);
       app.innerHTML = panel(mons);
     } else if (S.view === "bestiary") {
@@ -407,6 +407,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     else if (S.view === "profile") app.innerHTML = viewProfile();
     else if (S.view === "admin") app.innerHTML = viewAdmin();
     else app.innerHTML = viewTop();
+    updateMinimap(S.view === "watch" ? st : null);
     watchState((S.view === "watch" || S.view === "admin") && !document.hidden);
     chatWant(S.view === "watch" && !document.hidden);
     if (S.view === "profile") ensureProfile();
@@ -417,7 +418,69 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
   function statusLine(st) {
     const on = !!(st && st.online), mons = (st && st.monsters) || [], rounds = st && st.rounds;
     return '<div class="status"><span><i class="dot' + (on ? " on" : "") + '"></i>' + (on ? "live" : "the arena is offline right now") + "</span>" +
-      (on ? "<span>" + esc(st.mode || "") + " mode</span><span>round " + esc(st.round || "") + (rounds && rounds.phase ? " · " + esc(rounds.phase) + (rounds.seconds != null ? " " + Math.floor(rounds.seconds / 60) + ":" + String(rounds.seconds % 60).padStart(2, "0") : "") : "") + "</span><span>" + mons.length + " alive</span>" : "") + "</div>";
+      (on ? "<span>" + esc(st.mode === "ctf" ? "capture the flag" : (st.mode || "") + " mode") + "</span><span>round " + esc(st.round || "") + (rounds && rounds.phase ? " · " + esc(rounds.phase) + (rounds.seconds != null ? " " + Math.floor(rounds.seconds / 60) + ":" + String(rounds.seconds % 60).padStart(2, "0") : "") : "") + "</span><span>" + mons.length + " alive</span>" : "") + "</div>";
+  }
+  // ---- Capture the Flag: the match over the stream's status line, and a live map of the forts under it
+  const CTF_MAP = { xMin: -2752, yMax: 1792, w: 5504, h: 3584, basement: -100, deck: 200, red: [-2560, 0], blue: [2560, 0] };      // tools/arena/ctf2fort.json
+  function ctfLive() { const st = S.live; return !!(st && st.online && st.ctf); }
+  function flagWord(w) { w = String(w || "home"); return w.startsWith("carry") ? "taken" : w.startsWith("drop") ? "on the floor" : "home"; }
+  function mySide() {
+    const c = S.live && S.live.ctf, me = S.me && S.me.account;
+    if (!c || !me) return "";
+    const sup = c.supporters || {};
+    if ((sup.red || []).includes(me.name)) return "Red";
+    if ((sup.blue || []).includes(me.name)) return "Blue";
+    return me.home_door ? (me.home_door <= 4 ? "Red (your door " + me.home_door + ")" : "Blue (your door " + me.home_door + ")") : "";
+  }
+  function ctfBanner(st) {
+    const c = st && st.online && st.ctf;
+    if (!c) return st && st.online && st.mode === "ctf" ? '<div class="special ctf"><b>Capture the Flag</b><span>The game is moving to the forts; the first match opens in a moment.</span></div>' : "";
+    const sc = c.score || [0, 0], fl = c.flags || {}, left = Math.floor((c.seconds || 0) / 60) + ":" + String((c.seconds || 0) % 60).padStart(2, "0");
+    const phase = { warmup: "warm-up", play: "play", results: "results" }[c.phase] || c.phase, side = mySide();
+    const hint = c.phase === "warmup" ? "Doors 1-4 fight for Red, 5-8 for Blue. Send your monsters in with an order; your first one picks your side for the match."
+      : c.phase === "play" ? "A capture pays 100 souls to the owner of the monster that carries the flag home, and 25 to everyone else on its side."
+        : (c.result && c.result.caption ? c.result.caption.toLowerCase() : "the next match opens in a moment") + ".";
+    return '<div class="special ctf"><b>Capture the Flag · match ' + c.number + " · " + esc(phase) + " " + left + '</b>' +
+      '<div class="ctf-score"><span class="red">Red <i>' + sc[0] + '</i><small>flag ' + flagWord(fl.red) + '</small></span><span class="to">first to ' + (c.to_win || 3) + '</span>' +
+      '<span class="blue"><i>' + sc[1] + "</i> Blue<small>flag " + flagWord(fl.blue) + "</small></span></div><span>" + esc(hint) + (side ? " You: <b class=\"side\">" + esc(side) + "</b>." : "") +
+      (c.bets ? " Pot " + c.pot + " in " + c.bets + (c.bets === 1 ? " bet" : " bets") + (c.bets_open ? "" : " (closed)") + "." : "") + "</span></div>";
+  }
+  function mapPos(x, y) { return [Math.max(0, Math.min(100, (x - CTF_MAP.xMin) / CTF_MAP.w * 100)), Math.max(0, Math.min(100, (CTF_MAP.yMax - y) / CTF_MAP.h * 100))]; }
+  function updateMinimap(st) {
+    // the dots are kept from one update to the next and only moved, so they glide (a CSS transition) instead of jumping
+    const host = $("#ctf-map");
+    if (!host) return;
+    const c = st && st.online && st.ctf;
+    if (!c) { host.hidden = true; return; }
+    host.hidden = false;
+    if (!host.firstChild) {
+      host.innerHTML = '<div class="ctf-map-head"><h3>The forts, live</h3><span class="legend"><i class="mdot red"></i>Red <i class="mdot blue"></i>Blue <i class="mdot red low"></i>in the basement <i class="mdot blue carry"></i>has the flag</span></div>' +
+        '<div class="ctf-map-box"><img src="arena/ctf2fort.png?v=20260921a" alt="A plan of the two forts: Red on the left, Blue on the right, the bridge and the moat between them"><div class="layer"></div></div>';
+    }
+    const layer = host.querySelector(".layer"), seen = {};
+    const mons = (st.monsters || []).filter((m) => m.xy);
+    const place = (id, cls, x, y, title) => {
+      let el = layer.querySelector('[data-k="' + id + '"]');
+      if (!el) { el = document.createElement("i"); el.dataset.k = id; layer.appendChild(el); }
+      const p = mapPos(x, y);
+      el.className = cls; el.style.left = p[0] + "%"; el.style.top = p[1] + "%"; el.title = title;
+      seen[id] = 1;
+    };
+    const carriers = {};
+    ["red", "blue"].forEach((t) => { const w = String((c.flags || {})[t] || ""); if (w.startsWith("carry:")) carriers[w.slice(6)] = t; });
+    mons.forEach((m) => {
+      const z = m.z || 0, team = m.door <= 4 ? "red" : "blue", mine = S.me && S.me.account && m.owner === S.me.account.name;
+      place("m" + m.id, "mdot " + team + (z < CTF_MAP.basement ? " low" : z > CTF_MAP.deck ? " high" : "") + (carriers[m.id] ? " carry" : "") + (mine ? " mine" : ""), m.xy[0], m.xy[1],
+        m.name + " #" + m.id + (m.owner ? " (" + m.owner + ")" : "") + " · " + (m.job || "") + (z < CTF_MAP.basement ? " · in the basement" : z > CTF_MAP.deck ? " · on the battlements" : ""));
+    });
+    ["red", "blue"].forEach((t) => {
+      const w = String((c.flags || {})[t] || "home");
+      let xy = CTF_MAP[t];
+      if (w.startsWith("drop:")) xy = w.slice(5).split(",").map(Number);
+      else if (w.startsWith("carry:")) { const m = mons.find((x) => String(x.id) === w.slice(6)); if (m) xy = m.xy; }
+      place("f" + t, "mflag " + t + (w.startsWith("carry") ? " out" : w.startsWith("drop") ? " down" : ""), xy[0], xy[1], (t === "red" ? "Red" : "Blue") + "'s flag: " + flagWord(w));
+    });
+    layer.querySelectorAll("[data-k]").forEach((el) => { if (!seen[el.dataset.k]) el.remove(); });
   }
   function specialBanner(st) {
     const r = st && st.online && st.rounds;
@@ -483,8 +546,11 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
         '<p class="notes">' + esc(m.notes) + "</p>" + (ok ? "" : '<p class="locked-note">Locked: ' + m.unlock + ' souls in <a href="#bestiary/' + esc(m.key) + '">the bestiary</a>.</p>') +
         (a && a.progression ? '<p class="mastery-line">' + (mm && mm.rank ? rankPill(mm) + " " + esc(m.name + " " + mm.name) + " · " : "") + num(mm ? mm.xp : 0) + " XP" +
           (mm && mm.discount ? " · " + Math.round(mm.discount * 100) + "% off every send" : "") + "</p>" : "") + "</div></div>";
+      const ctf = ctfLive();
       opts = seg("How many", "count", [1, 2, 3, 4, 5].map((n) => ({ v: n, t: String(n) })), f.count, "copies cost " + step + "% more each") +
-        seg("Door", "door", [{ v: 0, t: home ? "yours · " + home : "emptiest" }].concat([1, 2, 3, 4, 5, 6, 7, 8].map((d) => ({ v: d, t: String(d) })), [{ v: 9, t: "all · lv 6" }]), f.door) +
+        (ctf ? seg("Door", "door", [{ v: 0, t: home ? "yours · " + home : "your side's" }].concat([1, 2, 3, 4, 5, 6, 7, 8].map((d) => ({ v: d, t: String(d) }))), f.door === 9 ? 0 : f.door, "1-4 Red · 5-8 Blue") +
+          seg("Order", "role", [{ v: "", t: "auto" }, { v: "attack", t: "attack" }, { v: "defend", t: "defend" }, { v: "escort", t: "escort" }, { v: "mid", t: "hold the middle" }], f.role, "auto leaves it to the team's commander")
+          : seg("Door", "door", [{ v: 0, t: home ? "yours · " + home : "emptiest" }].concat([1, 2, 3, 4, 5, 6, 7, 8].map((d) => ({ v: d, t: String(d) })), [{ v: 9, t: "all · lv 6" }]), f.door)) +
         seg("Strength", "strength", STRENGTHS.map((s) => ({ v: s, t: s + "%" })), f.strength, "150% and up is a champion") +
         (variants.length ? seg("Variant", "variant", [{ v: "", t: "plain" }].concat(variants.map((v) => ({ v: v, t: affix(v) }))), f.variant) : "") +
         (talents ? seg("Build", "vanilla", [{ v: "0", t: "your " + talents.points + "-point build" }, { v: "1", t: "vanilla" }], f.vanilla ? "1" : "0") : "");
@@ -523,6 +589,16 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
   function roundsPanel() {
     const st = S.live, r = st && st.rounds;
     const bets = (S.cat && S.cat.costs && S.cat.costs.bet) || [2, 5, 10, 20];
+    if (ctfLive()) {
+      const c = st.ctf;
+      return '<div class="panel"><h3>The match</h3><p class="sub">Match ' + c.number + " is in the " + esc(c.phase === "warmup" ? "warm-up" : c.phase) + ". Your home door picks your side (1-4 Red, 5-8 Blue); bet on the team you think wins." +
+        (c.bets_open ? "" : " The bets are closed for this match.") + "</p>" +
+        '<div class="form-row"><label>Door<select data-bind="joinDoor">' + [1, 2, 3, 4, 5, 6, 7, 8].map((d) => '<option value="' + d + '">door ' + d + (d <= 4 ? " · Red" : " · Blue") + "</option>").join("") + '</select></label><button data-act="join">Join this door</button></div>' +
+        '<div class="form-row"><label>Bet on<select data-bind="betTeam"><option value="red">Red</option><option value="blue">Blue</option></select></label><label>Essence<select data-bind="betAmt">' + bets.map((b) => '<option value="' + b + '">' + b + "</option>").join("") +
+        '</select></label><button data-act="bet-team"' + (c.bets_open ? "" : " disabled") + ">Place the bet</button></div>" +
+        '<div class="form-row"><span class="segl">Order all my monsters<small>1 essence</small></span>' + [["attack", "Attack"], ["defend", "Defend"], ["escort", "Escort"], ["mid", "Hold the middle"], ["auto", "Auto"]].map(([k, l]) =>
+          '<button class="small" data-act="ctf-order" data-role="' + k + '">' + l + "</button>").join("") + "</div></div>";
+    }
     return '<div class="panel"><h3>Rounds</h3><p class="sub">' + (r && r.phase ? "Round " + esc(st.round) + " is in the " + esc(r.phase) + ". " : "") + "Join a door and its kills are yours; bet on the door you think takes the round.</p>" +
       '<div class="form-row"><label>Door<select data-bind="joinDoor">' + [1, 2, 3, 4, 5, 6, 7, 8].map((d) => '<option value="' + d + '">door ' + d + "</option>").join("") + '</select></label><button data-act="join">Join this door</button></div>' +
       '<div class="form-row"><label>Bet on<select data-bind="betDoor">' + [1, 2, 3, 4, 5, 6, 7, 8].map((d) => '<option value="' + d + '">door ' + d + "</option>").join("") + '</select></label><label>Essence<select data-bind="betAmt">' + bets.map((b) => '<option value="' + b + '">' + b + "</option>").join("") + '</select></label><button data-act="bet">Place the bet</button></div></div>';
@@ -729,6 +805,14 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
   function viewAdmin() {
     if (!(S.me && S.me.admin)) return '<div class="panel"><h2>Admin</h2><p class="arena-muted">This page is for the arena\'s admins. Sign in with an admin\'s Discord account.</p></div>';
     const st = S.live, sp = st && st.specials, r = st && st.rounds;
+    const modeNow = st && st.online ? st.mode : "";
+    const modeBtn = (m, label) => '<button class="switch' + (modeNow === m ? " on" : "") + '" data-act="adm" data-cmd="!mode ' + m + '"' + (modeNow === m ? " disabled" : "") + ">" + label + (modeNow === m ? " <b>ON AIR</b>" : "") + "</button>";
+    const modePanel = st && st.online ? '<div class="panel"><h3>The show</h3><p class="sub">Only you change the mode, and it stays until you change it back, restarts included. Switching moves the game to the other map: about a minute of loading on the stream, and a round or a match in progress ends without a result (its bets are refunded).</p>' +
+      '<div class="adm-switches">' + modeBtn("rounds", "The coliseum: rounds") + modeBtn("ctf", "Capture the Flag") + "</div>" +
+      (st.ctf ? '<div class="form-row adm-row"><button data-act="adm" data-cmd="!match end">End this match now</button><label>Call a play for<select data-bind="admPlayTeam"><option value="red">Red</option><option value="blue">Blue</option></select></label>' +
+        '<label>the play<select data-bind="admPlayCall"><option value="allin">all in</option><option value="turtle">turtle</option><option value="upper">over the bridge, the long way down</option><option value="lower">through the moat, the short way down</option></select></label>' +
+        '<button data-act="adm-play">Call it (90 s)</button></div>' : "") + "</div>" : "";
+    if (st && st.online && !sp) return '<div class="panel"><h2>Admin</h2></div>' + modePanel;
     if (!st || !st.online || !sp) return '<div class="panel"><h2>Admin</h2><p class="arena-muted">The arena is not reporting its specials right now (offline, or not in rounds mode).</p></div>';
     const sw = (flag, label, cmd) => '<button class="switch' + (sp.flags[flag] ? " on" : "") + '" data-act="adm" data-cmd="' + esc(cmd + (sp.flags[flag] ? " off" : " on")) + '">' + esc(label) + " <b>" + (sp.flags[flag] ? "ON" : "OFF") + "</b></button>";
     const q = sp.queue || {};
@@ -752,7 +836,8 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
       '<h4>Mid-round events</h4><ul class="adm-list">' + evs + "</ul></div>";
     const pc = (v) => Math.round(v * 10) / 10 + "%";
     return '<div class="panel"><h2>Admin</h2><p class="sub">Rare rounds and events: left to chance, a special round comes up in about ' + pc(sp.chance_round) + " of rounds and never within " + sp.cooldown +
-      " rounds of the last one, a mid-round event in about " + pc(sp.chance_event) + ". Queue anything for the next round here, or switch it all off.</p></div>" + switches + queue;
+      " rounds of the last one, a mid-round event in about " + pc(sp.chance_event) + ". Queue anything for the next round here, or switch it all off.</p></div>" + modePanel +
+      (modeNow === "ctf" ? '<div class="panel"><p class="sub">The special rounds below belong to the coliseum: they wait while Capture the Flag is on.</p></div>' : "") + switches + queue;
   }
 
   // ------------------------------------------------------------------ commands
@@ -803,6 +888,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
       else if (f === "strength") S.form.strength = parseInt(v, 10) || 100;
       else if (f === "variant") S.form.variant = v;
       else if (f === "vanilla") S.form.vanilla = v === "1";
+      else if (f === "role") S.form.role = v;
       render(); return;
     }
     if (act === "open") { location.hash = "#bestiary/" + el.dataset.key; window.scrollTo({ top: 0, behavior: "smooth" }); return; }
@@ -830,6 +916,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
       else if (f.count > 1) text += " x" + f.count;
       if (f.variant) text += " " + f.variant;
       if (f.vanilla) text += " vanilla";
+      if (ctfLive() && f.role) text += " " + f.role;          // Capture the Flag: the order it goes out with
       await send(text); return;
     }
     if (act === "group-send") {
@@ -869,6 +956,9 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     if (act === "seal") { await send("!hazard seal " + bound("sealDoor")); return; }
     if (act === "join") { await send("!join " + bound("joinDoor")); return; }
     if (act === "bet") { await send("!bet " + bound("betDoor") + " " + bound("betAmt")); return; }
+    if (act === "bet-team") { await send("!bet " + bound("betTeam") + " " + bound("betAmt")); return; }
+    if (act === "ctf-order") { await send("!order mine " + el.dataset.role); return; }
+    if (act === "adm-play") { await send("!play " + bound("admPlayTeam") + " " + bound("admPlayCall")); return; }
     if (act === "unlock") { await send("!unlock " + el.dataset.name + (el.dataset.variant ? " " + el.dataset.variant : "")); return; }
     if (act === "spend") { await send("!talent " + el.dataset.build + " " + el.dataset.key); return; }
     if (act === "respec") { if (confirm("Reset every point in " + el.dataset.build + " for " + respecCost() + " souls? Nothing is refunded.")) await send("!respec " + el.dataset.build); return; }
