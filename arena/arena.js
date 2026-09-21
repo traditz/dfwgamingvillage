@@ -455,7 +455,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     host.hidden = false;
     if (!host.firstChild) {
       host.innerHTML = '<div class="ctf-map-head"><h3>The forts, live</h3><span class="legend"><i class="mdot red"></i>Red <i class="mdot blue"></i>Blue <i class="mdot red low"></i>in the basement <i class="mdot blue carry"></i>has the flag</span></div>' +
-        '<div class="ctf-map-box"><img src="arena/ctf2fort.png?v=20260921a" alt="A plan of the two forts: Red on the left, Blue on the right, the bridge and the moat between them"><div class="layer"></div></div>';
+        '<div class="ctf-map-box"><img src="arena/ctf2fort.png?v=20260921d" alt="A plan of the two forts: Red on the left, Blue on the right, the bridge and the moat between them"><div class="layer"></div></div>';
     }
     const layer = host.querySelector(".layer"), seen = {};
     const mons = (st.monsters || []).filter((m) => m.xy);
