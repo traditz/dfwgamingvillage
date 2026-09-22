@@ -158,6 +158,11 @@
 .seg { display: flex; flex-wrap: wrap; gap: 6px; }
 .arena-app .segb { min-height: 40px; min-width: 44px; padding: 6px 12px; font-weight: 600; }
 .arena-app .segb.on { border-color: var(--gold); color: var(--gold); background: #2a2110; }
+/* Capture the Flag: a door button in its side's colour (1-4 Red, 5-8 Blue); the picked one keeps the gold frame */
+.arena-app .segb.side-red { border-color: #a33a30; color: #f0857a; background: #2b1412; }
+.arena-app .segb.side-blue { border-color: #3d63a8; color: #8fb4f5; background: #121a2e; }
+.arena-app .segb.side-red.on { border-color: var(--gold); color: #ffb3a8; background: #3a1a15; }
+.arena-app .segb.side-blue.on { border-color: var(--gold); color: #bcd3ff; background: #182446; }
 .arena-app button.big { min-height: 46px; padding: 10px 20px; font-size: 1.05em; }
 /* the Watch layout: a grid of the stream, the commands (#app) and the feed. Side by side by
    default (stream and feed left, commands right); "theatre" stacks a full-width stream, the

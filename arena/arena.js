@@ -533,7 +533,9 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     const talents = m && a && a.talents && a.talents[f.variant ? affix(f.variant) + " " + m.name : m.name];
     const home = (a && a.home_door) || 0;
     const seg = (label, field, options, current, hint) => '<div class="opt"><span class="segl">' + label + (hint ? "<small>" + hint + "</small>" : "") + '</span><div class="seg" role="group">' +
-      options.map((o) => '<button type="button" class="segb' + (String(o.v) === String(current) ? " on" : "") + '" data-act="set" data-field="' + field + '" data-value="' + esc(o.v) + '">' + esc(o.t) + "</button>").join("") + "</div></div>";
+      options.map((o) => '<button type="button" class="segb' + (String(o.v) === String(current) ? " on" : "") + (o.side ? " side-" + o.side : "") + '" data-act="set" data-field="' + field + '" data-value="' + esc(o.v) + '">' + esc(o.t) + "</button>").join("") + "</div></div>";
+    // in Capture the Flag the doors are the sides: 1-4 spawn for Red, 5-8 for Blue, and the buttons wear the colour
+    const sideOf = (d) => (d >= 1 && d <= 4 ? "red" : d >= 5 && d <= 8 ? "blue" : "");
     const step = Math.round(((S.cat && S.cat.costs && S.cat.costs.multi_step) || 0.1) * 100), bossWait = (S.cat && S.cat.costs && S.cat.costs.boss_cooldown) || 30;
     let card, opts = "", foot = "";
     if (!m) {
@@ -548,7 +550,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
           (mm && mm.discount ? " · " + Math.round(mm.discount * 100) + "% off every send" : "") + "</p>" : "") + "</div></div>";
       const ctf = ctfLive();
       opts = seg("How many", "count", [1, 2, 3, 4, 5].map((n) => ({ v: n, t: String(n) })), f.count, "copies cost " + step + "% more each") +
-        (ctf ? seg("Door", "door", [{ v: 0, t: home ? "yours · " + home : "your side's" }].concat([1, 2, 3, 4, 5, 6, 7, 8].map((d) => ({ v: d, t: String(d) }))), f.door === 9 ? 0 : f.door, "1-4 Red · 5-8 Blue") +
+        (ctf ? seg("Door", "door", [{ v: 0, t: home ? "yours · " + home : "your side's", side: home ? sideOf(home) : "" }].concat([1, 2, 3, 4, 5, 6, 7, 8].map((d) => ({ v: d, t: String(d), side: sideOf(d) }))), f.door === 9 ? 0 : f.door, "1-4 Red · 5-8 Blue") +
           seg("Order", "role", [{ v: "", t: "auto" }, { v: "attack", t: "attack" }, { v: "defend", t: "defend" }, { v: "escort", t: "escort" }, { v: "mid", t: "hold the middle" }], f.role, "auto leaves it to the team's commander")
           : seg("Door", "door", [{ v: 0, t: home ? "yours · " + home : "emptiest" }].concat([1, 2, 3, 4, 5, 6, 7, 8].map((d) => ({ v: d, t: String(d) })), [{ v: 9, t: "all · lv 6" }]), f.door)) +
         seg("Strength", "strength", STRENGTHS.map((s) => ({ v: s, t: s + "%" })), f.strength, "150% and up is a champion") +
