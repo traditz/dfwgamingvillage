@@ -26,7 +26,8 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
   const BUDGET_FALLBACK = 10, RESPEC_FALLBACK = 200;
   const LADDER_FALLBACK = [[1, "Initiate", 125, ""], [2, "Handler", 375, ""], [3, "Adept", 875, ""], [4, "Expert", 1750, ""], [5, "Specialist", 3250, ""],
                            [6, "Master", 5750, ""], [7, "Grandmaster", 10000, ""], [8, "Paragon", 17500, ""], [9, "Legend", 30000, ""], [10, "Mythic", 55000, ""]];
-  const GROUPS_FALLBACK = [{ key: "mastery", label: "Mastery milestones" }, { key: "combat", label: "Combat and rounds" }, { key: "collection", label: "Collection" }, { key: "feats", label: "Feats" }, { key: "hunts", label: "Hunts" }];
+  const GROUPS_FALLBACK = [{ key: "mastery", label: "Mastery milestones" }, { key: "combat", label: "Combat and rounds" }, { key: "collection", label: "Collection" }, { key: "feats", label: "Feats" },
+    { key: "ctf", label: "Capture the Flag" }, { key: "raid", label: "The Raid" }, { key: "assault", label: "The Assault" }, { key: "hunts", label: "Hunts" }];
   const COMMAND_WAIT = 25000;
 
   const S = {
@@ -758,6 +759,8 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
       (mine ? '<div class="inline-note">Share this page: <code>' + esc(location.origin + location.pathname + "#profile/" + id) + "</code></div>" : "") + "</div>";
     const stats = '<div class="panel"><h3>Record</h3><div class="stats">' + [["Sent in", p.releases], ["Kills", p.kills], ["Lost", p.deaths], ["Orders", p.orders], ["Hazards", p.hazards], ["Champion kills", p.champion_kills], ["Boss kills", p.boss_kills], ["Round wins", p.round_wins], ["Bets won", p.bets_won], ["Upsets", p.upsets]].map(([k, v]) => '<div class="stat"><div class="k">' + k + '</div><div class="v">' + num(v) + "</div></div>").join("") + "</div>" +
       (p.ctf && Object.values(p.ctf).some((v) => v) ? '<h3>Capture the Flag</h3><div class="stats">' + [["Flags taken", p.ctf.pickups], ["Captures", p.ctf.captures], ["Returns", p.ctf.returns], ["Drops", p.ctf.drops], ["Carriers stopped", p.ctf.stops], ["Matches won", p.ctf.wins]].map(([k, v]) => '<div class="stat"><div class="k">' + k + '</div><div class="v">' + num(v) + "</div></div>").join("") + "</div>" : "") +
+      (p.raid && Object.values(p.raid).some((v) => v) ? '<h3>The Raid</h3><div class="stats">' + [["Raids", num(p.raid.raids)], ["Bosses down", num(p.raid.raid_wins)], ["Kinds beaten", num(p.raid.beaten || 0) + " of 9"], ["Most damage", num(p.raid.raid_mvps)], ["Last blows", num(p.raid.raid_lasthits)]].map(([k, v]) => '<div class="stat"><div class="k">' + k + '</div><div class="v">' + v + "</div></div>").join("") + "</div>" : "") +
+      (p.assault && Object.values(p.assault).some((v) => v) ? '<h3>The Assault</h3><div class="stats">' + [["Matches", p.assault.matches], ["Won", p.assault.wins], ["Cores broken", p.assault.cores], ["Cores your side destroyed", p.assault.razes], ["Cores your side held", p.assault.holds]].map(([k, v]) => '<div class="stat"><div class="k">' + k + '</div><div class="v">' + num(v) + "</div></div>").join("") + "</div>" : "") +
       ((p.daily && p.daily.glory) || (p.weekly && p.weekly.glory) ? '<p class="inline-note">today: ' + num(p.daily.glory) + " glory, " + num(p.daily.kills) + " kills · this week: " + num(p.weekly.glory) + " glory, " + num(p.weekly.kills) + " kills</p>" : "") +
       (p.best && p.best.kills ? '<p class="inline-note">best monster: ' + esc(p.best.name) + " with " + p.best.kills + " kills</p>" : "") +
       ((p.favourites || []).length ? '<p class="inline-note">favourites: ' + p.favourites.map((f) => esc(f.name) + " ×" + f.count).join(", ") + "</p>" : "") +
