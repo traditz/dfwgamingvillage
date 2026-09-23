@@ -308,6 +308,40 @@ body:not(.view-watch) #arena-stream { max-width: 360px; justify-self: end; }
 .special b { color: var(--gold); letter-spacing: .03em; text-transform: uppercase; font-size: .92em; }
 .special span { color: var(--muted); font-size: .95em; }
 .special.vote { border-color: var(--teal); }
+/* the Raid: the boss's name and health bar under the status line */
+.special.raid { flex-direction: column; align-items: stretch; gap: 8px; border-color: var(--line); }
+.special.raid.enraged { border-color: var(--gold); }
+.raid-boss { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.raid-boss .name { color: var(--text); font-weight: 700; font-size: 1.15em; letter-spacing: .02em; }
+.special.raid.enraged .raid-boss .name { color: var(--gold); }
+.raid-boss .count { color: var(--muted); font-size: .9em; font-variant-numeric: tabular-nums; }
+.raid-bar { position: relative; height: 20px; border-radius: 5px; background: #1c1b20; border: 1px solid var(--line); overflow: hidden; }
+.raid-bar i { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, #a8322b, #d9534a); transition: width 1.2s ease-out; }
+.special.raid.enraged .raid-bar i { background: linear-gradient(90deg, #c4721e, #e8a13c); }
+.raid-bar span { position: relative; display: block; text-align: center; line-height: 20px; font-size: .85em; font-weight: 700; color: #fff;
+  font-variant-numeric: tabular-nums; text-shadow: 0 1px 2px rgba(0, 0, 0, .7); }
+@media (prefers-reduced-motion: reduce) { .raid-bar i { transition: none; } }
+/* the Assault: both Cores' health under the status line, the Cores on the live map */
+.special.assault { flex-direction: column; align-items: stretch; gap: 8px; border-color: var(--line); }
+.special.assault b.side { color: var(--text); text-transform: none; letter-spacing: 0; font-size: 1em; }
+.asl-cores { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.asl-core { display: flex; flex-direction: column; gap: 5px; }
+.asl-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.asl-head .name { font-weight: 700; font-size: 1.05em; }
+.asl-head .role { color: var(--muted); font-size: .85em; text-transform: uppercase; letter-spacing: .06em; }
+.asl-core.red .name { color: #e8685c; }
+.asl-core.blue .name { color: #7aa5f0; }
+.asl-core.red .raid-bar i { background: linear-gradient(90deg, #a8322b, #d9534a); }
+.asl-core.blue .raid-bar i { background: linear-gradient(90deg, #2d5bb0, #5a8ae0); }
+.asl-core.under .raid-bar { border-color: var(--gold); }
+.asl-core.under .role { color: var(--gold); }
+.mcore { position: absolute; transform: translate(-50%, -50%) rotate(45deg); width: 12px; height: 12px; border: 2px solid rgba(0, 0, 0, .6); z-index: 1; }
+.mcore.red { background: #ff7b6e; }
+.mcore.blue { background: #8db6ff; }
+.mcore.under { box-shadow: 0 0 0 3px var(--gold); }
+.mcore.dead { background: #333; opacity: .7; }
+.ctf-map-head .legend .mcore { position: static; transform: rotate(45deg); display: inline-block; margin: 0 2px 0 0; width: 8px; height: 8px; }
+@media (prefers-reduced-motion: reduce) { .mcore { transition: none; } }
 /* Capture the Flag: the match banner and the live map of the forts */
 .special.ctf { border-color: var(--line); flex-direction: column; align-items: stretch; gap: 8px; }
 .special.ctf b.side { color: var(--text); text-transform: none; letter-spacing: 0; font-size: 1em; }

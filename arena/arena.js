@@ -396,7 +396,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     const app = $("#app");
     const st = S.live, mons = (st && st.monsters) || [];
     if (S.view === "watch") {
-      $("#watch-status").innerHTML = statusLine(st) + ctfBanner(st) + specialBanner(st);
+      $("#watch-status").innerHTML = statusLine(st) + ctfBanner(st) + raidBanner(st) + assaultBanner(st) + specialBanner(st);
       $("#watch-feed").innerHTML = feedList(st);
       app.innerHTML = panel(mons);
     } else if (S.view === "bestiary") {
@@ -418,14 +418,15 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
   function statusLine(st) {
     const on = !!(st && st.online), mons = (st && st.monsters) || [], rounds = st && st.rounds;
     return '<div class="status"><span><i class="dot' + (on ? " on" : "") + '"></i>' + (on ? "live" : "the arena is offline right now") + "</span>" +
-      (on ? "<span>" + esc(st.mode === "ctf" ? "capture the flag" : (st.mode || "") + " mode") + "</span><span>round " + esc(st.round || "") + (rounds && rounds.phase ? " · " + esc(rounds.phase) + (rounds.seconds != null ? " " + Math.floor(rounds.seconds / 60) + ":" + String(rounds.seconds % 60).padStart(2, "0") : "") : "") + "</span><span>" + mons.length + " alive</span>" : "") + "</div>";
+      (on ? "<span>" + esc(st.mode === "ctf" ? "capture the flag" : st.mode === "raid" ? "the raid" : st.mode === "assault" ? "the assault" : (st.mode || "") + " mode") + "</span><span>round " + esc(st.round || "") + (rounds && rounds.phase ? " · " + esc(rounds.phase) + (rounds.seconds != null ? " " + Math.floor(rounds.seconds / 60) + ":" + String(rounds.seconds % 60).padStart(2, "0") : "") : "") + "</span><span>" + mons.length + " alive</span>" : "") + "</div>";
   }
   // ---- Capture the Flag: the match over the stream's status line, and a live map of the forts under it
   const CTF_MAP = { xMin: -2752, yMax: 1792, w: 5504, h: 3584, basement: -100, deck: 200, red: [-2560, 0], blue: [2560, 0] };      // tools/arena/ctf2fort.json
+  const WELL_MAP = { xMin: -3840, yMax: 1664, w: 7680, h: 3328, basement: -100, deck: 200, red: [-3456, 0], blue: [3456, 0] };      // tools/arena/well.json (the Cores where the flags would be)
   function ctfLive() { const st = S.live; return !!(st && st.online && st.ctf); }
   function flagWord(w) { w = String(w || "home"); return w.startsWith("carry") ? "taken" : w.startsWith("drop") ? "on the floor" : "home"; }
   function mySide() {
-    const c = S.live && S.live.ctf, me = S.me && S.me.account;
+    const c = S.live && (S.live.ctf || S.live.assault), me = S.me && S.me.account;
     if (!c || !me) return "";
     const sup = c.supporters || {};
     if ((sup.red || []).includes(me.name)) return "Red";
@@ -445,24 +446,74 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
       '<span class="blue"><i>' + sc[1] + "</i> Blue<small>flag " + flagWord(fl.blue) + "</small></span></div><span>" + esc(hint) + (side ? " You: <b class=\"side\">" + esc(side) + "</b>." : "") +
       (c.bets ? " Pot " + c.pot + " in " + c.bets + (c.bets === 1 ? " bet" : " bets") + (c.bets_open ? "" : " (closed)") + "." : "") + "</span></div>";
   }
-  function mapPos(x, y) { return [Math.max(0, Math.min(100, (x - CTF_MAP.xMin) / CTF_MAP.w * 100)), Math.max(0, Math.min(100, (CTF_MAP.yMax - y) / CTF_MAP.h * 100))]; }
+  // ---- the Raid: every door against one boss; its health, who is hurting it most, the bet
+  function raidLive() { const st = S.live; return !!(st && st.online && st.raid); }
+  function raidBanner(st) {
+    const r = st && st.online && st.raid;
+    if (!r) return st && st.online && st.mode === "raid" ? '<div class="special raid"><b>The Raid</b><span>The next boss is on its way.</span></div>' : "";
+    const left = Math.floor((r.seconds || 0) / 60) + ":" + String((r.seconds || 0) % 60).padStart(2, "0");
+    const pct = Math.max(0, Math.min(100, r.pct == null ? 100 : r.pct));
+    const hint = r.phase === "gather" ? "The party gathers: send your monsters in from any door, they all fight on the same side."
+      : r.phase === "fight" ? "The boss's souls are shared by the damage your monsters deal, with a bonus for the most and for the last blow."
+        : (r.result && r.result.caption ? r.result.caption.toLowerCase() : "the next boss is on its way") + ".";
+    const top = (r.top || []).slice(0, 3).map((t) => esc(t.name) + " " + num(t.dealt)).join(" · ");
+    const mine = myId() && (r.bettors || {})[myId()];      // the bets are kept by the account's key: the Discord id
+    return '<div class="special raid' + (r.enraged ? " enraged" : "") + '"><b>The Raid · raid ' + r.number + " · " + esc(r.phase) + " " + left + '</b>' +
+      '<div class="raid-boss"><span class="name">' + esc(r.boss || "the boss") + (r.enraged ? " · enraged" : "") + '</span><span class="count">' + (r.raiders || 0) + " raiders</span></div>" +
+      '<div class="raid-bar" role="img" aria-label="The boss has ' + pct + '% of its health"><i style="width:' + pct + '%"></i><span>' + pct + "%" +
+      (r.hp0 && r.phase === "fight" ? " · " + num(r.hp) + " of " + num(r.hp0) : "") + "</span></div>" +
+      "<span>" + esc(hint) + (top ? " Most damage: " + top + "." : "") +
+      (r.bets ? " Pot " + r.pot + " in " + r.bets + (r.bets === 1 ? " bet" : " bets") + (r.bets_open ? "" : " (closed)") + "." : "") +
+      (mine ? " You bet " + mine[1] + " on " + (mine[0] === 1 ? "the raiders" : "the boss") + "." : "") + "</span></div>";
+  }
+  // ---- the Assault: each side attacks the other's Core for a half; both Cores' health, who attacks, what the second half must beat
+  function asLive() { const st = S.live; return !!(st && st.online && st.assault); }
+  function assaultBanner(st) {
+    const a = st && st.online && st.assault;
+    if (!a) return st && st.online && st.mode === "assault" ? '<div class="special assault"><b>The Assault</b><span>The game is moving to the Well; the first match opens in a moment.</span></div>' : "";
+    const left = Math.floor((a.seconds || 0) / 60) + ":" + String((a.seconds || 0) % 60).padStart(2, "0");
+    const phase = { warmup: "warm-up", half1: "first half", switch: "the switch", half2: "second half", results: "results" }[a.phase] || a.phase;
+    const playing = a.phase === "half1" || a.phase === "half2", cores = a.cores || {}, side = mySide();
+    const core = (t, name) => {
+      const c = cores[t] || {}, pct = Math.max(0, Math.min(100, c.pct == null ? 100 : c.pct));
+      const role = playing ? (a.attacker === name ? "attacking" : a.defender === name ? "defending" : "") : a.phase === "warmup" && a.first ? (a.first === name ? "attacks first" : "defends first") : "";
+      return '<div class="asl-core ' + t + (playing && a.defender === name ? " under" : "") + '"><div class="asl-head"><span class="name">' + name + "'s Core</span>" + (role ? '<span class="role">' + role + "</span>" : "") + "</div>" +
+        '<div class="raid-bar" role="img" aria-label="' + name + "'s Core has " + pct + '% of its health"><i style="width:' + pct + '%"></i><span>' + (pct <= 0 ? "destroyed" : pct + "%" + (c.max && playing ? " · " + num(c.hp) + " of " + num(c.max) : "")) + "</span></div></div>";
+    };
+    const halves = (a.halves || []).filter((h) => h.finished).map((h) => "Half " + h.half + ": " + h.line + ".").join(" ");
+    const hint = a.phase === "warmup" ? (a.first || "Red") + " attacks first. Doors 1-4 fight for Red, 5-8 for Blue; your first monster picks your side for the match."
+      : a.phase === "half1" ? a.attacker + " attacks " + a.defender + "'s Core. The last blow pays 100 souls to its monster's owner, and 25 to everyone else on its side."
+        : a.phase === "switch" ? "The sides change over." + (a.target ? " " + a.target + "." : "")
+          : a.phase === "half2" ? (a.target || a.attacker + " attacks") + "."
+            : (a.result && a.result.caption ? a.result.caption.toLowerCase() : "the next match opens in a moment") + ".";
+    return '<div class="special assault"><b>The Assault · match ' + a.number + " · " + esc(phase) + " " + left + "</b>" +
+      '<div class="asl-cores">' + core("red", "Red") + core("blue", "Blue") + "</div>" +
+      "<span>" + esc(hint) + (halves ? " " + esc(halves) : "") + (side ? " You: <b class=\"side\">" + esc(side) + "</b>." : "") +
+      (a.bets ? " Pot " + a.pot + " in " + a.bets + (a.bets === 1 ? " bet" : " bets") + (a.bets_open ? "" : " (closed)") + "." : "") + "</span></div>";
+  }
+  function mapPos(x, y, M) { M = M || CTF_MAP; return [Math.max(0, Math.min(100, (x - M.xMin) / M.w * 100)), Math.max(0, Math.min(100, (M.yMax - y) / M.h * 100))]; }
   function updateMinimap(st) {
     // the dots are kept from one update to the next and only moved, so they glide (a CSS transition) instead of jumping
     const host = $("#ctf-map");
     if (!host) return;
-    const c = st && st.online && st.ctf;
+    const asl = st && st.online && st.assault, c = st && st.online && (st.ctf || asl);
     if (!c) { host.hidden = true; return; }
     host.hidden = false;
-    if (!host.firstChild) {
-      host.innerHTML = '<div class="ctf-map-head"><h3>The forts, live</h3><span class="legend"><i class="mdot red"></i>Red <i class="mdot blue"></i>Blue <i class="mdot red low"></i>in the basement <i class="mdot blue carry"></i>has the flag</span></div>' +
-        '<div class="ctf-map-box"><img src="arena/ctf2fort.png?v=20260921d" alt="A plan of the two forts: Red on the left, Blue on the right, the bridge and the moat between them"><div class="layer"></div></div>';
+    const M = asl ? WELL_MAP : CTF_MAP, which = asl ? "well" : "forts";
+    if (!host.firstChild || host.dataset.map !== which) {
+      host.dataset.map = which;
+      host.innerHTML = asl
+        ? '<div class="ctf-map-head"><h3>The Well, live</h3><span class="legend"><i class="mdot red"></i>Red <i class="mdot blue"></i>Blue <i class="mdot red low"></i>down in the well <i class="mcore blue"></i>a Core</span></div>' +
+          '<div class="ctf-map-box"><img src="arena/well.png?v=20260923a" alt="A plan of the Well: Red\'s base on the left, Blue\'s on the right, the courtyard and the well between them, a Core at the back of each base"><div class="layer"></div></div>'
+        : '<div class="ctf-map-head"><h3>The forts, live</h3><span class="legend"><i class="mdot red"></i>Red <i class="mdot blue"></i>Blue <i class="mdot red low"></i>in the basement <i class="mdot blue carry"></i>has the flag</span></div>' +
+          '<div class="ctf-map-box"><img src="arena/ctf2fort.png?v=20260921d" alt="A plan of the two forts: Red on the left, Blue on the right, the bridge and the moat between them"><div class="layer"></div></div>';
     }
     const layer = host.querySelector(".layer"), seen = {};
     const mons = (st.monsters || []).filter((m) => m.xy);
     const place = (id, cls, x, y, title) => {
       let el = layer.querySelector('[data-k="' + id + '"]');
       if (!el) { el = document.createElement("i"); el.dataset.k = id; layer.appendChild(el); }
-      const p = mapPos(x, y);
+      const p = mapPos(x, y, M);
       el.className = cls; el.style.left = p[0] + "%"; el.style.top = p[1] + "%"; el.title = title;
       seen[id] = 1;
     };
@@ -470,9 +521,18 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     ["red", "blue"].forEach((t) => { const w = String((c.flags || {})[t] || ""); if (w.startsWith("carry:")) carriers[w.slice(6)] = t; });
     mons.forEach((m) => {
       const z = m.z || 0, team = m.door <= 4 ? "red" : "blue", mine = S.me && S.me.account && m.owner === S.me.account.name;
-      place("m" + m.id, "mdot " + team + (z < CTF_MAP.basement ? " low" : z > CTF_MAP.deck ? " high" : "") + (carriers[m.id] ? " carry" : "") + (mine ? " mine" : ""), m.xy[0], m.xy[1],
-        m.name + " #" + m.id + (m.owner ? " (" + m.owner + ")" : "") + " · " + (m.job || "") + (z < CTF_MAP.basement ? " · in the basement" : z > CTF_MAP.deck ? " · on the battlements" : ""));
+      place("m" + m.id, "mdot " + team + (z < M.basement ? " low" : z > M.deck ? " high" : "") + (carriers[m.id] ? " carry" : "") + (mine ? " mine" : ""), m.xy[0], m.xy[1],
+        m.name + " #" + m.id + (m.owner ? " (" + m.owner + ")" : "") + " · " + (m.job || "") + (z < M.basement ? (asl ? " · down in the well" : " · in the basement") : z > M.deck ? (asl ? " · on the deck" : " · on the battlements") : ""));
     });
+    if (asl) {
+      ["red", "blue"].forEach((t) => {
+        const k = (asl.cores || {})[t] || {}, pct = k.pct == null ? 100 : k.pct;
+        place("c" + t, "mcore " + t + (pct <= 0 ? " dead" : asl.defender && asl.defender.toLowerCase() === t && (asl.phase === "half1" || asl.phase === "half2") ? " under" : ""),
+          WELL_MAP[t][0], WELL_MAP[t][1], (t === "red" ? "Red" : "Blue") + "'s Core: " + (pct <= 0 ? "destroyed" : pct + "%"));
+      });
+      layer.querySelectorAll("[data-k]").forEach((el) => { if (!seen[el.dataset.k]) el.remove(); });
+      return;
+    }
     ["red", "blue"].forEach((t) => {
       const w = String((c.flags || {})[t] || "home");
       let xy = CTF_MAP[t];
@@ -548,10 +608,10 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
         '<p class="notes">' + esc(m.notes) + "</p>" + (ok ? "" : '<p class="locked-note">Locked: ' + m.unlock + ' souls in <a href="#bestiary/' + esc(m.key) + '">the bestiary</a>.</p>') +
         (a && a.progression ? '<p class="mastery-line">' + (mm && mm.rank ? rankPill(mm) + " " + esc(m.name + " " + mm.name) + " · " : "") + num(mm ? mm.xp : 0) + " XP" +
           (mm && mm.discount ? " · " + Math.round(mm.discount * 100) + "% off every send" : "") + "</p>" : "") + "</div></div>";
-      const ctf = ctfLive();
+      const ctf = ctfLive() || asLive();
       opts = seg("How many", "count", [1, 2, 3, 4, 5].map((n) => ({ v: n, t: String(n) })), f.count, "copies cost " + step + "% more each") +
         (ctf ? seg("Door", "door", [{ v: 0, t: home ? "yours · " + home : "your side's", side: home ? sideOf(home) : "" }].concat([1, 2, 3, 4, 5, 6, 7, 8].map((d) => ({ v: d, t: String(d), side: sideOf(d) }))), f.door === 9 ? 0 : f.door, "1-4 Red · 5-8 Blue") +
-          seg("Order", "role", [{ v: "", t: "auto" }, { v: "attack", t: "attack" }, { v: "defend", t: "defend" }, { v: "escort", t: "escort" }, { v: "mid", t: "hold the middle" }], f.role, "auto leaves it to the team's commander")
+          (ctfLive() ? seg("Order", "role", [{ v: "", t: "auto" }, { v: "attack", t: "attack" }, { v: "defend", t: "defend" }, { v: "escort", t: "escort" }, { v: "mid", t: "hold the middle" }], f.role, "auto leaves it to the team's commander") : "")
           : seg("Door", "door", [{ v: 0, t: home ? "yours · " + home : "emptiest" }].concat([1, 2, 3, 4, 5, 6, 7, 8].map((d) => ({ v: d, t: String(d) })), [{ v: 9, t: "all · lv 6" }]), f.door)) +
         seg("Strength", "strength", STRENGTHS.map((s) => ({ v: s, t: s + "%" })), f.strength, "150% and up is a champion") +
         (variants.length ? seg("Variant", "variant", [{ v: "", t: "plain" }].concat(variants.map((v) => ({ v: v, t: affix(v) }))), f.variant) : "") +
@@ -591,6 +651,21 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
   function roundsPanel() {
     const st = S.live, r = st && st.rounds;
     const bets = (S.cat && S.cat.costs && S.cat.costs.bet) || [2, 5, 10, 20];
+    if (asLive()) {
+      const a = st.assault;
+      return '<div class="panel"><h3>The Assault</h3><p class="sub">Match ' + a.number + " is in the " + esc({ warmup: "warm-up", half1: "first half", switch: "switch", half2: "second half" }[a.phase] || a.phase) +
+        ". Your home door picks your side (1-4 Red, 5-8 Blue); each side attacks the other's Core for a half, and you bet on the side you think wins." + (a.bets_open ? "" : " The bets are closed for this match.") + "</p>" +
+        '<div class="form-row"><label>Door<select data-bind="joinDoor">' + [1, 2, 3, 4, 5, 6, 7, 8].map((d) => '<option value="' + d + '">door ' + d + (d <= 4 ? " · Red" : " · Blue") + "</option>").join("") + '</select></label><button data-act="join">Join this door</button></div>' +
+        '<div class="form-row"><label>Bet on<select data-bind="betTeam"><option value="red">Red</option><option value="blue">Blue</option></select></label><label>Essence<select data-bind="betAmt">' + bets.map((b) => '<option value="' + b + '">' + b + "</option>").join("") +
+        '</select></label><button data-act="bet-team"' + (a.bets_open ? "" : " disabled") + ">Place the bet</button></div></div>";
+    }
+    if (raidLive()) {
+      const rd = st.raid;
+      return '<div class="panel"><h3>The raid</h3><p class="sub">Raid ' + rd.number + " against the " + esc(rd.boss || "boss") + " is in the " + esc(rd.phase) +
+        ". Every door fights on the same side; bet on whether the party brings it down." + (rd.bets_open ? "" : " The bets are closed for this raid.") + "</p>" +
+        '<div class="form-row"><label>Bet on<select data-bind="betTeam"><option value="win">the raiders</option><option value="fail">the boss</option></select></label><label>Essence<select data-bind="betAmt">' +
+        bets.map((b) => '<option value="' + b + '">' + b + "</option>").join("") + '</select></label><button data-act="bet-team"' + (rd.bets_open ? "" : " disabled") + ">Place the bet</button></div></div>";
+    }
     if (ctfLive()) {
       const c = st.ctf;
       return '<div class="panel"><h3>The match</h3><p class="sub">Match ' + c.number + " is in the " + esc(c.phase === "warmup" ? "warm-up" : c.phase) + ". Your home door picks your side (1-4 Red, 5-8 Blue); bet on the team you think wins." +
@@ -811,7 +886,21 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     const modeNow = st && st.online ? st.mode : "";
     const modeBtn = (m, label) => '<button class="switch' + (modeNow === m ? " on" : "") + '" data-act="adm" data-cmd="!mode ' + m + '"' + (modeNow === m ? " disabled" : "") + ">" + label + (modeNow === m ? " <b>ON AIR</b>" : "") + "</button>";
     const modePanel = st && st.online ? '<div class="panel"><h3>The show</h3><p class="sub">Only you change the mode, and it stays until you change it back, restarts included. Switching moves the game to the other map: about a minute of loading on the stream, and a round or a match in progress ends without a result (its bets are refunded).</p>' +
-      '<div class="adm-switches">' + modeBtn("rounds", "The coliseum: rounds") + modeBtn("ctf", "Capture the Flag") + "</div>" +
+      '<div class="adm-switches">' + modeBtn("rounds", "The coliseum: rounds") + modeBtn("ctf", "Capture the Flag") + modeBtn("raid", "The Raid: every door against a boss") +
+        modeBtn("assault", "The Assault: attack and defend a Core") + "</div>" +
+      (st.assault ? '<div class="form-row adm-row"><button data-act="adm" data-cmd="!assault end">End this match now</button></div>' +
+        '<p class="sub">The Cores\' health, from the next half on (both sides the same). Now: <b>' + num(st.assault.core_hp || 0) + "</b></p>" +
+        '<div class="adm-switches">' + [8000, 15000, 25000, 40000].map((n) => '<button class="switch' + ((st.assault.core_hp || 0) === n ? " on" : "") + '" data-act="adm" data-cmd="!assault hp ' + n + '">' + num(n) + "</button>").join("") + "</div>" +
+        '<p class="sub">The director\'s fill keeps both sides at a number alive, the same kinds for both. Now: <b>' +
+        (st.assault.fill ? esc(st.assault.fill) + " a side, one every " + esc(Math.round(st.assault.fill_every || 8)) + " s" : "off") + "</b>; while nobody plays: <b>" +
+        (st.assault.idle_fill ? esc(st.assault.idle_fill) + " a side" : "off") + "</b></p>" +
+        '<div class="adm-switches">' + [["off", "Off", 0], ["6", "6 a side", 6], ["10", "10 a side", 10], ["aggressive", "Aggressive: 14, one every 3 s", 14]].map(([arg, label, n]) =>
+          '<button class="switch' + ((st.assault.fill || 0) === n ? " on" : "") + '" data-act="adm" data-cmd="!ctf fill ' + arg + '">' + label + "</button>").join("") +
+        '<button class="switch' + (st.assault.idle_fill ? " on" : "") + '" data-act="adm" data-cmd="!ctf idle ' + (st.assault.idle_fill ? "off" : "on") + '">Idle fill ' + (st.assault.idle_fill ? "on" : "off") + "</button></div>" : "") +
+      (st.raid ? '<div class="form-row adm-row"><button data-act="adm" data-cmd="!raid end">End this raid now</button></div>' +
+        '<p class="sub">The director keeps the party at a number of raiders with its own monsters, so a raid is a raid with few viewers about. Now: <b>' + esc(st.raid.fill || 0) + "</b></p>" +
+        '<div class="adm-switches">' + [0, 8, 12, 16].map((n) => '<button class="switch' + ((st.raid.fill || 0) === n ? " on" : "") + '" data-act="adm" data-cmd="!raid fill ' + n + '">' +
+          (n ? n + " raiders" : "Off") + "</button>").join("") + "</div>" : "") +
       (st.ctf ? '<div class="form-row adm-row"><button data-act="adm" data-cmd="!match end">End this match now</button><label>Call a play for<select data-bind="admPlayTeam"><option value="red">Red</option><option value="blue">Blue</option></select></label>' +
         '<label>the play<select data-bind="admPlayCall"><option value="allin">all in</option><option value="turtle">turtle</option><option value="upper">over the bridge, the long way down</option><option value="lower">through the moat, the short way down</option></select></label>' +
         '<button data-act="adm-play">Call it (90 s)</button></div>' +
