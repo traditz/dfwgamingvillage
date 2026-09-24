@@ -887,21 +887,28 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     if (!(S.me && S.me.admin)) return '<div class="panel"><h2>Admin</h2><p class="arena-muted">This page is for the arena\'s admins. Sign in with an admin\'s Discord account.</p></div>';
     const st = S.live, sp = st && st.specials, r = st && st.rounds;
     const modeNow = st && st.online ? st.mode : "";
+    // the director's own monsters (its releases and revivals, the fills and base guards, the pacer, the free champions): one switch for every mode
+    const dir = st && st.director, spawnsOn = !dir || dir.spawns !== false;
+    const held = spawnsOn ? "" : ' <span class="arena-muted">(held: the director\'s monsters are off)</span>';
+    const spawnsRow = dir ? '<p class="sub">The director\'s own monsters: its releases and revivals, the fills and base guards, the pacer and the free champions. ' +
+      "Off, only the viewers' monsters come in (the Raid's boss still does), and it stays off through restarts until you switch it back.</p>" +
+      '<div class="adm-switches"><button class="switch' + (spawnsOn ? " on" : "") + '" data-act="adm" data-cmd="!spawns ' + (spawnsOn ? "off" : "on") + '">Director spawns <b>' +
+      (spawnsOn ? "ON" : "OFF") + "</b></button></div>" : "";
     const modeBtn = (m, label) => '<button class="switch' + (modeNow === m ? " on" : "") + '" data-act="adm" data-cmd="!mode ' + m + '"' + (modeNow === m ? " disabled" : "") + ">" + label + (modeNow === m ? " <b>ON AIR</b>" : "") + "</button>";
     const modePanel = st && st.online ? '<div class="panel"><h3>The show</h3><p class="sub">Only you change the mode, and it stays until you change it back, restarts included. Switching moves the game to the other map: about a minute of loading on the stream, and a round or a match in progress ends without a result (its bets are refunded).</p>' +
       '<div class="adm-switches">' + modeBtn("rounds", "The coliseum: rounds") + modeBtn("ctf", "Capture the Flag") + modeBtn("raid", "The Raid: every door against a boss") +
-        modeBtn("assault", "The Assault: attack and defend a Core") + "</div>" +
+        modeBtn("assault", "The Assault: attack and defend a Core") + "</div>" + spawnsRow +
       (st.assault ? '<div class="form-row adm-row"><button data-act="adm" data-cmd="!assault end">End this match now</button></div>' +
         '<p class="sub">The Cores\' health, from the next half on (both sides the same). Now: <b>' + num(st.assault.core_hp || 0) + "</b></p>" +
         '<div class="adm-switches">' + [8000, 15000, 25000, 40000].map((n) => '<button class="switch' + ((st.assault.core_hp || 0) === n ? " on" : "") + '" data-act="adm" data-cmd="!assault hp ' + n + '">' + num(n) + "</button>").join("") + "</div>" +
         '<p class="sub">The director\'s fill keeps both sides at a number alive, the same kinds for both. Now: <b>' +
         (st.assault.fill ? esc(st.assault.fill) + " a side, one every " + esc(Math.round(st.assault.fill_every || 8)) + " s" : "off") + "</b>; while nobody plays: <b>" +
-        (st.assault.idle_fill ? esc(st.assault.idle_fill) + " a side" : "off") + "</b></p>" +
+        (st.assault.idle_fill ? esc(st.assault.idle_fill) + " a side" : "off") + "</b>" + held + "</p>" +
         '<div class="adm-switches">' + [["off", "Off", 0], ["6", "6 a side", 6], ["10", "10 a side", 10], ["aggressive", "Aggressive: 14, one every 3 s", 14]].map(([arg, label, n]) =>
           '<button class="switch' + ((st.assault.fill || 0) === n ? " on" : "") + '" data-act="adm" data-cmd="!ctf fill ' + arg + '">' + label + "</button>").join("") +
         '<button class="switch' + (st.assault.idle_fill ? " on" : "") + '" data-act="adm" data-cmd="!ctf idle ' + (st.assault.idle_fill ? "off" : "on") + '">Idle fill ' + (st.assault.idle_fill ? "on" : "off") + "</button></div>" : "") +
       (st.raid ? '<div class="form-row adm-row"><button data-act="adm" data-cmd="!raid end">End this raid now</button></div>' +
-        '<p class="sub">The director keeps the party at a number of raiders with its own monsters, so a raid is a raid with few viewers about. Now: <b>' + esc(st.raid.fill || 0) + "</b></p>" +
+        '<p class="sub">The director keeps the party at a number of raiders with its own monsters, so a raid is a raid with few viewers about. Now: <b>' + esc(st.raid.fill || 0) + "</b>" + held + "</p>" +
         '<div class="adm-switches">' + [0, 8, 12, 16].map((n) => '<button class="switch' + ((st.raid.fill || 0) === n ? " on" : "") + '" data-act="adm" data-cmd="!raid fill ' + n + '">' +
           (n ? n + " raiders" : "Off") + "</button>").join("") + "</div>" : "") +
       (st.ctf ? '<div class="form-row adm-row"><button data-act="adm" data-cmd="!match end">End this match now</button><label>Call a play for<select data-bind="admPlayTeam"><option value="red">Red</option><option value="blue">Blue</option></select></label>' +
@@ -909,13 +916,13 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
         '<button data-act="adm-play">Call it (90 s)</button></div>' +
         // the director's fill: it keeps both sides at so many alive (the same kinds for both), for testing and for quiet hours
         '<p class="sub">The director\'s fill keeps both sides at a number alive, the same kinds for both. Now: <b>' +
-        (st.ctf.fill ? esc(st.ctf.fill) + " a side, one every " + esc(Math.round(st.ctf.fill_every || 8)) + " s" : "off") + "</b></p>" +
+        (st.ctf.fill ? esc(st.ctf.fill) + " a side, one every " + esc(Math.round(st.ctf.fill_every || 8)) + " s" : "off") + "</b>" + held + "</p>" +
         '<div class="adm-switches">' + [["off", "Off", 0], ["6", "6 a side", 6], ["10", "10 a side", 10], ["aggressive", "Aggressive: 14, one every 3 s", 14]].map(([arg, label, n]) =>
           '<button class="switch' + ((st.ctf.fill || 0) === n ? " on" : "") + '" data-act="adm" data-cmd="!ctf fill ' + arg + '">' + label + "</button>").join("") + "</div>" +
         // nobody playing: the director fields both sides by itself until a viewer sends a monster
         '<p class="sub">While nobody plays (no viewer\'s monster for two minutes) the director fields both sides by itself: <b>' +
         (st.ctf.idle_fill ? esc(st.ctf.idle_fill) + " a side, one every " + esc(Math.round(st.ctf.idle_fill_every || 3)) + " s" : "off") + "</b>" +
-        (st.ctf.idle ? " · <b>filling now</b>" : "") + "</p>" +
+        (st.ctf.idle && spawnsOn ? " · <b>filling now</b>" : "") + held + "</p>" +
         '<div class="adm-switches"><button class="switch' + (st.ctf.idle_fill ? " on" : "") + '" data-act="adm" data-cmd="!ctf idle on">On: 14 a side</button>' +
         '<button class="switch' + (st.ctf.idle_fill ? "" : " on") + '" data-act="adm" data-cmd="!ctf idle off">Off</button></div>' : "") + "</div>" : "";
     if (st && st.online && !sp) return '<div class="panel"><h2>Admin</h2></div>' + modePanel;
