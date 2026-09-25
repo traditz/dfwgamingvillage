@@ -397,7 +397,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     const app = $("#app");
     const st = S.live, mons = (st && st.monsters) || [];
     if (S.view === "watch") {
-      $("#watch-status").innerHTML = statusLine(st) + ctfBanner(st) + raidBanner(st) + assaultBanner(st) + specialBanner(st);
+      $("#watch-status").innerHTML = statusLine(st) + ctfBanner(st) + raidBanner(st) + assaultBanner(st) + specialBanner(st) + modeVoteBanner(st);
       $("#watch-feed").innerHTML = feedList(st);
       app.innerHTML = panel(mons);
     } else if (S.view === "bestiary") {
@@ -556,6 +556,22 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
         r.vote.options.map((o) => '<button data-act="vote" data-n="' + o.n + '" title="' + esc(o.blurb) + '"' + (S.me ? "" : " disabled") + ">" + o.n + " · " + esc(o.title) + " <i>" + o.votes + "</i></button>").join("") + "</div></div>";
     }
     return h;
+  }
+  // ---- the viewers' vote on the next mode: when the game on air ends, a mode with more than half the votes takes over (one vote on its own too)
+  function modeVoteBanner(st) {
+    const v = st && st.online && st.mode_vote;
+    if (!v || !v.on || !v.modes) return "";
+    const mine = myId() && (v.voters || {})[myId()], titles = {};
+    v.modes.forEach((m) => { titles[m.mode] = m.title; });
+    const head = v.next ? "The viewers voted: " + (titles[v.next] || v.next) + " is next" : "Vote the next mode";
+    const how = v.next ? "It starts when this countdown ends; a vote now counts for the game after it."
+      : "When the game on air ends, a mode with more than half the votes takes over. One vote on its own counts.";
+    const when = v.when && !v.next ? " " + esc(v.when.charAt(0).toUpperCase() + v.when.slice(1)) + "." : "";
+    const you = S.me ? (mine ? " Your vote: <b class=\"side\">" + esc(titles[mine] || mine) + "</b>." : "") : " Sign in to vote, or type !votemode ctf in the stream's chat.";
+    return '<div class="special vote modevote"><b>' + esc(head) + "</b><span>" + esc(how) + when + you + '</span><div class="vote-row">' +
+      v.modes.map((m) => '<button data-act="modevote" data-mode="' + esc(m.mode) + '"' + (m.mode === mine ? ' class="mine" aria-pressed="true"' : "") + (S.me ? "" : " disabled") + ">" +
+        esc(m.title) + (m.mode === v.current ? ' <small>on air</small>' : "") + " <i>" + (m.votes || 0) + "</i></button>").join("") +
+      (mine ? '<button class="quiet" data-act="modevote" data-mode="clear">Take my vote back</button>' : "") + "</div></div>";
   }
   function feedList(st) {
     return '<ul class="feed">' + ((st && st.feed) || []).slice().reverse().map((e) => '<li class="' + esc(e.kind) + '"><b>' + esc(e.kind) + "</b> " + esc(e.text) + "</li>").join("") + "</ul>";
@@ -895,9 +911,17 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
       '<div class="adm-switches"><button class="switch' + (spawnsOn ? " on" : "") + '" data-act="adm" data-cmd="!spawns ' + (spawnsOn ? "off" : "on") + '">Director spawns <b>' +
       (spawnsOn ? "ON" : "OFF") + "</b></button></div>" : "";
     const modeBtn = (m, label) => '<button class="switch' + (modeNow === m ? " on" : "") + '" data-act="adm" data-cmd="!mode ' + m + '"' + (modeNow === m ? " disabled" : "") + ">" + label + (modeNow === m ? " <b>ON AIR</b>" : "") + "</button>";
-    const modePanel = st && st.online ? '<div class="panel"><h3>The show</h3><p class="sub">Only you change the mode, and it stays until you change it back, restarts included. Switching moves the game to the other map: about a minute of loading on the stream, and a round or a match in progress ends without a result (its bets are refunded).</p>' +
+    // the viewers' vote on the next mode: a majority of their votes switches it when the game on air ends; the switch stops and starts the vote
+    const mv = st && st.mode_vote, voteOn = !!(mv && mv.on);
+    const tally = mv && mv.modes ? mv.modes.filter((m) => m.votes).map((m) => esc(m.title) + " " + m.votes).join(" · ") : "";
+    const voteRow = mv ? '<p class="sub">The viewers\' vote: when the game on air ends, a mode with more than half of their votes takes over (one vote on its own too); ' +
+      "a vote for the mode on air keeps it, and a tie changes nothing. Your own switch above works at once and clears their votes. Now: <b>" +
+      (voteOn ? (mv.next ? esc((mv.modes.find((m) => m.mode === mv.next) || {}).title || mv.next) + " is next, by the vote" : tally || "no votes yet") : "off") + "</b></p>" +
+      '<div class="adm-switches"><button class="switch' + (voteOn ? " on" : "") + '" data-act="adm" data-cmd="!votemode ' + (voteOn ? "off" : "on") + '">Viewers\' mode vote <b>' +
+      (voteOn ? "ON" : "OFF") + "</b></button></div>" : "";
+    const modePanel = st && st.online ? '<div class="panel"><h3>The show</h3><p class="sub">You change the mode at once, and it stays until it changes again, restarts included. Switching moves the game to the other map: about a minute of loading on the stream, and a round or a match in progress ends without a result (its bets are refunded).</p>' +
       '<div class="adm-switches">' + modeBtn("rounds", "The coliseum: rounds") + modeBtn("ctf", "Capture the Flag") + modeBtn("raid", "The Raid: every door against a boss") +
-        modeBtn("assault", "The Assault: attack and defend a Core") + "</div>" + spawnsRow +
+        modeBtn("assault", "The Assault: attack and defend a Core") + "</div>" + voteRow + spawnsRow +
       (st.assault ? '<div class="form-row adm-row"><button data-act="adm" data-cmd="!assault end">End this match now</button></div>' +
         '<p class="sub">The Cores\' health, from the next half on (both sides the same). Now: <b>' + num(st.assault.core_hp || 0) + "</b></p>" +
         '<div class="adm-switches">' + [8000, 15000, 25000, 40000].map((n) => '<button class="switch' + ((st.assault.core_hp || 0) === n ? " on" : "") + '" data-act="adm" data-cmd="!assault hp ' + n + '">' + num(n) + "</button>").join("") + "</div>" +
@@ -1007,6 +1031,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     if (act === "open") { location.hash = "#bestiary/" + el.dataset.key; window.scrollTo({ top: 0, behavior: "smooth" }); return; }
     if (act === "period") { S.boardPeriod = el.dataset.period; render(); return; }
     if (act === "vote") { await send("!vote " + el.dataset.n); return; }
+    if (act === "modevote") { await send("!votemode " + el.dataset.mode); return; }
     if (act === "adm") { await send(el.dataset.cmd); return; }
     if (act === "adm-chance") { await send("!specials chance " + (parseFloat($("#adm-cr").value) || 0) + " " + (parseFloat($("#adm-ce").value) || 0)); return; }
     if (act === "adm-clash") {

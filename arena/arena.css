@@ -382,6 +382,11 @@ body:not(.view-watch) #arena-stream { max-width: 360px; justify-self: end; }
 .vote-row button:hover:not(:disabled) { border-color: var(--teal); }
 .vote-row button:disabled { opacity: .55; cursor: not-allowed; }
 .vote-row i { font-style: normal; color: var(--teal); font-variant-numeric: tabular-nums; margin-left: 6px; }
+/* the viewers' vote on the next mode: your vote outlined, the mode on air tagged, the way to take a vote back kept quiet */
+.special.modevote b.side { color: var(--text); text-transform: none; letter-spacing: 0; font-size: 1em; }
+.vote-row button.mine { border-color: var(--teal); box-shadow: inset 0 0 0 1px var(--teal); }
+.vote-row button small { color: var(--muted); font-size: .78em; text-transform: uppercase; letter-spacing: .04em; margin-left: 4px; }
+.vote-row button.quiet { background: transparent; border-style: dashed; color: var(--muted); }
 .table-wrap { overflow-x: auto; }
 .tabs2 { flex-wrap: wrap; }              /* seven boards now: the row wraps on a phone instead of pushing the page sideways */
 .top-table small { color: var(--muted); }
