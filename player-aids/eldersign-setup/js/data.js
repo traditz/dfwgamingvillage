@@ -70,7 +70,7 @@ ES.modules = [
   { id: "master", name: "Master Mythos cards", requires: "uf", modes: ["museum"],
     summary: "Shuffle the 9 red-bordered Master Mythos cards into the Mythos deck for a harder game.",
     description: "An optional challenge for experienced players. If all players agree, shuffle all 9 Master Mythos cards into the Mythos deck before setup. Otherwise they are returned to the box during setup.",
-    src: "Unseen Forces p.4" },
+    src: "Unseen Forces p.1–2, p.4" },
   { id: "phobia", name: "Phobia deck", requires: "gc", modes: null,
     summary: "Sanity hitting 0 gives a permanent Phobia (and 1 doom) instead of devouring — until the fourth.",
     description: "When an investigator's sanity would drop to 0 or less, they are not devoured: they draw a Phobia card, restore sanity to full, and add 1 doom token to the doom track. Phobias can never be removed. Drawing a fourth Phobia devours the investigator. After the Ancient One awakens, no more Phobias are drawn — 0 sanity devours as normal.",
@@ -86,7 +86,7 @@ ES.modules = [
   { id: "winter", name: "Winter expedition (harder)", requires: "ooi", modes: ["alaska"],
     summary: "Use the Winter side of the Track card — if Day 7 ends, the investigators lose.",
     description: "Choose the season during setup. Summer (default) is more forgiving: when the day token must advance past Day 7, add 2 doom tokens, reset it to Day 7 and add 7 storm markers. Winter is unforgiving: when the day token must advance past Day 7, the investigators lose the game.",
-    src: "Omens of Ice p.2, p.4" },
+    src: "Omens of Ice p.2–3" },
   { id: "expert", name: "Expert Mythos variant", requires: "ootp", modes: ["pyramid"],
     summary: "Mythos options with the turquoise Expert watermark add +1 doom after resolving.",
     description: "For a greater challenge: each time the players resolve a Mythos card option that has the turquoise Expert Mythos watermark in its background, add 1 additional doom token to the doom track after resolving that option's effects.",
@@ -119,18 +119,21 @@ ES.phases = [
           const bits = [];
           bits.push("<li><b>Investigators</b> and <b>Ancient Ones</b> from every set you selected go into their shared pools.</li>");
           bits.push("<li><b>Common Items, Unique Items, Spells and Allies</b> from every selected set shuffle into their base-game decks.</li>");
+          bits.push("<li><b>Other World cards</b> from every selected set shuffle into one Other World deck" + (c.mode === "museum" && c.has("uf") ? "; Unseen Forces' <b>Adventure</b> and regular <b>Mythos</b> cards shuffle into the base Adventure and Mythos decks" : "") + ".</li>");
           if (c.has("goa") || c.has("ootd")) bits.push("<li><b>Skill cards</b> (Gates of Arkham / Omens of the Deep) shuffle together into one Skill deck.</li>");
-          bits.push("<li><b>Monster markers</b> from every selected set join the base-game monsters (mask monsters and Children of Abhoth stay out — see the monster cup step).</li>");
+          bits.push("<li><b>Monster markers</b> from every selected set join the base-game monsters (mask monsters and Children of Abhoth stay out — see the monster cup step" + (c.has("ootd") ? "; Omens of the Deep's <b>Deep One Legion</b> markers form their own stockpile and never go in the cup" : "") + ").</li>");
           if (c.mode === "museum" && (c.has("goa") || c.has("ooi") || c.has("ootd") || c.has("ootp")))
-            bits.push("<li>The mode-specific decks stay in their boxes: Arkham/Alaskan/Pacific/Egyptian Adventures, their Mythos decks, entrance, track and scenario cards are <b>only</b> used in their own game modes.</li>");
+            bits.push("<li>The mode-specific decks stay in their boxes: Arkham/Alaskan/Pacific/Egyptian Adventures, their Mythos decks, entrance, track and scenario cards are <b>only</b> used in their own game modes" + (c.mod("exhibit") ? " — except The Exhibit sheet and the Dark Pharaoh special adventures, which The Exhibit brings in" : "") + ".</li>");
           if (c.mode !== "museum")
-            bits.push("<li>Adventure and Mythos cards from sets other than the mode you're playing stay in the box — each game mode uses <b>only its own</b> Adventure and Mythos decks.</li>");
+            bits.push("<li>Adventure and Mythos cards from sets other than the mode you're playing stay in the box — each game mode uses <b>only its own</b> Adventure and Mythos decks" + (c.mod("exhibit") ? " (The Exhibit's Dark Pharaoh special adventures are the exception)" : "") + ".</li>");
           if (c.has("goa") && c.mode !== "streets")
-            bits.push("<li>Remove the Gates of Arkham cards marked with the <b>restriction (!) icon</b> — including the <i>Luck</i> and <i>Wanderlust</i> skills and the <i>Ancient Egypt</i>, <i>Far Side of the Moon</i> and <i>The Vaults of Zin</i> Other Worlds — they are Streets of Arkham only.</li>");
+            bits.push("<li>Remove the Gates of Arkham cards and tokens marked with the <b>restriction (!) icon</b> — including the <i>Luck</i> and <i>Wanderlust</i> skills and the <i>Ancient Egypt</i>, <i>Far Side of the Moon</i> and <i>The Vaults of Zin</i> Other Worlds — they are Streets of Arkham only.</li>");
           if (c.has("ootp")) bits.push("<li>Omens of the Pharaoh's <b>Calvin Wright investigator</b> replaces the Calvin Wright Ally card from Gates of Arkham — remove that Ally from the deck.</li>");
+          if (c.has("ooi") && c.mode !== "alaska") bits.push("<li>Omens of Ice's <b>storm markers</b> aren't Alaska-only: keep them in a facedown pile — its Ancient Ones' storm doom icon places them.</li>");
+          if (c.has("ootp") && c.mode !== "pyramid" && !c.mod("exhibit")) bits.push("<li>Keep Omens of the Pharaoh's four <b>Dark Pharaoh special adventures</b> shuffled nearby — its Ancient Ones' doom icon draws them into play.</li>");
           return "<ul>" + bits.join("") + "</ul>";
         },
-        src: "UF p.2 · GoA p.2 · OoI p.2,5 · OotD p.2,6 · OotP p.2,5 · FAQ p.4",
+        src: "UF p.2 · GoA p.2 · OoI p.2,5 · OotD p.2,6 · OotP p.2,4–5 · FAQ p.4",
         when: (c) => c.has("uf") || c.has("goa") || c.has("ooi") || c.has("ootd") || c.has("ootp") },
       { exp: "gc",
         t: "Choose your Grave Consequences decks",
@@ -140,7 +143,7 @@ ES.phases = [
           if (!on.length) return "Grave Consequences is on the table but none of its three decks is selected above. At the start of the game, players agree which of the Phobia, Epitaph and Epic Battle decks to use — any combination works with any other expansion.";
           return "All players agree to use the selected deck" + (on.length > 1 ? "s" : "") + ": <b>" + on.map(m => names[m]).join(", ") + "</b>. Place " + (on.length > 1 ? "each deck" : "the deck") + " shuffled beside the play area. (The Epic Battle deck is only shuffled and drawn when the Ancient One awakens.)";
         },
-        src: "Grave Consequences card 1/5",
+        src: "Grave Consequences cards 1/5–2/5",
         when: (c) => c.has("gc") }
     ] },
 
@@ -161,17 +164,17 @@ ES.phases = [
       { exp: "mode",
         t: "Set up the Clock and the Streets of Arkham",
         d: "Place the <b>Clock</b> in the center of the table with the clock hand on <b>XII (midnight)</b> and all dice near it" + " — investigators will start on the <b>Streets of Arkham entrance card</b>, which replaces the entrance sheet (and any Unseen Forces Entrance cards). Attach each of the 6 <b>gate markers</b> to a plastic stand and set them next to the Clock.",
-        src: "Gates of Arkham p.2, steps 6–7 · Base p.5, step 1",
+        src: "Gates of Arkham p.2, steps 6–7; p.3 · Base p.5, step 1",
         when: (c) => c.mode === "streets" },
       { exp: "mode",
         t: "Set up the Clock, Expedition Camp and Track card",
-        d: (c) => "Place the <b>Clock</b> in the center of the table on <b>XII</b> with all dice near it. Replace the entrance sheet with the <b>Expedition Camp</b> entrance card. Place the <b>Track card</b> with the <b>" + (c.mod("winter") ? "Winter" : "Summer") + "</b> side faceup near the play area: put the <b>supply token on the “5” space</b> of the supply track (top) and the <b>day token on “Day 1”</b> of the day track (bottom). Place the 28 <b>storm markers</b> randomly in a facedown pile.",
+        d: (c) => "Place the <b>Clock</b> in the center of the table on <b>XII</b> with all dice near it. Replace the entrance sheet with the <b>Expedition Camp</b> entrance card. Place the <b>Track card</b> with the <b>" + (c.mod("winter") ? "Winter" : "Summer") + "</b> side faceup near the play area: put the <b>“+10” supply token on the “5” space</b> of the supply track (top) — 15 supplies — and the <b>day token on “Day 1”</b> of the day track (bottom). Place the 28 <b>storm markers</b> randomly in a facedown pile.",
         src: "Omens of Ice p.2, steps 4–6 · Base p.5, step 1",
         when: (c) => c.mode === "alaska" },
       { exp: "mode",
         t: "Set up the Clock, the Ultima Thule and the Dark Waters",
         d: "Place the <b>Clock</b> in the center of the table on <b>XII</b> with all dice near it. Replace the entrance sheet with <b>“The Ultima Thule”</b> entrance card, ship side faceup. Place the <b>Scenario card</b> Dark Waters side up and put the <b>omen token on the starting space</b> of the Dark Waters track. Place the <b>broken amulet tokens</b> randomly in a facedown pile — then the investigators, as a group, <b>gain 1 broken amulet token</b> (draw, reveal, and set it by the scenario card).",
-        src: "Omens of the Deep p.2, steps 1–2, 8 · Base p.5, step 1",
+        src: "Omens of the Deep p.2, steps 1–2, 8; p.5 · Base p.5, step 1",
         when: (c) => c.mode === "rlyeh" },
       { exp: "mode",
         t: "Set up the Clock, Cairo and the Expedition",
@@ -181,7 +184,7 @@ ES.phases = [
       { exp: "ootp",
         t: "Add The Exhibit scenario sheet",
         d: "Place <b>“The Exhibit”</b> scenario sheet beside the entrance. It adds an effect to the current entrance (it is not a space investigators can move to): spending trophies there acquires <b>Relic</b> cards. Shuffle the <b>Relic deck</b> near the other card decks, and shuffle the four <b>Dark Pharaoh special adventure</b> cards into a facedown pile near the Adventure deck.",
-        src: "Omens of the Pharaoh p.4",
+        src: "Omens of the Pharaoh p.2 (steps 4, 8), p.4",
         when: (c) => c.mod("exhibit") && c.mode !== "pyramid" },
 
       /* --- Step 2: Ancient One --- */
@@ -194,7 +197,7 @@ ES.phases = [
           if (c.mode === "pyramid") d = "Choose any <b>Ancient One</b> to challenge and place it next to the clock. For your first Lightless Pyramid game the expansion recommends one of its own: <b>Haunter of the Dark</b> (average), <b>Nephren-Ka</b> (hard) or <b>Nyarlathotep</b> (insane).";
           return d;
         },
-        src: (c) => c.mode === "alaska" ? "Omens of Ice p.2, step 7" : c.mode === "rlyeh" ? "Omens of the Deep p.2, step 3" : c.mode === "pyramid" ? "Omens of the Pharaoh p.2, step 3" : "Base p.5, step 2",
+        src: (c) => c.mode === "alaska" ? "Omens of Ice p.2, step 7; p.6" : c.mode === "rlyeh" ? "Omens of the Deep p.2, step 3; p.6" : c.mode === "pyramid" ? "Omens of the Pharaoh p.2, step 3; p.6" : "Base p.5, step 2",
         when: () => true },
 
       /* --- Step 3: monster cup --- */
@@ -203,11 +206,11 @@ ES.phases = [
         d: (c) => {
           const bits = ["Place the monster markers in the box lid or another opaque container — the <b>monster cup</b>."];
           if (c.mode === "pyramid") {
-            bits.push("Add <b>all mask monster markers</b> from every set you own to the cup — in the Lightless Pyramid they are always in play. <b>Exception:</b> if you are facing the Omens of the Pharaoh version of <b>Nyarlathotep</b>, follow the mask-monster instructions on his card instead.");
+            bits.push("Add <b>all mask monster markers</b> from every set in play to the cup — in the Lightless Pyramid they are always in play. <b>Exception:</b> if you are facing the Omens of the Pharaoh version of <b>Nyarlathotep</b>, follow the mask-monster instructions on his card instead.");
           } else if (c.mod("exhibit")) {
             bits.push("Because The Exhibit is in play, add <b>all mask monster markers</b> to the cup as well.");
           } else {
-            bits.push("If <b>Nyarlathotep</b> is the Ancient One, add the <b>mask monster markers</b> to the cup; otherwise return them to the box.");
+            bits.push("If <b>Nyarlathotep</b> is the Ancient One, add the <b>mask monster markers</b> to the cup; otherwise return them to the box." + (c.has("ootp") ? " (The Omens of the Pharaoh <b>Nyarlathotep</b> instead follows the mask-monster instructions on his card.)" : ""));
           }
           if (c.has("uf")) bits.push("If <b>Abhoth</b> is the Ancient One, place the 3 <b>Children of Abhoth</b> markers in a facedown stockpile next to his card (never in the cup); otherwise return them to the box.");
           if (c.mode === "rlyeh") bits.push("Add the 5 <b>mission markers</b> to the monster cup, and set the 15 <b>Deep One Legion</b> markers aside as a separate stockpile — they never go in the cup.");
@@ -215,9 +218,10 @@ ES.phases = [
         },
         src: (c) => {
           const s = ["Base p.5, step 3"];
-          if (c.has("uf")) s.push("UF p.2, step 7");
+          if (c.has("uf")) s.push("UF p.2, step 7 · p.4");
           if (c.mode === "rlyeh") s.push("OotD p.2, steps 4–5");
           if (c.mode === "pyramid" || c.mod("exhibit")) s.push("OotP p.2, step 5 · p.3–4");
+          else if (c.has("ootp")) s.push("OotP p.3");
           return s.join(" · ");
         },
         when: () => true },
@@ -236,17 +240,17 @@ ES.phases = [
       { exp: "mode",
         t: "Set up the Alaskan Adventures",
         d: "Replace the Adventure deck with the <b>Alaskan Adventures</b>: set the four <b>Special Adventure</b> cards aside, separate the rest by stage, and shuffle a <b>Stage I</b> and a <b>Stage II</b> deck (Stage I under the table — backs are open information). Deal <b>three Stage I cards faceup</b> in a row and <b>three facedown</b> below them, then place the <b>“Arrival” Special Adventure faceup</b> below the bottom row. Shuffle the <b>Other World deck</b>; set the Stage II deck aside. Locked die icons on faceup cards get their dice.",
-        src: "Omens of Ice p.2, steps 2 & 8",
+        src: "Omens of Ice p.2, steps 2 & 8; p.3",
         when: (c) => c.mode === "alaska" },
       { exp: "mode",
         t: "Set up the Pacific Adventures",
         d: "Replace the Adventure deck with the <b>Pacific Adventures</b>: set the four <b>Special Adventure</b> cards aside, separate by stage, and shuffle a <b>Stage I</b> and a <b>Stage II</b> deck (Stage I under the table — backs are open information). Deal <b>three Stage I cards faceup</b> and <b>three facedown</b> below them, then place the <b>“Calling” Special Adventure faceup</b> below the bottom row. Shuffle the <b>Other World deck</b>; set the Stage II deck aside. Locked die icons on faceup cards get their dice.",
-        src: "Omens of the Deep p.2, steps 6–7",
+        src: "Omens of the Deep p.2, steps 6–7; p.4",
         when: (c) => c.mode === "rlyeh" },
       { exp: "mode",
         t: "Set up the Egyptian Adventures",
         d: "Replace the Adventure deck with the <b>Egyptian Adventures</b>: separate them by stage and shuffle a <b>Stage I “Cairo”</b> deck and a <b>Stage II “Dashur”</b> deck — the <b>Hidden Chamber</b> special adventures are shuffled into the Dashur deck. Deal <b>three Cairo cards faceup</b> and <b>three facedown</b> below them (shuffle under the table — backs are open information). Shuffle the four <b>Dark Pharaoh Special Adventure</b> cards into a facedown pile near the decks. Shuffle the <b>Other World deck</b> and place everything near the rows. Locked die icons on faceup cards get their dice.",
-        src: "Omens of the Pharaoh p.2, steps 6–8",
+        src: "Omens of the Pharaoh p.2, steps 6–8; p.3",
         when: (c) => c.mode === "pyramid" },
 
       /* --- Step 5: items & clues --- */
@@ -262,7 +266,7 @@ ES.phases = [
         },
         src: (c) => {
           const s = ["Base p.5, step 5"];
-          if (c.has("uf")) s.push("UF p.2, step 4");
+          if (c.has("uf")) s.push("UF p.2, steps 4–5");
           if (c.mode === "streets") s.push("GoA p.2, steps 3–5");
           if (c.mode === "rlyeh") s.push("OotD p.2, step 4");
           if (c.mode === "pyramid") s.push("OotP p.2, step 4");
@@ -288,7 +292,7 @@ ES.phases = [
         src: (c) => {
           const s = ["Base p.5, step 6"];
           if (c.mode === "museum" && c.has("uf")) s.push("UF p.2");
-          if (c.mode === "streets") s.push("GoA p.2");
+          if (c.mode === "streets") s.push("GoA p.3");
           if (c.mode === "alaska") s.push("OoI p.3");
           if (c.mode === "rlyeh") s.push("OotD p.3");
           if (c.mode === "pyramid") s.push("OotP p.3");
@@ -344,7 +348,7 @@ ES.reference = [
   { id: "turn", title: "Turn Structure (official FAQ timing)",
     when: () => true,
     html: (c) => `
-<p>The FAQ v2.0 replaces the loose base-game turn description with a strict three-phase structure. This is the current official timing.</p>
+<p>The FAQ v2.0 complements and expands the base-game turn description with a strict three-phase structure. This is the current official timing.</p>
 <h4>I. Movement phase</h4>
 <ul>
 <li>Move your Investigator marker to any Adventure${c.mode === "museum" ? " card" : " or Other World card"} in play, or to the entrance — or stay where you are.${c.mode === "streets" ? " You cannot move to an Arkham Adventure that has an open gate on it; enter its Other World instead." : ""}</li>
@@ -352,7 +356,7 @@ ${(c.mode !== "museum") ? "<li>If you move to a <b>facedown</b> Adventure, resol
 ${(c.has("uf") || c.mode !== "museum") ? "<li>If the card you arrive on has an <b>Entry</b> effect, resolve it as the last step of your Movement phase (if you cannot pay an Entry cost, ignore the effect — you may always still move there).</li>" : ""}
 </ul>
 <h4>II. Resolution phase</h4>
-<p>If you are on the entrance, resolve an entrance action instead${(c.mode === "alaska" || c.mode === "rlyeh") ? " (in this mode, being at the entrance skips the Resolution phase — its actions happen in the Clock phase)" : ""}. On an adventure, you <b>must</b> attempt it, using this exact sequence:</p>
+<p>If you are on the entrance, resolve an entrance action instead${(c.mode === "alaska" || c.mode === "rlyeh" || c.mode === "pyramid") ? " (in this mode, being at the entrance skips the Resolution phase — its actions happen in the Clock phase)" : c.mode === "streets" ? " (in this mode, the Streets of Arkham ability is used at the end of your Movement phase, not here)" : ""}. On an adventure, you <b>must</b> attempt it, using this exact sequence:</p>
 <ol>
 ${c.mode === "streets" ? "<li>If your card shows an <b>event icon</b>, draw and resolve an Event card.</li>" : ""}
 <li>Decide whether to <b>attempt or intentionally fail</b> the adventure. You may declare it failed before your first roll (avoiding Terror effects): apply the penalties, leave your marker there, and go to the Clock phase.</li>
@@ -361,12 +365,12 @@ ${c.mode === "streets" ? "<li>If your card shows an <b>event icon</b>, draw and 
 <li>Apply <b>rerolls and result-changing effects</b> (Clue tokens, abilities, items).</li>
 ${c.has("uf") ? "<li>If <b>Cursed</b>, resolve the black die: if it matches another die in your pool, discard both.</li>" : ""}
 <li><b>Secure dice on Spells</b> (spells that secure dice are cast <i>after</i> rolling, before Terror effects).</li>
-<li><b>Complete a task if you can</b> — assign dice covering all its requirements (one task per roll). If it was the last task, the adventure is resolved. If tasks remain, return to step 2 of this list. If you cannot or will not complete a task:
+<li><b>Complete a task if you can</b> — assign dice covering all its requirements (one task per roll). If it was the last task, the adventure is resolved. If tasks remain, return to step ${c.mode === "streets" ? 2 : 1} of this list. If you cannot or will not complete a task:
   <ul>
-  <li><b>a.</b> Resolve the card's <b>Terror effect once</b> if you rolled at least one terror result (never more than once per attempt);</li>
+  <li><b>a.</b> Resolve <b>Terror effects</b> — the card's and the current Mythos card's — if you rolled at least one terror result (each at most <b>once</b> per attempt);</li>
   <li><b>b.</b> optionally <b>focus</b> (or another investigator here may <b>assist</b>) — set one die's result aside on an investigator marker;</li>
   <li><b>c.</b> <b>discard one die</b> from the pool (mandatory);</li>
-  <li><b>d.</b> roll again (step 2). If your last die is discarded with tasks remaining, the adventure is failed: suffer the penalties.</li>
+  <li><b>d.</b> return to step ${c.mode === "streets" ? 2 : 1} and roll again. If your last die is discarded with tasks remaining, the adventure is failed: suffer the penalties.</li>
   </ul></li>
 <li><b>Adventure resolved:</b> in order — move your marker to the entrance, take the card as a trophy and replace it${c.mode !== "museum" ? " from the current Adventure deck" : ""} (Other Worlds are not replaced), then gain its rewards (so a “monster appears” reward can land on the replacement card). Then go to the Clock phase.</li>
 </ol>
@@ -388,7 +392,7 @@ ${(c.mode === "alaska" || c.mode === "rlyeh" || c.mode === "pyramid") ? "<li>If 
 ${c.has("uf") ? `<li><b>White</b> — same faces as green. Added to your pool at the start of every adventure while <b>Blessed</b>; behaves like any normal die.</li>
 <li><b>Black</b> — same faces as green, but rolled while <b>Cursed</b>: after each roll (and all rerolls/abilities), if it matches any die in your pool, discard the black die <i>and</i> one matching die. It can't be assigned to tasks, secured, discarded for a failed roll, or altered by any effect.</li>` : ""}
 <li>Dice added by items stay in the pool until used on a task, set aside from a failed roll, or your turn ends. A die discarded after a failed roll is <b>gone for the rest of that Resolution phase</b> — it cannot be re-bought with another item${c.has("ootp") ? " (Relics are the sole exception)" : ""}.</li>
-<li><b>Locked dice:</b> when a locked die icon appears on a card or marker, the matching die is immediately trapped on it (even off a Spell or investigator marker, but never off another lock). Free it by resolving that card. A die can queue behind multiple locks.</li>
+<li><b>Locked dice:</b> when a locked die icon appears on a card or marker, the matching die is immediately trapped on it (even off a Spell or investigator marker, but never off another lock). Free it by resolving that Adventure, completing that monster's task, or when that Mythos card is no longer in effect. A die can queue behind multiple locks.</li>
 </ul>
 <p class="src-line">Base p.6, p.11 · FAQ p.2 (wildcard), p.8 (locked dice, red/yellow)${c.has("uf") ? " · UF p.2–3" : ""}</p>` },
 
@@ -399,14 +403,14 @@ ${c.has("uf") ? `<li><b>White</b> — same faces as green. Added to your pool at
 <li>Each horizontal row on an Adventure is a <b>task</b>; complete every task to resolve the card. You may complete only <b>one task per roll</b>, in any order unless the card has an <b>arrow</b> (top-to-bottom required).</li>
 <li><b>Number symbol</b>: that many investigation pips (combine dice; excess is wasted). <b>Lore / Peril / Terror symbols</b>: one die showing that face. <b>Split symbol</b>: either shown result works.</li>
 <li><b>Clock symbol</b>: completing the task forces you to <b>advance the clock</b>. <b>Sanity/Stamina numbers</b>: completing the task costs that much sanity/stamina — you may not complete a task that would drop you to 0 or below (Whiskey/Food can pay a 1-point cost instead).</li>
-${c.has("uf") ? "<li><b>Cursed symbol</b> (UF): completing the task makes you Cursed. <b>Doom symbol</b> (UF): completing the task adds 1 doom.</li>" : ""}
+${c.has("uf") ? "<li><b>Cursed symbol</b> (UF): completing the task makes you Cursed. <b>Doom symbol</b> (UF): completing the task adds 1 doom.</li>" : c.has("goa") ? "<li><b>Doom symbol</b> (GoA): completing the task adds 1 doom.</li>" : ""}
 ${c.mode === "streets" ? "<li><b>Gate symbol</b> (GoA): completing the task opens a gate. <b>Membership tasks</b>: if you belong to the matching organization, the task counts as complete with no dice; a monster on it returns to the cup.</li>" : ""}
 <li><b>Rolling with no requirements:</b> you must still roll your pool before completing a task with no dice requirements.</li>
 <li><b>Monster tasks:</b> a white-bordered row is a monster task — empty ones are ignored until a monster sits there. Monsters on cards must be beaten as extra tasks (see Monsters).</li>
 <li><b>Failing a roll:</b> Terror effect (once per attempt, if any terror was rolled) → optional focus/assist (one die per roll, max; an investigator marker holds only one die) → discard one die → roll again. Assisting investigators whose die goes unused when the adventure is abandoned lose 1 sanity or 1 stamina.</li>
 <li><b>Focus/assist</b> is only allowed after a roll that <b>failed</b> to complete a task, and only <b>once per Resolution phase</b> for focusing. You cannot both focus and request assistance on the same roll.</li>
 </ul>
-<p class="src-line">Base p.5–8, p.10 · FAQ p.9 (focus/assist), p.5 · UF p.4 · GoA p.4</p>` },
+<p class="src-line">Base p.5–8, p.10 · FAQ p.9–10 (focus/assist, Whiskey/Food), p.5 · UF p.4 · GoA p.4–5</p>` },
 
   { id: "rewards", title: "Rewards & Penalties — Icon Glossary",
     when: () => true,
@@ -420,16 +424,18 @@ ${c.mode === "streets" ? "<li><b>Gate symbol</b> (GoA): completing the task open
         ["base", "Doom", "Add 1 doom token to the doom track."],
         ["base", "Sanity / Stamina", "Lose that much Sanity / Stamina."]
       ];
-      if (c.has("uf")) rows.push(
-        ["uf", "Blessed / Cursed", "Become Blessed / Cursed."],
-        ["uf", "Reprieve", "Remove 1 doom token from the doom track."],
-        ["uf", "Clock", "Advance the clock once."]);
-      if (c.has("goa") || c.has("ootd")) rows.push(["goa", "Skill / Lost Skill", "Draw 1 Skill card / discard 1 Skill."]);
-      rows.push(["base", "Healing / Respite", "Any one investigator regains 1 stamina / 1 sanity. (Expansion icon.)"],
-        ["base", "Expeditious", "Do not advance the clock during your Clock phase this turn. (Expansion icon.)"],
-        ["base", "Remove Monster", "Return 1 monster on an adventure to the cup. (Expansion icon.)"],
-        ["base", "Lost Item / Spell / Ally", "Discard 1 card of the shown type. (Expansion icon.)"],
-        ["base", "Lost Elder Sign", "Remove 1 Elder Sign from the Ancient One — if there are none, add 1 doom instead. (Expansion icon.)"]);
+      if (c.has("uf")) rows.push(["uf", "Blessed / Cursed", "Become Blessed / Cursed."]);
+      const reprieveExp = ["uf", "goa", "ooi", "ootd"].find(e => c.has(e));
+      if (reprieveExp) rows.push([reprieveExp, "Reprieve", "Remove 1 doom token from the doom track."]);
+      const clockExp = ["uf", "goa", "ooi", "ootd", "ootp"].find(e => c.has(e));
+      if (clockExp) rows.push([clockExp, "Clock", "Advance the clock once."]);
+      if (c.has("goa") || c.has("ootd")) rows.push([c.has("goa") ? "goa" : "ootd", "Skill / Lost Skill", "Draw 1 Skill card / discard 1 Skill."]);
+      const iconExp = ["goa", "ooi", "ootd", "ootp"].find(e => c.has(e));
+      if (iconExp) rows.push([iconExp, "Healing / Respite", "Any one investigator regains 1 stamina / 1 sanity. (Expansion icon.)"],
+        [iconExp, "Expeditious", "Do not advance the clock during your Clock phase this turn. (Expansion icon.)"],
+        [iconExp, "Remove Monster", "Return 1 monster on an adventure to the cup. (Expansion icon.)"],
+        [iconExp, "Lost Item / Spell / Ally", "Discard 1 card of the shown type. (Expansion icon.)"],
+        [iconExp, "Lost Elder Sign", "Remove 1 Elder Sign from the Ancient One — if there are none, add 1 doom instead. (Expansion icon.)"]);
       if (c.mode === "alaska") rows.push(
         ["ooi", "Supply / Lost Supply", "Gain 1 supply / lose 1 supply (if you can't, lose 1 stamina instead)."],
         ["ooi", "Storm", "Add 3 storm markers to adventures."]);
@@ -444,10 +450,10 @@ ${c.mode === "streets" ? "<li><b>Gate symbol</b> (GoA): completing the task open
       return `<p>Rewards sit in the green (lower-right) area of a card, penalties in the red (lower-left). You resolve every icon you are able to; a reward isn't always good, a penalty isn't always bad.</p>
 <div class="twrap"><table>${trs}</table></div>
 <ul>
-<li><b>Split rewards/penalties</b> (diagonal line): choose one group. You cannot choose a penalty you cannot fulfill${(c.has("uf")) ? "; if a split includes a blessing/curse/skill from an expansion you're not using, you must take the other side" : ""}.</li>
+<li><b>Split rewards/penalties</b> (diagonal line): choose one group. You cannot choose a penalty you cannot fulfill${(!c.has("uf") || !(c.has("goa") || c.has("ootd"))) ? "; if a split includes a blessing/curse/skill from an expansion you're not using, you must take the other side" : ""}.</li>
 <li><b>Trophies:</b> resolved Adventures and defeated monsters are spent at the entrance for their printed value. Overspending is allowed with no change. Spent monsters return to the cup; spent Adventures go under their deck.</li>
 </ul>
-<p class="src-line">Base p.8 · UF p.4 · GoA p.5 · OoI p.5 · OotD p.5 · OotP p.5 · FAQ p.10</p>`;
+<p class="src-line">Base p.8–9 · UF p.4 · GoA p.4–5 · OoI p.4–5 · OotD p.5 · OotP p.5 · FAQ p.10, p.12</p>`;
     } },
 
   { id: "entrance", title: "The Entrance",
@@ -485,7 +491,7 @@ ${c.mode === "streets" ? "<li><b>Gate symbol</b> (GoA): completing the task open
 </ul>
 <p class="src-line">OoI p.3 (camp card) · FAQ p.3</p>`;
       if (c.mode === "rlyeh") return `
-<p><b>“The Ultima Thule”</b> replaces the entrance. An investigator there <b>skips the Resolution phase</b> and may spend trophies at the start of their <b>Clock phase</b> (the benefit may go to any investigator). If <b>four or more Deep One Legions</b> are ever in play, the ship <b>sinks immediately</b>: flip the card to “Wreckage of the Ultima Thule” (a weaker entrance) for the rest of the game — and the game advances to Stage II.</p>
+<p><b>“The Ultima Thule”</b> replaces the entrance. An investigator there <b>skips the Resolution phase</b> and may spend trophies at the start of their <b>Clock phase</b> (the benefit may go to any investigator). If <b>four or more Deep One Legions</b> are ever in play, the ship <b>sinks immediately</b>: discard 1 broken amulet token and flip the card to “Wreckage of the Ultima Thule” for the rest of the game — and the game advances to Stage II.</p>
 <p class="src-line">OotD p.3 · FAQ p.5</p>`;
       return `
 <p>The double-sided <b>Cairo / Dashur</b> card replaces the entrance; the faceup side is where investigators return after adventures, and determines <b>which Adventure deck replacements are drawn from</b> (Cairo → Stage I, Dashur → Stage II). An investigator there skips their Resolution phase; in their <b>Clock phase</b> they may spend trophies on that side's options — or <b>advance the clock</b> to flip the card to the other side. Gather supplies in Cairo, but the Elder Signs are in Dashur.</p>
@@ -502,16 +508,16 @@ ${c.mode === "streets" ? "<li><b>Gate symbol</b> (GoA): completing the task open
 </ul>
 <h4>Order of operations at midnight</h4>
 <ol>
-${c.mode === "alaska" ? "<li><b>Advance the day token</b> one space and add the storm markers shown on the new space.</li><li>Add <b>1 doom token per adventure with 4 storm markers</b>.</li>" : ""}
+${c.mode === "alaska" ? "<li><b>Advance the day token</b> one space and add the storm markers shown on the new space.</li><li>Add <b>1 doom token per adventure with 4 storm markers</b>.</li>" : c.has("ooi") ? "<li>Add <b>1 doom token per adventure with 4 storm markers</b> (Omens of Ice storms).</li>" : ""}
 <li>“At Midnight” effects on the <b>Ancient One</b>;</li>
 <li>… on <b>monsters</b> (investigators choose the order);</li>
-<li>… on <b>Adventure and Other World cards</b> (investigators choose)${c.mode === "pyramid" ? " — but skip any Dark Pharaoh adventure that entered play earlier this same midnight" : ""};</li>
+<li>… on <b>Adventure and Other World cards</b> (investigators choose)${c.has("ootp") ? " — but skip any Dark Pharaoh adventure that came into play during the Ancient One step of this midnight" : ""};</li>
 <li>… on <b>other cards</b> (investigators choose);</li>
 <li>“The next time the clock strikes midnight…” effects on the current Mythos card;</li>
 <li><b>Draw and resolve a new Mythos card</b>${c.mode === "alaska" ? " — a group dilemma: choose one of its two options, and never the bottom option unless you can resolve it entirely" : ""}${c.mode === "rlyeh" || c.mode === "pyramid" ? " — a group dilemma: choose either of its two options, even one that would have no effect" : ""}${c.mode === "museum" && c.has("uf") ? " — on a card with the <b>insight icon</b>, the group chooses the top or bottom option (never one with no effect; if the group can't agree, the player who took the last turn before midnight decides)" : ""};</li>
 <li>Refresh all <b>“Once per day”</b> abilities.</li>
 </ol>
-<p class="src-line">FAQ p.3, p.11–12${c.mode === "alaska" ? " · OoI p.6" : ""}${c.mode === "rlyeh" ? " · OotD p.5–6" : ""}${c.mode === "pyramid" ? " · OotP p.5–6" : ""}</p>` },
+<p class="src-line">FAQ p.3, p.11–12${c.mode === "museum" && c.has("uf") ? " · UF p.3" : ""}${c.mode === "alaska" ? " · OoI p.6" : c.has("ooi") ? " · OoI p.5–6" : ""}${c.mode === "rlyeh" ? " · OotD p.5–6" : ""}${c.mode === "pyramid" ? " · OotP p.5–6" : c.has("ootp") ? " · OotP p.6" : ""}</p>` },
 
   { id: "monsters", title: "Monsters",
     when: () => true,
@@ -521,20 +527,20 @@ ${c.mode === "alaska" ? "<li><b>Advance the day token</b> one space and add the 
 <li>If no empty monster task exists, place the monster <b>below the bottom task</b> of an Adventure — distributing monsters <b>as evenly as possible</b> across adventures (no card gets a second bottom monster until every card has one). A monster added to the bottom counts as the card's <b>last task</b> if there's an arrow. Exception: “a monster appears <b>here</b>” effects ignore evenness and land on the current adventure.</li>
 <li>Defeating a monster's task claims the marker as a trophy (flip it facedown until the adventure ends — dice locked by it stay until the Resolution phase ends; a <b>discarded</b> monster frees its die immediately). You keep the monster trophy even if you then fail the adventure, and gain any reward on the marker's back.</li>
 <li>Items/spells that “defeat” a monster satisfy all its requirements (including sanity/stamina) and claim it at the end of the phase; <b>discarding</b> a monster just returns it to the cup — no trophy, and requirements under it reopen.</li>
-${c.has("uf") ? "<li><b>Monster order arrow</b> (Wizard Whateley): once placed, that card's tasks must be done top-to-bottom, ending with the monster.</li>" : ""}
+${c.has("uf") ? "<li><b>Monster order arrow</b> (Wizard Whateley): once placed, that card's tasks must be done in order top-to-bottom — if it sits below the bottom task, the monster comes last.</li>" : ""}
 ${c.mode === "rlyeh" ? "<li><b>Deep One Legions</b> live in their own stockpile, never the cup. When defeated, pay the cost on the marker's back or the Legion <b>reappears</b> on another adventure. Four Legions in play sink the Ultima Thule. <b>Missions</b> come from the cup and act like monsters but can't be defeated/discarded by items or spells; complete one, then spend the printed trophy value at your Movement or Clock phase start to gain its reward.</li>" : ""}
-${(c.mode === "pyramid" || c.mod("exhibit")) ? "<li><b>Mask monsters</b> are always in the cup in this configuration — they are tough, and several have “At Midnight” effects on their backs (midnight icon in the task list).</li>" : ""}
+${(c.mode === "pyramid" || c.mod("exhibit")) ? "<li><b>Mask monsters</b> are always in the cup in this configuration — they are often very difficult to defeat. (A monster with a <b>midnight icon</b> in its task list, such as the Pharaoh's Sand Dweller, has an “At Midnight” effect on its back.)</li>" : ""}
 </ul>
-<p class="src-line">Base p.10–11 · FAQ p.3 (placement), p.8–9, p.10${c.mode === "rlyeh" ? " · OotD p.3–4" : ""}${c.mode === "pyramid" || c.mod("exhibit") ? " · OotP p.3" : ""}</p>` },
+<p class="src-line">Base p.10–11 · FAQ p.3 (placement), p.8–10, p.12${c.has("uf") ? " · UF p.4" : ""}${c.mode === "rlyeh" ? " · OotD p.3–4" : ""}${c.mode === "pyramid" || c.mod("exhibit") ? " · OotP p.3, p.5" : ""}</p>` },
 
   { id: "blessed", title: "Blessed & Cursed",
     when: (c) => c.has("uf"),
     html: () => `
 <ul>
 <li><b>Blessed:</b> add the <b>white die</b> to your pool at the start of every adventure. Only one Blessed card each; blessed again → instead gain 1 clue <i>or</i> draw 1 Common Item, Unique Item or Spell. Discard your Blessed card when you <b>fail an adventure</b> or the Ancient One awakens.</li>
-<li><b>Cursed:</b> you must roll the <b>black die</b> with every pool. After each roll (post-rerolls), if it matches another die, discard both. Cursed again while Cursed → <b>devoured</b>. Discard your Cursed card when you <b>successfully resolve an adventure</b> or the Ancient One awakens — but if you were cursed <i>during</i> an adventure, succeeding at that same adventure doesn't count; you must resolve another one.</li>
+<li><b>Cursed:</b> you must add the <b>black die</b> to your pool at the start of every adventure. After each roll (post-rerolls), if it matches another die, discard both. Cursed again while Cursed → <b>devoured</b>. Discard your Cursed card when you <b>successfully resolve an adventure</b> or the Ancient One awakens — but if you were cursed <i>during</i> an adventure, succeeding at that same adventure doesn't count; you must resolve another one.</li>
 <li>Becoming Blessed while Cursed (or vice versa) just cancels the old card — you don't gain the new one.</li>
-<li>Mid-adventure changes apply the appropriate die from your <b>next</b> roll. A secured white die is lost (with its spell) if the blessing is lost. A black die can never be secured on a spell. The white die is never added during the final battle — it isn't an adventure.</li>
+<li>Cursed mid-adventure: add the black die from your <b>next</b> roll. Blessed mid-adventure: you gain the card at once, but the white die is only added when a Resolution phase's first dice pool is created (FAQ). A secured white die (on a spell or investigator marker) is removed if the blessing is lost — a spell left with no dice is discarded. A black die can never be secured on a spell. The white die is never added during the final battle — it isn't an adventure.</li>
 </ul>
 <p class="src-line">UF p.2–3 · FAQ p.4 (black-die timing), p.12</p>` },
 
@@ -544,12 +550,12 @@ ${(c.mode === "pyramid" || c.mod("exhibit")) ? "<li><b>Mask monsters</b> are alw
 <ul>
 <li>The Ancient One awakens when the <b>last doom space fills</b> (a game effect that awakens it fills the track). Pending rewards/penalties resolve first. If the final doom lands at the same moment as the final Elder Sign, <b>the investigators win</b>.</li>
 <li>On awakening: the current Mythos card is discarded (its lingering effect ends; dice locked on it are freed — dice locked on monsters/adventures are <b>removed from the game</b>). All investigator markers move to the Ancient One and cannot leave. “At Midnight” effects and special doom icons no longer function.</li>
-${c.mod("epicbattle") ? `<li><b>Epic Battle deck:</b> shuffle it and draw the top card, resolving top to bottom — it dictates whether investigators or the Ancient One strike first, plus battle effects. Investigators attack one per turn, advancing the clock after each; at each midnight the Ancient One attacks and you draw the next Epic Battle card. (If the Ancient One awakens at midnight, draw the first card instead of resolving its attack immediately.)</li>` : `<li>Each turn: <b>Attack the Ancient One</b> — roll your pool against its printed combat task; each completion removes 1 doom token (repeat as long as your dice hold out, once per roll). Then <b>advance the clock</b>; each midnight the Ancient One's <b>attack</b> resolves instead of a Mythos card.</li>`}
+${c.mod("epicbattle") ? `<li><b>Epic Battle deck:</b> shuffle it and draw the top card, resolving top to bottom — it dictates whether investigators or the Ancient One strike first, plus battle effects. Investigators attack one per turn, advancing the clock after each; when midnight strikes the round ends — the Ancient One attacks at that point if the investigators struck first — and you draw the next Epic Battle card. (If the Ancient One awakens at midnight, draw the first card instead of resolving its attack immediately.)</li>` : `<li>Each turn: <b>Attack the Ancient One</b> — roll your pool against its printed combat task; each completion removes 1 doom token (repeat as long as your dice hold out, once per roll). Then <b>advance the clock</b>; each midnight the Ancient One's <b>attack</b> resolves instead of a Mythos card.</li>`}
 <li>You may not focus or assist during the battle, but Items, Spells, Clues, allies and abilities all work. Completing the combat task still requires assigning dice.</li>
 <li>A devoured investigator during the battle adds 1 doom and is <b>not replaced</b> (their clock-advance still happens on their turn). All devoured, everyone loses. Remove every doom token — or bank enough Elder Signs — and <b>everyone wins, devoured included</b>.</li>
 ${c.mode === "alaska" && c.has("gc") ? "" : ""}
 </ul>
-<p class="src-line">Base p.11–12 · FAQ p.4–5, p.11${c.mod("epicbattle") ? " · Grave Consequences cards 3/5–5/5" : ""}</p>` },
+<p class="src-line">Base p.11–12 · FAQ p.4–6, p.8${c.mod("epicbattle") ? " · Grave Consequences cards 3/5–5/5" : ""}</p>` },
 
   { id: "devoured", title: "Devoured Investigators & the Doom Track",
     when: () => true,
@@ -560,7 +566,7 @@ ${c.mode === "alaska" && c.has("gc") ? "" : ""}
 <li>The doom track <b>can never hold more tokens than it has spaces</b> — overflow doom (multi-doom effects, devoured investigators during the battle) is discarded. Special doom icons (monster, gate, storm…) trigger when covered during the game, but <b>never during the final battle</b>.</li>
 <li>Doom is only added when an effect says so — never automatically at midnight.</li>
 </ul>
-<p class="src-line">Base p.11 · FAQ p.4, p.11${c.mod("phobia") || c.mod("epitaph") ? " · Grave Consequences cards 2/5–3/5" : ""}</p>` },
+<p class="src-line">Base p.11–12 · FAQ p.4–6, p.8${c.mod("phobia") || c.mod("epitaph") ? " · Grave Consequences cards 2/5–3/5" : ""}</p>` },
 
   /* --- mode-specific deep reference --- */
   { id: "mode-streets", title: "Streets of Arkham: Gates, Events, Skills & Memberships",
@@ -575,7 +581,7 @@ ${c.mode === "alaska" && c.has("gc") ? "" : ""}
 <ul>
 <li>Effects <b>open gates</b>: draw the top Other World card facedown below the Arkham row, place one gate marker of a color on it and the matching marker on an Arkham Adventure without a gate or seal. Investigators there move to the Streets.</li>
 <li>You cannot move to an Arkham Adventure with a gate; you can enter the gated <b>Other World</b> (flipping it faceup ends your Movement phase). Max 3 gates open at once; if no markers remain, a monster appears instead. If markers remain but every adventure is gated/sealed, remove all seals, add 1 doom, and open the gate normally.</li>
-<li><b>Closing:</b> resolving an Other World with a gate closes it — put a <b>seal marker</b> on the matching Arkham Adventure (no new gates there) and return both gate markers. If an effect discards a gate, the linked Other World is discarded too and the adventure is sealed.</li>
+<li><b>Closing:</b> resolving an Other World with a gate closes it — put a <b>seal marker</b> on the matching Arkham Adventure (no new gates there) and return both gate markers. If an effect closes a gate without resolving its Other World, that Other World is discarded and the adventure is sealed.</li>
 </ul>
 <h4>Events, Skills, Memberships</h4>
 <ul>
@@ -590,7 +596,7 @@ ${c.mode === "alaska" && c.has("gc") ? "" : ""}
     html: (c) => `
 <h4>Supplies & days</h4>
 <ul>
-<li>The <b>supply track</b> holds your provisions (the ±10 modifier tokens roll the track over). The Track card punishes an empty larder: <b>at midnight with 0 supplies, every investigator loses 1 stamina</b> (as printed on the Track card).</li>
+<li>The <b>supply track</b> holds your provisions (total = the supply token's modifier + its space — you start with “+10” on “5”, i.e. 15; past “9” or below “0”, swap to the token with the next higher/lower modifier). The Track card punishes an empty larder: <b>at midnight with 0 supplies, every investigator loses 1 stamina</b> (as printed on the Track card).</li>
 <li>The <b>day token</b> advances at every midnight (before other midnight effects), adding the storm markers shown on the new space. End of Day 7: <b>${c.mod("winter") ? "Winter — the investigators lose the game" : "Summer — add 2 doom, reset to Day 7 and add 7 storm markers"}</b>.</li>
 </ul>
 <h4>Storm markers</h4>
@@ -605,7 +611,7 @@ ${c.mode === "alaska" && c.has("gc") ? "" : ""}
 <li><b>Special Adventures</b> can't be discarded and never hold storms/monsters. Completing <b>“Into the Wild”</b> advances to <b>Stage II</b>: discard the Stage I deck, add “Treacherous Ascent,” and draw replacements from Stage II.</li>
 <li>Alaskan Mythos cards are group dilemmas: pick one of two options; you may not pick the bottom option unless you can resolve it fully.</li>
 </ul>
-<p class="src-line">OoI p.3–5 · FAQ p.11 (Mythos options)</p>` },
+<p class="src-line">OoI p.2–5 · FAQ p.11 (Mythos options)</p>` },
 
   { id: "mode-rlyeh", title: "R'lyeh Rising: Dark Waters, the Amulet & the Deep One Legion",
     when: (c) => c.mode === "rlyeh",
@@ -618,7 +624,7 @@ ${c.mode === "alaska" && c.has("gc") ? "" : ""}
 <h4>Stage II: the Amulet of R'lyeh</h4>
 <ul>
 <li>Flip the scenario card. Place all broken amulet tokens you've gained on their spaces; <b>each empty space locks its matching die</b> on the track. Gaining that amulet piece later frees the die. Locked dice there are lost for good if the Ancient One awakens.</li>
-<li>Discard the Stage I deck and Ocean Mythos; use Stage II adventures and the R'lyeh Mythos deck. Add <b>“R'lyeh Risen”</b> faceup (existing Special Adventures stay). Completing <b>“Echoes of the Dream”</b> is the Special-Adventure route to Stage II.</li>
+<li>Discard the Stage I deck and Ocean Mythos; use Stage II adventures and the R'lyeh Mythos deck. Add <b>“R'lyeh Risen”</b> faceup (existing Special Adventures stay). Per the FAQ, completing <b>“Echoes of the Dream”</b> is <b>not</b> directly linked to reaching Stage II (resolved in Stage II, its reward is gained only once).</li>
 </ul>
 <h4>Deep One Legion & missions</h4>
 <ul>
@@ -626,7 +632,7 @@ ${c.mode === "alaska" && c.has("gc") ? "" : ""}
 <li><b>Missions</b> (from the cup) act like monsters but ignore monster-defeating items/spells. A completed mission sits facedown in front of you (not a trophy): fulfill it at the start of your Movement or Clock phase by spending trophies equal to the number on its back to gain its reward.</li>
 <li>Pacific adventures enter facedown; Staged Mythos cards are group dilemmas — either option may be chosen, even one with no effect.</li>
 </ul>
-<p class="src-line">OotD p.3–5 · FAQ p.5 (Stage II), p.10–11</p>` },
+<p class="src-line">OotD p.3–5 · FAQ p.5 (Stage II), p.11</p>` },
 
   { id: "mode-pyramid", title: "Lightless Pyramid: the Expedition, Relics, Chambers & the Dark Pharaoh",
     when: (c) => c.mode === "pyramid",
@@ -649,7 +655,51 @@ ${c.mode === "alaska" && c.has("gc") ? "" : ""}
 <li>The new doom icon draws a <b>Dark Pharaoh special adventure</b> into play facedown. They can't hold markers and aren't trophies; resolved ones go to their own discard, which reshuffles when a fifth draw is needed. If one must be drawn while <b>all four are already in play, the doom track fills and the Ancient One awakens immediately</b>.</li>
 <li>Egyptian adventures enter facedown; replacements come from the deck matching the faceup entrance side (Cairo → Stage I, Dashur → Stage II). Mythos cards are group dilemmas — either option may be chosen, even with no effect.</li>
 </ul>
-<p class="src-line">OotP p.3–5 · FAQ p.9 (Relics/locked dice), p.11–12</p>` },
+<p class="src-line">OotP p.3–5 · FAQ p.8 (Relics), p.9 (Father Mateo), p.11–12</p>` },
+
+  /* --- expansion content used outside its own game mode --- */
+  { id: "out-of-mode", title: "Expansion Content Outside Its Own Mode",
+    when: (c) => (c.has("goa") && c.mode !== "streets") || (c.has("ooi") && c.mode !== "alaska") || (c.has("ootd") && c.mode !== "rlyeh") || (c.has("ootp") && c.mode !== "pyramid"),
+    html: (c) => {
+      const parts = [], src = [];
+      if (c.has("goa") && c.mode !== "streets") {
+        parts.push(`<h4>Gates of Arkham</h4>
+<ul>
+<li><b>Gate doom icon</b> (its Ancient Ones): outside the Streets of Arkham, each time a doom token lands on it, <b>each investigator loses 1 sanity</b>.</li>
+<li><b>Skills:</b> a Skill card you draw goes faceup in your play area and stays until its own text says it expires; only you can use it.</li>
+</ul>`);
+        src.push("GoA p.4–5");
+      }
+      if (c.has("ooi") && c.mode !== "alaska") {
+        parts.push(`<h4>Omens of Ice</h4>
+<ul>
+<li>Only its Alaskan Adventures, Alaskan Mythos cards, Track card and entrance card are Alaska-only — the rest, including the <b>storm markers</b>, can be used in any mode.</li>
+<li><b>Storm doom icon</b> (its Ancient Ones): each time a doom token lands on it, place <b>3 storm markers</b> on adventures — drawn unseen from the facedown pile and placed facedown one at a time (max 4 per adventure; never on Other World or Special Adventure cards; not on your own adventure during your Resolution phase unless every other adventure holds 4; if none are left, none are placed).</li>
+<li>At the start of your Resolution phase, flip all storm markers on your adventure and resolve their penalties in any order (blanks do nothing), then return them to the pile at random. At midnight, add <b>1 doom token per adventure holding 4 storm markers</b>. Storms on a discarded adventure return to the pile.</li>
+<li><b>Midnight icon</b> in a monster's task list (some of its monsters): at midnight, resolve the “At Midnight” effect on the back of that marker.</li>
+</ul>`);
+        src.push("OoI p.5 · FAQ p.12");
+      }
+      if (c.has("ootd") && c.mode !== "rlyeh") {
+        parts.push(`<h4>Omens of the Deep</h4>
+<ul>
+<li>Only its Pacific Adventures, Staged Mythos cards, Scenario card and entrance card are R'lyeh Rising-only — the rest can be used in any mode.</li>
+<li><b>Deep One Legion doom icon</b> (its Ancient Ones): each time a doom token lands on it, a <b>Deep One Legion</b> appears from the Deep One Legion stockpile (never the cup; if the stockpile is empty, nothing happens). Both sides of a Legion marker are open information. Defeat one and pay the cost on its back, or it <b>reappears</b> on another adventure; discarded Legions return to the stockpile.</li>
+<li><b>Missions</b> go in the monster cup and appear and are completed like monsters, but items and spells that defeat or discard monsters don't affect them. A completed mission sits facedown in front of you and is not a trophy: at the start of your Movement or Clock phase, spend trophies equal to the number on its back, return it to the box and gain its reward.</li>
+</ul>`);
+        src.push("OotD p.2–6");
+      }
+      if (c.has("ootp") && c.mode !== "pyramid") {
+        parts.push(`<h4>Omens of the Pharaoh</h4>
+<ul>
+<li>Only its Egyptian Adventures, Mythos cards, the Expedition side of the scenario sheet and the Cairo/Dashur entrance card are Lightless Pyramid-only; Relics come into other modes through <b>The Exhibit</b>.</li>
+<li><b>Dark Pharaoh doom icon</b> (its Ancient Ones): each time a doom token lands on it, draw a <b>Dark Pharaoh special adventure</b> and put it into play facedown — if all four are already in play, fill the doom track and the Ancient One awakens immediately. These cards can't hold markers or tokens and are never trophies; resolved ones go to their own discard pile, which is shuffled to draw from once all four have been drawn or discarded.</li>
+<li>The <b>Sand Dweller</b> monster has a midnight icon in its task list: at midnight, resolve the “At Midnight” effect on the back of its marker.</li>
+</ul>`);
+        src.push("OotP p.2, p.4–5");
+      }
+      return parts.join("\n") + `\n<p class="src-line">${src.join(" · ")}</p>`;
+    } },
 
   { id: "rulings", title: "Rulings Worth Remembering (FAQ v2.0)",
     when: () => true,
@@ -664,10 +714,11 @@ ${c.mode === "alaska" && c.has("gc") ? "" : ""}
 <li>First Aid at the entrance heals 1 stamina <b>or</b> 1 sanity for free — the sheet is right, the old rulebook text isn't.</li>
 <li><b>Hastur:</b> “X” in his battle task = monsters in play when the last doom token was added (min 1).</li>
 <li><b>Yig</b> loses you an Elder Sign whenever an investigator defeats any “Cultist” monster — but not when a spell or item does the defeating.</li>
-${c.has("uf") ? "<li><b>Shub-Niggurath</b> adds a one-terror task to every monster marker. <b>Shudde M'ell</b> frees locked dice when his ability discards the adventure locking them; “Fresh Start” refreshes to 6 adventures but doesn't end his game.</li>" : ""}
+<li><b>Shub-Niggurath</b> adds a one-terror task to every monster marker.</li>
+${c.has("uf") ? "<li><b>Shudde M'ell</b> frees locked dice when his ability discards the adventure locking them; “Fresh Start” refreshes to 6 adventures but doesn't end his game.</li>" : ""}
 ${c.mode === "museum" ? "<li><b>The Stars Align…Above an Open Door</b> is the only Mythos card whose effect outlives midnight (its extra Adventure card stays until completed).</li>" : ""}
 </ul>
-<p class="src-line">FAQ p.5–12</p>` },
+<p class="src-line">FAQ p.2, p.4–6, p.9–11</p>` },
 
   { id: "roster", title: "Ancient One Roster",
     when: () => true,
@@ -676,12 +727,12 @@ ${c.mode === "museum" ? "<li><b>The Stars Align…Above an Open Door</b> is the 
       rows.push(["base", "Azathoth · Cthulhu · Hastur · Ithaqua · Nyarlathotep · Shub-Niggurath · Yig · Yog-Sothoth", "The eight originals. Nyarlathotep brings the mask monsters; Cthulhu's attack reduces max sanity/stamina (errata'd wording in FAQ)."]);
       if (c.has("uf")) rows.push(["uf", "4 new Ancient Ones, including Abhoth and Shudde M'ell", "Abhoth spawns his Children from a stockpile next to his card; Shudde M'ell's World Cracking discards failed adventures (freeing their locked dice)."]);
       if (c.has("goa")) rows.push(["goa", "Yibb-Tstll (easy) · Ghatanothoa (average) · Atlach-Nacha (hard) · Yog-Sothoth, Lurker at the Threshold (insane)", "Each has the gate doom icon: doom landing on it opens a gate in Streets of Arkham — in any other mode, each investigator loses 1 sanity instead."]);
-      if (c.has("ooi")) rows.push(["ooi", "Rhan-Tegoth (average) · Rlim-Shaikorth (hard) · Ithaqua, alt (insane)", "The Alaska Expedition's dedicated trio — the mode's setup chooses among these."]);
+      if (c.has("ooi")) rows.push(["ooi", "Rhan-Tegoth (average) · Rlim-Shaikorth (hard) · Ithaqua, alt (insane)", "Each has the storm doom icon (doom landing on it places 3 storm markers). The Alaska Expedition's dedicated trio — the mode's setup chooses among these."]);
       if (c.has("ootd")) rows.push(["ootd", "Hydra (average) · Dagon (hard) · Cthulhu, alt (insane)", "Each has the Deep One Legion doom icon."]);
       if (c.has("ootp")) rows.push(["ootp", "Haunter of the Dark (average) · Nephren-Ka (hard) · Nyarlathotep, alt (insane)", "Each has the Dark Pharaoh doom icon; the alt Nyarlathotep has his own mask-monster setup."]);
       const trs = rows.map(r => `<tr><td class="tag ${ES.expMeta[r[0]].cls}">${ES.expMeta[r[0]].name}</td><td><b>${r[1]}</b></td><td>${r[2]}</td></tr>`).join("");
       return `<div class="twrap"><table>${trs}</table></div>
-<p class="src-line">Base p.4 · UF p.1 · GoA p.6 · OoI p.6 · OotD p.6 · OotP p.6</p>`;
+<p class="src-line">Base p.3–5 · FAQ p.4, p.6 · UF p.1–2, p.4 · GoA p.5–6 · OoI p.2, p.5–6 · OotD p.5–6 · OotP p.2–4, p.6</p>`;
     } }
 ];
 
@@ -705,21 +756,32 @@ ES.teach = {
 <p>Your tools: <b>Clue tokens</b> reroll dice; <b>Common and Unique Items</b> add the stronger yellow and red dice; <b>Spells</b> freeze a good result for later; <b>focusing</b> (or a friend on the same card assisting) saves one die from a bad roll. Choose Adventures your pool can actually beat — the rewards tell you what's worth the risk.</p>` },
 
     { h: "Unseen Forces — blessings and curses", when: (c) => c.has("uf") && c.mode === "museum", body: (c) => `
-<p>The museum entrance is now <b>four Entrance cards</b> — heal at one, shop at another, and seek a <b>Blessing</b> at the Chapel: Blessed investigators roll an extra white die every adventure. Get <b>Cursed</b> and the black die rides along instead, eating matching results. Some game effects can even close an entrance for a while.${c.mod("master") ? " And we've shuffled the red-bordered <b>Master Mythos</b> cards into the deck — the midnights will be crueler than usual." : ""}</p>` },
+<p>The museum entrance is now <b>four Entrance cards</b>, each its own place with its own ability — we start at the Souvenir Shop, and we seek a <b>Blessing</b> at the Chapel: Blessed investigators roll an extra white die every adventure. Get <b>Cursed</b> and the black die rides along instead, eating matching results. Some game effects can even close an entrance.${c.mod("master") ? " And we've shuffled the red-bordered <b>Master Mythos</b> cards into the deck — the midnights will be crueler than usual." : ""}</p>` },
 
     { h: "Rewards, penalties & trophies", body: (c) => `
 <p>Every Adventure card shows its price and its prize: fail and take the red penalties (sanity, stamina, doom…); succeed and take the green — <b>items, allies, Clues, and the Elder Signs we're here for</b>. Resolved Adventures and slain monsters become <b>trophies</b> you spend at the entrance for healing and gear. Monsters that appear squat on Adventure cards as extra tasks — someone has to go be the hero.</p>
-${c.mod("exhibit") ? "<p>This game also has <b>the Exhibit</b>: spend trophies at the entrance for <b>Relic</b> cards — the best gear in the game, able to buy back a die you already lost. The price: the mask monsters and the Dark Pharaoh's adventures are loose in the museum.</p>" : ""}` },
+${c.mod("exhibit") ? "<p>This game also has <b>the Exhibit</b>: spend trophies at the entrance for <b>Relic</b> cards — the best gear in the game, able to buy back a die you already lost. The price: the mask monsters and the Dark Pharaoh's adventures join the game.</p>" : ""}` },
 
     { h: "Doom, midnight & the Ancient One", body: (c) => `
 <p>Mythos cards add doom, spawn monsters, and curse the room${c.mod("expert") ? " — and with the <b>Expert Mythos</b> variant, resolving a watermarked option costs an extra doom token on top" : ""}. If the Doom track ever fills, the Ancient One <b>awakens</b>: every investigator is dragged into the final battle, rolling against its combat task to strip doom tokens away${c.mod("epicbattle") ? " — with the Epic Battle deck directing each round of the fight" : ""}. It's winnable, barely. Better plan: don't let it wake up.</p>
-<p>If your <b>sanity or stamina</b> hits zero, you're devoured — new investigator, one doom token to the enemy${c.mod("phobia") ? " (with the Phobia deck, a sanity break gives you a permanent Phobia instead — until the fourth one)" : ""}${c.mod("epitaph") ? ". The fallen draw an <b>Epitaph</b> and leave a gravestone beside the board — our little cemetery grows" : ""}.</p>` },
+<p>If your <b>sanity or stamina</b> hits zero, you're devoured — new investigator, one doom token to the enemy${c.mod("phobia") ? " (with the Phobia deck, a sanity break instead gives you a permanent Phobia — the doom token still lands — until the fourth one)" : ""}${c.mod("epitaph") ? ". The fallen draw an <b>Epitaph</b> and leave a gravestone beside the board — our little cemetery grows" : ""}.</p>` },
 
     { h: "This mode's twist", when: (c) => c.mode !== "museum", body: (c) => {
-      if (c.mode === "streets") return `<p><b>Streets of Arkham:</b> half the Adventures are facedown — walking onto one flips it, for better or worse. Success can open <b>gates</b> to Other Worlds that must be entered and sealed, <b>Events</b> trigger where you stand, and joining the <b>Sheldon Gang or the Lodge</b> auto-completes their tasks. The Streets card itself lets you pay 2 trophies to fix the board.</p>`;
-      if (c.mode === "alaska") return `<p><b>Alaska Expedition:</b> we manage <b>supplies</b> (zero at midnight hurts everyone) and a <b>day track</b> — ${c.mod("winter") ? "it's Winter: Day 7 ends and we lose" : "Summer forgives one overtime, at a price"}. <b>Storms</b> pile onto Adventures and punish whoever resolves them; four storms on a card feeds doom. The trek is staged: finish “Into the Wild” to reach Stage II and the endgame.</p>`;
-      if (c.mode === "rlyeh") return `<p><b>R'lyeh Rising:</b> Stage I is the voyage — manage the <b>Dark Waters track</b> and the <b>Deep One Legion</b>: four Legions in play <b>sink our ship</b>. Stage II reveals the broken <b>Amulet of R'lyeh</b>: every piece we haven't recovered locks one of our dice for the rest of the game. Collect amulet pieces like your dice depend on it, because they do.</p>`;
-      return `<p><b>Lightless Pyramid:</b> the entrance flips between <b>Cairo</b> (supplies, easier cards) and <b>Dashur</b> (the Elder Signs) — flipping costs clock time. <b>Relics</b> are the best items in the game: they can re-buy a die you already lost. <b>Hidden Chambers</b> demand an unlock roll before you may even enter, and the <b>Dark Pharaoh</b> adventures stack up: if a fifth must appear, the Ancient One wakes instantly.${c.mod("expert") ? " Expert Mythos is on: watermarked Mythos options cost an extra doom." : ""}</p>`;
+      if (c.mode === "streets") return `<p><b>Streets of Arkham:</b> half the Adventures are facedown — walking onto one flips it, for better or worse. Penalties, doom and Mythos cards open <b>gates</b> to Other Worlds that must be entered and sealed, <b>Events</b> trigger where you stand, and joining the <b>Sheldon Gang or the Lodge</b> auto-completes their tasks. The Streets card itself lets you pay 2 trophies to fix the board.</p>`;
+      if (c.mode === "alaska") return `<p><b>Alaska Expedition:</b> we manage <b>supplies</b> (zero at midnight hurts everyone) and a <b>day track</b> — ${c.mod("winter") ? "it's Winter: Day 7 ends and we lose" : "Summer lets us play on past Day 7 — at a price in doom and storms every extra day"}. <b>Storms</b> pile onto Adventures and punish whoever resolves them; four storms on a card feeds doom. The trek is staged: finish “Into the Wild” to reach Stage II and the endgame.</p>`;
+      if (c.mode === "rlyeh") return `<p><b>R'lyeh Rising:</b> Stage I is the voyage — manage the <b>Dark Waters track</b> and the <b>Deep One Legion</b>: four Legions in play <b>sink our ship</b>. Stage II reveals the broken <b>Amulet of R'lyeh</b>: every piece we haven't recovered locks one of our dice until we find it. Collect amulet pieces like your dice depend on it, because they do.</p>`;
+      return `<p><b>Lightless Pyramid:</b> the entrance flips between <b>Cairo</b> (where we gather supplies) and <b>Dashur</b> (the Elder Signs) — flipping costs clock time. <b>Relics</b> are the best items in the game: they can re-buy a die you already lost. <b>Hidden Chambers</b> demand an unlock roll before you may even enter, and the <b>Dark Pharaoh</b> adventures stack up: if a fifth must appear, the Ancient One wakes instantly.${c.mod("expert") ? " Expert Mythos is on: watermarked Mythos options cost an extra doom." : ""}</p>`;
+    }},
+
+    { h: "Extras from our other expansions",
+      when: (c) => (c.has("goa") && c.mode !== "streets") || (c.has("ooi") && c.mode !== "alaska") || (c.has("ootd") && c.mode !== "rlyeh") || (c.has("ootp") && c.mode !== "pyramid"),
+      body: (c) => {
+      const bits = [];
+      if (c.has("goa") && c.mode !== "streets") bits.push(`<p><b>Gates of Arkham:</b> its Ancient Ones have a gate icon on the doom track — outside the Streets of Arkham, when doom lands on it, each of us loses 1 sanity. If you draw a <b>Skill</b> card, it stays faceup in front of you until its own text says it expires, and only you can use it.</p>`);
+      if (c.has("ooi") && c.mode !== "alaska") bits.push(`<p><b>Omens of Ice:</b> its Ancient Ones have a storm icon on the doom track — when doom lands on it, we place 3 facedown <b>storm markers</b> on adventures, up to 4 per card. Whoever starts their Resolution phase on a stormy adventure flips those storms and suffers whatever they show, and at midnight every adventure holding 4 storms adds a doom token. Some of its monsters carry a midnight icon, meaning an “At Midnight” effect waits on the back of the marker.</p>`);
+      if (c.has("ootd") && c.mode !== "rlyeh") bits.push(`<p><b>Omens of the Deep:</b> its Ancient Ones have a Deep One Legion icon on the doom track — when doom lands on it, a <b>Deep One Legion</b> appears from its own stockpile, and when we beat one we pay the cost on its back or it pops up on another adventure. <b>Missions</b> come out of the monster cup like monsters, but items and spells that defeat or discard monsters can't touch them. Finish one and it waits facedown in front of you until you spend the trophies shown on its back, at the start of your Movement or Clock phase, to claim its reward.</p>`);
+      if (c.has("ootp") && c.mode !== "pyramid") bits.push(`<p><b>Omens of the Pharaoh:</b> its Ancient Ones have a Dark Pharaoh icon on the doom track — when doom lands on it, a <b>Dark Pharaoh</b> special adventure enters play facedown, and if all four are already out, the Ancient One awakens on the spot. Its Sand Dweller monster carries a midnight icon, so an “At Midnight” effect waits on the back of that marker.</p>`);
+      return bits.join("");
     }},
 
     { h: "Don't worry about these yet", body: (c) => {

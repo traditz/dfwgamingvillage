@@ -26,12 +26,14 @@
     return n;
   };
   const resolve = (v, c) => (typeof v === "function" ? v(c) : v);
+  // a module's requires is one set id or an array meaning "any of these"
+  const modAvailable = (mod) => [].concat(mod.requires).some(id => state.exps.has(id));
 
   function normalize() {
     const ao = EH.ancientOnes.find(a => a.id === state.ao);
     if (ao && !state.exps.has(ao.set)) state.ao = null;
     for (const mod of EH.modules) {
-      if (state.mods.has(mod.id) && !state.exps.has(mod.requires)) state.mods.delete(mod.id);
+      if (state.mods.has(mod.id) && !modAvailable(mod)) state.mods.delete(mod.id);
     }
     // campaign implies personal stories; choose-prelude and no-prelude are exclusive
     if (state.mods.has("campaign")) state.mods.add("stories");
@@ -89,7 +91,7 @@
     box.innerHTML = "";
     let shown = 0;
     for (const mod of EH.modules) {
-      if (!state.exps.has(mod.requires)) continue;
+      if (!modAvailable(mod)) continue;
       shown++;
       const on = state.mods.has(mod.id);
       const b = el("button", "mod" + (on ? " on" : ""));

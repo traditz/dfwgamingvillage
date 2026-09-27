@@ -48,8 +48,8 @@ CC.phases = [
         d: (c) => "<ul>" +
           (c.has("lairs") ? "<li><b>Lairs & Lost Chambers:</b> first shuffle its 12 new square tiles into your existing tiles by their backs (10 Depths, 2 “safe”). All Depths tiles are used. <i>(First game: shuffle the new tiles into the top half of the stack to see plenty of them.)</i></li>" : "") +
           "<li>Separate the square tiles by their backs. Shuffle the <b>Depths tiles</b> into a face-down stack in a Bank area next to the Clank! board.</li>" +
-          "<li>Shuffle the <b>“safe” tiles</b>; return <b>two at random</b> to the box unseen and place the remaining <b>four</b> on top of the Depths stack.</li></ul>",
-        src: (c) => c.has("lairs") ? "Core p.4 · Lairs p.4" : "Core p.4" },
+          "<li>Shuffle the <b>“safe” tiles</b>; return <b>" + (c.has("lairs") ? "four" : "two") + " at random</b> to the box unseen and place the remaining <b>four</b> on top of the Depths stack.</li></ul>",
+        src: (c) => c.has("lairs") ? "Core p.4 · Lairs p.3–4" : "Core p.4" },
       { when: (c) => c.has("uw"), exp: "uw",
         t: "Build the tile stacks — Underworld",
         d: (c) => "<ul>" +
@@ -63,7 +63,7 @@ CC.phases = [
         t: "Stock the Bank",
         d: (c) => "<ul><li>Add the <b>Gold</b> (1s, 5s, 10s) and <b>Lockpicks</b> (not limited — substitute if you run out), the five white <b>Ghost cubes</b>, and the <b>Dragon bag</b> with the 24 black dragon cubes inside.</li>" +
           "<li>Stack the <b>seven Artifacts</b> face up in order of value: 5-point on top, 20-point on the bottom." +
-          (c.p >= 5 ? " <b>Adventuring Party:</b> add its 10/15/20/25-point Artifacts (not the 30) to the stack, still in increasing order, each on top of a Catacombs Artifact of the same value.</li>" : "</li>") +
+          (c.p >= 5 ? " <b>Adventuring Party:</b> add its 10/15/20/25-point Artifacts (not the 30) to the stack, still in increasing order, each on top of any Catacombs Artifact of the same value.</li>" : "</li>") +
           "<li>Separate <b>major secrets, minor secrets, and prisoners</b>; shuffle each kind face down." + (c.has("uw") ? " Shuffle the <b>Underworld</b> secrets and prisoners into their matching pools." : "") + (c.p >= 5 ? " Add the Adventuring Party minor secrets and extra Gold and Mastery tokens." : "") + "</li>" +
           (c.has("uw")
             ? "<li>Add the <b>undercoins</b> and the <b>harpy and ladder tokens</b>. Use the <b>Underworld Market Board</b> instead of the Catacombs one: the <b>River Lamp</b> joins the regular items on the top row; the five <b>Underworld market items</b> go on the bottom row.</li>"
@@ -93,7 +93,7 @@ CC.phases = [
           "<li><b>Front side:</b> put one random face-up <b>Prisoner</b> from the Bank in the marked room (not yet freed — no immediate effects). <b>Back side:</b> the Monkey Shrine moves to the Underworld — place the three Monkey Idols there and cover the Catacombs Monkey Shrine with the replacement token.</li>" +
           "<li><i>First game suggestion:</i> each player takes one <b>undercoin</b> from the Bank.</li></ul>",
         src: "Underworld p.5" },
-      { when: () => true, exp: (c) => c.has("uw") || c.has("lairs") ? "mod" : "base",
+      { when: () => true, exp: (c) => c.has("uw") ? "uw" : c.has("lairs") ? "lairs" : "base",
         t: "Reserve, Dungeon Deck & Dungeon Row",
         d: (c) => "<ul><li>Create the <b>Reserve</b>: the Goblin card plus three stacks — Mercenary, Explore, Secret Tome" + (c.p >= 5 ? " (add the four extra copies of each from Adventuring Party)" : "") + "." + (c.has("uw") ? " Add the <b>Underworld Guardian</b> card next to the Goblin as a reference." : "") + "</li>" +
           ((c.has("lairs") || c.has("uw") || c.p >= 5) ? "<li>Shuffle into the <b>Dungeon Deck</b>: " + [c.has("lairs") ? "the 50 Lairs & Lost Chambers cards" : "", c.has("uw") ? "the 50 Underworld cards" : "", c.p >= 5 ? "the 35 Adventuring Party cards" : ""].filter(Boolean).join(", ") + ".</li>" : "") +
@@ -158,7 +158,7 @@ CC.reference = [
       "<li><b>Take an Artifact</b> (in its room, any point of your turn): you can never hold two (a Backpack allows one more). Taking one moves the <b>Dragon marker up the Rage Track</b>. You're stuck with the one you take!</li>" +
       "<li><b>Pick a Chest / Library / Prison</b> (spend a Lockpick onto the feature): Chest → random <b>major secret</b>; Library → a <b>Secret Tome</b> from the Reserve free into your discard pile; Prison → free <b>two random Prisoners</b> (kept face up for scoring; their “immediate” effects trigger).</li>" +
       "<li><b>Wayshrine</b> (special action): place a cube from your supply on an empty space; gain 1 Gold per Wayshrine you've marked so far. One mark per Wayshrine" + (c.p >= 5 ? "; each Wayshrine holds max four cubes — a fifth or sixth player arriving late may be shut out" : "") + ". (Wayshrine cubes never become Clank!.)</li></ul>",
-    src: (c) => c.p >= 5 ? "Core p.7–8, p.11, p.15" : "Core p.7–8, p.11"
+    src: (c) => (c.p >= 5 ? "Core p.7–8, p.11, p.15" : "Core p.7–8, p.11") + (c.has("uw") ? " · Underworld p.9" : "")
   },
   {
     title: "Discovering Tiles & Tile Features",
@@ -172,7 +172,7 @@ CC.reference = [
       "<li><b>Haunted tiles</b> (4 of the 22 Depths tiles): when added, put a <b>Ghost cube</b> from the Bank into the Clank! area.</li>" +
       "<li><b>Portals:</b> a tunnel into a portal exits from <b>any other portal</b>; the whole portal move costs one Boot.</li>" +
       "<li><b>Room rewards</b> (minor secret, Monkey Idol, Gold, healing): once per room per turn, on entry.</li></ul>",
-    src: (c) => c.p >= 5 ? "Core p.9–11, p.15" : "Core p.9–11"
+    src: (c) => c.p >= 5 ? "Core p.9–11, p.15 · Adventuring Party p.3" : "Core p.9–11"
   },
   {
     title: "Clank!, Dragon Attacks, Health",
@@ -180,20 +180,20 @@ CC.reference = [
     html: (c) => "<ul><li><b>End of turn:</b> (1) discard your play area and draw five; (2) refill the Dungeon Row to six; (3) if any <b>new</b> card shows the Dragon Attack symbol, the dragon attacks <b>once</b>.</li>" +
       "<li><b>Dragon Attack:</b> all cubes in the Clank! area go into the Dragon bag; shake and draw cubes equal to the Rage Track number (+1 per <b>Danger</b> card in the Row). Black cubes are set aside in the Bank; your colored cubes are <b>damage to you</b>; undrawn cubes stay in the bag for later attacks.</li>" +
       "<li><b>Ghost cubes:</b> when drawn, <b>every</b> player takes 1 damage; after the attack the Ghost cubes return to the Clank! area (they'll be in the bag again next time).</li>" +
-      "<li>The <b>Rage Track</b> advances every time an Artifact is picked up (and from certain tokens" + (c.has("uw") ? ", e.g. Dragon Egg, Soul Elixir, Judgement" : ", e.g. the Dragon Egg minor secret") + ").</li>" +
+      "<li>The <b>Rage Track</b> advances every time an Artifact is picked up (and from certain tokens" + (c.has("uw") ? ", e.g. Dragon Egg, Soul Elixir" : ", e.g. the Dragon Egg minor secret") + ").</li>" +
       "<li><b>Health:</b> damage cubes go on your Health Meter. You can't voluntarily take damage with an empty supply or if it would fill your meter. A full meter <b>knocks you out</b>. Healing returns a cube of yours to your supply.</li>" +
       "<li>If the Dragon bag is <b>empty after an attack</b>, or the Dungeon Deck can't refill the Row, the game ends immediately — remaining players are knocked out.</li></ul>",
-    src: () => "Core p.12"
+    src: (c) => "Core p.11–12" + (c.has("uw") ? " · Underworld p.12" : "")
   },
   {
     title: "Game End & Scoring",
     when: () => true,
     html: (c) => "<ul><li>The game ends when <b>all players have escaped or been knocked out</b>.</li>" +
       "<li><b>Escape:</b> reach the <b>Crypt</b> carrying an Artifact — you can't return empty-handed. Take a <b>Mastery token</b> (+20 points).</li>" +
-      "<li><b>Knocked out:</b> meter full. With no Artifact, or with your pawn in the <b>Depths</b>" + (c.has("uw") ? " or the Underworld" : "") + ", you score <b>0</b>. (The Depths are the 22 darker tiles plus the top half of the starting tile.)</li>" +
+      "<li><b>Knocked out:</b> meter full. With no Artifact, or with your pawn in the <b>Depths</b>" + (c.has("uw") ? " or the Underworld" : "") + ", you score <b>0</b>. (The Depths are the darker tiles — 22 in the base game — plus the top half of the starting tile.)</li>" +
       "<li>Escaped/knocked-out players stop playing; on each of their turns they put the Clank! area cubes in the bag and draw exactly <b>four</b> cubes (<b>six</b> in a 2-player game), ignoring the Rage Track and Danger.</li>" +
       "<li><b>Score:</b> Artifact value + all other tokens (Mastery, secrets, prisoners, Monkey Idols…) + Gold + points on your cards (deck, hand and discard pile). Most points wins; ties go to the most valuable Artifact.</li></ul>",
-    src: () => "Core p.14"
+    src: (c) => "Core p.14" + (c.has("uw") ? " · Underworld p.6" : "")
   },
   {
     title: "Token Quick Reference",
@@ -213,7 +213,7 @@ CC.reference = [
       "<li><b>Underworld chutes</b> (unlettered): descend to <b>any</b> ladder room — one-way, down only.</li>" +
       "<li>The Underworld starting tile's <b>return portal</b> is one-way <b>out</b>: exit to any other portal; you can never enter through it.</li>" +
       "<li><b>Tolls:</b> starting your turn in the Underworld costs <b>1 undercoin</b> (or +2 Clank! if you can't pay — you can't choose the Clank! if you have a coin). Toll-booth tunnels cost 1 undercoin, no Clank! option (teleports ignore them).</li>" +
-      "<li><b>Undercoins</b> work exactly like Gold (spend for market items, 1 pt each) and are earned in Underworld rooms.</li></ul>",
+      "<li><b>Undercoins</b> work exactly like Gold (spend for market items, 1 pt each) and are earned from undercoin rooms (once per room each turn) and some cards.</li></ul>",
     src: () => "Underworld p.6–7"
   },
   {
@@ -226,10 +226,11 @@ CC.reference = [
       "<li><b>Fate rooms:</b> first visit, draw three <b>fate cards</b>, keep one (max one per game; Gauntlets of Destiny allows two). Most stay hidden until scoring.</li>" +
       "<li><b>Harpies:</b> entering a harpy room means fight (2 Swords) or take 1 damage (once). Defeating one pays 1 undercoin per harpy trophy you own (including it).</li>" +
       "<li><b>Underground lakes:</b> on entry (once per turn), trash a card in your play area or discard pile.</li>" +
+      "<li><b>More haunted tiles, same five Ghosts:</b> Underworld adds haunted Depths and Underworld tiles, but there are still only five Ghost cubes — if all five are already out of the Bank when you discover a haunted tile, you don't add another.</li>" +
       (c.mod("fixeddim") ? "<li><b>Fixed Dimensions:</b> the dungeon may not exceed the agreed grid (5×5 or 6×6); tiles must be oriented to respect it, even if that forces damage.</li>" : "") +
       (c.mod("mercy") ? "<li><b>Mercy:</b> if you're completely trapped (no adjacent room, no placeable tile), rotate your current tile to any orientation that frees you.</li>" : "") +
       "<li><b>With Lairs & Lost Chambers:</b> the Guardian (marker + card) and harpies count as <b>trophies</b>; fate rooms are <b>lost chambers</b>; the Guardian's room is <b>not</b> a lair.</li></ul>",
-    src: () => "Underworld p.8–10"
+    src: () => "Underworld p.2, p.8–10"
   },
   {
     title: "Lairs & Lost Chambers",
@@ -240,7 +241,7 @@ CC.reference = [
       "<li><b>Linked one-way tunnels:</b> your entry direction decides which of the pair you use.</li>" +
       "<li><b>Pit traps:</b> each entry (per room, per turn): <b>Fall in</b> (1 damage, no more Boots this turn) or <b>Evade</b> (trash a non-Stumble card <b>from your hand</b>).</li>" +
       "<li><b>Lost chambers</b> (Wayshrine-style cube marking): <b>Aegis Shrine</b> (return your cube to cancel Ghost damage), <b>Bizarre Bazaar</b> (four one-off stalls, 3 Gold or trash a trophy each), <b>Altar of the Haunted</b> (trash a trophy: 2 Gold + fetch an artifact from anywhere), <b>Temple of Gold</b> (donate Gold from any Wayshrine for healing/Lockpick/major secret/artifact fetch — once per game), <b>Umbrok Vessna's Hoard</b> (5 Gold and +2 Clank! on entry; taking its artifact/chest teleports you to another room on the tile).</li>" +
-      "<li><b>Lairs:</b> <b>Living Statues</b> (fight in the lair; you must teleport to another lair/lost chamber after each kill), <b>Medusa</b> (fight or take 2 damage on entry; her trophy lets you ignore tunnel monsters), <b>Sphinx</b> (4 Swords <i>or</i> 7 Skill).</li></ul>",
+      "<li><b>Lairs:</b> <b>Living Statues</b> (fight in the lair; you must teleport to another lair/lost chamber after each kill), <b>Medusa</b> (fight her — you must play a Secret Tome that turn to do so — or take 2 damage on entry; her trophy lets you ignore tunnel monsters), <b>Sphinx</b> (4 Swords <i>or</i> 7 Skill).</li></ul>",
     src: () => "Lairs p.4–8"
   },
   {
@@ -252,7 +253,7 @@ CC.reference = [
         "<li>Wayshrines hold only <b>four cubes</b> — late arrivals can be shut out.</li>" +
         "<li>The <b>side board</b> tracks the health of the fifth and sixth players.</li>" +
         "<li>If the Ape Lord Phantasm is defeated, a Golden Monkey Bot prisoner can't be “returned” to the Monkey Shrine (it was never there).</li>" : "") +
-      (c.mod("chars") ? "<li><b>Characters</b> (any player count): six thieves — e.g. Agnet (conscription tokens put companions on top of your deck), D'allan (score “Finds”: dragon egg, artifact, crown, monkey idol) — each with a board and a 10-card custom deck holding three unique cards. Play characters against characters only; mixing with Legacy character packs is allowed.</li>" : "") +
+      (c.mod("chars") ? "<li><b>Characters</b> (any player count): six thieves — e.g. Agnet (conscription tokens put companions on top of your deck), D'allan (his first dragon egg, artifact, crown and monkey idol become “Finds” that power three of his cards) — each with a board and a 10-card custom deck holding three unique cards. Play characters against characters only; mixing with Legacy character packs is allowed.</li>" : "") +
       "</ul>",
     src: (c) => c.mod("chars") ? "Core p.15 · Adventuring Party p.2–7" : "Core p.15 · Adventuring Party p.2–3"
   }
@@ -267,7 +268,7 @@ CC.teach = {
     {
       h: "The hook — and how you win",
       body: () => "<p>We're thieves sneaking into a dragon's catacombs to steal an <b>Artifact</b> and get out alive. Two goals: grab an Artifact and escape back to the <b>Crypt</b> where we started — and score more than everyone else. Points come from your Artifact, treasure tokens, Gold, and the cards you buy. But greed is loud: every bit of noise you make — <b>Clank!</b> — becomes cubes with your color on them, and when the dragon attacks, cubes get pulled from a bag. Yours hurt <b>you</b>.</p>" +
-        "<p>One hard rule to respect: if you're knocked out before escaping — or knocked out deep in the dungeon without an Artifact — you score <b>zero</b>. Escape artists beat corpses every time.</p>"
+        "<p>One hard rule to respect: if you're knocked out while you're down in the <b>Depths</b>, or without an Artifact, you score <b>zero</b>. Escape artists beat corpses every time.</p>"
     },
     {
       h: "The shape of a turn",
@@ -275,26 +276,27 @@ CC.teach = {
     },
     {
       h: "The dungeon builds itself",
-      body: () => "<p>Unlike other Clank! games, there's no fixed map — the catacombs are a stack of <b>tiles</b>. Walk off the edge of the known dungeon and you flip the next tile and choose how to rotate it. Tunnels can demand extra Boots, bite you with <b>monsters</b> (a Sword each cancels a bite), or be <b>locked</b> — spend a Lockpick and it's open for everyone, forever. The first four tiles are safe-ish; everything after is the <b>Depths</b>, where being knocked out means scoring nothing.</p>" +
-        "<p>Rooms are where the loot lives: Artifact rooms, Markets (7 Gold a purchase), <b>Chests, Libraries and Prisons</b> you crack with Lockpicks, Wayshrines to mark for Gold, monkey shrines, portals. Room rewards pay once per visit.</p>"
+      body: (c) => "<p>Unlike other Clank! games, there's no fixed map — the catacombs are a stack of <b>tiles</b>. Walk off the edge of the known dungeon and you flip the next tile and choose how to rotate it. Tunnels can demand extra Boots, bite you with <b>monsters</b> (a Sword each cancels a bite), or be <b>locked</b> — spend a Lockpick and it's open for everyone, forever. The first " + (c.has("uw") ? "three" : "four") + " tiles are safe-ish; everything after is the <b>Depths</b>, where being knocked out means scoring nothing.</p>" +
+        "<p>Rooms are where the loot lives: Artifact rooms, Markets (7 Gold a purchase), <b>Chests, Libraries and Prisons</b> you crack with Lockpicks, Wayshrines to mark for Gold, monkey shrines, portals. Room rewards pay once per room each turn.</p>"
     },
     {
       h: "Clank! and the dragon — the heart of it",
-      body: () => "<p>When you attack, stumble, or grab an Artifact, cubes of your color go to the Clank! area. On a Dragon Attack, <b>everything</b> in that area goes into the bag with the black dragon cubes, and we draw as many as the <b>Rage Track</b> shows. Black cubes: nothing. Your cubes: damage on your health meter. Fill the meter and you're out. Every stolen Artifact enrages the dragon further — the endgame is a countdown of everyone's own making. The white <b>Ghost cubes</b> from haunted tiles hurt <i>everyone</i> when drawn.</p>" +
+      body: () => "<p>Whenever a card makes you add Clank! — like the Stumbles in your starting deck — cubes of your color go to the Clank! area. On a Dragon Attack, <b>everything</b> in that area goes into the bag with the black dragon cubes, and we draw as many as the <b>Rage Track</b> shows. Black cubes: nothing. Your cubes: damage on your health meter. Fill the meter and you're out. Every stolen Artifact enrages the dragon further — the endgame is a countdown of everyone's own making. The white <b>Ghost cubes</b> from haunted tiles hurt <i>everyone</i> when drawn.</p>" +
         "<p>So the real game is tempo: dive deep for the fat 20-point Artifact and risk the bag filling with your color, or snatch a cheap one and run. Once you escape (grabbing a 20-point <b>Mastery token</b> on the way out), your turns become extra bag-pulls that hurry everyone else.</p>"
     },
     { when: (c) => c.has("lairs"),
       h: "Lairs & Lost Chambers",
-      body: () => "<p>Twelve stranger tiles are shuffled in. <b>Lost chambers</b> are one-of-a-kind rooms — a bazaar with four buyable boons, a temple that trades Gold donations for healing and secrets, a hoard that pays 5 Gold but wakes the dragon. <b>Lairs</b> hold boss monsters: Living Statues, Medusa (fight her or turn briefly to stone), and the Sphinx, who falls to 4 Swords <i>or</i> 7 Skill. Beat them and keep them as <b>trophies</b> with permanent powers. Watch for <b>pit traps</b> and <b>magic barriers</b> that stop artifact-carriers.</p>" },
+      body: () => "<p>Twelve stranger tiles are shuffled in. <b>Lost chambers</b> are one-of-a-kind rooms — a bazaar with four buyable boons, a temple that trades Gold donations for healing and secrets, a hoard that pays 5 Gold but wakes the dragon. <b>Lairs</b> hold boss monsters: Living Statues, Medusa (fight her — only on a turn you play a Secret Tome — or turn to stone for 2 damage), and the Sphinx, who falls to 4 Swords <i>or</i> 7 Skill. Beat them and keep them as <b>trophies</b> — a point apiece, and Medusa's lets you ignore tunnel monsters. Watch for <b>pit traps</b> and <b>magic barriers</b> that stop artifact-carriers.</p>" },
     { when: (c) => c.has("uw"),
       h: "The Underworld",
       body: () => "<p>Below the Depths lies a second dungeon. Find a lettered <b>ladder</b> (or a one-way chute) to climb down. Down there the currency is <b>undercoins</b> — worth Gold, but also demanded as a <b>toll</b> every turn you wake up down there; can't pay and you make +2 Clank!. The prizes are rich: the 16-point <b>magic lyre</b>, <b>fate cards</b> that quietly score at game end, <b>artifact enhancers</b> that multiply your best artifact — guarded by <b>Kerberos</b> himself and a flock of harpies. Getting out again is the trick: ladders only climb to Depths rooms that actually exist, and the return portal is one-way. Don't get knocked out down there — that's a zero.</p>" },
     { when: (c) => c.p >= 5,
       h: "Five or six thieves",
-      body: () => "<p>With the Adventuring Party rules, artifact rooms hold <b>two artifacts</b> (first claimant takes gold, second silver — gold wins ties), Wayshrines only fit four cubes, and the fifth and sixth players start with a little bonus Gold instead of extra quiet. Expect the card row to churn and the bag to fill fast — escape windows close early at this count.</p>" },
+      body: () => "<p>With the Adventuring Party rules, artifact rooms with <b>“+” icons</b> hold <b>several artifacts</b> instead of one from deeper in the stack — each thief who takes one grabs the most valuable left (gold before silver at equal value; gold also wins ties). Wayshrines only fit four cubes, and the fifth and sixth players start with a little bonus Gold instead of extra quiet. Expect the card row to churn and the bag to fill fast — escape windows close early at this count.</p>" +
+        "<p>Adventuring Party's cards bring two new terms. <b>React</b>: when a React card's condition happens on someone else's turn, you may flash it from your hand into your play area and draw a replacement right away — its resources and text wait for your next turn. <b>Arrive Choice</b>: when one of these hits the Dungeon Row, every player picks their option, starting with the player about to take their turn (or the current player, if it arrives mid-turn).</p>" },
     { when: (c) => c.mod("chars"),
       h: "Characters",
-      body: () => "<p>Tonight everyone plays a unique <b>character</b> — your own board and a tweaked starting deck with three signature cards. Read your three cards; that's your whole edge. Characters only face other characters, so nobody's on a plain deck.</p>" },
+      body: () => "<p>Tonight everyone plays a unique <b>character</b> — your own board and a tweaked starting deck with three signature cards. Read your board and those three cards — that's your edge. Characters only face other characters, so nobody's on a plain deck.</p>" },
     { when: (c) => c.mod("fixeddim") || c.mod("mercy"),
       h: "Variants tonight",
       body: (c) => "<ul>" +

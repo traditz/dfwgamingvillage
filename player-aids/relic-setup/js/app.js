@@ -79,7 +79,7 @@ function renderConfigurator() {
   const op = $("#modules"); op.innerHTML = "";
   const avail = availableModules();
   if (!avail.length) {
-    op.appendChild(el("p", "muted", "Add an expansion to unlock the Enemies of the Imperium mode and variants."));
+    op.appendChild(el("p", "muted", "Add an expansion to unlock game modes and variants (Enemies of the Imperium needs Nemesis and 3+ players)."));
   } else {
     RL.moduleTypes.forEach(gt => {
       const mods = avail.filter(m => m.type === gt.id);
@@ -417,7 +417,8 @@ function rlSearch(q) {
   const allTerms = qterms.concat(synTerms);
 
   const active = new Set((RL._searchCtx || { exps: ["base"] }).exps);
-  const gov = (RL.rulesSuppress || []).map(s => { const ip = s.chain.filter(e => active.has(e)); return ip.length ? ip[ip.length - 1] : null; });
+  // A topic hides the older books' passages only when the search itself is about that topic.
+  const gov = (RL.rulesSuppress || []).map(s => { if (!s.kw.some(kw => phrase.includes(kw))) return null; const ip = s.chain.filter(e => active.has(e)); return ip.length ? ip[ip.length - 1] : null; });
   const prec = RL.precedence, k1 = 1.5, b = 0.75;
 
   // BM25 accumulation over candidate docs (union of postings).

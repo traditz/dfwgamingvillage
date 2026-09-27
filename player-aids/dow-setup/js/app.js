@@ -466,7 +466,8 @@ function dwSearch(q) {
   const allTerms = qterms.concat(synTerms);
 
   const active = new Set((DW._searchCtx || { exps: ["base"] }).exps);
-  const gov = (DW.rulesSuppress || []).map(s => { const ip = s.chain.filter(e => active.has(e)); return ip.length ? ip[ip.length - 1] : null; });
+  // A topic hides the older books' passages only when the search itself is about that topic.
+  const gov = (DW.rulesSuppress || []).map(s => { if (!s.kw.some(kw => phrase.includes(kw))) return null; const ip = s.chain.filter(e => active.has(e)); return ip.length ? ip[ip.length - 1] : null; });
   const prec = DW.precedence, k1 = 1.5, b = 0.75;
 
   // BM25 accumulation over candidate docs (union of postings).

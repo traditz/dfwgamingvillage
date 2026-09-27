@@ -237,7 +237,7 @@ function renderDetail() {
   const sympVariant = config.options.has("sympatheticCylon");
   if (L.sympathizer) cards.push(`<span class="loy-card sym">1× You Are a ${sympVariant ? "Sympathetic Cylon" : "Sympathizer"}</span>`);
   const sympNote = L.sympathizer
-    ? `<b>Timing:</b> the ${sympVariant ? "Sympathetic Cylon" : "Sympathizer"} card is <b>not</b> shuffled in before the starting deal — deal each player their first Loyalty card, <i>then</i> add it to the remaining deck and shuffle (it arrives with the Sleeper-phase deal).`
+    ? `<b>Timing:</b> the ${sympVariant ? "Sympathetic Cylon" : "Sympathizer"} card is <b>not</b> shuffled in before the starting deal — deal each player their first Loyalty card, <i>then</i> add it to the remaining deck and shuffle. It stays in the deck from then on — usually it arrives with the Sleeper-phase deal, but any earlier Loyalty draw can deliver it (FAQ p.6).`
     : "";
   const cylNote =
     L.gov === "daybreak"
@@ -254,7 +254,7 @@ function renderDetail() {
           <span class="etag ${gm.cls}">${gm.name} chart</span></h3>
       ${L.valid ? `<div class="loy-total">Deal a <b>${L.total}-card</b> Loyalty deck:</div>
       <div class="loy-cards">${cards.join("")}</div>` : `<div class="loy-total">No standard composition for this player count.</div>`}
-      ${L.extras.length ? `<p class="note2"><b>${L.not}× You Are Not a Cylon</b> = ${L.notBase} from the chart (${state.players} players${L.cl ? " + Cylon Leader" : ""}) + ${L.not - L.notBase} for ${L.extras.join(" & ")}. The chart's asterisk (*) is the Exodus +1.</p>` : ""}
+      ${L.extras.length ? `<p class="note2"><b>${L.not}× You Are Not a Cylon</b> = ${L.notBase} from the chart (${state.players} players${L.cl ? " + Cylon Leader" : ""}) + ${L.not - L.notBase} for ${L.extras.join(" & ")}. This is the Exodus +1 from the chart's asterisk (*) footnote.</p>` : ""}
       ${cylNote ? `<p class="note2 ${L.mutineer ? "req" : ""}">${cylNote}</p>` : ""}
       ${sympNote ? `<p class="note2">${sympNote}</p>` : ""}
       ${leaderNote ? `<p class="note2">${leaderNote}</p>` : ""}
@@ -483,7 +483,8 @@ function bsgSearch(q) {
   const allTerms = qterms.concat(synTerms);
 
   const active = new Set((BSG._searchCtx || { exps: ["base"] }).exps);
-  const gov = BSG.rulesSuppress.map(s => { const ip = s.chain.filter(e => active.has(e)); return ip.length ? ip[ip.length - 1] : null; });
+  // A topic hides the older books' passages only when the search itself is about that topic.
+  const gov = BSG.rulesSuppress.map(s => { if (!s.kw.some(kw => phrase.includes(kw))) return null; const ip = s.chain.filter(e => active.has(e)); return ip.length ? ip[ip.length - 1] : null; });
   const prec = BSG.precedence, k1 = 1.5, b = 0.75;
 
   // BM25 accumulation over candidate docs (union of postings).

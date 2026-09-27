@@ -252,7 +252,7 @@ function buildReference(c) {
     rows.push(`<tr${cls}><td>${p}</td><td>${AH.playerRef.monsterLimit(p)}</td><td>${AH.playerRef.outskirtsLimit(p)}</td><td>${gates}</td></tr>`);
   }
   const effNote = c.boardCount >= 2
-    ? `<p class="ref-callout">You have <b>${state.players}</b> investigators across <b>${c.boardCount}</b> expansion boards, so most in-game numbers use an <b>effective ${eff} player${eff === 1 ? "" : "s"}</b> (−1 per board beyond the first). The highlighted row reflects that — when counting successes against the Ancient One, use the full ${state.players}.</p>`
+    ? `<p class="ref-callout">You have <b>${state.players}</b> investigators across <b>${c.boardCount}</b> expansion boards, so the monster limit, Outskirts limit, gates to awaken and monsters per opening gate use an <b>effective ${eff} player${eff === 1 ? "" : "s"}</b> (−1 per board beyond the first). The highlighted row reflects that — card effects, successes against the Ancient One and the gate trophies needed to win still use the full ${state.players}.</p>`
     : "";
   const dunInnNote = dunInn
     ? `<p class="ref-callout">Dunwich + Innsmouth together: the “gates to awaken” column already includes the +1.</p>`
@@ -401,7 +401,8 @@ function ahSearch(q) {
   const allTerms = qterms.concat(synTerms);
 
   const active = new Set((AH._searchCtx || { exps: ["base", "faq"] }).exps);
-  const gov = (AH.rulesSuppress || []).map(s => { const ip = s.chain.filter(e => active.has(e)); return ip.length ? ip[ip.length - 1] : null; });
+  // A topic hides the older books' passages only when the search itself is about that topic.
+  const gov = (AH.rulesSuppress || []).map(s => { if (!s.kw.some(kw => phrase.includes(kw))) return null; const ip = s.chain.filter(e => active.has(e)); return ip.length ? ip[ip.length - 1] : null; });
   const prec = AH.precedence, k1 = 1.5, b = 0.75;
 
   // BM25 accumulation over candidate docs (union of postings).

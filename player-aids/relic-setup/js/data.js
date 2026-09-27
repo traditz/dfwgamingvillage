@@ -65,14 +65,14 @@ RL.setup = [
   /* ===================== Phase 0 — Board, Scenario & Decks ================= */
   { ph: 0, exp: "base", t: "Place the game board", src: "Core p.4 (step 1)",
     d: "Unfold the Relic game board and place it in the centre of the play area." },
-  { ph: 0, exp: "halls", t: "Add the Sol System board", when: c => c.solBoard, src: "Halls of Terra p.3 (step 1)",
+  { ph: 0, exp: "halls", t: "Add the Sol System board", when: c => c.solBoard, src: "Halls of Terra p.3 (step 1) · p.4",
     d: "Place the Sol System board next to the Relic board so that the <b>Luna</b> space is adjacent to <b>Battlefleet Antias</b> and the <b>Titan</b> space is adjacent to the <b>Grey Knight Envoy</b>. The Sol System board is an extension of the Relic board and is treated as part of it for game effects." },
-  { ph: 0, exp: "halls", t: "Cards only: pull the Sol System missions", when: c => c.has("halls") && !c.solBoard, src: "Halls of Terra p.3 (sidebar)",
-    d: "You are playing without the Sol System board, so remove the Halls of Terra <b>Mission cards</b> from the game (or ignore them when drawn) — they specifically interact with the Sol System board. The rest of the expansion's cards, characters and scenarios work normally." },
+  { ph: 0, exp: "halls", t: "Cards only: pull the Sol System missions", when: c => c.has("halls") && !c.solBoard, src: "Halls of Terra p.3 (Using this Expansion)",
+    d: "You are playing without the Sol System board, so remove the Halls of Terra <b>Mission cards</b> from the game (or ignore them when drawn) — they specifically interact with the Sol System board. The rest of the expansion's cards, characters and scenarios may still be used." },
 
   { ph: 0, exp: "nemesis", t: "Shuffle in the Nemesis cards & sheets", when: c => c.has("nemesis"), src: "Nemesis p.4",
     d: "Shuffle all Nemesis-icon <b>Wargear, Relic and Threat cards</b> into the matching base-game decks, and mix the new <b>character and scenario sheets</b> with the base-game sheets. The nemesis boards, nemesis tokens, nemesis sheets, Nemesis decks and Imperium deck are used only in the Enemies of the Imperium mode" + " — leave them in the box otherwise." },
-  { ph: 0, exp: "halls", t: "Shuffle in the Halls of Terra cards & sheets", when: c => c.has("halls"), src: "Halls of Terra p.3",
+  { ph: 0, exp: "halls", t: "Shuffle in the Halls of Terra cards & sheets", when: c => c.has("halls"), src: "Halls of Terra p.3, 8",
     d: "Mix all Halls of Terra <b>Mission, Corruption, Relic and red/blue/yellow Threat cards</b> into the matching base-game decks, and mix the new <b>character and scenario sheets</b> with the base-game sheets. The <b>orange Threat cards stay separate</b> — they form their own deck. (The Abraxis Synethi nemesis sheet, its Nemesis deck, the nemesis piece and the Imperium tokens are used only with the Nemesis expansion's Enemies of the Imperium mode.)" },
 
   { ph: 0, exp: "base", t: "Choose the scenario", src: "Core p.4 (step 2)",
@@ -117,11 +117,11 @@ RL.setup = [
   /* ===================== Phase 2 — Prepare the Players ===================== */
   { ph: 2, exp: "base", t: "Place character pieces", src: "Core p.4 (step 7)",
     d: "Each player attaches their plastic character piece to its base and places it on the <b>starting space</b> printed on their character sheet." },
-  { ph: 2, exp: "base", t: "Prepare character boards", src: "Core p.4 (step 8)",
+  { ph: 2, exp: "base", t: "Prepare character boards", src: "Core p.4 (step 8) · p.7",
     d: "Slide the top of the character sheet into the character board and insert the level peg into the slot above the word <b>“Start”</b> on the level track. Players are level 0 until they gain their first level." },
   { ph: 2, exp: "halls", t: "Take your starting affiliation", when: c => c.solBoard, src: "Halls of Terra p.3 (step 8) · p.6",
     d: "Each player takes the <b>affiliation token</b> matching the affiliation printed near their character's name on the character sheet. (You can never hold more than one token of the same affiliation.)" },
-  { ph: 2, exp: "base", t: "Set attributes & Life dials", src: "Core p.4 (step 9)",
+  { ph: 2, exp: "base", t: "Set attributes & Life dials", src: "Core p.4 (step 9) · p.7",
     d: "Each player adjusts their dials to the starting <b>Strength, Willpower, Cunning and Life</b> values printed at the bottom of their character sheet. Attributes can never drop below their starting value." },
   { ph: 2, exp: "base", t: "Take starting influence", src: "Core p.4 (step 10)",
     d: "Each player takes <b>3 influence tokens</b> and places them in their play area." },
@@ -132,7 +132,7 @@ RL.setup = [
 
   { ph: 2, exp: "nemesis", t: "Set up the nemesis boards & decks", when: c => c.eoti, src: "Nemesis p.6 (steps 3–5)",
     d: "While the characters set up, each nemesis player: shuffles their personal <b>Nemesis deck</b> and places it to the left of their nemesis board, leaving room for its discard pile directly above; attaches their nemesis piece to a <b>plastic character base</b> and places it on the <b>starting space</b> printed on the nemesis sheet; then slides the nemesis sheet into the nemesis board, inserts the level peg above <b>“Start”</b>, and attaches the <b>floating dial</b> matching the nemesis' attribute — red for Strength, blue for Willpower, yellow for Cunning. Also shuffle the shared <b>Imperium deck</b> and place it facedown near the game board — every nemesis draws from it." },
-  { ph: 2, exp: "nemesis", t: "Set nemesis dials & infamy", when: c => c.eoti, src: "Nemesis p.6 (step 6)",
+  { ph: 2, exp: "nemesis", t: "Set nemesis dials & infamy", when: c => c.eoti, src: "Nemesis p.6 (step 6) · p.7",
     d: "Each nemesis adjusts the attribute and Life dials to the starting values on the nemesis sheet, and sets the <b>infamy dial to 0</b>. The first nemesis to reach <b>25 infamy</b> wins the game." },
   { ph: 2, exp: "halls", t: "Place the Imperium tokens", when: c => c.eoti && c.solBoard, src: "Halls of Terra p.8–9",
     d: "Place <b>one Imperium token</b> on each space with a text box in the Mars and Holy Terra areas, and <b>two</b> on both the Titan and Luna spaces. (Palace Gates holds a movement box, not a text box — it gets none.) Imperium tokens act as temporary threat icons that affect only nemeses." },
@@ -153,7 +153,7 @@ RL.refRows = [
   { k: "Trophy points per level",        v: "6 (excess above multiples of 6 is lost)", src: "Core p.11" },
   { k: "Completed missions per relic",   v: "3 → reveal 2 Relic cards, keep 1",        src: "Core p.11, 18" },
   { k: "Corruption threshold",           v: "6 Corruption cards → corrupted",          src: "Core p.17" },
-  { k: "Attribute dials",                v: "min 1 · max 12 (never below starting value)", src: "Core p.6" },
+  { k: "Attribute dials",                v: "min 1 · max 12 (never below starting value)", src: "Core p.6–7" },
   { k: "Life dial",                      v: "max 12 · at 0 you are vanquished",        src: "Core p.7" },
   { k: "Maximum level",                  v: "12 (further levels → 1 completed mission each)", src: "Core p.14" },
   { k: "Weapons / armour per battle",    v: "1 weapon + 1 armour (equipment unlimited)",      src: "Core p.18" },
@@ -163,11 +163,11 @@ RL.refRows = [
   { k: "Nemesis tier crossing",          v: "1 infamy or discard 1 trophy / Might / arsenal", when: c => c.eoti, src: "Nemesis p.14" },
   { k: "Gateway arrow crossing",         v: "2 influence + all remaining movement points",    when: c => c.solBoard, src: "Halls of Terra p.4" },
   { k: "Affiliation token as influence", v: "discard 1 → gain 2 influence (not for forced losses)", when: c => c.solBoard, src: "Halls of Terra p.6" },
-  { k: "Palace Gates movement box",      v: "3+ affiliations + all remaining movement points → Titanolith", when: c => c.solBoard, src: "Halls of Terra board" }
+  { k: "Palace Gates movement box",      v: "3+ affiliations + all remaining movement points → Titanolith", when: c => c.solBoard, src: "Halls of Terra p.7" }
 ];
 RL.refNotes = [
   "<b>Skill test:</b> roll 1 die + attribute + modifiers vs the target number; equal or greater passes. A natural <b>1 auto-fails</b> (all dice must be 1s if rolling several); a natural <b>6 explodes</b>.",
-  "<b>Battle:</b> both sides roll 1 die and add their attribute + modifiers. Higher score wins; the loser loses 1 Life; a tie ends the Engagement phase with the enemy still on the space. Battle rolls of <b>6 explode</b> (no auto-fail).",
+  "<b>Battle:</b> both sides roll 1 die and add their attribute + modifiers. Higher score wins — beat the enemy and it becomes your trophy; lose and you lose 1 Life and your Engagement phase ends; a tie ends the Engagement phase with the enemy still on the space. Battle rolls of <b>6 explode</b> (no auto-fail).",
   "<b>Component counts:</b> 10 characters, 5 scenarios and 3 Threat decks in the base game; Nemesis adds 2 characters, 4 scenarios and 4 nemeses; Halls of Terra adds 3 characters, 3 scenarios, the orange Threat deck and 1 nemesis.",
   { t: "<b>Skill duel consequences</b> — Strength: loser loses 2 Life · Cunning: winner may steal 1 asset (not relics; charges transfer) · Willpower: winner looks at the loser's Power cards and takes 1 card <i>or</i> 3 influence. The winner may also steal 1 apostate asset (not relics).", when: c => c.has("nemesis") || c.has("halls") }
 ];
@@ -180,6 +180,7 @@ RL.boards = [
     "<b>Battlefleet Antias</b> (corner): buy <b>Wargear cards</b> for their printed influence cost, and cross to the Middle tier.",
     "<b>St. Antias' Sanctuary</b> (corner): <b>vanquished players</b> respawn here; also a crossing point to the Middle tier.",
     "<b>Ultramar Emissary</b> (corner): the fourth corner space." + " In Enemies of the Imperium, nemeses may cross tiers from any of the four corners.",
+    "<b>Webway Portal</b>: special movement — being moved directly to another space skips everything in between.",
     "Crossing to the Middle tier ends your Engagement phase immediately — you do not resolve the new space that turn."
   ]},
   { id: "middle", name: "Relic board — Middle tier", when: () => true, items: [
@@ -187,8 +188,7 @@ RL.boards = [
     "<b>Space Hulk</b>: a <b>movement box</b>, resolved the moment you enter (or start your Movement phase) there — and the nemeses' route back to the Outer tier. When you move from one tier to another, you may change your movement direction on entering the new tier.",
     "<b>Blackstone Fortress</b>: buy Power cards for influence.",
     "<b>Apothecarium Sepha</b> and <b>Antian Shrine World</b>: attempt to discard <b>Corruption cards</b>.",
-    "<b>Webway Portal</b>: special movement — being moved directly to another space skips everything in between.",
-    "<b>Guardian of the Rift</b>: a movement box and the only door to the Inner tier — you need a <b>relic</b> to pass."
+    "<b>Guardian of the Rift</b>: a movement box and the Relic board's only door to the Inner tier — you need a <b>relic</b> to pass."
   ]},
   { id: "inner", name: "Relic board — Inner tier & scenario space", when: () => true, items: [
     "No areas, no Threat cards. You move <b>one space per turn following the directional arrows</b> — movement die, movement points and movement abilities don't work here, and you can never go back (unless vanquished or corrupted).",
@@ -206,12 +206,12 @@ RL.boards = [
   { id: "sol", name: "Sol System board — Sol tier", when: c => c.solBoard, items: [
     "Twelve green-shaded spaces forming their own movement loop; normal movement rules apply. Clockwise/anticlockwise effects treat each board as an independent loop.",
     "<b>Titan</b> and <b>Luna</b>: the only two access points to the Relic board, joined by <b>gateway arrows</b> (Titan ↔ Grey Knight Envoy, Luna ↔ Battlefleet Antias). Crossing costs <b>2 influence + all remaining movement points</b> and skips your Exploration and Engagement phases that turn.",
-    "<b>Mars area</b> (also a Forge World area): five spaces whose text boxes grant affiliations, wargear and attribute rewards — e.g. the Fabricator General's Palace can reveal a Wargear card you acquire at no cost.",
+    "<b>Mars area</b> (also a Forge World area): five spaces — three with orange threat icons, plus text boxes granting affiliations, wargear and Mission cards — e.g. the Palace of the Fabricator General can reveal a Wargear card you acquire at no cost.",
     "<b>Holy Terra area</b> (also a Hive World area): five spaces including the <b>Scholastia Psykana</b> (Power cards / Willpower) and the <b>Palace Gates</b> — its movement box lets a player with <b>3+ affiliations</b> spend all remaining movement points to move to the Titanolith.",
     "Sol-tier text-box spaces reward <b>affiliations</b>; Titan's Chamber of Trials and Luna's Great Crossroads offer optional challenges and long-range travel."
   ]},
   { id: "palace", name: "Sol System board — Imperial Palace tier", when: c => c.solBoard, items: [
-    "Five yellow-shaded spaces that work like the Inner tier: no movement roll, no Threat cards, arrow-directed movement; enter only through the Palace Gates. Every game effect that says “Inner tier” also means the Imperial Palace tier.",
+    "Five yellow-shaded spaces that work like the Inner tier: no movement roll, no Threat cards, arrow-directed movement; enter only through the Palace Gates. Any game component other than the board itself that says “Inner tier” also means the Imperial Palace tier.",
     "<b>Titanolith</b>: landing here ends your Movement phase; its Engagement text box (<i>Petitioner's Plea</i>, test 8 on your highest printed attribute) decides which direction you may proceed next turn — fail and you lose 1 of that attribute and are sent back to the Palace Gates.",
     "<b>Eternity Gate</b> (<i>Cleanse and Purify</i>): lose 1 Life per Corruption card, then test 7 on your lowest printed attribute — pass to gain 1 of it and <b>discard all your Corruption cards</b>; fail and you're sent back to the Titanolith and your Engagement phase ends.",
     "<b>Administratum Archives</b> (<i>Cyclopean Bureaucracy</i>): test 5 using your <b>influence</b> instead of an attribute — fail and you lose an affiliation and are sent back to the Titanolith.",
@@ -257,7 +257,7 @@ RL.howToPlay = {
         "<b>Tie</b> — no trophy, no Life lost; your Engagement phase ends and the enemy stays."
       ]},
       "<b>Multiple enemies</b> with the same attribute battle together — one enemy roll plus <i>all</i> their attribute values against your single score. Different attributes fight separate battles, in the order you choose.",
-      "A roll of <b>6 explodes</b>: roll another die and add it — cumulatively, without limit. With several dice, each individual 6 explodes (a 5 and a 6 never combine).",
+      "A roll of <b>6 explodes</b>: roll another die and add it — cumulatively, without limit. With several dice, each individual 6 explodes (dice never combine — a 3 and a 3 don't count as a 6).",
       "Scenario sheets can be battled too: the sheet counts as an enemy for abilities, but has no traits, is not a Threat card and can never be a trophy."
     ]},
     { h: "Skill Tests & Bonuses", items: [
@@ -317,7 +317,7 @@ RL.howToPlay = {
       ]},
       "You keep assets, Corruption cards, missions and board tokens. If it happens on your turn, your turn ends.",
       "<b>Missing a turn:</b> tip your piece on its side; your current turn ends at once (skip the Experience phase and limit checks) and you skip all four phases of your next turn. Start/end-of-turn abilities don't trigger.",
-      "<b>Eliminated</b> players (usually via scenario rules) remove their piece, discard everything, lose the game and can no longer affect — or be affected by — anything."
+      "<b>Eliminated</b> players (usually via scenario rules) remove their piece, discard everything, lose the game, can't start a new character and can no longer affect the game in any way."
     ]},
     { h: "The Inner Tier & Winning", items: [
       "Enter from the <b>Guardian of the Rift</b> — a relic is required. Once inside you can never go back (except by being vanquished or corrupted).",
@@ -330,7 +330,7 @@ RL.howToPlay = {
       "<b>Golden Rule:</b> when a card, sheet or text box conflicts with the rulebook, the card wins. Anything that says you <b>cannot</b> do something beats everything that says you can.",
       "<b>“May”</b> = optional; every other ability is mandatory.",
       "<b>Start</b>-of abilities resolve before everything else in that turn/phase/step; <b>end</b>-of abilities after everything else; <b>during</b> abilities whenever the owner likes in between. Ties are ordered by the active player.",
-      "If an effect offers several valid options (including your highest/lowest attribute when tied), the active player chooses.",
+      "If an effect offers several valid options, the active player chooses. If an effect refers to your highest/lowest attribute and two or more are tied, you choose which one it uses.",
       "<b>Special movement</b> granted by a card may still be used this Movement phase even if the card is discarded during the turn — and if you miss a turn, you may use it on your next Movement phase instead. (Mark it with a character token under your piece as a reminder.)",
       "An ability that moves you <b>directly</b> to another space (like the Webway Portal) skips every space in between.",
       "Empty deck? Reshuffle its discard pile. Nothing to reshuffle? That card type can't be drawn. Token supplies are unlimited — substitute anything handy."
@@ -356,7 +356,7 @@ RL.howToPlay = {
       "Whatever the form, the winner may <i>also</i> steal one of the loser's <b>apostate</b> assets (not relics)."
     ]},
     { id: "nemTurn", when: c => c.eoti, h: "The Nemesis Turn", tag: "nemesis", items: [
-      "A nemesis is <b>not a player</b> and <b>not an enemy</b> — card text saying “player” or “enemy” never means a nemesis. Nemeses never read text boxes or vertical cards; characters never read horizontal cards.",
+      "A nemesis is <b>not a player</b> and <b>not an enemy</b> — card text saying “player” or “enemy” never means a nemesis. Nemeses never read the board's text boxes, and when encountering spaces nemeses never read vertical cards while characters never read horizontal cards.",
       { t: "The nemesis turn:", num: true, sub: [
         "<b>Movement</b> — normal die movement; never into the Inner tier.",
         "<b>Exploration</b> — on a space with a character it may declare a battle. Otherwise it draws <b>Imperium cards</b> to match the space's threat icons (colour ignored) — or, with no icons and no Imperium cards, draws 1 secret <b>Nemesis card</b>.",
@@ -369,7 +369,7 @@ RL.howToPlay = {
         "<b>Arsenal</b> — acquire into the nemesis' play area."
       ]},
       { t: "The <b>Nemesis deck</b> holds two kinds of cards:", sub: [
-        "<b>Vertical</b> — mimic base-game types (enemy, encounter, corruption, asset). The bold <b>nemesis text</b> resolves once, when drawn; afterwards the card behaves as its printed type.",
+        "<b>Vertical</b> — mimic base-game types (enemy, encounter, corruption, asset). The bold <b>nemesis text</b> resolves once, in the Engagement phase after the card is drawn; afterwards the card behaves as its printed type.",
         "<b>Horizontal</b> — nemesis-only: <b>Crisis</b> (resolve & discard) · <b>Might</b> (a hidden hand, the nemesis' Power cards — substitutable for its die rolls) · <b>Arsenal</b> (the nemesis' assets)."
       ]},
       "<b>Tier crossing:</b> ending movement on any of the four Outer-tier corners, a nemesis may spend 1 infamy or discard 1 trophy/Might/arsenal to jump to the nearest Middle-tier corner (skipping its Exploration & Engagement that turn); the Space Hulk movement box leads back out.",
@@ -398,7 +398,7 @@ RL.howToPlay = {
     { id: "sol", when: c => c.solBoard, h: "Navigating the Sol System", tag: "halls", items: [
       "The Sol tier is a normal movement loop; each board is its own loop for clockwise/anticlockwise effects.",
       "<b>Gateway arrows</b> (Titan ↔ Grey Knight Envoy, Luna ↔ Battlefleet Antias): crossing costs <b>2 influence + all remaining movement points</b> and skips your Exploration and Engagement phases that turn. Can't pay? Can't cross.",
-      "The <b>Imperial Palace tier</b> is entered only through the Palace Gates movement box (3+ affiliations). Inside, follow the arrows one space per turn — the Titanolith's text box sets your direction — and every rule referencing the Inner tier applies here too.",
+      "The <b>Imperial Palace tier</b> is entered only through the Palace Gates movement box (3+ affiliations). Inside, follow the arrows one space per turn — the Titanolith's text box sets your direction — and any game component other than the board itself that references the Inner tier also means this tier.",
       { t: "Nemeses move between the boards freely, <b>ignoring gateway arrows</b>, but can never enter the Imperial Palace tier. <b>Imperium tokens</b> on Sol-tier text-box spaces act as temporary threat icons for nemeses only: draw Imperium cards normally, then discard one token from the space (only if a card was actually drawn). A Sol text-box space with no tokens and no Imperium cards yields a Nemesis card draw.", when: c => c.eoti, tag: "nemesis" }
     ]},
     { id: "affiliations", when: c => c.solBoard, h: "Affiliations & Champion Cards", tag: "halls", items: [
@@ -412,7 +412,7 @@ RL.howToPlay = {
 /* ---- Contextual FAQ — clarifications surfaced for the active setup --------- */
 RL.faq = [
   { q: "Which die results explode, and does anything auto-fail?",
-    a: "A natural 6 on any battle or skill roll explodes: roll another die and add it, cumulatively and without limit. When rolling several dice, each 6 explodes individually — a 5 and a 6 never combine. A natural 1 automatically fails a <b>skill test</b> only (and only if every die you rolled shows a 1); there is no auto-fail on battle rolls." },
+    a: "A natural 6 on any battle or skill roll explodes: roll another die and add it, cumulatively and without limit. When rolling several dice, each 6 explodes individually — dice never combine to explode (a 3 and a 3 don't count as a 6). A natural 1 automatically fails a <b>skill test</b> only (and only if every die you rolled shows a 1); there is no auto-fail on battle rolls." },
   { q: "Can I use a Power card's number AND its ability?",
     a: "No — one or the other, then discard it. Used as a number, it substitutes for the die result before you roll, still counts as a die roll for abilities, and a power number of 6 explodes normally (you can even substitute a Power card for an exploded die's roll). Only one power number per roll, but there's no limit on Power cards per turn." },
   { q: "How many charges can I spend from one card?",
@@ -483,22 +483,26 @@ RL.teach = {
 
     { h: "Your turn — move, fight, grow", body: (c) => `
 <p>Roll a die and spend that many moves along your tier, clockwise or anticlockwise — you're choosing which space to <b>end</b> on, because then you draw <b>Threat cards</b> matching your space's colored icons: enemies, events, and loot.</p>
-<p><b>Battles</b>: every enemy fights in one of three languages — <b>Strength</b>, <b>Willpower</b> or <b>Cunning</b>. Both sides roll a die and add their attribute; high score wins. Win and the enemy becomes a <b>trophy</b> worth points equal to its attribute. Lose and you take wounds. Choose fights your character's numbers can speak.</p>` },
+<p><b>Battles</b>: every enemy fights in one of three languages — <b>Strength</b>, <b>Willpower</b> or <b>Cunning</b>. Both sides roll a die and add their attribute; high score wins. Win and the enemy becomes a <b>trophy</b> worth points equal to its attribute. Lose and you lose a <b>Life</b>, suffer the enemy's penalty, and your fighting is over for the turn. Choose fights your character's numbers can speak.</p>` },
 
     { h: "Levelling — the engine", body: (c) => `
-<p>At the end of your turn, spend <b>six trophy points</b> to gain a <b>level</b>: levels raise your attributes and unlock your character's ability track. That's the loop — fight what you can beat, cash trophies, get bigger, fight bigger. <b>Wargear</b> and <b>Power cards</b> tilt the odds; <b>influence</b> is the currency that greases everything.</p>
-<p>Two ways to fall: run out of <b>Life</b> and you're vanquished — you lose your gear and restart bruised. Collect too many <b>Corruption cards</b> (usually six) and Chaos takes you entirely: new character, from scratch. Some rewards are worth a little corruption. Some.</p>` },
+<p>At the end of your turn, spend <b>six trophy points</b> to gain a <b>level</b>: each level pays out the rewards printed in the column under your level peg — attributes, Life, influence, Power cards, even completed missions. That's the loop — fight what you can beat, cash trophies, get bigger, fight bigger. <b>Wargear</b> and <b>Power cards</b> tilt the odds; <b>influence</b> is the currency that greases everything.</p>
+<p>Two ways to fall: run out of <b>Life</b> and you're vanquished — you drop your Power cards, trophies and influence and restart at St. Antias' Sanctuary on your starting Life, though you keep your gear. Collect too many <b>Corruption cards</b> (usually six) and Chaos takes you entirely: a new random character back at level zero — only your assets, missions and board tokens carry over. Some rewards are worth a little corruption. Some.</p>` },
 
-    { h: "Enemies of the Imperium", when: (c) => c.eoti, body: () => `
-<p>We're playing <b>Enemies of the Imperium</b>: one or more of us are <b>Nemeses</b> — playable villains with their own dark missions, racing the loyalists to the center. Same engine, opposite prayers.</p>` },
+    { h: "Enemies of the Imperium", when: (c) => c.eoti, body: (c) => `
+<p>We're playing <b>Enemies of the Imperium</b>: ${c.nemCount === 1 ? "one of us plays a <b>nemesis</b> — a villain" : "two of us play <b>nemeses</b> — villains"} working against everyone else. A nemesis never goes for the centre (it can't even enter the Inner tier): it earns <b>infamy</b> by preying on characters and resolving its engagements, and wins the instant its infamy reaches <b>25</b>. Nemeses take their turns after all the characters have gone. Instead of Threat cards, a nemesis draws <b>Imperium cards</b> — Imperial agents it battles for trophies — or a secret card from its own <b>Nemesis deck</b>, and it may battle a character sharing its space. You can hunt it too: end your move on a nemesis and you may battle it — beat it and you collect the <b>bounty</b> on its sheet. For the rules, a nemesis is neither a player nor an enemy, so cards that say “player” or “enemy” never mean it.${c.has("halls") ? " With Halls of Terra, <b>Abraxis Synethi</b> joins the nemesis pool" + (c.solBoard ? "; nemeses ignore the gateway arrows but can never enter the Imperial Palace tier." : ".") : ""}</p>` },
 
-    { h: "The Nemesis expansion", when: (c) => c.has("nemesis") && !c.eoti, body: () => `
-<p>With <b>Nemesis</b> in the mix: up to six players, <b>duels</b> when agents collide (apostate wargear changes hands), and nastier scenarios. Watch your back in shared spaces.</p>` },
+    { h: "The Nemesis expansion", when: (c) => c.has("nemesis"), body: () => `
+<p>With <b>Nemesis</b> in the mix: two new characters, four new scenarios, and seats for up to six — red and black are the extra colours. Some of its new wargear and relics are <b>apostate</b> gear. Watch your back in shared spaces.</p>` },
 
-    { h: "Halls of Terra", when: (c) => c.has("halls"), body: () => `
-<p><b>Halls of Terra</b> adds the Sol board — a politically lethal detour toward the Imperial Palace with its own orange Threat deck, <b>affiliations</b> and Champions. Different dangers: fewer claws, more knives.</p>` },
+    { h: "Apostates & skill duels", when: (c) => c.has("nemesis") || c.has("halls"), body: () => `
+<p>Some assets carry the <b>Apostate</b> trait — you'll know them by their yellow-green hue. Hold one and you're an <b>apostate</b>: any character who ends their move on your space may skip their Exploration and Engagement to challenge you to a <b>skill duel</b>. The challenger picks Strength, Willpower or Cunning and tests it against 2 — fail and the duel fizzles; pass and that score is the number you must match with the same attribute. Strength: the loser loses 2 Life. Cunning: the winner may steal an asset. Willpower: the winner takes a Power card or 3 influence. The winner may also take one apostate asset. Relics can't be stolen, and there are no duels in the Inner tier.</p>` },
+
+    { h: "Halls of Terra", when: (c) => c.has("halls"), body: (c) => c.solBoard ? `
+<p><b>Halls of Terra</b> adds the <b>Sol System</b> board beside ours. Its Titan and Luna spaces link to the Grey Knight Envoy and Battlefleet Antias by <b>gateway arrows</b>: crossing costs 2 influence plus all your remaining movement, and skips that turn's Exploration and Engagement. Mars and Holy Terra have their own <b>orange Threat deck</b>, and their spaces hand out <b>affiliations</b> — tokens for the nine great Imperial factions. You start with your character's own, can hold one of each, and may cash any of them for 2 influence whenever you're spending influence. With three affiliations the <b>Palace Gates</b> open the Imperial Palace tier, which works like the Inner tier; its <b>Sanctum Imperialis</b> grants a permanent <b>Champion card</b>, and with all nine affiliations it can send you straight into the Inner tier at Daemon World Braxas.</p>` : `
+<p>We're using the <b>Halls of Terra</b> cards, characters and scenarios but not its Sol System board — so its Mission cards are out of play (ignore any that turn up); they only work with that board.</p>` },
 
     { h: "Don't worry about these yet", body: (c) => `
-<p>I'll explain individual Power cards, scenario special rules and Wargear as they surface. Opening advice: never travel without an active <b>Mission</b>, and read the threat icons before you end your move — the board tells you exactly what kind of trouble each space sells.</p>` }
+<p>I'll explain individual Power cards, Wargear, Corruption cards, charges and evading as they come up — the scenario sheet we read aloud covers this game's special rules. Opening advice: never travel without an active <b>Mission</b>, and read the threat icons before you end your move — the board tells you exactly what kind of trouble each space sells.</p>` }
   ]
 };

@@ -15,7 +15,7 @@ VC.expansions = [
   { id: "base", name: "Valeria: Card Kingdoms (2nd Edition)", short: "Base Game", year: 2021, kind: "base",
     blurb: "The dice-driven tableau builder: roll, harvest with your Citizens, then slay Monsters, recruit Citizens and build Domains to out-score your rival Dukes. 1–5 players." },
   { id: "ff", name: "Flames & Frost", short: "Flames & Frost", year: 2016, kind: "exp",
-    blurb: "The Demon of Loth awakens monsters of fire and ice: five new Monster Areas (Desert, Glacier, Oasis, Tundra, Volcano), new Citizens, Domains, Dukes — and Event cards hidden in the Exhausted stack." },
+    blurb: "The Demon of Loth awakens monsters of fire and ice: five new Monster Areas (Desert, Glacier, Oasis, Tundra, Volcano), new Citizens — and Event cards hidden in the Exhausted stack." },
   { id: "cs", name: "Crimson Seas", short: "Crimson Seas", year: 2019, kind: "exp",
     blurb: "The Island board: Sail with Maps to buy Goods in Araby and Tomes in Nae Aerie, raid Exekratys, rescue Nobles from Amarynth. Adds the Coxswain starter, Wardens, Monster Events and five sea Monster Areas." },
   { id: "sv", name: "Shadowvale", short: "Shadowvale", year: 2021, kind: "exp",
@@ -51,18 +51,18 @@ VC.modes = [
 ];
 
 /* ---- Modules & variants -------------------------------------------------------
-   requires: expansion id. modes: which play modes it applies to (null = all). */
+   requires: expansion id, or an array of ids (any one of them). modes: which play modes it applies to (null = all). */
 VC.modules = [
   { id: "monsterevents", name: "Monster Event cards", requires: "base", modes: ["standard"],
-    summary: "Shuffle 1 Monster Event per player into the Exhausted stack — dice-triggered mayhem that becomes slayable.",
+    summary: "Shuffle 1 Monster Event per player and place them on top of the Exhausted stack — dice-triggered mayhem that becomes slayable.",
     description: "Setup: take 2 Exhausted cards per player, then shuffle 1 facedown Monster Event card per player on top of that stack (you may pre-select favorites). Cardboard resource tokens go by the Center Stacks. Rolled Activation Numbers trigger the event at the end of the Roll Phase (never twice on doubles). Revealed events sit faceup in the exhausted slot and can be slain — replace a slain event with an Exhausted card from the BOTTOM of the stack. The slot still counts as exhausted for end-game checks; slain events score like Monsters.",
     src: "Base Rulebook p.12 (also Crimson Seas p.10–12)" },
-  { id: "events", name: "Event cards (Flames & Frost / Shadowvale)", requires: "ff", modes: ["standard"],
+  { id: "events", name: "Event cards (Flames & Frost / Shadowvale)", requires: ["ff", "sv"], modes: ["standard"],
     summary: "Shuffle 1 Event per player into the Exhausted stack; resolve when revealed.",
     description: "Shadowvale wording: take 1 Exhausted card per player and 1 facedown Event card per player, shuffle them together into the Exhausted stack (you may pre-select events). When an Event is revealed, place it in the open slot and follow its text before the next action or phase — actions it grants are free. Multiple affected players resolve in turn order from the active player. The slot counts as exhausted for the end-game trigger.",
-    src: "Shadowvale rules p.1–2 · Flames & Frost rulesheet" },
+    src: "Shadowvale rules p.2 · Flames & Frost rulesheet p.1 · Combined Guide p.2" },
   { id: "mixed", name: "Mixed Citizens variant", requires: "base", modes: ["standard"],
-    summary: "Each Citizen stack is a shuffled mix of both types for that number — facedown surprises.",
+    summary: "Each Citizen stack is a shuffled mix of all the types for that number — facedown surprises.",
     description: "For each Activation Number, shuffle all Citizen types with that number together and deal 4 facedown + 1 faceup (5 facedown + 1 faceup with 5 players). Facedown Citizens stay secret until the card above them is taken.",
     src: "Base Rulebook p.13" },
   { id: "noduke", name: "No Duke variant", requires: "base", modes: ["standard"],
@@ -72,39 +72,39 @@ VC.modules = [
   { id: "wardens", name: "Wardens (Monster Reinforcements)", requires: "minis", modes: ["standard", "solo"],
     summary: "One extra Monster slots in above each Boss — placed regardless of Strength.",
     description: "Each Warden belongs to the Monster Area on its card. During setup place the Warden directly above the Boss (below all other Monsters), ignoring its Strength value. The mini-pack covers base + Flames & Frost areas; later sets (Crimson Seas, Shadowvale) include their own Wardens automatically.",
-    src: "Crimson Seas p.5 · Shadowvale rules · Combined Guide" },
+    src: "Crimson Seas p.5 · Shadowvale rules p.3 · Combined Guide p.3" },
   { id: "agents", name: "Agents", requires: "minis", modes: ["standard"],
     summary: "A row of hireable Agents above the Monster stacks; using one is an action.",
     description: "Setup: shuffle the Agent deck above the left-most Monster stack and reveal 4 Agents, one above each other Monster stack. As an action, use a faceup Agent's ability, then return it to the bottom of the deck and refill the row.",
-    src: "Combined Guide (Agents, Exp. #3)" },
+    src: "Combined Guide p.1, p.5 (Agents, Exp. #3)" },
   { id: "kingsguard", name: "King's Guard", requires: "minis", modes: ["standard"],
     summary: "An Event that opens a recruitable King's Guard stack.",
     description: "Replace one Exhausted card with the King's Guard Event (or shuffle it in with the Events variant). When revealed, place the King's Guard Citizen stack on top of it — players may now Recruit a King's Guard normally. The stack counts as exhausted for end-game checks.",
-    src: "Combined Guide (King's Guard, Exp. #1)" },
+    src: "Combined Guide p.2, p.6–7 (King's Guard, Exp. #1)" },
   { id: "samurai", name: "Undead Samurai", requires: "minis", modes: ["standard"],
     summary: "Play it as a Monster stack — or as an ambush Event that floods the stacks.",
     description: "Either use it as a normal Monster stack (normal rules, no Warden exists for it in the pack), or as an Event: when its Event card is drawn, remove it and shuffle the Undead Samurai Lord into the Exhausted stack. When the Lord is later drawn, each player in turn order places an Undead Samurai Monster on an unexhausted center stack. Slaying the Lord removes all remaining Samurai from the game. Don't use the Event if it's already a stack.",
-    src: "Combined Guide (Undead Samurai, Exp. #2)" },
+    src: "Combined Guide p.2–3, p.6 (Undead Samurai, Exp. #2)" },
   { id: "relics", name: "Relics", requires: "minis", modes: ["standard"],
     summary: "Deal 2 Relics to each player at setup; keep 1 faceup.",
     description: "During setup deal two Relic cards to each player; each keeps one faceup and discards the other from the game. Relics are either ongoing (“When you…”) or action-triggered (“As an action…”).",
-    src: "Combined Guide (Relics, Exp. #6)" },
+    src: "Combined Guide p.3, p.6 (Relics, Exp. #6)" },
   { id: "wardtowers", name: "Ward Towers", requires: "minis", modes: ["standard"],
     summary: "The 5th Domain stack becomes the Towers — banner-building for shared slay discounts.",
     description: "Create only 4 normal Domain stacks (3 cards each) and place the Ward Towers faceup as the 5th; give each player 6 matching Banner tokens. As a Build a Domain action with 4 matching Role icons, pay 9 of the exact resource shown (Magic may NOT augment) to place a Banner. When a Tower's 3 slots fill, banners return flipped to their 5-VP side and the Tower's ongoing slay discount activates for everyone. The stack exhausts when the last Tower is built. Tomes may help pay.",
-    src: "Combined Guide (Ward Towers, Exp. #7)" },
+    src: "Combined Guide p.3, p.6 (Ward Towers, Exp. #7)" },
   { id: "morestacks", name: "Extra Monster stacks (Fire Temple · Kaharian · Gnoll Pack)", requires: "minis", modes: ["standard", "solo"],
     summary: "Three more Monster Areas to mix and match.",
     description: "Fire Temple (Exp. #13) and Kaharian (Exp. #12) are used as normal Monster stacks; the Gnoll Pack (Knoll region) likewise. Build them like any other Area stack.",
-    src: "Combined Guide" },
+    src: "Combined Guide p.2" },
   { id: "margrave", name: "Margrave Park starter", requires: "minis", modes: ["standard"],
     summary: "An alternate 3rd starter card in place of the Herald.",
     description: "Give each player a Margrave starter instead of the Herald. Its bonus triggers on doubles or when none of your Citizens activated. NOT compatible with Crimson Seas (the Coxswain takes that slot).",
-    src: "Combined Guide (Margrave Park)" },
+    src: "Combined Guide p.1–2, p.4 (Margrave Park)" },
   { id: "promos", name: "Promo Dukes & Domains", requires: "minis", modes: ["standard"],
     summary: "Duke Mico, the Man vs Meeple Dukes, The Tower, and the Promo Pack Domains.",
     description: "Shuffle promo Duke cards in before dealing two Dukes each. The Tower and the Promo Pack Domains (Coliseum, Jousting Field, Ullamalizatli) shuffle in with the other Domains before building the stacks.",
-    src: "Combined Guide" }
+    src: "Combined Guide p.2–3" }
 ];
 
 /* ---- helpers ------------------------------------------------------------------ */
@@ -133,7 +133,7 @@ VC.phases = [
           bits.push("First game? The rulebook recommends Hills, Ruins, Forest, Valley and Mountains.");
           return bits.join("<br>");
         },
-        src: (c) => "Base Rulebook p.2" + ((c.has("cs") || c.has("sv") || c.mod("wardens")) ? " · Crimson Seas p.5" : ""),
+        src: (c) => "Base Rulebook p.2" + (c.p === 5 ? ", p.13" : "") + ((c.has("cs") || c.has("sv") || c.mod("wardens")) ? " · Crimson Seas p.5" : ""),
         when: (c) => c.mode !== "darksworn" },
       { exp: "base",
         t: "Build the ten Citizen stacks",
@@ -141,10 +141,10 @@ VC.phases = [
           let d = "Row two: Citizen stacks with Activation Numbers <b>1, 2, 3, 4, 5</b>. Row three: <b>6, 7, 8, 9/10, 11/12</b>. Each stack is <b>" + (c.p === 5 ? "six" : "five") + " copies of the same Citizen</b> — pick one Citizen type per number from any set. Return the rest to the box.";
           if (c.mod("mixed")) d += "<br><b>Mixed Citizens variant:</b> instead, shuffle all Citizen types sharing an Activation Number together and deal " + (c.p === 5 ? "5" : "4") + " facedown + 1 faceup per stack. Facedown cards stay hidden until the card above them is taken.";
           d += "<br>First game? The rulebook recommends Cleric, Merchant, Mercenary, Archer, Peasant / Knight, Rogue, Champion, Paladin, Butcher.";
-          if (c.has("cs")) d += "<br>Note: the Hydromancer (1), Engineer (2) and Smuggler (7) reference Crimson Seas components — best used only when the Island board is on the table.";
+          if (!c.has("cs")) d += "<br><b>Not using Crimson Seas?</b> Its Hydromancer (1), Engineer (2) and Smuggler (7) have Crimson Seas-specific rewards/abilities — without the Island board they restrict players' choices.";
           return d;
         },
-        src: (c) => "Base Rulebook p.2, p.13" + (c.has("cs") ? " · Combined Guide" : ""),
+        src: (c) => "Base Rulebook p.2, p.13" + (!c.has("cs") ? " · Combined Guide p.1" : ""),
         when: (c) => c.mode !== "darksworn" },
       { exp: "base",
         t: "Build the five Domain stacks",
@@ -154,28 +154,31 @@ VC.phases = [
           if (!c.has("cs")) d += "<br><b>Not using Crimson Seas?</b> Leave out the Domains tied to it: Barbarossa Castle, Brigand's Bay, Browncoat's Sanctum, Daak Harbour, Dampiar's Workshop, Murat Reis, Port of Drake, Solo's Haven and Tabula Tower.";
           return d;
         },
-        src: (c) => "Base Rulebook p.2, p.13" + (!c.has("cs") || c.mod("wardtowers") ? " · Combined Guide" : ""),
+        src: (c) => "Base Rulebook p.2, p.13" + (!c.has("cs") || c.mod("wardtowers") || c.mod("promos") ? " · Combined Guide " + [!c.has("cs") ? "p.1" : "", c.mod("wardtowers") || c.mod("promos") ? "p.3" : ""].filter(Boolean).join(", ") : ""),
         when: (c) => c.mode !== "darksworn" },
-      { exp: (c) => c.mod("monsterevents") || VC.help.usesEvents(c) ? (c.mod("events") ? "sv" : "base") : "base",
+      { exp: (c) => c.mod("monsterevents") || VC.help.usesEvents(c) ? (c.mod("events") ? (c.has("sv") ? "sv" : "ff") : "base") : "base",
         t: "Prepare the Exhausted stack",
         d: (c) => {
           const bits = [];
           if (!c.mod("monsterevents") && !VC.help.usesEvents(c)) {
             bits.push("Take <b>2 Exhausted cards per player</b> and stack them above the Monster row. Return the rest to the box.");
           } else {
-            bits.push("Take <b>2 Exhausted cards per player</b>" + (VC.help.usesEvents(c) ? " — or, using the Events wording, 1 Exhausted + 1 Event per player —" : "") + " for the stack above the Monster row.");
-            if (c.mod("events")) bits.push("<b>Events:</b> shuffle <b>1 facedown Event card per player</b> into the stack (pre-select any favorites)." + (c.mod("samurai") ? " Skip the Undead Samurai Event if the Samurai are already a Monster stack." : ""));
+            bits.push(c.mod("events")
+              ? "<b>Events:</b> take <b>1 Exhausted card per player</b> and <b>1 facedown Event card per player</b>, shuffle them together and stack them above the Monster row (pre-select any favorites). Return the rest to the box." + (c.mod("samurai") ? " Skip the Undead Samurai Event if the Samurai are already a Monster stack." : "") +
+                (c.has("ff") ? " <i>(The Flames &amp; Frost rulesheet instead puts the Events on top of the usual Exhausted cards; the newer Combined Guide's 1 + 1 mix is used here.)</i>" : "")
+              : "Take <b>2 Exhausted cards per player</b> for the stack above the Monster row. Return the rest to the box.");
             if (c.mod("monsterevents")) bits.push("<b>Monster Events:</b> shuffle <b>1 facedown Monster Event per player</b> and place them <b>on top</b> of the Exhausted stack; set the cardboard resource tokens near the Center Stacks.");
             if (c.mod("kingsguard")) bits.push("<b>King's Guard:</b> its Event card replaces one Exhausted card (or joins the Event shuffle).");
+            if (c.mod("samurai") && !c.mod("events")) bits.push("<b>Undead Samurai (as an Event):</b> its Event card replaces one Exhausted card — skip it if the Samurai are a Monster stack.");
           }
-          bits.push("Whenever an action empties a center stack, finish the action, then cover the empty slot with the top Exhausted card. When exhausted slots equal <b>twice the player count</b>, the final round triggers.");
+          bits.push("Whenever an action empties a center stack, finish the action, then cover the empty slot with the top Exhausted card. " + (c.mode === "solo" ? "<b>Solo:</b> the game ends immediately once <b>any five stacks</b> are exhausted." : "When exhausted slots equal <b>twice the player count</b>, the final round triggers."));
           return bits.join("<br>");
         },
         src: (c) => {
-          const s = ["Base Rulebook p.3, p.5"];
-          if (c.mod("monsterevents")) s.push("p.12");
-          if (c.mod("events")) s.push("Shadowvale rules");
-          if (c.mod("kingsguard") || c.mod("samurai")) s.push("Combined Guide");
+          const s = ["Base Rulebook p.3, p.5" + (c.mod("monsterevents") ? ", p.12" : "") + (c.mode === "solo" ? ", p.15" : "")];
+          if (c.mod("events") && c.has("sv")) s.push("Shadowvale rules p.2");
+          if (c.mod("events") && c.has("ff")) s.push("Flames & Frost rulesheet p.1");
+          if (c.mod("events") || c.mod("kingsguard") || c.mod("samurai")) s.push("Combined Guide p.2" + (c.mod("samurai") ? "–3" : ""));
           return s.join(" · ");
         },
         when: (c) => c.mode !== "darksworn" }
@@ -192,7 +195,7 @@ VC.phases = [
           if (c.mod("relics")) d += "<br><b>Relics:</b> deal 2 Relic cards to each player; keep one faceup, remove the other from the game.";
           return d;
         },
-        src: (c) => "Base Rulebook p.3" + (c.has("cs") ? " · Crimson Seas p.2 · Combined Guide" : "") + (c.mod("relics") ? " · Combined Guide" : ""),
+        src: (c) => "Base Rulebook p.3" + (c.has("cs") ? " · Crimson Seas p.2" : "") + (c.has("cs") || c.mod("margrave") || c.mod("relics") ? " · Combined Guide " + [c.has("cs") ? "p.1" : "", c.mod("margrave") ? "p.2" : "", c.mod("relics") ? "p.3" : ""].filter(Boolean).join(", ") : ""),
         when: (c) => c.mode !== "darksworn" },
       { exp: "base",
         t: "Deal the secret Dukes",
@@ -202,7 +205,7 @@ VC.phases = [
           if (c.mode === "solo") d += "<br><b>Solo:</b> after picking yours, place one random Duke facedown above the Monster stacks — that traitor is the <b>Dark Lord</b>, scoring at game end from surviving Monsters and everything he captures.";
           return d;
         },
-        src: (c) => c.mode === "solo" ? "Base Rulebook p.3, p.14" : "Base Rulebook p.3" + (c.mod("noduke") ? ", p.13" : ""),
+        src: (c) => (c.mode === "solo" ? "Base Rulebook p.3, p.14" : "Base Rulebook p.3" + (c.mod("noduke") ? ", p.13" : "")) + (c.mod("promos") && !c.mod("noduke") ? " · Combined Guide p.2" : ""),
         when: (c) => c.mode !== "darksworn" },
       { exp: "cs",
         t: "Set up the Island board",
@@ -212,7 +215,7 @@ VC.phases = [
       { exp: "minis",
         t: "Set up the Agents row",
         d: "Shuffle the <b>Agent deck</b> above the left-most Monster stack and reveal <b>4 Agents</b>, one above each of the other four Monster stacks.",
-        src: "Combined Guide (Agents)",
+        src: "Combined Guide p.1 (Agents)",
         when: (c) => c.mode === "standard" && c.mod("agents") },
       { exp: "base",
         t: "Choose the first player",
@@ -230,8 +233,8 @@ VC.phases = [
     steps: [
       { exp: "ds",
         t: "Story board, Book and Number tiles",
-        d: "Place the <b>Story board</b> at the top of the play area with <b>1 Achievement token per player</b> on it. Unwrap the current Book (<b>Book One: The Prophesy</b> to begin) and slot it into the right side of the board's book illustration. Place the five <b>Number tiles</b> (2–6) left to right above where the Monster row will be. When play begins, the starting player flips the Book's cover card into the far-left slot — read and follow its setup and rules; the cover's rules apply for the whole Book.",
-        src: "Darksworn p.2, p.8",
+        d: "Place the <b>Story board</b> at the top of the play area with <b>1 Achievement token per player</b> on it. Unwrap the current Book (<b>Book One: The Prophesy</b> to begin) and slot it into the right side of the board's book illustration. Place the five <b>Number tiles</b> (1–5) left to right above where the Monster row will be. When play begins, the starting player flips the Book's cover card into the far-left slot — read and follow its setup and rules; the cover's rules apply for the whole Book.",
+        src: "Darksworn p.2, p.6, p.8",
         when: (c) => c.mode === "darksworn" },
       { exp: "ds",
         t: "Monster row, deck and Walls",
@@ -245,7 +248,7 @@ VC.phases = [
         when: (c) => c.mode === "darksworn" },
       { exp: "ds",
         t: "Player setup and first player",
-        d: (c) => "Each player takes <b>1 Explorer, 1 Peasant, 1 Knight and 1 Reference card</b> — no other starter with a consolation trigger is used. Everyone starts with <b>2 Gold, 1 Magic and 1 Victory Point</b>" + ((c.book || 1) > 1 ? " — in later Books, start with VP equal to the Book number instead" : "") + ". (Dungeon Delve: 2 Gold, 2 Strength, 2 Magic, 2 VP, and all 9 Shades in the deck.) Randomly pick the first player and hand them the dice.",
+        d: (c) => "Each player takes <b>1 Explorer, 1 Peasant, 1 Knight and 1 Reference card</b> — no other card with the consolation (=/x) trigger is used. Everyone starts with <b>2 Gold, 1 Magic and 1 Victory Point</b>" + ((c.book || 1) > 1 ? " — in later Books, start with VP equal to the Book number instead" : "") + ". (Dungeon Delve: 2 Gold, 2 Strength, 2 Magic, 2 VP, and all 9 Shades in the deck.) Randomly pick the first player and hand them the dice.",
         src: "Darksworn p.3, p.13",
         when: (c) => c.mode === "darksworn" }
     ] }
@@ -269,12 +272,12 @@ VC.reference = [
       return `
 <ol>
 <li><b>Roll Phase</b> — the Active player rolls both dice${solo ? " (you roll each round)" : ""}. Each die value <i>and the sum</i> will activate matching Citizens. Roll-Phase Domains may modify dice now (each once per Roll Phase), before anything else triggers.${c.has("cs") ? " <b>Crimson Seas:</b> for every 6 rolled (including a summed 6), place 1 Resource from your supply onto Exekratys." : ""}${c.mod("monsterevents") ? " <b>Monster Events:</b> a rolled Activation Number triggers the event now (once, even on doubles)." : ""}</li>
-<li><b>Harvest Phase</b> — every player harvests from each activated Citizen: the <b>left (sun) power</b> if you're the Active player, the <b>right (moon) power</b> otherwise. Doubles activate each matching card <b>twice</b>. Resolve your cards in any order and spend as you go — except a <b>Thief-style “take from a player” card resolves first</b>. ${c.has("cs") ? "<b>Coxswain:</b> activates when none of your Citizens did, or on doubles (never both) — the old any-1-Resource consolation rule is gone." : "<b>Herald:</b> if no Citizen of yours activated — or the roll was doubles — gain any 1 Resource (both true at once: gain twice). If your Citizens activated but you couldn't or wouldn't use them, no Herald."}${solo ? " Solo: harvest LEFT-side powers; “take from a player” effects just gain from the bank." : ""}</li>
+<li><b>Harvest Phase</b> — every player harvests from each activated Citizen: the <b>left (on-turn) power</b> if you're the Active player, the <b>right (off-turn) power</b> otherwise. Doubles activate each matching card <b>twice</b>. Resolve your cards in any order and spend as you go — except a <b>Thief-style “take from a player” card resolves first</b>. ${c.has("cs") ? "<b>Coxswain:</b> activates when none of your Citizens did, or on doubles (only once if both apply) — the old any-1-Resource consolation rule is gone." : c.mod("margrave") ? "<b>Margrave</b> (replaces the Herald): gain the bonus on the bottom of the Margrave card when the roll is doubles or none of your Citizens activated." : "<b>Herald:</b> if no Citizen of yours activated — or the roll was doubles — gain any 1 Resource (both true at once: gain twice). If your Citizens activated but you couldn't or wouldn't use them, no Herald."}${solo ? " Solo: harvest LEFT-side powers; “take from a player” effects just gain from the bank." : ""}</li>
 <li><b>Action Phase</b> — the Active player takes <b>exactly 2 actions</b> (repeats allowed, one finished before the next): Slay a Monster, Recruit a Citizen, Gain a Resource, Build a Domain${c.has("cs") ? ", Sail, Gain a Map" : ""}${c.mod("agents") ? ", Engage an Agent" : ""}.</li>
 ${solo ? "<li><b>Monsters Phase</b> — each die (not the sum) activates the Monster stack in that position (1 = left-most … 5 = right-most; 6 = your choice of unexhausted stack; doubles activate twice; exhausted stacks whiff). An activated stack captures a Citizen from its column for the Dark Lord — if both Citizen stacks are empty, a Domain; if the whole column is empty, you lose immediately. Harder game: also activate for a summed 2–6, and/or an exhausted rolled stack lets the Dark Lord attack the column directly.</li><li><b>Second Harvest Phase</b> — harvest the RIGHT-side powers of your activated Citizens, including any recruited this turn.</li>" : ""}
-<li><b>End Phase</b> — check the end conditions; otherwise pass the dice left.${c.has("cs") ? " Flip your used (facedown) Tomes faceup — the very last thing you do." : ""}${c.p === 5 ? " Pass the Resting token left too — it always sits right of the Active player." : ""}</li>
+<li><b>End Phase</b> — check the end conditions; otherwise ${solo ? "pick up the dice to start the next round" : "pass the dice left"}.${c.has("cs") ? " Flip your used (facedown) Tomes faceup — the very last thing you do." : ""}${c.p === 5 ? " Pass the Resting token left too — it always sits right of the Active player." : ""}</li>
 </ol>
-<p class="src-line">Base Rulebook p.4–5${solo ? ", p.14" : ""}${c.has("cs") ? " · Crimson Seas p.5" : ""}</p>`;
+<p class="src-line">Base Rulebook p.4–5${c.mod("monsterevents") ? ", p.12" : ""}${c.p === 5 ? ", p.13" : ""}${solo ? ", p.14" : ""}${c.has("cs") ? " · Crimson Seas p.5–6, p.9" : ""}${c.mod("agents") || (c.mod("margrave") && !c.has("cs")) ? " · Combined Guide " + [c.mod("margrave") && !c.has("cs") ? "p.4" : "", c.mod("agents") ? "p.5" : ""].filter(Boolean).join(", ") : ""}</p>`;
     } },
 
   { id: "actions", title: "The Actions",
@@ -288,9 +291,9 @@ ${solo ? "<li><b>Monsters Phase</b> — each die (not the sum) activates the Mon
 ${c.has("cs") ? `<li><b>Gain a Map</b> — take 1 Map token from the bank.</li>
 <li><b>Sail</b> — pay 1 Map, visit one island: <b>Araby</b> buy any number of the faceup Goods at their slot prices; <b>Nae Aerie</b> same for Tomes; <b>Exekratys</b> take ALL of one Resource type piled there; <b>Amarynth</b> rescue 1 Noble for 9 of any one Resource +1 per Noble you already have. Then refresh the island (slide tokens down cheaper, refill; draw a new Noble).</li>` : ""}
 ${c.mod("agents") ? "<li><b>Engage an Agent</b> — use a faceup Agent's ability, return it to the bottom of the deck, refill the row.</li>" : ""}
-${c.mod("wardtowers") ? "<li><b>Build a Banner (Ward Towers)</b> — with 4 matching Role icons, pay exactly 9 of the shown resource (no Magic augmentation; Tomes allowed) to place a Banner on the Tower.</li>" : ""}
+${c.mod("wardtowers") ? "<li><b>Build a Banner (Ward Towers)</b> — taken as a Build a Domain action: with 4 matching Role icons, pay exactly 9 of the shown resource (no Magic augmentation; Tomes allowed) to place a Banner on the Tower.</li>" : ""}
 </ul>
-<p class="src-line">Base Rulebook p.6–7${c.has("cs") ? " · Crimson Seas p.6–7" : ""}${c.mod("agents") || c.mod("wardtowers") ? " · Combined Guide" : ""}</p>` },
+<p class="src-line">Base Rulebook p.6–7, p.11${c.has("cs") ? " · Crimson Seas p.6–8" : ""}${c.mod("agents") || c.mod("wardtowers") ? " · Combined Guide " + (c.mod("agents") && c.mod("wardtowers") ? "p.5–6" : c.mod("agents") ? "p.5" : "p.6") : ""}</p>` },
 
   { id: "resources", title: "Resources, Magic & Icons",
     when: () => true,
@@ -298,25 +301,25 @@ ${c.mod("wardtowers") ? "<li><b>Build a Banner (Ward Towers)</b> — with 4 matc
 <ul>
 <li><b>Magic augments</b> Strength or Gold as long as at least one of the real resource is spent. Victory Points are <b>not</b> a Resource${c.mode === "darksworn" ? " (but Praying to Aquila spends them)" : ""}.</li>
 <li>Track values past 10 with the <b>+10 markers</b>; they're not a component limit.</li>
-<li><b>Operator icons</b>: <i>plus</i> (both sides), <i>or</i> (choose one), <i>per</i> (multiply), <i>≤</i> (take up to the limit — Citizens taken this way ignore the “+” surcharge), <i>paid-to-gain</i> (left goes to the bank for the right), <i>taken-from</i> (left comes from the right), <i>opponent of your choice</i>, <i>any die</i>${c.has("ff") || c.has("cs") || c.has("sv") ? ", <i>banish</i> (remove from the game — never a Starter)" : ""}${c.mode === "darksworn" ? ", <i>discard</i> (Citizens go to the oubliette; Monsters to the Monster discard), <i>return</i> (a captured Citizen back to its stack — this can un-exhaust it)" : ""}.</li>
+<li><b>Operator icons</b>: <i>plus</i> (both sides), <i>or</i> (choose one), <i>per</i> (multiply), <i>≤</i> (take up to the limit — Citizens taken this way ignore the “+” surcharge), <i>paid-to-gain</i> (left goes to the bank for the right), <i>taken-from</i> (left comes from the right), <i>opponent of your choice</i>, <i>any die</i>${c.has("ff") || c.has("cs") || c.has("sv") || c.mode === "darksworn" ? ", <i>banish</i> (remove from the game — never a Starter)" : ""}${c.mode === "darksworn" ? ", <i>discard</i> (Citizens go to the oubliette; Monsters to the Monster discard), <i>return</i> (a captured Citizen back to its stack — this can un-exhaust it)" : ""}.</li>
 <li><b>Wild</b>: that many of ONE Resource of your choice — never mixed.</li>
 <li>Card text beats the rulebook when they conflict. A Role icon overlapping a Citizen-card icon restricts the effect to Citizen cards.</li>
-<li>Tableau limits: none — except always exactly 1 Starter Peasant, 1 Starter Knight, 1 Starter ${VC.help.starter3(c)}${c.mod("noduke") ? "" : ", and 1 Duke"}.</li>
-${c.has("cs") ? "<li><b>Tomes</b>: flip facedown anytime to pay as the pictured Resource (works like the real token, may be augmented by Magic/Magic Tomes; never taken by opponents, never converts to a bank Resource). Flip used Tomes faceup at the very end of your turn.</li>" : ""}
+<li>Tableau limits: none — ${c.mode === "darksworn" ? "Darksworn deals no Dukes, and Banish can never remove Starter cards" : "except always exactly 1 Starter Peasant, 1 Starter Knight, 1 Starter " + VC.help.starter3(c) + (c.mod("noduke") ? "" : ", and 1 Duke")}.</li>
+${c.has("cs") && c.mode !== "darksworn" ? "<li><b>Tomes</b>: flip facedown anytime to pay as the pictured Resource (works like the real token, may be augmented by Magic/Magic Tomes; never taken by opponents, never converts to a bank Resource). Flip used Tomes faceup at the very end of your turn.</li>" : ""}
 </ul>
-<p class="src-line">Base Rulebook p.7–8, p.16${c.has("cs") ? " · Crimson Seas p.4, p.9" : ""}${c.mode === "darksworn" ? " · Darksworn p.4" : ""}</p>` },
+<p class="src-line">Base Rulebook p.4, p.7–8, p.13, p.16${c.has("ff") ? " · Flames & Frost rulesheet p.2" : ""}${c.has("cs") ? " · Crimson Seas p.4" + (c.mode !== "darksworn" ? ", p.9" : "") : ""}${c.has("sv") ? " · Shadowvale rules p.3" : ""}${c.mode === "darksworn" ? " · Darksworn p.3–5, p.9" : ""}</p>` },
 
   { id: "cards", title: "Citizens, Monsters, Domains & Dukes",
     when: (c) => c.mode !== "darksworn",
     html: (c) => `
 <ul>
-<li><b>Citizens</b>: Activation Number top-left (two numbers = either activates); Role icon top-right (Worker, Soldier, Shadow, Holy); two Harvest powers — sun side on your turn, moon side otherwise. Powers referencing names or Roles count your tableau <i>and</i> Victory stack at that moment; name references include Starters with the same name.</li>
+<li><b>Citizens</b>: Activation Number top-left (two numbers = either activates); Role icon top-right (Worker, Soldier, Shadow, Holy); two Harvest powers — left (on-turn, single-figure icon) on your turn, right (off-turn, group icon) otherwise. Powers referencing names or Roles count your tableau <i>and</i> Victory stack at that moment; name references include Starters with the same name.</li>
 <li><b>Monsters</b>: eight base Areas${c.has("ff") ? " + five Flames & Frost Areas" : ""}${c.has("cs") ? " + five Crimson Seas sea Areas" : ""}${c.has("sv") ? " + five Shadowvale Areas" : ""}; every card in a stack shares the Area icon. Types: Boss, Minion, Beast, Titan${c.has("cs") || c.has("sv") || c.mod("wardens") ? ", Warden (sits above the Boss regardless of Strength)" : ""}${c.mode === "darksworn" ? ", Shade" : ""}. Bosses reward per slain Monster of their Area. End-game VP is the mid-right number — never tracked on your board.</li>
 <li><b>Domains</b>: meet the Role icons, pay the Gold. One-time rewards happen on build; ongoing powers say when they fire (simultaneous powers resolve in your chosen order). VP mid-right at game end.</li>
 <li><b>Dukes</b>: secret, chosen 1-of-2 at setup, scored at the end. Duke scoring on Role icons counts Citizens <b>and</b> Domains${c.has("cs") ? " <b>and</b> Nobles" : ""}; Resource-scoring Dukes total ALL leftover Resources and divide.</li>
 ${c.has("cs") ? "<li><b>Nobles</b> (Amarynth): a Role icon up top that works like a Citizen's, plus end-game VP conditions printed below.</li><li><b>Goods</b> (Araby): end-game set scoring per type — 1/2/3/4/5/6 of a kind = <b>2/4/7/12/18/25 VP</b>.</li>" : ""}
 </ul>
-<p class="src-line">Base Rulebook p.8–11${c.has("cs") ? " · Crimson Seas p.8–9 · Combined Guide" : ""}</p>` },
+<p class="src-line">Base Rulebook p.8–11${c.has("cs") ? " · Crimson Seas p.8–9 · Combined Guide p.7" : ""}</p>` },
 
   { id: "endgame", title: "Ending the Game & Scoring",
     when: (c) => c.mode !== "darksworn",
@@ -324,7 +327,7 @@ ${c.has("cs") ? "<li><b>Nobles</b> (Amarynth): a Role icon up top that works lik
       if (c.mode === "solo") return `
 <ul>
 <li><b>Win immediately</b> by slaying every Monster. <b>Lose immediately</b> if a Monster attacks a column with no Citizen or Domain cards left to capture.</li>
-<li>Otherwise the game ends when <b>any five stacks are exhausted</b>: score your Monsters + Domains + Duke, then reveal the Dark Lord and score his surviving Center-Stack Monsters, captured Citizens/Domains, and his Duke against those spoils. Beat his total or share Valeria's fate.</li>
+<li>Otherwise the game ends when <b>any five stacks are exhausted</b>: score your Monsters + Domains + Duke, then reveal the Dark Lord and score the VP on his surviving Center-Stack Monsters and captured Domains, plus his Duke applied to those Monsters and his captured Citizens and Domains. Beat his total or share Valeria's fate.</li>
 </ul>
 <p class="src-line">Base Rulebook p.15</p>`;
       return `
@@ -334,7 +337,7 @@ ${c.has("cs") ? "<li><b>Nobles</b> (Amarynth): a Role icon up top that works lik
 <li><b>Tiebreak</b>: fewest cards in tableau; still tied, share the throne.</li>
 ${c.mod("monsterevents") || VC.help.usesEvents(c) ? "<li>Slain Monster Events score like normal Monsters, including their icons for Dukes" + (c.has("cs") ? " and Nobles" : "") + ".</li>" : ""}
 </ul>
-<p class="src-line">Base Rulebook p.5${c.has("cs") ? " · Crimson Seas p.6, p.8–9 · Combined Guide" : ""}</p>`;
+<p class="src-line">Base Rulebook p.5${c.mod("monsterevents") || VC.help.usesEvents(c) ? ", p.12" : ""}${c.mod("noduke") ? ", p.13" : ""}${c.has("cs") ? " · Crimson Seas p.6, p.8–9 · Combined Guide p.7" : ""}</p>`;
     } },
 
   { id: "events", title: "Events & Monster Events",
@@ -342,11 +345,11 @@ ${c.mod("monsterevents") || VC.help.usesEvents(c) ? "<li>Slain Monster Events sc
     html: (c) => `
 <ul>
 ${c.mod("events") ? "<li><b>Event cards</b> reveal from the Exhausted stack: place the Event in the open slot and resolve its text before the next action or phase — granted actions are free; multiple players resolve in turn order. The slot still counts as exhausted. <i>Flip a Citizen</i> effects: a facedown Citizen doesn't activate and doesn't count for Domains, but flips back up to score at the end.</li>" : ""}
-${c.mod("monsterevents") ? "<li><b>Monster Events</b> trigger at the end of a Roll Phase matching their Activation Number (never twice on doubles); once revealed they sit in a slot and can be <b>slain</b> (printed cost + any resource tokens piled on). Replace a slain event from the <b>bottom</b> of the Exhausted stack. Clarifications — <i>Leviathan</i>: +1 Strength token per rolled 6, max 10. <i>Ghost Ship</i>: each Roll Phase the Active player feeds it 1 Gold; the slayer takes the pile. <i>Giants of Ostendaar</i> (5): banish a faceup Domain. <i>Flaming Devourer</i> (4): banish a center-stack Citizen. <i>Skeleton Army</i> (3): flip an opponent's Citizen facedown for the rest of the game (it still scores). <i>Pirate Blockade</i>: rolled values (and the sum) can't be gained as Citizens this turn.</li>" : ""}
+${c.mod("monsterevents") ? "<li><b>Monster Events</b> trigger at the end of a Roll Phase matching their Activation Number (never twice on doubles); once revealed they sit in a slot and can be <b>slain</b> (printed cost + any Strength/Magic tokens piled on; Gold tokens on a Monster go to whoever slays it). Replace a slain event from the <b>bottom</b> of the Exhausted stack. Crimson Seas Monster Event clarifications — <i>Leviathan</i>: +1 Strength token per rolled 6, max 10. <i>Ghost Ship</i>: each Roll Phase the Active player feeds it 1 Gold; the slayer takes the pile. <i>Giants of Ostendaar</i> (5): banish a faceup Domain. <i>Flaming Devourer</i> (4): banish a center-stack Citizen. <i>Skeleton Army</i> (3): flip an opponent's Citizen facedown for the rest of the game (it still scores). <i>Pirate Blockade</i>: rolled values (and the sum) can't be gained as Citizens this turn.</li>" : ""}
 ${c.mod("samurai") ? "<li><b>Undead Samurai Event</b>: shuffles the Samurai Lord into the Exhausted stack; when the Lord appears, players seed Samurai onto unexhausted stacks in turn order. Slay the Lord to banish the rest.</li>" : ""}
 ${c.mod("kingsguard") ? "<li><b>King's Guard</b>: when revealed, its Citizen stack goes on top and becomes recruitable; the slot still counts as exhausted.</li>" : ""}
 </ul>
-<p class="src-line">Base Rulebook p.12 · Shadowvale rules · Crimson Seas p.10–12 · Combined Guide</p>` },
+<p class="src-line">${[c.mod("monsterevents") ? "Base Rulebook p.12" : "", c.mod("events") ? [c.has("ff") ? "Flames & Frost rulesheet p.1–2" : "", c.has("sv") ? "Shadowvale rules p.2" : ""].filter(Boolean).join(" · ") : "", c.mod("monsterevents") ? "Crimson Seas p.10–12" : "", "Combined Guide " + (c.mod("events") ? (c.mod("kingsguard") || c.mod("samurai") || c.mod("monsterevents") ? "p.5–7" : "p.5") : "p.6–7")].filter(Boolean).join(" · ")}</p>` },
 
   { id: "darksworn-ref", title: "Darksworn: Walls, Blessings, Shades & the Book",
     when: (c) => c.mode === "darksworn",
@@ -373,10 +376,10 @@ ${c.mod("kingsguard") ? "<li><b>King's Guard</b>: when revealed, its Citizen sta
 <li><b>Gargan's Embrace</b>: 1 VP whenever the dice are or become doubles — multiple triggers per roll possible.</li>
 <li><b>Nest of the Weaver Woman / Watcher on the Water</b>: return a Citizen/Monster to its stack — this can un-exhaust the slot and genuinely extend the game.</li>
 <li><b>Purloiner's Perch</b>: steal a random slain Monster (shuffle their stack facedown); no rewards, just the card.</li>
-${c.has("sv") ? "<li><b>Blood Moon Palace</b>: 2 Magic rerolls BOTH dice, before or after other dice Domains. <b>Opera House</b>: +1 Magic once per Harvest Phase in which you gained any Magic. <b>Laborium / Cursed Cavern</b>: flipped Citizens stay inactive but score at the end (Cursed Cavern flips one of everyone's, including yours). <b>Ancient Tomb</b>: its Strength tokens raise the Monster's cost for whoever slays it. <b>Raven's Outpost</b>: triggers only on opponents' slays. <b>Dragoon</b>: a free Slay during the Harvest Phase — Action-Phase triggers (like Raven's Outpost) don't fire on it.</li>" : ""}
+${c.has("sv") ? "<li><b>Blood Moon Palace</b>: 2 Magic rerolls BOTH dice, before or after other dice Domains. <b>Opera House</b>: +1 Magic once per Harvest Phase in which you gained any Magic. <b>Laborium / Cursed Cavern</b>: flipped Citizens stay inactive but score at the end (Cursed Cavern flips one of everyone's, including yours). <b>Ancient Tomb</b>: its Strength tokens raise the Monster's cost for whoever slays it. <b>Raven's Outpost</b>: triggers only on opponents' slays. <b>Dragoon</b>: a bonus Slay a Monster action during the Harvest Phase (not one of your two actions) — Action-Phase triggers (like Raven's Outpost) don't fire on it.</li>" : ""}
 ${c.has("ff") ? "<li><b>Betrayal of Bonds</b> (F&F): the flipped Citizen is dead weight until end-game scoring.</li>" : ""}
 </ul>
-<p class="src-line">Base Rulebook p.15–16${c.has("sv") ? " · Shadowvale rules" : ""}${c.has("ff") ? " · Flames & Frost rulesheet" : ""}</p>` }
+<p class="src-line">Base Rulebook p.15–16${c.has("sv") ? " · Shadowvale rules p.3–4" : ""}${c.has("ff") ? " · Flames & Frost rulesheet p.2" : ""}</p>` }
 ];
 
 /* ---- TEACHING SCRIPT (read aloud, ~5 min; content per the 2E rulebook, the
@@ -385,40 +388,40 @@ VC.teach = {
   intro: "Read this aloud — about five minutes. Dice down until the end.",
   sections: [
     { h: "The pitch — and how you win", when: (c) => c.mode !== "darksworn", body: (c) => `
-<p>We are dukes defending Valeria — by getting rich doing it. Most <b>Victory Points</b> wins: points come from <b>slain Monsters</b>, <b>built Domains</b>, points banked on your board${c.mod("noduke") ? ", and a public scoring rubric we all share" : ", and your secret <b>Duke card</b>'s bonus"}${c.has("cs") ? " — plus <b>Goods</b> sets, <b>Tomes</b> and rescued <b>Nobles</b> from the Island" : ""}.</p>
-<p>The game ends when all the Monsters are dead, all the Domains built, or enough card stacks run empty${c.has("cs") ? " — or when the Island can no longer restock its Goods, Tomes or Nobles" : ""} — then equal turns and we count.</p>` },
+<p>We are dukes defending Valeria — by getting rich doing it. ${c.mode === "solo" ? "Solo, you must <b>outscore the Dark Lord</b>: your points come from <b>slain Monsters</b>, <b>built Domains</b> and your secret <b>Duke card</b>'s bonus" : "Most <b>Victory Points</b> wins: points come from <b>slain Monsters</b>, <b>built Domains</b>, points banked on your board" + (c.mod("noduke") ? ", and a public scoring rubric we all share" : ", and your secret <b>Duke card</b>'s bonus")}${c.has("cs") ? " — plus <b>Goods</b> sets, <b>Tomes</b> and rescued <b>Nobles</b> from the Island" : ""}.</p>
+<p>${c.mode === "solo" ? "The solo game ends <b>immediately</b>: slay every Monster and you win outright; a Monster attacks a column with no Citizen or Domain left and you lose; otherwise it ends the moment <b>any five stacks</b> are exhausted — and a tie goes to the Dark Lord." : "The game ends when all the Monsters are dead, all the Domains built, or enough card stacks run empty" + (c.has("cs") ? " — or when the Island can no longer restock its Goods, Tomes or Nobles" : "") + " — then equal turns and we count."}</p>` },
 
     { h: "The pitch — hold the walls together", when: (c) => c.mode === "darksworn", body: () => `
-<p>This is <b>Darksworn</b> — fully cooperative and story-driven. We play through a <b>Book</b>: complete its Tasks to turn pages, and win by reaching the final page. We lose the moment a Monster attack demands a Citizen we can't give. Walls fall, Shades stalk the row, and the Book itself strikes on every 6.</p>` },
+<p>This is <b>Darksworn</b> — fully cooperative and story-driven. We play through a <b>Book</b>: complete its Tasks to turn pages, and win by reaching the final page. We lose the moment an attack demands a Citizen we can't give. Walls fall, Shades stalk the row, and the Book itself strikes on every 6.</p>` },
 
     { h: "The dice work for everyone", body: (c) => `
-<p>Here's the engine: the active player rolls two dice, and <b>every player harvests</b> — each die, <i>and their sum</i>, activates Citizens with those numbers in front of you. Active player takes the sun-side bonus, everyone else the moon side; doubles trigger twice. You are never idle in this game — every roll is your roll.</p>
-<p>${c.has("cs") && c.mode !== "darksworn" ? "No Citizen fired? Your <b>Coxswain</b> steps in with resources and Maps. And every rolled <b>6</b> — including the sum — drops one of your resources onto <b>Exekratys</b>, piling up an island treasure someone will later sail off with." : "No Citizen fired? Your consolation card feeds you a resource anyway."}</p>` },
+<p>Here's the engine: the active player rolls two dice, and <b>every player harvests</b> — each die, <i>and their sum</i>, activates Citizens with those numbers in front of you. Active player takes the left-side (on-turn) power, everyone else the right-side (off-turn) power; doubles trigger twice. You are never idle in this game — every roll is your roll.</p>
+<p>${c.has("cs") && c.mode !== "darksworn" ? "No Citizen fired? Your <b>Coxswain</b> steps in with resources and Maps. And every rolled <b>6</b> — including the sum — drops one of your resources onto <b>Exekratys</b>, piling up an island treasure someone will later sail off with." : "No Citizen fired? Your consolation card pays you a bonus anyway."}</p>` },
 
     { h: "Your two actions — and why", body: (c) => {
       if (c.mode === "darksworn") return `
-<p>On your turn, two actions: <b>Slay a Monster</b> (its points are yours instantly, and it stops attacking that column), <b>Recruit a Citizen</b> (grow everyone's engine — yours most), <b>Gain a Resource</b>, <b>Pray to Aquila</b> (spend hard-won points for fresh Walls or Blessings), <b>Share Resources</b> (half lands with a friend, rounded up), or <b>Engage the Book</b> (pay a Task's full cost to plant your Achievement token — Tasks need one token per player, so everyone pulls).</p>`;
+<p>On your turn, two actions: <b>Slay a Monster</b> (its points are yours instantly, and it stops attacking that column), <b>Recruit a Citizen</b> (grow everyone's engine — yours most), <b>Gain a Resource</b>, <b>Pray to Aquila</b> (spend hard-won points for fresh Walls or Blessings), <b>Share Resources</b> (half lands with a friend, rounded up), or <b>Engage the Book</b> (pay a Task's full cost to plant your Achievement token — Tasks need one token per player, though any of us can place them).</p>`;
       let extra = [];
       if (c.has("cs")) extra.push("<b>Gain a Map</b> — take a Map token, the fuel for sailing");
       if (c.has("cs")) extra.push("<b>Sail</b> — see the Island, below");
       if (c.mod("agents")) extra.push("<b>Engage an Agent</b> — use a faceup Agent's one-shot ability from the row above the Monsters");
-      if (c.mod("wardtowers")) extra.push("<b>Build a Banner</b> — with four matching Role icons, pay exactly nine of one resource (no Magic help) toward a shared Ward Tower; finished Towers discount everyone's Monster hunts and pay you 5 points a banner");
+      if (c.mod("wardtowers")) extra.push("<b>Build a Banner</b> — a Build a Domain action: with four matching Role icons, pay exactly nine of the resource the Tower shows (no Magic help) toward a shared Ward Tower; finished Towers discount everyone's Monster hunts and pay you 5 points a banner");
       return `
 <p>On your turn, two actions, any mix: <b>Slay a Monster</b> — pay its Strength (Magic tops up), take the card, its rewards, and its points; <b>Recruit a Citizen</b> — pay Gold for a stronger engine (each copy you already own costs +1); <b>Build a Domain</b> — match the Role icons in your tableau, pay Gold, gain powers and points; or <b>Gain a Resource</b> when you're short. Monsters are tempo, Citizens are income, Domains are the payoff.</p>${extra.length ? `<p>Also on the menu this game: ${extra.join("; ")}.</p>` : ""}`;
     }},
 
     { h: "Crimson Seas — the Island", when: (c) => c.has("cs") && c.mode !== "darksworn", body: () => `
 <p>The <b>Island board</b> floats above the market, and the <b>Sail</b> action (pay 1 Map) visits one of its four ports: <b>Araby</b> sells <b>Goods</b> — pure endgame points that snowball as sets (one of a kind is 2 points; six of a kind is 25); <b>Nae Aerie</b> sells <b>Tomes</b> — a resource you can spend <i>every turn</i>, flipping facedown and back; <b>Exekratys</b> lets you scoop up <b>everything</b> piled there of one resource; and <b>Amarynth</b> rescues <b>Nobles</b> — expensive, but they carry Role icons for your Domains and Dukes plus their own endgame conditions.</p>
-<p>After each visit the port restocks and everything left gets <i>cheaper</i> — so watch what your rivals leave behind.</p>` },
+<p>After a shopping trip to Araby or Nae Aerie, the leftovers slide down and get <i>cheaper</i> before the port restocks — so watch what your rivals leave behind. Out at sea, Monsters marked “+” cost 1 more Strength or Magic for each copy you've already slain, and Crimson Seas stacks include <b>Wardens</b>, placed just above the Boss.</p>` },
 
     { h: "The secret Duke", when: (c) => c.mode !== "darksworn" && !c.mod("noduke"), body: (c) => `
-<p>Your <b>Duke card</b> is hidden and scores at the end — most reward collecting certain Role icons or hoarding a resource. Peek at it whenever you like, build toward it quietly, and don't let your purchases give you away.</p>` },
+<p>Your <b>Duke card</b> is hidden and scores at the end — many reward collecting certain Role icons or hoarding resources. Peek at it whenever you like, build toward it quietly, and don't let your purchases give you away.</p>` },
 
     { h: "No Duke — everyone chases the same rubric", when: (c) => c.mode !== "darksworn" && c.mod("noduke"), body: () => `
 <p>No secret Dukes this game. Instead everyone scores a shared rubric at the end: points per <b>Role icon</b> across your Citizens and Domains, points for leftover resources, and <b>7-point bonuses</b> for the most Citizens, most Monsters and most Domains. Majorities are the battleground — watch the counts.</p>` },
 
     { h: "Solo — the Dark Lord", when: (c) => c.mode === "solo", body: () => `
-<p>Your rival is the <b>Dark Lord</b>: after your actions, each die activates the Monster stack in that position, and it <b>kidnaps a Citizen</b> from that column for his hoard — empty columns lose Domains, and a bare column loses you the game on the spot. Then you harvest again (moon side). At the end, he scores everything he's captured plus every Monster you left alive. Kill fast; he profits from your patience.</p>` },
+<p>Your rival is the <b>Dark Lord</b>: after your actions, each die activates the Monster stack in that position, and it <b>kidnaps a Citizen</b> from that column for his hoard — a column with no Citizens left gives up a Domain, and a bare column loses you the game on the spot. Then you harvest again (right side this time). At the end, he scores everything he's captured plus every Monster you left alive. Kill fast; he profits from your patience.</p>` },
 
     { h: "Events in the stacks", when: (c) => c.mode !== "darksworn" && (c.mod("monsterevents") || c.mod("events") || c.mod("kingsguard") || c.mod("samurai")), body: (c) => {
       const bits = [];
@@ -429,13 +432,15 @@ VC.teach = {
       return `<p>Some of the <b>Exhausted cards</b> covering emptied stacks are booby-trapped: ${bits.join("; ")}. Emptying a stack is still how the game ends, so treat every reveal as a small ceremony.</p>`;
     }},
 
-    { h: "Table variants in play", when: (c) => c.mode !== "darksworn" && (c.mod("mixed") || c.mod("relics") || c.mod("wardens") || c.mod("margrave") || c.has("ff") || c.has("sv")), body: (c) => {
+    { h: "Table variants in play", when: (c) => c.mode !== "darksworn" && (c.mod("mixed") || c.mod("relics") || c.mod("wardens") || (c.mod("margrave") && !c.has("cs")) || c.mod("morestacks") || c.mod("promos") || c.has("ff") || c.has("sv")), body: (c) => {
       const bits = [];
       if (c.mod("mixed")) bits.push("the <b>Citizen stacks are shuffled mixes</b> — facedown cards stay a mystery until the one above them sells");
       if (c.mod("relics")) bits.push("everyone starts with a <b>Relic</b> — a personal power card; read yours before we begin");
-      if (c.mod("wardens")) bits.push("each Monster stack hides a <b>Warden</b> just above its Boss — the second-to-last fight is meaner than you expect");
-      if (c.mod("margrave")) bits.push("your third starter is the <b>Margrave</b> — it fires on doubles or whiffed rolls");
-      if (c.has("ff")) bits.push("<b>Flames &amp; Frost</b> monsters, citizens and domains are shuffled through everything");
+      if (c.mod("wardens")) bits.push("each Monster stack hides a <b>Warden</b> just above its Boss, whatever its Strength");
+      if (c.mod("margrave") && !c.has("cs")) bits.push("your third starter is the <b>Margrave</b> — it fires on doubles or whiffed rolls");
+      if (c.mod("morestacks")) bits.push("the <b>Fire Temple, Kaharian and Gnoll</b> Monster stacks are extra Areas, built like any other");
+      if (c.mod("promos")) bits.push("<b>promo Dukes and Domains</b> are shuffled into their decks");
+      if (c.has("ff")) bits.push("<b>Flames &amp; Frost</b> monsters and citizens are in the mix");
       if (c.has("sv")) bits.push("<b>Shadowvale</b>'s night-hunters are in the mix — its stacks come with their own Wardens built in");
       return `<p>Also true this game: ${bits.join("; ")}.</p>`;
     }},
@@ -452,7 +457,7 @@ VC.teach = {
         if (c.mod("agents")) later.push("specific Agents");
         if (c.p === 5) later.push("the Resting player");
       }
-      return `<p>I'll explain ${later.join(", ")} as they come up. Opening advice: buy Citizens with numbers the table is missing — 6, 7 and 8 fire constantly, and a number nobody owns is a wasted roll for everyone.</p>`;
+      return `<p>I'll explain ${later.join(", ")} as they come up.</p>`;
     }}
   ]
 };

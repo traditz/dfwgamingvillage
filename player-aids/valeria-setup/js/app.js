@@ -40,11 +40,13 @@
     if (state.players > hi) state.players = hi;
     for (const mod of VC.modules) {
       if (!state.mods.has(mod.id)) continue;
-      if (!state.exps.has(mod.requires)) state.mods.delete(mod.id);
+      if (!hasReq(mod.requires)) state.mods.delete(mod.id);
       else if (mod.modes && !mod.modes.includes(state.mode)) state.mods.delete(mod.id);
     }
-    // events module needs ff or sv on the table (it lives under ff requirement)
-    if (state.mods.has("events") && !state.exps.has("ff") && !state.exps.has("sv")) state.mods.delete("events");
+  }
+
+  function hasReq(r) {
+    return Array.isArray(r) ? r.some(id => state.exps.has(id)) : state.exps.has(r);
   }
 
   function renderExpansions() {
@@ -94,9 +96,8 @@
     box.innerHTML = "";
     let shown = 0;
     for (const mod of VC.modules) {
-      if (!state.exps.has(mod.requires)) continue;
+      if (!hasReq(mod.requires)) continue;
       if (mod.modes && !mod.modes.includes(state.mode)) continue;
-      if (mod.id === "events" && !state.exps.has("ff") && !state.exps.has("sv")) continue;
       shown++;
       const on = state.mods.has(mod.id);
       const b = el("button", "mod" + (on ? " on" : ""));

@@ -25,24 +25,38 @@
   };
   const resolve = (v, c) => (typeof v === "function" ? v(c) : v);
 
+  // Module pairs the rulebooks rule out: [a, b, soloOnly]. Intrigues + Doomsday in every mode
+  // (Future Imperfect p.13); Doomsday + Pioneers / Guardians / Hypersync in solo only (Solo p.19).
+  const PAIRS = [
+    ["doomsday", "ic", false],
+    ["doomsday", "pioneers", true],
+    ["doomsday", "guardians", true],
+    ["doomsday", "hs", true]
+  ];
+
+  function dropConflicts(id) {
+    for (const [a, b, soloOnly] of PAIRS) {
+      if (soloOnly && state.players !== 1) continue;
+      if (id === a) state.mods.delete(b);
+      else if (id === b) state.mods.delete(a);
+    }
+  }
+
   function normalize() {
     state.exps.add("base");
-    // modules require their expansion
+    const solo = state.players === 1;
     for (const mod of AN.modules) {
-      if (state.mods.has(mod.id) && !state.exps.has(mod.requires)) state.mods.delete(mod.id);
+      if (state.mods.has(mod.id) && !modAvailable(mod)) state.mods.delete(mod.id);
     }
-    // Doomsday can't combine with Pioneers, Guardians, Hypersync, or Fractures of Time
-    if (state.mods.has("doomsday") &&
-        (state.mods.has("pioneers") || state.mods.has("guardians") || state.mods.has("hs") || state.exps.has("fot"))) {
-      state.mods.delete("doomsday");
+    for (const [a, b, soloOnly] of PAIRS) {
+      if ((!soloOnly || solo) && state.mods.has(a) && state.mods.has(b)) state.mods.delete(a);
     }
     // Intrigues replaces Endgame Condition cards entirely
     if (state.mods.has("ic")) state.mods.delete("egdraft");
-    // Chronossus toggle is solo-only; solo with any expansion content requires the Chronossus
-    if (state.players !== 1) state.mods.delete("chronossus");
-    else if (state.exps.has("classic") || state.exps.has("fot") || state.exps.has("fi")) state.mods.add("chronossus");
-    // solo: Fractures + Guardians is not a supported combination
-    if (state.players === 1 && state.exps.has("fot")) state.mods.delete("guardians");
+    // The Chronobot is base-game only (Solo p.4): any expansion module in play needs the Chronossus
+    if (solo && (state.exps.has("fot") || AN.modules.some(m => m.requires !== "base" && state.mods.has(m.id)))) {
+      state.mods.add("chronossus");
+    }
   }
 
   function renderExpansions() {
@@ -74,8 +88,13 @@
   }
 
   function modAvailable(mod) {
+    const solo = state.players === 1;
     if (!state.exps.has(mod.requires)) return false;
-    if (mod.id === "chronossus" && state.players !== 1) return false;
+    if (mod.id === "chronossus" && !solo) return false;
+    // Fractures of Time is not supported with Doomsday or Guardians (Fractures p.15)
+    if (state.exps.has("fot") && (mod.id === "doomsday" || mod.id === "guardians")) return false;
+    // Solo: Intrigues is unsupported (Solo p.3); Endgame Condition cards stay in the box (Solo p.4, p.8)
+    if (solo && (mod.id === "ic" || mod.id === "egdraft")) return false;
     return true;
   }
 
@@ -92,7 +111,8 @@
       b.innerHTML = "<span class='mod-name'>" + mod.name + "</span><span class='mod-sum'>" + mod.summary + "</span>";
       b.title = mod.description + " (" + mod.src + ")";
       b.addEventListener("click", () => {
-        on ? state.mods.delete(mod.id) : state.mods.add(mod.id);
+        if (on) state.mods.delete(mod.id);
+        else { dropConflicts(mod.id); state.mods.add(mod.id); }
         update();
       });
       box.appendChild(b);
