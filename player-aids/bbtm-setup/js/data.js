@@ -132,7 +132,7 @@ BBTM.teams = [
     difficulty:"Medium", style:"Cheat / Foul", since:"Unknown", location:"Unknown",
     stadium:"Unknown", coach:"Unknown",
     blurb:"Famed weapon-smiths whose creations are as twisted and cruel as they are. Not even being downed can stop these players from fouling their opponents. With thick skulls and intimidating centaurs, they fight to the last breath — and beyond.",
-    special:[{name:"Downed Fouling / Trample",text:"Chaos Dwarf players foul even from the floor via downed skills, and Bull Centaurs can Trample — re-attempt a tackle on a player they just downed, using their downed Star Power."}],
+    special:[{name:"Downed Fouling / Trample",text:"Chaos Dwarf players foul even from the floor via downed skills, and Bull Centaurs can Trample: each time one downs an opposing player, he may immediately attempt to tackle that now-downed player again — a success injures him (“to a Bull Centaur, a player is either standing or injured”)."}],
     stars:["Hthark the Unstoppable","Rashnak Backstabber","Zzharg Madeye"] },
 
   /* CABAL — Cabal Vision (Legendary) */
@@ -212,7 +212,7 @@ BBTM.teams = [
     blurb:"The oldest team on the circuit — some players were there for the very first game. The Khemri are tenacious, and they don’t like to die: it annoys them. A curse follows them, though no one yet knows whom it concerns.",
     special:[
       {name:"Immortality",text:"The Tomb Prince’s “Immortal” ability prevents him from being downed or injured by any effect — ignore any tackle, team upgrade or staff upgrade that would down him or remove him from play."},
-      {name:"Pharaoh skill",text:"An exclusive skill: if a player with Pharaoh is committed to a matchup, every friendly player committed to that same matchup may use their Pharaoh-flagged abilities."}],
+      {name:"Pharaoh skill",text:"An exclusive skill: once a player with the Pharaoh skill is committed to a matchup, friendly players committed there afterwards may use their Pharaoh abilities (e.g. a Thro-Ra committed after the Tomb Prince can Pass and also Sprint)."}],
     stars:["Setekh","Ramtut III","Ithaca Benoin","Sinnedbad"] },
   { id:"underworld-creepers", league:"tcd", name:"Underworld Creepers", race:"Underworld",
     difficulty:"Very High", style:"Synergy / Warpstone", since:"2440", location:"Naggaroth",
@@ -326,7 +326,7 @@ BBTM.setup = [
     d:c=>{
       if (c.p===2){
         const gtl = c.has("foul") ? " Include the Goblin Tribal Leeg in the tournaments you shuffle (Foul Play p.1) — one more card, so one more round." : "";
-        if (c.has("sudden")) return "Two managers (Sudden Death p.4): shuffle together all Tournament cards from the Sudden Death expansion to form the deck — the game lasts 5 rounds. (Remove all Headlines.)"+gtl;
+        if (c.has("sudden")) return "Two managers (Sudden Death p.4): shuffle together all Tournament cards from the Sudden Death expansion to form the deck — the game lasts 5 rounds. (Remove all Headlines, and keep “The Blood Bowl” on the bottom as in the base two-manager rule — the season ends the week it is resolved.)"+gtl;
         return "Two managers: remove all Headline cards. Set aside “The Blood Bowl”, shuffle the other three Tournament cards, then place “The Blood Bowl” on the bottom — a 2-manager game lasts 4 rounds."+gtl;
       }
       if (c.season==="abbrev") return "Abbreviated season (4 weeks): set aside “The Blood Bowl”. Draw 1 Tournament card and 2 Headline cards, shuffle them, place “The Blood Bowl” on the bottom — a 4-card deck, 4 weeks. Note: the rulebook’s “two Headline cards (instead of three)” (p.17) is a misprint; the standard deck already uses two Headlines, so the abbreviated season simply drops one Tournament.";
@@ -334,7 +334,8 @@ BBTM.setup = [
       return "Standard season (5 weeks): set aside “The Blood Bowl”. Draw 2 of the "+((c.has("sudden")||c.has("foul")) ? "remaining" : "3 remaining")+" Tournament cards and 2 of the Headline cards, shuffle the four together, then place “The Blood Bowl” facedown on the bottom. Place the deck at the opposite end from the Highlight deck.";
     },
     note:c=> (c.has("sudden")||c.has("foul")) && c.p>2
-      ? "First swap in the expansion cards (see below) before drawing." : "" },
+      ? "First swap in the expansion cards (see below) before drawing, and shuffle the new Headline cards into the Headline pool — "
+        + [c.has("sudden") && "Sudden Death’s 3 (p.1)", c.has("foul") && "Foul Play’s 3 (its 4 Spike! cards are 3 Headlines plus the Goblin Tribal Leeg)"].filter(Boolean).join(" and ") + "." : "" },
 
   { order:6.1, ph:0, src:"sudden", page:"Sudden Death p.2",
     when:c=>c.has("sudden"),
