@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marvel Champions — Hero Decks &amp; Villain Builder · DFW Gaming Village</title>
+  <meta name="description" content="Pre-built, community-tuned decks for every Marvel Champions hero that all fit one copy of the collection, plus a villain and encounter builder with setup and export.">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,700;1,800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=4">
+</head>
+<body>
+  <header class="mc-top">
+    <div class="mc-top-inner">
+      <nav class="crumbs" aria-label="Breadcrumb">
+        <a href="/player-aids.html">Player Aids</a><span aria-hidden="true">›</span><a href="/marvel-champions.html">Marvel Champions</a><span aria-hidden="true">›</span><b>Heroes &amp; Villains</b>
+      </nav>
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 64 64"><path d="M32 3l7.6 17.4L58 22l-14 12.4L48 53 32 43.4 16 53l4-18.6L6 22l18.4-1.6z" fill="currentColor"/></svg>
+        </div>
+        <div class="brand-text">
+          <h1 class="wordmark"><span>Marvel</span> Champions</h1>
+          <p class="brand-sub">Hero Decks &amp; Villain Builder</p>
+        </div>
+      </div>
+      <p class="tagline">Every hero ships with a community-tuned deck. Together, all the decks fit one copy of the whole collection. Then pick a villain, tune the encounter deck and head to the table.</p>
+      <nav class="tabs" role="tablist" aria-label="Sections">
+        <a role="tab" href="#heroes" data-tab="heroes">Heroes</a>
+        <a role="tab" href="#villains" data-tab="villains">Villains</a>
+        <a role="tab" href="#night" data-tab="night">Game Night</a>
+        <a role="tab" href="#collection" data-tab="collection">Collection</a>
+        <a href="../marvel-champions-setup/">Rules &amp; Setup</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="app" class="mc-main" aria-live="polite">
+    <noscript><p class="panel">This page needs JavaScript to build decks.</p></noscript>
+  </main>
+
+  <div id="cardpop" class="cardpop" hidden></div>
+  <div id="sheet" class="sheet" hidden></div>
+  <div id="toast" class="toast" role="status" hidden></div>
+
+  <footer class="mc-foot">
+    <p>Deck lists are built from every published MarvelCDB decklist (recent decks count more) and solved so that all decks fit <b>one copy of every product except the Cyclops and Phoenix hero packs</b>. Scenario setups follow the official scenario inserts; rules follow the Rules Reference v1.8.</p>
+    <p>Card data and scans: <a href="https://marvelcdb.com/" rel="noopener">MarvelCDB</a> · encounter scans and product inserts: <a href="https://hallofheroeslcg.com/browse/" rel="noopener">Hall of Heroes</a>. Marvel Champions: The Card Game is © Fantasy Flight Games; characters and art © Marvel. A fan-made player aid by DFW Gaming Village — not affiliated with FFG or Marvel.</p>
+  </footer>
+
+  <script src="js/mc-cards.js?v=4"></script>
+  <script src="js/mc-heroes.js?v=4"></script>
+  <script src="js/mc-encounters.js?v=4"></script>
+  <script src="js/app.js?v=4"></script>
+  <!-- DFW Gaming Village site analytics (lives at the site root; harmless 404 in standalone dev) -->
+  <script src="/site-analytics.js?v=20260607-analytics"></script>
+</body>
+</html>

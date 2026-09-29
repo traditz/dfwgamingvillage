@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:title" content="Marvel Champions Player Aids - DFW Gaming Village">
+    <meta name="description" content="Player aids for Marvel Champions: The Card Game — rules reference &amp; setup, pre-built community decks for every hero, and a villain &amp; encounter builder.">
+    <meta property="og:description" content="Marvel Champions player aids: Rules Reference & Setup, and a Hero Deck & Villain Builder.">
+    <meta property="og:image" content="https://www.dfwgamingvillage.com/banner_cropped.png">
+    <meta property="og:url" content="https://www.dfwgamingvillage.com/marvel-champions.html">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://www.dfwgamingvillage.com/banner.png">
+    <title>Marvel Champions Player Aids - DFW Gaming Village</title>
+    <link rel="stylesheet" href="community.css?v=20260622-cleanup">
+    <link rel="icon" href="favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Barlow+Condensed:ital,wght@1,800&display=swap" rel="stylesheet">
+    <style>
+      /* --- Marvel Champions hub: comic-panel art buttons --- */
+      .mc-hub-title {
+        font-family: 'Bangers', Impact, sans-serif;
+        font-weight: 400;
+        letter-spacing: .03em;
+        font-size: clamp(2.2rem, 6vw, 3.4rem);
+        line-height: 1;
+        margin-bottom: .35em;
+      }
+      .mc-hub-title span { color: #e62429; }
+      .mc-tools {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 24px;
+        justify-content: center;
+        margin: 30px auto 0;
+        max-width: 780px;
+      }
+      .mc-tool {
+        position: relative;
+        display: block;
+        width: min(100%, 350px);
+        aspect-ratio: 20 / 23;
+        text-align: left;
+        border-radius: 16px;
+        overflow: hidden;
+        text-decoration: none;
+        color: #fff;
+        border: 3px solid #000;
+        background-color: #000;
+        background-size: cover;
+        box-shadow: 6px 6px 0 #000, 0 16px 34px rgba(0, 0, 0, 0.45);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        isolation: isolate;
+      }
+      .mc-tool.rules { background-image: url("images/pic4900321.webp"); background-position: center 46%; --mc-accent: #ff3b3f; }
+      .mc-tool.builder { background-image: url("images/mc-hub-heroes.webp"); background-position: center 30%; --mc-accent: #ffd23f; }
+      .mc-tool::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        background:
+          radial-gradient(rgba(0, 0, 0, 0.25) 1.2px, transparent 1.4px) 0 0 / 6px 6px,
+          linear-gradient(180deg, rgba(8, 10, 20, 0) 0%, rgba(8, 10, 20, 0.05) 40%, rgba(8, 10, 20, 0.88) 62%, rgba(6, 8, 16, 0.98) 100%);
+      }
+      .mc-tool .mt-inner {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: 18px 20px 20px;
+      }
+      .mc-tool .mt-kicker {
+        align-self: flex-start;
+        margin-bottom: auto;
+        font: italic 800 13px/1 'Barlow Condensed', 'Arial Narrow', sans-serif;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        color: #111;
+        background: var(--mc-accent);
+        border: 2px solid #000;
+        border-radius: 8px;
+        padding: 6px 10px;
+        box-shadow: 3px 3px 0 #000;
+        transform: rotate(-3deg);
+      }
+      .mc-tool .mt-title {
+        margin: 0;
+        font: 400 clamp(1.9rem, 4.6vw, 2.4rem)/.95 'Bangers', Impact, sans-serif;
+        letter-spacing: .04em;
+        text-shadow: 3px 3px 0 #000;
+      }
+      .mc-tool .mt-bar {
+        width: 54px;
+        height: 5px;
+        margin: 10px 0;
+        background: var(--mc-accent);
+        border: 1px solid #000;
+        transform: skewX(-20deg);
+      }
+      .mc-tool .mt-sub {
+        margin: 0;
+        font-size: 0.9rem;
+        line-height: 1.38;
+        color: #e1e6f3;
+        max-width: 32ch;
+      }
+      .mc-tool .mt-cta {
+        margin-top: 12px;
+        font: italic 800 14px/1 'Barlow Condensed', 'Arial Narrow', sans-serif;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+        color: var(--mc-accent);
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .mc-tool .mt-cta .arrow { transition: transform 0.2s ease; }
+      .mc-tool:hover, .mc-tool:focus-visible {
+        transform: translate(-3px, -5px) rotate(-.4deg);
+        box-shadow: 9px 11px 0 #000, 0 22px 44px rgba(0, 0, 0, 0.55);
+        color: #fff;
+      }
+      .mc-tool:hover .mt-cta .arrow, .mc-tool:focus-visible .mt-cta .arrow { transform: translateX(5px); }
+      .mc-hub-note { max-width: 720px; margin: 26px auto 0; font-size: .95rem; opacity: .85; text-align: center; }
+      @media (prefers-reduced-motion: reduce) {
+        .mc-tool, .mc-tool .mt-cta .arrow { transition: none; }
+      }
+    </style>
+</head>
+<body data-page="player-aids">
+    <div class="nav">
+        <a href="index.html">Home</a>
+        <a href="join.html">Join the Community</a>
+        <a href="gallery.html">Gallery</a>
+        <a href="games.html">Game Library</a>
+        <a href="events.html">Events</a>
+        <a href="utilities.html">Utilities</a>
+        <a href="player-aids.html">Player Aids</a>
+        <a href="donate.html">Donate</a>
+        <a href="supporters.html">Supporters</a>
+        <a href="contact.html">Contact</a>
+    </div>
+
+    <div class="banner">
+        <img src="banner.png" alt="DFW Gaming Village Banner">
+    </div>
+
+    <main class="content">
+        <h1 class="mc-hub-title"><span>Marvel</span> Champions</h1>
+        <p>Learn the rules and set up any scenario step by step — then grab a hero with a pre-built, community-tuned deck and pick a villain to face. Every hero deck fits the library's collection at the same time.</p>
+
+        <div class="mc-tools">
+            <a href="player-aids/marvel-champions-setup/index.html" class="mc-tool rules">
+                <span class="mt-inner">
+                    <span class="mt-kicker">Rules Reference v1.8</span>
+                    <span class="mt-title">Rules &amp; Setup</span>
+                    <span class="mt-bar"></span>
+                    <span class="mt-sub">Step-by-step setup for your scenario, the round at a glance, keywords, FAQ &amp; errata, and a teaching script.</span>
+                    <span class="mt-cta">Open Reference <span class="arrow">&rarr;</span></span>
+                </span>
+            </a>
+
+            <a href="player-aids/marvel-champions-builder/index.html" class="mc-tool builder">
+                <span class="mt-inner">
+                    <span class="mt-kicker">67 heroes · every villain</span>
+                    <span class="mt-title">Heroes &amp; Villains</span>
+                    <span class="mt-bar"></span>
+                    <span class="mt-sub">Pick a hero and its pre-built deck, choose a villain, tune the encounter deck, and export the lists.</span>
+                    <span class="mt-cta">Open Builder <span class="arrow">&rarr;</span></span>
+                </span>
+            </a>
+        </div>
+        <p class="mc-hub-note">Fan-made player aids for Marvel Champions: The Card Game (Fantasy Flight Games). Card data from MarvelCDB; scenario inserts via Hall of Heroes.</p>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 DFW Gaming Village. All Rights Reserved.</p>
+    </footer>
+    <script src="site-analytics.js?v=20260607-analytics"></script>
+</body>
+</html>
