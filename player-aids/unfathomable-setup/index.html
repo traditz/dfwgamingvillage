@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unfathomable — Setup &amp; Reference Utility</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Aladin&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Macondo&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=2">
+</head>
+<body>
+  <!-- The page is laid out like the two rulebooks: the Learn to Play (sea-glass mint, purple ink) for the
+       manifest and setup, then — below the Atlantica's waterline — the Rules Reference (lavender, green ink). -->
+  <header class="cover">
+    <div class="plate">
+      <div class="plate-title">
+        <h1 class="brand"><img src="images/logo.webp" width="751" height="212" alt="Unfathomable"></h1>
+        <p class="brand-sub">Setup &amp; Reference Utility</p>
+      </div>
+    </div>
+    <img class="boxart" src="images/boxart.webp" width="360" height="360" alt="" aria-hidden="true">
+    <p class="tagline">
+      Setup steps for your exact table, the loyalty deck and who wins, the full rules reference and a search
+      of every rulebook. The SS <i>Atlantica</i> is three days out of port — and someone aboard wants her sunk.
+    </p>
+  </header>
+
+  <main>
+    <div class="book book-ltp">
+      <section class="sec sec-cfg" aria-label="Configuration">
+        <h2>The Passenger Manifest</h2>
+        <p class="sec-note">Select the sets on the table, the way you are playing, the player count and any variants. Every step, ruling and script below adapts to your choices.</p>
+        <div class="cfg">
+          <div class="cfg-group">
+            <p class="cfg-label" id="lbl-sets">Sets in play</p>
+            <div id="expansions" class="chips" role="group" aria-labelledby="lbl-sets"></div>
+          </div>
+          <div class="cfg-group">
+            <p class="cfg-label" id="lbl-modes">Way to play</p>
+            <div id="modes" class="mode-grid" role="group" aria-labelledby="lbl-modes"></div>
+          </div>
+          <div class="cfg-group">
+            <p class="cfg-label" id="lbl-players">Players <span class="hint">three to six; the Cultist joins at four and six in the standard game</span></p>
+            <div id="players" class="pbtns" role="group" aria-labelledby="lbl-players"></div>
+          </div>
+          <div id="modules-group" class="cfg-group">
+            <p class="cfg-label" id="lbl-mods">Modules &amp; variants <span class="hint">optional; preludes need From the Abyss, the No-Cultist variant needs 4 or 6 players in a standard game</span></p>
+            <div id="modules" class="mods" role="group" aria-labelledby="lbl-mods"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="sec sec-setup" aria-label="Setup">
+        <h2>Setup</h2>
+        <p class="sec-note">Follow the steps in order; each cites its source pages. Where the Rules Reference and the Learn to Play differ, the Rules Reference is applied (it is the definitive source) — except in the learning game, which follows the Learn to Play’s first-game setup as the Rules Reference itself directs (Rules Ref p.23). From the Abyss changes apply when the expansion is selected.</p>
+        <div class="teach-bar"><button id="teachBtn" type="button" aria-expanded="false" aria-controls="teach" title="A ~5 minute script to teach this exact setup aloud">📖 Teaching script</button></div>
+        <div id="teach" class="teach-panel" hidden></div>
+        <div id="setup"></div>
+      </section>
+    </div>
+
+    <!-- the From the Abyss cover: the Atlantica on the surface, the sea pulling down into the reference -->
+    <div class="waterline" aria-hidden="true"><img src="images/ship.webp" width="511" height="352" alt=""></div>
+
+    <div class="book book-rr">
+      <section class="sec sec-ref" aria-label="Reference">
+        <h2>Rules Reference</h2>
+        <p class="sec-note">Tap a heading to open it. Contents adapt to your sets, mode and player count. Citations: Learn to Play, Rules Ref (with its § paragraph numbers), From the Abyss; the Unofficial FAQ is labelled and never overrides the books.</p>
+        <div id="reference"></div>
+      </section>
+
+      <section class="sec sec-search" aria-label="Rulebook search">
+        <h2>Search the Rulebooks</h2>
+        <p class="sec-note">Full-text search across the Learn to Play, the Rules Reference, the From the Abyss rulebook (when selected) and the community Unofficial FAQ.</p>
+        <div class="rsearch-wrap">
+          <input id="rsearch" type="search" placeholder="e.g. hybrid, cultist, brig, awakening, chaos deck, shoggoth…" aria-label="Search the rulebooks">
+        </div>
+        <div id="rresults"></div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <span class="footer-emblem" aria-hidden="true"></span>
+    <p>
+      Setup and reference content grounded in the official Unfathomable Learn to Play and Rules Reference, the
+      From the Abyss rulebook, and — clearly labelled as the lowest tier — a community-compiled Unofficial FAQ.
+      A fan-made play aid — not affiliated with Fantasy Flight Games.
+    </p>
+    <p class="folio" aria-hidden="true"><span></span>✦<span></span></p>
+  </footer>
+
+  <script src="js/data.js?v=1"></script>
+  <script src="js/rules.js?v=1"></script>
+  <script src="js/app.js?v=1"></script>
+  <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
+  <script src="/site-analytics.js?v=20260607-analytics"></script>
+</body>
+</html>
