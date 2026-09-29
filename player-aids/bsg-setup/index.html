@@ -4,31 +4,42 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Battlestar Galactica — Setup Utility</title>
-  <link rel="stylesheet" href="css/styles.css?v=51">
+  <meta name="theme-color" content="#1c0a0e">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Michroma&family=Saira:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap">
+  <link rel="stylesheet" href="css/styles.css?v=61">
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">
-      <span class="brand-bsg">BATTLESTAR GALACTICA</span>
-      <span class="brand-sub">Setup Utility</span>
-    </div>
-    <p class="tagline">Every setup, every expansion combination — clean instructions &amp; rule diagrams.</p>
-  </header>
+  <!-- .topbar is read by app.js (syncTopbarHeight). It is display:contents, so its
+       height is 0 and the sticky jump-nav docks at the very top of the screen. -->
+  <div class="topbar">
+    <header class="hero">
+      <div class="hero-inner">
+        <h1 class="brand">
+          <span class="vh">Battlestar Galactica</span>
+          <img class="brand-logo" src="images/bsg-logo.webp" width="1122" height="280" alt="" aria-hidden="true">
+          <span class="brand-sub">Setup Utility</span>
+        </h1>
+        <p class="tagline">Every setup, every expansion combination — clean instructions &amp; rule diagrams.</p>
+      </div>
+    </header>
+  </div>
 
   <main>
     <!-- Configurator -->
-    <section class="config">
+    <section class="config" aria-label="Game configuration">
       <div class="cfg-group">
-        <label class="cfg-label">Expansions on the table</label>
-        <div id="expansions" class="chips"></div>
+        <p class="cfg-label" id="lbl-exp">Expansions on the table</p>
+        <div id="expansions" class="chips" role="group" aria-labelledby="lbl-exp"></div>
       </div>
       <div class="cfg-group">
-        <label class="cfg-label">Players</label>
-        <div id="players" class="pbtns"></div>
+        <p class="cfg-label" id="lbl-players">Players</p>
+        <div id="players" class="pbtns" role="group" aria-labelledby="lbl-players"></div>
       </div>
       <div class="cfg-group grow">
-        <label class="cfg-label">Optional modules to include <span class="hint">(only selected modules appear in setups)</span></label>
-        <div id="options" class="chips"></div>
+        <p class="cfg-label" id="lbl-mods">Optional modules to include <span class="hint">(only selected modules appear in setups)</span></p>
+        <div id="options" class="chips" role="group" aria-labelledby="lbl-mods"></div>
       </div>
     </section>
 
@@ -46,8 +57,9 @@
   </main>
 
   <footer class="footer">
-    Setup content grounded in the official Battlestar Galactica rulebooks (Base, Pegasus, Exodus, Daybreak).
-    A fan-made play aid — not affiliated with the publisher.
+    <span class="foot-brand">Battlestar Galactica</span>
+    <span class="foot-text">Setup content grounded in the official Battlestar Galactica rulebooks (Base, Pegasus, Exodus, Daybreak).
+    A fan-made play aid — not affiliated with the publisher.</span>
   </footer>
 
   <script src="js/data.js?v=52"></script>
