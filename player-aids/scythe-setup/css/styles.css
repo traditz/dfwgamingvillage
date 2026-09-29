@@ -1,0 +1,788 @@
+/* =============================================================================
+   Scythe — Setup & Reference Utility
+   Styled after the Scythe rulebooks (core 2022 printing, the expansion covers
+   and the Quick Reference Guide):
+     · an aged parchment page inside the rulebook's maroon frame rule with
+       wrought-iron corner flourishes (core p.1, cut from the page art)
+     · the grey SCYTHE logo with the crimson "Quick Reference Guide" plaque
+     · League Gothic headings over the grey L-bracket (core p.10, p.22, p.27)
+     · rust run-in labels and rust page-number medallions (every page edge)
+     · green bead bullets (core p.1, p.27), green "Designer's Note" plaques,
+       red "Example" plaques (p.23), riveted "Strategy Tip" cards (p.27)
+     · the copper "Episode Goals" plaque of The Rise of Fenris for its gates
+     · Rozalski cut-outs dissolving into the paper (core p.1, p.27)
+   Body type echoes Filosofia (Libre Bodoni); display type is League Gothic,
+   the rulebooks' own heading face.
+   ============================================================================= */
+
+:root {
+  /* paper */
+  --paper:      #f1ede4;   /* page centre (rulebook #eceae4, warmed) */
+  --paper-2:    #f9f6ef;   /* raised cards */
+  --paper-3:    #e9e3d6;   /* recessed / disabled controls */
+  --edge:       #b39a7c;   /* outside the frame (rulebook #ac937a–#c6b39d) */
+  /* ink */
+  --ink:        #231f20;   /* rulebook black */
+  --ink-2:      #4f5052;   /* rulebook heading grey #58595b, a touch darker */
+  --ink-3:      #5f5a54;   /* secondary text */
+  --line:       #857c70;   /* control borders (3.5:1 on paper) */
+  --rule:       rgba(35, 31, 32, 0.16);
+  --frame:      #2f120f;   /* frame rule */
+  --silver:     #8a8b8d;   /* heading bracket */
+  /* accents */
+  --rust:       #913b24;   /* run-in labels, medallions */
+  --rust-dk:    #6e2a17;
+  --green:      #4d7536;   /* designer's note */
+  --green-dk:   #3a5a28;
+  --copper:     #8d4718;   /* Rise of Fenris episode plaque */
+  --copper-hi:  #9a5020;
+  --copper-dk:  #6a3210;
+  --focus:      #1f5aa6;
+
+  --lg: "League Gothic", "Oswald", "Arial Narrow", Impact, sans-serif;
+  --serif: "Libre Bodoni", "Bodoni 72", Didot, "Bodoni MT", Georgia, "Times New Roman", serif;
+
+  --sheet-pad: 76px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+body {
+  background-color: var(--edge);
+  background-image:
+    url("../images/paper.webp"),
+    radial-gradient(140% 90% at 50% 0%, #c8b193 0%, #b39a7c 45%, #97795c 100%);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 18px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+.vh {
+  position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+/* on the copper and green plates a blue ring vanishes (1.0–1.3:1): use white there (≥ 6:1) */
+.gate:has(.gate-btn) :focus-visible,
+.teach-top :focus-visible { outline-color: #fff; }
+
+button { font: inherit; color: inherit; }
+
+/* ---- the page ------------------------------------------------------------- */
+.sheet {
+  position: relative;
+  max-width: 1120px;
+  margin: 34px auto 44px;
+  padding: 0 var(--sheet-pad) 30px;
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(rgba(241, 237, 228, 0.62), rgba(241, 237, 228, 0.62)),   /* mutes the grain under text */
+    url("../images/paper.webp"),
+    radial-gradient(90% 55% at 50% 38%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 70%),
+    radial-gradient(60% 40% at 12% 8%, rgba(196, 160, 112, 0.28), rgba(196, 160, 112, 0) 70%),
+    radial-gradient(60% 40% at 90% 96%, rgba(196, 160, 112, 0.22), rgba(196, 160, 112, 0) 70%);
+  box-shadow:
+    inset 0 0 70px rgba(160, 118, 66, 0.42),
+    inset 0 0 14px rgba(120, 84, 44, 0.35),
+    0 0 0 1px rgba(70, 45, 20, 0.35),
+    0 22px 50px rgba(50, 30, 12, 0.45);
+}
+.sheet::before {                      /* the frame rule */
+  content: ""; position: absolute; inset: 16px;
+  border: 4px solid var(--frame); border-radius: 4px;
+  pointer-events: none;
+}
+.corner {
+  position: absolute; z-index: 2; width: 55px; height: 70px;
+  background: no-repeat 0 0 / 100% 100%; pointer-events: none;
+}
+.c-tl { top: 16px;    left: 16px;  background-image: url("../images/corner-tl.webp"); }
+.c-tr { top: 16px;    right: 16px; background-image: url("../images/corner-tr.webp"); }
+.c-bl { bottom: 16px; left: 16px;  background-image: url("../images/corner-bl.webp"); }
+.c-br { bottom: 16px; right: 16px; background-image: url("../images/corner-br.webp"); }
+
+/* ---- header: a rulebook cover ------------------------------------------------ */
+.topbar {                             /* three columns: mech · cover · Mox, so art never sits under text */
+  position: relative;
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 540px) minmax(0, 1fr);
+  column-gap: 12px; align-items: end;
+  padding: 60px 0 34px;
+  text-align: center;
+}
+.cover { grid-column: 2; grid-row: 1; position: relative; z-index: 1; min-width: 0; }
+.kicker {
+  font-style: italic; font-size: 1rem; color: var(--ink-3); letter-spacing: 0.02em;
+  margin-bottom: 8px;
+}
+.lockup { position: relative; width: 430px; max-width: 100%; margin: 0 auto; padding-bottom: 12px; }
+.brand-title { margin: 0; line-height: 0; font-size: 1rem; }
+.logo { display: block; width: 100%; height: auto; }
+.brand-sub {                          /* the crimson Quick Reference Guide plaque */
+  position: absolute; left: 26.5%; right: -3%; top: 74%;
+  height: 48px;
+  display: flex; align-items: center; justify-content: center;
+  border-style: solid; border-width: 0 44px;
+  border-image: url("../images/plaque.webp") 0 140 fill / 0 44px / 0 stretch;
+  font-family: var(--lg); font-size: 1.4rem; line-height: 1; letter-spacing: 0.1em;
+  text-transform: uppercase; white-space: nowrap;
+  color: #fff; text-shadow: 0 1px 1px rgba(40, 0, 0, 0.55);
+  filter: drop-shadow(0 2px 3px rgba(60, 20, 10, 0.35));
+}
+.tagline {
+  max-width: 33em; margin: 30px auto 0;
+  font-style: italic; font-size: 1.05rem; line-height: 1.6; color: #4a4541;
+}
+.cover-art {
+  grid-row: 1; align-self: end; display: block; height: auto;
+  pointer-events: none; user-select: none;
+}
+.art-mech { grid-column: 1; justify-self: start; width: 240px; max-width: calc(100% + 36px); margin: 0 0 4px -36px; }
+.art-mox  {                           /* like core p.1, Bjorn & Mox step over the frame rule */
+  grid-column: 3; justify-self: end; width: 272px; max-width: calc(100% + 66px); margin: 0 -66px -10px 0;
+  position: relative; z-index: 3;
+}
+
+/* ---- sections: League Gothic over the grey L-bracket ------------------------ */
+main { position: relative; z-index: 1; }
+main > section { position: relative; margin-top: 58px; counter-increment: sec; }
+main > section:first-child { margin-top: 16px; }
+
+section h2 {
+  position: relative;
+  display: inline-block;
+  margin: 0 0 14px -14px;
+  padding: 10px 70px 20px 48px;
+  font-family: var(--lg); font-weight: 400;
+  font-size: 3.1rem; line-height: 1; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink);
+  background:
+    url("../images/bracket.webp") left bottom / 37px 48px no-repeat,
+    linear-gradient(90deg, var(--silver) 0%, var(--silver) 55%, rgba(138, 139, 141, 0) 100%) left bottom / 100% 3px no-repeat,
+    linear-gradient(0deg, var(--silver) 0%, var(--silver) 45%, rgba(138, 139, 141, 0) 100%) left bottom / 3px 100% no-repeat;
+}
+section h2::before {                  /* the rust page-number medallion on the page edge */
+  content: counter(sec);
+  position: absolute; top: 14px; left: calc(-1 * var(--sheet-pad) + 14px - 23px);
+  width: 46px; height: 46px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--lg); font-size: 1.55rem; letter-spacing: 0; color: #fbeee2;
+  background: radial-gradient(circle at 38% 32%, #a9492d 0%, var(--rust) 55%, #7c311d 100%);
+  box-shadow:
+    inset 0 0 0 3px var(--rust), inset 0 0 0 4.5px rgba(251, 225, 205, 0.75),
+    0 2px 4px rgba(50, 20, 10, 0.35);
+}
+.sec-note { color: var(--ink-3); font-style: italic; font-size: 1.02rem; margin: 0 0 20px; max-width: 70ch; }
+
+/* ---- configurator: a framed box, like the rulebook's table of contents ------ */
+.cfg, .toc {
+  border: 3px solid var(--frame); border-radius: 3px;
+  background:
+    url("../images/corner-tl.webp") left top / 41px 52px no-repeat,
+    url("../images/corner-tr.webp") right top / 41px 52px no-repeat,
+    url("../images/corner-bl.webp") left bottom / 41px 52px no-repeat,
+    url("../images/corner-br.webp") right bottom / 41px 52px no-repeat,
+    rgba(255, 255, 255, 0.4);
+  background-origin: border-box;
+}
+.cfg { display: flex; flex-direction: column; gap: 26px; padding: 28px 46px 32px; }
+.cfg-label {
+  display: block; margin-bottom: 10px;
+  font-family: var(--lg); font-size: 1.7rem; line-height: 1.1; letter-spacing: 0.07em;
+  text-transform: uppercase; color: var(--ink);
+}
+.cfg-label .hint {
+  font-family: var(--serif); font-size: 1rem; font-style: italic; letter-spacing: 0;
+  text-transform: none; color: var(--ink-3);
+}
+.cfg-note { margin-top: 10px; font-size: 1rem; color: var(--ink-3); }
+.cfg-note:empty { display: none; }
+.opt-group { margin-bottom: 16px; }
+.opt-group:last-child { margin-bottom: 0; }
+.opt-label {
+  display: flex; align-items: center; gap: 12px; margin: 4px 0 9px;
+  font-family: var(--lg); font-size: 1.3rem; line-height: 1.1; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--ink-2);
+}
+.opt-label::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--silver), rgba(138, 139, 141, 0)); }
+
+.chips, .mods, .pbtns, .mode-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+
+/* shared card control: paper card with a green bead (the rulebook's bullet) */
+.chip, .mode-btn, .mod, .ep-btn {
+  position: relative;
+  text-align: left; cursor: pointer;
+  background: var(--paper-2);
+  border: 1px solid var(--line); border-radius: 3px;
+  box-shadow: 0 1px 0 rgba(60, 40, 20, 0.12);
+  transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
+}
+.chip:hover, .mode-btn:hover, .mod:hover, .ep-btn:hover { border-color: var(--rust); box-shadow: 0 0 0 1px var(--rust), 0 2px 4px rgba(60, 40, 20, 0.18); }
+
+.chip::before, .mode-btn::before, .mod::before {        /* empty bead socket */
+  content: ""; position: absolute; left: 13px; top: 50%; margin-top: -10px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #ffffff 0%, #ece6da 70%);
+  border: 2px solid #6f685f;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.18);
+}
+.chip.on::before, .mode-btn.on::before, .mod.on::before {  /* filled green bead */
+  background: radial-gradient(circle at 36% 30%, #d9f1b0 0%, #86b556 22%, #4d7536 62%, #2c4a1c 100%);
+  border-color: #1f3514;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+.chip.on::after, .mode-btn.on::after, .mod.on::after {  /* check mark on the bead */
+  content: ""; position: absolute; left: 20px; top: 50%; margin-top: -6px;
+  width: 6px; height: 10px; border: solid #fff; border-width: 0 2.5px 2.5px 0;
+  transform: rotate(40deg);
+}
+.mode-btn.on::after, .mod.radio.on::after {                 /* radio: a dot, not a tick */
+  left: 19px; margin-top: -4px; width: 8px; height: 8px; border: 0; border-radius: 50%;
+  background: #fff; transform: none;
+}
+/* on multi-line cards the bead sits beside the name, not the middle of the card */
+.mod::before { top: 12px; margin-top: 0; }
+.mod.on::before { top: 11px; }
+.mod.on::after { top: 15px; margin-top: 0; }
+.mod.radio.on::after { top: 17px; margin-top: 0; }
+.mode-btn::before { top: 14px; margin-top: 0; }
+.mode-btn.on::before { top: 13px; }
+.mode-btn.on::after { top: 19px; margin-top: 0; }
+.chip.on, .mode-btn.on, .mod.on, .ep-btn.on {
+  background: #fffdf8;
+  border: 2px solid var(--ink);
+  box-shadow: 0 2px 0 rgba(35, 31, 32, 0.22);
+}
+
+.chip { display: flex; flex-direction: column; justify-content: center; min-height: 56px; padding: 7px 14px 7px 42px; }
+.chip.on { padding: 6px 13px 6px 41px; }
+.chip.on::before { left: 12px; }
+.chip.on::after { left: 19px; }
+.chip b {
+  font-family: var(--lg); font-weight: 400; font-size: 1.4rem; line-height: 1.1;
+  letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink);
+}
+.chip span { font-size: 0.9rem; font-style: italic; color: var(--ink-3); line-height: 1.3; }
+.chip.lock { cursor: default; }
+.chip.lock:hover { box-shadow: 0 2px 0 rgba(35, 31, 32, 0.22); border-color: var(--ink); }
+
+.mode-btn, .mod { display: flex; flex-direction: column; justify-content: flex-start; }  /* name at the top, beside the bead */
+.mode-btn { flex: 1 1 260px; max-width: 470px; padding: 11px 16px 12px 46px; }
+.mode-btn.on { padding: 10px 15px 11px 45px; }
+.mode-btn.on::before { left: 12px; }
+.mode-btn.on::after { left: 18px; }
+.mode-btn b {
+  display: block; margin-bottom: 2px;
+  font-family: var(--lg); font-weight: 400; font-size: 1.5rem; line-height: 1.1;
+  letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink);
+}
+.mode-btn span { display: block; font-size: 1rem; line-height: 1.45; color: var(--ink-3); }
+
+.mod { flex: 1 1 260px; max-width: 380px; padding: 10px 14px 11px 44px; }
+.mod.on { padding: 9px 13px 10px 43px; }
+.mod.on::before { left: 12px; }
+.mod.on::after { left: 19px; }
+.mod.radio.on::after { left: 18px; }
+.mod-name {
+  display: block; margin-bottom: 1px;
+  font-family: var(--lg); font-size: 1.3rem; line-height: 1.15; letter-spacing: 0.045em;
+  text-transform: uppercase; color: var(--ink);
+}
+.mod-sum { display: block; font-size: 1rem; line-height: 1.42; color: var(--ink-3); }
+
+/* disabled / "needs X" */
+.mode-btn.off, .mod.off {
+  cursor: not-allowed; background: var(--paper-3);
+  border: 1px dashed #7d7569; box-shadow: none;
+}
+.mode-btn.off:hover, .mod.off:hover { border-color: #7d7569; box-shadow: none; }
+.mode-btn.off::before, .mod.off::before { background: transparent; border-style: dashed; border-color: #7d7569; box-shadow: none; }
+.mode-btn.off b, .mod.off .mod-name { color: #56504a; }
+.mode-btn.off span, .mod.off .mod-sum { color: #5a544d; font-style: italic; }
+
+/* player count: power-dial tokens; selected = rust page medallion */
+.pbtns { gap: 10px; }
+.pbtn {
+  width: 50px; height: 50px; border-radius: 50%; cursor: pointer;
+  font-family: var(--lg); font-size: 1.65rem; line-height: 1; color: var(--ink);
+  background: radial-gradient(circle at 40% 32%, #ffffff 0%, #f1ebdf 65%, #e2d8c6 100%);
+  border: 2px solid #6f6258;
+  box-shadow: inset 0 0 0 3px #f7f2e8, inset 0 0 0 4px rgba(111, 98, 88, 0.45), 0 1px 2px rgba(60, 40, 20, 0.2);
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+.pbtn:hover { border-color: var(--rust); box-shadow: inset 0 0 0 3px #f7f2e8, inset 0 0 0 4px rgba(145, 59, 36, 0.6), 0 0 0 2px rgba(145, 59, 36, 0.35); }
+.pbtn.on {
+  color: #fff6ea; border: 2px solid var(--rust-dk);
+  background: radial-gradient(circle at 38% 32%, #b0502f 0%, var(--rust) 55%, #742c1a 100%);
+  box-shadow: inset 0 0 0 3px var(--rust), inset 0 0 0 4.5px rgba(251, 225, 205, 0.85), 0 2px 5px rgba(60, 20, 10, 0.4);
+  transform: scale(1.06);
+}
+.pbtn.off {
+  cursor: not-allowed; color: #6a635b; background: var(--paper-3);
+  border: 2px dashed #7d7569; box-shadow: none;
+}
+
+/* ---- Rise of Fenris spoiler gates: the copper "Episode Goals" plaque -------- */
+.gate {
+  position: relative; border-radius: 4px; padding: 16px 20px 18px;
+  background: rgba(165, 90, 36, 0.07);
+  border: 1px solid rgba(141, 71, 24, 0.45); border-top: 5px solid var(--copper);
+}
+.gate > .cfg-label { color: var(--copper-dk); }
+.gate-note { margin: 0 0 12px; font-size: 1rem; color: var(--ink-3); }
+.gate-note:empty { display: none; }
+
+.gate:has(.gate-btn) {                /* closed: a riveted copper plate */
+  color: #fff;
+  padding: 22px 26px 24px;
+  border: 1px solid #4f250b;
+  background:
+    radial-gradient(circle at 12px 12px, #f6ddb6 0 1.4px, #b98a4a 2.4px, #5e3a14 4.6px, rgba(0, 0, 0, 0) 5.2px),
+    radial-gradient(circle at calc(100% - 12px) 12px, #f6ddb6 0 1.4px, #b98a4a 2.4px, #5e3a14 4.6px, rgba(0, 0, 0, 0) 5.2px),
+    radial-gradient(circle at 12px calc(100% - 12px), #f6ddb6 0 1.4px, #b98a4a 2.4px, #5e3a14 4.6px, rgba(0, 0, 0, 0) 5.2px),
+    radial-gradient(circle at calc(100% - 12px) calc(100% - 12px), #f6ddb6 0 1.4px, #b98a4a 2.4px, #5e3a14 4.6px, rgba(0, 0, 0, 0) 5.2px),
+    linear-gradient(160deg, var(--copper-hi) 0%, var(--copper) 45%, #7a3c13 100%);
+  box-shadow:
+    inset 2px 2px 0 rgba(255, 214, 170, 0.35), inset -2px -2px 0 rgba(50, 20, 4, 0.4),
+    0 3px 8px rgba(60, 30, 10, 0.35);
+}
+.gate:has(.gate-btn) > .cfg-label { color: #fff; }
+.gate:has(.gate-btn) .gate-note,
+.gate:has(.gate-btn) .warn {
+  color: #fff; background: none; border: 0; box-shadow: none; padding: 0; margin: 0 0 14px;
+  font-size: 1.02rem; max-width: 70ch;
+}
+.gate:has(.gate-btn) .gate-note b,
+.gate:has(.gate-btn) .warn b {
+  font-family: var(--lg); font-weight: 400; font-size: 1.3rem; letter-spacing: 0.06em;
+  text-transform: uppercase; color: #ffe2b8; margin-right: 4px;
+}
+.gate-btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  min-height: 48px; padding: 11px 18px 11px 14px; text-align: left; cursor: pointer;
+  font-weight: 700; font-size: 1rem; line-height: 1.35; color: var(--ink);
+  background: #fbf3e6; border: 2px solid #fbf3e6; border-radius: 3px;
+  box-shadow: 0 2px 0 rgba(40, 15, 0, 0.45);
+}
+.gate-btn::before {
+  content: ""; flex: 0 0 auto; width: 20px; height: 22px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 22'%3E%3Cpath d='M5 10V6.5a5 5 0 0 1 9.6-1.9' fill='none' stroke='%23231f20' stroke-width='2.4' stroke-linecap='round'/%3E%3Crect x='1.5' y='10' width='17' height='11' rx='2' fill='%23913b24'/%3E%3Ccircle cx='10' cy='15' r='1.8' fill='%23fbf3e6'/%3E%3C/svg%3E") no-repeat center / contain;
+}
+.gate-btn:hover { background: #fff; border-color: #ffe2b8; }
+
+.link-btn {
+  display: inline-flex; align-items: center; min-height: 40px; padding: 0 4px;
+  background: none; border: 0; cursor: pointer;
+  color: var(--copper-dk); font-size: 1rem; text-decoration: underline; text-underline-offset: 3px;
+}
+.link-btn:hover { color: var(--rust); }
+
+.camp-top {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin: -4px 0 10px;
+  font-style: italic; color: var(--ink-3);
+}
+.gate .opt-label { color: var(--copper-dk); }
+.gate .opt-label::after { background: linear-gradient(90deg, rgba(141, 71, 24, 0.6), rgba(141, 71, 24, 0)); }
+.ep-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 9px; margin-bottom: 14px; }
+.ep-btn { min-height: 52px; padding: 8px 12px 9px; }
+.ep-btn b {
+  display: block; font-family: var(--lg); font-weight: 400; font-size: 1.35rem; line-height: 1.1;
+  letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink);
+}
+.ep-btn span { display: block; font-size: 1rem; font-style: italic; line-height: 1.3; color: var(--ink-3); }
+.ep-btn.on {
+  padding: 7px 11px 8px;
+  background: linear-gradient(160deg, var(--copper-hi) 0%, var(--copper) 50%, #7a3c13 100%);
+  border: 2px solid #4f250b;
+  box-shadow: inset 1px 1px 0 rgba(255, 214, 170, 0.4), inset -1px -1px 0 rgba(50, 20, 4, 0.4), 0 2px 3px rgba(60, 30, 10, 0.3);
+}
+.ep-btn.on b, .ep-btn.on span { color: #fff; }
+.ep-btn.on b::after { content: " ✓"; }
+.camp-flags { align-items: stretch; }
+.seg { display: flex; flex-wrap: wrap; align-items: center; gap: 0; flex: 1 1 100%; margin-bottom: 4px; }
+.seg-label { font-style: italic; color: var(--ink-3); margin-right: 12px; }
+.seg-btn {
+  min-height: 42px; padding: 8px 16px; cursor: pointer;
+  font-family: var(--lg); font-size: 1.2rem; letter-spacing: 0.05em; text-transform: uppercase;
+  background: var(--paper-2); color: var(--ink); border: 2px solid var(--ink);
+}
+.seg-btn + .seg-btn { border-left-width: 0; }
+.seg-btn:first-of-type { border-radius: 3px 0 0 3px; }
+.seg-btn:last-of-type { border-radius: 0 3px 3px 0; }
+.seg-btn:hover { background: #fff; }
+.seg-btn.on { background: var(--ink); color: #fbf3e6; }
+.seg-btn.on::before { content: "✓ "; }
+
+/* ---- plaques inside steps and references ---------------------------------- */
+.warn {                               /* the rulebook's red "Example" plaque */
+  margin: 8px 0 12px; padding: 11px 16px;
+  color: #fff;
+  background: linear-gradient(165deg, #9c301e 0%, #922a1d 55%, #86201a 100%);   /* sampled #962a1e */
+  border: 1px solid #5c1610; border-radius: 3px;
+  box-shadow: inset 1px 1px 0 rgba(255, 210, 190, 0.35), inset -1px -1px 0 rgba(40, 10, 0, 0.35), 0 2px 5px rgba(60, 20, 10, 0.22);
+}
+.warn b { color: #fff; }
+.inline-note {                        /* the riveted "Strategy Tip" card */
+  position: relative; margin: 10px 0 12px; padding: 11px 16px 12px 40px; min-height: 52px;
+  font-size: 1rem; line-height: 1.55; color: var(--ink);
+  background:
+    radial-gradient(circle at 18px 17px, #fff3d8 0 1.6px, #d0a45a 2.8px, #8a6326 4.6px, #4d3410 5.6px, rgba(0, 0, 0, 0) 6.2px),
+    radial-gradient(circle at 18px calc(100% - 17px), #fff3d8 0 1.6px, #d0a45a 2.8px, #8a6326 4.6px, #4d3410 5.6px, rgba(0, 0, 0, 0) 6.2px),
+    linear-gradient(175deg, #eaeae2 0%, #dfded4 100%);                          /* sampled #deded2 */
+  border: 1px solid #a9a79b; border-radius: 2px;
+  box-shadow: 0 2px 4px rgba(60, 40, 20, 0.2);
+}
+
+/* ---- setup steps ------------------------------------------------------------ */
+.teach-bar { margin: 0 0 20px; }
+.phase { margin-top: 30px; }
+.phase:first-child { margin-top: 8px; }
+.phase-title {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 4px;
+  font-family: var(--lg); font-weight: 400; font-size: 2rem; line-height: 1.1;
+  letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-2);
+}
+.phase-title::after { content: ""; flex: 1; height: 2px; background: linear-gradient(90deg, var(--silver), rgba(138, 139, 141, 0)); }
+.step {
+  display: grid; grid-template-columns: 46px minmax(0, 1fr); gap: 18px;
+  padding: 18px 0 20px;
+  border-top: 1px solid var(--rule);
+}
+.phase-title + .step { border-top: 0; }
+.step-num {                           /* rust page-number medallion */
+  width: 44px; height: 44px; border-radius: 50%; margin-top: 1px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--lg); font-size: 1.5rem; line-height: 1; color: #fbeee2;
+  background: radial-gradient(circle at 38% 32%, #a9492d 0%, var(--rust) 55%, #7c311d 100%);
+  box-shadow: inset 0 0 0 3px var(--rust), inset 0 0 0 4.5px rgba(251, 225, 205, 0.75), 0 1px 3px rgba(50, 20, 10, 0.3);
+}
+.step-body { min-width: 0; }
+.step-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin-bottom: 6px; }
+.step-head h4 {                       /* the rulebook's rust run-in label */
+  font-family: var(--lg); font-weight: 400; font-size: 1.62rem; line-height: 1.12;
+  letter-spacing: 0.045em; text-transform: uppercase; color: var(--rust);
+}
+.step-text { max-width: 72ch; }
+.step-text p { margin: 4px 0 8px; }
+.step-text b { color: #7a2d19; }
+
+/* expansion tags: the ribbon-plate shape of the rulebook's table headers */
+.tag {
+  --notch: 4px;
+  display: inline-block; white-space: nowrap;
+  padding: 3px 11px 2px;
+  font-family: var(--lg); font-size: 1.02rem; line-height: 1.25; letter-spacing: 0.1em; text-transform: uppercase;
+  color: #fff; background: #3b3638;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+  -webkit-mask:
+    radial-gradient(circle at 0 0, transparent var(--notch), #000 calc(var(--notch) + 0.5px)) top left / 51% 51% no-repeat,
+    radial-gradient(circle at 100% 0, transparent var(--notch), #000 calc(var(--notch) + 0.5px)) top right / 51% 51% no-repeat,
+    radial-gradient(circle at 0 100%, transparent var(--notch), #000 calc(var(--notch) + 0.5px)) bottom left / 51% 51% no-repeat,
+    radial-gradient(circle at 100% 100%, transparent var(--notch), #000 calc(var(--notch) + 0.5px)) bottom right / 51% 51% no-repeat;
+  mask:
+    radial-gradient(circle at 0 0, transparent var(--notch), #000 calc(var(--notch) + 0.5px)) top left / 51% 51% no-repeat,
+    radial-gradient(circle at 100% 0, transparent var(--notch), #000 calc(var(--notch) + 0.5px)) top right / 51% 51% no-repeat,
+    radial-gradient(circle at 0 100%, transparent var(--notch), #000 calc(var(--notch) + 0.5px)) bottom left / 51% 51% no-repeat,
+    radial-gradient(circle at 100% 100%, transparent var(--notch), #000 calc(var(--notch) + 0.5px)) bottom right / 51% 51% no-repeat;
+}
+.tag-core { background: #3b3638; }
+.tag-ifa  { background: #2f6134; }
+.tag-wg   { background: #2b5680; }
+.tag-mb   { background: #6a4a24; }
+.tag-rof  { background: #7c1d1d; }
+.tag-camp { background: #8c4516; }
+.tag-auto { background: #4b4f7a; }
+.tag-var  { background: #fbf3dc; color: #6b4e0f; box-shadow: inset 0 0 0 1.5px #8c7026; }
+.tag-fan  { background: #ece7dd; color: #3d3833; box-shadow: inset 0 0 0 1.5px #7b7367; }
+
+.src-line {
+  margin-top: 10px; font-size: 0.9rem; font-style: italic; color: var(--ink-3); line-height: 1.45;
+  display: flex; align-items: baseline; gap: 8px;
+}
+.src-line::before {                   /* a tiny page medallion */
+  content: ""; flex: 0 0 auto; width: 9px; height: 9px; border-radius: 50%; transform: translateY(-1px);
+  background: var(--rust); box-shadow: 0 0 0 1.5px rgba(145, 59, 36, 0.3);
+}
+
+/* lists: green beads for bullets, rust League Gothic numerals */
+.step-text ul, .ref-body ul, .teach-panel ul { list-style: none; margin: 6px 0 10px; padding: 0; }
+.step-text ul > li, .ref-body ul > li, .teach-panel ul > li { position: relative; padding-left: 26px; margin-bottom: 6px; }
+.step-text ul > li::before, .ref-body ul > li::before, .teach-panel ul > li::before {
+  content: ""; position: absolute; left: 3px; top: 0.52em;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: radial-gradient(circle at 36% 30%, #d9f1b0 0%, #86b556 24%, #4d7536 64%, #2c4a1c 100%);
+  box-shadow: 0 0 0 1px rgba(31, 53, 20, 0.7);
+}
+.step-text ol, .ref-body ol, .teach-panel ol { margin: 6px 0 10px; padding-left: 30px; }
+.step-text ol > li, .ref-body ol > li, .teach-panel ol > li { margin-bottom: 6px; padding-left: 4px; }
+.step-text ol > li::marker, .ref-body ol > li::marker, .teach-panel ol > li::marker {
+  font-family: var(--lg); font-size: 1.12em; color: var(--rust);
+}
+
+/* ---- tables: rust ribbon headers, grey League Gothic figures --------------- */
+.tbl {
+  border-collapse: separate; border-spacing: 0; width: 100%; max-width: 700px;
+  margin: 12px 0 18px; font-size: 1rem; line-height: 1.45;
+}
+.tbl caption {
+  caption-side: top; text-align: left; padding-bottom: 6px;
+  font-family: var(--lg); font-size: 1.35rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-2);
+}
+.tbl th, .tbl td { padding: 8px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid rgba(35, 31, 32, 0.2); }
+.tbl thead th {
+  font-family: var(--lg); font-weight: 400; font-size: 1.2rem; letter-spacing: 0.07em; text-transform: uppercase;
+  color: #fff; background: linear-gradient(180deg, #9c4027, var(--rust) 60%, #83341f);
+  border-bottom: 0; box-shadow: inset 0 0 0 1px rgba(255, 230, 215, 0.35);
+}
+.tbl thead th:first-child { border-radius: 10px 0 0 10px; }
+.tbl thead th:last-child { border-radius: 0 10px 10px 0; }
+.tbl tbody th { font-weight: 700; }
+.tbl td + td, .tbl th + td, .tbl td + th { border-left: 1px solid rgba(35, 31, 32, 0.14); }
+.tbl.tiers td, .tbl.tiers tbody th {
+  vertical-align: middle; font-family: var(--lg); font-weight: 400; font-size: 1.45rem; line-height: 1.2; letter-spacing: 0.04em;
+}
+.tbl.tiers td { text-align: center; color: var(--ink-2); }
+.tbl.tiers tbody th { color: var(--ink); }
+.tbl.compact { width: auto; }
+.nowrap { white-space: nowrap; }
+
+/* ---- rules reference: a framed table of contents ---------------------------- */
+.toc { padding: 18px 40px 22px; }
+.ref { border-bottom: 1px solid var(--rule); }
+.ref:last-child { border-bottom: 0; }
+.ref summary {
+  position: relative; display: flex; align-items: center; min-height: 52px;
+  padding: 10px 48px 10px 4px; cursor: pointer; list-style: none;
+  font-family: var(--lg); font-size: 1.7rem; line-height: 1.12; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--ink-2);
+  transition: color 0.15s;
+}
+.ref summary::-webkit-details-marker { display: none; }
+.ref summary::after {                 /* plus/minus in a small medallion (drawn, so it centres exactly) */
+  content: ""; position: absolute; right: 6px; top: 50%; margin-top: -15px;
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 2px solid var(--rust);
+  background:
+    linear-gradient(var(--rust), var(--rust)) center / 12px 2.5px no-repeat,
+    linear-gradient(var(--rust), var(--rust)) center / 2.5px 12px no-repeat,
+    var(--paper-2);
+}
+.ref summary:hover { color: var(--rust); }
+.ref summary:hover::after { box-shadow: 0 0 0 3px rgba(145, 59, 36, 0.2); }
+.ref[open] > summary { color: var(--rust); }
+.ref[open] > summary::after {
+  background: linear-gradient(#fbeee2, #fbeee2) center / 12px 2.5px no-repeat, var(--rust);
+}
+.ref-body { padding: 4px 6px 22px; }
+.ref-body > *:first-child { margin-top: 4px; }
+.ref-body h4 {
+  margin: 18px 0 6px;
+  font-family: var(--lg); font-weight: 400; font-size: 1.45rem; line-height: 1.15; letter-spacing: 0.05em;
+  text-transform: uppercase; color: var(--ink-2);
+}
+.ref-body h4 .who {
+  font-family: var(--serif); font-size: 1rem; font-style: italic; letter-spacing: 0; text-transform: none; color: var(--ink-3);
+}
+.ref-body p { margin-bottom: 10px; max-width: 75ch; }
+.ref-body ul, .ref-body ol { max-width: 75ch; }
+.ref-body b { color: #7a2d19; }
+.ref-body .warn b { color: #fff; }
+.cite { font-size: 0.9rem; font-style: italic; color: var(--ink-3); white-space: nowrap; }
+li.flagged {
+  padding: 8px 12px 9px 12px !important; margin-left: 0;
+  background: rgba(255, 255, 255, 0.45); border: 1px dashed #7d7569; border-radius: 3px;
+}
+li.flagged::before { display: none; }
+.flag {
+  display: inline-block; margin-right: 6px; padding: 1px 8px 0;
+  font-family: var(--lg); font-size: 1rem; letter-spacing: 0.08em; text-transform: uppercase;
+  color: #fbf3e6; background: var(--ink-2); border-radius: 2px;
+}
+
+/* faction colours on the faction headings (order fixed by SY.factions: the five
+   core factions first, then Albion and Togawa when Invaders from Afar is on) */
+.ref-body:has(> h4 > .who) > h4:nth-of-type(-n+5)::before,
+body:has(#expansions > .chip:nth-child(2).on) .ref-body:has(> h4 > .who) > h4:nth-of-type(-n+7)::before {
+  content: ""; display: inline-block; width: 18px; height: 18px; margin: 0 10px 0 1px; border-radius: 50%;
+  vertical-align: -1px; background: var(--fc, transparent);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.35), 0 0 0 1.5px rgba(35, 31, 32, 0.75);
+}
+.ref-body:has(> h4 > .who) > h4:nth-of-type(1) { --fc: #2f6db3; }  /* Nordic: blue */
+.ref-body:has(> h4 > .who) > h4:nth-of-type(2) { --fc: #b42a1f; }  /* Rusviet: red */
+.ref-body:has(> h4 > .who) > h4:nth-of-type(3) { --fc: #e2b01c; }  /* Crimea: yellow */
+.ref-body:has(> h4 > .who) > h4:nth-of-type(4) { --fc: #f6f3ec; }  /* Polania: white */
+.ref-body:has(> h4 > .who) > h4:nth-of-type(5) { --fc: #1f1d1e; }  /* Saxony: black */
+.ref-body:has(> h4 > .who) > h4:nth-of-type(6) { --fc: #3a7d3a; }  /* Albion: green */
+.ref-body:has(> h4 > .who) > h4:nth-of-type(7) { --fc: #6d3f8f; }  /* Togawa: purple */
+
+/* ---- teaching script: the green "Designer's Note" plaque -------------------- */
+#teachBtn, .teach-copy {
+  display: inline-flex; align-items: center; gap: 8px;
+  min-height: 48px; padding: 9px 20px 8px; cursor: pointer;
+  font-family: var(--lg); font-size: 1.45rem; line-height: 1; letter-spacing: 0.07em; text-transform: uppercase;
+  color: #fff; border: 1px solid #243d16; border-radius: 3px;
+  background: linear-gradient(170deg, #557d3c 0%, var(--green) 50%, #3f652b 100%);
+  box-shadow: inset 1px 1px 0 rgba(220, 245, 190, 0.35), inset -1px -2px 0 rgba(20, 40, 10, 0.35), 0 2px 4px rgba(30, 50, 20, 0.3);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
+}
+#teachBtn:hover, .teach-copy:hover { background: linear-gradient(170deg, #4f7a37, #3e6429); }
+#teachBtn[aria-expanded="true"] {
+  background: linear-gradient(170deg, #34521f, #2c4719);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.45);
+}
+#teachBtn[aria-expanded="true"]::after { content: "▲"; font-size: 0.7em; margin-left: 2px; }
+.teach-panel {
+  margin: 0 0 26px; padding: 0 26px 22px;
+  background: var(--paper-2);
+  border: 6px solid var(--green); border-radius: 4px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6), 0 0 0 1px #2f4d1f, 0 4px 10px rgba(40, 50, 20, 0.22);
+}
+.teach-panel[hidden] { display: none; }
+.teach-top {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin: 0 -26px 14px; padding: 12px 20px 12px 24px;
+  background: linear-gradient(170deg, #557d3c 0%, var(--green) 55%, #456a30 100%);
+  border-bottom: 1px solid #2f4d1f;
+}
+.teach-top h3 {
+  font-family: var(--lg); font-weight: 400; font-size: 1.8rem; line-height: 1.1; letter-spacing: 0.06em;
+  text-transform: uppercase; color: #fff; text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
+}
+.teach-copy {
+  font-size: 1.2rem; min-height: 44px; padding: 8px 14px 7px;
+  color: var(--ink); text-shadow: none;
+  background: #fbf3e6; border: 1px solid #243d16;
+  box-shadow: 0 2px 0 rgba(20, 40, 10, 0.4);
+}
+.teach-copy:hover { background: #fff; }
+.teach-note {
+  margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px dashed #9aa98a;
+  font-size: 1rem; font-style: italic; color: var(--ink-3);
+}
+.teach-panel h4 {
+  margin: 20px 0 6px;
+  font-family: var(--lg); font-weight: 400; font-size: 1.5rem; line-height: 1.15; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--green-dk);
+}
+.teach-panel p { margin-bottom: 10px; max-width: 72ch; }
+.teach-panel ul, .teach-panel ol { max-width: 72ch; }
+.teach-panel b { color: var(--green-dk); }
+
+/* ---- search ------------------------------------------------------------------ */
+.rsearch-wrap { margin-bottom: 16px; }
+#rsearch {
+  width: 100%; min-height: 52px; padding: 12px 16px 12px 48px;
+  font: inherit; font-size: 1.1rem; color: var(--ink);
+  background: var(--paper-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='10' cy='10' r='6.5' fill='none' stroke='%23913b24' stroke-width='2.6'/%3E%3Cpath d='M15 15l6 6' stroke='%23913b24' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat 15px 50% / 22px 22px;
+  border: 2px solid var(--ink-2); border-radius: 3px;
+  box-shadow: inset 0 2px 3px rgba(60, 40, 20, 0.12);
+  -webkit-appearance: none; appearance: none;
+}
+#rsearch:focus { border-color: var(--rust); outline: 3px solid var(--focus); outline-offset: 2px; }
+#rsearch::placeholder { color: #6a635c; font-style: italic; opacity: 1; }
+.rhint { margin: 6px 0; font-style: italic; color: var(--ink-3); }
+.rhit {
+  margin-bottom: 10px; padding: 11px 16px 12px;
+  background: var(--paper-2); border: 1px solid rgba(35, 31, 32, 0.2); border-left: 5px solid var(--rust);
+  border-radius: 2px;
+}
+.rhit.fan { border-left-style: dashed; border-left-color: #6f685f; }
+.rhit-src {
+  margin-bottom: 3px;
+  font-family: var(--lg); font-size: 1.2rem; letter-spacing: 0.07em; text-transform: uppercase; color: var(--rust);
+}
+.rhit.fan .rhit-src { color: #5a544d; }
+.rhit-text { font-size: 1rem; line-height: 1.55; overflow-wrap: anywhere; }
+.rhit-text mark { background: #f4d67c; color: var(--ink); padding: 0 2px; border-radius: 2px; }
+
+/* ---- footer ------------------------------------------------------------------ */
+.footer {
+  position: relative; z-index: 1;
+  margin-top: 60px; padding: 26px 40px 34px;
+  text-align: center; font-size: 0.95rem; line-height: 1.55; color: var(--ink-3);
+  border-top: 1px solid var(--rule);
+}
+.footer p { max-width: 80ch; margin: 0 auto; }
+.footer-fine { margin-top: 8px !important; font-style: italic; }
+
+/* ---- responsive ---------------------------------------------------------------- */
+@media (max-width: 1100px) {
+  :root { --sheet-pad: 64px; }
+  .sheet { margin: 24px 20px 36px; }
+  .topbar { grid-template-columns: minmax(0, 1fr) minmax(0, 470px) minmax(0, 1fr); }
+  .art-mox { margin-right: -54px; max-width: calc(100% + 54px); }
+}
+@media (max-width: 900px) {
+  .topbar { display: block; }
+  .cover-art { display: none; }
+  .cover { max-width: 560px; margin: 0 auto; }
+}
+@media (max-width: 640px) {
+  :root { --sheet-pad: 18px; }
+  body { font-size: 17px; }
+  .sheet { margin: 0; padding: 0 var(--sheet-pad) 20px; box-shadow: inset 0 0 40px rgba(160, 118, 66, 0.4); }
+  .sheet::before { inset: 6px; border-width: 3px; }
+  .corner { width: 41px; height: 52px; }
+  .c-tl { top: 6px; left: 6px; } .c-tr { top: 6px; right: 6px; }
+  .c-bl { bottom: 6px; left: 6px; } .c-br { bottom: 6px; right: 6px; }
+  .topbar { padding: 36px 0 22px; }
+  .kicker { font-size: 0.95rem; margin-bottom: 6px; }
+  .lockup { width: 320px; }
+  .brand-sub { height: 38px; border-width: 0 35px; border-image-width: 0 35px; font-size: 1.12rem; letter-spacing: 0.06em; }
+  .tagline { margin-top: 22px; font-size: 1rem; }
+  .seg-label { flex: 1 1 100%; margin: 0 0 6px; }
+  main > section { margin-top: 44px; }
+  section h2 { font-size: 2.3rem; margin-left: 0; padding: 6px 30px 16px 40px; }
+  section h2::before { position: relative; top: auto; left: auto; display: inline-flex; vertical-align: 4px;
+    width: 34px; height: 34px; margin-right: 12px; font-size: 1.2rem; }
+  .cfg, .toc { padding: 18px 12px 22px; border-width: 2px;
+    background-size: 28px 36px, 28px 36px, 28px 36px, 28px 36px, auto; }
+  .cfg { gap: 22px; }
+  .cfg-row > .cfg-label { padding-left: 8px; }
+  .cfg-label { font-size: 1.5rem; }
+  .mode-btn, .mod { max-width: none; flex-basis: 100%; }
+  .chip { flex: 1 1 100%; }
+  .pbtns { gap: 5px; }
+  .pbtn { width: 40px; height: 40px; font-size: 1.4rem; }
+  .gate { padding: 14px 12px 16px; }
+  .gate:has(.gate-btn) { padding: 20px 16px 20px; }
+  .ep-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* medallion beside the title; the step text then runs the full width */
+  .step { grid-template-columns: 38px minmax(0, 1fr); column-gap: 12px; row-gap: 4px; padding: 16px 0 18px; }
+  .step-body { display: contents; }
+  .step-num { grid-column: 1; grid-row: 1; align-self: start; width: 38px; height: 38px; font-size: 1.3rem; margin-top: 0; }
+  .step-head { grid-column: 2; grid-row: 1; align-self: center; margin-bottom: 2px; }
+  .step-text, .src-line { grid-column: 1 / -1; }
+  .step-head h4 { font-size: 1.45rem; }
+  .phase-title { font-size: 1.75rem; }
+  .ref summary { font-size: 1.45rem; padding-right: 42px; }
+  .ref-body { padding: 2px 0 18px; }
+  .teach-panel { padding: 0 16px 18px; border-width: 5px; }
+  .teach-top { margin: 0 -16px 12px; padding: 10px 14px; }
+  .teach-top h3 { font-size: 1.5rem; }
+  .tbl { font-size: 0.95rem; }
+  .tbl th, .tbl td { padding: 7px 7px; }
+  .nowrap { white-space: normal; }
+  .inline-note { padding-left: 36px; }
+  .footer { padding: 22px 8px 30px; }
+}
+@media (max-width: 360px) {           /* very narrow phones */
+  :root { --sheet-pad: 14px; }
+  .cfg, .toc { padding-left: 8px; padding-right: 8px; }
+  .tbl th, .tbl td { padding: 6px 4px; }
+  .tbl thead th { font-size: 1.05rem; letter-spacing: 0.03em; }
+  .tbl.tiers td, .tbl.tiers tbody th { font-size: 1.25rem; }
+  .tbl caption { font-size: 1.2rem; }
+  .lockup { width: 280px; }
+  .brand-sub { font-size: 1rem; }
+  .pbtns { gap: 3px; }
+  .pbtn { width: 38px; height: 38px; }
+  .cite { white-space: normal; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+  html { scroll-behavior: auto; }
+}

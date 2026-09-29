@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scythe — Setup &amp; Reference Utility</title>
+  <meta name="description" content="Scythe setup steps, rules reference, teaching script and rulebook search for the core game, Invaders from Afar, The Wind Gambit, The Rise of Fenris (spoiler-gated) and the Modular Board.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=League+Gothic&family=Libre+Bodoni:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=2">
+</head>
+<body>
+  <div class="sheet">
+    <!-- the rulebook's page frame: a maroon rule with wrought-iron corner flourishes -->
+    <span class="corner c-tl" aria-hidden="true"></span>
+    <span class="corner c-tr" aria-hidden="true"></span>
+    <span class="corner c-bl" aria-hidden="true"></span>
+    <span class="corner c-br" aria-hidden="true"></span>
+
+    <header class="topbar">
+      <img class="cover-art art-mech" src="images/mech.webp" width="443" height="430" alt="" aria-hidden="true">
+      <img class="cover-art art-mox" src="images/mox.webp" width="516" height="400" alt="" aria-hidden="true">
+      <div class="cover">
+        <p class="kicker">A DFW Gaming Village player aid</p>
+        <div class="lockup">
+          <h1 class="brand-title"><span class="vh">Scythe</span><img class="logo" src="images/logo.webp" width="760" height="290" alt="" aria-hidden="true"></h1>
+          <div class="brand-sub">Setup &amp; Reference Utility</div>
+        </div>
+        <p class="tagline">
+          Exact setup steps, a rules reference, a five-minute teaching script and a search of the rulebooks, for
+          the sets on your table. The Rise of Fenris campaign and modules wait behind spoiler gates until you open them.
+        </p>
+      </div>
+    </header>
+
+    <main>
+      <section aria-labelledby="cfg-h">
+        <h2 id="cfg-h">The Council of Europa</h2>
+        <p class="sec-note">Select the boxes on the table, how you're playing and the player count. Every step, ruling and script below adapts to your choices.</p>
+        <div class="cfg">
+          <div class="cfg-row">
+            <span class="cfg-label" id="exp-l">Sets in play</span>
+            <div id="expansions" class="chips" role="group" aria-labelledby="exp-l"></div>
+          </div>
+          <div class="cfg-row">
+            <span class="cfg-label" id="mode-l">Way to play</span>
+            <div id="modes" class="mode-grid" role="group" aria-labelledby="mode-l"></div>
+          </div>
+          <div class="cfg-row">
+            <span class="cfg-label" id="pl-l">Players <span class="hint">(1 = solo; 6–7 need Invaders from Afar)</span></span>
+            <div id="players" class="pbtns" role="group" aria-labelledby="pl-l"></div>
+            <p id="players-note" class="cfg-note"></p>
+          </div>
+          <div id="options-group" class="cfg-row">
+            <span class="cfg-label">Board, airships &amp; variants</span>
+            <div id="options"></div>
+          </div>
+          <div id="modules-group" class="cfg-row gate" hidden>
+            <span class="cfg-label">The Rise of Fenris — modules</span>
+            <p id="rof-note" class="cfg-note gate-note"></p>
+            <div id="modules"></div>
+          </div>
+          <div id="camp-group" class="cfg-row gate" hidden>
+            <span class="cfg-label">The Rise of Fenris — campaign</span>
+            <div id="campaign"></div>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="setup-h">
+        <h2 id="setup-h">Setup</h2>
+        <p class="sec-note">Follow the steps in order. Each cites its source pages; newer rulings are already applied.</p>
+        <div class="teach-bar"><button id="teachBtn" type="button" aria-expanded="false" aria-controls="teach" title="A ~5 minute script to teach this exact setup aloud">📖 Teaching script</button></div>
+        <div id="teach" class="teach-panel" hidden></div>
+        <div id="setup"></div>
+      </section>
+
+      <section aria-labelledby="ref-h">
+        <h2 id="ref-h">Rules Reference</h2>
+        <p class="sec-note">Tap a heading to open it. Contents adapt to your sets, modules and player count.</p>
+        <div class="toc">
+          <div id="reference"></div>
+        </div>
+      </section>
+
+      <section aria-labelledby="search-h">
+        <h2 id="search-h">Search the Rulebooks</h2>
+        <p class="sec-note">Full-text search of the rulebooks for the sets selected above, the Quick Reference Guide and the fan “Frequently Overlooked Rules” sheet. Rise of Fenris pages stay hidden until their spoiler gate is open (its spoiler-free opening pages, pp.2–5, are always searchable).</p>
+        <div class="rsearch-wrap">
+          <input id="rsearch" type="search" placeholder="e.g. riverwalk, factory, encounter, recruit, tunnel…" aria-label="Search the rulebooks">
+        </div>
+        <div id="rresults" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>
+        Setup and reference content grounded in the official Scythe rulebook (2022 printing), the Quick Reference Guide,
+        and the Invaders from Afar, The Wind Gambit, The Rise of Fenris and Modular Board rulebooks; a fan-made
+        “Frequently Overlooked Rules” sheet is used only as a checklist. Page numbers are printed page numbers, except the
+        Quick Reference Guide, the Modular Board rules and the fan Overlooked Rules sheet, which are cited by PDF page.
+        The Automa (solo) rulebook is not covered.
+      </p>
+      <p class="footer-fine">A fan-made play aid — not affiliated with Stonemaier Games. Art by Jakub Rozalski, from the Scythe rulebooks.</p>
+    </footer>
+  </div>
+
+  <script src="js/data.js?v=1"></script>
+  <script src="js/rules.js?v=1"></script>
+  <script src="js/app.js?v=1"></script>
+  <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
+  <script src="/site-analytics.js?v=20260607-analytics"></script>
+</body>
+</html>
