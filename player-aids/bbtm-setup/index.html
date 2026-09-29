@@ -4,25 +4,35 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Blood Bowl: Team Manager — Setup Utility &amp; Reference</title>
+  <meta name="theme-color" content="#3a3536">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=5">
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Sancreek&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,700;1,8..60,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=7">
 </head>
 <body>
+  <!-- The Rules of Play cover billboard: blood-splattered planks between spiked iron bands -->
   <header class="topbar">
-    <div class="brand">
-      <span class="brand-bbtm">BLOOD BOWL</span>
-      <span class="brand-tm">TEAM MANAGER — THE CARD GAME</span>
-      <span class="brand-sub">Setup Utility &amp; Reference · Legendary Edition</span>
+    <div class="billboard">
+      <div class="brand-col">
+        <h1 class="brand">
+          <img class="brand-logo" src="images/theme/logo.webp" width="376" height="270" alt="" aria-hidden="true">
+          <span class="sr-only">Blood Bowl: Team Manager — The Card Game</span>
+          <span class="brand-sub">Setup Utility &amp; Reference</span>
+        </h1>
+      </div>
+      <div class="poster">
+        <img src="images/theme/clash.webp" width="820" height="442" alt="" aria-hidden="true">
+        <p class="tagline"><span class="tag-ed">Legendary Edition</span> Tailored setup steps, a full rules reference, and every league &amp; team — with difficulty as printed in the Legendary rulebook.</p>
+      </div>
     </div>
-    <p class="tagline">Tailored setup steps, a full rules reference, and every league &amp; team — with difficulty as printed in the Legendary rulebook.</p>
-    <nav class="tabs" id="tabs">
-      <button class="tab on" data-tab="setup">Setup Utility</button>
-      <button class="tab" data-tab="reference">Game Reference</button>
-      <button class="tab" data-tab="teams">Teams &amp; Leagues</button>
-    </nav>
   </header>
+
+  <nav class="tabs" id="tabs" aria-label="Page sections">
+    <button class="tab on" data-tab="setup">Setup Utility</button>
+    <button class="tab" data-tab="reference">Game Reference</button>
+    <button class="tab" data-tab="teams">Teams &amp; Leagues</button>
+  </nav>
 
   <main>
     <!-- ============ SETUP UTILITY ============ -->
@@ -48,9 +58,9 @@
         </div>
       </section>
 
-          <div class="teach-bar"><button id="teachBtn" type="button" title="A ~5 minute script to teach this exact setup aloud">📖 Teaching script</button></div>
-    <div id="teach" class="teach-panel" hidden></div>
-    <section class="setup-out">
+      <div class="teach-bar"><button id="teachBtn" type="button" title="A ~5 minute script to teach this exact setup aloud">📖 Teaching script</button></div>
+      <div id="teach" class="teach-panel" hidden></div>
+      <section class="setup-out">
         <div class="section-head">
           <h2>Setup</h2>
           <span id="setupMeta" class="count"></span>
@@ -74,7 +84,7 @@
         <p>Every team is grouped under its league. Each card shows the team’s race, play style and
            <b>difficulty rating exactly as printed in the Legendary rulebook</b> (★ Low → ★★★★ Very High).</p>
         <div class="teams-controls">
-          <input type="search" id="teamSearch" class="rs-input" placeholder="Search teams, races, styles or leagues — e.g. “undead”, “stunty”, “very high”" autocomplete="off" spellcheck="false">
+          <input type="search" id="teamSearch" class="rs-input" placeholder="Search teams, races, styles or leagues — e.g. “undead”, “stunty”, “very high”" autocomplete="off" spellcheck="false" aria-label="Search teams">
           <div class="filt" id="teamFilters"></div>
         </div>
         <div class="diff-legend" id="diffLegend"></div>
@@ -84,9 +94,9 @@
   </main>
 
   <footer class="footer">
-    A fan-made play aid for <b>Blood Bowl: Team Manager – The Card Game</b> (Fantasy Flight Games / Games Workshop) and the
+    <p>A fan-made play aid for <b>Blood Bowl: Team Manager – The Card Game</b> (Fantasy Flight Games / Games Workshop) and the
     community <b>Legendary Edition</b>. Setup &amp; rules grounded in the official rulebook, the <i>Sudden Death</i> and
-    <i>Foul Play</i> expansions, the official FAQ, and the Legendary Edition rulebook. Not affiliated with the publishers.
+    <i>Foul Play</i> expansions, the official FAQ, and the Legendary Edition rulebook. Not affiliated with the publishers.</p>
   </footer>
 
   <script src="js/data.js?v=6"></script>
