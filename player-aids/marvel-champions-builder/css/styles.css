@@ -423,6 +423,64 @@ details.pack .pbody { padding: 0 14px 12px; }
 .sheet .close { position: absolute; top: 10px; right: 12px; }
 .scrim { position: fixed; inset: 0; z-index: 55; background: rgba(0, 0, 0, .55); }
 .toast { position: fixed; z-index: 70; left: 50%; bottom: 22px; transform: translateX(-50%); background: var(--gold); color: #111; border: 3px solid #000; border-radius: 12px; padding: 10px 16px; font: italic 800 15px/1.2 var(--font-head); letter-spacing: .04em; box-shadow: 4px 4px 0 #000; max-width: calc(100vw - 32px); }
+/* encounter-set sheet (js/set-sheet.js) */
+.sheet.set-sheet .sh-in { max-width: 860px; gap: 14px; }
+.sheet.set-sheet img { width: auto; margin: 0; }
+.ss-head { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 16px; align-items: center; padding-right: 40px; }
+.sheet .ss-art img { width: 170px; height: 118px; object-fit: cover; border-radius: 10px; border: 3px solid #000; display: block; }
+.ss-name { margin: 0; font: 400 34px/1 var(--font-display); letter-spacing: .03em; text-shadow: 2px 2px 0 #000; }
+.ss-meta { margin-top: 6px; color: var(--muted); font-size: 14px; }
+.ss-diff { color: var(--gold); font-weight: 700; }
+.ss-desc { margin: 0; font-size: 16px; line-height: 1.5; color: #eef1ff; }
+.ss-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.ss-chip { font: 700 12px/1 var(--font-body); padding: 5px 8px; border-radius: 999px; border: 2px solid var(--line-2); background: var(--ink-3); color: #dfe5ff; }
+.ss-chip.kw { border-color: var(--red); }
+.ss-chip.ic { border-color: var(--gold); }
+.ss-note { margin: 8px 0 0; font-size: 13px; color: var(--muted); }
+.ss-kv { margin: 0; }
+.ss-actions { display: flex; gap: 8px; }
+.ss-h { margin: 4px 0 8px; font: italic 800 18px/1 var(--font-head); letter-spacing: .06em; text-transform: uppercase; color: var(--gold); }
+.ss-group + .ss-group { margin-top: 12px; }
+.ss-group h5 { margin: 0 0 6px; font: italic 800 14px/1 var(--font-head); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.ss-group h5 small { color: var(--dim); margin-left: 4px; }
+.ss-card { display: grid; grid-template-columns: 104px minmax(0, 1fr); gap: 12px; padding: 10px; border: 2px solid #000; border-radius: 12px; background: var(--ink-3); align-items: start; }
+.ss-card + .ss-card { margin-top: 8px; }
+.ss-card.land { grid-template-columns: 146px minmax(0, 1fr); }
+.ss-thumb { padding: 0; border: 0; background: none; cursor: zoom-in; border-radius: 8px; }
+.sheet .ss-thumb img { width: 100%; height: auto; border-radius: 8px; border: 2px solid #000; display: block; }
+.ss-cn b { font: italic 800 17px/1.15 var(--font-head); letter-spacing: .03em; text-transform: uppercase; }
+.ss-q { color: var(--gold); font-weight: 800; }
+.ss-type { color: var(--muted); font-size: 12.5px; }
+.ss-st { margin-top: 3px; font-size: 13px; font-weight: 700; color: #cfd6f5; }
+.ss-boost { color: var(--gold); white-space: nowrap; }
+.ss-x { margin-top: 6px; font-size: 14px; line-height: 1.45; color: #dbe2fb; }
+.ss-x .tr { font-weight: 800; font-size: 12px; letter-spacing: .04em; text-transform: uppercase; }
+.ss-x .ic { display: inline-block; padding: 0 5px; border-radius: 5px; background: var(--line-2); font-size: 11px; font-weight: 800; letter-spacing: .03em; text-transform: uppercase; line-height: 1.5; }
+.ss-back { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line-2); font-size: 13.5px; }
+.ss-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+.ss-light { position: fixed; inset: 0; z-index: 90; background: rgba(0, 0, 0, .86); display: grid; place-items: center; align-content: center; gap: 10px; cursor: zoom-out; padding: 16px; }
+.ss-light img { max-width: min(92vw, 560px); max-height: 84vh; border-radius: 14px; border: 3px solid #000; }
+.ss-light-x { color: #cfd6f5; font-size: 13px; }
+/* "what's in it" affordances: the info button on modular tiles, clickable set rows, chip info */
+.mwrap { position: relative; }
+.mwrap > .mtile { width: 100%; }
+.mwrap .mtile .mt-n, .mwrap .mtile .mt-s { right: 44px; }
+.mt-info { position: absolute; right: 7px; bottom: 7px; z-index: 2; width: 30px; height: 30px; border-radius: 50%; border: 2px solid #000; background: #fff; color: #111; font: italic 900 17px/1 Georgia, serif; cursor: pointer; box-shadow: 2px 2px 0 #000; display: grid; place-items: center; padding: 0; }
+.mt-info:hover { background: var(--gold); }
+.setrow.clickable { cursor: pointer; }
+.setrow.clickable:hover, .setrow.clickable:focus-visible { border-color: var(--gold); outline: none; }
+.setrow .more { color: var(--gold); font-weight: 800; margin-left: 4px; }
+.chipset { display: inline-flex; align-items: center; gap: 2px; }
+.chip-info { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--line-2); background: var(--ink-3); color: #fff; font: italic 900 14px/1 Georgia, serif; cursor: pointer; padding: 0; }
+.chip-info:hover { border-color: var(--gold); color: var(--gold); }
+a.setlink { color: inherit; text-decoration: underline dotted var(--gold); text-underline-offset: 3px; cursor: pointer; }
+a.setlink:hover { color: var(--gold); }
+@media (max-width: 640px) {
+  .ss-head { grid-template-columns: 1fr; padding-right: 36px; }
+  .sheet .ss-art img { width: 100%; height: 130px; }
+  .ss-name { font-size: 28px; }
+  .ss-card, .ss-card.land { grid-template-columns: 84px minmax(0, 1fr); }
+}
 .ctext-card { background: var(--paper); color: var(--paper-ink); border: 3px solid #000; border-radius: 12px; padding: 12px; font-size: 14px; }
 .ctext-card .ct-h { font: italic 800 18px/1.1 var(--font-head); text-transform: uppercase; }
 

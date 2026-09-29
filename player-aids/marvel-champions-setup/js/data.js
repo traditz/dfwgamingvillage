@@ -42,7 +42,9 @@ const MC = {};
     } catch (e) {
       n = null;
     }
-    return n === null || n === undefined || n === "" ? String(id) : String(n);
+    const name = n === null || n === undefined || n === "" ? String(id) : String(n);
+    // the page opens a set's cards from these links (c.linkSets); the text dump / teach copy stay plain
+    return c && c.linkSets ? '<a href="#" class="setlink" data-setinfo="' + String(id).replace(/[^a-z0-9_]/gi, "") + '">' + name + "</a>" : name;
   };
   const villainDeck = (c) => {
     const s = scn(c);
@@ -359,7 +361,7 @@ const MC = {};
             const faced = foeOf(side);
             const parts = [nm(c, t.scn.id) + " set (the leader's 10 cards)"]
               .concat(t.modulars.map((id) => nm(c, id)))
-              .concat(["Standard PvP"], m === "expert" ? ["Expert"] : [])
+              .concat([nm(c, "standard_pvp")], m === "expert" ? [nm(c, "expert")] : [])
               .concat([n === 1 ? "the " + faced + " hero's obligation" : "the " + faced + " heroes' obligations"]);
             const warn = t.modulars.length < 3 || t.modulars.length > 4 ? " <b>⚠ Choose 3–4 modular sets for this deck.</b>" : "";
             return "<b>" + t.leader + " deck</b> — built by the " + side + " team, faced by the " + faced + " team: " + parts.join(", ") + "." + warn;

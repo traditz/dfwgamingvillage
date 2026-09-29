@@ -893,41 +893,24 @@
     $$('[data-mod]').forEach(b => b.addEventListener('click', () => openSetSheet(b.dataset.mod)));
   }
   function formatName(f) { return { standard: 'Standard', 'multi-villain': 'Multi-villain', leader: 'Hero leaders', special: 'Special' }[f] || f; }
-  function modTile(id, on, rec) {
+  function modTile(id, on, rec, info) {
     const s = setInfo(id);
     const n = s.enc || s.cards;
-    return `<button class="mtile ${on ? 'on' : ''} ${rec ? 'rec' : ''}" data-mod="${id}" aria-pressed="${on}">
+    const tile = `<button class="mtile ${on ? 'on' : ''} ${rec ? 'rec' : ''}" data-mod="${id}" aria-pressed="${on}">
       ${s.img ? `<img src="${s.img}" alt="" loading="lazy">` : ''}<span class="shade"></span>
       ${rec ? '<span class="mt-rec">Recommended</span>' : ''}${s.difficulty ? `<span class="mt-diff" title="Official difficulty (Learn to Play p.23 / scenario insert)">Diff ${s.difficulty}</span>` : ''}
       <span class="mt-n">${esc(s.name)}</span><span class="mt-s">${n ? (s.approx ? '≈' : '') + n + ' card' + (n === 1 ? '' : 's') + ' · ' : ''}${esc(packName(s.product))}</span></button>`;
+    return info ? `<div class="mwrap">${tile}<button type="button" class="mt-info" data-setinfo="${id}" aria-label="What's in ${esc(s.name)}" title="See the cards in this set">i</button></div>` : tile;
   }
   function compText(comp, encOnly) {
     const names = { minion: ['minion', 'minions'], treachery: ['treachery', 'treacheries'], attachment: ['attachment', 'attachments'], side_scheme: ['side scheme', 'side schemes'], environment: ['environment', 'environments'], obligation: ['obligation', 'obligations'], ally: ['ally', 'allies'], villain: ['villain', 'villains'], main_scheme: ['main scheme', 'main schemes'], upgrade: ['upgrade', 'upgrades'], event: ['event', 'events'], support: ['support', 'supports'], resource: ['resource', 'resources'], leader: ['leader', 'leaders'], player_side_scheme: ['player side scheme', 'player side schemes'] };
     return Object.entries(comp || {}).filter(([t]) => !encOnly || !NOT_ENC.includes(t))
       .map(([t, n]) => `${n} ${(names[t] || [t, t])[n === 1 ? 0 : 1]}`).join(' · ');
   }
-  function openSetSheet(id) {
-    const s = setInfo(id);
-    const sheet = $('#sheet');
-    const scrim = document.createElement('div'); scrim.className = 'scrim';
-    const all = ENC.scenarios.concat(ENC.interchangeableMainSchemes || []);
-    const recs = all.filter(x => (x.recommendedModulars || []).includes(id)).map(x => x.name);
-    const reqs = all.filter(x => (x.requiredModulars || []).includes(id) || ((x.encounterSets || []).includes(id) && !(x.recommendedModulars || []).includes(id))).map(x => x.name);
-    const n = s.enc || s.cards;
-    sheet.innerHTML = `<button class="iconbtn close" aria-label="Close">✕</button><div class="sh-in">
-      ${s.img ? `<img src="${s.img}" alt="">` : ''}
-      <div class="ctext-card"><div class="ct-h">${esc(s.name)}</div>
-      <div style="color:#555">${esc(packName(s.product))} · ${s.approx ? '≈' : ''}${n || '?'} encounter card${n === 1 ? '' : 's'}${s.difficulty ? ' · official difficulty ' + s.difficulty + '/5' : ''}</div>
-      ${compText(s.comp, false) ? `<p>${esc(compText(s.comp, false))}</p>` : ''}
-      ${recs.length ? `<p><b>Recommended for:</b> ${esc(recs.join(', '))}</p>` : ''}
-      ${reqs.length ? `<p><b>Always part of:</b> ${esc(reqs.join(', '))}</p>` : ''}
-      ${s.restrictions ? `<p><b>Note:</b> ${esc(s.restrictions)}</p>` : ''}
-      ${(s.cardList || []).length ? `<p style="font-size:13px"><b>Cards:</b> ${esc(s.cardList.join(', '))}</p>` : ''}
-      ${s.approx ? '<p style="font-size:13px">Fear No Evil card counts come from the Hall of Heroes card gallery (MarvelCDB has no encounter data for it yet).</p>' : ''}</div></div>`;
-    sheet.hidden = false; document.body.appendChild(scrim);
-    const close = () => { sheet.hidden = true; scrim.remove(); };
-    scrim.addEventListener('click', close); sheet.querySelector('.close').addEventListener('click', close);
+  function openSetSheet(id, opts) {
+    if (window.MCSetSheet) window.MCSetSheet.open(id, opts);
   }
+
 
   // ---------------------------------------------------- encounter builder
   function schemeOf(s, e) { return (s.mainSchemeOptions || []).length ? msById(e.ms || s.mainSchemeOptions[0]) : null; }
@@ -1027,12 +1010,12 @@
     }).join('')}</div><p class="explain" style="margin:6px 0 0">Stages used in ${e.mode} mode are highlighted; hit points shown for ${e.players} player${e.players > 1 ? 's' : ''}.</p>` : '';
     const rec = (s.recommendedModulars || []).concat(ms ? (ms.recommendedModulars || []) : []);
     const top = Array.from(new Set(e.mods.concat(rec)));
-    const topGrid = top.map(mid => modTile(mid, e.mods.includes(mid), rec.includes(mid))).join('');
+    const topGrid = top.map(mid => modTile(mid, e.mods.includes(mid), rec.includes(mid), true)).join('');
     const sd = vsSide(s), ls = leaderSchemes(s, e);
     const browse = e.vs && sd ? sd.modulars : ENC.modularOrder;     // competitive: only this side's sets (CW p.5)
     const mf = (state.modFilter || '').toLowerCase();
     const allGrid = browse.filter(mid => !top.includes(mid) && (!mf || (setInfo(mid).name + ' ' + packName(setInfo(mid).product)).toLowerCase().includes(mf)))
-      .map(mid => modTile(mid, false, false)).join('');
+      .map(mid => modTile(mid, false, false, true)).join('');
     let leaderNote = '';
     if (sd) {
       const own = e.mods.filter(m => sd.modulars.includes(m)), other = e.mods.filter(m => !sd.modulars.includes(m));
@@ -1115,10 +1098,10 @@
         <div class="enc-side">
           <section class="panel">
             <h3 class="h-sec">Encounter deck</h3>
-            <div class="setlist">${deck.rows.map(r => `<div class="setrow">${setImg(r.id) ? `<img src="${setImg(r.id)}" alt="">` : '<span></span>'}<div><b>${esc(r.name)} <span class="tag ${r.tag === 'Required' || r.tag === 'Scenario' ? 'req' : r.tag === 'Recommended' ? 'rec' : 'opt'}">${esc(r.tag)}</span></b><span>${esc(compText(r.comp, true))}</span></div><span class="cnt">${r.approx ? '≈' : ''}${r.n}</span></div>`).join('')}
+            <div class="setlist">${deck.rows.map(r => `<div class="setrow clickable" data-setinfo="${r.id}" role="button" tabindex="0" aria-label="What's in ${esc(r.name)}" title="See the cards in this set">${setImg(r.id) ? `<img src="${setImg(r.id)}" alt="">` : '<span></span>'}<div><b>${esc(r.name)} <span class="tag ${r.tag === 'Required' || r.tag === 'Scenario' ? 'req' : r.tag === 'Recommended' ? 'rec' : 'opt'}">${esc(r.tag)}</span></b><span>${esc(compText(r.comp, true))} <span class="more">· cards ›</span></span></div><span class="cnt">${r.approx ? '≈' : ''}${r.n}</span></div>`).join('')}
               <div class="setrow"><span></span><div><b>Hero obligations</b><span>${s.noObligations ? 'not used in this scenario' : e.vs ? '1 per player on the team facing this scenario' : '1 per player'}</span></div><span class="cnt">${deck.obl}</span></div></div>
             <div class="total-bar"><span class="muted">${/deck separately|decks separately|own encounter deck/i.test(setupNotes.join(' ')) ? 'Encounter cards (in separate villain decks)' : 'Encounter deck at setup'}</span><b>${deck.approx ? '≈' : ''}${deck.total} cards</b></div>
-            <p class="explain">Villain stages and main schemes are separate decks and aren't counted; some cards are put into play during setup.${expStages.length && e.mode !== 'expert' ? ' Expert villain deck: ' + esc(expStages.join(' → ')) + '.' : ''}</p>
+            <p class="explain">Tap a set (or the <b>i</b> on a modular tile) to see its cards. Villain stages and main schemes are separate decks and aren't counted; some cards are put into play during setup.${expStages.length && e.mode !== 'expert' ? ' Expert villain deck: ' + esc(expStages.join(' → ')) + '.' : ''}</p>
             <div class="actions" style="margin-top:12px">
               <a class="btn small red" href="${rulesHref}">Step-by-step setup ↗</a>
               <button class="btn small" id="toNight">★ Use for Game Night</button>
@@ -1129,6 +1112,16 @@
           ${e.vs && sd ? vsBoxHtml(s, e) : ''}
         </div>
       </div>`;
+    const fixedSets = (s.encounterSets || []).concat(ms ? (ms.encounterSets || []) : [], s.requiredModulars || [], ms ? (ms.requiredModulars || []) : []);
+    const openSet = id => {
+      const inDeck = e.mods.includes(id);
+      const addable = !fixedSets.includes(id) && (inDeck || ((ENC.modularOrder.includes(id) || ENC.campaignPools.includes(id)) && (!e.vs || !sd || sd.modulars.includes(id))));
+      openSetSheet(id, addable ? { action: { label: inDeck ? 'Remove from this encounter' : 'Add to this encounter', cls: inDeck ? 'ghost' : 'red', onClick: () => upd({ mods: inDeck ? e.mods.filter(x => x !== id) : e.mods.concat(id) }) } } : null);
+    };
+    $$('[data-setinfo]').forEach(el => {
+      el.addEventListener('click', ev => { ev.preventDefault(); ev.stopPropagation(); openSet(el.dataset.setinfo); });
+      if (el.tagName !== 'BUTTON') el.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openSet(el.dataset.setinfo); } });
+    });
     const vb = $('.vs-box'); if (vb) { bindCardRows(vb); $$('.vs-card', vb).forEach(el => el.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openSheet(el.dataset.card); } })); }
     const upd = patch => { Object.assign(e, patch); saveEnc(s, e); const y = window.scrollY; renderVillain(s.id); window.scrollTo(0, y); };
     $$('[data-mode]').forEach(b => b.addEventListener('click', () => upd({ mode: b.dataset.mode })));

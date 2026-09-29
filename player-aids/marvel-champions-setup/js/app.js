@@ -100,7 +100,7 @@
     if (state.vs && ENC && ENC.vs) {
       return {
         vs: true, team: state.team, players: state.team, mode: state.mode, heroic: 0, skirmish: false, campaign: false, pool: false,
-        scn: null, setName, modulars: [], teams: { registration: vsTeam('registration'), resistance: vsTeam('resistance') },
+        scn: null, setName, linkSets: true, modulars: [], teams: { registration: vsTeam('registration'), resistance: vsTeam('resistance') },
       };
     }
     const s = scenario();
@@ -115,13 +115,33 @@
     const mods = s ? (state.mods || (s.recommendedModulars || []).slice()) : [];
     return {
       players: state.players, mode: state.mode, heroic: state.heroic, skirmish: state.skirmish,
-      campaign: state.campaign, pool: state.pool, scn, setName, modulars: mods,
+      campaign: state.campaign, pool: state.pool, scn, setName, linkSets: true, modulars: mods,
     };
   }
   const val = (x, c) => typeof x === 'function' ? x(c) : x;
   const when = (item, c) => { try { return !item.when || item.when(c); } catch (e) { console.warn(e); return false; } };
 
   // --------------------------------------------------------- configurator
+  const infoBtn = (id, side) => `<button type="button" class="chip-info" data-setinfo="${esc(id)}"${side ? ` data-side="${side}"` : ''} aria-label="What's in ${esc(setName(id))}" title="See the cards in this set">i</button>`;
+  function openSet(id, side, fromChip) {
+    if (!window.MCSetSheet) return;
+    let action = null;
+    if (fromChip && side) {
+      const t = vsTeam(side);
+      const on = t && t.modulars.includes(id);
+      if (t) action = { label: on ? `Remove from the ${side} scenario` : `Add to the ${side} scenario`, cls: on ? 'ghost' : 'red', onClick: () => { state[VSKEY[side] + 'm'] = on ? t.modulars.filter(x => x !== id) : t.modulars.concat(id); update(); } };
+    } else if (fromChip && scenario()) {
+      const mods = ctx().modulars, on = mods.includes(id);
+      action = { label: on ? 'Remove from this setup' : 'Add to this setup', cls: on ? 'ghost' : 'red', onClick: () => { state.mods = on ? mods.filter(x => x !== id) : mods.concat(id); update(); } };
+    }
+    window.MCSetSheet.open(id, action ? { action } : {});
+  }
+  document.addEventListener('click', e => {
+    const el = e.target.closest('[data-setinfo]');
+    if (!el) return;
+    e.preventDefault();
+    openSet(el.dataset.setinfo, el.dataset.side || null, el.classList.contains('chip-info'));
+  });
   const seg = (key, opts) => `<div class="seg" role="group">${opts.map(([v, l]) => `<button type="button" data-k="${key}" data-v="${v}" class="${String(state[key]) === String(v) ? 'on' : ''}">${l}</button>`).join('')}</div>`;
   const gameSeg = () => (ENC && ENC.vs ? `<div class="cfg-group"><span class="cfg-label">Game</span>${seg('vs', [['false', 'Co-op'], ['true', 'VS · competitive']])}</div>` : '');
   function bindSeg() {
@@ -137,7 +157,7 @@
     const key = VSKEY[side], foe = side === 'registration' ? 'resistance' : 'registration';
     const rec = t.scn.recommendedModulars || [];
     const n = t.modulars.length;
-    const chips = t.pool.modulars.map(id => `<button type="button" class="chip ${t.modulars.includes(id) ? 'on' : ''}" data-vsmod="${side}:${esc(id)}" aria-pressed="${t.modulars.includes(id)}">${esc(setName(id))}${rec.includes(id) ? ' ★' : ''}</button>`).join('');
+    const chips = t.pool.modulars.map(id => `<span class="chipset"><button type="button" class="chip ${t.modulars.includes(id) ? 'on' : ''}" data-vsmod="${side}:${esc(id)}" aria-pressed="${t.modulars.includes(id)}">${esc(setName(id))}${rec.includes(id) ? ' ★' : ''}</button>${infoBtn(id, side)}</span>`).join('');
     const msSel = (stage, cur) => `<select class="select" data-vsms="${side}:${stage}" aria-label="${esc(t.sideName)} stage ${stage} main scheme">${t.pool['stage' + stage].map(x => `<option value="${esc(x.code)}" ${cur && cur.code === x.code ? 'selected' : ''}>${esc(x.name)}${x.product === 'synthezoid' ? ' (Synthezoid)' : ''}</option>`).join('')}</select>`;
     const bq = new URLSearchParams({ vs: '1', p: String(state.team), m: state.mode, mods: t.modulars.join(','), ms1: t.ms1 ? t.ms1.code : '', ms2: t.ms2 ? t.ms2.code : '' });
     return `<div class="vs-team ${side}">
@@ -150,7 +170,7 @@
           <div class="row">${chips}</div>
           <div class="cfg-label vs-lbl">Main schemes <span class="hint">one stage 1 on top of one stage 2</span></div>
           <div class="vs-ms">${msSel(1, t.ms1)}<span aria-hidden="true">→</span>${msSel(2, t.ms2)}</div>
-          <p class="explain" style="margin:8px 0 0">★ = in the preconstructed ${esc(t.leader)} scenario. <a href="../marvel-champions-builder/#villain/${encodeURIComponent(t.scn.id)}?${bq.toString()}">Open in builder ↗</a></p>
+          <p class="explain" style="margin:8px 0 0">★ = in the preconstructed ${esc(t.leader)} scenario; <b>i</b> = see the cards. <a href="../marvel-champions-builder/#villain/${encodeURIComponent(t.scn.id)}?${bq.toString()}">Open in builder ↗</a></p>
         </div></div></div>`;
   }
   function renderVsConfig() {
@@ -202,14 +222,14 @@
     if (s) {
       const c = ctx();
       const modChips = (ENC.modularOrder || []).filter(id => c.modulars.includes(id) || (s.recommendedModulars || []).includes(id))
-        .map(id => `<button type="button" class="chip ${c.modulars.includes(id) ? 'on' : ''}" data-mod="${esc(id)}">${esc(setName(id))}${(s.recommendedModulars || []).includes(id) ? ' ★' : ''}</button>`).join('');
+        .map(id => `<span class="chipset"><button type="button" class="chip ${c.modulars.includes(id) ? 'on' : ''}" data-mod="${esc(id)}">${esc(setName(id))}${(s.recommendedModulars || []).includes(id) ? ' ★' : ''}</button>${infoBtn(id)}</span>`).join('');
       const addOpts = (ENC.modularOrder || []).filter(id => !c.modulars.includes(id)).map(id => `<option value="${esc(id)}">${esc(setName(id))}</option>`).join('');
       scnHtml = `<div class="scn-card">${s.img ? `<img src="../marvel-champions-builder/${esc(s.img)}" alt="">` : '<span></span>'}
         <div><b>${esc(s.name)}</b><div class="muted">${esc(s.productName)}${s.campaign ? ' · ' + esc(s.campaign) : ''}</div>
         <div class="row" style="margin-top:8px">${modChips}<select class="select" id="addMod" aria-label="Add a modular set"><option value="">+ Add modular…</option>${addOpts}</select>
         <a class="btn small ghost" href="../marvel-champions-builder/#villain/${encodeURIComponent(s.id)}">Open in builder ↗</a></div>
         ${lmsHtml(s)}
-        <p class="explain" style="margin:6px 0 0">★ = recommended by the scenario insert. Tap a chip to remove it.</p></div></div>`;
+        <p class="explain" style="margin:6px 0 0">★ = recommended by the scenario insert. Tap a chip to remove it, or its <b>i</b> to see the cards.</p></div></div>`;
     }
     $('#cfg').innerHTML = `
       <div class="cfg-row">${gameSeg()}
