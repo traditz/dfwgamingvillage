@@ -1,318 +1,608 @@
 /* =============================================================================
    Talisman (Revised 4th Edition) — Setup Utility & Reference
-   Aged-parchment widgets on a dark frame. Cinzel display + EB Garamond body.
+   Styled after the Revised 4th Edition rulebook (Talisman Rules2.pdf) and box:
+   · the box lid — deep purple, gold filigree border, the cover's red dragon and
+     the steel-and-gold TALISMAN wordmark (header)
+   · rulebook pages — pale stone-grey parchment, torn gilt page-head rule with the
+     gold Talisman emblem, page-number medallion at the foot (main sheet)
+   · the red "Example of…" boxes with gold jewelled corners (config, notes, Regions)
+   · the parchment boxes in red-velvet frames with gold triangle corners
+     ("Example of Spell Limit" — teaching script, Golden Rules)
+   · Windlass-style display headings (Amarante), Caxton-style body (Spectral),
+     each expansion's own card symbol on its source tag
    ============================================================================= */
 :root{
-  --frame:#2b2013; --frame-2:#1f160c; --band:#443422;
-  --parch:#c1b79a; --parch-2:#bcb08e; --parch-hi:#cac2ad; --panel:#ccc3a9;
-  --ink:#231a0f; --ink-soft:#4a3c27; --ink-faint:#6a5b3f;
-  --gold:#8f701f; --gold-bright:#c39a37; --gold-band:#d8b150;
-  --crimson:#8a2b2b; --crimson-deep:#6d1f1f; --head:#6d1f1f;
-  --edge:#aa9a71; --edge-2:#99855c; --card-line:#a5956e;
-  --shadow:rgba(18,10,2,.5);
-  /* aged-paper texture, layered over each surface's own background-color */
-  --paper:
-    radial-gradient(120% 85% at 12% 8%, rgba(255,251,232,.4), rgba(255,251,232,0) 55%),
-    radial-gradient(115% 100% at 88% 92%, rgba(143,112,68,.18), rgba(143,112,68,0) 60%),
-    radial-gradient(70% 60% at 78% 18%, rgba(120,90,50,.10), rgba(120,90,50,0) 70%),
-    radial-gradient(60% 55% at 30% 80%, rgba(120,90,50,.08), rgba(120,90,50,0) 70%),
-    repeating-linear-gradient(94deg, rgba(120,90,50,.028) 0 2px, rgba(120,90,50,0) 2px 6px);
-  --paper-inset:inset 0 0 34px rgba(150,118,70,.18), inset 0 0 1px rgba(90,64,30,.4);
-  /* source accents */
-  --s-base:#8a2b2b; --s-dragon:#bf3a26; --s-dungeon:#5b3a8c; --s-highland:#2a7d6a;
-  --s-city:#b07d12; --s-woodland:#3d7d39; --s-cataclysm:#566b7a; --s-reaper:#6a6a6a;
-  --s-frost:#2f7da6; --s-pool:#1f9d8f; --s-blood:#9b2226; --s-fire:#d9741b;
-  --s-nether:#7a2e6b; --s-harb:#4a5568; --s-deep:#1f6f6f; --s-lost:#876a37; --s-var:#5a5a8c;
+  /* rulebook page — sampled from the page art: centre #dfd8cf, edges #c7bbaa */
+  --page:#e3dcd1; --page-hi:#eee8de; --page-card:#f1ebe2; --page-edge:#c9bdaa;
+  --ink:#1d1814; --ink-2:#352c24; --ink-3:#5a4733;
+  --rule:rgba(88,68,44,.24);
+  /* red example boxes — sampled #8a1114, edge #690e0f */
+  --red:#8a1114; --red-hi:#9e181c; --red-lo:#650c0f; --red-ink:#6d0d10;
+  --on-red:#fbf3e6; --on-red-2:#f2dbd0; --on-red-3:#ecd08e;
+  /* gold — sampled from the emblem & frames #b79b6c #937548 #72562f */
+  --gold:#c9a45a; --gold-hi:#e6c77e; --gold-lo:#8a6a35;
+  /* box lid — sampled #312134 #1e1213, sky #4f2736 */
+  --lid:#2a1a2c; --lid-lo:#170d17; --lid-wine:#4f2736;
+  --steel:#dfe1dd;
+  --focus-dark:#1d1814; --focus-light:#fff1cf;
+  --line-ui:#6f5a3b;   /* control outlines on parchment (>=3:1 on the darkest paper) */
+
+  /* parchment grain + the rulebook's cloudy staining (SVG noise, tiles seamlessly) */
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g' x='0' y='0' width='1' height='1'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .32 0 0 0 0 .26 0 0 0 0 .18 0 0 0 .55 -.18'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  --clouds:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='760' height='760'%3E%3Cfilter id='c' x='0' y='0' width='1' height='1'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.0055' numOctaves='4' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .38 0 0 0 0 .27 0 0 0 .9 -.42'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23c)'/%3E%3C/svg%3E");
+  --fibres:repeating-linear-gradient(90deg, rgba(90,60,30,.018) 0 1px, rgba(90,60,30,0) 1px 4px);
+
+  /* small gold Talisman triangle used as the list bullet */
+  --tri:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 12'%3E%3Cpath d='M7 .6 13.4 11.4H.6z' fill='%23a9843f' stroke='%236a4c1c' stroke-width='.8'/%3E%3Cpath d='M7 4.6 9.9 9.6H4.1z' fill='%23e6c77e'/%3E%3Ccircle cx='7' cy='9.3' r='1.5' fill='%238a1114'/%3E%3C/svg%3E");
+  --check:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.2 8.6 6.6 12 12.9 4.6' fill='none' stroke='%23fbf5ea' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --lock:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='3' y='7' width='10' height='7.5' rx='1.4' fill='%23ead0c4'/%3E%3Cpath d='M5.2 7V5.2a2.8 2.8 0 0 1 5.6 0V7' fill='none' stroke='%23ead0c4' stroke-width='1.7'/%3E%3C/svg%3E");
+  --swirl:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 16'%3E%3Cg fill='none' stroke='%23e6c77e' stroke-linecap='round'%3E%3Cpath d='M59 8H34c-5 0-6.5-5-11-5-4.4 0-6.4 5.6-2.4 7.1 2.7 1 4.8-1.4 3.4-3.4' stroke-width='1.7'/%3E%3Cpath d='M34 8c-9 0-15 6-26 3.6C4 10.8 1.6 8.8 1 8' stroke-width='1.2'/%3E%3C/g%3E%3C/svg%3E");
+
+  /* each expansion's card symbol, lifted from its rulebook (alpha masks) */
+  --i-base:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAB2ElEQVR42u2Z4a2DIBSFz0u6gCu4giuwgiu4AivYEXAEOoIdoW8EO4Idoe8PvJAGgasgkJTk/jExOXD5uPcA8B3fUfxoahbPAYhaxbcAVgBvAF2NExBK/BuArE18Z6y+DlbTBOYP8W8Aj1qAHizidfAajszFMYFVwV3sGB3idYiawN2KIoGWgeI10EWNniBex1ATuLbvSylAc4f40XOsipL6HdsK68L1cGSnKxXcIZCROZd4RhQlSwK6cWyLrfY5dLtlB1ccAP40cJedR2NTAtCCsJdby4RcQMsSwaUC3acEdyY0aGZzxwhAJzM+1Io6e0TxM40PFdw+gA8f0O1ZRmUIbO7WXEB3RHCpNUKmNj5UcH0+oI8J9CUA3K1VmADcLWIm4l3pU/3DN7I/ALjGNiqxzUgSoMeTu8c+pvFx3TDMmfwFozDAHfDcAlPaGM3ZL4BXwD83RyvBLcztumFYd9xAhMZ69CbDZ1Ryh9f48AQrGjtj454bhj0hDT8gIi9KR624MVIdc2v+V+iLsfengCoaWrWf6tTRk3ipb+apdAXKe5E008w+6sqSw8Af6VoXNSluaUlYDS+T2Yz70aZMevxDVL/7g3QPfcxoOZ6qDZiA+l7rk74B/AGyQnGsbkWx5gAAAABJRU5ErkJggg==");
+  --i-dragon:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAC3klEQVR42tVZ0Y3bMAx9F3QBr6AV3BHUEXQjqCP4RsgKvhGSEXIjOCPIIzgjpD8UwLK0LDuyziUgHM4RaD2JfOSTgXxraOxtDQCTO/m0wrEH0FYCYPcAYCudAOgEmpIAosOxwuIftFltSQDR2Yh6ZksCsLQzj4oAXE4YnUonVcEwMiUBGDZQiYmKsVDDEtlUrgNFTmBkyesqAPBs4cVy7gzgScMnqHYNw5iZxJ3oPUPJumOY44kASbtknlAL4KYA8GyTnnucdi9ecBGLcPTcLMT3AKATz6Tv2x5Vn59CHIGFVPy9T/joBMiWAHGf0549l1NAPFniBfp97hQGBmDO13nNgt42JnSnFJ4vFrdfMwwSG8LrTHN4BfBeg6dvys69OkLJuHdKkkommQoufkqwjqG8cms532ckY8nRL1BvVn4YVkRqLp6DmAujGLYWGUiDEj5G4es9hha6DWOwvwjkx4yIMIR4FCqpqaQDLIC7AKDWBgngLna8VvtcTIPEYvQ86Miq0vagIMICM/6TsJYSpk9w/kBOwwvcf0nMiVXfvRLOncISQdQKvwFAJ7rY6HvKrA1ZomMQu21FFe4TnerSaBUAjukFHjpuTRJ3zEFgQqURBSX27VCerwHQKf1QZKGebeKN5hrZjbasvY0gHtQZ3sVllme7Hp//ovnDyjj9ST4GcY3yCeC3UgM8W1vsaMdYfW1Cp2qCpqf/A5OHaxPZsL7LiJNwiVuJhq23XRNaAwHwio71C2yiMVBHf7l8jCInlFRlll4yKE4tW9C0gUa1rtcwNvKvti/xaG0C3KvFKaU5ur2vNRtFlJfSANXMY3tfY3EQu2wAcMOBbEsldjiY9d+x+6eCAK4r5o44oF2+6w6oZA50C6EU9UMxBjoV/q4FAB90tQhFb79T+NT+YIjcT7GBdlmquHhrHVsSh4NaI77myL6nP1rsp+525iTkf2NnoXV3sbedQcRd/9wraf8AWWNoWjp5cEEAAAAASUVORK5CYII=");
+  --i-city:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABzElEQVR42u2a7XGDMAyGn34soBVYIR2BFdIRWCErpCOkI5ARkhHICDBCPEL6R77z+RpSsIohh+50h4MNfo30SrIDdiJAoSpADdxU66iPWL303RBAHUzsCLhf+lSqF+BzbgD86qMTfNTHRF4TTeYEtMAW6IJ77s4Y/3unY1p9hkwNQIADUCasqh9X6rNkShMSYNOz4lXULoEmmqSL7kvPlzOXArgGLNNG7Ud61TG+vR/7BcaakAO+gxUbSo1i5cypTmzF59XUXwDLYJRThth9nx5yLIgYAbjmiAOzkRXACmAFkF/cXOqBsA44BtToNHU+axq9iyJ5Ev+/JMaBNsgivxTARicqUV8XADorqL22P6bMRONAttPrrabM94KVv260b/kfFdqYtLpUHRqV26imyCIS5fW3ESCKnCwkz0CjLtBJKRTgzWDynbLPZWBl5pnrPIeAWI+oi2+pWypWTlwl1AXtHGh00SxEjghqDUDWdHoFkB7EFgtAlu4D8R7pIn2gWLoJlQlmlOxDuVmoINO+6NPsjR4NHDibCVnFgGw0bGVC7dK31yUnC3UGALrcq3dKKGpOczlr80CaP/hFo4DruR0U+rPf5sHkTf9y8wNf5xrebqOKawAAAABJRU5ErkJggg==");
+  --i-woodland:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACt0lEQVR42s1ay5GcMBB9Xk8CSkEpcPVRDgGHIIcwDgGHwIbAhgAhMFffmBAghPGlqerqAv3QgFRFDcXOSP2k7tevmwXyjQrAHUAHYAIwA3jR50zPLACVcU18yzSPBdAEGvcA8En3/PtPAF+4aPS020ev+1UAukwAZnLF4PGRCcAj0zwKQBsTJ7cDCyl2X2U8TU3zDbkBGAA1Ta4FmKJHldHHQ686lwsZMr74Xfaxy3zi7k/CRZNZSAbqWeOTkloWNphP9v1XTkZrLzD+xXTTSFedCmC6CEBUdnbFwFIIkSgSipvjuycGfhQCQgP4R1dUApsLcaMXKd4oF3pcqc9DXfrm8DudWaTliIVgf+sLcp2oWqEqiD6TKraxYOM3A/lDuI5G+UPtAXgWlLySauJUxcmB/wHwi9HwbwA/M9Lx4tpkncAKay+opmcd+eko3LERej+VKKzPt6ZAw9f7hozXggAqcap3YYQ5UOxUvg6bawK+47KFyBeR7njf4PIqMd84QRgPhamd3NEIIEacbL8Dzoj+aSiIJkW81cItlKMA6kRsTTsAFCtgTERs9Fss5OscV0JULY7uHO8duZhjod9pYrNHCNtwO28bBu5RpaVJv1jSU/RsXXxhQrANLNCfrAOiWWE/0Bw6VJm6ZIRhLZZpx9X6neezeFdQeeJOBvoUWhsYD3XmKm46sW69I9jUzt+dos7uIO5oIkufhq7UzkW7cfKzowPRis3UMfWA7wfdgZNo2OkaT4tzC7xzNCzt1x7A05t1/kq3Y6xiDpXY5kCMdBHt/bfK/SbB+Kakzrc5EMhZ6oGzx1AaAPXm77+9Tu0TCnRVguH2QDdjJBayVwGomTbqE6nUl8ROGzZC4EkA/dVtzEoozo7tqmVvWhqParVX/bfKmuIHpuVlNh/Ey0Mtiv/12d8Yiv0PFRwxnRJ6ba0AAAAASUVORK5CYII=");
+  --i-cataclysm:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACrElEQVR42u1ZPXKzQAx9IW5S7hW4AlfgCrQpuYJzBPsI+AikTWfadNB+HRzB26YjjXZG3lmW/cNmvolmNHgwXvT0JK20Bv7kufKy0bqCFACmvQIQTHODcgATgI59lqQPAZAzI4VmoPrsIwrEoF1lKgACQA2gYIbykLCJZAZO9JtyBaRiY2A6uYaeDqACcFp54bRg7MDu6Q5paG1XkWzNwcYSB1DTi3SqJ81YGUC5AHAlVkNFATmb2CkBzEyPWiKmkFp7R6jedDaVd9QDtcWLLglfWL67JQRRmrzfBJbTknLHFiYCwJgIwEzvEgeNjoulKgkt7oWh7p8pTpcSM6WUioWeEPWWhwsH+u9oXXDELSEDM4A2YyVzWqkAl0iPFYmLAgAUmceik0Mu5JaEr7fouTKP2BSOpVIY1jx6bmQ+BcQpB6CVWpv2ZGxJ1zZx3Ot5h4bdWPJSFbj4vLH2eoVRuxxvk+sHGROiJx6jOrJr4o1ni/C52zRPOzbWpEcAeGUAOgBfVEF+2P23HY7CFwAfLo1Z6VF95gcl7d1+cnAY/aoneVmSl3M2g3QhPdX1iUm6unlmHu0BIqcpGdimRwNIYXwXuFYeCyDFWHmOWCOa/QrxU1PMKNk/O4Q+IllcPY/KElAoLZvN4JKIMUXkEACAHzp1dFWnEQXrT85sdo0FMIQAMNHHjVc5UgP4ZAbzETWPTEQZO+30nglXRhSBG3W/LTVq0TN0aPVomddbhyrVsMPkpEN/EVE+C8bAaGmHU59SrNKvaF5jpjKcTnvV91QAenq5OlVQNFcO8Xw0rDeuzN6b/c9lksYzH1RebR46PgBdZuYxci+wymvEb38AfDPPvlmAvtPz/7RxdTdSOJbcGjsWl8TOsXM5uRxC7VnEwgw9buX9lweW3wl/8h/KL+wanoPZ0hxjAAAAAElFTkSuQmCC");
+  --i-reaper:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACY0lEQVR42u1YO3LCMBB9ARpKtZS6gq/AFZwyZXIEcgSnTQdtOnMEaNM5bTpzBLulIwXrmR2NhFe2JMxMdmYHj5Glt9r/AnEoA7AFcGFc0PtJ0xpAaQDn3ExZkFcCeBFwTcJOhjZC4KY28imALwaA50KsHxX8XTWhAoHv+JBagDwgeB5mVarbryIIcEkRXhWp+xKJy9hayCKC79hLgNmAZJUim0ejKoEGqpiRp0kggFdemN9w1hUATb8vCcPckpnRmc5f0fM5Zm0Tmzc+TnwE8IMHIJcAPwD2E8HYEp6T74eaRZ2GQqimXKAD10IF7dkx7y0qeuftfzzrbh3/1wHA1w5wW1boqVCJzFRtSDMJ6gNSegawIwAnIRC+dkd7RG9YDj02mBH3JbsuSWU9lSc332Js8dYByoWOX/fYu/boN5q+EnsmUHfLbkVysO4RMBcGEPP80T6gBLcvqVZfBVpQIZ24FUQKTWFPWxLiUbjW90xxMqt7HNnVpXXrlWNaVwr2k/qMeGxiHuoCt7WsKwRC2PYrQjfvJUv5peeI5OAQ9tZ+1dAyfuj0wVcASYc2qJRoJ1KR7sc68+ZGVg2lgcanieG0EAjwQbegHKEtNxxNkT2fLBHNNIV3i5aVUTNFJ23xlUIQ0aqxITJENQq6JdctKpadlcW2R9/wAvFGMEdWeSLWCH0RcYZaGt1V0qb+YWgW8MZTfINYE+t6YDOfTUEDemA4HPpdcAFa3HGyMbuT/Qfzg/8odG8TmgcS4ATgF9fZ/hLXOf7Ssu5M674AfAL49pn52+gpQmHH66CutXxjdU/QKvMP3JQjF65FQC0AAAAASUVORK5CYII=");
+  --i-frost:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAADOElEQVR42u1ZLZPbMBB9SY4EihaaFvovmBa68GAOFpoedH6C/ROSn5DQYzE9FtMwiYblyHpGo65krWx32k52RnM3knf1+Z5eVsDTnjbJVsLvMwA1/a8A7AGcrXZF3wCAAdBbfoqpB4AcQBWIOas1AB5WOVgDG9o1lYs1mZNVz/mEYs5mBYCr05kGsLPatdNe0+rqgE8o5qyW06o+nHKitgPTdiUfzfhkAZ9iqSO0YwYzHIsrM5gdgFLoUy8JekWrx62aW3exzvJB4JMtNfChlJ7OQ+e4iPSpnL5modHhGIChS18nRwBvRJmD1RZdctY79Aqi0/2Ulc88wA0VHwhTY+VTJlAJO3wQr4fi6RnjYT0ygY7Z1hi6zTw4yoWXlKExeG0zEqAH8J06NZ4CAFvL5xuAOyMHXglPW2eAt0DcAQN3KYhLi0UUgbITgLwnEJ+t839gzvMZQOuA3d6xymo70rdJXF8LJYaraeoIqh27NC+xgPbdtmXAxzfAklZ/bIIcjpJv6ZDmUUK6PdFAtVDvNIEFiaZPPXHLh4FKV7L0UG0zh+YJnUPl0TwSvSPud2XNunDYIGM43RBz9IGjlAcGOOY/aC3FSIzO+a4D0K6ow4b++ujMHUTMDvomIPU1gVhv8IDsXygawGkduSp/q5mVdUtmzBYp4REyI1reWN9IjpDx1P98IYDsGQzkjPgydKWHQFyMDLALyJKMAbFhfBQD7Gg6k1LgojQqlQa7hMvvKryUigTpMTlASEo0CVIiZQFHxVyqdkkVc5dUMcdJgqlyuppJTv+GnRcP1bXOhEyAXUomcO/8UDmSf8HIBjPCWHaMPuWyqC0wckVHbvUuAHLtiXuYetPFJLEenrxnqloVAXcdkReSpvqMZ6uHeiOU9ZNSjanJqFLALPZqixNbm4jVHNImHYBPKneq2wa0zNlJh7wD+BHo6xPAh9XHjYB7/K+Tu0un17OR9Lqeml7fCCfwSsXNrn1QnXIydDf6+8vjoxif+1KPfEs8MTVTn5jWCTgA8/ugo5u3Z94JWo9P77ld1VKvNJxK9D2zXv/UM2vKQ3dlddAyD91uSsStN0z6xpYe7ZIP3U97mmNfDVHgk0WWQQUAAAAASUVORK5CYII=");
+  --i-pool:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAADZElEQVR42u1ZsXXcMAz9dtykZJtSbUquwBUuIzBlSmUEZQR5BHkEXZvubgTdCNQIlwZ8D8YjKZKizinM9/isk0UKAIEPfAj4HB87nhrtowB0ADRNxaYfNwAr/T2z3x82FAADYASwALgXzoXWGqHoQwS3AC4VQsfmBUD/CEVOjQUPKXI6yurjgYLLOVFMNRn6YKunYkTvFd4AcBsvcgcq6Pa4VI7wd3KtPuDLlixoGUpdAMzsdy56RZV4SbjNVIAKHM9/A3hl9640T3Svo/mDjGQz9h9p7TlHmK7AMhOz9Jhx3JqdGAqBYckN7KnQT/sCJBuYxXVFApxzcL4Ut00lLM+VgW1Tmy4VeF2TPTs6ub4CwRx/5xe26a8KyPoG4DsL2LUA4Tpa/5eucw3xlf6e91r/zgJ3YlXoloueSAFp1fuegLZsI4/TLvM4F1ozbiigmLv0DZJfL5FnETVIR9banWwqIVoaySdBx+Lv3aaTEIKTkj7yYl7TlwbwnHCPiZ45ifgwpIij2T0xH14BvBFTMuwkrpRdfRb1/7syZuXd0O8RE7wTwafp/YrtxZmaZhn8Tdw7AfgJSi45x2gjPm6YNYeNLOyTkU1kVU37LAEZnAj68SWzZFWsBPCWX0kQI55L7eEVNoIfr4JTp9bza41K+EydVMyy8xHl9nNjHqoSChzRgVCtFTiTi4XG9Sii3sp1bEYM+DaMa+VGT3SRS1puZMk1cO+WwQX8SSiB87s6cy5huStjVx6jNRPeX78WlNBnev5GwtsdiqzYqEmMICNLpHOQm4lHts6IJDdWdi6SC711XIIdDQWszAoyJPF9ruAj7za9Z5a5k7CaLuABIXalRLYuqkh1ISoszPJFZJuec8JAOuJmOVPX8NORXrTIsraSC88bSqb4uHqmSL5WtBs7WvunEDXOAbey4jvCW2bSXLlAroC46IzqM4eZxSjiFvEJud5mP8gxS3lIVTvaljHXVBmtzTlVr4cEnxhum63+TGFO4O8xAZmWRH5KbjoJZiaDUDeoXJcIRR0YVbWRk9ok3VNEyD0Nrdr2vSuBbBPwt57uDxSAzb6eMKLeqvMBBPr93BIthecnv6VEMeINgXLCAId+/Rw3kucupLB4zBhbCc9PYgAe+h36siNR/hfDPPDEP8eu8Q+jMnqyWthJmAAAAABJRU5ErkJggg==");
+  --i-blood:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAADsElEQVR42s1a7ZGjMAx92UkDbsEteEvgSqCFXAlsCaQEtgRSAikBSgglhBK4P9LOi898O7Ce0SQhIEu29PRhTogzDAAnZIWcXAeAFkBDnw2ATmjTOG0UOgGQkuAtUefda0g5I0rcAdzk+27DAMgAPAD0AGoAF2/Fx561onguPJ7CI91D+ItM+ABQiDBbRwqgEr6VLET0YYV5H1FwfyQ0Rxabsa6622GXM1GimmGSs7a3B1DGYLZgOFmwx5bdVuFzHDOsOPcqJY4WnlFLlTBLNFdnjSWE2WCCVnywnBvIavn8Q9jcLAw2Gpk1yGlQ64hXsyASO5HrC8B1DgJoZC3kt2J0OrGS+owGuSHS4JUvsO9MnrNjq8YYfJFJ/Mk1iBUerKYyQb+AHmIaOfHMB+DayP2VB/E/oyBnUed5ElUBAfV6RfctUeA5cj2kiKOFKwCUJw+yrkKOfAFkv1OOeAPwTT5gN+Y4nZcYdsTbAPjr25ch8+lXUhaI5PVCHqU8p0CQyYprRpD78aHyYMptUKAPOLyRSZ8znw2Bw0VIs+HKx/004DD9RnqQ46mT1jP8ovRAwtJqG7kn9dHDh6ciggJjSo3tQOEjDI2SahCrgoa27V0KTCk3BhQ5WUsNIDnLNu1a0o2Mlhy/8UpXrfru8p8FYD+olh2CsHZHBRSxHEGmpiM3SkVULnuWm0I5ydX7L5WHjedU7xjftCMqR0GL+lOfnGckUZrY3eh3KwwuI862pQ4oRYmWzMdK4EoYgc4zGN5p63xbvb+pEE+EOprviwJbN2cHOkqlEfjOpla+0ak1lUhpoRSpuvNEjjOVs+vWNm8q+N0U3w/15oH/ryMo5KjFsidSvezQmTB1DJeHggpi9TjXKvAhjuhIiWQGRGaEPs2bIXXMP7pQMqeVWBXI5Q21FzVvSVYUMjHoBTj8dJpbiZrGFnStp05dfYDwKheGChrOVAvKALkgd3L9COH/y56195KN9Im0RtXoe5TwL+Zz8tLnBMBnAFVygtuE8qGjxmcoqBrqBgw1lvpfQOXcxpafmzwmCpF+BzR6ztn5OtBSAaW0PtOC2ifJDGX7iB2P0WZqMZFCjB16ODHFci/TCaWzU+11MxG1DUHx1h2p13S3Y54RuA1KRDmliXHElK9ceftbDvkuK2ze/KZj1mwBVEY9Zo1x0G3oDGBq1d0RrxpkM181SAdWvFrbho/xskdCcMpFeBsww4R6Tfqyx31LZ/AUcVcsFeEm8LpN671208YoRf8BDQAS3vr/gWUAAAAASUVORK5CYII=");
+  --i-fire:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAADUUlEQVR42u1Z7ZGbMBDdu0kDakEtkBJoQSlBLdACLZASdCWQEnAJuAS5BPJnlTyvVyA+fINnvDOawSCb/Xz7ViZ6y4MYIqpeVfmaiAIR2VdUviKi+MreH4io/+6Xfr7z/r8BkYgmroOXEC+83rMBAxv0EkU7AOLUbMDESITROa2MRNTA5xaMSPctX9szFrERHv4iohtfO1b6yve6sxlgWflbJl0q+PzF+/2Z0qfjVHFwL0AKjZA2llFqOIvyDpRMadSB8lHAaSv2r0nRpyifMN9nPI/w2mTQqeQ91TPIWhTKtOB1TCkjDAsrPOqekW6WvYvNyoLiEzczo3h+TeoY/v14NPR2Sn474f2g7E/P+0KaYcBRI0fYHuH9qFAFB0pK4ywrHcWeriAaDoyQiLYLdeSPGeBA+NyLftDOpNqc0zAN273EbRIKVJlinSBSTQYApsLOjPyq5nf6LfDqFAWTtwclTeQel6mLaqYOMGoNGzBuhVYjcnLLatlYvJejFq1SM7GUT9kF+jwduJoFwEjw63N18Knkes4rFyL6SUS/iOgPsMw9clugDzexZ7E7xxXVbjgvPX8nrEwzWQMGVq/s6TNU5S5F9o6ECfpigQG98l0PumAzqwVhjFqmVIK32APGzTkDasWAXlDwIIpZNrgHI3ql/XcbTxpyyBXFDCFH1IGfG6jLXEQHWTgG4C6Kl/oFlNKkmaEaS1Qd+4fLGBExfJ1Qzio830DR0spOWnpmJN/rM864MyCFSpIm2YHTHFyqTKWFe2X0Eq22S0BgFI4SlGnKruiK1QzqlEiA77aKAU57WVBChnjsVoyHfkcENBI5zZHBADlXzbT8XrM+IxLV7EEk8oFWeMH1+8w4WK9odlrRhY0pNMujcNYNypzbKkp1G5THWqhnopGO6ruFRuiIiH6Ic8sLIM0c+botUAm/AK01k8GLIGwJbZY4/5UJ5T8Ch96WEUBorWZGQnfAzFC67hykteY+M1XJQ6pEv/tC9pmoQlpjIfFDanMHHh/8Qxiy31DYe+XKB7sXvsYZwsDZkoH00eaBq0ybUqjausatw/dWaQ9SPA1E3/6vjFnA3JIVzvBPZbOiqCSun0ZsZiaQaNKdQfGPAjZpATFuogG9Za/8BU0JenKLQIs0AAAAAElFTkSuQmCC");
+  --i-nether:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAADhUlEQVR42tVaIZecMBD+eldTGXsylZWsrKQ/gcpKTlbyF6ity9o6KitZe461dexPAHuOmsl703kJJAF2b/NeHixHwkxmvpkvkwOu3zSAfKvJHm6gwIWuFQCFO24FAMOUUPeoUAmgYa5V3IML8XakqyHX0tTvqikAA61+BqC+tTCprtTT6rcxVtjDhapEN9CkyBiDhceNhX8F8ATgD7nDSP01wHLfAHyi3x8A/A754LuAVbGJx95bN7HCXaif2X1GwMzo+ZEB1qdAS++Dxnyh+VdlzILMWpBrdACmmT6QICUJVbO/NQsYMWKezaKRXc2OJp4Ce08KDEIJX6vF+GwLztJECBzaixnwRyvwfmYyyVWsj4/MN236zyNCaOEB6Nz4nOFrUYGGVv9EA4/0wYsHVAULfUooW3iE0UwYFYANGyQWQ1lLvpjTfR6IkdoBZtdzlxtpsrYLxA3JEZRBDZu4TgBRKYQs6XnrUKAWFump8wBQLmDmP+ErttpraC0PsxVbYalEw77VeSJYx+jFIqiyDbh9I0JmyYTUQtCOxnQz+WQKdR+9Mke0nhXUDiVjQ265J+usPImt84BfCT8PSYS77NAyh+mHwKhVOJToPa5U7SF87ln1JoE2V6SQFiF0CgXvVsIbxlJTTG6u4fva479l4lwZ24WtsaaXC4Xssn5QerecaaTriXoITZftBOB5D9BOnmjji0Jz0av0gLbZK+oYkVymgE2NDoxA9v3dKhEWuCZAgUGQNV7j8VmxWVknzR4Cwt0z+bqaqXUeBMcvRBGXCzkSRT8A+LqAl6XFVUvZVrE9gg8Hmk3IrcGpcC3GqA24V5nKMnnPhcKu9zIH1a5X1p3qWN7Ti9W1VHdpT8C50eBQQs9Y3bdHN6m1Sy5QPRMuW48SvgjUUW89ZwZ2x9annilIBSxpa2byxhBJm1u281Is2dWM7FVk4SxFgV5sMmzRSkXypjnq3DJr9A6ma1JDrmIm5pk2DyiF9CtrSL2o9EXXRrlfn1np5CPjPuNCLjGOPHARgB1Ft2WUs6sWlNJqFr6mBFNK5tkyf9Zr6HhMef0zgJ8AvgP4C+AlYuwZwC9mLU3zFXR9opL6JaAUn+RCdg98ZDWjw4ryN19xxSjJZW1JfYlWW3MPKSeKeGPHo/29H1Sb2O3fW2zNnsUnXOlY1dwSD48bnEq+EMDVVknnVi2/xb8J/ANUnRDTIuzhvQAAAABJRU5ErkJggg==");
+  --i-harb:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACgUlEQVR42u1ZO3KDMBB9TtykpE2pK+gKtClJm44cgRwBH4EcwWnT4TYdtOngCKZ1R5rVzI6GjySQSCa8mR1jDwittPv2aQ3s2PG/cRj5PWLXEkCi/VYDuNDn5g5EAGIyQd/5ZMXIsx2ADwAnAO2WTqQASgANgN7BGtqhzRHRRAoAVwdHCm3nguCeXd8AfAP4pNB4oPg3hWRhKOn5jsbdNLz6BdbQGNGWTpQLnegBVFs6kqzgAHckm2A2b8ndrOhETyRRUM4EQbayA9zKEDTs0wE9T/6sA3xH5G9OZJvCKF3FnA5BKyMCM2BHOqvWbJOi5sJU1YCsUQwmbHZA4RxYuL2TKakimLUAXl1qQhV4JxoiEX0eQhdzJrjRQebJoyyoAbwA+CJx+UAF75HerebRLXmJdJTcNgw0RCSrIvbsxDmE+Is96CS9qHl3Qjom9tVCYoilhcyEnc6auuRdC1WQIorvGsCbRZjUAJ59Nw+UE2rl0pFE7AHkDhKlCSG/UxYe8Ui49ZrGySzJIDfNC0mDRw6iL59p4QztTELPNYZ5IU1PYbml7K5mzteZ4TgljVWNaKIeQDGVxAWL42dqtcxRakH31iOLUrJkFCO73o48z9s2ihi6OQl9ZQkkZu6d69ClTElWdP+QrSoWC60yYmJli4HGsG3VVlQcLa2ukl3zF2QTzJMM7Erq2FfKTCd7HFjxhBUPHYrCThR/EcuTnHW3uXYPhtiyg1B6Ohs0Lo4Lz6LMVsAZ444lXoftcbE9Jh4HEjdEp0GJO271ErEmV+pCT8W1KozSp8ZPVnSkImaKfU74MPNvS2xBhyosLiQ72hB5dTBkKM7r+mq2Wvdsx44dAfEDX+qbUu/0sq0AAAAASUVORK5CYII=");
+  --i-deep:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAADK0lEQVR42s1Zu5HjMAx9q9vkQrXAFngl6MIL3QJdglyCL7yQLsFbglSCXIJcgpRupkvAGQwGsn6kLMxgPLZJCY/4g0BcygGUACoAHYCBuAVwB+BozSGpANAwoTsSvBVgKlp7KDoxIRs6aQvAMHYEJoA7HVH4asJEDK0JIOy7hc+Z2VQz7XvNnqSnv+Y0C+YTm7SQRdAAADwBPBbse9AebNVA9mbz20xZRGGWCGRpfc808RayzJbLBfvutMcfIYxemSM74agl/e8ZQMfWmyMAyNmJDkzgTmTlUuQMd7Rs7JnAgygdLNPUUnPbPS+0AoBj4KrYJUTsMPoFoFYc/S+AXxRxDluNcuftFC2URzcfTqXiC0kq0B8RnxVK5n8A/gD4Kf7/pt9yMqXvo4TQQgmbU9zSnmKrT3xsyMAF4y1UU3EXPvuUp+2UfjcmN+Q/Zo/IkpK7uZrNFlaPe/qWOXo/EIU+V+4LzmZW9AIa9cSLn7UFwJmpmnPOWPa7T8a9+AxV7W6ZdcrJnLLn+uKEPXPgIXbW5gA8JaJmxtShU/oCOxIkWjYzmg0gW2CjPPHc6KVupKTwZBZnJWH5EW3VSiWbRAMlmUGYexoR/ipmYkY0NkZpPXOmGb/ARFeH0TBNuLACjvfHBZ18rYB7Um9wZf+VI3OlPqUGAlWsOXdKr2tFmcBHiyHitGyPXzqx+9wI7MKEMeQbtxn+dKE9d/r+tXbwlW1M9w8yCctyg5agtAr0RpHmNrImOYBeSVb5wv558+gxizDUCk17sXDWE5x3rHzuUwNwxGey6Xqilu9ForMAftPvZcyB71QUciy+e5HAOlHPGCUKheh1FXcMRkShU4r5ZwijDQkxBrR4EUYLCp25AOTFe4pUADolA3NqmIAagEqZDVl6brMHgCn1WlFyyOvVdsTWZcVrUwII1agnMLkiTMdONgColEhl2OX4bgC0Jjw45ole3hB3wowMrbkKkxlSAnALpxKdMqUeWAU75xk29mArtIwFi+MxqWcDrnrurecHtt2PWQZmTXMf+uOaSovnXqNFrW6xTEP2RZh9ilN+6y3lK3MrhKM2LItHo/8a/LfRM0MhswAAAABJRU5ErkJggg==");
+  /* The Dungeon's card symbol is a stone doorway arch — printed too small to lift, so redrawn */
+  --i-dungeon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M8 28V14.6a8 8 0 0 1 16 0V28h-4.3V14.9a3.7 3.7 0 0 0-7.4 0V28z'/%3E%3Cpath d='M5.2 26h8.2v3H5.2zM18.6 26h8.2v3h-8.2zM2.8 14.2h5.4v2.2H2.8zM23.8 14.2h5.4v2.2h-5.4zM2.8 20.2h5.4v2.2H2.8zM23.8 20.2h5.4v2.2h-5.4zM4.6 7.7l4.5 3.1-1.2 1.8-4.5-3.1zM27.4 7.7l-4.5 3.1 1.2 1.8 4.5-3.1zM14.9 1.6h2.2v5.2h-2.2z'/%3E%3C/svg%3E");
+
 }
+
 *{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%; text-size-adjust:100%}
 html,body{margin:0}
-/* dark leather "table" surround, like the rulebook covers & the Dragon book's iron frame */
 body{
-  font-family:"EB Garamond",Georgia,serif; color:var(--ink); font-size:17px; line-height:1.5;
+  font-family:"Spectral",Georgia,"Times New Roman",serif; font-size:17px; line-height:1.6; color:var(--ink);
   background:
-    radial-gradient(1200px 560px at 50% -140px, rgba(216,177,80,.10) 0%, rgba(216,177,80,0) 65%),
-    repeating-linear-gradient(94deg, rgba(0,0,0,.14) 0 2px, rgba(0,0,0,0) 2px 5px),
-    radial-gradient(140% 120% at 50% 40%, var(--frame) 0%, var(--frame-2) 100%);
+    radial-gradient(1300px 620px at 50% -60px, rgba(92,38,62,.55), rgba(92,38,62,0) 70%),
+    linear-gradient(180deg, #221322 0%, #180e18 100%);
   min-height:100vh;
 }
-h1,h2,h3,h4,h5{font-family:"Cinzel",serif; letter-spacing:.02em; color:var(--head); margin:0}
-/* Lombardic display face for major headers, like the rulebooks' red section titles */
-.section-head h2,.ref-card h2,.callouts h3{font-family:"Uncial Antiqua","Cinzel",serif; font-weight:400; letter-spacing:.015em}
+b,strong{font-weight:600}
+button{font:inherit}
+h1,h2,h3,h4{margin:0; font-weight:400}
 
-/* parchment surface helper applied across widgets — a touch lighter than the
-   page itself, like the rulebooks' inset example boxes */
-.config,.ustep li,.ref-card,.callouts,.faq-item,.flow-strip,.tab.on{
-  background-color:var(--panel); background-image:var(--paper);
-}
+/* ---- focus: dark ring on parchment, pale ring on red / the lid ------------ */
+:focus-visible{outline:3px solid var(--focus-dark); outline-offset:2px}
+.topbar :focus-visible,.config :focus-visible,.callouts :focus-visible,#ref-regions :focus-visible{outline-color:var(--focus-light)}
 
-/* ---- Topbar — book-cover banner: centred sigil & gold beveled wordmark ---- */
+/* =============================================================================
+   HEADER — the box lid
+   ============================================================================= */
 .topbar{
-  border-top:3px double rgba(216,177,80,.55);
-  border-bottom:3px double var(--gold-band);
+  position:relative; overflow:hidden; color:var(--on-red); padding-bottom:28px;
   background:
-    radial-gradient(900px 300px at 50% 115%, rgba(216,177,80,.14), rgba(216,177,80,0) 70%),
-    linear-gradient(180deg, #33261a 0%, #241a10 100%);
-  box-shadow:0 4px 18px rgba(0,0,0,.55);
+    radial-gradient(70% 130% at 82% 35%, rgba(126,22,32,.5), rgba(126,22,32,0) 62%),
+    radial-gradient(60% 90% at 12% 20%, rgba(79,39,54,.55), rgba(79,39,54,0) 70%),
+    linear-gradient(180deg, #2c1a2c 0%, #1f121f 70%, #180d17 100%);
 }
-.topbar-inner{max-width:1180px; margin:0 auto; padding:16px 26px 0; position:relative;
-  display:flex; flex-direction:column; align-items:center; text-align:center}
-.sigil{width:64px; height:64px; color:var(--gold-band); opacity:.95; margin-bottom:2px}
-.sigil svg{width:100%; height:100%}
-.brand{display:flex; flex-direction:column; gap:2px; align-items:center}
-.brand-tal{font-family:"Cinzel",serif; font-weight:800; font-size:44px; line-height:1;
-  background:linear-gradient(180deg,#f6df9a 0%,#d8b150 45%,#9c7527 78%,#c69c3d 100%);
-  -webkit-background-clip:text; background-clip:text; color:transparent;
-  filter:drop-shadow(0 1px 0 rgba(0,0,0,.85)) drop-shadow(0 0 14px rgba(216,177,80,.3));}
-.brand-sub{font-family:"Cinzel",serif; font-weight:600; font-size:13.5px; letter-spacing:.18em;
-  text-transform:uppercase; color:var(--gold-band); margin-top:4px}
-.deco-rule{display:flex; align-items:center; gap:8px; width:300px; margin:7px auto 2px}
-.deco-rule i{height:1px; flex:1; background:linear-gradient(90deg,transparent,var(--gold-band))}
-.deco-rule i:last-child{background:linear-gradient(90deg,var(--gold-band),transparent)}
-.deco-rule b{width:7px; height:7px; transform:rotate(45deg); background:var(--gold-band); border-radius:1px}
-.tagline{max-width:760px; color:#cdb88c; margin:8px auto 14px; font-size:16px}
+/* the lid's gold filigree border, from the box art */
+.topbar::after{
+  content:""; position:absolute; left:0; right:0; bottom:0; height:28px;
+  background:url("../images/filigree.webp") repeat-x center/auto 28px;
+  box-shadow:0 -1px 0 rgba(0,0,0,.55);
+}
+.hero-art{position:absolute; top:0; right:0; bottom:28px; left:max(540px, calc(50% - 30px), calc(100% - 1000px)); pointer-events:none}
+.hero-art img{
+  display:block; width:100%; height:100%; object-fit:cover; object-position:30% 42%;
+  -webkit-mask-image:linear-gradient(90deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.5) 11%, #000 26%);
+          mask-image:linear-gradient(90deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.5) 11%, #000 26%);
+}
+.topbar-inner{
+  position:relative; z-index:1; max-width:1180px; margin:0 auto; min-height:372px;
+  padding:34px 32px 34px; display:flex; flex-direction:column; justify-content:center; align-items:flex-start;
+}
+.brand{display:flex; flex-direction:column; align-items:inherit; gap:2px; line-height:1}
+.brand-logo{
+  display:block; width:480px; max-width:100%; height:auto;
+  filter:drop-shadow(0 3px 2px rgba(0,0,0,.75)) drop-shadow(0 0 22px rgba(0,0,0,.5));
+}
+/* "THE MAGICAL QUEST GAME" line of the cover */
+.brand-sub{
+  font-family:"Cinzel","Trajan Pro",Georgia,serif; font-weight:700; font-size:22px; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--steel); margin-top:8px; padding-left:.12em;
+  text-shadow:0 2px 1px #000, 0 0 12px rgba(0,0,0,.7);
+}
+/* "~ Revised 4th Edition ~" with the cover's gold swirls */
+.brand-ed{
+  display:inline-flex; align-items:center; gap:12px; margin-top:9px;
+  font-family:"Cinzel",Georgia,serif; font-weight:700; font-size:14px; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--gold-hi); text-shadow:0 1px 1px #000;
+}
+.brand-ed::before,.brand-ed::after{content:""; width:58px; height:16px; background:var(--swirl) center/contain no-repeat; flex:none}
+.brand-ed::after{transform:scaleX(-1)}
+.tagline{
+  max-width:500px; margin:18px 0 0; font-size:17px; line-height:1.55; color:#efe3d2;
+  text-shadow:0 1px 2px rgba(0,0,0,.8);
+}
 
-/* Tabs */
-.tabs{display:flex; gap:6px; justify-content:center}
+/* tabs — plaques on the lid; the open one is a red example-box plate with a gold rim and pointer */
+.tabs{display:flex; flex-wrap:wrap; gap:12px; margin-top:22px}
 .tab{
-  font-family:"Cinzel",serif; font-weight:600; font-size:14px; letter-spacing:.04em;
-  padding:9px 18px; border:1px solid var(--gold); border-bottom:none;
-  border-radius:8px 8px 0 0; background:#2c2317; color:#c9b489; cursor:pointer;
-  transition:.15s; position:relative; top:2px;
+  position:relative; min-height:46px; padding:9px 22px; cursor:pointer;
+  font-family:"Amarante",Georgia,serif; font-size:19px; line-height:1.2; letter-spacing:.01em;
+  color:#f3e7d3; background:rgba(14,6,12,.62); border:1px solid rgba(230,199,126,.62); border-radius:3px;
+  transition:background-color .15s, border-color .15s;
 }
-.tab:hover{background:#362b1b; color:#e8d5a8}
-.tab.on{color:var(--crimson-deep); top:0; padding-bottom:11px; box-shadow:0 -2px 10px rgba(0,0,0,.4); border-color:var(--edge-2)}
+.tab:hover{background:rgba(88,20,30,.75); border-color:var(--gold-hi)}
+.tab.on{
+  color:#fff8ea; padding:8px 21px; border:2px solid #d9b56a;
+  background:linear-gradient(180deg, #a2191d 0%, #7c1013 100%);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.45), 0 3px 10px rgba(0,0,0,.55);
+}
+.tab.on::after{
+  content:""; position:absolute; left:50%; bottom:-10px; margin-left:-8px;
+  border:8px solid transparent; border-bottom:0; border-top-color:#d9b56a;
+}
 
-/* ---- Layout — the content sits on a vignetted parchment "page", framed and
-   riveted like the rulebook pages ------------------------------------------ */
+/* =============================================================================
+   MAIN — a rulebook page
+   ============================================================================= */
 main{
-  max-width:1180px; margin:26px auto 20px; padding:30px 34px 40px;
-  background-color:var(--parch); background-image:
-    radial-gradient(circle at 13px 13px, rgba(216,177,80,.8) 0 3px, rgba(139,105,48,.9) 3px 4.5px, transparent 6px),
-    radial-gradient(circle at calc(100% - 13px) 13px, rgba(216,177,80,.8) 0 3px, rgba(139,105,48,.9) 3px 4.5px, transparent 6px),
-    radial-gradient(circle at 13px calc(100% - 13px), rgba(216,177,80,.8) 0 3px, rgba(139,105,48,.9) 3px 4.5px, transparent 6px),
-    radial-gradient(circle at calc(100% - 13px) calc(100% - 13px), rgba(216,177,80,.8) 0 3px, rgba(139,105,48,.9) 3px 4.5px, transparent 6px),
-    var(--paper);
-  border:1px solid #8a6d3b; border-radius:4px;
-  outline:1px solid rgba(216,177,80,.35); outline-offset:4px;
-  box-shadow:
-    inset 0 0 90px rgba(88,58,22,.35), inset 0 0 10px rgba(88,58,22,.28),
-    0 12px 44px rgba(0,0,0,.6);
+  position:relative; max-width:1180px; margin:30px auto 34px; padding:84px 52px 96px;
+  background-color:var(--page);
+  background-image:var(--grain), var(--clouds), var(--fibres);
+  box-shadow:inset 0 0 90px rgba(126,104,70,.30), inset 0 0 14px rgba(100,80,50,.25),
+             0 18px 50px rgba(0,0,0,.6), 0 0 0 1px rgba(0,0,0,.55);
+}
+/* page head: darker margin band ending in the torn gilt rule, emblem centred on it */
+main::before{
+  content:""; position:absolute; left:0; right:0; top:0; height:42px; pointer-events:none;
+  background:url("../images/page-line.webp") repeat-x 0 100%/auto 13px,
+             linear-gradient(180deg, rgba(118,98,68,.05), rgba(118,98,68,.26));
+}
+main::after{
+  content:""; position:absolute; top:3px; left:50%; width:132px; height:75px; margin-left:-66px; pointer-events:none;
+  background:url("../images/emblem.webp") center/contain no-repeat;
+  filter:drop-shadow(0 3px 3px rgba(60,40,20,.35));
+}
+/* page foot: rule + page-number medallion */
+.page-end{
+  position:absolute; left:0; right:0; bottom:0; height:56px; pointer-events:none;
+  background:url("../images/page-line.webp") repeat-x 0 22px/auto 13px,
+             linear-gradient(0deg, rgba(118,98,68,.24), rgba(118,98,68,.04));
+}
+.page-end::after{
+  content:""; position:absolute; left:50%; top:3px; width:48px; height:48px; margin-left:-24px;
+  background:url("../images/ring.webp") center/100% no-repeat,
+             radial-gradient(circle, var(--page-card) 0 50%, rgba(0,0,0,0) 52%);
+  filter:drop-shadow(0 2px 2px rgba(60,40,20,.35));
 }
 .view{display:none}
 .view.on{display:block}
 
-/* ---- Config -------------------------------------------------------------- */
-.config{
-  border:1px solid var(--edge-2); border-radius:8px;
-  outline:1px solid rgba(122,98,55,.5); outline-offset:3px;
-  padding:18px 20px; box-shadow:var(--paper-inset), 0 4px 18px var(--shadow); margin-bottom:26px;
+/* ---- shared: red "Example" box with the gold jewelled frame ---------------- */
+.config,.callouts,#ref-regions{
+  position:relative; color:var(--on-red);
+  border:18px solid transparent;
+  border-image:url("../images/frame-gold.webp") 56 / 48px / 14px stretch;
+  background:
+    var(--fibres),
+    radial-gradient(130% 100% at 50% 35%, #99171b 0%, #86110f 55%, #690c0f 100%);
+  background-clip:padding-box, border-box;
+  box-shadow:0 10px 26px -12px rgba(40,10,5,.55);
 }
-.cfg-group{margin-bottom:16px}
+/* ---- shared: parchment box in the red-velvet frame with gold triangle corners -- */
+.teach-panel,#ref-golden{
+  position:relative;
+  border:11px solid transparent;
+  border-image:url("../images/frame-red.webp") 64 / 46px / 6px stretch;
+  background:var(--page-card) padding-box;
+  background-image:var(--grain);
+  background-clip:padding-box;
+  box-shadow:0 10px 24px -14px rgba(40,20,5,.5);
+}
+
+/* =============================================================================
+   CONFIGURATOR — the play area: cards laid on the red box
+   ============================================================================= */
+.config{padding:26px 30px 28px; margin:0 0 8px}
+.cfg-group{margin-bottom:22px}
 .cfg-group:last-child{margin-bottom:0}
-.cfg-row{display:flex; gap:26px; flex-wrap:wrap; margin-bottom:16px}
+.cfg-row{display:flex; flex-wrap:wrap; gap:18px 40px; margin-bottom:22px}
 .cfg-row .cfg-group{margin-bottom:0}
 .cfg-row .grow{flex:1; min-width:280px}
-.cfg-label{display:block; font-family:"Cinzel",serif; font-weight:700; font-size:13px;
-  letter-spacing:.08em; text-transform:uppercase; color:var(--crimson); margin-bottom:9px}
-.hint{font-family:"EB Garamond",serif; font-weight:400; text-transform:none; letter-spacing:0;
-  color:var(--ink-faint); font-size:13.5px; font-style:italic}
-.src-block{margin-bottom:14px}
+.cfg-label{
+  display:block; margin:0 0 10px; font-family:"Amarante",Georgia,serif; font-size:22px; line-height:1.2;
+  letter-spacing:.01em; color:var(--on-red); text-shadow:0 1px 1px rgba(0,0,0,.35);
+}
+.hint{font-family:"Spectral",Georgia,serif; font-style:italic; font-size:15px; letter-spacing:0; color:var(--on-red-2); text-shadow:none}
+.src-block{margin-bottom:16px}
 .src-block:last-child{margin-bottom:0}
-.src-head{font-family:"Cinzel",serif; font-size:11.5px; letter-spacing:.1em; text-transform:uppercase;
-  color:var(--gold); margin-bottom:7px}
+.src-head{
+  display:flex; align-items:center; gap:12px; margin:2px 0 9px;
+  font-family:"Amarante",Georgia,serif; font-size:17px; letter-spacing:.05em; color:var(--on-red-3);
+}
+.src-head::after{content:""; flex:1; height:1px; background:linear-gradient(90deg, rgba(236,208,142,.65), rgba(236,208,142,0))}
 
-/* Chips */
-.chips{display:flex; flex-wrap:wrap; gap:8px}
+/* chips: an unchosen expansion is an empty card slot; a chosen one is a parchment card, ticked */
+.chips{display:flex; flex-wrap:wrap; gap:10px}
 .chip{
-  display:inline-flex; align-items:center; gap:8px; cursor:pointer;
-  background-color:#b7a884; background-image:var(--paper);
-  border:1px solid var(--edge-2); border-radius:9px;
-  padding:7px 12px; font-family:"EB Garamond",serif; font-size:15.5px; color:var(--ink-soft);
-  transition:.13s; line-height:1.15;
+  display:inline-flex; align-items:center; gap:9px; min-height:44px; padding:7px 12px 7px 10px;
+  font-family:"Spectral",Georgia,serif; font-size:16.5px; line-height:1.2; text-align:left; color:#f8ecdc; cursor:pointer;
+  background:rgba(30,4,6,.36); border:1px dashed rgba(247,226,196,.66); border-radius:4px;
+  transition:background-color .15s, border-color .15s, box-shadow .15s;
 }
-.chip:hover{background-color:#c4b794; border-color:var(--gold); color:var(--ink)}
+.chip::before{
+  content:""; flex:none; width:18px; height:18px; border-radius:3px;
+  border:1.5px solid rgba(247,226,196,.75); background:rgba(0,0,0,.15);
+}
+.chip:hover{background:rgba(30,4,6,.55); border-color:rgba(247,226,196,.95); border-style:solid}
 .chip .chip-name{font-weight:600}
-.chip .chip-tag{font-family:"Cinzel",serif; font-size:10px; font-weight:700; letter-spacing:.05em;
-  padding:2px 6px; border-radius:5px; color:#fff; background:var(--s-base)}
-.chip .chip-sub{font-size:12.5px; font-style:italic; color:var(--ink-faint)}
-.chip.on{background-color:var(--parch-hi); color:var(--ink); border-color:var(--gold);
-  box-shadow:0 0 0 1px var(--gold), 0 2px 9px var(--shadow)}
-.chip.on .chip-sub{color:var(--crimson)}
-.chip.locked{cursor:default; border-style:double; border-width:3px; border-color:var(--edge-2)}
-.chip.locked:hover{border-color:var(--edge-2); background-color:#b7a884}
-.chip.small{padding:6px 11px; font-size:14.5px}
-.chip.ending{padding:8px 14px}
-.chip.ending .chip-name{font-family:"Cinzel",serif; font-size:14px}
-.chip.disabled{opacity:.45; cursor:not-allowed; filter:grayscale(.4)}
-.chip.disabled:hover{background-color:#b7a884; border-color:var(--edge-2); color:var(--ink-soft)}
+.chip .chip-sub{font-size:14.5px; font-style:italic; color:var(--on-red-2)}
+.chip.on{
+  color:var(--ink); padding:6px 11px 6px 9px; border:2px solid #d8b465;
+  background:var(--page-card) var(--grain);
+  box-shadow:0 1px 0 rgba(255,255,255,.35) inset, 0 3px 0 rgba(40,6,4,.35), 0 6px 14px rgba(20,2,2,.35);
+}
+.chip.on::before{border-color:var(--red); background:var(--red) var(--check) center/13px no-repeat}
+.chip.on:hover{background-color:#fbf6ee}
+.chip.on .chip-sub{color:var(--red-ink)}
+.chip.locked{cursor:default}
+.chip.locked::before{background-color:var(--red-lo)}
+.chip.ending{padding-top:8px; padding-bottom:8px}
+.chip.ending.on{padding-top:7px; padding-bottom:7px}
+.chip.ending::before{border-radius:50%}
+.chip.ending.on::before{background:var(--red) radial-gradient(circle, #fbf5ea 0 3.5px, rgba(0,0,0,0) 4px)}
+.chip.ending .chip-name{font-family:"Amarante",Georgia,serif; font-weight:400; font-size:18.5px}
+.chip.disabled{cursor:not-allowed; background:rgba(30,4,6,.18); border-color:rgba(234,208,196,.58); color:#ecd6cc}
+.chip.disabled::before{border:0; border-radius:0; background:var(--lock) center/16px no-repeat}
+.chip.disabled:hover{background:rgba(30,4,6,.18); border-color:rgba(234,208,196,.58); border-style:dashed}
+.chip.disabled .chip-sub{color:#ecd6cc}
+.chip.small{font-size:16px}
 
-/* Player buttons */
-.pbtns{display:flex; gap:6px}
+/* players — the page-number medallion marks the chosen count */
+.pbtns{display:flex; flex-wrap:wrap; gap:8px}
 .pbtn{
-  width:42px; height:42px; border-radius:9px; border:1px solid var(--edge-2);
-  background-color:#b7a884; background-image:var(--paper);
-  color:var(--ink-soft); font-family:"Cinzel",serif; font-weight:700; font-size:18px;
-  cursor:pointer; transition:.13s;
+  width:48px; height:48px; border-radius:50%; cursor:pointer;
+  font-family:"Spectral",Georgia,serif; font-weight:600; font-size:20px; line-height:1; color:#f8ecdc;
+  background:rgba(30,4,6,.36); border:1.5px dashed rgba(247,226,196,.66);
+  transition:background-color .15s, border-color .15s, transform .15s;
 }
-.pbtn:hover{background-color:#c4b794; border-color:var(--gold)}
-.pbtn.on{background:var(--crimson); color:#f6e7c2; border-color:var(--crimson-deep); box-shadow:0 2px 8px var(--shadow)}
+.pbtn:hover{background:rgba(30,4,6,.58); border-style:solid; border-color:rgba(247,226,196,.95)}
+.pbtn.on{
+  color:var(--ink); border:0; transform:scale(1.1);
+  background:url("../images/ring.webp") center/100% no-repeat, radial-gradient(circle, #f4efe6 0 53%, rgba(0,0,0,0) 55%);
+  filter:drop-shadow(0 3px 3px rgba(20,2,2,.5));
+}
 
-/* ---- Source colour tints (chip tag + chip accent) ------------------------ */
-.s-base{background:var(--s-base)} .s-dragon{background:var(--s-dragon)} .s-dungeon{background:var(--s-dungeon)}
-.s-highland{background:var(--s-highland)} .s-city{background:var(--s-city)} .s-woodland{background:var(--s-woodland)}
-.s-cataclysm{background:var(--s-cataclysm)} .s-reaper{background:var(--s-reaper)} .s-frost{background:var(--s-frost)}
-.s-pool{background:var(--s-pool)} .s-blood{background:var(--s-blood)} .s-fire{background:var(--s-fire)}
-.s-nether{background:var(--s-nether)} .s-harb{background:var(--s-harb)} .s-deep{background:var(--s-deep)}
-.s-lost{background:var(--s-lost)} .s-var{background:var(--s-var)}
-.s-base-chip.on{box-shadow:0 0 0 1px var(--s-base), 0 2px 9px var(--shadow)}
-.s-dragon-chip.on{box-shadow:0 0 0 1px var(--s-dragon),0 2px 9px var(--shadow)}
-.s-dungeon-chip.on{box-shadow:0 0 0 1px var(--s-dungeon),0 2px 9px var(--shadow)}
-.s-highland-chip.on{box-shadow:0 0 0 1px var(--s-highland),0 2px 9px var(--shadow)}
-.s-city-chip.on{box-shadow:0 0 0 1px var(--s-city),0 2px 9px var(--shadow)}
-.s-woodland-chip.on{box-shadow:0 0 0 1px var(--s-woodland),0 2px 9px var(--shadow)}
-.s-cataclysm-chip.on{box-shadow:0 0 0 1px var(--s-cataclysm),0 2px 9px var(--shadow)}
-.s-reaper-chip.on{box-shadow:0 0 0 1px var(--s-reaper),0 2px 9px var(--shadow)}
-.s-frost-chip.on{box-shadow:0 0 0 1px var(--s-frost),0 2px 9px var(--shadow)}
-.s-pool-chip.on{box-shadow:0 0 0 1px var(--s-pool),0 2px 9px var(--shadow)}
-.s-blood-chip.on{box-shadow:0 0 0 1px var(--s-blood),0 2px 9px var(--shadow)}
-.s-fire-chip.on{box-shadow:0 0 0 1px var(--s-fire),0 2px 9px var(--shadow)}
-.s-nether-chip.on{box-shadow:0 0 0 1px var(--s-nether),0 2px 9px var(--shadow)}
-.s-harb-chip.on{box-shadow:0 0 0 1px var(--s-harb),0 2px 9px var(--shadow)}
-.s-deep-chip.on{box-shadow:0 0 0 1px var(--s-deep),0 2px 9px var(--shadow)}
-.s-lost-chip.on{box-shadow:0 0 0 1px var(--s-lost),0 2px 9px var(--shadow)}
+/* =============================================================================
+   SOURCE TAGS — each box's colour + its printed card symbol
+   ============================================================================= */
+.etag,.chip .chip-tag{
+  display:inline-flex; align-items:center; gap:5px; vertical-align:3px; white-space:nowrap;
+  padding:4px 8px 4px 6px; border-radius:3px;
+  font-family:"Spectral",Georgia,serif; font-weight:600; font-size:13px; line-height:1; letter-spacing:.07em;
+  text-transform:uppercase; color:#fbf5ea; background:var(--tag, var(--red));
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.2), 0 1px 1px rgba(0,0,0,.25);
+}
+.etag::before,.chip .chip-tag::before{
+  content:""; flex:none; width:15px; height:15px; background-color:currentColor;
+  -webkit-mask:var(--ico) center/contain no-repeat; mask:var(--ico) center/contain no-repeat;
+}
+/* The Highland's card symbol is printed too small and too blurred to identify — colour + name only */
+.etag.s-highland::before,.etag.s-var::before,.chip .chip-tag.s-highland::before{display:none}
+.etag.s-highland,.etag.s-var,.chip .chip-tag.s-highland{padding-left:8px}
+.s-base{--tag:#8a1114; --ico:var(--i-base)}
+.s-dragon{--tag:#8a5a0c; --ico:var(--i-dragon)}
+.s-dungeon{--tag:#3d2f7a; --ico:var(--i-dungeon)}
+.s-highland{--tag:#1f5f3f}
+.s-city{--tag:#234e8c; --ico:var(--i-city)}
+.s-woodland{--tag:#3a6b1e; --ico:var(--i-woodland)}
+.s-cataclysm{--tag:#5a524a; --ico:var(--i-cataclysm)}
+.s-reaper{--tag:#2e2a28; --ico:var(--i-reaper)}
+.s-frost{--tag:#1a6590; --ico:var(--i-frost)}
+.s-pool{--tag:#0f6b64; --ico:var(--i-pool)}
+.s-blood{--tag:#8c1a4f; --ico:var(--i-blood)}
+.s-fire{--tag:#a8420e; --ico:var(--i-fire)}
+.s-nether{--tag:#5b2466; --ico:var(--i-nether)}
+.s-harb{--tag:#3b4757; --ico:var(--i-harb)}
+.s-deep{--tag:#4f5a1c; --ico:var(--i-deep)}
+/* The Lost Realms bundles both realms: both symbols, both colours */
+.s-lost{--tag:linear-gradient(90deg, #5b2466, #4f5a1c)}
+.etag.s-lost::before,.chip .chip-tag.s-lost::before{
+  width:32px;
+  -webkit-mask:var(--i-nether) left center/15px 15px no-repeat, var(--i-deep) right center/15px 15px no-repeat;
+          mask:var(--i-nether) left center/15px 15px no-repeat, var(--i-deep) right center/15px 15px no-repeat;
+}
+/* "Variant" is a house choice, not a box: an outlined parchment label */
+.s-var{--tag:var(--page-card); color:var(--ink); box-shadow:inset 0 0 0 1.5px var(--gold-lo)}
+/* on an unchosen chip the tag is only outlined */
+.chip:not(.on) .chip-tag{background:transparent; color:#f8ecdc; box-shadow:inset 0 0 0 1px rgba(247,226,196,.6)}
 
-/* ---- Setup output -------------------------------------------------------- */
-.section-head{display:flex; align-items:baseline; gap:12px; margin-bottom:6px}
-.section-head h2{font-size:26px}
-.count{font-family:"Cinzel",serif; font-size:13px; color:var(--gold); letter-spacing:.05em}
-.legend{color:var(--ink-soft); font-size:15.5px; margin:0 0 18px; max-width:880px}
-.legend b{color:var(--crimson-deep)}
+/* =============================================================================
+   TEACHING SCRIPT
+   ============================================================================= */
+.teach-bar{margin:34px 0 16px}
+#teachBtn{
+  display:inline-flex; align-items:center; gap:8px; min-height:48px; padding:9px 20px; cursor:pointer;
+  font-family:"Amarante",Georgia,serif; font-size:20px; line-height:1.2; color:var(--on-red);
+  background:linear-gradient(180deg, #a2191d 0%, #7c1013 100%);
+  border:2px solid #cfa95c; border-radius:4px;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.4), 0 3px 8px rgba(60,20,10,.35);
+  transition:filter .15s, box-shadow .15s;
+}
+#teachBtn:hover{filter:brightness(1.12)}
+.teach-bar:has(+ #teach:not([hidden])) #teachBtn{
+  background:linear-gradient(180deg, #6f0e11 0%, #8f1418 100%);
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.5);
+}
+.teach-panel{max-width:780px; margin:0 auto 34px; padding:28px 34px 22px}
+.teach-panel[hidden]{display:none}
+.teach-panel > *{max-width:590px; margin-left:auto; margin-right:auto}
+.teach-top{display:flex; flex-direction:column; align-items:center; gap:12px; text-align:center; margin-bottom:6px}
+.teach-top h3{font-family:"Amarante",Georgia,serif; font-size:30px; line-height:1.15; color:var(--ink)}
+.teach-top h3::after{
+  content:""; display:block; width:230px; height:10px; margin:10px auto 0;
+  background:url("../images/flourish.webp") center/contain no-repeat; opacity:.85;
+}
+.teach-copy{
+  min-height:40px; padding:6px 16px; cursor:pointer; border-radius:3px;
+  font-family:"Spectral",Georgia,serif; font-size:16px; font-weight:600; color:var(--red-ink);
+  background:var(--page-hi); border:1.5px solid var(--red);
+  transition:background-color .15s, color .15s;
+}
+.teach-copy:hover{background:var(--red); color:var(--on-red)}
+.teach-note{
+  text-align:center; font-style:italic; font-size:16px; color:var(--ink-3);
+  margin:8px auto 14px; padding-bottom:14px; border-bottom:1px solid var(--rule);
+}
+.teach-panel h4{
+  font-family:"Amarante",Georgia,serif; font-size:23px; line-height:1.2; color:var(--red-ink); margin:22px auto 6px;
+}
+.teach-panel p{font-size:17.5px; line-height:1.68; margin:0 auto 11px; color:var(--ink)}
+.teach-panel b{color:var(--red-ink)}
 
-.setup-block{margin-bottom:20px}
+/* =============================================================================
+   SETUP SEQUENCE
+   ============================================================================= */
+.section-head{display:flex; align-items:baseline; flex-wrap:wrap; gap:6px 16px; margin:6px 0 8px}
+.section-head h2{font-family:"Amarante",Georgia,serif; font-size:44px; line-height:1.1; color:var(--ink)}
+.count{
+  font-family:"Spectral",Georgia,serif; font-size:14px; font-weight:600; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--on-red); background:var(--red); padding:4px 10px 3px; border-radius:2px; position:relative; top:-6px;
+}
+.legend{max-width:66ch; margin:0 0 10px; font-size:17px; line-height:1.6; color:var(--ink-2)}
+.legend b{color:var(--red-ink)}
+
+.setup-block{margin:30px 0 6px}
 .setup-block h3{
-  font-family:"Uncial Antiqua","Cinzel",serif; font-weight:400;
-  font-size:17px; letter-spacing:.04em; color:var(--head);
-  border-bottom:1px solid var(--edge-2); padding-bottom:5px; margin-bottom:12px;
+  display:flex; align-items:center; gap:18px; margin:0 0 4px;
+  font-family:"Amarante",Georgia,serif; font-size:28px; line-height:1.2; color:var(--ink);
 }
-.ustep{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px}
+.setup-block h3::after{content:""; flex:1; min-width:40px; height:13px; background:url("../images/page-line.webp") repeat-x left center/auto 13px}
+.ustep{list-style:none; margin:0; padding:0}
 .ustep li{
-  display:flex; gap:12px; border:1px solid var(--edge-2);
-  border-left:4px solid var(--gold); border-radius:9px; padding:11px 14px;
-  box-shadow:var(--paper-inset), 0 2px 9px var(--shadow);
+  display:grid; grid-template-columns:48px minmax(0,1fr); gap:0 16px; align-items:start;
+  padding:15px 4px 16px 0; border-top:1px solid var(--rule);
 }
-/* step numbers styled like the rulebooks' circular page-number medallions */
+.ustep li:first-child{border-top:0}
+/* step numbers = the rulebook's page-number medallion */
 .snum{
-  flex:none; width:28px; height:28px; border-radius:50%;
-  background:var(--parch-hi); color:var(--crimson-deep);
-  border:1.5px solid #8a6d3b;
-  font-family:"Cinzel",serif; font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center;
-  box-shadow:inset 0 0 0 2px var(--parch-hi), inset 0 0 0 3px rgba(138,109,59,.75), 0 1px 3px var(--shadow);
+  width:46px; height:46px; display:grid; place-items:center; margin-top:-5px;
+  font-family:"Spectral",Georgia,serif; font-weight:600; font-size:17px; line-height:1; color:var(--ink);
+  background:url("../images/ring.webp") center/100% no-repeat, radial-gradient(circle, var(--page-card) 0 51%, rgba(0,0,0,0) 53%);
+  filter:drop-shadow(0 1.5px 1.5px rgba(60,40,20,.35));
 }
-.sbody{flex:1}
-.st{font-family:"Cinzel",serif; font-weight:700; font-size:16px; color:var(--ink)}
-.ssrc{font-size:12.5px; font-style:italic; color:var(--gold); margin-left:4px}
-.sd{margin-top:4px; color:var(--ink-soft); font-size:15.5px}
+/* desktop: title + text on the left, the source tag and page citation in a ledger column on the right,
+   so a glance down the right edge shows which box every step comes from */
+.sbody{min-width:0; display:grid; grid-template-columns:minmax(0,66ch) minmax(150px,1fr); column-gap:32px; align-items:start}
+.st{grid-column:1; grid-row:1; font-family:"Amarante",Georgia,serif; font-size:21.5px; line-height:1.25; color:var(--ink)}
+.sbody::after{content:""; grid-column:2; grid-row:1 / span 3; justify-self:start; align-self:stretch; width:0; margin-left:-16px; border-left:1px dashed rgba(88,68,44,.3)}
+.sbody .etag{grid-column:2; grid-row:1; justify-self:start; margin-top:4px}
+.ssrc{grid-column:2; grid-row:2; justify-self:start; text-align:left; margin-top:7px; font-size:14.5px; font-style:italic; line-height:1.4; color:var(--ink-3)}
+.sd{grid-column:1; grid-row:2 / span 2; margin-top:6px; max-width:66ch; font-size:17px; line-height:1.62; color:var(--ink)}
 
-/* Source tags */
-.etag{display:inline-block; font-family:"Cinzel",serif; font-size:10px; font-weight:700; letter-spacing:.05em;
-  color:#fff; padding:2px 7px; border-radius:5px; vertical-align:middle; box-shadow:0 1px 2px var(--shadow)}
+/* configuration notes — a red example box */
+.callouts{margin-top:40px; padding:24px 30px 18px}
+.callouts h3{
+  text-align:center; font-family:"Amarante",Georgia,serif; font-size:30px; line-height:1.15; color:#fff7ea;
+  text-shadow:0 1px 1px rgba(0,0,0,.4);
+}
+.callouts h3::after{
+  content:""; display:block; width:230px; height:10px; margin:10px auto 12px;
+  background:url("../images/flourish.webp") center/contain no-repeat; opacity:.9;
+}
+.callout{padding:13px 0 12px; border-top:1px solid rgba(247,226,196,.28)}
+.callout:first-of-type{border-top:0}
+.callout .etag{box-shadow:inset 0 0 0 1px rgba(255,240,220,.7)}
+.callout .s-var{box-shadow:inset 0 0 0 1.5px var(--gold)}
+.callout b{font-family:"Amarante",Georgia,serif; font-weight:400; font-size:20px; color:#fff7ea; margin-left:6px}
+.callout p{margin:6px 0 0; max-width:66ch; font-size:17px; line-height:1.6; color:#f8ecdc}
 
-/* Callouts — framed like the rulebooks' bordered example boxes, with a
-   centred red title between flanking rules */
-.callouts{margin-top:24px; border:1px solid var(--edge-2);
-  outline:1px solid rgba(122,98,55,.5); outline-offset:3px;
-  border-radius:8px; padding:16px 18px; box-shadow:var(--paper-inset), 0 3px 12px var(--shadow)}
-.callouts h3{font-size:19px; letter-spacing:.02em; text-transform:none; color:var(--head); margin-bottom:12px;
-  display:flex; align-items:center; gap:12px; justify-content:center}
-.callouts h3::before,.callouts h3::after{content:""; height:1px; flex:1; max-width:180px;
-  background:linear-gradient(90deg, rgba(138,109,59,0), rgba(138,109,59,.75))}
-.callouts h3::after{background:linear-gradient(90deg, rgba(138,109,59,.75), rgba(138,109,59,0))}
-.callout{padding:9px 0; border-top:1px dashed var(--card-line)}
-.callout:first-of-type{border-top:none}
-.callout b{font-family:"Cinzel",serif; font-size:14.5px; color:var(--ink); margin-left:6px}
-.callout p{margin:4px 0 0; color:var(--ink-soft); font-size:15px}
-
-/* ---- Reference ----------------------------------------------------------- */
+/* =============================================================================
+   GAME REFERENCE
+   ============================================================================= */
+/* sticky contents bar: a strip of the page's darker head margin */
 .jump-nav{
-  position:sticky; top:0; z-index:5; display:flex; flex-wrap:wrap; gap:6px;
-  background:rgba(193,183,154,.97); backdrop-filter:blur(4px);
-  padding:11px 12px; margin:-30px -34px 20px; border-bottom:1px solid var(--edge-2);
-  border-radius:4px 4px 0 0;
+  position:sticky; top:0; z-index:5; display:flex; flex-wrap:wrap; justify-content:center; gap:7px;
+  margin:-5px -52px 36px; padding:11px 40px 12px;
+  background-color:#d6cdbe; background-image:var(--grain), linear-gradient(180deg, #dcd4c6, #d0c6b6);
+  border-bottom:1px solid rgba(88,68,44,.45);
+  box-shadow:0 8px 14px -10px rgba(40,25,10,.55);
 }
-.jn{font-family:"Cinzel",serif; font-size:12px; letter-spacing:.03em; color:var(--ink-soft);
-  text-decoration:none; padding:5px 11px; border:1px solid var(--edge-2); border-radius:20px;
-  background-color:#b7a884; background-image:var(--paper); transition:.13s}
-.jn:hover{background:var(--crimson); color:#f6e7c2; border-color:var(--crimson-deep)}
+.jn{
+  display:inline-flex; align-items:center; min-height:38px; padding:5px 11px; text-decoration:none;
+  font-family:"Amarante",Georgia,serif; font-size:16.5px; line-height:1.15; color:var(--ink);
+  background:var(--page-card); border:1px solid var(--line-ui); border-radius:3px;
+  transition:background-color .15s, color .15s, border-color .15s;
+}
+.jn:hover{background:var(--red); color:var(--on-red); border-color:var(--red-lo)}
 
-.ref-card{border:1px solid var(--edge-2); border-radius:8px;
-  outline:1px solid rgba(122,98,55,.5); outline-offset:3px;
-  padding:20px 22px; margin-bottom:22px; box-shadow:var(--paper-inset), 0 3px 14px var(--shadow); scroll-margin-top:64px}
-.ref-card h2{font-size:25px; margin-bottom:8px; padding-bottom:8px; border-bottom:3px double var(--card-line)}
-.ref-intro{color:var(--ink-soft); font-size:16px; margin:0 0 14px; font-style:italic}
+.ref-card{margin:0 0 46px; scroll-margin-top:130px}
+.ref-card h2{
+  display:flex; align-items:center; gap:18px; margin:0 0 8px;
+  font-family:"Amarante",Georgia,serif; font-size:34px; line-height:1.15; color:var(--ink);
+}
+.ref-card h2::after{content:""; flex:1; min-width:40px; height:13px; background:url("../images/page-line.webp") repeat-x left center/auto 13px}
+.ref-intro{max-width:66ch; margin:0 0 16px; font-size:17.5px; font-style:italic; line-height:1.6; color:var(--ink-2)}
 
-.flow-list{margin:0 0 14px; padding-left:20px}
-.flow-list li{margin-bottom:7px}
-.flow-list b{font-family:"Cinzel",serif; color:var(--crimson)}
-.flow-strip{display:flex; flex-wrap:wrap; align-items:center; gap:4px; margin:12px 0;
-  padding:11px 13px; border:1px solid var(--card-line); border-radius:9px; box-shadow:var(--paper-inset)}
-.flow-strip span{font-family:"Cinzel",serif; font-size:12px; background:#b7a884; border:1px solid var(--edge-2);
-  border-radius:6px; padding:4px 9px; color:var(--ink)}
-.flow-strip i{color:var(--gold); font-style:normal; font-weight:700}
+.flow-list{list-style:none; margin:0 0 16px; padding:0; max-width:66ch}
+.flow-list li{padding:9px 0; border-top:1px solid var(--rule); line-height:1.6}
+.flow-list li:first-child{border-top:0}
+.flow-list b{font-family:"Amarante",Georgia,serif; font-weight:400; font-size:19px; color:var(--red-ink)}
+/* the encounter sequence as a run of board spaces */
+.flow-strip{
+  display:flex; flex-wrap:wrap; align-items:center; gap:8px 6px; margin:16px 0; padding:14px 16px;
+  background:rgba(255,252,245,.35); border:1px solid rgba(88,68,44,.35); border-radius:2px;
+}
+.flow-strip span{
+  font-size:16px; line-height:1.3; color:var(--ink); padding:6px 10px;
+  background:var(--page-card); border:1px solid #a58c63; border-top:3px solid var(--red); border-radius:2px;
+}
+.flow-strip i{font-style:normal; font-weight:600; font-size:20px; color:var(--red-ink)}
 
-.def-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px}
-.def-list li{display:flex; gap:14px; flex-wrap:wrap}
-.def-list .dk{font-family:"Cinzel",serif; font-weight:700; font-size:14.5px; color:var(--crimson);
-  flex:none; width:230px}
-.def-list .dt{flex:1; min-width:280px; color:var(--ink-soft); font-size:15.5px}
+.def-list{list-style:none; margin:0; padding:0}
+.def-list li{
+  display:grid; grid-template-columns:minmax(180px,250px) minmax(0,1fr); gap:4px 26px;
+  padding:12px 0; border-top:1px solid var(--rule);
+}
+.def-list li:first-child{border-top:0}
+.def-list .dk{font-family:"Amarante",Georgia,serif; font-size:19.5px; line-height:1.3; color:var(--red-ink)}
+.def-list .dt{max-width:66ch; font-size:17px; line-height:1.6; color:var(--ink)}
 
-.bullet{margin:14px 0 0; padding-left:22px}
-.bullet li{margin-bottom:6px; color:var(--ink-soft); font-size:15.5px}
+.bullet{list-style:none; margin:16px 0 0; padding:0; max-width:66ch}
+.bullet li{position:relative; padding:4px 0 4px 26px; line-height:1.6}
+.bullet li::before{content:""; position:absolute; left:2px; top:.62em; width:15px; height:13px; background:var(--tri) center/contain no-repeat}
 
-.ref-table{border-collapse:collapse; margin:6px 0 14px}
-.ref-table th,.ref-table td{border:1px solid var(--card-line); padding:6px 16px; text-align:center; font-size:15.5px}
-.ref-table th{font-family:"Cinzel",serif; font-size:13px; background:var(--crimson); color:#f6e7c2}
-.ref-table td{background:#bbae8b; color:var(--ink)}
+.ref-table{border-collapse:collapse; margin:4px 0 16px; background:var(--page-card)}
+.ref-table th,.ref-table td{border:1px solid #a58c63; padding:8px 16px; text-align:center; font-size:17px}
+.ref-table tr:first-child th{font-family:"Amarante",Georgia,serif; font-weight:400; font-size:17px; color:var(--on-red); background:var(--red)}
+.ref-table tr:first-child th:first-child,.ref-table td:first-child{text-align:left}
+.ref-table td:first-child{font-family:"Amarante",Georgia,serif; color:var(--red-ink)}
+
+/* the rulebook's "Regions" page is a red example box — so is ours */
+#ref-regions{padding:24px 30px 20px}
+#ref-regions h2{color:#fff7ea}
+#ref-regions h2::after{background:linear-gradient(90deg, rgba(236,208,142,.7), rgba(236,208,142,0)); height:1px}
+#ref-regions .ref-intro{color:var(--on-red-2)}
+#ref-regions .def-list li{border-top-color:rgba(247,226,196,.25)}
+#ref-regions .dk{color:var(--on-red-3)}
+#ref-regions .dt{color:#f8ecdc}
+/* Golden Rules supersede all others: the framed parchment box */
+#ref-golden{padding:24px 32px 18px}
 
 /* FAQ */
-.faq-list{display:flex; flex-direction:column; gap:8px}
-.faq-item{border:1px solid var(--card-line); border-radius:9px; overflow:hidden; box-shadow:var(--paper-inset)}
-.faq-item summary{cursor:pointer; padding:11px 14px; font-family:"Cinzel",serif; font-size:15px; color:var(--ink);
-  list-style:none; position:relative; padding-right:36px}
+.faq-list{display:flex; flex-direction:column; gap:10px}
+.faq-item{background:var(--page-card) var(--grain); border:1px solid var(--line-ui); border-left:4px solid var(--line-ui); border-radius:2px}
+.faq-item summary{
+  position:relative; list-style:none; cursor:pointer; min-height:46px; padding:11px 48px 11px 16px;
+  font-weight:600; font-size:17px; line-height:1.5; color:var(--ink);
+}
 .faq-item summary::-webkit-details-marker{display:none}
-.faq-item summary::after{content:"+"; position:absolute; right:15px; top:9px; font-size:20px; color:var(--gold); font-family:"Cinzel",serif}
-.faq-item[open] summary::after{content:"–"}
-.faq-item[open] summary{background:rgba(150,118,70,.18); color:var(--crimson-deep)}
-.faq-a{padding:11px 14px; color:var(--ink-soft); font-size:15.5px; border-top:1px solid var(--card-line)}
+.faq-item summary::after{
+  content:"+"; position:absolute; right:14px; top:50%; width:24px; height:24px; margin-top:-12px;
+  display:grid; place-items:center; border-radius:50%; font-size:19px; line-height:1; font-weight:600;
+  color:var(--on-red); background:var(--red);
+}
+.faq-item summary:hover{background:rgba(138,17,20,.06)}
+.faq-item[open]{border-left-color:var(--red)}
+.faq-item[open] summary{color:var(--red-ink)}
+.faq-item[open] summary::after{content:"\2013"}
+.faq-a{padding:4px 16px 14px; max-width:66ch; font-size:17px; line-height:1.62; color:var(--ink)}
 
-/* ---- Footer (sits on the dark leather surround) --------------------------- */
-.footer{max-width:1180px; margin:0 auto; padding:6px 26px 30px; color:#a8946a;
-  font-size:13.5px; font-style:italic; text-align:center}
-.footer b{font-style:normal; color:#d3b573}
+/* =============================================================================
+   FOOTER — back on the lid
+   ============================================================================= */
+.footer{
+  max-width:880px; margin:0 auto; padding:4px 24px 44px; text-align:center;
+  font-size:15px; font-style:italic; line-height:1.6; color:#d8c9b5;
+}
+.footer b{font-style:normal; font-weight:600; color:#f1e2c6}
 
-/* ---- Responsive ---------------------------------------------------------- */
+/* =============================================================================
+   RESPONSIVE
+   ============================================================================= */
+@media (max-width:900px){
+  .topbar{padding-bottom:20px}
+  .topbar::after{height:20px; background-size:auto 20px}
+  .hero-art{position:relative; left:auto; bottom:auto; width:100%; height:clamp(100px, 27vw, 240px)}
+  .hero-art img{
+    object-position:27% 44%;
+    -webkit-mask-image:linear-gradient(180deg, #000 52%, rgba(0,0,0,0) 100%);
+            mask-image:linear-gradient(180deg, #000 52%, rgba(0,0,0,0) 100%);
+  }
+  .topbar-inner{min-height:0; margin-top:-34px; padding:0 16px 14px; align-items:center; text-align:center}
+  .brand-logo{width:min(84vw, 380px)}
+  .brand-sub{font-size:16.5px; margin-top:5px}
+  .brand-ed{font-size:12.5px; gap:8px; margin-top:6px}
+  .brand-ed::before,.brand-ed::after{width:40px}
+  .tagline{margin-top:7px; font-size:16px; line-height:1.5; max-width:34em}
+  .tabs{justify-content:center; margin-top:12px; gap:10px}
+  .tab{font-size:18px; padding:8px 16px}
+  .tab.on{padding:7px 15px}
+  /* steps: back to one flowing column */
+  .sbody{display:block}
+  .sbody::after{display:none}
+  .sbody .etag{margin:0 4px 0 6px; vertical-align:3px}
+  .ssrc{margin-top:0; text-align:left}
+}
 @media (max-width:680px){
-  .brand-tal{font-size:32px}
-  .sigil{width:48px; height:48px}
-  main{margin:14px 8px 14px; padding:20px 14px 32px}
-  .jump-nav{margin:-20px -14px 18px}
-  .def-list .dk{width:100%}
+  main{margin:14px 6px 20px; padding:76px 16px 84px}
+  main::after{width:104px; height:59px; margin-left:-52px; top:6px}
+  .config,.callouts,#ref-regions{border-width:14px; border-image-width:38px; border-image-outset:11px}
+  .config{padding:14px 10px 16px}
+  .cfg-label{font-size:20px}
+  .cfg-row{gap:18px}
+  .cfg-row .grow{min-width:0; flex-basis:100%}
+  /* chips become a two-up grid of small cards; a chosen card gets its box's symbol stamped in the corner */
+  .config .src-block .chips{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:9px 8px}
+  #endings,#options{display:grid; grid-template-columns:minmax(0,1fr); gap:8px}
+  .config .chip{position:relative; min-height:50px; padding:7px 8px 7px 8px; gap:8px; font-size:16px; line-height:1.2}
+  .config .chip.on{padding:6px 7px}
+  .config .chip .chip-name{min-width:0; overflow-wrap:anywhere; hyphens:auto}
+  .config .chip:not(.on) .chip-tag{display:none}
+  .config .chip.on .chip-tag{
+    position:absolute; top:-9px; right:-7px; width:26px; height:26px; padding:0; gap:0;
+    justify-content:center; border-radius:50%; font-size:0; letter-spacing:0;
+    box-shadow:0 0 0 2px #d8b465, 0 2px 4px rgba(0,0,0,.4);
+  }
+  .config .chip.on .chip-tag::before{width:16px; height:16px}
+  .config .chip.on .chip-tag.s-lost::before{width:22px; -webkit-mask-size:11px 11px, 11px 11px; mask-size:11px 11px, 11px 11px}
+  .config .chip.ending .chip-name{font-size:18px}
+  .config .chip.ending .chip-sub{margin-left:auto; text-align:right}
+  /* the Highland prints no liftable symbol: its seal carries the initial instead */
+  .config .chip.on .chip-tag.s-highland::before{
+    display:block; content:"H"; width:auto; height:auto; background:none; -webkit-mask:none; mask:none;
+    font:15px/1 "Amarante",Georgia,serif; letter-spacing:0; color:#fbf5ea;
+  }
+  .pbtns{gap:7px}
+  .teach-bar{margin-top:28px}
+  .teach-panel,#ref-golden{border-width:9px; border-image-width:38px; border-image-outset:5px}
+  .teach-panel{padding:18px 12px 12px}
+  .teach-top h3{font-size:25px}
+  .section-head h2{font-size:38px}
+  .setup-block h3{font-size:25px}
+  .ustep li{grid-template-columns:40px minmax(0,1fr); gap:0 12px}
+  .snum{width:40px; height:40px; font-size:15.5px}
+  .st{font-size:20px}
+  .callouts{padding:16px 12px 10px}
+  .callouts h3{font-size:25px}
+  .jump-nav{margin:-9px -16px 26px; padding:10px 16px; justify-content:flex-start; flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none}
+  .jump-nav::-webkit-scrollbar{display:none}
+  .jump-nav::after{content:""; flex:none; position:sticky; right:-16px; width:34px; margin-left:-34px;
+    background:linear-gradient(90deg, rgba(214,205,190,0), #d4cbbb 80%)}
+  .jn{flex:none; min-height:42px; font-size:17px}
+  .ref-card{scroll-margin-top:84px}
+  .ref-card h2{font-size:28px}
+  /* headings may wrap on a phone: the gilt rule drops beneath them instead of trailing a stub */
+  .ref-card h2,.setup-block h3{display:block}
+  .ref-card h2::after,.setup-block h3::after{display:block; width:100%; margin-top:8px}
+  #ref-regions{padding:14px 12px 10px}
+  #ref-golden{padding:16px 12px 10px}
+  .def-list li{grid-template-columns:minmax(0,1fr)}
+  .ref-table th,.ref-table td{padding:7px 9px; font-size:16px}
 }
-
-/* ---- teaching script ---- */
-.teach-bar{margin:14px 0 12px}
-#teachBtn,.teach-copy{
-  background:var(--panel2,var(--panel,rgba(127,127,127,.10))); color:inherit;
-  border:1px solid var(--line2,var(--line,rgba(127,127,127,.4))); border-radius:8px;
-  padding:8px 14px; cursor:pointer; font:inherit; font-size:.9rem; transition:border-color .16s, transform .16s;
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition:none !important; animation:none !important; scroll-behavior:auto !important}
+  .pbtn.on{transform:none}
 }
-#teachBtn:hover,.teach-copy:hover{border-color:currentColor; transform:translateY(-1px)}
-.teach-panel{
-  background:var(--panel,rgba(127,127,127,.06)); border:1px solid var(--line2,var(--line,rgba(127,127,127,.4)));
-  border-radius:10px; padding:16px 20px 18px; margin:0 0 18px;
-}
-.teach-panel[hidden]{display:none}
-.teach-top{display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:4px}
-.teach-top h3{margin:0; font-size:1.05rem}
-.teach-note{font-size:.85rem; font-style:italic; opacity:.75; margin:4px 0 12px; padding-bottom:10px; border-bottom:1px dashed var(--line2,var(--line,rgba(127,127,127,.4)))}
-.teach-panel h4{font-size:.8rem; letter-spacing:.1em; text-transform:uppercase; margin:14px 0 5px; opacity:.95}
-.teach-panel p{margin:0 0 9px; max-width:78ch}
