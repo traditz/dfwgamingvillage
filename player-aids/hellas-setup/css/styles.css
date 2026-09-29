@@ -1,286 +1,553 @@
 /* =============================================================================
    Lords of Hellas — Setup & Reference Utility
-   Theme: black-figure pottery — kiln-black ground, terracotta orange,
-   ivory slip and aged bronze.
+   Theme: the Awaken Realms Game Manual (core rulebook + expansion manuals).
+   · Cover: art, the steel-and-bronze logo plate, a dark hex-mesh band with
+     glowing cyan light-bars and the Cinzel Decorative title, the blue meander rail.
+   · Pages: grey marble crossed by pale light-shards; heavy slate headings over a
+     thin blue rule; Aegean-blue title bars with the white delta number badge
+     (red tip); blue-framed boxes; striped rule lists with blue dot bullets;
+     red label bars; dark callouts.
    ============================================================================= */
 
 :root {
-  --ink:      #14100c;   /* kiln black */
-  --ink-2:    #201812;   /* raised panels */
-  --ink-3:    #2a1f16;   /* cards */
-  --line:     #5e4326;   /* hairlines */
-  --sand:     #f2e7d0;   /* body text — ivory slip */
-  --sand-dim: #baa584;   /* secondary text */
-  --spice:    #d96f2e;   /* terracotta */
-  --spice-dim: #97501f;
-  --ibad:     #b8c4c9;   /* aegean marble accent */
-  --gold:     #c9a45c;   /* aged bronze */
+  --marble: #e4e6e9;
+  --paper: rgba(255, 255, 255, 0.88);
+  --ink: #231f20;          /* rulebook black */
+  --ink-2: #3f4042;        /* secondary text */
+  --slate: #58595b;        /* heading grey / dark callouts */
+  --frame: #56708a;        /* steel-blue frame on unselected controls */
+  --aegean: #0078ba;       /* the title-bar blue */
+  --aegean-ink: #005f96;   /* blue text on light grounds */
+  --aegean-soft: #dce8f5;  /* striped rows */
+  --aegean-pale: #eef4fb;
+  --navy: #003a5e;
+  --navy-2: #0b5e8e;
+  --red: #c8161d;          /* red label bars */
+  --char: #161412;         /* cover band */
+  --cyan: #3fc4f2;         /* light-bar glow */
+  --bar: linear-gradient(180deg, #0077b9, #006ba7);
+
+  --display: "Cinzel Decorative", "Cinzel", Georgia, "Times New Roman", serif;
+  --sans: "Figtree", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+
+  /* one colour per box — shared by the set chips and the source tabs on each step */
+  --c-base: #0070ad; --c-da: #0e6b5e; --c-cos: #4a5663; --c-apollo: #8a5f00;
+  --c-atlas: #5e4a8e; --c-kronos: #b23a16; --c-solo: #2e7a33; --c-faq: #231f20; --c-mod: #7a4e1e;
+
+  /* the rulebook's step badge: white delta, blue core, red tip */
+  --delta: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 66 58'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='.8' y2='1'%3E%3Cstop offset='0' stop-color='%231b86c4'/%3E%3Cstop offset='.5' stop-color='%23005b8f'/%3E%3Cstop offset='1' stop-color='%23002f4b'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M33 1.5 64.5 56.5H1.5Z' fill='%23fff' stroke='%238fa3b5' stroke-width='1.2' stroke-linejoin='round'/%3E%3Cpath d='M33 11 56 52H10Z' fill='url(%23g)'/%3E%3Cpath d='M23.6 18 18.2 27.4 25.2 24.5Z' fill='%23cf252b'/%3E%3C/svg%3E");
+  --check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4.5 10.5l3.6 3.6L15.6 6' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --meander: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 18 18'%3E%3Cpath d='M0 16.5H18M14.5 16.5V2.5H3.5V12.5H10.5V6.5H7V9.5' fill='none' stroke='%2306354a' stroke-width='2.2'/%3E%3C/svg%3E");
+  --hex: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='17.32' height='30' viewBox='0 0 17.32 30'%3E%3Cpath d='M8.66 0 17.32 5v10L8.66 20 0 15V5ZM8.66 20V30' fill='none' stroke='%23fff' stroke-opacity='.06' stroke-width='1'/%3E%3C/svg%3E");
+  /* the pale crossing light-shards behind every manual page */
+  --shards: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1400 1200'%3E%3Cdefs%3E%3ClinearGradient id='f' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23fff' stop-opacity='0'/%3E%3Cstop offset='.28' stop-color='%23fff' stop-opacity='.55'/%3E%3Cstop offset='.72' stop-color='%23fff' stop-opacity='.55'/%3E%3Cstop offset='1' stop-color='%23fff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M250 0h300l700 1200h-300z' fill='url(%23f)'/%3E%3Cpath d='M1130 0h210l-760 1200h-210z' fill='url(%23f)' opacity='.7'/%3E%3C/svg%3E");
+
+  --measure: 38em;         /* ~76 characters of Figtree per line */
+  --band-h: 78px;
+  --rail-h: 24px;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
+*, *::before, *::after { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 
 body {
-  background:
-    radial-gradient(1100px 500px at 50% -120px, rgba(217, 111, 46, 0.14), transparent 70%),
-    radial-gradient(900px 700px at 88% 10%, rgba(184, 196, 201, 0.06), transparent 60%),
-    linear-gradient(180deg, #1e150d 0%, var(--ink) 45%),
-    var(--ink);
-  color: var(--sand);
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 16.5px;
-  line-height: 1.55;
+  margin: 0;
   min-height: 100vh;
+  /* the rulebook's own grey marble texture (mirrored into a seamless strip) under its light-shards */
+  background:
+    var(--shards) center 440px / 1400px 1200px repeat-y,
+    url("../images/hellas-marble.webp") center top / 100% auto repeat-y,
+    var(--marble);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+img { max-width: 100%; }
+b, strong { font-weight: 700; }
+button { font: inherit; }
+
+/* ---- cover ------------------------------------------------------------------ */
+.cover { position: relative; overflow: hidden; background: var(--char); }
+.cover-art { position: relative; height: clamp(200px, 18vw + 110px, 340px); }
+.cover-art img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 36% 12%; }
+.cover-art::after {
+  content: ""; position: absolute; inset: 0;
+  background:
+    linear-gradient(180deg, rgba(22, 20, 18, 0) 55%, rgba(22, 20, 18, 0.82) 100%),
+    linear-gradient(90deg, rgba(22, 20, 18, 0.35), transparent 30%, transparent 70%, rgba(22, 20, 18, 0.3));
+}
+.cover-plate {
+  position: absolute; z-index: 3;
+  right: max(4vw, calc((100% - 1180px) / 2));
+  bottom: calc(var(--band-h) + var(--rail-h) - 16px);
+  width: clamp(240px, 32vw, 420px);
+}
+.brand-title { margin: 0; line-height: 0; }
+.brand-title img {
+  display: block; width: 100%; height: auto;
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 22px rgba(40, 184, 238, 0.22));
 }
 
-/* drifting sand haze */
-.grain {
-  position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.05;
-  background-image: repeating-linear-gradient(104deg, transparent 0 110px, #e0b98a 110px 114px, transparent 114px 240px);
-}
-
-/* ---- header --------------------------------------------------------------- */
-.topbar {
-  position: relative; z-index: 1;
-  border-bottom: 1px solid var(--line);
-  background: linear-gradient(180deg, rgba(42, 31, 22, 0.85), rgba(20, 16, 12, 0.4));
-  padding: 22px 20px 18px;
-  text-align: center;
-}
-.sigil { display: inline-block; width: 60px; height: 60px; color: var(--spice); filter: drop-shadow(0 0 16px rgba(217, 111, 46, 0.5)); }
-.sigil svg { width: 100%; height: 100%; }
-
-.brand-title {
-  font-family: "Cinzel", Georgia, serif;
-  font-size: clamp(1.5rem, 4.2vw, 2.35rem);
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  color: var(--sand);
-  text-transform: uppercase;
-  text-shadow: 0 0 24px rgba(217, 111, 46, 0.45);
-  margin-top: 8px;
+.cover-band {
+  position: relative; z-index: 2;
+  height: var(--band-h);
+  display: flex; align-items: center; justify-content: flex-end;
+  padding: 0 max(4vw, calc((100% - 1180px) / 2));
+  background:
+    var(--hex),
+    radial-gradient(90% 160% at 18% 0%, rgba(120, 86, 52, 0.22), transparent 60%),
+    linear-gradient(180deg, #211f1b, #121110);
 }
 .brand-sub {
-  font-family: "Cinzel", Georgia, serif;
-  font-weight: 300;
-  font-size: clamp(0.56rem, 1.54vw, 0.7rem);
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  color: var(--ibad);
-  margin-top: 6px;
+  margin: 0; width: clamp(240px, 32vw, 420px);
+  text-align: center;
+  font-family: var(--display); font-weight: 400;
+  font-size: clamp(1.5rem, 1.6vw + 0.95rem, 2.35rem);
+  line-height: 1; letter-spacing: 0.01em;
+  color: #f4f6f7;
+  text-shadow: 0 0 18px rgba(40, 184, 238, 0.35);
 }
-.deco-rule {
-  display: flex; align-items: center; justify-content: center; gap: 12px;
-  margin: 10px auto 7px; max-width: 460px;
+
+/* glowing light-bars along the band's top edge, as on the manual covers */
+.lightbar {
+  position: absolute; top: -5px; height: 8px; border-radius: 1px;
+  background: linear-gradient(180deg, #f0fcff 0%, #8fdcf7 45%, #1aa6df 100%);
+  box-shadow: 0 0 8px 1px rgba(40, 184, 238, 0.85), 0 0 26px 2px rgba(40, 184, 238, 0.45);
+  transform: skewX(-42deg);
 }
-.deco-rule i { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--spice-dim)); }
-.deco-rule i:last-child { background: linear-gradient(90deg, var(--spice-dim), transparent); }
-.deco-rule b { width: 8px; height: 8px; border-radius: 50%; background: var(--spice); box-shadow: 0 0 10px rgba(217, 111, 46, 0.7); }
-.tagline { max-width: 760px; margin: 0 auto; color: var(--sand-dim); font-style: italic; }
+.lb-left { left: -24px; width: calc(16% + 24px); }
+.lb-mid { left: 29%; width: 26%; }
+.lb-right { left: calc(55% + 12px); right: -24px; }
 
-/* ---- layout ---------------------------------------------------------------- */
-main { position: relative; z-index: 1; max-width: 1060px; margin: 0 auto; padding: 26px 18px 60px; }
+/* the blue meander rail */
+.meander {
+  position: relative; z-index: 2;
+  height: var(--rail-h);
+  background:
+    var(--meander) 0 50% / calc(var(--rail-h) - 8px) calc(var(--rail-h) - 8px) repeat-x,
+    linear-gradient(180deg, #a6e3f5 0, #43acd6 14%, #1c7aa2 48%, #135f80 72%, #0b4058 100%);
+  border-top: 1px solid #d3f3ff;
+  border-bottom: 1px solid #041f2c;
+  box-shadow: 0 0 14px rgba(40, 184, 238, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
 
+/* ---- page ------------------------------------------------------------------- */
+main { max-width: 900px; margin: 0 auto; padding: 30px 22px 10px; }
+
+.tagline {
+  margin: 0; max-width: var(--measure);
+  font-style: italic; font-size: 1.06rem; line-height: 1.6; color: var(--ink-2);
+}
+
+section { margin-top: 46px; }
 section h2 {
-  font-family: "Cinzel", Georgia, serif;
-  font-weight: 600;
-  font-size: 1.45rem; letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--gold);
-  margin: 38px 0 4px;
-  display: flex; align-items: center; gap: 14px;
+  position: relative;
+  margin: 0 0 10px; padding-bottom: 6px;
+  font-family: var(--sans); font-weight: 800; text-transform: uppercase;
+  font-size: clamp(1.95rem, 2.2vw + 1.1rem, 2.8rem); line-height: 1.05; letter-spacing: -0.005em;
+  color: var(--slate);
+  border-bottom: 2px solid var(--aegean);
 }
-section h2::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--line), transparent); }
-.sec-note { color: var(--sand-dim); font-size: 0.92rem; margin-bottom: 14px; font-style: italic; }
-
-/* ---- configurator ---------------------------------------------------------- */
-.cfg { display: flex; flex-direction: column; gap: 18px; }
-.cfg-label {
-  display: block;
-  font-family: "Cinzel", Georgia, serif; font-size: 0.82rem;
-  letter-spacing: 0.2em; text-transform: uppercase; color: var(--spice);
-  margin-bottom: 8px;
+/* a circuit terminal at the end of the rule, borrowed from the logo plate */
+section h2::after {
+  content: ""; position: absolute; right: -2px; bottom: -6px;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: #fff; border: 2px solid var(--aegean);
+  box-shadow: 0 0 8px rgba(40, 184, 238, 0.6);
 }
-.cfg-label .hint { color: var(--sand-dim); text-transform: none; letter-spacing: 0; font-family: Georgia, serif; font-style: italic; }
+.sec-note { margin: 0 0 20px; max-width: var(--measure); font-style: italic; color: var(--ink-2); }
 
-.chips, .mods, .pbtns, .mode-grid { display: flex; flex-wrap: wrap; gap: 9px; }
+/* ---- configurator ------------------------------------------------------------ */
+.cfg { display: grid; gap: 28px; }
+.cfg-label { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-bottom: 12px; }
+.cfg-name {
+  display: inline-block;
+  padding: 5px 14px 4px;
+  font-weight: 800; font-size: 0.9rem; letter-spacing: 0.07em; text-transform: uppercase;
+  color: #fff; background: var(--aegean);
+}
+.hint { display: inline-flex; align-items: baseline; gap: 8px; font-style: italic; font-size: 1rem; color: var(--ink-2); }
+/* the rulebook's red "Note!" roundel */
+.hint::before {
+  content: "!"; flex: none; transform: translateY(-1px);
+  display: inline-grid; place-items: center; width: 19px; height: 19px; border-radius: 50%;
+  font-style: normal; font-weight: 800; font-size: 0.8rem; line-height: 1;
+  color: #fff; background: var(--red); box-shadow: 0 0 0 2px rgba(200, 22, 29, 0.18);
+}
 
+.chips { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.mode-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.mods { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 10px; }
+.pbtns { display: flex; flex-wrap: wrap; gap: 12px; }
+
+/* set chips: a little box lid — the title strip lights up in the set's colour */
 .chip {
-  display: flex; flex-direction: column; align-items: flex-start;
-  background: var(--ink-2); color: var(--sand-dim);
-  border: 1px solid var(--line); border-radius: 10px;
-  padding: 8px 14px; cursor: pointer; font: inherit;
-  transition: border-color 0.16s, color 0.16s, box-shadow 0.16s;
+  --c: var(--c-base);
+  position: relative;
+  display: flex; flex-direction: column; align-items: stretch; text-align: left;
+  min-height: 70px; padding: 0; overflow: hidden; cursor: pointer;
+  color: var(--ink); background: var(--paper);
+  border: 2px solid var(--frame); border-radius: 4px;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
 }
-.chip b { font-family: "Cinzel", Georgia, serif; font-size: 0.92rem; letter-spacing: 0.04em; }
-.chip span { font-size: 0.72rem; letter-spacing: 0.14em; opacity: 0.7; }
-.chip:hover { border-color: var(--ibad); }
-.chip.on { color: var(--sand); border-color: var(--spice-dim); box-shadow: inset 0 0 0 1px var(--spice-dim), 0 0 16px rgba(217, 111, 46, 0.15); background: linear-gradient(180deg, rgba(217, 111, 46, 0.1), rgba(42, 31, 22, 0.9)); }
+.chip:nth-child(1) { --c: var(--c-base); }
+.chip:nth-child(2) { --c: var(--c-da); }
+.chip:nth-child(3) { --c: var(--c-cos); }
+.chip:nth-child(4) { --c: var(--c-apollo); }
+.chip:nth-child(5) { --c: var(--c-atlas); }
+.chip:nth-child(6) { --c: var(--c-kronos); }
+.chip b {
+  display: block; flex: 1 1 auto; padding: 8px 38px 7px 12px;
+  font-weight: 800; font-size: 0.94rem; line-height: 1.25; letter-spacing: 0.03em; text-transform: uppercase;
+  color: var(--ink-2); background: #dde1e6;
+}
+.chip span { display: block; padding: 6px 12px 8px; font-weight: 600; font-size: 0.9rem; color: var(--ink-2); }
+.chip:hover { border-color: var(--c); transform: translateY(-1px); }
+.chip.on { border-color: var(--c); box-shadow: 0 6px 16px -10px rgba(0, 0, 0, 0.6); }
+.chip.on b { color: #fff; background: var(--c); }
+.chip.on::after {
+  content: "✓"; position: absolute; top: 7px; right: 8px;
+  display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%;
+  font-weight: 800; font-size: 0.85rem; line-height: 1; color: var(--c); background: #fff;
+}
 .chip.lock { cursor: default; }
+.chip.lock:hover { transform: none; }
 
+/* ways to play: boxes with a title bar, like the Victory Conditions */
 .mode-btn {
-  flex: 1 1 220px; max-width: 420px; text-align: left;
-  background: var(--ink-2); color: var(--sand-dim);
-  border: 1px solid var(--line); border-radius: 10px;
-  padding: 10px 14px; cursor: pointer; font: inherit;
-  transition: border-color 0.16s, color 0.16s, box-shadow 0.16s;
+  position: relative;
+  display: flex; flex-direction: column; text-align: left;
+  padding: 0; overflow: hidden; cursor: pointer;
+  color: var(--ink); background: var(--paper);
+  border: 2px solid var(--frame); border-radius: 4px;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
-.mode-btn b { display: block; font-family: "Cinzel", Georgia, serif; font-size: 0.98rem; color: var(--sand); margin-bottom: 3px; }
-.mode-btn span { font-size: 0.8rem; line-height: 1.35; display: block; }
-.mode-btn:hover { border-color: var(--ibad); }
-.mode-btn.on { border-color: var(--ibad); box-shadow: inset 0 0 0 1px var(--ibad), 0 0 16px rgba(184, 196, 201, 0.2); background: linear-gradient(180deg, rgba(184, 196, 201, 0.1), rgba(42, 31, 22, 0.9)); color: var(--sand); }
-.mode-btn.on b { color: var(--ibad); }
-.mode-btn.off { opacity: 0.42; cursor: not-allowed; }
+.mode-btn b {
+  display: block; padding: 9px 42px 8px 14px;
+  font-weight: 800; font-size: 1.02rem; line-height: 1.25; letter-spacing: 0.02em; text-transform: uppercase;
+  color: #fff; background: var(--slate);
+}
+.mode-btn span { display: block; padding: 10px 14px 12px; font-size: 1rem; line-height: 1.5; color: var(--ink-2); }
+.mode-btn:hover { border-color: var(--aegean); }
+.mode-btn.on { border-color: var(--aegean); box-shadow: inset 0 0 0 1px var(--aegean), 0 8px 18px -12px rgba(0, 58, 94, 0.8); }
+.mode-btn.on b { background: var(--bar); }
+.mode-btn.on::after {
+  content: "✓"; position: absolute; top: 8px; right: 10px;
+  display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%;
+  font-weight: 800; font-size: 0.85rem; line-height: 1; color: var(--aegean-ink); background: #fff;
+}
+.mode-btn.off { cursor: not-allowed; background: rgba(255, 255, 255, 0.4); border-style: dashed; border-color: #6d7a86; }
+.mode-btn.off b { color: #45474a; background: #d3d7dc; }
+.mode-btn.off span { font-style: italic; color: #505357; }
+.mode-btn.off:hover { border-color: #6d7a86; }
 
+/* player count: hero tokens — the chosen one glows like the rulebook's player-count rings */
 .pbtn {
-  width: 42px; height: 42px; border-radius: 50%;
-  background: var(--ink-2); color: var(--sand-dim);
-  border: 1px solid var(--line); cursor: pointer;
-  font-family: "Cinzel", Georgia, serif; font-size: 1rem;
-  transition: all 0.16s;
+  position: relative; width: 50px; height: 50px; border-radius: 50%;
+  display: grid; place-items: center; cursor: pointer;
+  font-family: var(--sans); font-weight: 800; font-size: 1.25rem; line-height: 1;
+  color: var(--ink); background: radial-gradient(circle at 50% 32%, #fff 0%, #e6e9ec 100%);
+  border: 2px solid var(--frame);
+  transition: box-shadow 0.15s, border-color 0.15s, transform 0.15s;
 }
-.pbtn:hover { border-color: var(--gold); }
-.pbtn.on { color: var(--ink); background: var(--spice); border-color: var(--spice); box-shadow: 0 0 18px rgba(217, 111, 46, 0.5); font-weight: 600; }
-.pbtn.off { opacity: 0.35; cursor: not-allowed; }
+.pbtn:hover { border-color: var(--aegean); transform: translateY(-1px); }
+.pbtn.on {
+  color: #fff;
+  background: radial-gradient(circle at 50% 30%, #0a6fa8 0%, #004a77 72%);
+  border: 3px solid #c4f1ff;
+  box-shadow: 0 0 0 3px rgba(40, 184, 238, 0.5), 0 0 18px 2px rgba(40, 184, 238, 0.65);
+}
+.pbtn.off { cursor: not-allowed; color: #55585c; background: rgba(255, 255, 255, 0.35); border: 2px dashed #8a949e; }
+.pbtn.off:hover { transform: none; border-color: #8a949e; }
 
+/* gods & modules: tick-box cards */
 .mod {
-  flex: 1 1 240px; max-width: 340px; text-align: left;
-  background: var(--ink-2); border: 1px solid var(--line); border-radius: 10px;
-  padding: 10px 14px; cursor: pointer; font: inherit; color: var(--sand-dim);
-  transition: border-color 0.16s, box-shadow 0.16s;
+  position: relative; text-align: left; cursor: pointer;
+  display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start;
+  padding: 11px 14px 12px 50px;
+  color: var(--ink); background: var(--paper);
+  border: 2px solid var(--frame); border-radius: 4px;
+  transition: border-color 0.15s, background-color 0.15s;
 }
-.mod:hover { border-color: var(--gold); }
-.mod.on { border-color: var(--spice-dim); box-shadow: inset 0 0 0 1px var(--spice-dim); color: var(--sand); background: linear-gradient(180deg, rgba(217, 111, 46, 0.08), rgba(42, 31, 22, 0.9)); }
-.mod-name { display: block; font-weight: 700; margin-bottom: 2px; }
-.mod-name::before { content: "◇ "; color: var(--sand-dim); }
-.mod.on .mod-name::before { content: "◆ "; color: var(--spice); }
-.mod-sum { display: block; font-size: 0.8rem; line-height: 1.35; }
+.mod::before {
+  content: ""; position: absolute; left: 14px; top: 13px;
+  width: 22px; height: 22px; border-radius: 3px;
+  background: #fff; border: 2px solid var(--frame);
+}
+.mod:hover { border-color: var(--aegean); }
+.mod.on { border-color: var(--aegean); background: var(--aegean-pale); box-shadow: inset 5px 0 0 var(--aegean); }
+.mod.on::before { border-color: var(--aegean); background: var(--aegean) var(--check) center / 16px no-repeat; }
+.mod-name { display: block; font-weight: 800; font-size: 1.02rem; line-height: 1.3; }
+.mod-sum { display: block; margin-top: 3px; font-size: 1rem; line-height: 1.5; color: var(--ink-2); }
 
-/* ---- setup steps ----------------------------------------------------------- */
-.phase { margin-top: 22px; }
+/* ---- setup steps --------------------------------------------------------------- */
+.phase { margin-top: 34px; }
 .phase-title {
-  font-family: "Cinzel", Georgia, serif; letter-spacing: 0.14em; text-transform: uppercase;
-  font-size: 1rem; color: var(--spice); margin-bottom: 4px;
+  margin: 0 0 18px; padding-bottom: 5px;
+  font-weight: 400; text-transform: uppercase;
+  font-size: clamp(1.4rem, 1vw + 1.05rem, 1.8rem); line-height: 1.15; letter-spacing: 0.01em;
+  color: var(--ink-2);
+  border-bottom: 1px solid #7d8894;
 }
 
-.step {
-  display: flex; gap: 14px;
-  background: var(--ink-3);
-  border: 1px solid var(--line); border-left: 3px solid var(--spice);
-  border-radius: 10px; padding: 14px 16px; margin-bottom: 10px;
-}
+.step { position: relative; padding-top: 14px; margin-bottom: 26px; }
+/* the white delta with its red tip, holding the step number */
 .step-num {
-  flex: 0 0 auto; width: 34px; height: 34px; border-radius: 50%;
-  border: 1px solid var(--gold); color: var(--gold);
-  display: flex; align-items: center; justify-content: center;
-  font-family: "Cinzel", Georgia, serif; font-size: 1rem; margin-top: 2px;
+  position: absolute; left: 0; top: 0; z-index: 2;
+  width: 66px; height: 58px; padding-bottom: 6px;
+  display: grid; place-items: end center;
+  background: var(--delta) center / 100% 100% no-repeat;
+  font-weight: 800; font-size: 1.45rem; line-height: 1; color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.25));
 }
 .step-body { min-width: 0; }
-.step-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; margin-bottom: 4px; }
-.step-head h4 { font-family: "Cinzel", Georgia, serif; font-weight: 600; font-size: 1.02rem; letter-spacing: 0.02em; color: var(--sand); }
-.step-text ul, .step-text ol { margin: 6px 0 2px 20px; }
-.step-text li { margin-bottom: 4px; }
-.step-text b { color: var(--spice); font-weight: 700; }
-.step-text i { color: var(--sand-dim); }
-.inline-note { margin-top: 6px; font-size: 0.88rem; color: var(--sand-dim); font-style: italic; }
-
-.tag {
-  display: inline-block; font-family: Verdana, sans-serif;
-  font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase;
-  border-radius: 4px; padding: 2px 7px; white-space: nowrap;
+.step-head {
+  position: relative;
+  display: flex; align-items: center;
+  min-height: 44px; margin-left: 33px; padding: 9px 14px 9px 45px;
+  background: var(--bar);
 }
-.tag-base   { background: #44301a; color: #f0b56a; }
-.tag-da     { background: #3a2438; color: #dfa3d4; }
-.tag-kronos { background: #45201c; color: #f0968a; }
-.tag-cos    { background: #253048; color: #a3b8e8; }
-.tag-apollo { background: #3d3620; color: #e0c87e; }
-.tag-atlas  { background: #1f3644; color: #8ecfe8; }
-.tag-solo   { background: #203a2e; color: #8fe0b4; }
-.tag-faq    { background: #203a2e; color: #8fe0b4; }
-.tag-mod    { background: #3d2c17; color: #e0b98a; }
+.step-head h4 {
+  margin: 0;
+  font-weight: 800; font-size: 1.08rem; line-height: 1.25; letter-spacing: 0.01em; text-transform: uppercase;
+  color: #fff;
+}
+/* which box the step comes from: an index tab riding on the bar */
+.step-head .tag { position: absolute; right: 10px; bottom: 100%; border-radius: 5px 5px 0 0; }
+.tag {
+  display: inline-block; white-space: nowrap;
+  padding: 5px 10px 4px;
+  font-family: var(--sans); font-weight: 800; font-size: 0.82rem; line-height: 1.15; letter-spacing: 0.08em; text-transform: uppercase;
+  color: #fff; background: var(--c-base);
+}
+.tag-base   { background: var(--c-base); }
+.tag-da     { background: var(--c-da); }
+.tag-kronos { background: var(--c-kronos); }
+.tag-cos    { background: var(--c-cos); }
+.tag-apollo { background: var(--c-apollo); }
+.tag-atlas  { background: var(--c-atlas); }
+.tag-solo   { background: var(--c-solo); }
+.tag-faq    { background: var(--c-faq); }
+.tag-mod    { background: var(--c-mod); }
 
-.src-line { margin-top: 7px; font-size: 0.76rem; letter-spacing: 0.04em; color: var(--spice-dim); font-family: Verdana, sans-serif; }
-.src-line::before { content: "❧ "; color: var(--gold); }
+.step-text, .step .src-line {
+  background: var(--paper);
+  border-left: 2px solid var(--aegean); border-right: 2px solid var(--aegean);
+}
+.step-text { padding: 13px 20px 6px; }
+.step-text > :first-child { margin-top: 0; }
+.step-text p { margin: 0 0 8px; max-width: var(--measure); }
+.step-text i, .ref-body i { color: var(--ink-2); }
 
-/* ---- reference ------------------------------------------------------------- */
+/* blue dot bullets, as in the rulebook */
+.step-text ul, .ref-body ul, .teach-panel ul { list-style: none; margin: 4px 0 8px; padding: 0; max-width: calc(var(--measure) + 22px); }
+.step-text ol, .ref-body ol, .teach-panel ol { margin: 4px 0 8px; padding-left: 22px; max-width: calc(var(--measure) + 22px); }
+.step-text ul > li, .teach-panel ul > li { position: relative; padding-left: 22px; margin-bottom: 6px; }
+.step-text ul > li::before, .teach-panel ul > li::before, .ref-body ul > li::before {
+  content: ""; position: absolute; left: 3px; top: 0.62em;
+  width: 9px; height: 9px; border-radius: 50%; background: var(--aegean);
+}
+
+.src-line {
+  display: flex; align-items: baseline; gap: 8px;
+  font-size: 0.875rem; font-weight: 600; line-height: 1.5; letter-spacing: 0.01em; color: var(--ink-2);
+}
+.src-line::before {
+  content: ""; flex: none; width: 14px; height: 12px; transform: translateY(1px);
+  background: var(--delta) center / 100% 100% no-repeat;
+}
+.step .src-line {
+  padding: 8px 20px 11px;
+  border-bottom: 2px solid var(--aegean);
+  box-shadow: inset 0 1px 0 #d5dbe1;
+}
+
+/* ---- reference -------------------------------------------------------------------- */
 .ref {
-  background: var(--ink-3); border: 1px solid var(--line); border-radius: 10px;
-  margin-bottom: 10px; overflow: hidden;
+  margin-bottom: 10px;
+  background: var(--paper);
+  border: 2px solid var(--frame); border-radius: 3px;
+  transition: border-color 0.15s;
 }
 .ref summary {
-  cursor: pointer; list-style: none;
-  font-family: "Cinzel", Georgia, serif; font-weight: 400; font-size: 1rem; letter-spacing: 0.04em;
-  color: var(--sand); padding: 13px 18px;
-  display: flex; align-items: center; gap: 10px;
-  transition: color 0.16s;
+  list-style: none; cursor: pointer;
+  display: flex; align-items: center; gap: 12px;
+  min-height: 52px; padding: 10px 14px;
+  font-weight: 800; font-size: 1.05rem; line-height: 1.3; letter-spacing: 0.015em; text-transform: uppercase;
+  color: var(--ink);
+  transition: background-color 0.15s;
 }
 .ref summary::-webkit-details-marker { display: none; }
-.ref summary::before { content: "●"; color: var(--spice); font-size: 0.7rem; transition: transform 0.2s; }
-.ref[open] summary::before { transform: scale(1.35); color: var(--ibad); }
-.ref summary:hover { color: var(--ibad); }
-.ref[open] summary { border-bottom: 1px solid var(--line); color: var(--ibad); }
-.ref-body { padding: 14px 20px 16px; }
-.ref-body h4 { font-family: "Cinzel", Georgia, serif; color: var(--spice); font-size: 0.9rem; letter-spacing: 0.1em; text-transform: uppercase; margin: 12px 0 5px; }
-.ref-body p { margin-bottom: 8px; }
-.ref-body ul, .ref-body ol { margin: 4px 0 10px 22px; }
-.ref-body li { margin-bottom: 5px; }
-.ref-body b { color: var(--spice); }
-.ref-body i { color: var(--sand); }
-
-/* ---- search ---------------------------------------------------------------- */
-.rsearch-wrap { margin-bottom: 14px; }
-#rsearch {
-  width: 100%; padding: 12px 16px;
-  background: var(--ink-2); border: 1px solid var(--line); border-radius: 10px;
-  color: var(--sand); font: inherit; font-size: 1rem;
-  transition: border-color 0.16s, box-shadow 0.16s;
+.ref summary::before {
+  content: ""; flex: none; width: 24px; height: 21px;
+  background: var(--delta) center / 100% 100% no-repeat;
 }
-#rsearch:focus { outline: none; border-color: var(--spice-dim); box-shadow: 0 0 0 1px var(--spice-dim), 0 0 18px rgba(217, 111, 46, 0.15); }
-#rsearch::placeholder { color: var(--sand-dim); font-style: italic; }
+.ref summary::after {
+  content: "+"; flex: none; margin-left: auto;
+  display: grid; place-items: center; width: 28px; height: 28px; border-radius: 3px;
+  font-size: 1.25rem; font-weight: 800; line-height: 1;
+  color: var(--aegean-ink); border: 2px solid var(--aegean);
+}
+.ref summary:hover { background: var(--aegean-pale); }
+.ref:hover, .ref[open] { border-color: var(--aegean); }
+.ref[open] summary { color: #fff; background: var(--bar); }
+.ref[open] summary::after { content: "−"; color: #fff; border-color: #fff; }
+.ref-body { padding: 14px 18px; }
+.ref-body p { margin: 0 0 10px; max-width: var(--measure); }
+/* the striped rule lists of the rulebook's Hoplite Movement box — stripes run full width, text keeps its measure */
+.ref-body ul { max-width: none; }
+.ref-body ul > li {
+  position: relative; margin: 0 0 2px;
+  padding: 9px max(14px, calc(100% - 36px - var(--measure))) 9px 36px;
+  background: var(--aegean-pale);
+}
+.ref-body ul > li:nth-child(even) { background: var(--aegean-soft); }
+.ref-body ul > li::before { left: 14px; top: calc(9px + 0.62em); }
+.ref-body .src-line { margin-top: 12px; padding-top: 9px; border-top: 1px dashed #93a0ad; }
 
-.rhint { color: var(--sand-dim); font-style: italic; }
-.rhit { background: var(--ink-3); border: 1px solid var(--line); border-radius: 10px; padding: 11px 15px; margin-bottom: 8px; }
-.rhit-src { font-family: Verdana, sans-serif; font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); margin-bottom: 4px; }
-.rhit-text { font-size: 0.92rem; color: var(--sand-dim); }
-.rhit-text mark { background: rgba(217, 111, 46, 0.25); color: var(--spice); border-radius: 2px; padding: 0 1px; }
-
-/* ---- footer ---------------------------------------------------------------- */
-.footer {
-  position: relative; z-index: 1;
-  border-top: 1px solid var(--line);
-  text-align: center; padding: 22px 18px 30px;
-  color: var(--sand-dim); font-size: 0.85rem; font-style: italic;
+/* ---- teaching script ---------------------------------------------------------------- */
+.teach-bar { margin: 4px 0 20px; }
+#teachBtn {
+  min-height: 48px; padding: 11px 22px 13px; cursor: pointer;
+  font-weight: 700; font-size: 1.02rem; line-height: 1.2; letter-spacing: 0.02em;
+  color: #fff;
+  background: var(--hex), linear-gradient(180deg, #2b2926, #141311);
+  border: 1px solid #000; border-radius: 4px;
+  box-shadow: inset 0 -3px 0 var(--cyan), 0 0 0 1px rgba(63, 196, 242, 0.25), 0 8px 18px -8px rgba(40, 184, 238, 0.7);
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+#teachBtn:hover { transform: translateY(-1px); box-shadow: inset 0 -3px 0 #9be6ff, 0 0 0 1px rgba(63, 196, 242, 0.55), 0 8px 24px -6px rgba(40, 184, 238, 0.95); }
+/* while the script is open the button stays lit */
+.teach-bar:has(+ .teach-panel:not([hidden])) #teachBtn {
+  background: var(--hex), linear-gradient(180deg, #0b5e8e, #003a5e);
+  box-shadow: inset 0 -3px 0 #9be6ff, 0 0 0 2px rgba(63, 196, 242, 0.75), 0 0 20px rgba(40, 184, 238, 0.55);
 }
 
-/* ---- teaching script -------------------------------------------------------- */
-.teach-bar { margin: 2px 0 12px; }
-#teachBtn, .teach-copy {
-  background: var(--ink-2); color: inherit; border: 1px solid var(--line); border-radius: 8px;
-  padding: 8px 14px; cursor: pointer; font: inherit; font-size: 0.9rem;
-  transition: border-color 0.16s, transform 0.16s;
+.teach-panel {
+  position: relative; overflow: hidden;
+  margin: 0 0 28px; padding: 0 22px 20px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 2px solid var(--aegean); border-radius: 0 22px 0 0;
 }
-#teachBtn:hover, .teach-copy:hover { border-color: currentColor; transform: translateY(-1px); }
-.teach-panel { background: var(--ink-3); border: 1px solid var(--line); border-radius: 8px; padding: 16px 20px 18px; margin: 0 0 18px; }
 .teach-panel[hidden] { display: none; }
-.teach-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
-.teach-top h3 { font-size: 1.05rem; }
-.teach-note { font-size: 0.85rem; font-style: italic; opacity: 0.75; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px dashed var(--line); }
-.teach-panel h4 { font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; margin: 14px 0 5px; opacity: 0.95; color: var(--spice); }
-.teach-panel p { margin-bottom: 9px; max-width: 78ch; }
-.teach-panel ul { margin: 4px 0 10px 22px; }
-.teach-panel li { margin-bottom: 5px; }
-.teach-panel b { color: var(--spice); }
+/* its header is a strip of the dark cover band, cyan light-bar underneath */
+.teach-top {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px 14px; flex-wrap: wrap;
+  margin: 0 -22px 16px; padding: 12px 16px 13px 22px;
+  background: var(--hex), linear-gradient(180deg, #2b2926, #141311);
+  box-shadow: inset 0 -3px 0 var(--cyan);
+}
+.teach-top h3 {
+  margin: 0;
+  font-weight: 800; font-size: 1.2rem; line-height: 1.25; letter-spacing: 0.01em; text-transform: uppercase;
+  color: #fff;
+}
+.teach-copy {
+  min-height: 42px; padding: 8px 14px; cursor: pointer;
+  font-weight: 700; font-size: 0.95rem;
+  color: #fff; background: rgba(255, 255, 255, 0.06);
+  border: 2px solid var(--cyan); border-radius: 4px;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+.teach-copy:hover { background: var(--aegean); border-color: #9be6ff; }
+.teach-top :focus-visible { outline-color: #9be6ff; }
+.teach-note {
+  margin: 0 0 14px; padding: 0 max(0px, calc(100% - var(--measure))) 12px 0;
+  font-style: italic; font-size: 1rem; color: var(--ink-2);
+  border-bottom: 1px dashed #93a0ad;
+}
+.teach-panel h4 {
+  display: table; margin: 18px 0 9px; padding: 5px 14px 4px;
+  font-weight: 800; font-size: 0.92rem; line-height: 1.25; letter-spacing: 0.07em; text-transform: uppercase;
+  color: #fff; background: var(--red);
+}
+.teach-panel p { margin: 0 0 10px; max-width: var(--measure); }
 
-/* ---- responsive ------------------------------------------------------------ */
-@media (max-width: 640px) {
-  body { font-size: 15.5px; }
-  .step { padding: 12px; gap: 10px; }
-  .step-num { width: 28px; height: 28px; font-size: 0.85rem; }
-  .mode-btn { max-width: none; }
-  .mod { max-width: none; }
-  .ref-body { padding: 12px 14px 14px; }
+/* ---- search ------------------------------------------------------------------------------ */
+.rsearch-wrap { margin-bottom: 16px; }
+#rsearch {
+  width: 100%; min-height: 54px; padding: 13px 16px 13px 50px;
+  font: 400 1.06rem var(--sans); color: var(--ink);
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233f4042' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='10.5' cy='10.5' r='6.5'/%3E%3Cpath d='M15.5 15.5 21 21'/%3E%3C/svg%3E") 15px 50% / 22px no-repeat;
+  border: 2px solid var(--slate); border-radius: 4px;
+  -webkit-appearance: none; appearance: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+#rsearch:focus { outline: 3px solid var(--navy-2); outline-offset: 2px; border-color: var(--aegean); box-shadow: 0 0 16px rgba(40, 184, 238, 0.45); }
+#rsearch::placeholder { color: #5f6368; font-style: italic; opacity: 1; }
+
+.rhint { margin: 0; font-style: italic; color: var(--ink-2); }
+.rhit {
+  margin-bottom: 10px; padding: 12px 16px 13px;
+  background: var(--paper);
+  border: 1px solid #aab4be; border-left: 4px solid var(--aegean); border-radius: 2px;
+}
+.rhit-src {
+  display: inline-block; margin-bottom: 7px; padding: 4px 10px 3px;
+  font-weight: 800; font-size: 0.82rem; line-height: 1.2; letter-spacing: 0.06em; text-transform: uppercase;
+  color: #fff; background: var(--slate);
+}
+.rhit-text { font-size: 1rem; line-height: 1.6; color: var(--ink); max-width: var(--measure); overflow-wrap: anywhere; }
+.rhit-text mark { padding: 0 2px; font-weight: 700; color: #00304d; background: #cdebfa; box-shadow: inset 0 -2px 0 var(--aegean); }
+
+/* ---- vista + footer --------------------------------------------------------------------------- */
+.vista {
+  height: clamp(150px, 18vw, 270px); margin-top: 48px;
+  background: url("../images/hellas-vista.webp") 50% 62% / cover no-repeat;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 62%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 62%);
+}
+.footer {
+  position: relative;
+  color: #d5dadf;
+  background: var(--hex), linear-gradient(180deg, #1d1b18, #0f0e0c);
+  text-align: center;
+}
+.footer .meander { --rail-h: 16px; }
+.footer p { max-width: 780px; margin: 0 auto; padding: 22px 20px 30px; font-size: 1rem; font-style: italic; line-height: 1.6; }
+
+/* ---- focus -------------------------------------------------------------------------------------- */
+:focus-visible { outline: 3px solid var(--navy-2); outline-offset: 3px; }
+.ref summary:focus-visible { outline-offset: -5px; }
+.ref[open] summary:focus-visible { outline-color: #fff; }
+.pbtn.on:focus-visible, .chip.on:focus-visible, .mode-btn.on:focus-visible { outline-color: var(--navy); }
+
+/* ---- responsive ------------------------------------------------------------------------------------ */
+@media (max-width: 720px) {
+  :root { --band-h: 60px; --rail-h: 18px; }
+  body { background-position: center 300px, center top; }
+  .cover-art { height: 210px; }
+  .cover-art img { object-position: 40% 0%; }
+  .cover-plate { left: 50%; right: auto; width: min(250px, 66vw); transform: translateX(-50%); bottom: calc(var(--band-h) + var(--rail-h) - 12px); }
+  .cover-band { justify-content: center; padding: 0 16px; }
+  .brand-sub { width: auto; }
+  .lb-left { width: calc(14% + 24px); }
+  .lb-mid { display: none; }
+  .lb-right { left: 80%; }
+  main { padding: 22px 16px 6px; }
+  section { margin-top: 38px; }
+  .chips { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mode-grid, .mods { grid-template-columns: 1fr; }
+  .pbtns { gap: 9px; }
+  .pbtn { width: 48px; height: 48px; }
+  .step-num { width: 54px; height: 47px; font-size: 1.2rem; padding-bottom: 5px; }
+  .step { padding-top: 11px; }
+  .step-head { margin-left: 27px; padding: 8px 12px 8px 36px; min-height: 40px; }
+  .step-head h4 { font-size: 1rem; }
+  .step-text { padding: 12px 14px 4px; }
+  .step .src-line { padding: 8px 14px 10px; }
+  .ref-body { padding: 12px; }
+  .ref-body ul > li { padding: 8px 10px 8px 30px; }
+  .ref-body ul > li::before { left: 11px; top: calc(8px + 0.62em); }
+  .teach-panel { padding: 0 14px 18px; border-radius: 0 16px 0 0; }
+  .teach-top { margin: 0 -14px 14px; padding: 12px 14px 13px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  * { transition: none !important; }
+  *, *::before, *::after { transition: none !important; }
   html { scroll-behavior: auto; }
+  .chip:hover, .pbtn:hover, #teachBtn:hover { transform: none; }
 }

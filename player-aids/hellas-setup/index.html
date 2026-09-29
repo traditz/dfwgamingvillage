@@ -6,53 +6,54 @@
   <title>Lords of Hellas — Setup &amp; Reference Utility</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=1">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative&family=Figtree:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=3">
 </head>
 <body>
-  <div class="grain" aria-hidden="true"></div>
+  <!-- Cover: laid out like the Game Manual cover — art, the logo plate, a dark band with
+       glowing light-bars and the Cinzel Decorative title, and the blue meander rail. -->
+  <header class="cover">
+    <div class="cover-art" aria-hidden="true">
+      <img src="images/hellas-cover.webp" width="1500" height="780" alt="" decoding="async" fetchpriority="high">
+    </div>
+    <div class="cover-plate">
+      <h1 class="brand-title"><img src="images/hellas-logo.webp" width="760" height="398" alt="Lords of Hellas"></h1>
+    </div>
+    <div class="cover-band">
+      <span class="lightbar lb-left" aria-hidden="true"></span>
+      <span class="lightbar lb-mid" aria-hidden="true"></span>
+      <span class="lightbar lb-right" aria-hidden="true"></span>
+      <p class="brand-sub">Setup &amp; Reference</p>
+    </div>
+    <div class="meander" aria-hidden="true"></div>
+  </header>
 
-  <header class="topbar">
-    <span class="sigil" aria-hidden="true">
-      <!-- a Corinthian helmet within a meander-broken ring -->
-      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <path d="M50 8 a42 42 0 0 1 0 84 a42 42 0 0 1 0 -84" fill="none" stroke="currentColor" stroke-width="2" opacity="0.45" stroke-dasharray="10 6"/>
-        <path d="M50 22 q-16 0 -18 20 q-1 12 4 22 l6 12 q2 4 6 4 v-14 q-6 -8 -6 -16 h16 q0 8 -6 16 v14 q4 0 6 -4 l6 -12 q5 -10 4 -22 q-2 -20 -18 -20 Z"
-              fill="none" stroke="currentColor" stroke-width="2.8" stroke-linejoin="round"/>
-        <path d="M50 22 q3 -8 0 -12 q-3 4 0 12" fill="currentColor"/>
-        <line x1="50" y1="44" x2="50" y2="56" stroke="currentColor" stroke-width="2.4"/>
-      </svg>
-    </span>
-    <div class="brand-title">Lords of Hellas</div>
-    <div class="deco-rule" aria-hidden="true"><i></i><b></b><i></i></div>
-    <div class="brand-sub">Setup &amp; Reference Utility</div>
-    <p class="tagline" style="margin-top:10px">
+  <main>
+    <p class="tagline">
       Choose your gods, expansions and way to play — the standard race for Hellas, the Kronos
       Rebellion, or the solo Persian Invasion — for exact setup steps, a full rules reference with
       FAQ rulings applied, and a searchable index of every rulebook. Four roads to victory; take the
       one your rivals forgot to guard.
     </p>
-  </header>
 
-  <main>
     <section aria-label="Configuration">
       <h2>The Pantheon</h2>
       <p class="sec-note">Select the sets on the table, the mode, and the player count. Every step, ruling and script below adapts to your choices.</p>
       <div class="cfg">
-        <div>
-          <label class="cfg-label">Sets in play</label>
+        <div class="cfg-group">
+          <label class="cfg-label"><span class="cfg-name">Sets in play</span></label>
           <div id="expansions" class="chips"></div>
         </div>
-        <div>
-          <label class="cfg-label">Way to play</label>
+        <div class="cfg-group">
+          <label class="cfg-label"><span class="cfg-name">Way to play</span></label>
           <div id="modes" class="mode-grid"></div>
         </div>
-        <div>
-          <label class="cfg-label">Heroes <span class="hint">(player count; 5 needs Atlantis, 6 needs City of Steel, 1 is the Solo Campaign)</span></label>
+        <div class="cfg-group">
+          <label class="cfg-label"><span class="cfg-name">Heroes</span> <span class="hint">Player count — 5 needs Atlantis, 6 needs City of Steel, 1 is the Solo Campaign</span></label>
           <div id="players" class="pbtns"></div>
         </div>
-        <div id="modules-group">
-          <label class="cfg-label">Gods, modules &amp; variants <span class="hint">— full god expansions share the board's one free Monument slot, so pick at most one</span></label>
+        <div id="modules-group" class="cfg-group">
+          <label class="cfg-label"><span class="cfg-name">Gods, modules &amp; variants</span> <span class="hint">Full god expansions share the board's one free Monument slot, so pick at most one</span></label>
           <div id="modules" class="mods"></div>
         </div>
       </div>
@@ -82,10 +83,15 @@
     </section>
   </main>
 
+  <div class="vista" aria-hidden="true"></div>
+
   <footer class="footer">
-    Setup and reference content grounded in the official Lords of Hellas core rulebook, the Dark Ages,
-    Kronos, City of Steel, Apollo and Atlas expansion manuals, the Solo Campaign book, and the official
-    FAQ and Solo Campaign FAQ (v1.0, 2018-03-27). A fan-made play aid — not affiliated with Awaken Realms.
+    <div class="meander" aria-hidden="true"></div>
+    <p>
+      Setup and reference content grounded in the official Lords of Hellas core rulebook, the Dark Ages,
+      Kronos, City of Steel, Apollo and Atlas expansion manuals, the Solo Campaign book, and the official
+      FAQ and Solo Campaign FAQ (v1.0, 2018-03-27). A fan-made play aid — not affiliated with Awaken Realms.
+    </p>
   </footer>
 
   <script src="js/data.js?v=2"></script>
