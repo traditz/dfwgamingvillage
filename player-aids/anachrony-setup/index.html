@@ -6,34 +6,40 @@
   <title>Anachrony — Setup &amp; Reference Utility</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=1">
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
+  <link rel="preload" as="image" href="images/anachrony-logo.webp">
+  <link rel="stylesheet" href="css/styles.css?v=3">
 </head>
 <body>
+  <!-- hex-grid linework in the page corner, as on every rulebook page -->
   <div class="grain" aria-hidden="true"></div>
 
   <header class="topbar">
-    <span class="sigil" aria-hidden="true">
-      <!-- an hourglass inside a hex — exosuits and time travel -->
-      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <polygon points="50,6 88,28 88,72 50,94 12,72 12,28" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linejoin="round"/>
-        <path d="M36 30 h28 M36 70 h28 M38 30 q0 14 12 20 q12 6 12 20 M62 30 q0 14 -12 20 q-12 6 -12 20"
-              fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
-        <circle cx="50" cy="50" r="2.4" fill="currentColor"/>
-      </svg>
-    </span>
-    <div class="brand-title">Anachrony</div>
-    <div class="deco-rule" aria-hidden="true"><i></i><b></b><i></i></div>
-    <div class="brand-sub">Setup &amp; Reference Utility</div>
-    <p class="tagline" style="margin-top:10px">
-      Choose your expansions, modules and player count — from the Essential Edition through
-      Fractures of Time and Future Imperfect — for exact setup steps, a full rules reference,
-      and a searchable index of every rulebook. The Impact is coming. Borrow from your future wisely.
-    </p>
+    <!-- exosuit illustrations: Essential Edition rulebook p.12 and p.15 -->
+    <img class="exo exo-l" src="images/exosuit-gold.webp" width="409" height="560" alt="" aria-hidden="true">
+    <img class="exo exo-r" src="images/exosuit-rust.webp" width="404" height="560" alt="" aria-hidden="true">
+    <div class="hero">
+      <h1 class="brand-title">
+        <!-- tribar + wordmark from the Essential Edition rulebook cover -->
+        <img class="brand-logo" src="images/anachrony-logo.webp" width="424" height="431" alt="Anachrony">
+      </h1>
+      <p class="brand-sub">
+        <span class="brand-sub-main">Setup &amp; Reference</span>
+        <span class="brand-sub-ed">Utility</span>
+      </p>
+      <p class="tagline">
+        <span class="tl-full">Choose your expansions, modules and player count — from the Essential Edition through
+        Fractures of Time and Future Imperfect — for exact setup steps, a full rules reference,
+        and a searchable index of every rulebook.</span>
+        <span class="tl-coda">The Impact is coming. Borrow from your future wisely.</span>
+      </p>
+    </div>
   </header>
 
   <main>
-    <section aria-label="Configuration">
+    <section class="paths" aria-label="Configuration">
+      <!-- the four Path banners: Essential Edition rulebook p.4 -->
+      <img class="path-banners" src="images/path-banners.webp" width="560" height="176" alt="" aria-hidden="true">
       <h2>The Paths</h2>
       <p class="sec-note">Select the sets on the table. Every step, ruling and script below adapts to your choices.</p>
       <div class="cfg">
@@ -77,9 +83,12 @@
   </main>
 
   <footer class="footer">
-    Setup and reference content grounded in the official Anachrony Essential Edition, Classic Expansion Pack,
-    Fractures of Time, Future Imperfect, and Chronobot &amp; Chronossus rulebooks.
-    A fan-made play aid — not affiliated with Mindclash Games.
+    <img class="footer-mark" src="images/anachrony-logo.webp" width="424" height="431" alt="" aria-hidden="true">
+    <p>
+      Setup and reference content grounded in the official Anachrony Essential Edition, Classic Expansion Pack,
+      Fractures of Time, Future Imperfect, and Chronobot &amp; Chronossus rulebooks.
+      A fan-made play aid — not affiliated with Mindclash Games.
+    </p>
   </footer>
 
   <script src="js/data.js?v=2"></script>
