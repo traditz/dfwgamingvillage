@@ -4,37 +4,30 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Clank! Catacombs — Setup &amp; Reference Utility</title>
+  <meta name="theme-color" content="#1e1330">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=1">
+  <link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@700&family=Lora:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=3">
 </head>
 <body>
-  <div class="grain" aria-hidden="true"></div>
-
-  <header class="topbar">
-    <span class="sigil" aria-hidden="true">
-      <!-- a dragon eye over a keyhole arch -->
-      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <path d="M20 92 v-40 a30 30 0 0 1 60 0 v40" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-        <path d="M32 92 v-36 a18 18 0 0 1 36 0 v36" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.55"/>
-        <path d="M30 40 Q50 24 70 40 Q50 56 30 40 Z" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/>
-        <ellipse cx="50" cy="40" rx="4" ry="7" fill="currentColor"/>
-        <circle cx="50" cy="74" r="6" fill="none" stroke="currentColor" stroke-width="2.6"/>
-        <path d="M50 80 v10" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
-      </svg>
-    </span>
-    <div class="brand-title">Clank! Catacombs</div>
-    <div class="deco-rule" aria-hidden="true"><i></i><b></b><i></i></div>
-    <div class="brand-sub">Setup &amp; Reference Utility</div>
-    <p class="tagline" style="margin-top:10px">
-      Choose your expansions and party size — from the base catacombs to the Lairs, the Underworld
-      and a six-thief Adventuring Party — for exact setup steps, a full rules reference, and a
-      searchable index of the expansion rulebooks. Grab an Artifact. Try not to Clank!.
-    </p>
+  <header class="hero">
+    <div class="hero-stage">
+      <img class="hero-art" src="images/hero-catacombs.webp" width="1500" height="800" alt="" aria-hidden="true" fetchpriority="high">
+    </div>
+    <h1 class="hero-title">
+      <span class="vh">Clank! Catacombs — </span><span class="ribbon">Setup &amp; Reference Utility</span>
+    </h1>
   </header>
 
-  <main>
+  <main class="page">
+    <p class="tagline">
+      Choose your expansions and party size — from the base catacombs to the Lairs, the Underworld
+      and a six-thief Adventuring Party — for exact setup steps, a full rules reference, and a
+      searchable index of the expansion rulebooks. Grab an Artifact. Try not to Clank!
+    </p>
+    <div class="flourish" aria-hidden="true"><i></i><span class="ghost"></span><i></i></div>
+
     <section aria-label="Configuration">
       <h2>The Heist</h2>
       <p class="sec-note">Select the sets on the table. Every step, ruling and script below adapts to your choices.</p>
@@ -79,9 +72,12 @@
   </main>
 
   <footer class="footer">
-    Setup and reference content grounded in the official Clank! Catacombs Rulebook &amp; Token Reference
-    Guide, the Underworld and Lairs &amp; Lost Chambers rulebooks, and the Clank! Adventuring Party rules.
-    A fan-made play aid — not affiliated with Dire Wolf Digital.
+    <span class="footer-ghost ghost" aria-hidden="true"></span>
+    <p>
+      Setup and reference content grounded in the official Clank! Catacombs Rulebook &amp; Token Reference
+      Guide, the Underworld and Lairs &amp; Lost Chambers rulebooks, and the Clank! Adventuring Party rules.
+      A fan-made play aid — not affiliated with Dire Wolf Digital.
+    </p>
   </footer>
 
   <script src="js/data.js?v=2"></script>
