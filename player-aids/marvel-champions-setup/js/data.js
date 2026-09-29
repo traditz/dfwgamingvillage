@@ -64,11 +64,93 @@ const MC = {};
   };
   const sameSet = (a, b) => a.length === b.length && a.every((x) => b.indexOf(x) >= 0);
 
+  /* ---- competitive (VS) mode: Civil War rulebook pp.3-6, 14-17, 20 · Synthezoid Smackdown rulebook pp.9-18 ----
+   * In VS mode c.vs is true, c.players / c.team = players per team (1 or 2) and c.teams holds one entry per side:
+   *   { side, sideName, scn (leader scenario), leader (title), modulars [set ids], ms1 / ms2 ({name, text}), cards [{name, type}] }
+   * Each side's entry is the scenario that team BUILDS; the other team plays against it. */
+  const isVS = (c) => !!(c && c.vs && c.teams);
+  const CW = "Civil War rulebook";
+  const team = (c, side) => (isVS(c) ? c.teams[side] || null : null);
+  const foeOf = (side) => (side === "registration" ? "resistance" : "registration");
+  const teamName = (side) => (side === "registration" ? "registration" : "resistance");
+  const leaderDeck = (c, t) => (t && t.scn && t.scn.villainDeck ? arr(t.scn.villainDeck[modeName(c)]) : []);
+  const firstStage = (c, t) => {
+    const st = (t && t.scn && t.scn.stats && t.scn.stats.stages) || [];
+    const name = leaderDeck(c, t)[0];
+    return st.find((x) => x.name === name) || null;
+  };
+  const vsLine = (c, fn) => ["registration", "resistance"].map((side) => fn(team(c, side), side)).filter(Boolean);
+
   /* ------------------------------------------------------------------ sources */
   MC.sources = {
     rr: { name: "Rules Reference v1.8", short: "RR" },
     ltp: { name: "Learn to Play", short: "LtP" },
   };
+
+  /* ------------------------------------------------------------------ competitive (VS) setup */
+  // "Setting Up a Competitive Game" (Civil War rulebook p.14; the same 5 steps on Synthezoid Smackdown p.9).
+  // Shown before the normal setup when VS is on; step 5 hands over to the official 16 steps below.
+  MC.vsPhase = "VS · Competitive setup";
+  MC.vsSetup = [
+    {
+      n: "V1",
+      t: "Each team builds its scenario",
+      src: CW + " p.4–5, 14 · Synthezoid Smackdown p.9",
+      d: (c) => {
+        const mine = vsLine(c, (t, side) =>
+          t
+            ? "<b>" + cap(side) + " team:</b> " + t.leader + " · " + t.modulars.length + " modular " + plural(t.modulars.length, "set", "sets") +
+              (t.modulars.length ? " (" + t.modulars.map((id) => nm(c, id)).join(", ") + ")" : "") +
+              " · main schemes " + (t.ms1 ? t.ms1.name : "?") + " → " + (t.ms2 ? t.ms2.name : "?") +
+              (t.modulars.length < 3 || t.modulars.length > 4 ? " <b>⚠ choose 3–4 modular sets</b>" : "")
+            : null
+        );
+        return (
+          "Each team builds the scenario for <b>its own leader</b>, following Custom Scenario Creation:" +
+          ul([
+            "<b>Pick different sides</b>: one team is registration, the other resistance.",
+            "<b>Choose a leader from your side.</b> Players can't use an identity that shares a title with their own leader, so pick a leader different from your heroes.",
+            "<b>Add 3–4 modular sets from your side</b> (no mixing registration and resistance). Only registration or resistance sets are allowed in competitive mode, and the teams don't need the same number. <i>(CW p.4–5, 20)</i>",
+            "<b>Replace the Standard set with the Standard PvP set.</b>",
+            "<b>Main scheme deck:</b> one of your side's stage 1s on top of one of its stage 2s.",
+          ]) +
+          (mine.length ? "<b>This game:</b>" + ul(mine) : "") +
+          "<i>Random scenario creation: choose side, leader, 3–4 modular sets and both main scheme stages at random — unseen, for surprises. (CW p.5)</i>"
+        );
+      },
+    },
+    {
+      n: "V2",
+      t: "Sit across the table",
+      src: CW + " p.14–15",
+      d: "The opposing teams sit <b>across the table</b> from each other. Each half of the table is a team's <b>game area</b>: its heroes, the enemy leader it fights with that leader's main scheme and encounter decks, Choosing Sides, and the team's own first player token. (Setup diagram, CW p.15)",
+    },
+    {
+      n: "V3",
+      t: "Set aside your leader's basic cards",
+      src: CW + " p.3, 14, 16",
+      d: (c) =>
+        "Each team finds its chosen leader's <b>4 basic player cards</b> and sets them aside. They're only used in competitive mode, and your team <b>earns</b> them during the game by defeating <b>Choosing Sides</b> in your game area." +
+        ul(vsLine(c, (t) => (t && arr(t.cards).length ? "<b>" + t.leader + ":</b> " + t.cards.map((x) => x.name).join(", ") : null))),
+    },
+    {
+      n: "V4",
+      t: "Trade scenarios",
+      src: CW + " p.14",
+      d: (c) =>
+        "Swap scenarios so each team faces <b>the leader, main scheme deck and encounter deck prepared by the opposing team</b>. Each team brings exactly one scenario, whatever its number of players." +
+        ul(vsLine(c, (t, side) => {
+          const o = team(c, foeOf(side));
+          return t && o ? "The <b>" + side + " team</b> fights <b>" + o.leader + "</b> (built by the " + foeOf(side) + " team)." : null;
+        })),
+    },
+    {
+      n: "V5",
+      t: "Follow the normal setup",
+      src: CW + " p.14",
+      d: "Now follow the <b>normal setup rules</b> below. Each team sets up its own game area as a regular game for its players; the steps outlined in gold spell out what changes in competitive mode.",
+    },
+  ];
 
   /* ------------------------------------------------------------------ setup */
   MC.phases = ["1 · Choose Heroes", "2 · Scenario & Encounter Deck", "3 · Scenario Setup", "4 · Draw & Mulligan"];
@@ -80,8 +162,20 @@ const MC = {};
       ph: 0,
       t: "Select identities",
       src: "RR p.51 (step 1) · LtP p.4 (step 1)",
+      vs: true,
       d: (c) => {
         const n = players(c);
+        if (isVS(c)) {
+          const bans = vsLine(c, (t, side) => (t ? "no <b>" + t.leader + "</b> hero on the " + side + " team" : null));
+          return (
+            "Each team chooses " + (n === 1 ? "<b>one identity</b> (1v1)" : "<b>two identities</b> (2v2)") + ", placed <b>alter-ego side up</b>. <i>(RR p.23 · CW p.14)</i>" +
+            ul([
+              "A team <b>can't use a hero with the same title as its own leader</b>" + (bans.length ? " — this game: " + joinAnd(bans) : "") + ". <i>(CW p.14, 16)</i>",
+              "The unique rule only applies to <b>friendly</b> cards — your team's player cards and your own leader" + (n > 1 ? ", so teammates can't choose matching identities, but the two teams may" : "") + ". An enemy leader or minion may share a title with your identity or allies. <i>(CW p.16, 20)</i>",
+              "Set aside any <b>permanent</b> and <b>linked</b> cards as usual. <i>(RR p.27, 32)</i>",
+            ])
+          );
+        }
         return (
           "Each player chooses <b>one identity</b> (the hero/alter-ego card) and places it <b>alter-ego side up</b> — everyone starts the game in alter-ego form. <i>(RR p.23)</i>" +
           ul([
@@ -105,8 +199,13 @@ const MC = {};
       ph: 0,
       t: "Select first player",
       src: "RR p.51 (step 3) · LtP p.4 (step 3)",
+      vs: true,
       d: (c) =>
-        "As a group, choose a <b>first player</b> and give them the first player token." +
+        isVS(c)
+          ? "Each team has <b>its own first player token</b>" +
+            (players(c) === 1 ? " — in 1v1 each player is their team's first player." : " — each team chooses its first player.") +
+            " The <b>registration team goes first</b> every round, and each team's token passes at the end of <b>that team's villain phase</b>. Short of tokens or dials? Use coins or pen and paper. <i>(CW p.16)</i>"
+          : "As a group, choose a <b>first player</b> and give them the first player token." +
         (players(c) === 1
           ? " Playing solo, that's you."
           : " The first player goes first each round, makes the choices encounter cards leave open, and orders simultaneous effects; the token passes clockwise at the end of every round. <i>(RR p.19–20)</i>"),
@@ -116,8 +215,16 @@ const MC = {};
       ph: 0,
       t: "Set aside obligations",
       src: "RR p.51 (step 4) · LtP p.4 (step 4)",
+      vs: true,
       d: (c) => {
         const n = players(c);
+        if (isVS(c)) {
+          return (
+            "Obligations are still used in competitive mode. Each team sets aside its identities' <b>obligation cards</b> — at least " +
+            (n === 1 ? "one card" : word(n) + " cards") +
+            " per team — and they're shuffled into <b>the encounter deck your team faces</b> in step 10. <i>(RR p.30 · CW p.20, FAQ)</i>"
+          );
+        }
         return (
           "For each identity being played, <b>set aside its obligation card</b> — " +
           (n === 1 ? "at least one card" : "at least " + word(n) + " cards") +
@@ -153,10 +260,28 @@ const MC = {};
       ph: 1,
       t: "Select scenario",
       src: "RR p.51 (step 8) · LtP p.6 (step 8)",
+      vs: true,
       d: (c) => {
         const s = scn(c);
         const m = modeName(c);
         const items = [];
+        if (isVS(c)) {
+          return (
+            "Each game area gets the leader and main scheme deck <b>the other team built</b>. Stack the leader's stages in order, and put the stage 1 main scheme on top of the stage 2, <b>1A side up</b>. <i>(CW p.5, 14–15)</i>" +
+            ul(
+              vsLine(c, (t, side) => {
+                const o = team(c, foeOf(side));
+                if (!o) return null;
+                return (
+                  "<b>" + cap(side) + " game area:</b> enemy leader " + (leaderDeck(c, o).join(" → ") || o.leader) +
+                  " · main schemes " + (o.ms1 ? o.ms1.name : "?") + " → " + (o.ms2 ? o.ms2.name : "?") +
+                  " <i>(built by the " + foeOf(side) + " team)</i>"
+                );
+              })
+            ) +
+            (m === "expert" ? "<b>Expert:</b> each leader's stages III and IV replace I and II. <i>(CW p.3)</i>" : "")
+          );
+        }
         if (s) {
           const vd = villainDeck(c);
           const ms = arr(s.mainSchemeDeck);
@@ -188,9 +313,23 @@ const MC = {};
       ph: 1,
       t: "Set the villain's hit points",
       src: "RR p.51 (step 9) · LtP p.6 (step 9)",
+      vs: true,
       d: (c) => {
         const n = players(c);
         const vd = villainDeck(c);
+        if (isVS(c)) {
+          return (
+            "Set each <b>enemy leader's</b> hit point dial: its hit points × the number of players <b>on the team fighting it</b> — in competitive mode “per player” counts only your own team. <i>(CW p.20 · RR p.26, 32, 47)</i>" +
+            ul(
+              vsLine(c, (t, side) => {
+                const st = firstStage(c, team(c, foeOf(side)));
+                if (!st) return null;
+                return "<b>" + cap(side) + " team</b> vs " + st.name + ": " + st.hp + (st.perPlayer ? " × " + n + " = <b>" + st.hp * n + "</b>" : "") + " hit points";
+              })
+            ) +
+            "When a stage is defeated, reveal the next and reset the dial. <i>(RR p.47)</i>"
+          );
+        }
         let h =
           "Set the <b>villain's hit point dial</b> to the hit points on the villain card multiplied by the number of players — <b>× " +
           n +
@@ -207,12 +346,35 @@ const MC = {};
       ph: 1,
       t: "Create the encounter deck",
       src: "RR p.51 (step 10) · LtP p.6 (step 11), p.23",
+      vs: true,
       d: (c) => {
         const n = players(c);
         const s = scn(c);
         const m = modeName(c);
         const h = heroic(c);
         const items = [];
+        if (isVS(c)) {
+          const decks = vsLine(c, (t, side) => {
+            if (!t) return null;
+            const faced = foeOf(side);
+            const parts = [nm(c, t.scn.id) + " set (the leader's 10 cards)"]
+              .concat(t.modulars.map((id) => nm(c, id)))
+              .concat(["Standard PvP"], m === "expert" ? ["Expert"] : [])
+              .concat([n === 1 ? "the " + faced + " hero's obligation" : "the " + faced + " heroes' obligations"]);
+            const warn = t.modulars.length < 3 || t.modulars.length > 4 ? " <b>⚠ Choose 3–4 modular sets for this deck.</b>" : "";
+            return "<b>" + t.leader + " deck</b> — built by the " + side + " team, faced by the " + faced + " team: " + parts.join(", ") + "." + warn;
+          });
+          return (
+            "Each leader's encounter deck is shuffled together and placed in the game area of the team that fights it: <i>(CW p.4, 14)</i>" +
+            ul(decks) +
+            ul([
+              "<b>Standard PvP</b> replaces the Standard set: Choosing Sides, Righteous Cause, Whatever It Takes and Targeted Strike ×2 (Choosing Sides is permanent: it's set aside at the start of setup and enters play in step 12). Civil War and Synthezoid Smackdown each include two copies, one per team. <i>(CW p.3 · SS p.3)</i>",
+              "Only <b>registration or resistance</b> modular sets may be used in competitive mode, and a deck never mixes the two sides. <i>(CW p.4–5)</i>",
+              "Obligations are still shuffled in. <i>(CW p.20, FAQ)</i>",
+              m === "expert" ? "<b>Expert:</b> the competitive rules only swap in stages III and IV (CW p.3), but they say to follow the normal setup (CW p.14) and expert mode adds the Expert encounter set (RR p.28) — so add one to each leader's deck. Each deck needs its own copy; Expert II may replace the Expert set (The Hood insert p.2)." : null,
+            ])
+          );
+        }
         let chosen = [];
         let rec = [];
         if (s) {
@@ -271,11 +433,36 @@ const MC = {};
       ph: 2,
       t: "Resolve scenario setup & When Revealed abilities",
       src: "RR p.51 (step 12) · LtP p.6 (step 10), p.14",
+      vs: true,
       d: (c) => {
         const n = players(c);
         const s = scn(c);
         const ms = s ? arr(s.mainSchemeDeck) : [];
         const vd = villainDeck(c);
+        if (isVS(c)) {
+          const areas = vsLine(c, (t, side) => {
+            const o = team(c, foeOf(side));
+            if (!o) return null;
+            const hinder = o.ms1 && /hinder 2/i.test(o.ms1.text || "");
+            const notes = arr(o.scn && o.scn.setupNotes).filter((x) => !/^Co-op:/i.test(x));
+            const wr = /When Revealed:\s*(.+?)(?:\s*If this stage is completed|$)/.exec((o.ms1 && o.ms1.text) || "");
+            return (
+              "<b>" + cap(side) + " game area</b> (" + o.leader + "): stage 1B <b>" + (o.ms1 ? o.ms1.name : "?") + "</b> starts with " +
+              (hinder && n > 1 ? "<b>" + 2 * n + " threat</b> (hinder 2 per player: more than 1 player on the team)" : "0 threat") +
+              (wr ? "; its <b>When Revealed</b>: " + wr[1].replace(/^The /, "the ").replace(/\.$/, "") + " (dealt cards stay facedown until the villain phase, RR p.15)" : "") +
+              "; Choosing Sides starts with <b>" + 4 * n + " threat</b>." + (notes.length ? " " + notes.join(" ") : "")
+            );
+          });
+          return (
+            "In each game area, as in a normal game: <i>(1A card text · CW p.15)</i>" +
+            ul([
+              "<b>a.</b> Resolve the 1A side's <b>Setup</b>. In competitive mode <b>the enemy team finds Choosing Sides</b> (from its Standard PvP set; it's permanent, so it was set aside at the start of setup, RR p.32) and <b>your team reveals it</b>: a side scheme with 4 threat per player. While it's in play, the enemy leader can't take more than 2 damage from each attack.",
+              "<b>b.</b> Flip to side <b>1B</b> and place its starting threat; every stage 1 gains <b>hinder 2 per player</b> if there is more than 1 player on your team. Resolve any “When Revealed”.",
+              "<b>c.</b> Resolve the enemy leader's <b>“Setup”</b> and “When Revealed” abilities. <b>“The enemy team”</b> is the team that built the scenario — they make the choices these abilities give them.",
+            ]) +
+            ul(areas)
+          );
+        }
         let out = ul([
           "<b>a.</b> Resolve any <b>“Setup”</b> abilities on side 1A of the main scheme" + (ms.length ? " (<b>" + ms[0] + "</b>)" : "") + ".",
           "<b>b.</b> Flip it to side <b>1B</b>, place its <b>starting threat</b> (bottom of the card" +
@@ -323,13 +510,40 @@ const MC = {};
   /* ------------------------------------------------------------------ round */
   MC.round = [
     {
+      id: "vs",
+      h: "Competitive Round (VS)",
+      when: (c) => isVS(c),
+      src: CW + " p.16, 20",
+      steps: [
+        {
+          t: "Registration team: player phase",
+          d: "The registration team plays its <b>entire</b> player phase — the competitive rules call it the hero phase — including readying its cards and refilling its hands.",
+        },
+        {
+          t: "Resistance team: player phase",
+          d: "Then the resistance team plays its entire player phase the same way.",
+        },
+        {
+          t: "Registration team: villain phase",
+          d: "The registration team resolves its <b>entire villain phase</b> in its game area; then its first player token passes.",
+        },
+        {
+          t: "Resistance team: villain phase",
+          d: "The resistance team resolves its entire villain phase; then its token passes, and the next round begins.",
+        },
+      ],
+      note: "<b>While the other team plays</b>, your side of the table is inactive: watch their game to make sure they don't miss any relevant effects. Cards in their game area aren't in play in yours and have no impact on your side unless they specifically refer to it.",
+    },
+    {
       id: "player",
       h: "Player Phase",
       src: "RR p.4, 18, 34–35 · LtP p.10–14",
       steps: [
         {
           t: "Take turns in player order",
-          d: "Each player takes one full turn: the first player, then clockwise. On your turn you may do the things below in any order, as many times as you can pay for them — except changing form, which is once per turn.",
+          d: (c) =>
+            "Each player takes one full turn: the first player, then clockwise. On your turn you may do the things below in any order, as many times as you can pay for them — except changing form, which is once per turn." +
+            (isVS(c) ? " <i>VS: only your team's players take turns in your phase, starting with your team's first player.</i>" : ""),
           src: "RR p.34 · LtP p.10",
         },
         {
@@ -381,7 +595,9 @@ const MC = {};
       steps: [
         {
           t: "Place threat",
-          d: "Place the main scheme's acceleration value (bottom-right of the card; multiply it by the number of players if it shows the per-player icon) on it, plus <b>1 threat for each acceleration icon and acceleration token</b> in play.",
+          d: (c) =>
+            "Place the main scheme's acceleration value (bottom-right of the card; multiply it by the number of players if it shows the per-player icon) on it, plus <b>1 threat for each acceleration icon and acceleration token</b> in play." +
+            (isVS(c) ? " <i>VS: “players” means the players on your team. (" + CW + " p.20)</i>" : ""),
           src: "RR p.5, 27, 47 · LtP p.15",
         },
         {
@@ -411,7 +627,9 @@ const MC = {};
         },
         {
           t: "Pass the first player token & end the round",
-          d: "Pass the token to the next player clockwise. Then “until the end of the round/phase” effects end and end-of-round effects resolve (for example, <b>temporary</b> cards are discarded). The next round begins.",
+          d: (c) =>
+            "Pass the token to the next player clockwise. Then “until the end of the round/phase” effects end and end-of-round effects resolve (for example, <b>temporary</b> cards are discarded). The next round begins." +
+            (isVS(c) ? " <i>VS: each team passes its own token at the end of its own villain phase, and the round ends after the resistance team's villain phase. (" + CW + " p.16)</i>" : ""),
           src: "RR p.44, 47 · LtP p.17",
         },
       ],
@@ -739,6 +957,53 @@ const MC = {};
         "You can't play cards into another player's play area unless a rule or card says so. <i>(RR p.35)</i>",
       ],
     },
+    {
+      id: "leaders",
+      h: "Leaders & Custom Scenarios",
+      src: CW + " p.3–6 · Synthezoid Smackdown p.3–7 · RR p.26",
+      items: [
+        "A <b>leader</b> follows the villain rules for all purposes; the only difference is that in competitive play you team up with yours. <i>(RR p.26 · CW p.3)</i>",
+        "Leaders: <b>Iron Man, Captain Marvel</b> and <b>She-Hulk</b> (registration); <b>Captain America, Spider-Woman</b> and <b>Vision</b> (resistance). Each has 4 stages — III and IV replace I and II in expert mode — a 10-card encounter set, and 4 basic player cards used only in competitive mode. <i>(CW p.3 · SS p.3)</i>",
+        "<b>Custom scenario:</b> choose a side → a leader from it → 3–4 of that side's modular sets plus the Standard set (<b>Standard PvP</b> in competitive mode) → one stage 1 on top of one stage 2 of that side. Or build it all at random. <i>(CW p.4–5)</i>",
+        "Modular sets from any product may join a custom scenario in <b>cooperative</b> play; in <b>competitive</b> mode only registration or resistance sets (Civil War, Synthezoid Smackdown) may be used. <i>(CW p.5 · SS p.3)</i>",
+        "Main scheme 1A setup: in <b>co-op</b>, find the leader's own side scheme (Stark Tower, Alpha Flight Station, Fearless Determination, Self-propelled Glide, Legal Practice, Just Passing Through) and reveal it; in <b>competitive</b> mode, the enemy team finds <b>Choosing Sides</b> and your team reveals it. <i>(1A card text)</i>",
+        "<b>Playing a leader scenario co-op or solo:</b> the leader is “the enemy leader” and counts as “the villain”; “the enemy team” means the players — resolve it with the grim rule; an ability that refers to “your leader” can't resolve — do as much as you can with its alternate effect. <i>(CW p.6 · SS p.4)</i>",
+      ],
+    },
+    {
+      id: "vs",
+      h: "Competitive (VS) Mode",
+      src: CW + " p.14–16, 20 · Synthezoid Smackdown p.9–15",
+      intro: "Two teams — <b>1v1 or 2v2</b>, registration vs. resistance — each build a scenario for their own leader, trade, and race to defeat the enemy leader first. Turn on <b>VS</b> above for the full setup.",
+      items: [
+        "Each half of the table is a separate <b>game area</b>. Cards in your opponents' game area aren't in play in yours; card abilities on your side ignore the other side unless they specifically refer to it. <i>(CW p.16, 20)</i>",
+        "<b>“The villain” / “the enemy leader”</b> = the leader in your game area (the one you fight). <b>“Your leader”</b> = your team's leader, in your opponents' game area. <b>“The enemy team”</b> = the players you're playing against. <b>“Enemy/enemies”</b> = the leader you fight and the minions on your side — never your opponents' allies or identities. <b>“The players / each player / per player”</b> = your team only. <i>(CW p.16, 20)</i>",
+        "<b>Uniqueness</b> only applies to friendly cards: your team's player cards and your own leader. You can't use a hero with your own leader's title, but an enemy leader or minion may share a title with your cards. Encounter cards that name a leader by title mean that leader, not a hero or ally version. <i>(CW p.16, 20)</i>",
+        "Dealt more than one encounter card? <b>Reveal them in the order they were dealt</b> — the enemy team can set up combos. <i>(CW p.16)</i>",
+        "<b>The enemy leader attacks your leader</b> (ignores guard; nobody can defend): 1. give the attacking leader a facedown boost card from its encounter deck; 2. the first player on the defending leader's team turns it faceup and resolves it; 3. the boost card goes to the attacking leader's encounter discard pile; 4. the attacking leader deals damage equal to its total ATK to the defending leader. <i>(CW p.16)</i>",
+        "<b>Choosing Sides</b> (Standard PvP, 4 threat per player, permanent): while it's in your game area the enemy leader can't take more than 2 damage from each attack. When its last threat is removed, the enemy team searches the top 5 encounter cards for 1 per player and deals one to each player facedown; then it flips to <b>Now It's Personal</b>, given to your first player. Its Action removes it from the game so that each player on your team adds 2 of your leader's set-aside basic cards to their hand — they're part of that player's deck for the rest of the game. <i>(CW p.16; card text)</i>",
+      ],
+    },
+    {
+      id: "vs-win",
+      h: "Winning a Competitive Game",
+      src: CW + " p.17, 20 · Synthezoid Smackdown p.16–17",
+      items: [
+        "A team wins if it <b>defeats the enemy leader</b> first, if <b>its leader completes its main scheme 2B</b> first, or if <b>its leader defeats all the opposing identities</b> first.",
+        "The game doesn't end until <b>both sides have played an equal number of phases</b>. If the registration team loses first (its enemy leader completes its scheme, or all its heroes are defeated), play continues through the end of the resistance team's next phase — if the resistance team also loses that way, both teams lose.",
+        "If the registration team defeats its enemy leader first, play continues through the end of the resistance team's next phase; if the resistance team also defeats theirs, it's a <b>tie</b>. A resistance leader defeated during the registration hero phase stays on the table until then, so resistance player cards can still target it.",
+      ],
+      table: {
+        cols: ["Tie-break", "In order, the winner is the team…"],
+        rows: [
+          ["1", "…whose enemy main scheme deck did not advance past stage 1B"],
+          ["2", "…with the fewest total minions and side schemes in its game area"],
+          ["3", "…with the least threat on the main scheme in its game area"],
+          ["4", "…whose identities have the most remaining hit points"],
+          ["5", "…with the fewest attachments on the leader in its game area"],
+        ],
+      },
+    },
   ];
 
   /* ------------------------------------------------------------------ keywords & icons (alphabetical) */
@@ -820,6 +1085,12 @@ const MC = {};
       src: "RR p.11, 29, 51, 61",
       d: "Interconnected scenarios played one after another, with rules in the campaign's own rulebook and a <b>campaign log</b> recording what persists between games. A card removed from a campaign stays out for the rest of it, even on a replay. <b>Expert campaign</b> adds cards or setup instructions but doesn't require expert mode — choose the other modes freely for each scenario. Campaign setup is setup step 13; campaign-specific cards can only be used in their own campaign.",
     },
+    {
+      id: "vs",
+      h: "Competitive (VS) Mode",
+      src: CW + " p.3, 14–17 · Synthezoid Smackdown p.9–17",
+      d: "Player versus player, introduced by <b>Civil War</b> (and playable with <b>Synthezoid Smackdown</b>): <b>1v1 or 2v2</b>, registration against resistance. Each team builds a scenario around its own leader with the <b>Standard PvP</b> set, the teams trade scenarios, and they race to defeat the enemy leader first. Turn on <b>VS</b> above for the full setup, the threaded round and the win conditions.",
+    },
   ];
 
   /* ------------------------------------------------------------------ deckbuilding */
@@ -846,6 +1117,7 @@ const MC = {};
       "Modular sets are added <b>whole</b> — no single cards unless the scenario says so. Some scenarios <b>require</b> particular modular sets; others let players choose. <i>(RR p.29)</i>",
       "The <b>Standard</b> and <b>Expert</b> sets are not modular and can't be picked when a scenario asks for a modular set. <i>(RR p.19, 40)</i>",
       "Encounter sets with the same name but different set icons are different sets. <i>(RR p.18)</i>",
+      "<b>Leader scenarios</b> (Civil War, Synthezoid Smackdown) are built from parts: a leader, 3–4 modular sets of its side (co-op games may also add sets from other products), the Standard set (Standard PvP in competitive mode) and one stage 1 plus one stage 2 main scheme of its side. <i>(CW p.4–5)</i>",
       "Core set modular difficulty levels: Bomb Scare 1, Masters of Evil 2, Under Attack 3, Legions of Hydra 4, The Doomsday Chair 5 — a higher level generally adds more difficulty. <i>(LtP p.23)</i>",
     ],
   };
@@ -994,6 +1266,14 @@ const MC = {};
     { topic: "Falcon Hero Pack · Redwing (#2)", src: "RR p.65", q: "Can Redwing trigger if the top encounter card is visible and has no boost icons?", a: "No. You know the ability can't affect its target, so it can't be triggered." },
     // Hercules Hero Pack
     { topic: "Hercules Hero Pack · Labor cards", src: "RR p.65", q: "What happens if a Labor card finds no target when it's revealed?", a: "Discard it. Whenever a Labor card leaves play other than to the victory display, put it on the bottom of the Labor deck." },
+    // Civil War rulebook p.20 (the first, third and fourth also appear in the Synthezoid Smackdown rulebook p.18)
+    { topic: "Civil War · Competitive mode", src: CW + " p.20 · Synthezoid Smackdown p.18", q: "In competitive mode, does it matter if the enemy leader has the same title as my identity or ally?", a: "No — nor if a minion does. The unique rule only applies to friendly characters in competitive mode: that includes your leader, but not the minions in your leader's encounter deck." },
+    { topic: "Civil War · Competitive mode", src: CW + " p.20", q: "Do my opponent and I have to choose the same number of modular sets for our encounter decks?", a: "No. Each team builds its scenario independently." },
+    { topic: "Civil War · Competitive mode", src: CW + " p.20 · Synthezoid Smackdown p.18", q: "What happens if I reveal stage II of the enemy leader during the villain phase?", a: "Resolve the stage II leader's “When Revealed” ability: deal a facedown encounter card to each player on your team. That leader can't take any more damage until the end of the villain phase." },
+    { topic: "Civil War · Competitive mode", src: CW + " p.20 · Synthezoid Smackdown p.18", q: "Do I shuffle my identity's obligation into the encounter deck during competitive play?", a: "Yes. Obligations are still shuffled into the encounter deck during setup in competitive mode." },
+    { topic: "Civil War · Captain Marvel leader (#92)", src: CW + " p.20", q: "If a leader attacks the Captain Marvel leader, does the Forced Response on Energy Channel (#98) trigger?", a: "Yes. It can cause Captain Marvel to attack that leader." },
+    { topic: "Civil War · Drafted (#80)", src: CW + " p.20", q: "What happens to a minion with Drafted attached when it's defeated in competitive mode?", a: "Put the minion in the discard pile of the encounter deck it came from, and do the same with Drafted." },
+    { topic: "Civil War · Cap's Shield (#143)", src: CW + " p.20", q: "What happens to Cap's Shield if the identity it's attached to is defeated?", a: "It attaches to the Captain America leader. When an attachment with the permanent keyword becomes unattached, resolve its “attach to” text." },
   ];
 
   /* ------------------------------------------------------------------ errata (RR Appendix V, p.65–70) — all 87 entries */
@@ -1130,9 +1410,16 @@ const MC = {};
   MC.teach = {
     intro: (c) => {
       const n = players(c);
-      const team = n === 1 ? "you're playing <b>solo</b> — one hero" : "there are <b>" + word(n) + " of you</b> — " + word(n) + " heroes on one team";
+      if (isVS(c)) {
+        const reg = team(c, "registration"), res = team(c, "resistance");
+        return (
+          "Welcome to <b>Marvel Champions — competitive mode</b>! Today it's <b>" + (n === 1 ? "1v1" : "2v2") + "</b>: the <b>registration</b> team, led by <b>" + (reg ? reg.leader : "its leader") +
+          "</b>, against the <b>resistance</b> team, led by <b>" + (res ? res.leader : "its leader") + "</b>, in <b>" + modeName(c) + " mode</b>. It's the regular game with a few twists — here they are."
+        );
+      }
+      const who = n === 1 ? "you're playing <b>solo</b> — one hero" : "there are <b>" + word(n) + " of you</b> — " + word(n) + " heroes on one team";
       const foe = scnName(c) ? "<b>" + scnName(c) + "</b>" : "a villain";
-      let t = "Welcome to <b>Marvel Champions</b>! Today " + team + ", taking on " + foe + " in <b>" + modeName(c) + " mode</b>.";
+      let t = "Welcome to <b>Marvel Champions</b>! Today " + who + ", taking on " + foe + " in <b>" + modeName(c) + " mode</b>.";
       const extras = [];
       const h = heroic(c);
       if (h) extras.push("<b>heroic level " + h + "</b>");
@@ -1145,8 +1432,21 @@ const MC = {};
     },
     sections: [
       {
+        h: "The hook: how you win",
+        when: (c) => isVS(c),
+        body: (c) => {
+          const reg = team(c, "registration"), res = team(c, "resistance");
+          return (
+            "Each team built a scenario around <b>its own leader</b> and handed it across the table: the registration team fights <b>" + (res ? res.leader : "the resistance leader") +
+            "</b>, the resistance team fights <b>" + (reg ? reg.leader : "the registration leader") + "</b>. A leader is just a villain you can team up with." +
+            "<br><br>Win by being first to <b>defeat the enemy leader</b> — or by having <b>your leader</b> complete its main scheme 2B or knock out all of the other team's heroes. " +
+            "Both teams always finish the same number of phases. The registration team acts first, so if it gets there first — defeating its enemy leader, or losing — the resistance team still plays out its next phase: if it also defeats its enemy leader it's a <b>tie</b> (use the tie-break list); if it also loses, both teams lose. If the resistance team gets there first, the game ends."
+          );
+        },
+      },
+      {
         h: "The hook: how you win and lose",
-        when: () => true,
+        when: (c) => !isVS(c),
         body: (c) => {
           const solo = players(c) === 1;
           return (
@@ -1166,6 +1466,16 @@ const MC = {};
         when: () => true,
         body: (c) => {
           const solo = players(c) === 1;
+          if (isVS(c)) {
+            return (
+              "Each round is <b>threaded</b>: the <b>registration team</b> plays its whole player phase — " +
+              (solo ? "your turn" : "both turns") +
+              ", then discard down, <b>draw up to hand size</b> and <b>ready</b> everything — then the <b>resistance team</b> does the same. Then the registration team plays its whole <b>villain phase</b>, then the resistance team." +
+              "<br><br>In your villain phase, threat goes on your main scheme, the enemy leader and your engaged minions activate against " +
+              (solo ? "you" : "each of you") +
+              ", and " + (solo ? "you're" : "each of you is") + " dealt an encounter card. While the other team plays, your side is quiet — watch their game so nobody misses an effect. Each team has its own first player token, passed at the end of its villain phase."
+            );
+          }
           return (
             "Every round has two halves. In the <b>player phase</b>, " +
             (solo
@@ -1230,7 +1540,9 @@ const MC = {};
         when: (c) => modeName(c) === "expert",
         body: (c) =>
           "We're playing <b>expert mode</b>: " +
-          (c && c.skirmish
+          (isVS(c)
+            ? "both leaders use their <b>stages III and IV</b>, and the <b>Expert encounter set</b> joins the Standard PvP set in each deck."
+            : c && c.skirmish
             ? "the <b>Expert encounter set</b> joins the standard set in the encounter deck — and with skirmish we still face only the one villain version we chose."
             : "the villain uses this scenario's <b>expert stages</b>, and the <b>Expert encounter set</b> joins the standard set in the encounter deck.") +
           " Same rules — a greater challenge.",
@@ -1268,8 +1580,25 @@ const MC = {};
           " the <b>'Pool</b> aspect, so <b>Crisis of Infinite Deadpools</b> is included in the encounter deck. It's only added when someone picks 'Pool as their aspect — not when an ability just lets a deck borrow a few 'Pool cards.",
       },
       {
+        h: "Competitive twists",
+        when: (c) => isVS(c),
+        body: (c) => {
+          const n = players(c);
+          return ul([
+            "<b>Choosing Sides</b> sits in your game area from the start: while it's there, <b>the enemy leader can't take more than 2 damage from each attack</b>. Thwart it away and the enemy team deals each of you an encounter card of their choice from the top 5 — then it flips to <b>Now It's Personal</b>: remove it and " +
+              (n === 1 ? "you add" : "each of you adds") + " two of <b>your leader's four special cards</b> to your hand.",
+            "“<b>The enemy team</b>” on a card means the other team — they make that card's choices, like which encounter card you're dealt.",
+            "Your attacks and abilities hit <b>enemies</b> — the leader you fight and the minions on your side — never the other team's heroes or allies.",
+            "Some cards make one leader attack the other (Whatever It Takes, or your leader's own cards): the attacker takes a boost card from its own encounter deck, the defending team's first player flips it, guard is ignored and nobody can defend.",
+            "“<b>Per player</b>” and “each player” only count your own team — that's why the enemy leader has " + n + "× hit points.",
+            "You can't play a hero who shares your own leader's name, and uniqueness only counts your own team's cards and leader.",
+            "Dealt two encounter cards? Reveal them <b>in the order they were dealt</b> — the other team can set up combos.",
+          ]);
+        },
+      },
+      {
         h: "Playing as a team",
-        when: (c) => players(c) > 1,
+        when: (c) => players(c) > 1 && !isVS(c),
         body: (c) => {
           const n = players(c);
           return (

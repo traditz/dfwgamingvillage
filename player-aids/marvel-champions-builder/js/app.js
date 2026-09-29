@@ -38,7 +38,20 @@
   const store = loadStore();
   store.edits = store.edits || {};
   store.night = store.night || { seats: [], scn: null };
+  // Game Night competitive (VS) mode: one hero list and one leader scenario per side; `add` = the team the hero grid fills
+  store.night.vs = Object.assign({ on: false, add: 'registration', registration: [], resistance: [], scn: {} }, store.night.vs || {});
   store.enc = store.enc || {};
+  // A leader's 4 basic cards are competitive-only (Civil War rulebook p.3). The first release still treated them as
+  // deck cards, so Rebuild could use them as filler: drop them from saved edits and say so once the page is up.
+  let strippedLeaderCards = 0;
+  const dropLeaderCards = edits => {
+    for (const d of Object.values(edits || {})) {
+      if (!d || !d.cards) continue;
+      for (const code of Object.keys(d.cards)) if (C[code] && C[code].ld) { strippedLeaderCards += d.cards[code] || 0; delete d.cards[code]; }
+    }
+  };
+  dropLeaderCards(store.edits);
+  if (strippedLeaderCards) saveStore();
 
   // ------------------------------------------------------------ weights
   const weightCache = {};
@@ -162,7 +175,7 @@
       if (L.off) { off += q; offTitles++; }
       if (c.u) uniques.push(code);
       const free = freeFor(code, h.id);
-      if (q > free) {
+      if (c.q != null && q > free) {
         const others = Object.entries(usage().by[code] || {}).filter(([id]) => id !== h.id).map(([id, n]) => `${HERO[id].name} ×${n}`);
         issues.push({ lvl: 'warn', code, t: `${c.n}: the collection has ${c.q}, ${others.length ? 'also in ' + others.join(', ') : ''}.` });
       }
@@ -395,6 +408,7 @@
       a.setAttribute('aria-selected', on ? 'true' : 'false');
     });
   }
+  setTimeout(() => { if (strippedLeaderCards) toast(`Removed ${strippedLeaderCards} competitive-only leader card${strippedLeaderCards > 1 ? 's' : ''} from your edited decks — use Rebuild to refill them`); }, 600);
   function render(scrollTop) {
     const r = parseHash();
     state.view = r.view; state.id = r.id; state.params = r.params;
@@ -769,7 +783,7 @@
       ${url ? `<img src="${url}" alt="${esc(c.n)}" onerror="this.remove()">` : ''}
       <div class="ctext-card"><div class="ct-h">${esc(c.n)}${c.s ? ' — ' + esc(c.s) : ''}</div>
       <div class="dim" style="color:#555">${esc(TYPE_ONE[c.t] || c.t)} · ${esc(ANAME[c.f] || c.f)}${c.c != null ? ' · cost ' + c.c : ''}${c.tr ? ' · ' + esc(c.tr) : ''}</div>
-      <p>${esc(c.x || '')}</p>${c.q != null ? `<p style="margin:0"><b>Owned:</b> ${c.q} · <b>In decks:</b> ${inDecks.length ? esc(inDecks.join(', ')) : 'none'}</p>` : ''}</div></div>`;
+      <p>${esc(c.x || '')}</p>${c.ld ? `<p style="margin:0 0 6px"><b>Competitive mode only:</b> a leader card, set aside at setup and earned by clearing Choosing Sides (${c.p === 'synthezoid' ? 'Synthezoid Smackdown rulebook p.3, 15' : 'Civil War rulebook p.3, 16'}).</p>` : ''}${c.q != null ? `<p style="margin:0"><b>Owned:</b> ${c.q} · <b>In decks:</b> ${inDecks.length ? esc(inDecks.join(', ')) : 'none'}</p>` : ''}</div></div>`;
     sheet.hidden = false; document.body.appendChild(scrim);
     const close = () => { sheet.hidden = true; scrim.remove(); };
     scrim.addEventListener('click', close); sheet.querySelector('.close').addEventListener('click', close);
@@ -792,6 +806,33 @@
   function msById(id) { return ENC ? (ENC.interchangeableMainSchemes || []).find(m => m.id === id) : null; }
   function setInfo(id) { return (ENC && ENC.sets[id]) || { name: id, cards: 0, enc: 0, comp: {} }; }
   function setImg(id) { const s = setInfo(id); return s.img ? s.img : null; }
+  // ---- leaders & competitive (VS) mode — Civil War rulebook pp.3-6, 14-17, 20
+  const leaderTitle = s => String(s.villain || s.name).replace(/\s*\(leader\)$/i, '');
+  const foeSide = side => (side === 'registration' ? 'resistance' : 'registration');
+  const sideName = side => side.charAt(0).toUpperCase() + side.slice(1);
+  function vsSide(s) { return s && s.side && ENC && ENC.vs ? ENC.vs.sides[s.side] || null : null; }
+  function leaderSchemes(s, e) {      // a leader scenario's chosen stage 1 and stage 2 main schemes
+    const sd = vsSide(s);
+    if (!sd) return null;
+    const pre = s.vsSchemes || [];
+    return {
+      ms1: sd.stage1.find(x => x.code === e.ms1) || sd.stage1.find(x => x.code === pre[0]) || sd.stage1[0],
+      ms2: sd.stage2.find(x => x.code === e.ms2) || sd.stage2.find(x => x.code === pre[1]) || sd.stage2[0],
+    };
+  }
+  function mainSchemeList(s, e) {
+    const ls = leaderSchemes(s, e);
+    if (ls) return [ls.ms1.name + ' (stage 1)', ls.ms2.name + ' (stage 2)'];
+    const ms = schemeOf(s, e);
+    return (s.mainSchemeDeck || []).length ? s.mainSchemeDeck : (ms ? ms.mainSchemeDeck || [] : []);
+  }
+  // Setup-page link for this leader scenario in VS mode (the other side keeps the setup page's default)
+  function vsSetupHref(s, e) {
+    const k = s.side === 'registration' ? 'reg' : 'res';
+    const p = new URLSearchParams({ vs: '1', t: String(e.players), m: e.mode });
+    p.set(k, s.id); p.set(k + 'm', e.mods.join(',')); p.set(k + 's', [e.ms1 || '', e.ms2 || ''].join(','));
+    return '../marvel-champions-setup/#' + p.toString();
+  }
   const NOT_ENC = ['villain', 'main_scheme', 'leader', 'event', 'upgrade', 'resource', 'support', 'ally', 'player_side_scheme'];
   function yearOf(product) { return String((PACK[product] || {}).date || '').slice(0, 4); }
   function villainTile(s) {
@@ -830,7 +871,7 @@
     app.innerHTML = `
       <section class="panel" style="margin-bottom:18px">
         <h2 class="h-sec">Choose your villain <small>${ENC.scenarios.length} scenarios · ${ENC.modularOrder.length} modular sets</small></h2>
-        <p class="explain">Pick a scenario to see its villain deck, main schemes and recommended modular sets from the official insert, then tune the encounter deck: expert, standard/expert set variants, heroic level, and extra or random modulars. Tiles show the first villain stage's hit points (×P = per player). Can't decide? Roll the dice.</p>
+        <p class="explain">Pick a scenario to see its villain deck, main schemes and recommended modular sets from the official insert, then tune the encounter deck: expert, standard/expert set variants, heroic level, and extra or random modulars. Tiles show the first villain stage's hit points (×P = per player). Can't decide? Roll the dice. <b>Competitive (VS):</b> the Civil War and Synthezoid Smackdown leaders can also be played registration vs. resistance, 1v1 or 2v2 — open a leader and switch to VS, or use Game Night's VS mode.</p>
         <div class="toolbar">
           <input class="input search" id="vilQ" type="search" placeholder="Search villains, boxes, campaigns…" value="${esc(state.vilQ)}" aria-label="Search villains">
           <select class="select" id="vilProd" aria-label="Box"><option value="all">All boxes</option>${prods.map(p => `<option value="${p}" ${state.vilProd === p ? 'selected' : ''}>${esc(packName(p))}</option>`).join('')}</select>
@@ -894,7 +935,8 @@
     const ms = (s.mainSchemeOptions || []).length ? msById(s.mainSchemeOptions[0]) : null;
     const mods = (s.recommendedModulars || []).concat(ms ? (ms.recommendedModulars || []) : []);
     return { mode: 'standard', std: s.standardSet || null, exp: s.expertSet || null,
-      heroic: 0, skirmish: false, players: 2, mods: Array.from(new Set(mods)), ms: ms ? ms.id : null };
+      heroic: 0, skirmish: false, players: 2, mods: Array.from(new Set(mods)), ms: ms ? ms.id : null,
+      vs: false, ms1: (s.vsSchemes || [])[0] || null, ms2: (s.vsSchemes || [])[1] || null };
   }
   function encState(s, params) {
     const base = Object.assign(encDefaults(s), store.enc[s.id] || {});
@@ -903,6 +945,13 @@
     if (params && params.has('h')) base.heroic = Math.max(0, Math.min(5, +params.get('h') || 0));
     if (params && params.has('mods')) base.mods = params.get('mods').split(',').filter(x => ENC.sets[x]);
     if (params && params.has('ms') && msById(params.get('ms'))) base.ms = params.get('ms');
+    if (params && s.side) {
+      if (params.has('vs')) base.vs = params.get('vs') === '1';
+      if (params.get('ms1')) base.ms1 = params.get('ms1');
+      if (params.get('ms2')) base.ms2 = params.get('ms2');
+    }
+    if (!s.side) base.vs = false;
+    if (base.vs) { base.players = Math.max(1, Math.min(2, base.players)); base.heroic = 0; base.skirmish = false; }
     return base;
   }
   function saveEnc(s, e) { store.enc[s.id] = e; saveStore(); }
@@ -922,7 +971,8 @@
     for (const id of fixed) if (!req.includes(id)) add(id, 'Scenario');
     for (const id of req) add(id, 'Required');
     for (const id of e.mods) add(id, rec.includes(id) ? 'Recommended' : 'Modular');
-    if (e.std) add(e.std, 'Standard');
+    const std = e.vs && s.side && ENC.vs ? ENC.vs.pvpSet : e.std;     // competitive: Standard PvP replaces Standard (CW p.4, 14)
+    if (std) add(std, 'Standard');
     if (e.mode === 'expert' && e.exp) add(e.exp, 'Expert');
     const obl = s.noObligations ? 0 : e.players;
     const total = rows.reduce((t, r) => t + (r.n || 0), 0) + obl;
@@ -931,20 +981,33 @@
   function stageToken(name) { const m = String(name).match(/\(([^)]+)\)\s*$/); return m ? m[1] : null; }
   function leaderBuildHtml(s) {
     const L = ENC && ENC.leaderCustomization;
-    if (!L) return '';
-    let side = null, pool = null;
-    for (const [name, sd] of Object.entries(L.sides || {})) {
-      if ((sd.leaders || []).includes(s.id)) { side = name; pool = sd; }
-      else if (sd.synthezoidSmackdown && sd.synthezoidSmackdown.leader === s.id) { side = name; pool = sd.synthezoidSmackdown; }
-    }
-    const list = ids => (ids || []).map(id => esc(setInfo(id).name || id)).join(', ');
+    const sd = vsSide(s);
+    if (!L || !sd) return '';
+    const note = Object.values(L.sides || {}).map(x => x.synthezoidSmackdown && x.synthezoidSmackdown.note).find(Boolean);
+    const ss = x => (x === 'synthezoid' ? ' (Synthezoid)' : '');
     return `<h4 class="h-sec" style="font-size:16px;margin-top:14px">Custom leader build</h4>
       <ol class="ul">${(L.steps || []).map(x => `<li>${esc(x)}</li>`).join('')}</ol>
-      ${pool ? `<dl class="kv" style="margin-top:8px"><dt>Side</dt><dd>${esc(side.replace(/^./, c => c.toUpperCase()))}</dd>
-        ${pool.modulars ? `<dt>Side modulars</dt><dd>${list(pool.modulars)}</dd>` : ''}
-        ${pool.stage1 ? `<dt>Stage 1 schemes</dt><dd>${esc(pool.stage1.join(', '))}</dd>` : ''}
-        ${pool.stage2 ? `<dt>Stage 2 schemes</dt><dd>${esc(pool.stage2.join(', '))}</dd>` : ''}</dl>
-        ${pool.note ? `<p class="explain">${esc(pool.note)}</p>` : ''}` : ''}`;
+      <dl class="kv" style="margin-top:8px"><dt>Side</dt><dd>${esc(sideName(s.side))} — leaders ${esc(sd.leaders.map(id => leaderTitle(scnById(id))).join(', '))}</dd>
+        <dt>Side modulars</dt><dd>${esc(sd.modulars.map(id => setInfo(id).name + ss(setInfo(id).product)).join(', '))}</dd>
+        <dt>Stage 1 schemes</dt><dd>${esc(sd.stage1.map(x => x.name + ss(x.product)).join(', '))}</dd>
+        <dt>Stage 2 schemes</dt><dd>${esc(sd.stage2.map(x => x.name + ss(x.product)).join(', '))}</dd></dl>
+      ${note ? `<p class="explain">${esc(note)}</p>` : ''}`;
+  }
+  function vsBoxHtml(s, e) {
+    const n = e.players, L = leaderTitle(s);
+    const cards = (s.vsCards || []).map(x => `<div class="vs-card" data-card="${esc(x.code)}" tabindex="0" role="button" aria-label="${esc(x.name)}">${imgUrl(x.code) ? `<img src="${imgUrl(x.code)}" alt="" loading="lazy" onerror="this.remove()">` : ''}<span>${esc(x.name)}</span></div>`).join('');
+    return `<section class="panel vs-box ${esc(s.side)}">
+      <h3 class="h-sec">Competitive (VS) <small>${n === 1 ? '1v1' : '2v2'} · ${esc(sideName(s.side))}</small></h3>
+      <ul class="ul">
+        <li>The <b>${esc(s.side)}</b> team builds this scenario; the <b>${foeSide(s.side)}</b> team fights ${esc(L)} in its own game area — and you fight the leader they built.</li>
+        <li>No ${esc(L)} hero on the ${esc(s.side)} team; uniqueness only applies within a team.</li>
+        <li><b>Choosing Sides</b> (Standard PvP) starts in the ${foeSide(s.side)} team's game area with ${4 * n} threat; until it's cleared, ${esc(L)} can't take more than 2 damage from each attack.</li>
+      </ul>
+      <h4 class="h-sec" style="font-size:16px;margin-top:12px">${esc(L)}'s basic cards <small>set aside at setup</small></h4>
+      <div class="vs-cards">${cards}</div>
+      <p class="explain">When the ${esc(s.side)} team clears the Choosing Sides in its own game area, it flips to Now It's Personal: its Action lets each player on the team add 2 of these cards to their hand, and they stay in that player's deck for the rest of the game. (Civil War rulebook p.16)</p>
+      <div class="actions"><a class="btn small red" href="${vsSetupHref(s, e)}">Competitive setup, step by step ↗</a></div>
+    </section>`;
   }
   function renderVillain(id, params) {
     const s = scnById(id);
@@ -965,13 +1028,23 @@
     const rec = (s.recommendedModulars || []).concat(ms ? (ms.recommendedModulars || []) : []);
     const top = Array.from(new Set(e.mods.concat(rec)));
     const topGrid = top.map(mid => modTile(mid, e.mods.includes(mid), rec.includes(mid))).join('');
+    const sd = vsSide(s), ls = leaderSchemes(s, e);
+    const browse = e.vs && sd ? sd.modulars : ENC.modularOrder;     // competitive: only this side's sets (CW p.5)
     const mf = (state.modFilter || '').toLowerCase();
-    const allGrid = ENC.modularOrder.filter(mid => !top.includes(mid) && (!mf || (setInfo(mid).name + ' ' + packName(setInfo(mid).product)).toLowerCase().includes(mf)))
+    const allGrid = browse.filter(mid => !top.includes(mid) && (!mf || (setInfo(mid).name + ' ' + packName(setInfo(mid).product)).toLowerCase().includes(mf)))
       .map(mid => modTile(mid, false, false)).join('');
+    let leaderNote = '';
+    if (sd) {
+      const own = e.mods.filter(m => sd.modulars.includes(m)), other = e.mods.filter(m => !sd.modulars.includes(m));
+      const wrongSide = e.mods.filter(m => ENC.vs.sides[foeSide(s.side)].modulars.includes(m));
+      if (wrongSide.length) leaderNote = `<p class="note red" style="margin:0 0 10px">You can't mix registration and resistance modular sets — remove ${esc(wrongSide.map(m => setInfo(m).name).join(', '))}. (Civil War rulebook p.4)</p>`;
+      else if (e.vs && other.length) leaderNote = `<p class="note red" style="margin:0 0 10px">Competitive mode only allows ${esc(s.side)} modular sets — remove ${esc(other.map(m => setInfo(m).name).join(', '))}. (Civil War rulebook p.4–5)</p>`;
+      else if (own.length < 3 || own.length > 4) leaderNote = `<p class="note ${e.vs ? 'red' : ''}" style="margin:0 0 10px">A custom leader scenario uses <b>3–4 ${esc(s.side)} modular sets</b> (${own.length} chosen)${e.vs ? '' : '; co-op games may also add sets from other products'}. (Civil War rulebook p.4–5)</p>`;
+    }
     const setupNotes = (s.setupNotes || []).concat(ms ? (ms.setupNotes || []) : []);
     const special = (s.specialRules || []).concat(ms ? (ms.specialRules || []) : []);
-    const mainSchemes = (s.mainSchemeDeck || []).length ? s.mainSchemeDeck : (ms ? ms.mainSchemeDeck || [] : []);
-    const rulesHref = `../marvel-champions-setup/#scn=${encodeURIComponent(s.id)}&m=${e.mode}&p=${e.players}&h=${e.heroic}${e.skirmish ? '&sk=1' : ''}&mods=${e.mods.join(',')}&std=${e.std || ''}&exp=${e.exp || ''}`;
+    const mainSchemes = mainSchemeList(s, e);
+    const rulesHref = e.vs ? vsSetupHref(s, e) : `../marvel-champions-setup/#scn=${encodeURIComponent(s.id)}&m=${e.mode}&p=${e.players}&h=${e.heroic}${e.skirmish ? '&sk=1' : ''}&mods=${e.mods.join(',')}&std=${e.std || ''}&exp=${e.exp || ''}${ls ? `&lms=${ls.ms1.code},${ls.ms2.code}` : ''}`;
     app.innerHTML = `
       <div class="back-row">
         <a class="btn small ghost" href="#villains">← All villains</a><span class="spacer"></span>
@@ -983,7 +1056,7 @@
         <div class="b-in">
           <h2>${esc(s.name)}</h2>
           <p class="b-sub">${esc(s.productName)}${s.campaign ? ' · ' + esc(s.campaign) + (s.campaignOrder ? ' campaign #' + s.campaignOrder : ' campaign') : ''}</p>
-          <div class="row">${s.format !== 'standard' ? `<span class="pill a-encounter">${esc(formatName(s.format))}</span>` : ''}<span class="pill" style="background:var(--gold)">${deck.approx ? '≈' : ''}${deck.total} encounter cards</span></div>
+          <div class="row">${s.format !== 'standard' ? `<span class="pill a-encounter">${esc(formatName(s.format))}</span>` : ''}${e.vs ? `<span class="pill vs-pill">VS · ${e.players === 1 ? '1v1' : '2v2'}</span>` : ''}<span class="pill" style="background:var(--gold)">${deck.approx ? '≈' : ''}${deck.total} encounter cards</span></div>
         </div>
       </section>
       <div class="enc-grid">
@@ -1003,17 +1076,23 @@
           </section>
           <section class="panel">
             <h3 class="h-sec">Tune the encounter</h3>
+            ${sd ? `<div class="row" style="margin-bottom:10px"><div class="seg" role="group" aria-label="Game"><button data-vs="0" class="${e.vs ? '' : 'on'}">Co-op</button><button data-vs="1" class="${e.vs ? 'on' : ''}">VS · competitive</button></div><span class="dim">${e.vs ? 'Your team builds this scenario; the other team plays against it.' : 'Or play it competitively: two teams trade scenarios (Civil War rulebook p.14).'}</span></div>` : ''}
             <div class="row" style="margin-bottom:10px">
               <div class="seg" role="group" aria-label="Mode"><button data-mode="standard" class="${e.mode === 'standard' ? 'on' : ''}">Standard</button><button data-mode="expert" class="${e.mode === 'expert' ? 'on' : ''}">Expert</button></div>
-              <div class="seg" role="group" aria-label="Players">${[1, 2, 3, 4].map(n => `<button data-players="${n}" class="${e.players === n ? 'on' : ''}">${n}P</button>`).join('')}</div>
+              <div class="seg" role="group" aria-label="${e.vs ? 'Team size' : 'Players'}">${(e.vs ? [1, 2] : [1, 2, 3, 4]).map(n => `<button data-players="${n}" class="${e.players === n ? 'on' : ''}">${e.vs ? (n === 1 ? '1v1' : '2v2') : n + 'P'}</button>`).join('')}</div>
             </div>
+            ${ls ? `<div class="row" style="margin-bottom:10px">
+              <label class="muted" for="ms1Sel">Stage 1</label><select class="select" id="ms1Sel">${sd.stage1.map(x => `<option value="${esc(x.code)}" ${x.code === ls.ms1.code ? 'selected' : ''}>${esc(x.name)}${x.product === 'synthezoid' ? ' (Synthezoid)' : ''}</option>`).join('')}</select>
+              <label class="muted" for="ms2Sel">Stage 2</label><select class="select" id="ms2Sel">${sd.stage2.map(x => `<option value="${esc(x.code)}" ${x.code === ls.ms2.code ? 'selected' : ''}>${esc(x.name)}${x.product === 'synthezoid' ? ' (Synthezoid)' : ''}</option>`).join('')}</select>
+            </div>
+            <p class="explain" style="margin:-4px 0 10px"><b>${esc(ls.ms1.name)}:</b> ${esc(ls.ms1.text)}<br><b>${esc(ls.ms2.name)}:</b> ${esc(ls.ms2.text)}</p>` : ''}
             <div class="row" style="margin-bottom:10px">
               <label class="muted" for="stdSel">Standard set</label>
-              <select class="select" id="stdSel"><option value="">None</option>${(ENC.standardSets || []).map(x => `<option value="${x.id}" ${e.std === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select>
+              <select class="select" id="stdSel" ${e.vs ? 'disabled title="Competitive mode uses the Standard PvP set"' : ''}>${e.vs ? '<option>Standard PvP</option>' : `<option value="">None</option>${(ENC.standardSets || []).filter(x => x.id !== (ENC.vs && ENC.vs.pvpSet)).map(x => `<option value="${x.id}" ${e.std === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}`}</select>
               <label class="muted" for="expSel">Expert set</label>
               <select class="select" id="expSel" ${e.mode !== 'expert' ? 'disabled' : ''}><option value="">None</option>${(ENC.expertSets || []).map(x => `<option value="${x.id}" ${e.exp === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select>
             </div>
-            <div class="row" style="margin-bottom:12px">
+            <div class="row" style="margin-bottom:12px" ${e.vs ? 'hidden' : ''}>
               <label class="muted" for="heroicSel">Heroic level</label>
               <select class="select" id="heroicSel">${[0, 1, 2, 3, 4, 5].map(n => `<option value="${n}" ${e.heroic === n ? 'selected' : ''}>${n ? 'Heroic ' + n : 'Off'}</option>`).join('')}</select>
               <label class="row" style="gap:6px"><input type="checkbox" id="skirm" ${e.skirmish ? 'checked' : ''}> Skirmish (one villain version)</label>
@@ -1021,13 +1100,14 @@
             <h4 class="h-sec" style="font-size:17px">Modular sets <small>${e.mods.length} chosen</small></h4>
             <div class="row" style="margin-bottom:10px">
               <button class="btn small ghost" id="recBtn">Recommended</button>
-              <button class="btn small ghost" id="rand1">🎲 Random 1</button>
-              <button class="btn small ghost" id="rand2">🎲 Random 2</button>
+              ${sd ? `<button class="btn small ghost" id="randBuild" title="3-4 random ${esc(s.side)} sets and random main schemes (Civil War rulebook p.5)">🎲 Random build</button>` : `<button class="btn small ghost" id="rand1">🎲 Random 1</button>
+              <button class="btn small ghost" id="rand2">🎲 Random 2</button>`}
               <button class="btn small ghost" id="clrBtn">Clear</button>
             </div>
+            ${leaderNote}
             ${s.modularChoice ? `<p class="note" style="margin:0 0 10px">This scenario picks modular sets by rule: choose ${esc(String(s.modularChoice.count || ''))} — ${esc(s.modularChoice.from || '')}.</p>` : ''}
             <div class="m-grid" id="modGrid">${topGrid || '<p class="muted">No modular sets chosen.</p>'}</div>
-            <details class="pack" id="modBrowse" style="margin-top:12px" ${state.modBrowse ? 'open' : ''}><summary>Browse all modular sets<small>${ENC.modularOrder.length} sets</small></summary>
+            <details class="pack" id="modBrowse" style="margin-top:12px" ${state.modBrowse ? 'open' : ''}><summary>${e.vs && sd ? 'Browse the ' + esc(s.side) + ' modular sets' : 'Browse all modular sets'}<small>${browse.length} sets</small></summary>
               <div class="pbody"><input class="input search" id="modQ" type="search" placeholder="Filter by name or box…" value="${esc(state.modFilter || '')}" style="width:100%;margin-bottom:10px">
               <div class="m-grid small" id="modAll">${allGrid || '<p class="muted">No sets match.</p>'}</div></div></details>
           </section>
@@ -1036,7 +1116,7 @@
           <section class="panel">
             <h3 class="h-sec">Encounter deck</h3>
             <div class="setlist">${deck.rows.map(r => `<div class="setrow">${setImg(r.id) ? `<img src="${setImg(r.id)}" alt="">` : '<span></span>'}<div><b>${esc(r.name)} <span class="tag ${r.tag === 'Required' || r.tag === 'Scenario' ? 'req' : r.tag === 'Recommended' ? 'rec' : 'opt'}">${esc(r.tag)}</span></b><span>${esc(compText(r.comp, true))}</span></div><span class="cnt">${r.approx ? '≈' : ''}${r.n}</span></div>`).join('')}
-              <div class="setrow"><span></span><div><b>Hero obligations</b><span>${s.noObligations ? 'not used in this scenario' : '1 per player'}</span></div><span class="cnt">${deck.obl}</span></div></div>
+              <div class="setrow"><span></span><div><b>Hero obligations</b><span>${s.noObligations ? 'not used in this scenario' : e.vs ? '1 per player on the team facing this scenario' : '1 per player'}</span></div><span class="cnt">${deck.obl}</span></div></div>
             <div class="total-bar"><span class="muted">${/deck separately|decks separately|own encounter deck/i.test(setupNotes.join(' ')) ? 'Encounter cards (in separate villain decks)' : 'Encounter deck at setup'}</span><b>${deck.approx ? '≈' : ''}${deck.total} cards</b></div>
             <p class="explain">Villain stages and main schemes are separate decks and aren't counted; some cards are put into play during setup.${expStages.length && e.mode !== 'expert' ? ' Expert villain deck: ' + esc(expStages.join(' → ')) + '.' : ''}</p>
             <div class="actions" style="margin-top:12px">
@@ -1046,8 +1126,10 @@
               <button class="btn small ghost" id="linkEnc">🔗 Share link</button>
             </div>
           </section>
+          ${e.vs && sd ? vsBoxHtml(s, e) : ''}
         </div>
       </div>`;
+    const vb = $('.vs-box'); if (vb) { bindCardRows(vb); $$('.vs-card', vb).forEach(el => el.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openSheet(el.dataset.card); } })); }
     const upd = patch => { Object.assign(e, patch); saveEnc(s, e); const y = window.scrollY; renderVillain(s.id); window.scrollTo(0, y); };
     $$('[data-mode]').forEach(b => b.addEventListener('click', () => upd({ mode: b.dataset.mode })));
     $$('[data-players]').forEach(b => b.addEventListener('click', () => upd({ players: +b.dataset.players })));
@@ -1071,8 +1153,18 @@
       while (out.length < n && pool.length) out.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
       return out;
     };
-    $('#rand1').addEventListener('click', () => { upd({ mods: randomMods(1) }); toast('Random modular chosen'); });
-    $('#rand2').addEventListener('click', () => { upd({ mods: randomMods(2) }); toast('Two random modulars chosen'); });
+    const r1 = $('#rand1'); if (r1) r1.addEventListener('click', () => { upd({ mods: randomMods(1) }); toast('Random modular chosen'); });
+    const r2 = $('#rand2'); if (r2) r2.addEventListener('click', () => { upd({ mods: randomMods(2) }); toast('Two random modulars chosen'); });
+    $$('[data-vs]').forEach(b => b.addEventListener('click', () => { const on = b.dataset.vs === '1'; upd({ vs: on, players: on ? Math.min(2, e.players) : e.players }); }));
+    const m1 = $('#ms1Sel'); if (m1) m1.addEventListener('change', ev => upd({ ms1: ev.target.value }));
+    const m2 = $('#ms2Sel'); if (m2) m2.addEventListener('change', ev => upd({ ms2: ev.target.value }));
+    const rb = $('#randBuild'); if (rb) rb.addEventListener('click', () => {
+      // Random scenario creation (Civil War rulebook p.5): 3-4 of the side's modular sets and both main scheme stages at random
+      const pool = sd.modulars.slice(), mods = [], n = 3 + Math.floor(Math.random() * 2);
+      while (mods.length < n && pool.length) mods.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+      const pick = a => a[Math.floor(Math.random() * a.length)].code;
+      upd({ mods, ms1: pick(sd.stage1), ms2: pick(sd.stage2) }); toast('Random ' + s.side + ' build');
+    });
     $$('#modGrid [data-mod], #modAll [data-mod]').forEach(b => b.addEventListener('click', () => {
       const m = b.dataset.mod;
       const mods = e.mods.includes(m) ? e.mods.filter(x => x !== m) : e.mods.concat(m);
@@ -1080,23 +1172,31 @@
     }));
     const mb = $('#modBrowse'); mb.addEventListener('toggle', () => { state.modBrowse = mb.open; });
     const mq = $('#modQ'); mq.addEventListener('input', () => { state.modFilter = mq.value; const pos = mq.selectionStart; const y = window.scrollY; renderVillain(s.id); window.scrollTo(0, y); const n = $('#modQ'); n.focus(); n.setSelectionRange(pos, pos); });
-    $('#toNight').addEventListener('click', () => { store.night.scn = { id: s.id, enc: e }; saveStore(); go('night'); });
+    $('#toNight').addEventListener('click', () => {
+      if (e.vs && s.side) { const V = store.night.vs; saveEnc(s, e); V.on = true; V.scn[s.side] = { id: s.id }; saveStore(); go('night'); return; }
+      store.night.vs.on = false; store.night.scn = { id: s.id, enc: e }; saveStore(); go('night');
+    });
     $('#copyEnc').addEventListener('click', () => copyText(encText(s, e), 'Encounter list copied'));
-    $('#linkEnc').addEventListener('click', () => copyText(location.origin + location.pathname + `#villain/${s.id}?m=${e.mode}&p=${e.players}&h=${e.heroic}&mods=${e.mods.join(',')}${e.ms ? '&ms=' + e.ms : ''}`, 'Link copied'));
+    $('#linkEnc').addEventListener('click', () => copyText(location.origin + location.pathname + `#villain/${s.id}?m=${e.mode}&p=${e.players}&h=${e.heroic}&mods=${e.mods.join(',')}${e.ms ? '&ms=' + e.ms : ''}${s.side ? `&vs=${e.vs ? 1 : 0}&ms1=${e.ms1 || ''}&ms2=${e.ms2 || ''}` : ''}`, 'Link copied'));
   }
   function encText(s, e) {
     const deck = encounterDeck(s, e);
     const ms = schemeOf(s, e);
     const L = [];
-    L.push(`${s.name}${ms ? ' — ' + ms.name : ''} — ${e.mode === 'expert' ? 'Expert' : 'Standard'}${e.heroic ? ' · Heroic ' + e.heroic : ''}${e.skirmish ? ' · Skirmish' : ''} · ${e.players} player${e.players > 1 ? 's' : ''}`);
+    L.push(`${s.name}${ms ? ' — ' + ms.name : ''} — ${e.mode === 'expert' ? 'Expert' : 'Standard'}${e.heroic ? ' · Heroic ' + e.heroic : ''}${e.skirmish ? ' · Skirmish' : ''} · ${e.vs ? 'Competitive (VS) ' + (e.players === 1 ? '1v1' : '2v2') : e.players + ' player' + (e.players > 1 ? 's' : '')}`);
     L.push(`${s.productName}${s.campaign ? ' (' + s.campaign + (s.campaignOrder ? ' #' + s.campaignOrder : '') + ')' : ''}`);
     L.push('');
     L.push(`Villain deck: ${((s.villainDeck || {})[e.mode] || []).join(', ')}`);
-    L.push(`Main scheme deck: ${((s.mainSchemeDeck || []).length ? s.mainSchemeDeck : (ms ? ms.mainSchemeDeck || [] : [])).join(', ')}`);
+    L.push(`Main scheme deck: ${mainSchemeList(s, e).join(', ')}`);
     L.push('');
     L.push(`Encounter deck (${deck.approx ? '≈' : ''}${deck.total} cards):`);
     for (const r of deck.rows) L.push(`  • ${r.name} (${r.tag}) — ${r.approx ? '≈' : ''}${r.n} cards`);
-    L.push(s.noObligations ? '  • (no hero obligations in this scenario)' : `  • Each hero's obligation — ${e.players}`);
+    L.push(s.noObligations ? '  • (no hero obligations in this scenario)' : `  • Each hero's obligation — ${e.players}${e.vs ? ' (the team facing this scenario)' : ''}`);
+    if (e.vs && s.side) {
+      L.push('');
+      L.push(`Competitive (VS): the ${sideName(s.side)} team builds this scenario; the ${foeSide(s.side)} team plays against it. No ${leaderTitle(s)} hero on the ${s.side} team.`);
+      L.push(`Set aside ${leaderTitle(s)}'s basic cards (earned via Choosing Sides): ${(s.vsCards || []).map(x => x.name).join(', ')}`);
+    }
     const setupNotes = (s.setupNotes || []).concat(ms ? (ms.setupNotes || []) : []);
     const special = (s.specialRules || []).concat(ms ? (ms.specialRules || []) : []);
     if (setupNotes.length) { L.push(''); L.push('Setup:'); setupNotes.forEach(x => L.push('  • ' + x)); }
@@ -1105,7 +1205,189 @@
   }
 
   // ========================================================= GAME NIGHT TAB
+  // ------------------------------------------------ Game Night: competitive (VS)
+  const nightModeSeg = on => `<div class="seg" role="group" aria-label="Game"><button data-nmode="coop" class="${on ? '' : 'on'}">Co-op</button><button data-nmode="vs" class="${on ? 'on' : ''}">VS · competitive</button></div>`;
+  function bindNightMode() {
+    $$('[data-nmode]').forEach(b => b.addEventListener('click', () => { store.night.vs.on = b.dataset.nmode === 'vs'; saveStore(); renderNight(); }));
+  }
+  function vsNightTeams() {
+    const V = store.night.vs;
+    const T = {};
+    for (const side of ['registration', 'resistance']) {
+      const leaders = ENC.scenarios.filter(x => x.side === side);
+      const saved = V.scn[side] && scnById(V.scn[side].id);
+      const sc = saved && saved.side === side ? saved : leaders[0];
+      const heroes = (V[side] || []).filter(id => HERO[id]).slice(0, 2);
+      // The leader's own page is the single source of truth (Tune ↔ Game Night). A build that was only ever tuned
+      // for co-op starts from the preconstructed sets, since co-op may hold sets that competitive mode bars.
+      const stored = store.enc[sc.id];
+      const e = encState(sc);
+      if (!stored || !stored.vs) e.mods = (sc.recommendedModulars || []).slice();
+      Object.assign(e, { vs: true, heroic: 0, skirmish: false, mode: V.mode === 'expert' ? 'expert' : 'standard' });
+      // The collection has one Expert and one Expert II set; Expert II may replace Expert (The Hood insert p.2).
+      e.exp = side === 'registration' ? 'expert' : 'expert_ii';
+      T[side] = { side, s: sc, e, heroes, leader: leaderTitle(sc) };
+    }
+    const n = Math.max(1, T.registration.heroes.length, T.resistance.heroes.length);
+    for (const t of Object.values(T)) t.e.players = n;
+    return T;
+  }
+  function vsNightIssues(T) {
+    const out = [];
+    const a = T.registration.heroes.length, b = T.resistance.heroes.length;
+    if (!a || !b) out.push('Seat at least one hero on each team.');
+    else if (a !== b) out.push(`Teams play 1v1 or 2v2 — this table is ${a} vs ${b}. (Civil War rulebook p.14)`);
+    for (const t of Object.values(T)) {
+      for (const id of t.heroes) {
+        if (HERO[id].name.toLowerCase() === t.leader.toLowerCase()) out.push(`${HERO[id].name} can't play on the ${t.side} team: players can't use an identity that shares a title with their own leader. (Civil War rulebook p.14)`);
+      }
+      if (t.heroes.length === 2) {
+        const [x, y] = t.heroes.map(id => HERO[id]);
+        if (matchesUnique({ n: x.name, ae: x.ae }, { n: y.name, ae: y.ae })) out.push(`${x.name} and ${y.name} match — teammates can't choose matching identities. (RR p.45)`);
+      }
+      for (const id of t.heroes) {
+        const h = HERO[id], d = deckOf(id);
+        const codes = h.sig.map(([code]) => code).concat(Object.keys(d.cards).filter(code => d.cards[code]));
+        const clash = Array.from(new Set(codes)).filter(code => C[code] && C[code].u && C[code].t !== 'hero' && C[code].t !== 'alter_ego' && matchesUnique(C[code], { n: t.leader }));
+        if (clash.length) out.push(`Heads-up: ${h.name}'s deck has ${clash.map(code => C[code].n + ' (' + (TYPE_ONE[C[code].t] || C[code].t).toLowerCase() + ')').join(', ')}, which matches the team's own ${t.leader} leader — the unique rule includes your leader, so it can't enter play while that leader is in play. (Civil War rulebook p.20, FAQ)`);
+      }
+      const pool = vsSide(t.s).modulars, own = t.e.mods.filter(m => pool.includes(m));
+      if (own.length !== t.e.mods.length) out.push(`${t.leader}'s deck has sets from outside the ${t.side} side — competitive mode only allows ${t.side} sets. (Civil War rulebook p.5)`);
+      else if (own.length < 3 || own.length > 4) out.push(`${t.leader}'s deck needs 3–4 ${t.side} modular sets (${own.length} chosen). (Civil War rulebook p.4)`);
+    }
+    return out;
+  }
+  function vsNightHref(T, n) {
+    const p = new URLSearchParams({ vs: '1', t: String(n), m: T.registration.e.mode });
+    for (const [k, t] of [['reg', T.registration], ['res', T.resistance]]) {
+      p.set(k, t.s.id); p.set(k + 'm', t.e.mods.join(',')); p.set(k + 's', [t.e.ms1 || '', t.e.ms2 || ''].join(','));
+    }
+    return '../marvel-champions-setup/#' + p.toString();
+  }
+  function vsNightSteps(T, n) {
+    const reg = T.registration, res = T.resistance;
+    const heroList = t => t.heroes.map(id => `${HERO[id].name} (${HERO[id].hp} HP)`).join(' & ') || '(no heroes yet)';
+    const area = (t, o) => {      // t's game area, facing o's scenario
+      const ls = leaderSchemes(o.s, o.e), deck = encounterDeck(o.s, o.e);
+      const st = ((o.s.stats && o.s.stats.stages) || []).find(x => x.name === ((o.s.villainDeck || {})[o.e.mode] || [])[0]);
+      const obl = t.heroes.map(id => C[HERO[id].ob] ? C[HERO[id].ob].n : '').filter(Boolean);
+      return `${sideName(t.side)} game area — fights ${st ? st.name : o.leader}${st && st.hp != null ? ` (${st.hp}×${n} = ${st.hp * n} HP)` : ''} · main schemes ${ls.ms1.name} → ${ls.ms2.name} · encounter deck: ${deck.rows.map(r => r.name).join(', ')}${obl.length ? ' + ' + obl.join(', ') : ''} — ${deck.approx ? 'about ' : ''}${deck.total} cards.`;
+    };
+    const setupOf = o => (o.s.setupNotes || []).filter(x => !/^Co-op:/i.test(x)).join(' ');
+    return [
+      `Registration: ${heroList(reg)} — led by ${reg.leader}. Resistance: ${heroList(res)} — led by ${res.leader}. Sit across the table; each half is a team's game area.`,
+      `Each team sets aside its leader's 4 basic cards: ${reg.leader} — ${(reg.s.vsCards || []).map(x => x.name).join(', ')}; ${res.leader} — ${(res.s.vsCards || []).map(x => x.name).join(', ')}.`,
+      `Trade scenarios: the registration team fights ${res.leader}, the resistance team fights ${reg.leader}.`,
+      'Each player: identity alter-ego side up, set hit points, set aside obligation and nemesis set, shuffle the deck. Each team takes its own first player token; the registration team goes first every round.',
+      area(reg, res),
+      area(res, reg),
+      `Setup in each area: the enemy team finds Choosing Sides and your team reveals it (${4 * n} threat; the enemy leader can't take more than 2 damage per attack while it's in play). Flip the main scheme to 1B${n > 1 ? ` (hinder: ${2 * n} threat)` : ''} and resolve its When Revealed${[reg, res].map(o => leaderSchemes(o.s, o.e).ms1).map(m => { const w = /When Revealed:\s*(.+?)(?:\s*If this stage is completed|$)/.exec(m.text || ''); return w ? ` (${m.name}: ${w[1]})` : ''; }).join('')}. Then each leader's setup: ${[setupOf(reg), setupOf(res)].filter(Boolean).join(' ') || '—'}`,
+      ...(reg.e.mode === 'expert' ? ['Expert: each leader uses stages III and IV and each deck adds an Expert set — the collection has one Expert and one Expert II set, and Expert II may replace Expert (The Hood insert p.2), so the registration deck takes Expert and the resistance deck Expert II.'] : []),
+      'Draw to alter-ego hand size and mulligan. Round: registration player phase → resistance player phase → registration villain phase → resistance villain phase.',
+    ];
+  }
+  function renderNightVs() {
+    const V = store.night.vs;
+    const T = vsNightTeams();
+    const n = Math.max(1, T.registration.heroes.length, T.resistance.heroes.length);
+    const found = vsNightIssues(T);
+    const issues = found.filter(x => !x.startsWith('Heads-up')), heads = found.filter(x => x.startsWith('Heads-up'));
+    const seated = T.registration.heroes.concat(T.resistance.heroes);
+    const teamPanel = t => {
+      const seats = [0, 1].map(i => {
+        const id = t.heroes[i];
+        if (!id) return `<div class="seat"><span style="width:90px;height:70px;border:2px dashed var(--line-2);border-radius:8px;display:block"></span><div class="empty">${i === 0 ? 'Seat 1' : 'Seat 2 (for 2v2)'} — pick a hero below</div><span></span></div>`;
+        const h = HERO[id], d = deckOf(id);
+        return `<div class="seat"><img src="images/heroes/${id}.webp" alt=""><div><b>${esc(h.name)}</b><div class="dim">${aeOf(h) ? esc(aeOf(h)) + ' · ' : ''}${optPills(d.opt)}</div></div>
+          <span class="seat-x row"><a class="btn small ghost" href="#hero/${id}">Deck</a><button class="iconbtn" data-vsunseat="${t.side}:${id}" aria-label="Remove ${esc(h.name)}">✕</button></span></div>`;
+      }).join('');
+      const deck = encounterDeck(t.s, t.e), ls = leaderSchemes(t.s, t.e);
+      const tune = `#villain/${t.s.id}?vs=1&p=${n}&m=${t.e.mode}&mods=${t.e.mods.join(',')}&ms1=${t.e.ms1 || ''}&ms2=${t.e.ms2 || ''}`;
+      return `<section class="panel vs-team-panel ${t.side}">
+        <h3 class="h-sec"><span class="vs-side">${sideName(t.side)} team</span> <small>${t.heroes.length}/2 heroes</small></h3>${seats}
+        <h4 class="h-sec" style="font-size:16px;margin-top:14px">Leader &amp; scenario <small>the ${foeSide(t.side)} team plays it</small></h4>
+        <div class="seat">${t.s.img ? `<img src="${t.s.img}" alt="">` : '<span></span>'}<div><select class="select" data-vsleader="${t.side}" aria-label="${sideName(t.side)} leader">${ENC.scenarios.filter(x => x.side === t.side).map(x => `<option value="${x.id}" ${x.id === t.s.id ? 'selected' : ''}>${esc(leaderTitle(x))}</option>`).join('')}</select>
+          <div class="dim" style="margin-top:4px">${t.e.mods.length} modular sets · ${ls ? esc(ls.ms1.name) + ' → ' + esc(ls.ms2.name) : ''} · ${deck.approx ? '≈' : ''}${deck.total} encounter cards</div></div>
+          <a class="btn small ghost seat-x" href="${tune}">Tune</a></div>
+      </section>`;
+    };
+    const mini = HEROES.slice().sort((a, b) => a.name.localeCompare(b.name)).map(h => {
+      const on = seated.includes(h.id), full = (T[V.add].heroes.length >= 2);
+      return `<button class="mini ${on ? 'on' : ''}" data-vsseat="${h.id}" ${!on && full ? 'disabled' : ''} title="${esc(h.name + ' — ' + h.ae)}"><img src="images/heroes/${h.id}.webp" alt="" loading="lazy"><span>${esc(h.name)}</span></button>`;
+    }).join('');
+    const ready = !issues.length;
+    const steps = vsNightSteps(T, n);
+    app.innerHTML = `
+      <section class="panel" style="margin-bottom:18px">
+        <h2 class="h-sec">Game night <small>registration vs. resistance</small></h2>
+        <p class="explain">Competitive mode (Civil War rulebook p.14): <b>1v1 or 2v2</b>. Each team seats its heroes and builds a scenario for its own leader; the teams trade scenarios and race to defeat the enemy leader first. Every pre-built deck can be on the table at once.</p>
+        <div class="actions">${nightModeSeg(true)}
+          <div class="seg" role="group" aria-label="Mode"><button data-vsmode="standard" class="${V.mode !== 'expert' ? 'on' : ''}">Standard</button><button data-vsmode="expert" class="${V.mode === 'expert' ? 'on' : ''}">Expert</button></div>
+          <button class="btn small" id="vsRollHeroes">🎲 Random heroes</button><button class="btn small" id="vsRollLeaders">🎲 Random leaders</button><button class="btn small ghost" id="clearNight">Clear</button></div>
+      </section>
+      <div class="night-grid vs-night">${teamPanel(T.registration)}${teamPanel(T.resistance)}</div>
+      ${issues.length ? `<div class="note red" style="margin:14px 0">${issues.map(esc).join('<br>')}</div>` : ''}${heads.length ? `<div class="note" style="margin:14px 0">${heads.map(esc).join('<br>')}</div>` : ''}
+      <section class="panel" style="margin-top:18px"><h3 class="h-sec">Add a hero <small>to the team below</small></h3>
+        <div class="row" style="margin-bottom:10px"><div class="seg" role="group" aria-label="Add heroes to"><button data-vsadd="registration" class="${V.add === 'registration' ? 'on' : ''}">Registration team</button><button data-vsadd="resistance" class="${V.add === 'resistance' ? 'on' : ''}">Resistance team</button></div><span class="dim">Tap a seated hero to remove it.</span></div>
+        <div class="mini-grid">${mini}</div></section>
+      <section class="panel" style="margin-top:18px"><h3 class="h-sec">Competitive setup checklist <small>${n === 1 ? '1v1' : '2v2'} · ${V.mode === 'expert' ? 'expert' : 'standard'}</small></h3>
+        ${ready ? '' : '<p class="note" style="margin:0 0 10px">Fix the notes above first — the checklist follows the table as it stands.</p>'}
+        <ol class="checklist">${steps.map(x => `<li>${esc(x)}</li>`).join('')}</ol>
+        <div class="actions" style="margin-top:12px"><a class="btn small red" href="${vsNightHref(T, n)}">Full competitive setup ↗</a><button class="btn small blue" id="copyNight">⧉ Copy game plan</button></div></section>`;
+    bindNightMode();
+    $$('[data-vsmode]').forEach(b => b.addEventListener('click', () => { V.mode = b.dataset.vsmode; saveStore(); renderNight(); }));
+    $$('[data-vsadd]').forEach(b => b.addEventListener('click', () => { V.add = b.dataset.vsadd; saveStore(); renderNight(); }));
+    $$('[data-vsseat]').forEach(b => b.addEventListener('click', () => {
+      const id = b.dataset.vsseat;
+      if (seated.includes(id)) { V.registration = (V.registration || []).filter(x => x !== id); V.resistance = (V.resistance || []).filter(x => x !== id); }
+      else if ((V[V.add] || []).filter(x => HERO[x]).length < 2) V[V.add] = (V[V.add] || []).filter(x => HERO[x]).concat(id);
+      saveStore(); renderNight();
+    }));
+    $$('[data-vsunseat]').forEach(b => b.addEventListener('click', () => { const [side, id] = b.dataset.vsunseat.split(':'); V[side] = (V[side] || []).filter(x => x !== id); saveStore(); renderNight(); }));
+    $$('[data-vsleader]').forEach(sel => sel.addEventListener('change', ev => {
+      const sc = scnById(ev.target.value);
+      if (sc) { V.scn[sel.dataset.vsleader] = { id: sc.id }; saveStore(); renderNight(); }
+    }));
+    $('#vsRollHeroes').addEventListener('click', () => {
+      const size = n > 1 || !seated.length ? 2 : 1;
+      for (let tries = 0; tries < 50; tries++) {
+        const pool = HEROES.slice(), picks = { registration: [], resistance: [] };
+        for (const side of ['registration', 'resistance']) {
+          while (picks[side].length < size && pool.length) {
+            const h = pool.splice(Math.floor(Math.random() * pool.length), 1)[0];
+            if (h.name.toLowerCase() === T[side].leader.toLowerCase()) continue;
+            if (picks[side].some(id => matchesUnique({ n: HERO[id].name, ae: HERO[id].ae }, { n: h.name, ae: h.ae }))) continue;
+            picks[side].push(h.id);
+          }
+        }
+        if (picks.registration.length === size && picks.resistance.length === size) { V.registration = picks.registration; V.resistance = picks.resistance; break; }
+      }
+      saveStore(); renderNight();
+    });
+    $('#vsRollLeaders').addEventListener('click', () => {
+      for (const side of ['registration', 'resistance']) {
+        const names = T[side].heroes.map(id => HERO[id].name.toLowerCase());
+        const all = ENC.scenarios.filter(x => x.side === side), ok = all.filter(x => !names.includes(leaderTitle(x).toLowerCase()));
+        const list = ok.length ? ok : all, sc = list[Math.floor(Math.random() * list.length)];
+        V.scn[side] = { id: sc.id };
+      }
+      saveStore(); renderNight();
+    });
+    $('#clearNight').addEventListener('click', () => { Object.assign(V, { registration: [], resistance: [], scn: {} }); saveStore(); renderNight(); });
+    $('#copyNight').addEventListener('click', () => {
+      const lines = ['Marvel Champions — game night (competitive, ' + (n === 1 ? '1v1' : '2v2') + ')', ''];
+      for (const t of [T.registration, T.resistance]) {
+        lines.push(`${sideName(t.side)} team (leader: ${t.leader})`);
+        t.heroes.forEach(id => { const h = HERO[id], d = deckOf(id); lines.push(`  ${h.name} (${h.ae}) — ${optLabel(d.opt)}`); });
+      }
+      lines.push(''); steps.forEach((x, i) => lines.push(`${i + 1}. ${x}`));
+      for (const t of [T.registration, T.resistance]) { lines.push(''); lines.push(encText(t.s, t.e)); }
+      copyText(lines.join('\n'), 'Game plan copied');
+    });
+  }
+
   function renderNight() {
+    if (store.night.vs.on && ENC && ENC.vs) { renderNightVs(); return; }
     const seats = store.night.seats.filter(id => HERO[id]);
     const sc = store.night.scn && scnById(store.night.scn.id);
     const e = sc ? Object.assign(encDefaults(sc), store.night.scn.enc || {}) : null;
@@ -1135,20 +1417,20 @@
       steps.push(`Set aside each hero's obligation${seats.length ? ' (' + seats.map(id => C[HERO[id].ob] ? C[HERO[id].ob].n : '').filter(Boolean).join(', ') + ')' : ''} and nemesis set${seats.length ? ' (' + seats.map(id => (HERO[id].nemesis.minions || []).join('/')).join(', ') + ')' : ''}.`);
       steps.push('Shuffle each player deck; collect tokens and status cards.');
       const nms = schemeOf(sc, e);
-      const nMain = (sc.mainSchemeDeck || []).length ? sc.mainSchemeDeck : (nms ? nms.mainSchemeDeck || [] : []);
+      const nMain = mainSchemeList(sc, e);
       steps.push(`Villain deck: ${((sc.villainDeck || {})[e.mode] || []).join(' → ')}${e.skirmish ? ' (skirmish: keep only the chosen version)' : ''}. Main scheme deck: ${nMain.join(' → ')}${nms ? ' (' + nms.name + ')' : ''}.`);
       steps.push(`Encounter deck: ${deck.rows.map(r => r.name).join(', ')}${sc.noObligations ? ' (no obligations in this scenario)' : ` + the ${e.players} obligation${e.players > 1 ? 's' : ''}`} — ${deck.approx ? 'about ' : ''}${deck.total} cards.`);
       (sc.setupNotes || []).concat(nms ? (nms.setupNotes || []) : []).forEach(x => steps.push(x));
       steps.push('Put setup cards into play, resolve main scheme 1A setup, flip to 1B, then the villain\'s setup / when revealed.');
       steps.push(`Draw to hand size (alter-ego side: ${seats.map(id => `${HERO[id].name} ${HERO[id].hand[1] ?? HERO[id].hand[0]}`).join(', ') || '—'}), then mulligan.`);
       setupHtml = `<ol class="checklist">${steps.map(x => `<li>${esc(x)}</li>`).join('')}</ol>
-        <div class="actions" style="margin-top:12px"><a class="btn small red" href="../marvel-champions-setup/#scn=${encodeURIComponent(sc.id)}&m=${e.mode}&p=${e.players}&h=${e.heroic}${e.skirmish ? '&sk=1' : ''}&mods=${e.mods.join(',')}">Full rules setup ↗</a><button class="btn small blue" id="copyNight">⧉ Copy game plan</button></div>`;
+        <div class="actions" style="margin-top:12px"><a class="btn small red" href="../marvel-champions-setup/#scn=${encodeURIComponent(sc.id)}&m=${e.mode}&p=${e.players}&h=${e.heroic}${e.skirmish ? '&sk=1' : ''}&mods=${e.mods.join(',')}${leaderSchemes(sc, e) ? `&lms=${leaderSchemes(sc, e).ms1.code},${leaderSchemes(sc, e).ms2.code}` : ''}">Full rules setup ↗</a><button class="btn small blue" id="copyNight">⧉ Copy game plan</button></div>`;
     }
     app.innerHTML = `
       <section class="panel" style="margin-bottom:18px">
         <h2 class="h-sec">Game night <small>heroes + villain = tonight's table</small></h2>
         <p class="explain">Seat up to four heroes and pick a villain. Every pre-built deck can be on the table at once — the collection plan guarantees it.</p>
-        <div class="actions"><button class="btn small" id="rollHeroes">🎲 Random heroes</button><button class="btn small" id="rollVillain">🎲 Random villain</button><button class="btn small ghost" id="clearNight">Clear</button></div>
+        <div class="actions">${ENC && ENC.vs ? nightModeSeg(false) : ''}<button class="btn small" id="rollHeroes">🎲 Random heroes</button><button class="btn small" id="rollVillain">🎲 Random villain</button><button class="btn small ghost" id="clearNight">Clear</button></div>
       </section>
       <div class="night-grid">
         <section class="panel"><h3 class="h-sec">Heroes <small>${seats.length}/4</small></h3>${seatHtml}
@@ -1156,6 +1438,7 @@
           <h4 class="h-sec" style="font-size:16px;margin-top:16px">Add a hero</h4><div class="mini-grid">${mini}</div></section>
         <section class="panel"><h3 class="h-sec">Villain</h3>${villainHtml}${setupHtml ? `<h4 class="h-sec" style="font-size:16px;margin-top:16px">Setup checklist</h4>${setupHtml}` : ''}</section>
       </div>`;
+    bindNightMode();
     $$('[data-seat]').forEach(b => b.addEventListener('click', () => {
       const id = b.dataset.seat;
       const s = store.night.seats.filter(x => HERO[x]);
@@ -1178,7 +1461,7 @@
       const pick = pool[Math.floor(Math.random() * pool.length)];
       store.night.scn = { id: pick.id, enc: encState(pick) }; saveStore(); renderNight();
     });
-    $('#clearNight').addEventListener('click', () => { store.night = { seats: [], scn: null }; saveStore(); renderNight(); });
+    $('#clearNight').addEventListener('click', () => { store.night.seats = []; store.night.scn = null; saveStore(); renderNight(); });
     const cn = $('#copyNight'); if (cn) cn.addEventListener('click', () => {
       const lines = ['Marvel Champions — game night', ''];
       seats.forEach((id, i) => { const h = HERO[id], d = deckOf(id); lines.push(`Player ${i + 1}: ${h.name} (${h.ae}) — ${optLabel(d.opt)}`); });
@@ -1270,7 +1553,8 @@
           const j = JSON.parse(t);
           const edits = j.edits || {};
           for (const [id, d] of Object.entries(edits)) if (HERO[id] && d && d.cards) store.edits[id] = { opt: d.opt, cards: d.cards };
-          saveStore(); usageDirty = true; renderCollection(); toast('Edits imported');
+          strippedLeaderCards = 0; dropLeaderCards(store.edits);
+          saveStore(); usageDirty = true; renderCollection(); toast(strippedLeaderCards ? `Edits imported (left out ${strippedLeaderCards} competitive-only leader card${strippedLeaderCards > 1 ? 's' : ''})` : 'Edits imported');
         } catch (e) { toast('That file is not a builder export'); }
       });
     });

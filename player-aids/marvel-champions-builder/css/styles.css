@@ -225,6 +225,21 @@ img { max-width: 100%; }
 .group-h { grid-column: 1 / -1; margin: 8px 0 -4px; font: italic 800 15px/1 var(--font-head); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 10px; }
 .group-h::after { content: ""; flex: 1; height: 2px; background: var(--line); }
 
+/* ------------------------------------------------------------------ competitive (VS) mode */
+.row[hidden] { display: none; }        /* .row sets display:flex, which would beat the hidden attribute */
+.pill.vs-pill { background: linear-gradient(100deg, var(--red) 0 50%, var(--blue) 50% 100%); color: #fff; }
+.vs-side { display: inline-block; font: italic 800 15px/1 var(--font-head); letter-spacing: .08em; text-transform: uppercase; padding: 6px 10px; border: 2px solid #000; border-radius: 8px; box-shadow: 2px 2px 0 #000; color: #fff; background: var(--ink-3); }
+.registration .vs-side { background: var(--red); }
+.resistance .vs-side { background: var(--blue); }
+.vs-box.registration, .vs-team-panel.registration { box-shadow: 5px 5px 0 var(--red); }
+.vs-box.resistance, .vs-team-panel.resistance { box-shadow: 5px 5px 0 var(--blue); }
+.vs-cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 6px 0 8px; }
+.vs-card { cursor: pointer; border: 2px solid #000; border-radius: 10px; background: var(--ink-3); overflow: hidden; display: grid; align-content: start; }
+.vs-card img { width: 100%; aspect-ratio: 5 / 7; object-fit: cover; display: block; background: #000; }
+.vs-card span { font: italic 800 12px/1.1 var(--font-head); letter-spacing: .03em; text-transform: uppercase; padding: 6px; }
+.vs-card:hover, .vs-card:focus-visible { border-color: var(--gold); outline: none; }
+@media (max-width: 640px) { .vs-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
 /* ------------------------------------------------------------------ dossier */
 .back-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
 .back-row .spacer { flex: 1; }
@@ -363,6 +378,7 @@ img { max-width: 100%; }
 
 /* -------------------------------------------------------------- game night */
 .night-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.night-grid > .panel + .panel { margin-top: 0; }   /* the grid gap spaces them; keep both columns level */
 .seat { display: grid; grid-template-columns: 90px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 8px; border: 3px solid #000; border-radius: 12px; background: var(--ink-3); box-shadow: 3px 3px 0 #000; }
 .seat + .seat { margin-top: 10px; }
 .seat img { width: 90px; height: 70px; object-fit: cover; border-radius: 8px; border: 2px solid #000; }

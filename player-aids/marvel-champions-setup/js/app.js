@@ -17,7 +17,12 @@
   const setName = id => (SETS[id] && SETS[id].name) || String(id).replace(/_/g, ' ');
 
   // ------------------------------------------------------------- config
-  const state = { players: 2, mode: 'standard', heroic: 0, skirmish: false, campaign: false, pool: false, scn: '', mods: null, std: null, exp: null };
+  // Competitive (VS) mode: vs, t = players per team, and per side (reg / res) the leader scenario,
+  // its modular sets (…m) and its stage 1 + stage 2 main scheme codes (…s). null = the preconstructed scenario's.
+  const state = { players: 2, mode: 'standard', heroic: 0, skirmish: false, campaign: false, pool: false, scn: '', mods: null, std: null, exp: null,
+    vs: false, team: 2, reg: '', res: '', regm: null, resm: null, regs: null, ress: null, lms: null };
+  const VSKEY = { registration: 'reg', resistance: 'res' };
+  const list = (p, k) => (p.has(k) ? p.get(k).split(',').filter(Boolean) : null);
   function readHash() {
     const p = new URLSearchParams(location.hash.replace(/^#/, ''));
     if (p.has('p')) state.players = clamp(+p.get('p'), 1, 4);
@@ -27,31 +32,83 @@
     state.campaign = p.get('cp') === '1';
     state.pool = p.get('pool') === '1';
     if (p.has('scn')) state.scn = p.get('scn');
-    state.mods = p.has('mods') ? p.get('mods').split(',').filter(Boolean) : null;
+    state.mods = list(p, 'mods');
+    state.lms = list(p, 'lms');
     state.std = p.has('std') ? p.get('std') : null;
     state.exp = p.has('exp') ? p.get('exp') : null;
+    state.vs = p.get('vs') === '1';
+    if (p.has('t')) state.team = clamp(+p.get('t'), 1, 2);
+    for (const k of ['reg', 'res']) {
+      state[k] = p.get(k) || '';
+      state[k + 'm'] = list(p, k + 'm');
+      state[k + 's'] = list(p, k + 's');
+    }
   }
   function writeHash() {
     const p = new URLSearchParams();
-    p.set('p', state.players); p.set('m', state.mode);
-    if (state.heroic) p.set('h', state.heroic);
-    if (state.skirmish) p.set('sk', '1');
-    if (state.campaign) p.set('cp', '1');
-    if (state.pool) p.set('pool', '1');
-    if (state.scn) p.set('scn', state.scn);
-    if (state.scn && state.mods) p.set('mods', state.mods.join(','));
-    if (state.std) p.set('std', state.std);
-    if (state.exp) p.set('exp', state.exp);
+    if (state.vs) {
+      p.set('vs', '1'); p.set('t', state.team); p.set('m', state.mode);
+      for (const k of ['reg', 'res']) {
+        if (state[k]) p.set(k, state[k]);
+        if (state[k + 'm']) p.set(k + 'm', state[k + 'm'].join(','));
+        if (state[k + 's']) p.set(k + 's', state[k + 's'].join(','));
+      }
+    } else {
+      p.set('p', state.players); p.set('m', state.mode);
+      if (state.heroic) p.set('h', state.heroic);
+      if (state.skirmish) p.set('sk', '1');
+      if (state.campaign) p.set('cp', '1');
+      if (state.pool) p.set('pool', '1');
+      if (state.scn) p.set('scn', state.scn);
+      if (state.scn && state.mods) p.set('mods', state.mods.join(','));
+      if (state.scn && state.lms) p.set('lms', state.lms.join(','));
+      if (state.std) p.set('std', state.std);
+      if (state.exp) p.set('exp', state.exp);
+    }
     const h = '#' + p.toString();
     if (location.hash !== h) history.replaceState(null, '', h);
   }
   const clamp = (n, a, b) => Math.max(a, Math.min(b, isNaN(n) ? a : n));
   function scenario() { return ENC && state.scn ? ENC.scenarios.find(s => s.id === state.scn) || null : null; }
+  const leaderTitle = s => String(s.villain || s.name).replace(/\s*\(leader\)$/i, '');
+  // The scenario one team builds for its own leader (Civil War rulebook p.4-5).
+  function vsTeam(side) {
+    const V = ENC && ENC.vs;
+    const sd = V && V.sides[side];
+    if (!sd) return null;
+    const key = VSKEY[side];
+    const leaders = ENC.scenarios.filter(s => s.side === side);
+    const s = leaders.find(x => x.id === state[key]) || leaders[0];
+    if (!s) return null;
+    const codes = state[key + 's'] || s.vsSchemes || [];
+    return {
+      side, sideName: sd.name, scn: s, leader: leaderTitle(s), pool: sd, cards: s.vsCards || [],
+      modulars: (state[key + 'm'] || s.recommendedModulars || []).filter(id => sd.modulars.includes(id)),
+      ms1: sd.stage1.find(x => x.code === codes[0]) || sd.stage1[0],
+      ms2: sd.stage2.find(x => x.code === codes[1]) || sd.stage2[0],
+    };
+  }
+  // A leader scenario's stage 1 and stage 2 main schemes in co-op (custom scenario creation, Civil War rulebook p.4-5)
+  function leaderMs(s) {
+    const sd = s && s.side && ENC && ENC.vs ? ENC.vs.sides[s.side] : null;
+    if (!sd) return null;
+    const codes = state.lms || s.vsSchemes || [];
+    const m1 = sd.stage1.find(x => x.code === codes[0]) || sd.stage1[0], m2 = sd.stage2.find(x => x.code === codes[1]) || sd.stage2[0];
+    return m1 && m2 ? [m1, m2] : null;
+  }
   function ctx() {
+    if (state.vs && ENC && ENC.vs) {
+      return {
+        vs: true, team: state.team, players: state.team, mode: state.mode, heroic: 0, skirmish: false, campaign: false, pool: false,
+        scn: null, setName, modulars: [], teams: { registration: vsTeam('registration'), resistance: vsTeam('resistance') },
+      };
+    }
     const s = scenario();
     let scn = null;
     if (s) {
       scn = Object.assign({}, s);
+      const ls = leaderMs(s);
+      if (ls) scn.mainSchemeDeck = [ls[0].name + ' (stage 1)', ls[1].name + ' (stage 2)'];
       if (state.std !== null) scn.standardSet = state.std || null;
       if (state.exp !== null) scn.expertSet = state.exp || null;
     }
@@ -65,9 +122,76 @@
   const when = (item, c) => { try { return !item.when || item.when(c); } catch (e) { console.warn(e); return false; } };
 
   // --------------------------------------------------------- configurator
+  const seg = (key, opts) => `<div class="seg" role="group">${opts.map(([v, l]) => `<button type="button" data-k="${key}" data-v="${v}" class="${String(state[key]) === String(v) ? 'on' : ''}">${l}</button>`).join('')}</div>`;
+  const gameSeg = () => (ENC && ENC.vs ? `<div class="cfg-group"><span class="cfg-label">Game</span>${seg('vs', [['false', 'Co-op'], ['true', 'VS · competitive']])}</div>` : '');
+  function bindSeg() {
+    $$('[data-k]').forEach(b => b.addEventListener('click', () => {
+      const k = b.dataset.k, v = b.dataset.v;
+      state[k] = k === 'players' || k === 'team' ? +v : k === 'vs' ? v === 'true' : v;
+      update();
+    }));
+  }
+  function vsTeamCard(side) {
+    const t = vsTeam(side);
+    if (!t) return '';
+    const key = VSKEY[side], foe = side === 'registration' ? 'resistance' : 'registration';
+    const rec = t.scn.recommendedModulars || [];
+    const n = t.modulars.length;
+    const chips = t.pool.modulars.map(id => `<button type="button" class="chip ${t.modulars.includes(id) ? 'on' : ''}" data-vsmod="${side}:${esc(id)}" aria-pressed="${t.modulars.includes(id)}">${esc(setName(id))}${rec.includes(id) ? ' ★' : ''}</button>`).join('');
+    const msSel = (stage, cur) => `<select class="select" data-vsms="${side}:${stage}" aria-label="${esc(t.sideName)} stage ${stage} main scheme">${t.pool['stage' + stage].map(x => `<option value="${esc(x.code)}" ${cur && cur.code === x.code ? 'selected' : ''}>${esc(x.name)}${x.product === 'synthezoid' ? ' (Synthezoid)' : ''}</option>`).join('')}</select>`;
+    const bq = new URLSearchParams({ vs: '1', p: String(state.team), m: state.mode, mods: t.modulars.join(','), ms1: t.ms1 ? t.ms1.code : '', ms2: t.ms2 ? t.ms2.code : '' });
+    return `<div class="vs-team ${side}">
+      <div class="vs-team-h"><span class="vs-side">${esc(t.sideName)} team</span><span class="muted">builds this scenario · the ${foe} team plays against it</span></div>
+      <div class="scn-card">${t.scn.img ? `<img src="../marvel-champions-builder/${esc(t.scn.img)}" alt="">` : '<span></span>'}
+        <div>
+          <label class="cfg-label" for="vsL-${side}">Leader</label>
+          <select class="select" id="vsL-${side}" data-vsleader="${side}">${ENC.scenarios.filter(s => s.side === side).map(s => `<option value="${esc(s.id)}" ${s.id === t.scn.id ? 'selected' : ''}>${esc(leaderTitle(s))} · ${esc(s.productName)}</option>`).join('')}</select>
+          <div class="cfg-label vs-lbl">Modular sets <span class="hint">${n} chosen · 3–4 from the ${side} side${n < 3 || n > 4 ? ' · <b class="warn">choose 3–4</b>' : ''}</span></div>
+          <div class="row">${chips}</div>
+          <div class="cfg-label vs-lbl">Main schemes <span class="hint">one stage 1 on top of one stage 2</span></div>
+          <div class="vs-ms">${msSel(1, t.ms1)}<span aria-hidden="true">→</span>${msSel(2, t.ms2)}</div>
+          <p class="explain" style="margin:8px 0 0">★ = in the preconstructed ${esc(t.leader)} scenario. <a href="../marvel-champions-builder/#villain/${encodeURIComponent(t.scn.id)}?${bq.toString()}">Open in builder ↗</a></p>
+        </div></div></div>`;
+  }
+  function renderVsConfig() {
+    $('#cfg').innerHTML = `
+      <div class="cfg-row">${gameSeg()}
+        <div class="cfg-group"><span class="cfg-label">Teams</span>${seg('team', [[1, '1v1'], [2, '2v2']])}</div>
+        <div class="cfg-group"><span class="cfg-label">Mode</span>${seg('mode', [['standard', 'Standard'], ['expert', 'Expert']])}</div>
+      </div>
+      <p class="explain" style="margin:0">Competitive mode (Civil War rulebook p.14): each team builds a scenario for <b>its own</b> leader, then the teams trade. Tune both below; the setup, round and rules adapt.</p>
+      <div class="vs-teams">${vsTeamCard('registration')}${vsTeamCard('resistance')}</div>`;
+    bindSeg();
+    $$('[data-vsleader]').forEach(sel => sel.addEventListener('change', e => {
+      const key = VSKEY[sel.dataset.vsleader];
+      state[key] = e.target.value; state[key + 'm'] = null; state[key + 's'] = null;
+      update();
+    }));
+    $$('[data-vsmod]').forEach(b => b.addEventListener('click', () => {
+      const [side, id] = b.dataset.vsmod.split(':');
+      const t = vsTeam(side);
+      state[VSKEY[side] + 'm'] = t.modulars.includes(id) ? t.modulars.filter(x => x !== id) : t.modulars.concat(id);
+      update();
+    }));
+    $$('[data-vsms]').forEach(sel => sel.addEventListener('change', e => {
+      const [side, stage] = sel.dataset.vsms.split(':');
+      const t = vsTeam(side);
+      const codes = [t.ms1 ? t.ms1.code : '', t.ms2 ? t.ms2.code : ''];
+      codes[+stage - 1] = e.target.value;
+      state[VSKEY[side] + 's'] = codes;
+      update();
+    }));
+  }
+  function lmsHtml(s) {
+    const ls = leaderMs(s);
+    if (!ls) return '';
+    const sd = ENC.vs.sides[s.side];
+    const sel = k => `<select class="select" data-lms="${k}" aria-label="Stage ${k} main scheme">${sd['stage' + k].map(x => `<option value="${esc(x.code)}" ${x.code === ls[k - 1].code ? 'selected' : ''}>${esc(x.name)}${x.product === 'synthezoid' ? ' (Synthezoid)' : ''}</option>`).join('')}</select>`;
+    return `<div class="cfg-label vs-lbl">Main schemes <span class="hint">one ${esc(s.side)} stage 1 on top of one stage 2</span></div><div class="vs-ms">${sel(1)}<span aria-hidden="true">→</span>${sel(2)}</div>`;
+  }
   function renderConfig() {
+    if (state.vs && ENC && ENC.vs) { renderVsConfig(); return; }
     const s = scenario();
-    const seg = (key, opts) => `<div class="seg" role="group">${opts.map(([v, l]) => `<button type="button" data-k="${key}" data-v="${v}" class="${String(state[key]) === String(v) ? 'on' : ''}">${l}</button>`).join('')}</div>`;
     let scnOpts = '<option value="">— No scenario (general setup) —</option>';
     if (ENC) {
       const groups = {};
@@ -84,10 +208,11 @@
         <div><b>${esc(s.name)}</b><div class="muted">${esc(s.productName)}${s.campaign ? ' · ' + esc(s.campaign) : ''}</div>
         <div class="row" style="margin-top:8px">${modChips}<select class="select" id="addMod" aria-label="Add a modular set"><option value="">+ Add modular…</option>${addOpts}</select>
         <a class="btn small ghost" href="../marvel-champions-builder/#villain/${encodeURIComponent(s.id)}">Open in builder ↗</a></div>
+        ${lmsHtml(s)}
         <p class="explain" style="margin:6px 0 0">★ = recommended by the scenario insert. Tap a chip to remove it.</p></div></div>`;
     }
     $('#cfg').innerHTML = `
-      <div class="cfg-row">
+      <div class="cfg-row">${gameSeg()}
         <div class="cfg-group"><span class="cfg-label">Players</span>${seg('players', [[1, '1'], [2, '2'], [3, '3'], [4, '4']])}</div>
         <div class="cfg-group"><span class="cfg-label">Mode</span>${seg('mode', [['standard', 'Standard'], ['expert', 'Expert']])}</div>
         <div class="cfg-group"><span class="cfg-label">Heroic level</span><select class="select" id="heroic">${[0, 1, 2, 3, 4, 5].map(n => `<option value="${n}" ${state.heroic === n ? 'selected' : ''}>${n ? 'Heroic ' + n : 'Off'}</option>`).join('')}</select></div>
@@ -99,12 +224,17 @@
       <div class="cfg-row"><div class="cfg-group grow"><span class="cfg-label">Scenario <span class="hint">(optional — adds its exact villain deck, schemes and encounter sets to the steps)</span></span>
         <select class="select" id="scnSel" style="width:100%">${scnOpts}</select></div></div>
       ${scnHtml}`;
-    $$('[data-k]').forEach(b => b.addEventListener('click', () => {
-      const k = b.dataset.k; state[k] = k === 'players' ? +b.dataset.v : b.dataset.v; update();
-    }));
+    bindSeg();
     $('#heroic').addEventListener('change', e => { state.heroic = +e.target.value; update(); });
     $$('[data-t]').forEach(i => i.addEventListener('change', () => { state[i.dataset.t] = i.checked; update(); }));
-    $('#scnSel').addEventListener('change', e => { state.scn = e.target.value; state.mods = null; state.std = null; state.exp = null; update(); });
+    $('#scnSel').addEventListener('change', e => { state.scn = e.target.value; state.mods = null; state.std = null; state.exp = null; state.lms = null; update(); });
+    $$('[data-lms]').forEach(sel => sel.addEventListener('change', e => {
+      const ls = leaderMs(scenario());
+      const codes = ls ? [ls[0].code, ls[1].code] : ['', ''];
+      codes[+sel.dataset.lms - 1] = e.target.value;
+      state.lms = codes;
+      update();
+    }));
     $$('[data-mod]').forEach(b => b.addEventListener('click', () => {
       const c = ctx(); const id = b.dataset.mod;
       state.mods = c.modulars.includes(id) ? c.modulars.filter(x => x !== id) : c.modulars.concat(id);
@@ -138,19 +268,26 @@
     const steps = (MCd.setup || []).filter(st => when(st, c));
     let n = 0;
     let setupHtml = '';
+    if (c.vs && (MCd.vsSetup || []).length) {
+      setupHtml += `<div class="phase"><h3 class="phase-h vs">${esc(MCd.vsPhase || 'Competitive setup')}</h3><ol class="steps">${MCd.vsSetup.map(st => stepHtml(st, st.n, c, 'mode vs')).join('')}</ol></div>`;
+    }
     phases.forEach((ph, i) => {
       const list = steps.filter(st => (st.ph || 0) === i);
       if (!list.length) return;
-      setupHtml += `<div class="phase"><h3 class="phase-h">${esc(ph)}</h3><ol class="steps">${list.map(st => stepHtml(st, st.n || ++n, c, st.when ? 'mode' : '')).join('')}</ol></div>`;
+      setupHtml += `<div class="phase"><h3 class="phase-h">${esc(ph)}</h3><ol class="steps">${list.map(st => stepHtml(st, st.n || ++n, c, st.when || (c.vs && st.vs) ? 'mode' : '')).join('')}</ol></div>`;
     });
     const sItems = scenarioSteps(c);
     if (sItems && sItems.length) setupHtml += `<div class="phase"><h3 class="phase-h">While playing ${esc(c.scn.name)}</h3><ol class="steps">${sItems.map(st => stepHtml(st, '★', c, 'scn')).join('')}</ol></div>`;
-    html += `<section class="sec" id="sec-setup"><h2 class="sec-h">Setup <span class="tagbox">${c.players} player${c.players > 1 ? 's' : ''} · ${c.mode}${c.heroic ? ' · heroic ' + c.heroic : ''}</span></h2>
-      <p class="sec-intro">The official 16-step setup (Rules Reference Appendix II, p.51), filled in for your options${c.scn ? ' and ' + esc(c.scn.name) : ''}. Steps that only apply to a chosen option are outlined in gold.</p>${setupHtml || '<p class="muted">Setup data is loading…</p>'}</section>`;
+    const tag = c.vs ? `${c.team === 1 ? '1v1' : '2v2'} · VS · ${c.mode}` : `${c.players} player${c.players > 1 ? 's' : ''} · ${c.mode}${c.heroic ? ' · heroic ' + c.heroic : ''}`;
+    const intro = c.vs
+      ? 'Competitive setup comes first (Civil War rulebook p.14). Then each team follows the official 16-step setup (Rules Reference Appendix II, p.51) in its own game area, against the scenario the other team built. Steps that change in competitive mode are outlined in gold.'
+      : `The official 16-step setup (Rules Reference Appendix II, p.51), filled in for your options${c.scn ? ' and ' + esc(c.scn.name) : ''}. Steps that only apply to a chosen option are outlined in gold.`;
+    html += `<section class="sec" id="sec-setup"><h2 class="sec-h">Setup <span class="tagbox">${tag}</span></h2>
+      <p class="sec-intro">${intro}</p>${setupHtml || '<p class="muted">Setup data is loading…</p>'}</section>`;
     // ---- round
-    const round = MCd.round || [];
+    const round = (MCd.round || []).filter(r => when(r, c));
     if (round.length) {
-      html += `<section class="sec" id="sec-round"><h2 class="sec-h">The round at a glance</h2><div class="round">${round.map(r => `<div class="panel ${esc(r.id)}"><h3>${esc(r.h)}</h3>${(r.steps || []).map((s, i) => `<div class="rs"><span class="n">${i + 1}</span><div><span class="rs-t">${esc(s.t)}</span><div class="rs-d">${val(s.d, c) || ''}</div>${s.src ? `<span class="src">📖 ${esc(s.src)}</span>` : ''}</div></div>`).join('')}${r.src ? `<span class="src">📖 ${esc(r.src)}</span>` : ''}</div>`).join('')}</div></section>`;
+      html += `<section class="sec" id="sec-round"><h2 class="sec-h">The round at a glance</h2><div class="round">${round.map(r => `<div class="panel ${esc(r.id)}"><h3>${esc(r.h)}</h3>${(r.steps || []).map((s, i) => `<div class="rs"><span class="n">${i + 1}</span><div><span class="rs-t">${esc(s.t)}</span><div class="rs-d">${val(s.d, c) || ''}</div>${s.src ? `<span class="src">📖 ${esc(s.src)}</span>` : ''}</div></div>`).join('')}${r.note ? `<p class="rs-note">${val(r.note, c)}</p>` : ''}${r.src ? `<span class="src">📖 ${esc(r.src)}</span>` : ''}</div>`).join('')}</div></section>`;
     }
     // ---- reference
     const ref = (MCd.reference || []).filter(r => when(r, c));
@@ -169,7 +306,7 @@
     // ---- FAQ & errata
     const faq = MCd.faq || [], errata = MCd.errata || [];
     html += `<section class="sec faq" id="sec-faq"><h2 class="sec-h">FAQ &amp; errata <span class="tagbox">RR v1.8</span></h2>
-      <p class="sec-intro">Official rulings from Appendix IV (FAQ) and Appendix V (errata) of the Rules Reference, paraphrased. Errata'd card text always wins over the printed card.</p>
+      <p class="sec-intro">Official rulings from Appendix IV (FAQ) and Appendix V (errata) of the Rules Reference, plus the competitive-mode FAQ from the Civil War rulebook — paraphrased. Errata'd card text always wins over the printed card.</p>
       <div class="toolbar"><input class="input search" id="faqQ" type="search" placeholder="Filter FAQ &amp; errata (card name, keyword…)" aria-label="Filter FAQ"></div>
       <h3 class="phase-h">FAQ · ${faq.length}</h3>
       <div id="faqList">${faq.map(f => `<details data-q="${esc((f.q + ' ' + stripTags(f.a) + ' ' + (f.topic || '')).toLowerCase())}"><summary><span class="q-t">${f.topic ? `<span class="topic">${esc(f.topic)}</span>` : ''}${esc(f.q)}</span></summary><div class="ans">${f.a}<br><span class="src">📖 ${esc(f.src || '')}</span></div></details>`).join('')}</div>
@@ -177,7 +314,7 @@
       <div class="tblwrap"><table class="tbl" id="errTbl"><thead><tr><th>Card</th><th>Change</th><th>Source</th></tr></thead><tbody>${errata.map(e => `<tr data-q="${esc((e.card + ' ' + (e.product || '') + ' ' + stripTags(e.change)).toLowerCase())}"><td><b>${esc(e.card)}</b><br><span class="dim">${esc(e.product || '')}</span></td><td>${e.change}</td><td class="dim">${esc(e.src || '')}</td></tr>`).join('')}</tbody></table></div></section>`;
     // ---- search
     html += `<section class="sec" id="sec-search"><h2 class="sec-h">Search the rulebooks</h2>
-      <p class="sec-intro">Searches every page of the Rules Reference v1.8 and the Learn to Play. Type keywords or ask a plain question (“can allies defend for another player?”). Expand a result for the full page.</p>
+      <p class="sec-intro">Searches every page of the Rules Reference v1.8 and the Learn to Play, plus the rules pages of the Civil War and Synthezoid Smackdown rulebooks (leaders and competitive mode). Type keywords or ask a plain question (“can allies defend for another player?”). Expand a result for the full page.</p>
       <input type="search" id="rules-q" class="input rs-input" placeholder="Ask a question, or search a rule or keyword…" autocomplete="off" spellcheck="false">
       <div id="rules-results"><p class="rs-hint">Type a few words — or ask a question.</p></div></section>`;
     $('#content').innerHTML = html;
@@ -262,9 +399,12 @@
     tough: ['status', 'damage'], expert: ['mode', 'set'], heroic: ['mode', 'level'], skirmish: ['mode', 'rookie'], campaign: ['mode', 'log'],
     unique: ['match', 'title'], mulligan: ['setup', 'draw'], first: ['player', 'token'], exhaust: ['ready', 'basic'], ready: ['exhaust'],
     lose: ['defeat', 'win', 'threat'], win: ['defeat', 'villain'], deck: ['empty', 'shuffle'], upgrade: ['attach', 'restricted'], support: ['upgrade'],
+    vs: ['competitive', 'versus'], versus: ['competitive'], pvp: ['competitive', 'standard'], competitive: ['team', 'enemy', 'leader'],
+    leader: ['villain', 'enemy', 'competitive'], registration: ['resistance', 'side'], resistance: ['registration', 'side'],
   };
   const stem = w => { if (w.length <= 3) return w; w = w.replace(/('s|s')$/, ''); if (/ies$/.test(w) && w.length > 4) return w.slice(0, -3) + 'y'; if (/(ches|shes|sses|xes|zes)$/.test(w)) return w.slice(0, -2); if (/s$/.test(w) && !/(ss|us|is|as|os)$/.test(w)) return w.slice(0, -1); return w; };
   const tok = t => (t.toLowerCase().match(/[a-z0-9]+/g) || []).filter(w => !STOP.has(w) && w.length >= 2).map(stem).filter(s => s.length >= 2);
+  const BOOKS = { rr: ['Rules Reference', 'a-aggression'], ltp: ['Learn to Play', 'a-leadership'], cw: ['Civil War rulebook', 'a-justice'], ss: ['Synthezoid Smackdown', 'a-protection'] };
   let SI = null;
   function index() {
     if (SI) return SI;
@@ -336,7 +476,8 @@
     if (!top.length) { box.innerHTML = '<p class="rs-hint">No matches. Try different words.</p>'; return; }
     box.innerHTML = `<p class="rs-count">${res.length} matching page${res.length === 1 ? '' : 's'}${res.length > top.length ? ` · showing top ${top.length}` : ''}</p>` + top.map(r => {
       const e = r.e;
-      return `<details class="rs-item"><summary class="rs-sum"><div class="rs-meta"><span class="pill ${e.x === 'rr' ? 'a-aggression' : 'a-leadership'}">${esc(e.x === 'rr' ? 'Rules Reference' : 'Learn to Play')}</span><span>${esc(e.b)} · p.${e.p}</span><span class="rs-toggle">Full page</span></div><div class="rs-snip">${snip(e.t.replace(/\n/g, ' '), qt, phrase)}</div></summary><div class="rs-full">${e.t.split('\n').map(p => `<p>${hl(p, qt)}</p>`).join('')}</div></details>`;
+      const [label, pill] = BOOKS[e.x] || [e.b, 'a-basic'];
+      return `<details class="rs-item"><summary class="rs-sum"><div class="rs-meta"><span class="pill ${pill}">${esc(label)}</span><span>${esc(e.b)} · p.${e.p}</span><span class="rs-toggle">Full page</span></div><div class="rs-snip">${snip(e.t.replace(/\n/g, ' '), qt, phrase)}</div></summary><div class="rs-full">${e.t.split('\n').map(p => `<p>${hl(p, qt)}</p>`).join('')}</div></details>`;
     }).join('');
   }
 

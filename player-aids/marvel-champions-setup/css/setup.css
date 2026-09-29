@@ -24,6 +24,21 @@
 .scn-card b { font: 400 26px/1 var(--font-display); letter-spacing: .03em; }
 .scn-card > div { min-width: 0; }
 .scn-card .select { max-width: 100%; min-width: 0; }
+/* competitive (VS) configurator: one card per team */
+.vs-teams { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+.vs-team { display: grid; gap: 8px; align-content: start; min-width: 0; }
+.vs-team-h { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; }
+.vs-side { font: italic 800 15px/1 var(--font-head); letter-spacing: .08em; text-transform: uppercase; padding: 6px 10px; border: 2px solid #000; border-radius: 8px; box-shadow: 2px 2px 0 #000; color: #fff; }
+.vs-team.registration .vs-side { background: var(--red); }
+.vs-team.resistance .vs-side { background: var(--blue); }
+.vs-team.registration .scn-card { box-shadow: 3px 3px 0 var(--red); }
+.vs-team.resistance .scn-card { box-shadow: 3px 3px 0 var(--blue); }
+.vs-team .scn-card { align-items: start; }
+.vs-lbl { margin-top: 10px; }
+.vs-ms { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 8px; align-items: center; }
+.vs-ms .select { width: 100%; min-width: 0; }
+.cfg-label .warn { color: #ff8a8a; }
+.phase-h.vs { background: linear-gradient(100deg, var(--red) 0 50%, var(--blue) 50% 100%); color: #fff; text-shadow: 1px 1px 0 #000; }
 .teach-bar { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; }
 .teach-panel { margin-bottom: 18px; background: var(--paper); color: var(--paper-ink); border-color: #000; }
 .teach-panel h3, .teach-panel h4 { font: italic 800 20px/1.1 var(--font-head); letter-spacing: .04em; text-transform: uppercase; color: #b0121b; margin: 16px 0 6px; }
@@ -59,6 +74,9 @@
 .round .rs:last-child { border-bottom: 0; }
 .round .rs .n { width: 30px; height: 30px; border-radius: 8px; background: var(--blue); color: #fff; border: 2px solid #000; display: grid; place-items: center; font: 400 18px/1 var(--font-display); }
 .round .villain .rs .n { background: var(--red); }
+.round .panel.vs { grid-column: 1 / -1; border-color: var(--gold); }
+.round .vs .rs .n { background: var(--gold); color: #111; }
+.round .rs-note { margin: 10px 0 0; font-size: 14.5px; color: #dbe2fb; }
 .round .rs .rs-t { display: block; font: italic 800 16px/1.2 var(--font-head); letter-spacing: .03em; text-transform: uppercase; }
 .round .rs .rs-d { font-size: 14.5px; color: #dbe2fb; }
 .round .rs .rs-d ul { margin: 4px 0; padding-left: 18px; }
@@ -106,6 +124,7 @@ mark { background: var(--gold); color: #111; border-radius: 3px; padding: 0 2px;
 
 @media (max-width: 900px) {
   .round { grid-template-columns: 1fr; }
+  .vs-teams { grid-template-columns: 1fr; }
 }
 @media (max-width: 640px) {
   .jumpbar { margin: 0 -16px 16px; padding: 8px 16px; }
@@ -115,6 +134,8 @@ mark { background: var(--gold); color: #111; border-radius: 3px; padding: 0 2px;
   .scn-card img { width: 90px; height: 70px; }
   .kw-grid { grid-template-columns: 1fr; }
   .faq .ans { padding-left: 14px; }
+  .vs-ms { grid-template-columns: 1fr; }
+  .vs-ms > span { display: none; }
 }
 @media print {
   .cfg, .teach-bar, .jumpbar, #sec-search { display: none !important; }
