@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Twilight Imperium 4th Edition — Setup &amp; Reference Utility</title>
+  <meta name="description" content="Setup steps for 3–8 players, a full rules reference with the Living Rules Reference errata applied, a teaching script and a searchable index of every Twilight Imperium 4th Edition rulebook.">
+  <meta name="theme-color" content="#00163a">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Saira (extended) stands in for the rulebooks' Handel Gothic headings; Source Serif 4 for their Times body text -->
+  <link href="https://fonts.googleapis.com/css2?family=Saira:wdth,wght@112.5..125,500..700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,700;1,8..60,400;1,8..60,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=2">
+  <link rel="stylesheet" href="css/components.css?v=1">
+</head>
+<body>
+  <!-- Masthead: the rulebook covers — the logo band over deep space, a portrait planet in its orbit rings
+       (the Winnaran custodian from the Rules Reference cover) and the interior pages' stepped cyan edge.
+       The motto is the Learn to Play's sign-off (LtP p.21). -->
+  <header class="mast">
+    <div class="mast-sky" aria-hidden="true"></div>
+    <div class="mast-inner">
+      <div class="mast-emblem" aria-hidden="true">
+        <img class="mast-planet" src="images/custodian-planet.webp" width="460" height="460" alt="" decoding="async">
+        <svg class="mast-rings" viewBox="0 0 600 600" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M156.8 141.0A214 214 0 0 1 489.0 199.5M512.8 322.4A214 214 0 0 1 387.0 495.5M307.5 513.9A214 214 0 0 1 101.6 219.8" opacity=".75"/><path d="M73.1 169.0A262 262 0 0 1 201.9 57.1L211.6 81.2A236 236 0 0 0 95.6 182.0ZM389.6 53.8A262 262 0 0 1 482.0 111.5L463.9 130.2A236 236 0 0 0 380.7 78.2ZM227.8 551.9A262 262 0 0 1 93.5 461.3L114.0 445.3A236 236 0 0 0 234.9 526.9ZM494.7 475.3A262 262 0 0 1 431.0 526.9L418.0 504.4A236 236 0 0 0 475.4 457.9Z" opacity=".9"/><path d="M114.7 193.0L95.6 182.0M448.7 146.1L463.9 130.2M241.0 505.7L234.9 526.9M407.0 485.3L418.0 504.4" opacity=".7"/><path d="M31.2 397.8A286 286 0 0 1 31.2 202.2M547.7 157.0A286 286 0 0 1 552.5 434.3" opacity=".45"/></g></svg>
+      </div>
+      <h1 class="mast-title">
+        <img class="mast-logo" src="images/ti-logo.webp" width="960" height="149" alt="Twilight Imperium — Fourth Edition">
+        <span class="mast-sub">Setup &amp; Reference</span>
+      </h1>
+      <p class="mast-kicker" aria-hidden="true"><span>Pax magnifica</span> <span>bellum gloriosum!</span></p>
+    </div>
+    <span class="mast-edge" aria-hidden="true"><i></i><b></b><i></i></span>
+  </header>
+
+  <main>
+    <div class="intro">
+      <p class="tagline">
+        Choose the sets on the table, the player count and how you build the galaxy — for exact setup steps,
+        a full rules reference with the Living Rules Reference errata and FAQ applied, a teaching script, and a
+        searchable index of every rulebook. <em>The throne on Mecatol Rex stands empty. Who will claim it?</em>
+      </p>
+      <p class="toplinks"><a class="btn-link" href="../../ti.html">Faction Reference <span aria-hidden="true">→</span></a> <span class="hint">faction sheets, technologies, legendary planets, relics</span></p>
+    </div>
+
+    <section class="sec sec-cfg" aria-label="Configuration">
+      <h2>The Council Chamber</h2>
+      <p class="sec-note">Select the sets in play, the game mode, the player count and the galaxy. Every step, ruling and script below adapts to your choices.</p>
+      <div class="cfg">
+        <div class="cfg-row">
+          <span class="cfg-label" id="lbl-sets">Sets in play</span>
+          <div id="expansions" class="chips" role="group" aria-labelledby="lbl-sets"></div>
+        </div>
+        <div class="cfg-row">
+          <span class="cfg-label" id="lbl-modes">Game mode / scenario</span>
+          <div id="modes" class="mode-grid" role="group" aria-labelledby="lbl-modes"></div>
+        </div>
+        <div class="cfg-row">
+          <span class="cfg-label" id="lbl-players">Players <span class="hint">(3–6 with the base game; 7 and 8 need Prophecy of Kings)</span></span>
+          <div id="players" class="pbtns" role="group" aria-labelledby="lbl-players"></div>
+        </div>
+        <div class="cfg-row" id="galaxy-group">
+          <span class="cfg-label" id="lbl-galaxy">Galaxy <span class="hint">— how the game board is built for this player count</span></span>
+          <div id="galaxy" class="mode-grid" role="group" aria-labelledby="lbl-galaxy"></div>
+        </div>
+        <div class="cfg-row" id="modules-group">
+          <span class="cfg-label" id="lbl-mods">Options &amp; variants <span class="hint">— optional rules the rulebooks define</span></span>
+          <div id="modules" class="mods" role="group" aria-labelledby="lbl-mods"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec sec-setup" aria-label="Setup">
+      <h2>Setup</h2>
+      <p class="sec-note">Follow the steps in order. Each cites its official source pages; the Living Rules Reference errata and FAQ are already applied.</p>
+      <div class="teach-bar"><button id="teachBtn" type="button" aria-expanded="false" aria-controls="teach" title="A ~5 minute script to teach this exact setup aloud">📖 Teaching script</button></div>
+      <div id="teach" class="teach-panel" hidden></div>
+      <div id="setup"></div>
+    </section>
+
+    <section class="sec sec-comp" id="components" aria-labelledby="comp-h" hidden>
+      <h2 id="comp-h">Components</h2>
+      <p class="sec-note">Every component the rulebooks picture for the sets and mode you’ve selected, with its count. Tap a picture to enlarge it. The first game and Twilight’s Fall leave out the components they don’t use.</p>
+      <div id="aid-comp"></div>
+    </section>
+
+    <section class="sec sec-ref" aria-label="Reference">
+      <h2>Rules Reference</h2>
+      <p class="sec-note">Tap a heading to open it. Contents adapt to your sets, mode and player count.</p>
+      <div id="reference"></div>
+    </section>
+
+    <section class="sec sec-search" aria-label="Rulebook search">
+      <h2>Search the Rulebooks</h2>
+      <p class="sec-note">Full-text search across every rulebook for the sets and mode selected, plus the official errata and the TI4 Wiki FAQ.</p>
+      <div class="rsearch-wrap">
+        <input id="rsearch" type="search" placeholder="e.g. command token, gravity rift, custodians, retreat, relic…" aria-label="Search the rulebooks">
+      </div>
+      <div id="rresults" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span class="foot-edge" aria-hidden="true"><i></i><b></b><i></i></span>
+    <p>
+      Setup and reference content grounded in the official Twilight Imperium Fourth Edition Learn to Play and
+      Rules Reference, the Prophecy of Kings rulebook and Living Rules Reference v2.0, the Twilight Codex volumes,
+      the Thunder’s Edge and Twilight’s Fall rulebooks, and the TI4 Wiki’s FAQ and errata pages (labelled wherever used).
+      Faction sheets live in the <a href="../../ti.html">Faction Reference</a>. A fan-made play aid — not affiliated with Fantasy Flight Games.
+    </p>
+  </footer>
+
+  <script src="js/data.js?v=1"></script>
+  <!-- optional module files (Codex I–IV, Thunder's Edge + Twilight's Fall); the page works without them -->
+  <script src="js/data-codex.js?v=1"></script>
+  <script src="js/data-te.js?v=1"></script>
+  <script src="js/rules.js?v=1"></script>
+  <script src="js/components.js?v=1"></script>
+  <script src="js/comp-widget.js?v=1"></script>
+  <script src="js/app.js?v=2"></script>
+  <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
+  <script src="/site-analytics.js?v=20260607-analytics"></script>
+</body>
+</html>
