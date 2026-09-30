@@ -34,6 +34,9 @@
   overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
 }
 
+/* the widget toggles items, sets and messages with the hidden attribute: keep it winning over display rules below */
+#aid-comp [hidden] { display: none !important; }
+
 /* ---- toggle bar ---- */
 #aid-comp .aid-comp-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 #aid-comp .aid-comp-toggle {
