@@ -376,6 +376,18 @@ section > h2::after {                     /* the glowing light rule after every 
   background: radial-gradient(circle, #fff 0 34%, #d6eaff 48%, rgba(150, 205, 255, 0) 74%);
   box-shadow: 0 0 6px 1px rgba(150, 205, 255, 0.7);
 }
+/* Bag Development: the rulebooks' own token image beside each token name */
+.ref-body ul.bag-list > li { display: flex; align-items: flex-start; gap: 14px; padding-left: 0; margin-bottom: 12px; }
+.ref-body ul.bag-list > li::before { content: none; }
+.ref-body ul.bag-list > li > div { flex: 1 1 auto; min-width: 0; }
+.bag-token {
+  flex: 0 0 44px; width: 44px; height: 44px; margin-top: -8px; border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(150, 205, 255, 0.35), 0 0 10px rgba(80, 160, 230, 0.28);
+}
+@media (max-width: 600px) {
+  .ref-body ul.bag-list > li { gap: 11px; }
+  .bag-token { flex-basis: 38px; width: 38px; height: 38px; margin-top: -5px; }
+}
 /* numbered lists: "1)" in light blue, as in the rulebook */
 .step-text ol, .ref-body ol, .teach-panel ol { margin: 8px 0 4px; padding-left: 30px; }
 .step-text ol > li, .ref-body ol > li, .teach-panel ol > li { margin-bottom: 6px; padding-left: 4px; }
