@@ -369,12 +369,15 @@ function _buildSearchIndex() {
       if (!post) { post = []; inv.set(t, post); }
       post.push([idx, c]);
     });
-    docs.push({ len: toks.length || 1, flatLower: flat.toLowerCase() });
+    docs.push({ len: toks.length || 1, flatLower: _fold(flat.toLowerCase()) });
     total += toks.length;
   });
   RL._si = { docs, inv, N: docs.length, avgdl: total / Math.max(1, docs.length) };
   return RL._si;
 }
+
+/* Curly quotes match straight ones (the rulebook text keeps the PDFs' curly apostrophes). */
+const _fold = (s) => s.replace(/[\u2018\u2019\u02BC]/g, "'").replace(/[\u201C\u201D]/g, "\"");
 
 /* Highlight every query-term occurrence (prefix match) in an HTML-escaped string. */
 function _hlTerms(text, terms) {
@@ -384,7 +387,7 @@ function _hlTerms(text, terms) {
   return s;
 }
 function _snip(text, terms, phrase) {
-  const lt = text.toLowerCase();
+  const lt = _fold(text.toLowerCase());
   let pos = phrase && phrase.includes(" ") && lt.includes(phrase) ? lt.indexOf(phrase) : -1;
   if (pos < 0) for (const t of terms) { const m = lt.search(new RegExp("\\b" + _escReg(t))); if (m >= 0 && (pos < 0 || m < pos)) pos = m; }
   if (pos < 0) pos = 0;
@@ -399,7 +402,7 @@ function _fullPassage(text, terms) {
 function rlSearch(q) {
   const box = document.getElementById("rules-results");
   if (!box) return;
-  const phrase = (q || "").trim().toLowerCase().replace(/\s+/g, " ");
+  const phrase = _fold((q || "").trim().toLowerCase()).replace(/\s+/g, " ");
   if (phrase.length < 2) { box.innerHTML = `<p class="rs-hint">Type a few words — or ask a question.</p>`; return; }
   if (!RL.rulesIndex) { box.innerHTML = `<p class="rs-hint">Loading rulebook index…</p>`; return; }
   const si = _buildSearchIndex();

@@ -634,8 +634,9 @@
   }
   function doSearch() {
     const input = $("#rsearch"), out = $("#rresults");
+    const fold = (s) => s.replace(/[\u2018\u2019\u02BC]/g, "'").replace(/[\u201C\u201D]/g, "\"");   // curly quotes match straight ones
     const raw = input.value.trim();
-    const q = raw.toLowerCase();
+    const q = fold(raw.toLowerCase());
     out.innerHTML = "";
     if (q.length < 3) {
       out.innerHTML = "<p class='rhint'>Type at least 3 characters to search every rulebook for the selected sets and mode, plus the errata and the TI4 Wiki FAQ.</p>";
@@ -646,7 +647,7 @@
     const hits = [], loose = [];
     for (const pg of TI.rulesIndex || []) {
       if (!docVisible(pg.x, c)) continue;
-      const t = pg.t.toLowerCase();
+      const t = fold(pg.t.toLowerCase());
       const idx = t.indexOf(q);
       if (idx !== -1) hits.push({ pg, idx, len: q.length });
       else if (words.length > 1 && words.every((w) => t.indexOf(w) !== -1)) loose.push({ pg, idx: t.indexOf(words[0]), len: words[0].length });
@@ -657,7 +658,7 @@
       return;
     }
     out.appendChild(el("p", "rhint", all.length + (hits.length + loose.length > all.length ? "+" : "") + " matching page" + (all.length === 1 ? "" : "s") + (loose.length && !hits.length ? " (all words, not the exact phrase)" : "") + "."));
-    const rxWords = (hits.length ? [q] : words).map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+    const rxWords = (hits.length ? [q] : words).map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/'/g, "['\u2018\u2019\u02BC]").replace(/"/g, "[\"\u201C\u201D]"));
     const rx = new RegExp("(" + rxWords.join("|") + ")", "ig");
     for (const { pg, idx, len } of all) {
       const start = Math.max(0, idx - 130);

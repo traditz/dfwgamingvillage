@@ -381,12 +381,15 @@ function _buildSearchIndex() {
     const tf = new Map();
     toks.forEach(t => tf.set(t, (tf.get(t) || 0) + 1));
     tf.forEach((c, t) => { (inv.get(t) || inv.set(t, []).get(t)).push([idx, c]); });
-    docs.push({ len: toks.length || 1, flatLower: flat.toLowerCase() });
+    docs.push({ len: toks.length || 1, flatLower: _fold(flat.toLowerCase()) });
     total += toks.length;
   });
   BSG._si = { docs, inv, N: docs.length, avgdl: total / Math.max(1, docs.length) };
   return BSG._si;
 }
+
+/* Curly quotes match straight ones (the rulebook text keeps the PDFs' curly apostrophes). */
+const _fold = (s) => s.replace(/[\u2018\u2019\u02BC]/g, "'").replace(/[\u201C\u201D]/g, "\"");
 
 /* Highlight every query-term occurrence (prefix match) in an HTML-escaped string. */
 function _hlTerms(text, terms) {
@@ -421,7 +424,7 @@ function _bestPos(lt, qterms) {
   return mid;
 }
 function _snip(text, terms, phrase) {
-  const lt = text.toLowerCase();
+  const lt = _fold(text.toLowerCase());
   let pos = phrase && phrase.includes(" ") && lt.includes(phrase) ? lt.indexOf(phrase) : _bestPos(lt, terms);
   if (pos < 0) pos = 0;
   const start = Math.max(0, pos - 115), end = Math.min(text.length, pos + 160);
@@ -465,7 +468,7 @@ function _proximity(lt, qterms) {
 function bsgSearch(q) {
   const box = document.getElementById("rules-results");
   if (!box) return;
-  const phrase = (q || "").trim().toLowerCase().replace(/\s+/g, " ");
+  const phrase = _fold((q || "").trim().toLowerCase()).replace(/\s+/g, " ");
   if (phrase.length < 2) { box.innerHTML = `<p class="rs-hint">Type at least 2 characters, or ask a question.</p>`; return; }
   if (!BSG.rulesIndex) { box.innerHTML = `<p class="rs-hint">Loading rulebook index…</p>`; return; }
   const si = _buildSearchIndex();

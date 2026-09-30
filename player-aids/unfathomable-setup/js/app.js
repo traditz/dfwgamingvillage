@@ -179,7 +179,8 @@
   }
 
   function doSearch() {
-    const q = $("#rsearch").value.trim().toLowerCase();
+    const fold = (s) => s.replace(/[‘’ʼ]/g, "'").replace(/[“”]/g, "\"");   // curly quotes match straight ones
+    const q = fold($("#rsearch").value.trim().toLowerCase());
     const out = $("#rresults");
     out.innerHTML = "";
     if (q.length < 3) {
@@ -191,7 +192,7 @@
     const hits = [];
     for (const pg of UF.rulesIndex) {
       if (!docVisible(pg.x, c)) continue;
-      const t = pg.t.toLowerCase();
+      const t = fold(pg.t.toLowerCase());
       const idx = t.indexOf(q);
       if (idx === -1) continue;
       hits.push({ pg, idx });
@@ -203,7 +204,7 @@
     }
     const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     const highlight = (raw) => {
-      const lower = raw.toLowerCase();
+      const lower = fold(raw.toLowerCase());
       let html = "", i = 0, j;
       while ((j = lower.indexOf(q, i)) !== -1) {
         html += esc(raw.slice(i, j)) + "<mark>" + esc(raw.slice(j, j + q.length)) + "</mark>";

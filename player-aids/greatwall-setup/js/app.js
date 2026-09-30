@@ -184,7 +184,8 @@
   }
 
   function doSearch() {
-    const q = $("#rsearch").value.trim().toLowerCase();
+    const fold = (s) => s.replace(/[\u2018\u2019\u02BC]/g, "'").replace(/[\u201C\u201D]/g, "\"");   // curly quotes match straight ones
+    const q = fold($("#rsearch").value.trim().toLowerCase());
     const out = $("#rresults");
     out.innerHTML = "";
     if (q.length < 3) {
@@ -195,7 +196,7 @@
     const hits = [];
     for (const pg of GW.rulesIndex) {
       if (!docVisible(pg.x, c)) continue;
-      const t = pg.t.toLowerCase();
+      const t = fold(pg.t.toLowerCase());
       const idx = t.indexOf(q);
       if (idx === -1) continue;
       hits.push({ pg, idx });
@@ -210,7 +211,7 @@
       const end = Math.min(pg.t.length, idx + q.length + 200);
       let snip = (start > 0 ? "…" : "") + pg.t.slice(start, end) + (end < pg.t.length ? "…" : "");
       snip = snip.replace(/</g, "&lt;");
-      const rx = new RegExp("(" + q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ")", "ig");
+      const rx = new RegExp("(" + q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/'/g, "['\u2018\u2019\u02BC]").replace(/"/g, "[\"\u201C\u201D]") + ")", "ig");
       snip = snip.replace(rx, "<mark>$1</mark>");
       const hit = el("div", "rhit");
       hit.appendChild(el("div", "rhit-src", pg.b + " — p." + pg.p));

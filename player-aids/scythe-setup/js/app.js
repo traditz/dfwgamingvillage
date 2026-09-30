@@ -413,7 +413,8 @@
   }
 
   function doSearch() {
-    const q = $("#rsearch").value.trim().toLowerCase();
+    const fold = (s) => s.replace(/[\u2018\u2019\u02BC]/g, "'").replace(/[\u201C\u201D]/g, "\"");   // curly quotes match straight ones
+    const q = fold($("#rsearch").value.trim().toLowerCase());
     const out = $("#rresults");
     out.innerHTML = "";
     if (q.length < 3) {
@@ -429,7 +430,7 @@
                    : " Rise of Fenris campaign and module pages are left out until you open a spoiler gate above.");
     for (const pg of SY.rulesIndex) {
       if (!docVisible(pg.x, c)) continue;
-      const t = pg.t.toLowerCase();
+      const t = fold(pg.t.toLowerCase());
       const idx = t.indexOf(q);
       if (idx === -1) continue;
       hits.push({ pg, idx });
@@ -439,7 +440,7 @@
       out.innerHTML = "<p class='rhint'>No matches in the selected sets' documents." + gated + "</p>";
       return;
     }
-    const rx = new RegExp("(" + q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ")", "ig");
+    const rx = new RegExp("(" + q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/'/g, "['\u2018\u2019\u02BC]").replace(/"/g, "[\"\u201C\u201D]") + ")", "ig");
     for (const { pg, idx } of hits) {
       const start = Math.max(0, idx - 130);
       const end = Math.min(pg.t.length, idx + q.length + 200);
