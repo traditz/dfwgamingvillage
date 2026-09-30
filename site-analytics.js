@@ -5,16 +5,27 @@
     return;
   }
 
+  function newSessionId() {
+    return crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
+  }
+
   function getSessionId() {
     const key = "dfwgv_session_id";
-    let sessionId = sessionStorage.getItem(key);
 
-    if (!sessionId) {
-      sessionId = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
-      sessionStorage.setItem(key, sessionId);
+    // sessionStorage throws when the visitor blocks site data; still count the
+    // view, as a session of its own.
+    try {
+      let sessionId = sessionStorage.getItem(key);
+
+      if (!sessionId) {
+        sessionId = newSessionId();
+        sessionStorage.setItem(key, sessionId);
+      }
+
+      return sessionId;
+    } catch {
+      return newSessionId();
     }
-
-    return sessionId;
   }
 
   function getUtmParams() {
@@ -51,21 +62,15 @@
   }
 
   function sendPageView() {
-    const body = JSON.stringify(buildPayload());
-
-    if (navigator.sendBeacon) {
-      // A string body goes as text/plain, which needs no CORS preflight. An
-      // application/json Blob forces a credentialed preflight the worker rejects.
-      if (navigator.sendBeacon(ENDPOINT, body)) {
-        return;
-      }
-    }
-
+    // fetch, not sendBeacon: EasyPrivacy (uBlock Origin, Brave) blocks every beacon
+    // to another domain (*$ping,third-party). The string body goes as text/plain,
+    // so there's no CORS preflight, and without credentials the worker's CORS
+    // headers are enough.
     fetch(ENDPOINT, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body,
-      keepalive: true
+      body: JSON.stringify(buildPayload()),
+      keepalive: true,
+      credentials: "omit"
     }).catch(() => {});
   }
 
