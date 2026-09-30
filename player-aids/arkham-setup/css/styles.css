@@ -548,3 +548,10 @@ main{max-width:1000px; margin:0 auto; padding:24px 28px 64px}
   html{scroll-behavior:auto}
   *{transition:none !important; animation:none !important}
 }
+
+/* Components glossary (css/components.css) — tokens from this page's palette */
+#components {
+  --comp-surface: #fbfaf1; --comp-fig: #d1d9c5; --comp-ink: var(--ink); --comp-muted: var(--ink-soft);
+  --comp-line: #5f7355; --comp-accent: var(--forest); --comp-accent-ink: var(--cream);
+  --comp-head-font: var(--display); --comp-radius: var(--radius);
+}

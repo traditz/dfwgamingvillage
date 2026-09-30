@@ -524,3 +524,10 @@ section h2::after { /* the rod runs in from the page edge, under the pearl, and 
   *, *::before, *::after { transition: none !important; }
   html { scroll-behavior: auto; }
 }
+
+/* Components glossary (css/components.css) — tokens from this page's palette */
+#components {
+  --comp-surface: #faf9f7; --comp-fig: #d7e4e6; --comp-ink: var(--ink); --comp-muted: var(--ink-2);
+  --comp-line: #5f7d88; --comp-accent: var(--teal); --comp-accent-ink: #ffffff;
+  --comp-head-font: "IM Fell English", "Iowan Old Style", Georgia, serif; --comp-radius: 4px;
+}

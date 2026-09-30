@@ -231,6 +231,7 @@
     renderReference(c);
     renderTeach(c);
     doSearch();
+    document.dispatchEvent(new CustomEvent("aid:config", { detail: c }));   // components glossary (js/comp-widget.js)
   }
 
   document.addEventListener("DOMContentLoaded", () => {

@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
   <link rel="preload" as="image" href="images/anachrony-logo.webp">
   <link rel="stylesheet" href="css/styles.css?v=3">
+  <link rel="stylesheet" href="css/components.css?v=1">
 </head>
 <body>
   <!-- hex-grid linework in the page corner, as on every rulebook page -->
@@ -66,6 +67,12 @@
       <div id="setup"></div>
     </section>
 
+    <section id="components" aria-labelledby="comp-h" hidden>
+      <h2 id="comp-h">Components</h2>
+      <p class="sec-note">Every component the rulebooks picture for the sets, modules and player count you’ve selected, with its count. Tap a picture to enlarge it.</p>
+      <div id="aid-comp"></div>
+    </section>
+
     <section aria-label="Reference">
       <h2>Rules Reference</h2>
       <p class="sec-note">Tap a heading to open it. Contents adapt to your sets, modules and player count.</p>
@@ -93,7 +100,9 @@
 
   <script src="js/data.js?v=2"></script>
   <script src="js/rules.js?v=1"></script>
-  <script src="js/app.js?v=2"></script>
+  <script src="js/components.js?v=1"></script>
+  <script src="js/comp-widget.js?v=1"></script>
+  <script src="js/app.js?v=3"></script>
   <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
   <script src="/site-analytics.js?v=20260607-analytics"></script>
 </body>

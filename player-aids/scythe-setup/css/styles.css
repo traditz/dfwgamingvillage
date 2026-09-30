@@ -786,3 +786,10 @@ body:has(#expansions > .chip:nth-child(2).on) .ref-body:has(> h4 > .who) > h4:nt
   * { transition: none !important; }
   html { scroll-behavior: auto; }
 }
+
+/* Components glossary (css/components.css) — tokens from this page's palette */
+#components {
+  --comp-surface: var(--paper-2); --comp-fig: #f8fcf9; --comp-ink: var(--ink); --comp-muted: var(--ink-3);
+  --comp-line: var(--line); --comp-accent: var(--rust); --comp-accent-ink: #ffffff;
+  --comp-head-font: var(--serif); --comp-radius: 3px;   /* the serif: League Gothic is too condensed at the widget's 14–18px */
+}

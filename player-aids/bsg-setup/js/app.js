@@ -753,7 +753,11 @@ function copyTeachScript(btn) {
   );
 }
 
-function renderAll() { renderConfigurator(); renderGallery(); renderDetail(); syncUrl(); }
+function renderAll() { renderConfigurator(); renderGallery(); renderDetail(); syncUrl();
+  // components glossary (js/comp-widget.js): expansions, modules in play (7 players forces a Cylon Leader), the picked setup's objective
+  document.dispatchEvent(new CustomEvent("aid:config", { detail: { has: expEnabled, p: state.players, mode: state.selected ? state.selected.split("|")[0] : "",
+    mod: id => (id === "cylonLeaders" && sevenForced()) || availableOptions().some(o => o.id === id && state.options.has(id)) } }));
+}
 
 /* Dock the sticky jump-nav just under the (variable-height) topbar, and offset
    anchored sections so the topbar + nav never cover their heading. Concrete px

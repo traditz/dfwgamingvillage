@@ -703,3 +703,10 @@ main::after{bottom:-11px; background:var(--torn-bot) 0 0 / 220px 12px repeat-x}
   *,*::before,*::after{animation:none !important; transition-duration:.001ms !important}
   .team-card:hover,.pbtn:hover{transform:none}
 }
+
+/* Components glossary (css/components.css) — tokens from this page's palette */
+#components{
+  --comp-surface:var(--parch-hi); --comp-fig:#f3e6d4; --comp-ink:var(--ink); --comp-muted:var(--muted);
+  --comp-line:var(--line-2); --comp-accent:var(--blood); --comp-accent-ink:#fff6e3;
+  --comp-head-font:var(--label); --comp-radius:4px;
+}

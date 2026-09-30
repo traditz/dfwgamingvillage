@@ -208,7 +208,9 @@ function renderReference() {
 }
 
 /* ---- Tabs & boot --------------------------------------------------------- */
-function renderAll() { renderConfig(); renderSetup(); renderTeach(); }
+function renderAll() { renderConfig(); renderSetup(); renderTeach();
+  document.dispatchEvent(new CustomEvent("aid:config", { detail: ctx() }));   // components glossary (js/comp-widget.js)
+}
 
 function switchTab(tab) {
   state.tab = tab;

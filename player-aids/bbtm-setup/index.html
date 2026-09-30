@@ -8,7 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Sancreek&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,700;1,8..60,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=7">
+  <link rel="stylesheet" href="css/styles.css?v=8">
+  <link rel="stylesheet" href="css/components.css?v=1">
 </head>
 <body>
   <!-- The Rules of Play cover billboard: blood-splattered planks between spiked iron bands -->
@@ -74,6 +75,12 @@
     <!-- ============ REFERENCE ============ -->
     <section class="view" id="view-reference">
       <nav class="jump-nav" id="refNav" aria-label="Jump to section"></nav>
+      <!-- Components glossary (js/comp-widget.js): follows the content and optional rules chosen on the Setup tab -->
+      <section class="ref-card" id="components" aria-labelledby="comp-h" hidden>
+        <h2 id="comp-h">Components</h2>
+        <p class="ref-intro">Every component pictured in the rulebooks for the content on your table, with its count. Tap a picture to enlarge it. Optional-rule pieces appear when you switch that rule on in the Setup tab.</p>
+        <div id="aid-comp"></div>
+      </section>
       <div id="refBody"></div>
     </section>
 
@@ -100,7 +107,9 @@
   </footer>
 
   <script src="js/data.js?v=6"></script>
-  <script src="js/app.js?v=3"></script>
+  <script src="js/components.js?v=1"></script>
+  <script src="js/comp-widget.js?v=1"></script>
+  <script src="js/app.js?v=4"></script>
 <!-- DFW Gaming Village site analytics -->
 <script src="/site-analytics.js?v=20260607-analytics"></script>
 </body>

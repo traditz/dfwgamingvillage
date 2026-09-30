@@ -10,6 +10,7 @@
   <!-- the rulebooks are set entirely in PT Serif, with PT Serif Caption for the capital headings -->
   <link href="https://fonts.googleapis.com/css2?family=PT+Serif+Caption&family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css?v=6">
+  <link rel="stylesheet" href="css/components.css?v=1">
 </head>
 <body>
   <!-- light shafts from the surface and a few rising bubbles, behind everything -->
@@ -75,6 +76,16 @@
       <div id="setup"></div>
     </section>
 
+    <section class="page" id="components" aria-labelledby="comp-h" hidden>
+      <span class="page-badge" aria-hidden="true">
+        <!-- a sunken chest: what's in the box -->
+        <svg viewBox="0 0 32 32"><path d="M5 14.5 C5 9 9 6.5 16 6.5 C23 6.5 27 9 27 14.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M5 14.5 H27 V26 H5 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M5 18.5 H13.5 M18.5 18.5 H27 M11 7.5 V14.5 M21 7.5 V14.5" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="13.5" y="16.5" width="5" height="5.5" rx="1" fill="currentColor"/></svg>
+      </span>
+      <h2 id="comp-h">Components</h2>
+      <p class="sec-note">Every component pictured in the rulebooks for the sets you've selected, with its count. Tap a picture to enlarge it.</p>
+      <div id="aid-comp"></div>
+    </section>
+
     <section class="page" aria-label="Reference">
       <span class="page-badge" aria-hidden="true">
         <!-- the rulebook -->
@@ -110,7 +121,9 @@
 
   <script src="js/data.js?v=4"></script>
   <script src="js/rules.js?v=1"></script>
-  <script src="js/app.js?v=4"></script>
+  <script src="js/components.js?v=1"></script>
+  <script src="js/comp-widget.js?v=1"></script>
+  <script src="js/app.js?v=5"></script>
   <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
   <script src="/site-analytics.js?v=20260607-analytics"></script>
 </body>

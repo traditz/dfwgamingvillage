@@ -608,3 +608,10 @@ main { position: relative; z-index: 1; max-width: 1060px; margin: 0 auto; paddin
   *, *::before, *::after { transition: none !important; animation: none !important; }
   html { scroll-behavior: auto; }
 }
+
+/* Components glossary (css/components.css) — tokens from this page's palette */
+#components {
+  --comp-surface: var(--card); --comp-fig: #dbe0ed; --comp-ink: var(--ink); --comp-muted: var(--ink-2);
+  --comp-line: var(--ctl); --comp-accent: var(--navy); --comp-accent-ink: var(--gold);
+  --comp-head-font: var(--serif); --comp-radius: 16px;
+}

@@ -551,3 +551,10 @@ section h2::after {
   html { scroll-behavior: auto; }
   .chip:hover, .pbtn:hover, #teachBtn:hover { transform: none; }
 }
+
+/* Components glossary (css/components.css) — tokens from this page's palette */
+#components {
+  --comp-surface: #fbfcfd; --comp-fig: #e8eaee; --comp-ink: var(--ink); --comp-muted: var(--ink-2);
+  --comp-line: var(--frame); --comp-accent: var(--aegean); --comp-accent-ink: #ffffff;
+  --comp-head-font: var(--sans); --comp-radius: 3px;
+}

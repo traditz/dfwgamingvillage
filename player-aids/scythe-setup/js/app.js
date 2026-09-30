@@ -490,6 +490,7 @@
     renderReference(c);
     renderTeach(c);
     doSearch();
+    document.dispatchEvent(new CustomEvent("aid:config", { detail: Object.assign({}, c, { spoil: (x) => docVisible(x, c) }) }));   // components glossary (js/comp-widget.js); c carries the spoiler gates, spoil(x) = the search's gate
   }
 
   // expose a read-only hook for the test harness

@@ -606,3 +606,11 @@ main::after{
   *,*::before,*::after{transition:none !important; animation:none !important; scroll-behavior:auto !important}
   .pbtn.on{transform:none}
 }
+
+/* Components glossary (css/components.css) — tokens from this page's palette (the rulebook parchment,
+   the red "Example" boxes, the Amarante display face). --comp-fig = median corner colour of the crops. */
+#components {
+  --comp-surface: var(--page-card); --comp-fig: #e1d9cf; --comp-ink: var(--ink); --comp-muted: var(--ink-3);
+  --comp-line: var(--line-ui); --comp-accent: var(--red); --comp-accent-ink: var(--on-red);
+  --comp-head-font: "Amarante", Georgia, serif; --comp-radius: 3px;
+}

@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Aladin&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Macondo&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css?v=2">
+  <link rel="stylesheet" href="css/components.css?v=1">
 </head>
 <body>
   <!-- The page is laid out like the two rulebooks: the Learn to Play (sea-glass mint, purple ink) for the
@@ -64,6 +65,12 @@
     <div class="waterline" aria-hidden="true"><img src="images/ship.webp" width="511" height="352" alt=""></div>
 
     <div class="book book-rr">
+      <section class="sec sec-comp" id="components" aria-labelledby="comp-h" hidden>
+        <h2 id="comp-h">Components</h2>
+        <p class="sec-note">Every component the rulebooks picture for the sets you’ve selected, with its count — tap a picture to enlarge it. From the Abyss swaps in its updated title cards and reference sheets.</p>
+        <div id="aid-comp"></div>
+      </section>
+
       <section class="sec sec-ref" aria-label="Reference">
         <h2>Rules Reference</h2>
         <p class="sec-note">Tap a heading to open it. Contents adapt to your sets, mode and player count. Citations: Learn to Play, Rules Ref (with its § paragraph numbers), From the Abyss; the Unofficial FAQ is labelled and never overrides the books.</p>
@@ -93,7 +100,9 @@
 
   <script src="js/data.js?v=1"></script>
   <script src="js/rules.js?v=1"></script>
-  <script src="js/app.js?v=1"></script>
+  <script src="js/components.js?v=1"></script>
+  <script src="js/comp-widget.js?v=1"></script>
+  <script src="js/app.js?v=2"></script>
   <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
   <script src="/site-analytics.js?v=20260607-analytics"></script>
 </body>

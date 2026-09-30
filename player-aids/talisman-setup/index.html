@@ -7,7 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amarante&family=Cinzel:wght@700&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=5">
+  <link rel="stylesheet" href="css/styles.css?v=6">
+  <link rel="stylesheet" href="css/components.css?v=1">
 </head>
 <body>
   <!-- Header = the box lid: the cover's red dragon, the steel-and-gold TALISMAN wordmark and the lid's gold filigree -->
@@ -71,6 +72,11 @@
     <!-- ============ GAME REFERENCE ============ -->
     <section class="view" id="view-reference">
       <nav class="jump-nav" id="refNav" aria-label="Jump to section"></nav>
+      <section class="ref-card" id="components" aria-labelledby="comp-h" hidden>
+        <h2 id="comp-h">Components</h2>
+        <p class="ref-intro">Every component the rulebooks list for the content you’ve chosen on the Setup tab, with its count. Tap a picture to enlarge it. Optional Alternative Ending cards appear when that endgame is chosen, and the Cataclysm board replaces the base game’s.</p>
+        <div id="aid-comp"></div>
+      </section>
       <div id="refBody"></div>
     </section>
 
@@ -84,7 +90,9 @@
   </footer>
 
   <script src="js/data.js?v=4"></script>
-  <script src="js/app.js?v=2"></script>
+  <script src="js/components.js?v=1"></script>
+  <script src="js/comp-widget.js?v=1"></script>
+  <script src="js/app.js?v=3"></script>
 <!-- DFW Gaming Village site analytics -->
 <script src="/site-analytics.js?v=20260607-analytics"></script>
 </body>

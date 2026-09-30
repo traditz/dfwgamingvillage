@@ -569,3 +569,10 @@ main{max-width:1140px; margin:0 auto; padding:52px 28px 72px}
   *,*::before,*::after{animation:none !important; transition:none !important}
   .pbtn:hover::before{transform:none}
 }
+
+/* Components glossary (css/components.css) — tokens from this page's palette */
+#components {
+  --comp-surface: #f8f8f8; --comp-fig: #f1f1f1; --comp-ink: var(--ink); --comp-muted: var(--ink-2);
+  --comp-line: var(--ctl); --comp-accent: var(--iron); --comp-accent-ink: #ffffff;
+  --comp-head-font: var(--display); --comp-radius: 4px;
+}

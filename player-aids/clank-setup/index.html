@@ -10,6 +10,7 @@
   <!-- The Clank! rulebooks are set in Alegreya Bold (ribbon headings) and Lora (body) -->
   <link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@700;800&family=Lora:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css?v=4">
+  <link rel="stylesheet" href="css/components.css?v=1">
 </head>
 <body>
   <div class="sheet">
@@ -67,6 +68,12 @@
         <div id="setup"></div>
       </section>
 
+      <section id="components" aria-labelledby="comp-h" hidden>
+        <h2 id="comp-h">Components</h2>
+        <p class="sec-note">Every component the rulebooks picture for the sets, board and party size you’ve selected, with its count. Tap a picture to enlarge it.</p>
+        <div id="aid-comp"></div>
+      </section>
+
       <section aria-label="Reference">
         <h2>Rules Reference</h2>
         <p class="sec-note">Tap a heading to open it. Contents adapt to your sets, board and player count.</p>
@@ -94,7 +101,9 @@
 
   <script src="js/data.js?v=2"></script>
   <script src="js/rules.js?v=1"></script>
-  <script src="js/app.js?v=1"></script>
+  <script src="js/components.js?v=1"></script>
+  <script src="js/comp-widget.js?v=1"></script>
+  <script src="js/app.js?v=2"></script>
   <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
   <script src="/site-analytics.js?v=20260607-analytics"></script>
 </body>

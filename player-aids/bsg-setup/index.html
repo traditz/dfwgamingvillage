@@ -8,7 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Michroma&family=Saira:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap">
-  <link rel="stylesheet" href="css/styles.css?v=61">
+  <link rel="stylesheet" href="css/styles.css?v=62">
+  <link rel="stylesheet" href="css/components.css?v=1">
 </head>
 <body>
   <!-- .topbar is read by app.js (syncTopbarHeight). It is display:contents, so its
@@ -52,6 +53,13 @@
       <div id="gallery" class="gallery"></div>
     </section>
 
+    <!-- Components glossary (js/comp-widget.js): follows the expansions, modules and setup chosen above -->
+    <section class="detail" id="components" aria-labelledby="comp-h" hidden>
+      <div class="section-head"><h2 id="comp-h">Components</h2></div>
+      <p class="legend">Every component pictured in the rulebooks for the expansions you’ve selected, with its count. Tap a picture to enlarge it. Once you pick a setup, pieces that only other objectives use drop out.</p>
+      <div id="aid-comp"></div>
+    </section>
+
     <!-- Detail -->
     <section id="detail" class="detail"></section>
   </main>
@@ -64,7 +72,9 @@
 
   <script src="js/data.js?v=52"></script>
   <script src="js/rules.js?v=51"></script>
-  <script src="js/app.js?v=52"></script>
+  <script src="js/components.js?v=1"></script>
+  <script src="js/comp-widget.js?v=1"></script>
+  <script src="js/app.js?v=53"></script>
   <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
   <script src="/site-analytics.js?v=20260607-analytics"></script>
 </body>

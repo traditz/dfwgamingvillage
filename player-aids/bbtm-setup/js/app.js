@@ -291,7 +291,9 @@ function teamCard(t) {
 }
 
 /* ---- Tabs & boot --------------------------------------------------------- */
-function renderAll() { renderConfig(); renderSetup(); renderTeach(); }
+function renderAll() { renderConfig(); renderSetup(); renderTeach();
+  document.dispatchEvent(new CustomEvent("aid:config", { detail: Object.assign(ctx(), { mod: id => state.options.has(id) }) }));   // components glossary (js/comp-widget.js); mod = optional rule on
+}
 
 function switchTab(tab) {
   state.tab = tab;

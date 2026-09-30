@@ -755,3 +755,10 @@ figure.tall img{width:auto; max-width:100%; max-height:640px}
   .chip, .pbtn, .card, .share-btn, .jump-nav .jn{border:2px solid ButtonText}
   .chip.on, .pbtn.on, .card.active{outline:3px solid Highlight}
 }
+
+/* Components glossary (css/components.css) — tokens from this page's palette */
+#components{
+  --comp-surface:var(--paper); --comp-fig:#dde2e6; --comp-ink:var(--ink); --comp-muted:var(--muted);
+  --comp-line:var(--edge); --comp-accent:var(--red-ink); --comp-accent-ink:#ffffff;
+  --comp-head-font:var(--sans); --comp-radius:3px;
+}

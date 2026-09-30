@@ -65,8 +65,10 @@ GW.phases = [
           return s.join(" · ");
         } },
       { when: () => true, exp: (c) => (c.mode === "coop" || c.mod("gk") || c.mod("ac") || c.mod("rat")) ? "mod" : "core",
-        t: (c) => c.mode === "coop" ? "Emperor's Requests (co-op)" : "Artifacts",
+        t: (c) => c.mode === "coop" ? (c.mod("ac") ? "Artifacts (Ancient Chronicles co-op Scenario)" : "Emperor's Requests (co-op)") : "Artifacts",
         d: (c) => {
+          if (c.mode === "coop" && c.mod("ac")) return "<ul><li>The co-op Scenarios (<i>Siege of Diaoyucheng</i>, <i>Red Turban Rebellion</i>) don't use the <b>Emperor's Requests</b>.</li><li>Shuffle the <b>Ancient Chronicles Artifacts</b> with the base <b>Artifact cards</b> and place <b>3</b> face up at random on the Artifact slots, as normal; return the rest to the box. Their effects are active <b>all game</b>, not just at scoring.</li>" +
+            (c.mod("gk") ? "<li><b>Genghis Khan:</b> draw 1 random <b>Emperor's Award</b> card, place it near the board with the Emperor's Award model on it.</li>" : "") + "</ul>";
           if (c.mode === "coop") return "<ul><li>Artifact cards are <b>not used</b>. Shuffle the <b>Emperor's Request cards</b> into a face-down deck near the board" + (c.p === 2 ? " — with 2 players, first remove <i>Taunt them and prevail</i>, <i>Warriors for Emperor's guard</i>, <i>Glory belongs to the Emperor</i> and <i>Royal escort for Emperor's officials</i>" : "") + ".</li><li>Draw " + (c.p === 2 ? "<b>2</b> Requests (the third slot is unused)" : "<b>3</b> Requests") + " and place them on the Artifact slots.</li>" +
             (c.mod("gk") ? "<li><b>Genghis Khan:</b> draw 1 random <b>Emperor's Award</b> card, place it near the board with the Emperor's Award model on it.</li>" : "") + "</ul>";
           const mixes = [];
@@ -77,6 +79,7 @@ GW.phases = [
             (c.mod("gk") ? "<li><b>Genghis Khan:</b> draw 1 random <b>Emperor's Award</b> card, place it near the board with the Emperor's Award model on it.</li>" : "") + "</ul>";
         },
         src: (c) => {
+          if (c.mode === "coop" && c.mod("ac")) return "Core p.14 · Stretch Goals " + (c.mod("gk") ? "p.3–4" : "p.4") + ", p.6–7";
           if (c.mode === "coop") return c.mod("gk") ? "Core p.14 · Stretch Goals p.3" : "Core p.14";
           const s = ["Core p.5"];
           if (c.mod("ac")) s.push("Stretch Goals p.4");
@@ -317,7 +320,13 @@ GW.reference = [
   {
     title: "End of the Game & Scoring",
     when: () => true,
-    html: (c) => c.mode === "coop"
+    html: (c) => c.mode === "coop" && c.mod("ac")
+      ? "<ul><li><b>Ancient Chronicles co-op Scenario:</b> the Emperor's Requests aren't used. <b>Win</b> by surviving to the end of the last Year:<ul>" +
+        "<li><b>Siege of Diaoyucheng:</b> the Fortress's Defense never drops below 1 — each Winter it falls by the Shame tokens beside the Scenario card, and Defense 0 is an immediate loss.</li>" +
+        "<li><b>Red Turban Rebellion:</b> no Breach ever takes place. The game is 1 Year shorter (the Shame token on the Time track marks it).</li></ul></li>" +
+        "<li><b>Lose</b> (both): a player must take a Shame token and the pool is empty" + (c.has("bp") ? ", or all Wall levels are destroyed (Black Powder)" : "") + ".</li>" +
+        "<li>Each Winter a new co-op <b>Event</b> is revealed (end of Winter — FAQ errata); Event passives persist.</li></ul>"
+      : c.mode === "coop"
       ? "<ul><li><b>Win:</b> fulfill the required Emperor's Requests — <b>6/7/9/9</b> for 2/3/4/5 players — checked each Winter. Requests are paid whole, at the Request-fulfillment step only, each player covering their own share; <b>Sacrificed</b> pieces leave the game.</li>" +
         "<li>Each Winter after the End Game check: everyone takes 1 Shame token per unfulfilled Request on the board, empty Request slots refill, and a new <b>Event</b> is revealed (end of Winter — FAQ errata); Event passives persist.</li>" +
         "<li><b>Lose:</b> a Shame token is due and the pool is empty (immediately), or the Time token reaches the last slot" + (c.has("bp") ? ", or all Wall levels are destroyed (Black Powder)" : "") + ". The wall-building end condition doesn't apply.</li></ul>"
@@ -326,6 +335,7 @@ GW.reference = [
         (c.mode === "solo" ? "<li><b>Solo:</b> beat Qin Jiushao's total. He scores 20 Honor per Artifact automatically. If the Shame pool empties, you lose outright.</li>" : "") + "</ul>",
     src: (c) => {
       const s = [c.mode === "coop" ? "Core p.14 · FAQ" : (c.mode === "solo" ? "Core p.11, p.13" : "Core p.11")];
+      if (c.mode === "coop" && c.mod("ac")) s.push("Stretch Goals p.6–7");
       if (c.mod("gk") && c.mode !== "coop") s.push("Stretch Goals p.3");
       if (c.has("bp")) s.push("Black Powder p.4");
       return s.join(" · ");
@@ -416,7 +426,9 @@ GW.teach = {
   sections: [
     {
       h: "The hook — and how you win",
-      body: (c) => c.mode === "coop"
+      body: (c) => c.mode === "coop" && c.mod("ac")
+        ? "<p>The Mongol Horde is at the Great Wall and, for once, we're on the same side. Tonight's <b>Scenario</b> replaces the Emperor's Requests: we win by <b>surviving to the end of the last Year</b>, and its card tells us exactly what we must never let happen. If anyone must take a Shame token when the pool is empty, we all lose on the spot. Each Winter ends with a new <b>Event</b> card whose effects stay for the rest of the game.</p>"
+        : c.mode === "coop"
         ? "<p>The Mongol Horde is at the Great Wall and, for once, we're on the same side. The Emperor sends <b>Requests</b> — costly demands we must pay off together, one per Artifact slot. Fulfill <b>" + ({2:"six",3:"seven",4:"nine",5:"nine"}[c.p] || "the required number of") + "</b> of them and we win. But every unfulfilled Request breeds <b>Shame</b> each year, and if anyone must take a Shame token when the pool is empty — we all lose on the spot. Time is against us too, and each Winter ends with a new <b>Event</b> card whose effects stay for the rest of the game.</p>"
         : c.mode === "solo"
         ? "<p>You are a Song general holding the Great Wall — against the Horde in front and the flawless bureaucrat <b>Qin Jiushao</b> beside you. He earns Honor with machine-like efficiency and pays for nothing; you must simply finish with <b>more Honor</b> than him. The wretched <b>Reed Clan</b> shuffles between you both — and only you can profit from commanding it; Qin never does.</p>"
@@ -471,7 +483,7 @@ GW.teach = {
         items.push("<li><b>Exact Embassy pricing</b> — Advisors cost as many Gold as you'll then own.</li>");
         if (c.has("bp")) items.push("<li><b>War Machine Shot cards</b> — each machine's card shows where its wounds land (Rockets draw a random one); wounds on already-wounded or missing spots are wasted.</li>");
         if (c.mod("gk")) items.push("<li><b>The Khan's numbered spots</b> — some only activate at higher player counts.</li>");
-        if (c.mode === "coop") items.push("<li><b>Request wording</b> — payments are all-at-once, at the year-end step only.</li>");
+        if (c.mode === "coop" && !c.mod("ac")) items.push("<li><b>Request wording</b> — payments are all-at-once, at the year-end step only.</li>");
         items.push("<li><b>End-game timing</b> — conditions are only checked at the end of Winter" + ((c.mode === "coop" || c.has("bp") || c.mod("ac")) ? " (the instant losses aside)" : "") + ".</li>");
         return "<ul>" + items.join("") + "</ul>";
       }

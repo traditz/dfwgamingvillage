@@ -197,7 +197,7 @@ EH.phases = [
           const xg = [["mom", "Mountains of Madness"], ["utp", "Under the Pyramids"], ["mon", "Masks"]].filter(e => c.has(e[0]));
           return "<ul><li><b>Gate stack:</b> randomize the nine Gate tokens" + (xg.length ? " (" + ["twelve", "fifteen", "eighteen"][xg.length - 1] + " with the three non-side-board Gates from " + (xg.length > 1 ? "each of " : "") + xg.map(e => e[1]).join(", ") + ")" : "") + " facedown, common side up." + (sb ? " <b>Add the side board's three Gates first</b> — they shuffle into the stack." : "") + "</li>" +
           "<li><b>Clue pool:</b> all Clue tokens facedown (common side up), randomized." + (sb ? " <b>Add the side board's Clues</b> (" + (sb === "dreamlands" ? "seven" : "six") + ") before randomizing.</li>" : "</li>") +
-          "<li><b>General pool:</b> Health, Sanity, Improvement, Travel Ticket, Eldritch, Mystery and Rumor tokens" + ((c.has("mom") || c.has("sr") || c.has("td") || c.has("mon")) ? ", plus Focus" : "") + ((c.has("utp") || c.has("soc")) ? ", Impairment" : "") + ((c.has("mon")) ? ", Resource" : "") + ((c.has("cir")) ? ", Devastation" : "") + " tokens in reach of everyone.</li></ul>";
+          "<li><b>General pool:</b> Health, Sanity, Improvement, Travel Ticket, Eldritch, Mystery and Rumor" + ((c.has("mom") || c.has("sr") || c.has("td") || c.has("mon")) ? ", plus Focus" : "") + ((c.has("utp") || c.has("soc")) ? ", Impairment" : "") + ((c.has("mon")) ? ", Resource" : "") + ((c.has("cir")) ? ", Devastation" : "") + " tokens in reach of everyone.</li></ul>";
         },
         src: (c) => {
           const sb = EH.helpers.sideBoard(c);

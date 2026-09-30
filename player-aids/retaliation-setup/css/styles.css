@@ -889,3 +889,10 @@ button:focus-visible, a:focus-visible, summary:focus-visible {
   *, *::before, *::after { transition: none !important; animation: none !important; }
   html { scroll-behavior: auto; }
 }
+
+/* Components glossary (css/components.css) — tokens from this page's palette */
+#components {
+  --comp-surface: var(--panel); --comp-fig: #24302f; --comp-ink: var(--ice); --comp-muted: var(--ice-3);
+  --comp-line: var(--line-ui); --comp-accent: var(--jade); --comp-accent-ink: #0f1a17;
+  --comp-head-font: var(--f-display); --comp-radius: 4px;
+}

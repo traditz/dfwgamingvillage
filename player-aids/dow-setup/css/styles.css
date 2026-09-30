@@ -522,3 +522,10 @@ mark{color:inherit; background:linear-gradient(180deg, transparent 10%, #f0d46a 
   html{scroll-behavior:auto}
   *,*::before,*::after{transition:none !important; animation:none !important}
 }
+
+/* Components glossary (css/components.css) — tokens from this page's palette */
+#components {
+  --comp-surface: var(--card); --comp-fig: #e3ddd3; --comp-ink: var(--ink); --comp-muted: var(--muted);
+  --comp-line: #766c64; --comp-accent: var(--blood); --comp-accent-ink: #ffffff;
+  --comp-head-font: var(--serif); --comp-radius: 6px;
+}

@@ -614,3 +614,10 @@ section h2::after {                        /* short chamfered bar below */
   *, *::before, *::after { transition: none !important; }
   html { scroll-behavior: auto; }
 }
+
+/* Components glossary (css/components.css) — tokens from this page's palette */
+#components {
+  --comp-surface: var(--panel); --comp-fig: #f2f3ef; --comp-ink: var(--ink-strong); --comp-muted: var(--ink-soft);
+  --comp-line: var(--ctl); --comp-accent: var(--plum); --comp-accent-ink: #ffffff;
+  --comp-head-font: var(--font); --comp-radius: 6px;
+}

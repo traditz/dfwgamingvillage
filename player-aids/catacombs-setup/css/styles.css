@@ -688,3 +688,10 @@ li::marker { color: var(--teal); }
   html { scroll-behavior: auto; }
   .chip:hover, .mod:hover, .pbtn:hover, #teachBtn:hover, .teach-copy:hover { transform: none; }
 }
+
+/* Components glossary (css/components.css) — tokens from this page's palette */
+#components {
+  --comp-surface: var(--paper-hi); --comp-fig: #f0e2d1; --comp-ink: var(--text); --comp-muted: var(--muted);
+  --comp-line: var(--rule); --comp-accent: var(--teal-ink); --comp-accent-ink: #ffffff;
+  --comp-head-font: var(--f-head); --comp-radius: 3px;
+}

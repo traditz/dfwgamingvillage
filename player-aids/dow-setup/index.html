@@ -8,7 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Caveat+Brush&family=League+Gothic&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400;1,6..72,600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=7">
+  <link rel="stylesheet" href="css/styles.css?v=8">
+  <link rel="stylesheet" href="css/components.css?v=1">
 </head>
 <body>
   <header class="topbar">
@@ -47,6 +48,11 @@
       <span class="teach-hint">A five-minute read-aloud teach for exactly this setup</span>
     </div>
     <div id="teach" class="teach-panel" hidden></div>
+    <section class="reference" id="components" aria-labelledby="comp-h" hidden>
+      <h2 class="dh-mode" id="comp-h">Components</h2>
+      <p class="legend">Every component the rulebooks list for the sets you’ve selected, with its count and the rulebook’s picture where there is one. It follows your modules, variants and mode, leaving out pieces your game won’t use. Tap a picture to enlarge it.</p>
+      <div id="aid-comp"></div>
+    </section>
     <section id="detail" class="detail"></section>
   </main>
 
@@ -59,7 +65,9 @@
 
   <script src="js/data.js?v=7"></script>
   <script src="js/rules.js?v=5"></script>
-  <script src="js/app.js?v=6"></script>
+  <script src="js/components.js?v=1"></script>
+  <script src="js/comp-widget.js?v=1"></script>
+  <script src="js/app.js?v=7"></script>
   <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
   <script src="/site-analytics.js?v=20260607-analytics"></script>
 </body>

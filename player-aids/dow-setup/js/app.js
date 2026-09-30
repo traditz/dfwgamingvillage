@@ -554,7 +554,7 @@ function copyShareLink(btn) {
   );
 }
 
-function renderAll() { renderConfigurator(); renderDetail(); renderTeach(); syncUrl(); }
+function renderAll() { renderConfigurator(); renderDetail(); renderTeach(); syncUrl(); document.dispatchEvent(new CustomEvent("aid:config", { detail: ctx() })); /* components glossary (js/comp-widget.js) */ }
 
 /* Dock the sticky jump-nav under the variable-height topbar; offset anchors. */
 function syncTopbarHeight() {

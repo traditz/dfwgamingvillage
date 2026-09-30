@@ -530,3 +530,10 @@ section h2::after {          /* gold rule ending in a thunder-spiral, like the r
   * { transition: none !important; }
   html { scroll-behavior: auto; }
 }
+
+/* Components glossary (css/components.css) — tokens from this page's palette */
+#components {
+  --comp-surface: var(--paper-hi); --comp-fig: #f8f6f3; --comp-ink: var(--ink); --comp-muted: var(--ink-2);
+  --comp-line: var(--ctl); --comp-accent: var(--slate); --comp-accent-ink: #ffffff;
+  --comp-head-font: var(--f-display); --comp-radius: 3px;
+}

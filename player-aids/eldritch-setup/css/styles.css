@@ -813,3 +813,12 @@ section:first-of-type > h2 { margin-top: 34px; }
   html { scroll-behavior: auto; }
   .chip:hover, .ao-btn:hover, .pbtn:hover, .mod:hover, #teachBtn:hover, .teach-copy:hover { transform: none; }
 }
+
+/* Components glossary (css/components.css) — tokens from this page's palette: card parchment, the
+   rulebook's crimson sidebar ink for the count badges, the page's display face. --comp-fig is the median
+   corner colour of the crops (the rulebook paper), so no box shows around each picture. */
+#components {
+  --comp-surface: var(--card); --comp-fig: #f5e7d5; --comp-ink: var(--ink); --comp-muted: var(--ink-soft);
+  --comp-line: var(--ctl); --comp-accent: var(--crimson); --comp-accent-ink: #fdf8ee;
+  --comp-head-font: var(--f-head); --comp-radius: 6px;
+}

@@ -523,3 +523,10 @@ section:first-child > h2 { margin-top: 40px; }
   .pbtn:hover, #teachBtn:hover, .teach-copy:hover { transform: none; }
   .pbtn.on:hover { transform: rotate(-8deg) translateY(-2px); }
 }
+
+/* Components glossary (css/components.css) — tokens from this page's palette */
+#components {
+  --comp-surface: var(--paper); --comp-fig: #e7f0f4; --comp-ink: var(--ink); --comp-muted: var(--ink-soft);
+  --comp-line: var(--ctl); --comp-accent: var(--magenta); --comp-accent-ink: #ffffff;
+  --comp-head-font: var(--display); --comp-radius: 14px;
+}

@@ -1,0 +1,85 @@
+/* =============================================================================
+   Clank! Catacombs — Components glossary data (standard v1.1; rendered by js/comp-widget.js)
+   Sources (component lists): Catacombs Rulebook & Token Reference Guide p.2–3 (image-only: read visually) ·
+   Lairs & Lost Chambers p.3 · Underworld p.2–3 · Adventuring Party p.1. Pictures cropped from those pages.
+   Gating: the Underworld Market Board replaces the Catacombs one (Underworld p.4), so the Catacombs board is hidden
+   with Underworld. Adventuring Party components follow "Party in the Catacombs!" (Core p.15): used at 5–6 players,
+   except the Master Key (no Master Keys in Catacombs) and the 30-point Artifact. Character boards, decks and tokens
+   show with the Characters module (Adventuring Party p.5), and then replace the regular starting decks; the two
+   extra regular decks show only at 5–6 players without characters (Adventuring Party p.2).
+   ============================================================================= */
+window.AID_COMPONENTS = {
+  sets: [
+    { id: "base", name: "Clank! Catacombs", src: "Core p.2–3" },
+    { id: "lairs", name: "Lairs & Lost Chambers", src: "Lairs p.3", when: (c) => c.has("lairs") },
+    { id: "uw", name: "Underworld", src: "Underworld p.2–3", when: (c) => c.has("uw") },
+    { id: "party", name: "Adventuring Party", src: "Adventuring Party p.1", fig: "#b69e84", when: (c) => c.has("party") }
+  ],
+  items: [
+    { set: "base", name: "Clank! board", img: "base-clank-board.webp", w: 320, h: 281 },
+    { set: "base", qty: "1", name: "Double-sided starting tile", img: "base-starting-tile.webp", w: 175, h: 320 },
+    { set: "base", qty: "28", name: "Square tiles", note: "22 in the Depths, 6 in safety", img: "base-square-tiles.webp", w: 320, h: 262 },
+    { set: "base", name: "Dragon marker", img: "base-dragon-marker.webp", w: 183, h: 253 },
+    { set: "base", name: "Dragon bag", img: "base-dragon-bag.webp", w: 306, h: 320 },
+    { set: "base", qty: "24", name: "Dragon cubes", img: "base-dragon-cubes.webp", w: 153, h: 146 },
+    { set: "base", qty: "120", name: "Clank! cubes", note: "30 of each player color", img: "base-clank-cubes.webp", w: 320, h: 289 },
+    { set: "base", qty: "4", name: "Player pawns", img: "base-pawns.webp", w: 320, h: 101 },
+    { set: "base", qty: "5", name: "Ghost cubes", img: "base-ghost-cubes.webp", w: 126, h: 105 },
+    { set: "base", name: "Reserve cards", note: "15 Mercenary, 15 Explore, 12 Secret Tome, 1 Goblin", img: "base-reserve-cards.webp", w: 320, h: 166 },
+    { set: "base", qty: "4", name: "10-card starting decks", note: "Each containing 6 Burgle, 2 Stumble, 1 Sidestep, 1 Scramble", img: "base-starting-decks.webp", w: 320, h: 161, when: (c) => !c.mod("chars") },
+    { set: "base", qty: "100", name: "Dungeon Deck cards", img: "base-dungeon-deck.webp", w: 320, h: 142 },
+    { set: "base", name: "Token Reference Guide", note: "Rules supplement", img: "base-token-guide.webp", w: 320, h: 315 },
+    { set: "base", name: "Market Board", img: "base-market-board.webp", w: 320, h: 141, when: (c) => !c.has("uw") },
+    { set: "base", qty: "7", name: "Artifacts", img: "base-artifacts.webp", w: 320, h: 183 },
+    { set: "base", qty: "11", name: "Major secrets", img: "base-major-secrets.webp", w: 320, h: 239 },
+    { set: "base", qty: "20", name: "Minor secrets", img: "base-minor-secrets.webp", w: 259, h: 214 },
+    { set: "base", qty: "2", name: "Backpacks", img: "base-backpacks.webp", w: 162, h: 153 },
+    { set: "base", qty: "2", name: "Blood Amulets", img: "base-blood-amulets.webp", w: 170, h: 160 },
+    { set: "base", qty: "3", name: "Burglar’s Kits", img: "base-burglars-kits.webp", w: 187, h: 160 },
+    { set: "base", qty: "3", name: "Crowns", img: "base-crowns.webp", w: 178, h: 160 },
+    { set: "base", qty: "20", name: "Prisoners", img: "base-prisoners.webp", w: 320, h: 183 },
+    { set: "base", qty: "3", name: "Monkey Idols", img: "base-monkey-idols.webp", w: 287, h: 172 },
+    { set: "base", qty: "4", name: "Mastery tokens", note: "One per player; return the extras to the box (Core p.4)", img: "base-mastery-tokens.webp", w: 276, h: 171 },
+    { set: "base", name: "Gold", note: "Valued 1, 5 and 10. Not limited: substitute if you run out (Core p.4)", img: "base-gold.webp", w: 320, h: 108 },
+    { set: "base", qty: "24", name: "Lockpicks", note: "Not limited: substitute if you run out (Core p.4)", img: "base-lockpicks.webp", w: 320, h: 154 },
+    { set: "lairs", qty: "50", name: "Dungeon Deck cards", img: "lairs-dungeon-cards.webp", w: 320, h: 161 },
+    { set: "lairs", qty: "12", name: "Square tiles", note: "10 in the Depths, 2 in safety", img: "lairs-square-tiles.webp", w: 320, h: 160 },
+    { set: "lairs", qty: "5", name: "Monster markers", note: "3 Living Statues, 1 Medusa, 1 Sphinx", img: "lairs-monster-markers.webp", w: 320, h: 270 },
+    { set: "uw", name: "Underworld starting tile", img: "uw-starting-tile.webp", w: 320, h: 293 },
+    { set: "uw", qty: "7", name: "Underworld tiles", img: "uw-underworld-tiles.webp", w: 320, h: 171 },
+    { set: "uw", qty: "6", name: "Depths tiles", note: "Three are used each game, chosen at random (Underworld p.4)", img: "uw-depths-tiles.webp", w: 320, h: 180 },
+    { set: "uw", qty: "50", name: "Dungeon Deck cards", img: "uw-dungeon-cards.webp", w: 320, h: 152 },
+    { set: "uw", qty: "22", name: "Fate Deck cards", img: "uw-fate-cards.webp", w: 320, h: 159 },
+    { set: "uw", qty: "4", name: "Prisoners", img: "uw-prisoners.webp", w: 320, h: 268 },
+    { set: "uw", qty: "6", name: "Major secrets", img: "uw-major-secrets.webp", w: 304, h: 252 },
+    { set: "uw", qty: "6", name: "Minor secrets", img: "uw-minor-secrets.webp", w: 261, h: 224 },
+    { set: "uw", qty: "6", name: "Market items", note: "The River Lamp joins the top row; the other five go in the bottom row (Underworld p.4)", img: "uw-market-items.webp", w: 320, h: 191 },
+    { set: "uw", name: "Undercoins", note: "20 worth 1; 2 worth 5. Not limited: substitute if you run out", img: "uw-undercoins.webp", w: 320, h: 118 },
+    { set: "uw", name: "Magic Lyre", note: "16-point artifact", img: "uw-magic-lyre.webp", w: 184, h: 178 },
+    { set: "uw", qty: "3", name: "Artifact Enhancers", img: "uw-artifact-enhancers.webp", w: 256, h: 161 },
+    { set: "uw", qty: "5", name: "Ladder tokens", img: "uw-ladder-tokens.webp", w: 281, h: 139 },
+    { set: "uw", qty: "8", name: "Harpy tokens", img: "uw-harpy-tokens.webp", w: 320, h: 197 },
+    { set: "uw", name: "Market Board", note: "Replaces the Catacombs Market Board (Underworld p.4)", img: "uw-market-board.webp", w: 320, h: 131 },
+    { set: "uw", qty: "3", name: "Imp Assistants", img: "uw-imp-assistants.webp", w: 320, h: 239 },
+    { set: "uw", name: "Underworld Guardian marker and Monster card", img: "uw-guardian.webp", w: 320, h: 267 },
+    { set: "uw", qty: "4", name: "Reference cards", img: "uw-reference-cards.webp", w: 320, h: 289 },
+    { set: "uw", name: "Monkey Shrine replacement", note: "Only with the back side of the Underworld starting tile (Underworld p.5)", img: "uw-monkey-shrine.webp", w: 257, h: 320 },
+    { set: "party", qty: "35", name: "Dungeon Deck cards", img: "party-dungeon-cards.webp", w: 320, h: 267, when: (c) => c.p >= 5 },
+    { set: "party", qty: "12", name: "Reserve cards", note: "4 Mercenary, 4 Explore, 4 Secret Tome", img: "party-reserve-cards.webp", w: 320, h: 213, when: (c) => c.p >= 5 },
+    { set: "party", qty: "2", name: "Regular 10-card starting decks", note: "For the fifth and sixth players, identical to the others (Adventuring Party p.2)", img: "party-regular-decks.webp", w: 320, h: 124, when: (c) => c.p >= 5 && !c.mod("chars") },
+    { set: "party", qty: "6", name: "10-card Character starting decks", note: "Characters module: each replaces a player’s regular starting deck (Adventuring Party p.5)", img: "party-character-decks.webp", w: 320, h: 151, when: (c) => c.mod("chars") },
+    { set: "party", qty: "60", name: "Clank! cubes", note: "30 in two new player colors", img: "party-clank-cubes.webp", w: 245, h: 141, when: (c) => c.p >= 5 },
+    { set: "party", qty: "6", name: "Player pawns", img: "party-pawns.webp", w: 320, h: 227, when: (c) => c.p >= 5 },
+    { set: "party", name: "Boss marker", note: "Optional: may replace the Dragon marker (Adventuring Party p.2)", img: "party-boss-marker.webp", w: 319, h: 255, when: (c) => c.p >= 5 },
+    { set: "party", name: "Side board", note: "Tracks the Dragon’s rage and the fifth and sixth players’ health (Core p.15)", img: "party-side-board.webp", w: 320, h: 42, when: (c) => c.p >= 5 },
+    { set: "party", qty: "1 each", name: "Backpack, Crown and Master Key", note: "Leave the Master Key out: Catacombs has no Master Keys (Core p.15)", img: "party-market-items.webp", w: 239, h: 151, when: (c) => c.p >= 5 },
+    { set: "party", qty: "5", name: "Artifacts", note: "Use four: the 10-, 15-, 20- and 25-point Artifacts, not the 30 (Core p.15)", img: "party-artifacts.webp", w: 172, h: 129, when: (c) => c.p >= 5 },
+    { set: "party", qty: "3", name: "Invisibility Cloaks", img: "party-cloaks.webp", w: 172, h: 98, when: (c) => c.p >= 5 },
+    { set: "party", name: "Market Board", img: "party-market-board.webp", w: 320, h: 155, when: (c) => c.p >= 5 },
+    { set: "party", name: "Gold", img: "party-gold.webp", w: 282, h: 196, when: (c) => c.p >= 5 },
+    { set: "party", qty: "6", name: "Character boards", note: "Characters module (Adventuring Party p.5)", img: "party-character-boards.webp", w: 320, h: 193, when: (c) => c.mod("chars") },
+    { set: "party", qty: "2", name: "Mastery tokens", img: "party-mastery-tokens.webp", w: 166, h: 121, when: (c) => c.p >= 5 },
+    { set: "party", name: "Character tokens", note: "4 Conscription, 1 Carnage, 10 Mana, 7 Cogwheel, 3 Behavior", img: "party-character-tokens.webp", w: 320, h: 60, when: (c) => c.mod("chars") },
+    { set: "party", qty: "18", name: "Minor secrets", img: "party-minor-secrets.webp", w: 166, h: 123, when: (c) => c.p >= 5 }
+  ]
+};
