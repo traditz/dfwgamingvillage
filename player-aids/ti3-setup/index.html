@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Twilight Imperium 3rd Edition — Setup &amp; Reference Utility</title>
+  <meta name="description" content="Setup steps for 3–8 players with Shattered Empire and Shards of the Throne, a full rules reference with the official FAQ &amp; errata applied, a teaching script and a searchable index of every Twilight Imperium 3rd Edition rulebook.">
+  <meta name="theme-color" content="#020746">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- The 3rd Edition books set headings in Slicker (a Helvetica) and text in Times New Roman: Arimo and Tinos are
+       their metric twins. Audiowide echoes the lettering on the Strategy Cards. -->
+  <link href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;700&family=Audiowide&family=Tinos:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=2">
+  <link rel="stylesheet" href="css/components.css?v=1">
+</head>
+<body>
+  <!-- Masthead: the three rulebook covers share one layout — a starfield band with the logo, the painted band of
+       races (Base cover), and a lower starfield band whose gold title sits on red scan lines ("Rules of Play").
+       Below it, the blue page bar and steel rail that top every interior page. -->
+  <header class="mast">
+    <div class="mast-sky">
+      <img class="mast-logo" src="images/ti3-logo.webp" width="1001" height="157" alt="" aria-hidden="true" decoding="async">
+    </div>
+    <div class="mast-art" aria-hidden="true">
+      <img src="images/cover-art.webp" width="816" height="424" alt="" decoding="async">
+    </div>
+    <div class="mast-foot">
+      <h1 class="mast-title"><span class="vh">Twilight Imperium 3rd Edition — </span><span class="mast-sub">Setup &amp; Reference</span></h1>
+      <p class="mast-credit"><span>Base Game</span> <b aria-hidden="true">·</b> <span>Shattered Empire</span> <b aria-hidden="true">·</b> <span>Shards of the Throne</span></p>
+    </div>
+  </header>
+
+  <main>
+    <p class="tagline">
+      Choose your expansions, player count, strategy cards and optional rules — Shattered Empire, Shards of the
+      Throne, the Long War, Distant Suns, Leaders, Political Intrigue, even the Fall of the Empire scenario — for
+      exact setup steps, a full rules reference with the official FAQ &amp; errata applied, and a searchable index of
+      every rulebook. <em>The Imperial Throne on Mecatol Rex stands empty. Who will claim it?</em>
+    </p>
+
+    <section class="sec sec-cfg" aria-label="Configuration">
+      <h2>The Galactic Council</h2>
+      <p class="sec-note">Select the sets on the table, the way you are playing, the player count, your strategy cards and the optional rules. Every step, ruling and script below adapts to your choices.</p>
+      <div class="cfg">
+        <div class="cfg-group">
+          <p class="cfg-label" id="lbl-sets">Sets in play</p>
+          <div id="expansions" class="chips" role="group" aria-labelledby="lbl-sets"></div>
+        </div>
+        <div class="cfg-group">
+          <p class="cfg-label" id="lbl-modes">Way to play</p>
+          <div id="modes" class="mode-grid" role="group" aria-labelledby="lbl-modes"></div>
+        </div>
+        <div class="cfg-group">
+          <p class="cfg-label" id="lbl-players">Players <span class="hint" id="players-hint">(3–6; 7–8 need Shattered Empire)</span></p>
+          <div id="players" class="pbtns" role="group" aria-labelledby="lbl-players"></div>
+        </div>
+        <div id="scards-group" class="cfg-group">
+          <p class="cfg-label" id="lbl-sc">Strategy cards <span class="hint" id="sc-hint">— the eight in play</span></p>
+          <div id="scset" class="mode-grid" role="group" aria-labelledby="lbl-sc"></div>
+          <div id="slots" class="slots" role="group" aria-label="Strategy card slots"></div>
+        </div>
+        <div id="modules-group" class="cfg-group">
+          <p class="cfg-label" id="lbl-mods">Optional rules &amp; variants <span class="hint">— grouped by the book that defines them; greyed-out pairings are explained on hover</span></p>
+          <div id="modules" class="mod-groups" role="group" aria-labelledby="lbl-mods"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec sec-setup" aria-label="Setup">
+      <h2>Setup</h2>
+      <p class="sec-note">Follow the steps in order; each cites its source pages. The FAQ &amp; errata (v2.5, 2012 — the newest official ruling) is applied wherever it corrects a rulebook.</p>
+      <div class="teach-bar"><button id="teachBtn" type="button" aria-expanded="false" aria-controls="teach" title="A ~5 minute script to teach this exact setup aloud">📖 Teaching script</button></div>
+      <div id="teach" class="teach-panel" hidden></div>
+      <div id="setup"></div>
+    </section>
+
+    <section class="sec sec-comp" id="components" aria-labelledby="comp-h" hidden>
+      <h2 id="comp-h">Components</h2>
+      <p class="sec-note">Every component the rulebooks list for the sets and options you’ve selected, with its count — pictured where the component pages show it. Tap a picture to enlarge it.</p>
+      <div id="aid-comp"></div>
+    </section>
+
+    <section class="sec sec-ref" aria-label="Reference">
+      <h2>Rules Reference</h2>
+      <p class="sec-note">Tap a heading to open it. Contents adapt to your sets, mode, player count, strategy cards and options.</p>
+      <div id="reference"></div>
+    </section>
+
+    <section class="sec sec-search" aria-label="Rulebook search">
+      <h2>Search the Rulebooks</h2>
+      <p class="sec-note">Full-text search across the base rulebook, each selected expansion, the official FAQ &amp; errata and the official Game Options &amp; Variants sheet.</p>
+      <div class="rsearch-wrap">
+        <input id="rsearch" type="search" placeholder="e.g. retreat, fleet supply, bombard, wormhole, trade agreement, artifact…" aria-label="Search the rulebooks">
+      </div>
+      <div id="rresults"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span class="foot-cap" aria-hidden="true"></span>
+    <p>
+      Setup and reference content grounded in the official Twilight Imperium 3rd Edition rulebook, the Shattered Empire
+      and Shards of the Throne expansion rulebooks, the official FAQ &amp; Errata (v2.5) and the official Game Options
+      &amp; Variants sheet. A fan-made play aid — not affiliated with Fantasy Flight Games.
+    </p>
+  </footer>
+
+  <script src="js/data.js?v=1"></script>
+  <script src="js/rules.js?v=1"></script>
+  <script src="js/components.js?v=1"></script>
+  <script src="js/comp-widget.js?v=1"></script>
+  <script src="js/app.js?v=1"></script>
+  <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
+  <script src="/site-analytics.js?v=20260607-analytics"></script>
+</body>
+</html>

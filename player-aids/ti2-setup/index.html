@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Twilight Imperium 2nd Edition — Setup &amp; Reference Utility</title>
+  <meta name="description" content="Setup steps for 2–6 players and every galaxy, a rules reference with the official FAQ applied, a teaching script and a searchable index of the Twilight Imperium Second Edition rulebook, FAQ and Hope's End expansion.">
+  <meta name="theme-color" content="#161616">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Audiowide stands in for the rulebook's squared Neuropol-style headings, STIX Two Text for its Times body;
+       Abril Fatface (squeezed in an SVG) redraws the box cover's flame-gradient logo, so only its letters load -->
+  <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=STIX+Two+Text:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&text=TWILIGHT%20IMPERUM&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=2">
+  <link rel="stylesheet" href="css/components.css?v=1">
+</head>
+<body>
+  <!-- Masthead: the Rules of Play booklet — its running head, then its cover (the grey Hacan lion under white
+       extended capitals), crowned with the box lid's flame-gradient logo. -->
+  <header class="mast">
+    <div class="runhead" aria-hidden="true"><span>Twilight Imperium 2nd Edition: Setup &amp; Reference</span><span>Pax Magnifica Bellum Gloriosum</span></div>
+    <div class="cover">
+      <img class="cover-art" src="images/cover-lion.webp" width="1072" height="750" alt="" aria-hidden="true" decoding="async">
+      <div class="cover-text">
+        <h1 class="brand">
+          <svg class="logo" viewBox="0 0 1000 200" aria-hidden="true" focusable="false">
+            <defs>
+              <linearGradient id="ti2-flame" gradientUnits="userSpaceOnUse" x1="0" y1="30" x2="0" y2="152">
+                <stop offset="0" stop-color="#d4260f"/>
+                <stop offset=".26" stop-color="#f2560b"/>
+                <stop offset=".5" stop-color="#ff9a13"/>
+                <stop offset=".72" stop-color="#ffd21b"/>
+                <stop offset="1" stop-color="#fff37a"/>
+              </linearGradient>
+            </defs>
+            <rect x="4" y="6" width="992" height="8" fill="#ec4a19" stroke="#2a0703" stroke-width="2"/>
+            <text x="500" y="152" text-anchor="middle" textLength="990" lengthAdjust="spacingAndGlyphs"
+                  font-family="'Abril Fatface', 'Bodoni 72', Didot, 'Times New Roman', serif" font-size="164"
+                  fill="url(#ti2-flame)" stroke="#2a0703" stroke-width="6" stroke-linejoin="round" paint-order="stroke">TWILIGHT IMPERIUM</text>
+            <rect x="4" y="170" width="292" height="8" fill="#ffd21b" stroke="#2a0703" stroke-width="2"/>
+            <rect x="704" y="170" width="292" height="8" fill="#ffd21b" stroke="#2a0703" stroke-width="2"/>
+            <text x="500" y="186" text-anchor="middle" font-family="Audiowide, 'Arial Black', sans-serif" font-size="27" letter-spacing="9"
+                  fill="#ffd21b" stroke="#2a0703" stroke-width="4" stroke-linejoin="round" paint-order="stroke">SECOND EDITION</text>
+          </svg>
+          <span class="vh">Twilight Imperium 2nd Edition —</span>
+          <span class="brand-sub">Setup &amp; Reference</span>
+        </h1>
+        <p class="cover-kicker"><span>Rules of Play</span><i aria-hidden="true">◆</i><span>Official FAQ</span><i aria-hidden="true">◆</i><span>Hope's End</span></p>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="intro">
+      <p class="tagline">
+        Choose your player count, galaxy and rules options — with or without the Hope's End expansion — for exact
+        setup steps, a rules reference with the official FAQ applied, and a searchable index of every rulebook.
+        <em>The imperial throne on Mecatol Rex has stood empty for more than three thousand years. Pax magnifica, bellum gloriosum.</em>
+      </p>
+    </div>
+
+    <section class="sec sec-cfg" aria-label="Configuration">
+      <h2>The Galactic Council</h2>
+      <p class="sec-note">Select the sets on the table, the player count, the galaxy and any rules options. Every step, ruling and script below adapts to your choices.</p>
+      <div class="cfg">
+        <div class="cfg-group">
+          <p class="cfg-label" id="lbl-sets">Sets in play</p>
+          <div id="expansions" class="chips" role="group" aria-labelledby="lbl-sets"></div>
+        </div>
+        <div class="cfg-group">
+          <p class="cfg-label" id="lbl-players">Players <span class="hint">two to six; the rulebook says it plays best with 3, 4 or 6</span></p>
+          <div id="players" class="pbtns" role="group" aria-labelledby="lbl-players"></div>
+        </div>
+        <div class="cfg-group">
+          <p class="cfg-label" id="lbl-galaxy">Galaxy <span class="hint">the Hope's End constellations need the expansion and are recommended for 6 players</span></p>
+          <div id="modes" class="mode-grid" role="group" aria-labelledby="lbl-galaxy"></div>
+        </div>
+        <div id="modules-group" class="cfg-group">
+          <p class="cfg-label" id="lbl-mods">Rules options <span class="hint">optional; Shock Troops and Leaders need Hope's End</span></p>
+          <div id="modules" class="mods" role="group" aria-labelledby="lbl-mods"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec sec-setup" aria-label="Setup">
+      <h2>Setup</h2>
+      <p class="sec-note">Follow the steps in order; each cites its source. The rulebook and the Hope's End sheet print no page numbers, so “Rules p.N” and “Hope's End p.N” count pages from the cover, with the rulebook's own section numbers (§). FAQ rulings are already applied.</p>
+      <div class="teach-bar"><button id="teachBtn" type="button" aria-expanded="false" aria-controls="teach" title="A ~5 minute script to teach this exact setup aloud">📖 Teaching script</button></div>
+      <div id="teach" class="teach-panel" hidden></div>
+      <div id="setup"></div>
+    </section>
+
+    <section class="sec sec-comp" id="components" aria-labelledby="comp-h" hidden>
+      <h2 id="comp-h">Components</h2>
+      <p class="sec-note">Every component the rulebooks list for the sets and options you've selected, with its count. Tap a picture to enlarge it. The Hope's End sheet lists its contents without pictures.</p>
+      <div id="aid-comp"></div>
+    </section>
+
+    <section class="sec sec-ref" aria-label="Reference">
+      <h2>Rules Reference</h2>
+      <p class="sec-note">Tap a heading to open it. Contents adapt to your sets, options and player count. The official FAQ overrides the rulebook; where two FAQ answers disagree, the newer one is applied and flagged.</p>
+      <div id="reference"></div>
+    </section>
+
+    <section class="sec sec-search" aria-label="Rulebook search">
+      <h2>Search the Rulebooks</h2>
+      <p class="sec-note">Full-text search across the rulebook, the official FAQ and — when selected — the Hope's End rules. The rulebook is a scan: its text was machine-read and repaired, so the odd word may be misspelled.</p>
+      <div class="rsearch-wrap">
+        <input id="rsearch" type="search" placeholder="e.g. withdraw, blockade, insurgence, wormhole, domain, trade…" aria-label="Search the rulebooks">
+      </div>
+      <div id="rresults"></div>
+    </section>
+  </main>
+
+  <!-- Footer: the battle scene that runs along the foot of every page of the Rules of Play -->
+  <footer class="footer">
+    <p>
+      Setup and reference content grounded in the official Twilight Imperium Second Edition rules of play, the official
+      Fantasy Flight Games FAQ, and the official Hope's End expansion rules. A fan-made play aid — not affiliated with
+      Fantasy Flight Games.
+    </p>
+    <img class="foot-band" src="images/battle-band.webp" width="1185" height="307" alt="" aria-hidden="true" loading="lazy" decoding="async">
+  </footer>
+
+  <script src="js/data.js?v=1"></script>
+  <script src="js/rules.js?v=1"></script>
+  <script src="js/components.js?v=1"></script>
+  <script src="js/comp-widget.js?v=1"></script>
+  <script src="js/app.js?v=1"></script>
+  <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
+  <script src="/site-analytics.js?v=20260607-analytics"></script>
+</body>
+</html>

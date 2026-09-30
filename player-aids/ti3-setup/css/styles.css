@@ -1,0 +1,801 @@
+/* =============================================================================
+   Twilight Imperium 3rd Edition — Setup & Reference Utility
+   Styled after the 3rd Edition rulebooks (Base 2005, Shattered Empire 2006, Shards of the Throne 2011):
+   · gold schematic pages between a blue page bar and a steel rail, with the black "Page N" capsule and its two
+     red jewels (every interior page; the page art itself is images/page-gold.webp);
+   · royal-blue title pills ("Welcome", "Game Setup", Base p.4–6), yellow outlined pills ("Passing" Base p.14,
+     "Option N" SE p.9, SoT p.10), red "Game option" pills (Base p.32–35);
+   · red numbered balls for the setup steps (Base p.6);
+   · grey circuit sidebars capped with blue metal frame bars ("Reinforcements" Base p.6, "Imperium Rex" p.14);
+   · dark blueprint panels for the galaxy diagrams (Base p.8, p.32; SE p.8);
+   · black Strategy Cards, one colour per number, white cards for Shattered Empire's variant set
+     (Base p.36–38, SE p.14–16);
+   · covers: starfield band + logo, painted band, gold "Rules of Play" on red scan lines.
+   Headings: Arimo (the books' Slicker/Helvetica). Text: Tinos (their Times New Roman).
+   ============================================================================= */
+
+:root {
+  --gold:      #f8d474;   /* page art median (Base p.4–44) */
+  --gold-dk:   #eec25c;   /* darkest page mottling */
+  --paper:     rgba(255, 251, 236, 0.74);   /* card surface over the page (≈ #fdf0ca) */
+  --paper-ln:  rgba(110, 80, 10, 0.42);     /* hairline around cards */
+  --ink:       #16120a;
+  --muted:     #4b3c12;   /* secondary text on the gold */
+  --royal:     #0003b7;   /* title pills (sampled) */
+  --royal-dk:  #00027d;
+  --bar:       #1642c5;   /* page bar blue (sampled #1439aa–#1642c5) */
+  --navy:      #030e40;   /* metal frames (sampled) */
+  --space:     #020746;   /* cover starfield (sampled) */
+  --ptext:     #3b4250;   /* secondary text on the grey sidebar */
+  --pline:     #4e5967;   /* control borders on the grey sidebar */
+  --pcard:     #fbfbf9;   /* controls on the grey sidebar */
+  --yellow:    #ffff00;   /* option pills (sampled) */
+  --gold-ink:  #ffcc03;   /* "Rules of Play" gold (from the PDF) */
+  /* the setup steps' glossy red ball (Base p.6): a small highlight kept clear of the numeral, a flat #d30b0b face */
+  --red-ball:  radial-gradient(circle at 29% 23%, rgba(255, 200, 190, 0.95) 0 7%, rgba(255, 140, 120, 0) 17%),
+               radial-gradient(circle at 50% 46%, #d30b0b 0 52%, #a80000 80%, #6e0000 100%);
+  --jewel:     radial-gradient(circle at 36% 32%, #ff9a8c 0 14%, #e41212 46%, #8a0000 100%);
+  /* Strategy Card colours, sampled from the cards' "Active" tabs (Base p.36–38) */
+  --sc1: #d6070a; --sc2: #e0600f; --sc3: #f2e24e; --sc4: #0f7a1a;
+  --sc5: #0ddd55; --sc6: #0ed8cb; --sc7: #0a4ed7; --sc8: #9f07da;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+body {
+  background: var(--gold) url("../images/page-gold.webp") center top / 100% auto repeat-y;
+  color: var(--ink);
+  font-family: "Tinos", "Times New Roman", Times, serif;
+  font-size: 19px;
+  line-height: 1.55;
+  min-height: 100vh;
+}
+::selection { background: var(--yellow); color: #000; }
+:focus-visible { outline: 3px solid var(--royal); outline-offset: 2px; }
+.vh {
+  position: absolute !important; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0;
+  overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+b, strong { font-weight: 700; }
+
+/* =============================================================================
+   Masthead — the cover's three bands, then the interior page bar
+   ============================================================================= */
+.mast { position: relative; background: var(--space); color: #fff; text-align: center; }
+
+.mast-sky {
+  position: relative;
+  padding: 22px 16px 18px;
+  background-color: var(--space);
+  background-image:
+    radial-gradient(circle at 30% 40%, #fff 0 1px, transparent 1.7px),
+    radial-gradient(circle at 70% 60%, rgba(190, 215, 255, 0.95) 0 1.4px, rgba(120, 170, 255, 0.35) 2.2px, transparent 4px),
+    radial-gradient(circle at 20% 70%, rgba(255, 255, 255, 0.55) 0 0.7px, transparent 1.3px),
+    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.45) 0 0.6px, transparent 1.2px),
+    radial-gradient(circle at 55% 35%, rgba(200, 220, 255, 0.6) 0 0.8px, transparent 1.5px),
+    radial-gradient(60% 150% at 92% 110%, rgba(1, 39, 241, 0.75), transparent 62%),
+    radial-gradient(45% 130% at 4% 120%, rgba(20, 70, 220, 0.4), transparent 60%),
+    linear-gradient(180deg, #020746 0%, #00086a 60%, #000b84 100%);
+  background-size: 311px 157px, 467px 211px, 83px 67px, 139px 101px, 197px 89px, 100% 100%, 100% 100%, 100% 100%;
+  background-position: 11px 23px, 97px 61px, 41px 9px, 67px 31px, 5px 53px, 0 0, 0 0, 0 0;
+}
+.mast-logo {
+  display: block; width: min(600px, 90vw); height: auto; margin: 0 auto;
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 20, 0.7));
+}
+/* the thin glowing line between the cover's bands */
+.mast-sky::after, .mast-art::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; z-index: 2;
+  background: linear-gradient(90deg, rgba(71, 151, 219, 0.35), #8cc4ff 50%, rgba(71, 151, 219, 0.35));
+  box-shadow: 0 0 9px 1px rgba(110, 170, 255, 0.65);
+}
+
+.mast-art {
+  position: relative; isolation: isolate; height: 264px; overflow: hidden;
+  background: linear-gradient(180deg, #050820, #0b0a14);
+}
+/* beyond the painting's own width, a blurred and darkened copy of it carries its colours to the edges */
+.mast-art::before {
+  content: ""; position: absolute; inset: -30px; z-index: -1;
+  background: url("../images/cover-art.webp") 50% 32% / cover no-repeat;
+  filter: blur(26px) brightness(0.34) saturate(1.1);
+}
+.mast-art img {
+  position: relative;
+  display: block; width: 816px; max-width: none; height: 100%; margin: 0 auto;
+  object-fit: cover; object-position: 50% 32%;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 13%, #000 87%, transparent 100%);
+          mask-image: linear-gradient(90deg, transparent 0, #000 13%, #000 87%, transparent 100%);
+}
+
+.mast-foot {
+  position: relative; overflow: hidden;
+  padding: 16px 16px 16px;
+  background:
+    radial-gradient(70% 160% at 50% -20%, rgba(14, 44, 108, 0.95), transparent 70%),
+    linear-gradient(180deg, #010851 0%, #0a0c2c 62%, #07070f 100%);
+}
+.mast-title {
+  position: relative; z-index: 0;
+  font-family: "Arimo", Arial, "Helvetica Neue", Helvetica, sans-serif;
+  font-weight: 400;
+  font-size: clamp(1.55rem, 4.6vw, 2.75rem);
+  line-height: 1.12;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold-ink);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+  padding: 2px 0 4px 0.14em;   /* balances the trailing tracking */
+}
+/* the cover's red scan lines run the full width behind the title */
+.mast-title::before {
+  content: ""; position: absolute; left: -16px; right: -16px; top: 8%; bottom: 10%; z-index: -1;
+  background: repeating-linear-gradient(180deg, transparent 0 7px, rgba(214, 28, 28, 0.62) 7px 8px);
+}
+.mast-credit {
+  margin-top: 8px;
+  font-family: "Tinos", "Times New Roman", serif;
+  font-weight: 700; font-size: 0.875rem; line-height: 1.4;
+  font-variant: small-caps; letter-spacing: 0.26em;
+  color: #f2f4ff;
+}
+.mast-credit b { color: var(--gold-ink); padding: 0 0.3em; }
+.mast-credit span { white-space: nowrap; }
+
+/* the blue page bar and steel rail that top every interior page (sampled from the page art) */
+.mast::after {
+  content: ""; display: block; height: 30px;
+  background:
+    linear-gradient(180deg, transparent 0 15px, #2e3741 15px 16px, #b3b9b3 16px 17px, #87908b 17px 18px,
+      #545b59 18px 19px, #252728 19px 20px, #1a150c 20px 21px, rgba(85, 72, 37, 0.9) 21px 22px,
+      rgba(150, 110, 20, 0.35) 22px 26px, rgba(150, 110, 20, 0) 30px),
+    repeating-linear-gradient(118deg, rgba(0, 0, 50, 0.16) 0 2px, transparent 2px 11px),
+    radial-gradient(35% 200% at 18% 20%, rgba(90, 130, 255, 0.45), transparent 70%),
+    radial-gradient(30% 200% at 70% 80%, rgba(0, 12, 90, 0.4), transparent 70%),
+    linear-gradient(180deg, #1339af, var(--bar) 15px, transparent 15px);
+}
+
+/* =============================================================================
+   Page layout
+   ============================================================================= */
+main { max-width: 1000px; margin: 0 auto; padding: 22px 16px 64px; }
+
+.tagline { max-width: 70ch; font-size: 1.05rem; line-height: 1.6; color: var(--ink); }
+.tagline em { font-style: italic; color: var(--royal-dk); }
+
+.sec { margin-top: 42px; }
+/* section headings: the books' royal-blue title pills */
+.sec > h2 {
+  display: inline-block; min-width: min(100%, 300px);
+  margin: 0 0 10px;
+  padding: 7px 34px 8px;
+  font-family: "Arimo", Arial, "Helvetica Neue", Helvetica, sans-serif;
+  font-weight: 400; font-size: 1.6rem; line-height: 1.15;
+  text-align: center; color: #fff;
+  background: var(--royal);
+  border-radius: 999px;
+  box-shadow: inset 0 1px 0 rgba(150, 160, 255, 0.35), 0 2px 0 rgba(0, 0, 60, 0.28);
+}
+.sec-note { max-width: 70ch; margin: 0 0 16px; font-style: italic; font-size: 1.05rem; color: var(--muted); }
+
+/* =============================================================================
+   Sidebars: grey circuit panel + blue metal frame bars (configurator, teaching script)
+   ============================================================================= */
+.cfg, .teach-panel {
+  position: relative;
+  margin: 30px 8px 36px;
+  padding: 32px 26px 30px;
+  background:
+    linear-gradient(rgba(243, 244, 245, 0.66), rgba(243, 244, 245, 0.66)),
+    url("../images/circuit.webp") 0 0 / 327px 327px repeat,
+    #cbcbcb;
+  border-left: 2px solid #7d8795; border-right: 2px solid #7d8795;
+  box-shadow: 0 4px 12px rgba(90, 60, 0, 0.28);
+}
+/* frame bars (the sidebar art, Base p.6): a thick bar with a slanted tab at each end and a step in its inner edge */
+.cfg::before, .cfg::after, .teach-panel::before, .teach-panel::after {
+  --tab: 24px; --step: 96px;
+  content: ""; position: absolute; left: -12px; right: -12px; height: 30px; z-index: 1;
+  background: #0b2a66 url("../images/frame-bars.webp") 0 0 / 100% 200% no-repeat;
+}
+/* the bar's inner edge never rises above the panel's edge, so no page shows between them */
+.cfg::before, .teach-panel::before {
+  top: -19px; background-position: 0 0;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 7px) 100%, calc(100% - var(--tab)) 100%, calc(100% - var(--tab)) 24px,
+    calc(100% - var(--step)) 24px, calc(100% - var(--step) - 5px) 19px, calc(var(--step) + 5px) 19px, var(--step) 24px,
+    var(--tab) 24px, var(--tab) 100%, 7px 100%);
+}
+.cfg::after, .teach-panel::after {
+  bottom: -19px; background-position: 0 100%;
+  clip-path: polygon(7px 0, var(--tab) 0, var(--tab) 6px, var(--step) 6px, calc(var(--step) + 5px) 11px,
+    calc(100% - var(--step) - 5px) 11px, calc(100% - var(--step)) 6px, calc(100% - var(--tab)) 6px,
+    calc(100% - var(--tab)) 0, calc(100% - 7px) 0, 100% 100%, 0 100%);
+}
+
+/* =============================================================================
+   Configurator
+   ============================================================================= */
+.cfg { display: flex; flex-direction: column; gap: 20px; }
+.cfg-group + .cfg-group {
+  padding-top: 20px;
+  background: linear-gradient(90deg, rgba(46, 55, 65, 0.55), rgba(46, 55, 65, 0.1)) 0 0 / 100% 1px no-repeat,
+              linear-gradient(90deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.2)) 0 1px / 100% 1px no-repeat;
+}
+.cfg-label {
+  margin: 0 0 10px;
+  font-family: "Arimo", Arial, "Helvetica Neue", Helvetica, sans-serif;
+  font-weight: 700; font-size: 1.08rem; line-height: 1.35;
+  font-variant: small-caps; letter-spacing: 0.05em;
+  color: var(--navy);
+}
+.cfg-label::before {
+  content: ""; display: inline-block; width: 11px; height: 11px; margin-right: 9px; vertical-align: 0;
+  border-radius: 50%; background: var(--jewel); box-shadow: 0 0 0 1px #4a0000;
+}
+.cfg-label .hint {
+  font-family: "Tinos", "Times New Roman", serif; font-weight: 400; font-style: italic;
+  font-size: 1rem; font-variant: normal; letter-spacing: 0; color: var(--ptext);
+}
+
+.chips, .pbtns { display: flex; flex-wrap: wrap; gap: 10px; }
+
+.chip, .mode-btn, .mod, .pbtn, #teachBtn, .teach-copy {
+  font: inherit; color: var(--ink); cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+
+/* sets in play — pills with a check disc */
+.chip {
+  position: relative;
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: center;
+  min-height: 54px; padding: 6px 22px 7px 48px; text-align: left;
+  background: var(--pcard); border: 2px solid var(--pline); border-radius: 999px;
+}
+.chip b { font-family: "Arimo", Arial, sans-serif; font-weight: 700; font-size: 1rem; line-height: 1.25; }
+.chip span { font-family: "Arimo", Arial, sans-serif; font-size: 0.875rem; line-height: 1.3; color: var(--ptext); }
+.chip::before {
+  content: ""; position: absolute; left: 14px; top: 50%; width: 22px; height: 22px; margin-top: -11px;
+  border-radius: 50%; border: 2px solid var(--pline); background: #fff;
+}
+.chip.on { background: var(--royal); border-color: var(--royal-dk); color: #fff; box-shadow: 0 2px 0 rgba(0, 0, 50, 0.3); }
+.chip.on span { color: #e3e6ff; }
+.chip.on::before {
+  border-color: #fff;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8.5l3.2 3.2L13 4.6' fill='none' stroke='%230003b7' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 15px no-repeat;
+}
+.chip.lock { cursor: default; }
+.chip:not(.lock):hover { border-color: var(--royal); box-shadow: 0 0 0 3px rgba(0, 3, 183, 0.2); }
+.chip.on:not(.lock):hover { background: #1116cf; }
+
+/* ways to play / strategy-card sets — radio cards; the chosen one turns into the dark "Lazax" panel (SoT p.14) */
+.mode-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.mode-btn {
+  position: relative; text-align: left;
+  display: flex; flex-direction: column; justify-content: flex-start; align-items: stretch;
+  padding: 12px 16px 13px 50px;
+  background: var(--pcard); border: 2px solid var(--pline); border-radius: 8px;
+}
+.mode-btn::before {
+  content: ""; position: absolute; left: 15px; top: 14px; width: 22px; height: 22px;
+  border-radius: 50%; border: 2px solid var(--pline); background: #fff;
+}
+.mode-btn b { display: block; margin-bottom: 3px; font-family: "Arimo", Arial, sans-serif; font-weight: 700; font-size: 1.05rem; line-height: 1.25; }
+.mode-btn span { display: block; font-size: 1rem; line-height: 1.45; color: var(--ptext); }
+.mode-btn.on {
+  background: linear-gradient(180deg, #0c1c63, var(--navy));
+  border-color: var(--navy); color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(160, 180, 235, 0.4), 0 2px 0 rgba(0, 0, 30, 0.3);
+}
+.mode-btn.on span { color: #dfe4f7; }
+.mode-btn.on::before { border: 2px solid #fff; background: var(--red-ball); box-shadow: 0 0 0 1px #5a0000; }
+.mode-btn:hover:not(:disabled):not(.on) { border-color: var(--royal); box-shadow: 0 0 0 3px rgba(0, 3, 183, 0.2); }
+.mode-btn.off { background: rgba(255, 255, 255, 0.34); border-style: dashed; color: #444b57; cursor: not-allowed; }
+.mode-btn.off span { color: #444b57; }
+.mode-btn.off::before { background: transparent; border-style: dashed; }
+.mode-btn.off::after {           /* the reason, visible without hovering (the button's own title) */
+  content: attr(title); display: block; margin-top: 6px;
+  font-family: "Arimo", Arial, sans-serif; font-size: 0.875rem; font-weight: 700; color: #8a0000;
+}
+
+/* players — the setup steps' red balls */
+.pbtn {
+  width: 50px; height: 50px; border-radius: 50%;
+  background: var(--pcard); border: 2px solid var(--pline);
+  font-family: "Tinos", "Times New Roman", serif; font-weight: 700; font-size: 1.45rem; line-height: 1;
+  color: var(--navy);
+}
+.pbtn.on {
+  background: var(--red-ball); border: 3px solid #fff; color: #fff;
+  box-shadow: 0 0 0 1.5px #6e0000, 0 3px 6px rgba(60, 0, 0, 0.35);
+  text-shadow: 0 1px 1px rgba(60, 0, 0, 0.75);
+  transform: scale(1.07);
+}
+.pbtn:hover:not(:disabled):not(.on) { border-color: var(--royal); box-shadow: 0 0 0 3px rgba(0, 3, 183, 0.2); }
+.pbtn.off { background: transparent; border-style: dashed; color: #4d5563; cursor: not-allowed; }
+
+/* strategy cards — black cards with each number's colour (Base p.36–38); white for SE's variant set */
+.slots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+/* three layers, as on the printed cards: a black outer edge (the button's own background, drawn as a trapezoid),
+   the number's colour frame (::before) and the card face (::after) */
+.slot {
+  --sc: #777; --sc-body: #0b0b0b; --sc-ink: #fff; --sc-sub: #d2d2d2; --edge: #0b0b0b;
+  position: relative; isolation: isolate;
+  display: flex; flex-wrap: wrap; align-items: center; align-content: center; column-gap: 10px;
+  min-height: 72px; padding: 10px 21px 12px 15px;
+  font: inherit; text-align: left; color: var(--sc-ink);
+  border: 0; border-radius: 0;
+  background:
+    linear-gradient(to bottom left, var(--edge) calc(50% - 0.6px), transparent calc(50% + 0.6px)) left top / 11px 100% no-repeat,
+    linear-gradient(to bottom right, var(--edge) calc(50% - 0.6px), transparent calc(50% + 0.6px)) right top / 11px 100% no-repeat,
+    linear-gradient(var(--edge), var(--edge)) center / calc(100% - 22px) 100% no-repeat;
+}
+.slot::before, .slot::after { content: ""; position: absolute; z-index: -1; }
+.slot::before { inset: 1.5px; background: var(--sc); clip-path: polygon(0 0, 100% 0, calc(100% - 10.3px) 100%, 10.3px 100%); }
+.slot::after { inset: 4.5px; background: var(--sc-body); clip-path: polygon(0 0, 100% 0, calc(100% - 9.4px) 100%, 9.4px 100%); }
+.slot .slot-n {
+  flex: 0 0 auto;
+  display: grid; place-items: center; width: 36px; height: 36px;
+  font-family: "Audiowide", "Arimo", Arial, sans-serif; font-size: 1.3rem; line-height: 1;
+  color: #fff; background: #000; border: 2px solid var(--sc);
+}
+.slot .slot-name {
+  flex: 1 1 0; min-width: 0;
+  font-family: "Audiowide", "Arimo", Arial, sans-serif; font-size: 0.9rem; line-height: 1.2;
+  text-transform: uppercase; letter-spacing: 0.02em;
+}
+.slot .slot-swap {
+  flex: 0 0 100%; margin-top: 4px; padding-left: 46px;
+  font-family: "Arimo", Arial, sans-serif; font-size: 0.875rem; line-height: 1.25; color: var(--sc-sub);
+}
+@media (min-width: 980px) { .slots { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.slots .slot:nth-child(1) { --sc: var(--sc1); }
+.slots .slot:nth-child(2) { --sc: var(--sc2); }
+.slots .slot:nth-child(3) { --sc: var(--sc3); }
+.slots .slot:nth-child(4) { --sc: var(--sc4); }
+.slots .slot:nth-child(5) { --sc: var(--sc5); }
+.slots .slot:nth-child(6) { --sc: var(--sc6); }
+.slots .slot:nth-child(7) { --sc: var(--sc7); }
+.slots .slot:nth-child(8) { --sc: var(--sc8); }
+.slot.set-se { --sc-body: #f6f6f1; --sc-ink: #0b0b0b; --sc-sub: #33363d; }
+.slot.fixed { cursor: default; }
+.slot.can { cursor: pointer; }
+.slot.can:hover { transform: translateY(-2px); }
+.slot.can:hover::before { filter: brightness(1.25) saturate(1.1); }
+.slot.swapped { outline: 3px dashed #a30000; outline-offset: 3px; }
+.slot.swapped .slot-swap::after { content: " · swapped"; font-weight: 700; }
+.slot:focus-visible { outline: 3px solid var(--royal); outline-offset: 3px; }
+
+/* optional rules — grouped under the books' yellow "Option" pills; on = the pill's yellow */
+.mod-groups { display: flex; flex-direction: column; gap: 18px; }
+.mod-group-h {
+  display: inline-block; margin: 0 0 10px; padding: 3px 22px 4px;
+  font-family: "Arimo", Arial, sans-serif; font-weight: 400; font-size: 1.05rem; line-height: 1.3;
+  color: #000; background: var(--yellow); border: 2px solid #111; border-radius: 999px;
+}
+.mod-group-h span { margin-left: 6px; font-family: "Tinos", "Times New Roman", serif; font-style: italic; font-size: 0.95rem; color: #2a2a00; }
+.mods { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; }
+.mod {
+  position: relative; text-align: left;
+  display: flex; flex-direction: column; justify-content: flex-start; align-items: stretch;
+  padding: 10px 14px 12px;
+  background: var(--pcard); border: 2px solid var(--pline); border-radius: 8px;
+}
+.mod-name {
+  display: block; position: relative; margin-bottom: 4px; padding-left: 31px;
+  font-family: "Arimo", Arial, sans-serif; font-weight: 700; font-size: 1rem; line-height: 1.3;
+}
+.mod-name::before {
+  content: ""; position: absolute; left: 0; top: -1px; width: 21px; height: 21px;
+  border: 2px solid var(--pline); border-radius: 3px; background: #fff;
+}
+.mod-sum { display: block; font-size: 1rem; line-height: 1.45; color: var(--ptext); }
+.mod.on { background: #fff47e; border-color: #111; box-shadow: inset 0 0 0 1px #111; }
+.mod.on .mod-sum { color: #2c2900; }
+.mod.on .mod-name::before {
+  border-color: #111;
+  background: #111 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8.5l3.2 3.2L13 4.6' fill='none' stroke='%23ffff00' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 15px no-repeat;
+}
+.mod:hover:not(:disabled) { border-color: var(--royal); }
+.mod.on:hover:not(:disabled) { border-color: #111; background: #fff8a3; }
+.mod.off { background: rgba(255, 255, 255, 0.34); border-style: dashed; cursor: not-allowed; }
+.mod.off .mod-name, .mod.off .mod-sum { color: #444b57; }
+.mod.off .mod-name::before { background: transparent; border-style: dashed; }
+.mods-note {
+  padding: 14px 18px; font-size: 1rem; line-height: 1.5; color: #f3f5ff;
+  background: linear-gradient(180deg, #0c1c63, var(--navy)); border: 2px solid var(--navy); border-radius: 8px;
+  box-shadow: inset 0 0 0 1px rgba(160, 180, 235, 0.4);
+}
+.mods-note b { color: var(--gold-ink); }
+
+/* =============================================================================
+   Teaching script
+   ============================================================================= */
+.teach-bar { margin: 2px 0 16px; }
+#teachBtn {
+  display: inline-flex; align-items: center; gap: 12px;
+  min-height: 48px; padding: 8px 24px 9px 20px;
+  font-family: "Arimo", Arial, sans-serif; font-weight: 700; font-size: 1.05rem; line-height: 1.2;
+  color: #fff; background: var(--royal); border: 2px solid var(--royal-dk); border-radius: 999px;
+  box-shadow: 0 2px 0 rgba(0, 0, 60, 0.3);
+}
+#teachBtn::after {
+  content: ""; width: 0; height: 0;
+  border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 8px solid currentColor;
+  transition: transform 0.15s;
+}
+#teachBtn:hover { background: #1116cf; }
+#teachBtn[aria-expanded="true"] { color: #000; background: var(--yellow); border-color: #111; }
+#teachBtn[aria-expanded="true"]::after { transform: rotate(180deg); }
+
+.teach-panel { margin-top: 26px; padding: 30px 30px 30px; }
+.teach-panel[hidden] { display: none; }
+.teach-top {
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px 14px;
+  padding-bottom: 12px; margin-bottom: 12px; border-bottom: 2px solid rgba(3, 14, 64, 0.22);
+}
+.teach-top h3 {
+  font-family: "Arimo", Arial, sans-serif; font-weight: 400; font-size: 1.5rem; line-height: 1.2;
+  text-transform: uppercase; letter-spacing: 0.01em; color: #000;
+}
+.teach-copy {
+  min-height: 44px; padding: 7px 18px;
+  font-family: "Arimo", Arial, sans-serif; font-weight: 700; font-size: 0.95rem;
+  color: var(--royal); background: var(--pcard); border: 2px solid var(--royal); border-radius: 999px;
+}
+.teach-copy:hover { background: #e6e8ff; }
+.teach-note { max-width: 72ch; margin-bottom: 6px; font-style: italic; font-size: 1rem; color: var(--ptext); }
+.teach-panel h4 {
+  margin: 20px 0 6px;
+  font-family: "Arimo", Arial, sans-serif; font-weight: 700; font-size: 1.08rem; line-height: 1.3;
+  font-variant: small-caps; letter-spacing: 0.05em; color: var(--royal);
+}
+.teach-panel h4::before {
+  content: ""; display: inline-block; width: 11px; height: 11px; margin-right: 9px;
+  border-radius: 50%; background: var(--jewel); box-shadow: 0 0 0 1px #4a0000;
+}
+.teach-panel p, .teach-panel ul, .teach-panel ol { max-width: 72ch; }
+.teach-panel p { margin-bottom: 10px; }
+.teach-panel b { color: var(--royal-dk); }
+
+/* =============================================================================
+   Setup steps
+   ============================================================================= */
+.phase { margin-top: 28px; }
+.phase:first-child { margin-top: 8px; }
+/* phase headings: the books' yellow outlined pills */
+.phase-title {
+  display: inline-block; margin: 0 0 12px; padding: 4px 26px 5px;
+  font-family: "Arimo", Arial, sans-serif; font-weight: 400; font-size: 1.2rem; line-height: 1.3;
+  color: #000; background: var(--yellow); border: 2px solid #111; border-radius: 999px;
+}
+.step {
+  display: flex; gap: 16px;
+  margin: 0 0 12px; padding: 16px 22px 16px 14px;
+  background: var(--paper); border: 1px solid var(--paper-ln); border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(110, 80, 10, 0.12);
+}
+/* the red numbered ball (Base p.6) */
+.step-num {
+  flex: 0 0 auto; width: 46px; height: 46px; margin-top: 1px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; background: var(--red-ball);
+  border: 2.5px solid #fff; box-shadow: 0 0 0 1px rgba(110, 0, 0, 0.6), 0 3px 6px rgba(90, 50, 0, 0.3);
+  font-family: "Tinos", "Times New Roman", serif; font-weight: 700; font-size: 1.45rem; line-height: 1;
+  color: #fff; text-shadow: 0 1px 1px rgba(70, 0, 0, 0.7);
+}
+.step-body { flex: 1; min-width: 0; }
+.step-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin: 6px 0 6px; }
+.step-head h4 { font-family: "Arimo", Arial, sans-serif; font-weight: 700; font-size: 1.15rem; line-height: 1.3; color: var(--ink); }
+.step-text { max-width: 72ch; }
+.step-text b { color: var(--royal-dk); }
+.step-text p { margin-bottom: 8px; }
+
+/* lists: TI's hex for bullets, the red ball for numbers */
+.step-text ul, .ref-body ul, .teach-panel ul { list-style: none; margin: 4px 0 8px; }
+.step-text ul > li, .ref-body ul > li, .teach-panel ul > li { position: relative; margin-bottom: 6px; padding-left: 26px; }
+.step-text ul > li::before, .ref-body ul > li::before, .teach-panel ul > li::before {
+  content: ""; position: absolute; left: 5px; top: 0.5em; width: 12px; height: 11px;
+  background: var(--royal);
+  clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
+}
+.step-text ol, .ref-body ol, .teach-panel ol { list-style: none; counter-reset: n; margin: 4px 0 10px; }
+.step-text ol > li, .ref-body ol > li, .teach-panel ol > li { position: relative; counter-increment: n; margin-bottom: 7px; padding-left: 36px; }
+.step-text ol > li::before, .ref-body ol > li::before, .teach-panel ol > li::before {
+  content: counter(n); position: absolute; left: 0; top: 0.12em;
+  width: 25px; height: 25px; display: grid; place-items: center;
+  border-radius: 50%; background: var(--red-ball); border: 1.5px solid #fff; box-shadow: 0 0 0 1px rgba(110, 0, 0, 0.55);
+  font-family: "Tinos", "Times New Roman", serif; font-weight: 700; font-size: 0.875rem; line-height: 1; color: #fff;
+}
+
+/* galaxy diagrams in the books' dark blueprint panel (Base p.8, p.32) */
+.diagram {
+  margin: 14px 0 6px; padding: 14px 14px 12px;
+  background:
+    repeating-linear-gradient(0deg, rgba(140, 185, 255, 0.14) 0 1px, transparent 1px 17px),
+    repeating-linear-gradient(90deg, rgba(140, 185, 255, 0.14) 0 1px, transparent 1px 17px),
+    radial-gradient(70% 90% at 50% 45%, #2d5896, #173672 75%);
+  border: 3px solid var(--navy); border-radius: 4px;
+  box-shadow: inset 0 0 0 1px rgba(170, 179, 188, 0.75), 0 2px 6px rgba(0, 0, 40, 0.3);
+}
+.diagram img { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+.diagram figcaption { max-width: 60ch; margin: 10px auto 0; font-style: italic; font-size: 1rem; line-height: 1.45; color: #eef2ff; text-align: center; }
+
+/* source tags — pills, one fill per book */
+.tag {
+  display: inline-block; padding: 3px 11px 2px;
+  font-family: "Arimo", Arial, sans-serif; font-weight: 700; font-size: 0.8125rem; line-height: 1.3;
+  letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap;
+  border: 1.5px solid #111; border-radius: 999px;
+}
+.tag-core { background: var(--royal); color: #fff; border-color: var(--royal-dk); }
+.tag-se   { background: #fff; color: #111; border-color: #111; }
+.tag-sot  { background: #6a1f9e; color: #fff; border-color: #3b0d5c; }
+.tag-faq  { background: var(--yellow); color: #111; border-color: #111; }
+.tag-mod  { background: #d10000; color: #fff; border-color: #5c0000; }
+.tag-var  { background: #0b6b3a; color: #fff; border-color: #043a1e; }
+.tag-fote { background: #111; color: var(--gold-ink); border-color: #000; }
+
+/* citations: the black "Page N" capsule with its red jewels */
+.src-line {
+  position: relative; display: inline-block; max-width: calc(100% - 12px);
+  margin: 12px 0 0 7px; padding: 3px 20px 4px;
+  font-family: "Arimo", Arial, sans-serif; font-size: 0.875rem; line-height: 1.4; letter-spacing: 0.02em;
+  color: #fff;
+  background:
+    linear-gradient(135deg, transparent 5px, #0d0d0d 5.5px) top left / 51% 51% no-repeat,
+    linear-gradient(225deg, transparent 5px, #0d0d0d 5.5px) top right / 51% 51% no-repeat,
+    linear-gradient(315deg, transparent 5px, #0d0d0d 5.5px) bottom right / 51% 51% no-repeat,
+    linear-gradient(45deg, transparent 5px, #0d0d0d 5.5px) bottom left / 51% 51% no-repeat;
+}
+.src-line::before, .src-line::after {
+  content: ""; position: absolute; top: 50%; width: 12px; height: 12px; margin-top: -6px;
+  border-radius: 50%; background: var(--jewel); box-shadow: 0 0 0 1px #3a0000;
+}
+.src-line::before { left: -6px; }
+.src-line::after { right: -6px; }
+
+/* =============================================================================
+   Rules reference — closed: a heading on the page; open: the blue title pill over its text
+   ============================================================================= */
+#reference { display: flex; flex-direction: column; gap: 10px; }
+.ref { background: var(--paper); border: 1px solid #7a5e14; border-radius: 8px; overflow: hidden; }
+.ref > summary {
+  display: flex; align-items: center; gap: 12px;
+  min-height: 52px; padding: 10px 18px 10px 12px;
+  cursor: pointer; list-style: none;
+  font-family: "Arimo", Arial, sans-serif; font-weight: 700; font-size: 1.1rem; line-height: 1.3;
+  color: var(--royal);
+}
+.ref > summary::-webkit-details-marker { display: none; }
+.ref > summary::before {
+  content: "+"; flex: 0 0 auto;
+  display: grid; place-items: center; width: 30px; height: 30px;
+  border-radius: 50%; background: var(--royal); color: #fff;
+  font-family: "Arimo", Arial, sans-serif; font-weight: 700; font-size: 1.35rem; line-height: 1;
+}
+.ref > summary:hover { background: rgba(0, 3, 183, 0.08); }
+.ref > summary:focus-visible { outline: 3px solid var(--royal); outline-offset: -5px; }
+.ref[open] > summary { color: #fff; background: var(--royal); }
+.ref[open] > summary::before { content: "\2212"; color: var(--royal); background: #fff; }
+.ref[open] > summary:hover { background: #1116cf; }
+.ref[open] > summary:focus-visible { outline-color: var(--yellow); }
+.ref-body { padding: 16px 24px 20px; }
+.ref-body > p, .ref-body > ul, .ref-body > ol, .ref-body > dl, .ref-body > h4, .ref-body > .sc-card { max-width: 75ch; }
+.ref-body h4 {
+  margin: 20px 0 6px;
+  font-family: "Arimo", Arial, sans-serif; font-weight: 700; font-size: 1.06rem; line-height: 1.3;
+  font-variant: small-caps; letter-spacing: 0.05em; color: var(--navy);
+}
+.ref-body h4:first-child { margin-top: 2px; }
+.ref-body p { margin-bottom: 10px; }
+.ref-body b { color: var(--royal-dk); }
+
+/* a Strategy Card in the reference: the card's black title bar, framed in its colour */
+.sc-card {
+  --sc: #777;
+  margin: 12px 0; overflow: hidden;
+  background: rgba(255, 255, 255, 0.5);
+  border: 2px solid var(--sc); border-radius: 6px;
+}
+.ref-body > .sc-card:nth-of-type(1) { --sc: var(--sc1); }
+.ref-body > .sc-card:nth-of-type(2) { --sc: var(--sc2); }
+.ref-body > .sc-card:nth-of-type(3) { --sc: var(--sc3); }
+.ref-body > .sc-card:nth-of-type(4) { --sc: var(--sc4); }
+.ref-body > .sc-card:nth-of-type(5) { --sc: var(--sc5); }
+.ref-body > .sc-card:nth-of-type(6) { --sc: var(--sc6); }
+.ref-body > .sc-card:nth-of-type(7) { --sc: var(--sc7); }
+.ref-body > .sc-card:nth-of-type(8) { --sc: var(--sc8); }
+.sc-card > p, .sc-card > ul { margin-left: 14px; margin-right: 14px; }
+.sc-card > p:nth-child(2) { margin-top: 10px; }
+.sc-card > .sc-title { margin: 0; }
+.sc-card > :last-child { margin-bottom: 12px; }
+.sc-title {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px;
+  padding: 7px 14px 7px 8px; margin: 0;
+  font-family: "Audiowide", "Arimo", Arial, sans-serif; font-size: 1.02rem; line-height: 1.25;
+  text-transform: uppercase; letter-spacing: 0.02em;
+  color: #fff; background: #0b0b0b; border-bottom: 3px solid var(--sc);
+}
+.sc-num {
+  display: inline-grid; place-items: center; width: 32px; height: 32px; margin: 0;
+  font-family: "Audiowide", "Arimo", Arial, sans-serif; font-size: 1.1rem; line-height: 1;
+  color: #fff; background: #000; border: 2px solid var(--sc);
+}
+.sc-src {
+  margin-left: auto;
+  font-family: "Arimo", Arial, sans-serif; font-size: 0.8125rem; font-weight: 400;
+  text-transform: none; letter-spacing: 0.02em; color: #d0d0d0;
+}
+
+.tbl-wrap { overflow-x: auto; margin: 8px 0 12px; border: 1px solid var(--paper-ln); border-radius: 6px; }
+.tbl { border-collapse: collapse; width: 100%; font-size: 1rem; line-height: 1.45; background: rgba(255, 255, 255, 0.55); }
+.tbl th, .tbl td { padding: 7px 10px; text-align: left; vertical-align: top; border: 1px solid rgba(110, 80, 10, 0.4); }
+.tbl th {
+  font-family: "Arimo", Arial, sans-serif; font-weight: 700; font-size: 0.95rem;
+  color: #fff; background: var(--royal); border-color: var(--royal-dk);
+}
+.tbl tbody tr:nth-child(even) td { background: rgba(248, 212, 116, 0.22); }
+.tbl tr > :first-child { border-left: 0; }
+.tbl tr > :last-child { border-right: 0; }
+.tbl thead th { border-top: 0; }
+.tbl tbody tr:last-child td { border-bottom: 0; }
+
+.defs { margin: 6px 0 12px; }
+.defs dt { margin-top: 10px; font-family: "Arimo", Arial, sans-serif; font-weight: 700; font-size: 1rem; color: var(--navy); }
+.defs dd { margin: 2px 0 0 18px; }
+
+/* =============================================================================
+   Search
+   ============================================================================= */
+.rsearch-wrap { margin: 4px 0 16px; }
+#rsearch {
+  width: 100%; min-height: 52px; padding: 12px 20px 12px 50px;
+  font: inherit; font-size: 1.05rem; color: var(--ink);
+  background: #fffdf4 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='10' cy='10' r='6.5' fill='none' stroke='%23030e40' stroke-width='2.4'/%3E%3Cpath d='M15 15l6 6' stroke='%23030e40' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E") 17px 50% / 21px no-repeat;
+  border: 2px solid var(--navy); border-radius: 999px;
+  box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.12);
+  -webkit-appearance: none; appearance: none;
+}
+#rsearch::placeholder { color: #5a5242; font-style: italic; opacity: 1; }
+#rresults { display: flex; flex-direction: column; gap: 8px; }
+.rhint { font-style: italic; color: var(--muted); }
+.rhit {
+  padding: 10px 18px 12px;
+  background: var(--paper); border: 1px solid var(--paper-ln); border-left: 5px solid var(--royal); border-radius: 6px;
+}
+.rhit-src {
+  margin-bottom: 4px;
+  font-family: "Arimo", Arial, sans-serif; font-weight: 700; font-size: 0.875rem; line-height: 1.35;
+  letter-spacing: 0.06em; text-transform: uppercase; color: var(--royal);
+}
+.rhit-src::before {
+  content: ""; display: inline-block; width: 9px; height: 9px; margin-right: 8px; vertical-align: 1px;
+  border-radius: 50%; background: var(--jewel); box-shadow: 0 0 0 1px #3a0000;
+}
+.rhit-text { max-width: 75ch; font-size: 1rem; line-height: 1.55; color: var(--ink); }
+.rhit-text mark { color: #000; background: var(--yellow); border-radius: 2px; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3); }
+
+/* =============================================================================
+   Components glossary tokens (css/components.css reads these)
+   ============================================================================= */
+#components {
+  --comp-surface: #fdf0ca;  --comp-fig: #fad575;  --comp-ink: #16120a;  --comp-muted: #4b3c12;
+  --comp-line: #7a5e14;     --comp-accent: #0003b7;  --comp-accent-ink: #ffffff;
+  --comp-head-font: "Arimo", Arial, "Helvetica Neue", Helvetica, sans-serif;  --comp-radius: 6px;
+}
+#components[hidden] { display: none; }
+
+/* =============================================================================
+   Footer — the page's bottom bar, rail and capsule
+   ============================================================================= */
+.footer {
+  position: relative; margin-top: 30px;
+  padding: 34px 18px 32px; text-align: center;
+  color: #fff;
+  background:
+    repeating-linear-gradient(118deg, rgba(0, 0, 50, 0.16) 0 2px, transparent 2px 11px),
+    radial-gradient(30% 140% at 20% 30%, rgba(80, 120, 255, 0.28), transparent 70%),
+    radial-gradient(34% 160% at 80% 70%, rgba(0, 12, 90, 0.35), transparent 70%),
+    linear-gradient(180deg, #173fb8, #0f2f95);
+}
+.footer::before {   /* the steel rail */
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 9px;
+  background: linear-gradient(180deg, rgba(85, 72, 37, 0.9) 0 1px, #1a150c 1px 2px, #252728 2px 3px, #545b59 3px 4px,
+    #87908b 4px 5px, #b3b9b3 5px 6px, #2e3741 6px 7px, rgba(20, 40, 120, 0.8) 7px 9px);
+}
+.foot-cap {   /* the "Page N" capsule, jewels at each end */
+  position: absolute; left: 50%; top: -8px; width: 128px; height: 26px; margin-left: -64px;
+  background:
+    linear-gradient(135deg, transparent 6px, #0d0d0d 6.5px) top left / 51% 51% no-repeat,
+    linear-gradient(225deg, transparent 6px, #0d0d0d 6.5px) top right / 51% 51% no-repeat,
+    linear-gradient(315deg, transparent 6px, #0d0d0d 6.5px) bottom right / 51% 51% no-repeat,
+    linear-gradient(45deg, transparent 6px, #0d0d0d 6.5px) bottom left / 51% 51% no-repeat;
+  filter: drop-shadow(0 0 1px #9ea49e);
+}
+.foot-cap::before, .foot-cap::after {
+  content: ""; position: absolute; top: 50%; width: 13px; height: 13px; margin-top: -6.5px;
+  border-radius: 50%; background: var(--jewel); box-shadow: 0 0 0 1px #3a0000;
+}
+.foot-cap::before { left: -6px; }
+.foot-cap::after { right: -6px; }
+.footer p { max-width: 72ch; margin: 0 auto; font-style: italic; font-size: 1rem; line-height: 1.6; color: #f4f6ff; }
+
+/* =============================================================================
+   Responsive
+   ============================================================================= */
+@media (max-width: 860px) {
+  .mast-art { height: 230px; }
+  .mast-art img { width: 100%; max-width: 100%; -webkit-mask-image: none; mask-image: none; }
+}
+@media (max-width: 640px) {
+  body { font-size: 18px; }
+  .mast-sky { padding: 14px 12px 12px; }
+  .mast-logo { width: min(360px, 92vw); }
+  .mast-art { height: 150px; }
+  .mast-foot { padding: 10px 12px 12px; }
+  .mast-title { letter-spacing: 0.1em; padding-left: 0.1em; }
+  .mast-credit { margin-top: 4px; font-size: 0.8125rem; letter-spacing: 0.1em; }
+  .mast::after { height: 26px; }
+  main { padding: 18px 16px 56px; }
+  .sec { margin-top: 36px; }
+  .sec > h2 { min-width: 0; padding: 6px 24px 7px; font-size: 1.38rem; }
+  .cfg, .teach-panel { margin: 30px 2px 34px; padding: 28px 14px 26px; }
+  .cfg::before, .cfg::after, .teach-panel::before, .teach-panel::after { left: -8px; right: -8px; --tab: 20px; --step: 58px; }
+  .chip { flex: 1 1 100%; }
+  .pbtns { gap: 8px; }
+  .pbtn { width: 46px; height: 46px; font-size: 1.35rem; }
+  .slots { gap: 10px; }
+  .slot { padding: 9px 18px 11px 14px; column-gap: 8px; min-height: 66px; }
+  .slot .slot-n { width: 32px; height: 32px; font-size: 1.15rem; }
+  .slot .slot-name { font-size: 0.85rem; }
+  .slot .slot-swap { padding-left: 40px; }
+  .mods { grid-template-columns: 1fr; }
+  .phase-title { font-size: 1.1rem; padding: 4px 20px 5px; }
+  /* phones: the ball sits beside the heading and the text runs the card's full width */
+  .step { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0 12px; padding: 13px 14px 14px 12px; }
+  .step-body { display: contents; }
+  .step-num { grid-column: 1; grid-row: 1; align-self: start; width: 38px; height: 38px; font-size: 1.2rem; margin-top: 0; }
+  .step-head { grid-column: 2; grid-row: 1; align-self: center; margin: 0 0 4px; }
+  .step-text, .step > .step-body > .src-line { grid-column: 1 / -1; }
+  .step > .step-body > .src-line { justify-self: start; }
+  .step-text { margin-top: 6px; }
+  .ref > summary { font-size: 1.04rem; padding: 9px 14px 9px 10px; }
+  .ref-body { padding: 14px 14px 18px; }
+  .sc-card > p, .sc-card > ul { margin-left: 11px; margin-right: 11px; }
+  /* the Units table (Unit · Available · Cost · Rules) becomes one card per unit instead of four squeezed columns */
+  .tbl-wrap:has(.tbl th:nth-child(4)) { overflow: visible; border: 0; border-radius: 0; }
+  .tbl:has(th:nth-child(4)), .tbl:has(th:nth-child(4)) tbody, .tbl:has(th:nth-child(4)) tr,
+  .tbl:has(th:nth-child(4)) td { display: block; width: auto; background: none; }
+  .tbl:has(th:nth-child(4)) thead {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+  }
+  .tbl:has(th:nth-child(4)) tr {
+    margin: 0 0 8px; padding: 8px 12px 10px;
+    background: rgba(255, 255, 255, 0.55); border: 1px solid rgba(110, 80, 10, 0.4); border-left: 4px solid var(--royal); border-radius: 6px;
+  }
+  .tbl:has(th:nth-child(4)) tbody tr:nth-child(even) td { background: none; }
+  .tbl:has(th:nth-child(4)) td { padding: 0; border: 0; }
+  .tbl:has(th:nth-child(4)) td:first-child { margin-bottom: 2px; font-family: "Arimo", Arial, sans-serif; font-size: 1.05rem; }
+  .tbl:has(th:nth-child(4)) td:nth-child(2), .tbl:has(th:nth-child(4)) td:nth-child(3) { display: inline; }
+  .tbl:has(th:nth-child(4)) td:nth-child(2)::before, .tbl:has(th:nth-child(4)) td:nth-child(3)::before {
+    font-family: "Arimo", Arial, sans-serif; font-weight: 700; font-size: 0.875rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted);
+  }
+  .tbl:has(th:nth-child(4)) td:nth-child(2)::before { content: "Available "; }
+  .tbl:has(th:nth-child(4)) td:nth-child(3)::before { content: "\00a0 · Cost "; }
+  .tbl:has(th:nth-child(4)) td:nth-child(4) { margin-top: 4px; }
+  .teach-top h3 { font-size: 1.25rem; }
+  .diagram { padding: 10px 8px 10px; }
+  .rhit { padding: 10px 14px 12px; }
+}
+/* narrow phones: the number sits above the name so the longest names (Bureaucracy, Technology II) fit */
+@media (max-width: 480px) {
+  .slot { align-content: flex-start; row-gap: 5px; }
+  .slot .slot-name { flex: 0 0 100%; }
+  .slot .slot-swap { margin-top: 0; padding-left: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; }
+  html { scroll-behavior: auto; }
+  .pbtn.on, .slot.can:hover { transform: none; }
+}

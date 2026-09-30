@@ -1,0 +1,603 @@
+/* =============================================================================
+   Twilight Imperium 2nd Edition — Setup & Reference Utility
+   Styled after the Rules of Play booklet (FFG, 2000) and its box lid:
+   · white pages and black type — Times body, squared Neuropol-style headings (Rules pp.2–19);
+   · the running head "Twilight Imperium 2nd Edition: Rules of Play" / "Pax Magnifica Bellum Gloriosum";
+   · the cover: a grey lion under white extended capitals (Rules p.1); the box lid's flame-gradient logo;
+   · the back cover's black-framed title box and bordered text boxes with round domain counters (Rules p.20);
+   · grey star-flecked "Diagram" plates and hex maps — black hexes are home systems (Rules pp.4–5);
+   · the race sidebars: a colour oval portrait over a halftone-screened box (Rules pp.6, 9, 10, 12, 14, 17);
+   · the Hope's End technology tree's black title bars (Hope's End p.4);
+   · the battle scene along the foot of every page.
+   Colours sampled from the scans: paper #ffffff, Diagram grey #dddddd, halftone ≈ #e9e9e9; flame logo
+   red→orange→yellow and motto gold from the box lid.
+   ============================================================================= */
+
+/* Audiowide's "&" reads as an "E" ("Races & Supplies"): borrow a plain bold "&" from a system sans for that one
+   character (falls back to Audiowide's own where none of these exist). */
+@font-face {
+  font-family: "TI2 Amp";
+  src: local("Trebuchet MS Bold"), local("TrebuchetMS-Bold"), local("Arial Bold"), local("Arial-BoldMT"),
+       local("Helvetica Bold"), local("Helvetica-Bold"), local("Roboto Bold"), local("Roboto-Bold");
+  unicode-range: U+0026;
+}
+
+:root {
+  --paper:      #ffffff;   /* rulebook page (sampled) */
+  --ink:        #141414;   /* type and box rules */
+  --ink-2:      #333333;   /* secondary text: 12.6:1 on paper */
+  --ink-3:      #4d4d4d;   /* citations, hints: 8.4:1 on paper, 6.6:1 on --plate */
+  --line:       #595959;   /* unselected control borders: 7:1 on paper, 5.5:1 on --plate */
+  --rule-soft:  #c4c4c4;   /* table row rules (decorative) */
+  --plate:      #e6e6e6;   /* the grey Diagram plates (sampled #dddddd, lifted for text) */
+  --tint:       #f1f1f1;   /* hover / table head */
+  --night:      #161616;   /* the cover plate */
+  --sel:        #fff5cc;   /* selected fill: a pale wash of the logo's yellow */
+  --flame-1:    #d4260f;   /* box-lid logo gradient (sampled, top → bottom) */
+  --flame-2:    #f2560b;
+  --flame-3:    #ff9a13;
+  --flame-4:    #ffd21b;
+  --gold:       #f0c14b;   /* "Pax Magnifica" gold on the lid's dark bar */
+  --imperial:   #9c1c10;   /* deep logo red: Hope's End tags */
+  --focus:      #1c4fc4;   /* the lid's space blue: focus rings (6.9:1 on paper) */
+
+  --f-display: "TI2 Amp", "Audiowide", "Neuropol", "Eurostile", "Microgramma", "Arial Black", sans-serif;
+  --f-body:    "STIX Two Text", "Times New Roman", Times, Georgia, serif;
+
+  --wrap: 1080px;
+  /* flat-topped hexes, as drawn in the rulebook's galaxy diagrams (black = home system) */
+  --hex: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 20'%3E%3Cpath d='M21.2 10 16.1 18.83H5.9L.8 10 5.9 1.17h10.2z' fill='%23141414'/%3E%3C/svg%3E");
+  --hex-open: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 20'%3E%3Cpath d='M20.2 10 15.6 17.95H6.4L1.8 10 6.4 2.05h9.2z' fill='%23fff' stroke='%23141414' stroke-width='1.8' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --hex-white: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 20'%3E%3Cpath d='M21.2 10 16.1 18.83H5.9L.8 10 5.9 1.17h10.2z' fill='%23fff'/%3E%3C/svg%3E");
+  /* Mecatol Rex (dark) in its first ring (grey), after Diagram Two (Rules p.4) */
+  --galaxy: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-26.5 -27 53 54'%3E%3Cg stroke='%23141414' stroke-width='1.7' stroke-linejoin='round'%3E%3Cpath d='M10.00 0.00 5.00 8.66 -5.00 8.66 -10.00 0.00 -5.00 -8.66 5.00 -8.66Z' fill='%234d4d4d'/%3E%3Cpath d='M10.00 -17.32 5.00 -8.66 -5.00 -8.66 -10.00 -17.32 -5.00 -25.98 5.00 -25.98Z' fill='%23c4c4c4'/%3E%3Cpath d='M10.00 17.32 5.00 25.98 -5.00 25.98 -10.00 17.32 -5.00 8.66 5.00 8.66Z' fill='%23c4c4c4'/%3E%3Cpath d='M25.00 -8.66 20.00 0.00 10.00 0.00 5.00 -8.66 10.00 -17.32 20.00 -17.32Z' fill='%23c4c4c4'/%3E%3Cpath d='M25.00 8.66 20.00 17.32 10.00 17.32 5.00 8.66 10.00 0.00 20.00 0.00Z' fill='%23c4c4c4'/%3E%3Cpath d='M-5.00 -8.66 -10.00 0.00 -20.00 0.00 -25.00 -8.66 -20.00 -17.32 -10.00 -17.32Z' fill='%23c4c4c4'/%3E%3Cpath d='M-5.00 8.66 -10.00 17.32 -20.00 17.32 -25.00 8.66 -20.00 0.00 -10.00 0.00Z' fill='%23c4c4c4'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; padding: 0; }
+[hidden] { display: none !important; }
+
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 17px;
+  line-height: 1.55;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+img { max-width: 100%; }
+b, strong { font-weight: 700; }
+
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+.vh {
+  position: absolute !important; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0;
+  overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+
+/* ---- masthead: running head + the cover ------------------------------------ */
+.runhead {
+  max-width: var(--wrap); margin: 0 auto; padding: 14px 24px 9px;
+  display: flex; justify-content: space-between; gap: 18px;
+  font-size: 13px; line-height: 1.3; letter-spacing: 0.24em; text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.cover {
+  position: relative; isolation: isolate;
+  max-width: calc(var(--wrap) - 48px); margin: 0 auto;
+  min-height: 318px;
+  display: flex; align-items: center;
+  background-color: var(--night);
+  background-image:
+    radial-gradient(1.4px 1.4px at 9% 18%, rgba(255, 255, 255, 0.85) 60%, transparent 70%),
+    radial-gradient(1px 1px at 23% 74%, rgba(255, 255, 255, 0.7) 60%, transparent 70%),
+    radial-gradient(1.2px 1.2px at 37% 12%, rgba(255, 255, 255, 0.6) 60%, transparent 70%),
+    radial-gradient(1px 1px at 46% 88%, rgba(255, 255, 255, 0.55) 60%, transparent 70%),
+    radial-gradient(1.6px 1.6px at 3% 62%, rgba(255, 255, 255, 0.7) 60%, transparent 70%),
+    radial-gradient(1px 1px at 31% 44%, rgba(255, 255, 255, 0.45) 60%, transparent 70%),
+    radial-gradient(ellipse 70% 90% at 78% 45%, #3a3a3a 0%, #232323 45%, transparent 75%),
+    linear-gradient(180deg, #1d1d1d 0%, #111111 100%);
+  border: 2px solid #000;
+  outline: 1px solid var(--ink); outline-offset: 5px;   /* the cover's thin frame inside the page margin */
+  overflow: hidden;
+}
+.cover-art {
+  position: absolute; z-index: -1; top: 0; right: 0; bottom: 0;
+  width: 62%; height: 100%;
+  object-fit: cover; object-position: 50% 42%;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.55) 22%, #000 46%);
+          mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.55) 22%, #000 46%);
+}
+.cover-text { position: relative; width: min(560px, 58%); padding: 34px 0 30px 36px; }
+.brand { margin: 0; font-weight: 400; line-height: 1; }
+.logo { display: block; width: 100%; height: auto; overflow: visible; filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.55)); }
+.brand-sub {
+  display: block; margin-top: 18px;
+  font-family: var(--f-display); font-weight: 400;
+  font-size: clamp(1.3rem, 2.7vw, 2.05rem); line-height: 1.1; letter-spacing: 0.07em; text-transform: uppercase;
+  color: #ffffff;
+  text-shadow: 0 2px 0 #000, 0 0 18px rgba(0, 0, 0, 0.8);
+}
+.cover-kicker {
+  display: flex; flex-wrap: wrap; align-items: center; column-gap: 0.7em; row-gap: 2px;
+  margin-top: 14px;
+  font-size: 13px; font-weight: 700; line-height: 1.4; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--gold);
+}
+.cover-kicker span { white-space: nowrap; }
+.cover-kicker i { font-style: normal; font-size: 0.7em; color: var(--flame-2); }
+
+/* ---- layout ---------------------------------------------------------------- */
+main { max-width: var(--wrap); margin: 0 auto; padding: 0 24px 34px; }
+.intro { margin: 30px 0 4px; }
+.tagline { max-width: 74ch; font-size: 1.0625rem; color: var(--ink); }
+.tagline em { color: var(--ink-2); }
+
+.sec { margin-top: 46px; }
+/* section headings: the back cover's black-framed title box ("Distant Suns Domain Effects", Rules p.20) */
+.sec > h2 {
+  font-family: var(--f-display); font-weight: 400;
+  font-size: clamp(1.3rem, 2.4vw, 1.7rem); line-height: 1.15; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--ink);
+  background: var(--paper) var(--galaxy) no-repeat right 18px center / auto 36px;
+  border: 4px solid var(--ink);
+  padding: 13px 76px 11px 20px;
+  margin: 0 0 12px;
+}
+.sec-note { max-width: 75ch; font-size: 1rem; font-style: italic; color: var(--ink-2); margin-bottom: 18px; }
+
+/* ---- configurator: a grey Diagram plate ------------------------------------ */
+.cfg {
+  display: flex; flex-direction: column; gap: 20px;
+  padding: 20px 22px 22px;
+  background-color: var(--plate);
+  background-image:
+    radial-gradient(1.3px 1.3px at 7% 22%, #ffffff 60%, transparent 70%),
+    radial-gradient(1px 1px at 38% 71%, #ffffff 60%, transparent 70%),
+    radial-gradient(1.5px 1.5px at 64% 14%, #ffffff 60%, transparent 70%),
+    radial-gradient(1px 1px at 88% 58%, #ffffff 60%, transparent 70%),
+    radial-gradient(1.2px 1.2px at 52% 93%, #ffffff 60%, transparent 70%);
+  background-size: 340px 220px;
+  border: 2px solid var(--ink);
+}
+.cfg-group + .cfg-group { border-top: 1px dashed #8c8c8c; padding-top: 18px; }
+.cfg-label {
+  font-family: var(--f-display); font-size: 0.875rem; line-height: 1.3;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink);
+  margin-bottom: 10px;
+}
+.cfg-label .hint {
+  display: block; margin-top: 3px;
+  font-family: var(--f-body); font-style: italic; font-size: 1rem; line-height: 1.4;
+  letter-spacing: 0; text-transform: none; color: var(--ink-2);
+}
+
+.chips, .mods, .pbtns { display: flex; flex-wrap: wrap; gap: 10px; }
+.mode-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); gap: 10px; }
+.mods { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); }
+
+/* option boxes: the back cover's bordered text boxes; the token at left is the round domain counter */
+.chip, .mode-btn, .mod {
+  position: relative;
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start;
+  min-height: 56px; padding: 10px 16px 11px 50px;
+  font: inherit; text-align: left; color: var(--ink);
+  background: var(--paper);
+  border: 1.5px solid var(--line); border-radius: 0;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
+}
+.chip:hover, .mode-btn:hover, .mod:hover { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.chip.on, .mode-btn.on, .mod.on {
+  background: var(--sel);
+  border-color: var(--ink);
+  box-shadow: inset 0 0 0 2px var(--ink), 3px 3px 0 var(--ink);
+}
+.chip.lock { cursor: default; }
+.chip.lock:hover { box-shadow: inset 0 0 0 2px var(--ink), 3px 3px 0 var(--ink); }
+
+/* checkbox tokens (sets, rules options) */
+.chip::before, .mod::before {
+  content: ""; position: absolute; left: 14px; top: 13px;
+  width: 24px; height: 24px;
+  background: var(--paper);
+  border: 2px solid var(--ink); border-radius: 4px;
+  box-shadow: inset 0 0 0 2px var(--paper), inset 0 0 0 4px #bdbdbd;
+}
+.chip.on::before, .mod.on::before { background: var(--ink); box-shadow: none; }
+.chip.on::after, .mod.on::after {
+  content: ""; position: absolute; left: 23px; top: 16px;
+  width: 7px; height: 13px;
+  border-right: 3px solid var(--flame-4); border-bottom: 3px solid var(--flame-4);
+  transform: rotate(45deg);
+}
+/* radio tokens (galaxy) */
+.mode-btn::before {
+  content: ""; position: absolute; left: 13px; top: 12px;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: radial-gradient(circle, var(--paper) 52%, #bdbdbd 54%, #f4f4f4 66%, #8d8d8d 78%);
+  border: 2px solid var(--ink);
+}
+.mode-btn.on::before { background: radial-gradient(circle, var(--flame-4) 30%, var(--ink) 33%); }
+
+.chip b {
+  font-size: 1.0625rem; line-height: 1.3; font-weight: 700;
+}
+.chip span { font-size: 0.9375rem; line-height: 1.35; color: var(--ink-2); }
+
+.mode-btn b {
+  display: block; margin-bottom: 3px;
+  font-family: var(--f-display); font-weight: 400; font-size: 0.9375rem; line-height: 1.3; letter-spacing: 0.03em;
+}
+.mode-btn span { display: block; font-size: 1rem; line-height: 1.4; color: var(--ink-2); }
+.mode-btn.off, .mode-btn:disabled {
+  cursor: not-allowed;
+  background: #efefef; color: var(--ink-3);
+  border: 1.5px dashed #6b6b6b; box-shadow: none;
+}
+.mode-btn.off::before, .mode-btn:disabled::before { background: #efefef; border: 2px dashed #6b6b6b; }
+.mode-btn.off span, .mode-btn:disabled span { color: var(--ink-3); }
+.mode-btn.off b::after, .mode-btn:disabled b::after {
+  content: "Needs Hope's End"; display: inline-block; margin-left: 8px;
+  font-family: var(--f-body); font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--ink-3); border: 1px solid #6b6b6b; padding: 0 5px; vertical-align: 1px;
+}
+
+.mod-name { display: block; font-size: 1.0625rem; line-height: 1.3; font-weight: 700; margin-bottom: 3px; }
+.mod-sum { display: block; font-size: 1rem; line-height: 1.4; color: var(--ink-2); }
+
+/* player count: numbered counters */
+.pbtn {
+  width: 54px; height: 54px; border-radius: 50%;
+  display: inline-grid; place-items: center;
+  font-family: var(--f-display); font-size: 1.3rem; line-height: 1; color: var(--ink);
+  background: radial-gradient(circle, var(--paper) 55%, #c9c9c9 57%, #f7f7f7 68%, #8a8a8a 80%, #5a5a5a 88%);
+  border: 2px solid var(--ink);
+  cursor: pointer;
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+.pbtn:hover { box-shadow: 0 0 0 3px var(--paper), 0 0 0 5px var(--line); }
+.pbtn.on {
+  color: var(--flame-4);
+  background: radial-gradient(circle, var(--ink) 55%, #707070 57%, #e8e8e8 68%, #7a7a7a 80%, #3a3a3a 88%);
+  box-shadow: 0 0 0 3px var(--paper), 0 0 0 5px var(--ink);
+}
+
+/* ---- setup steps ------------------------------------------------------------ */
+.phase { margin-top: 28px; }
+.phase:first-child { margin-top: 18px; }
+/* phase headings: the rulebook's squared section heads, with a black home-system hex */
+.phase-title {
+  display: flex; align-items: center; gap: 12px;
+  font-family: var(--f-display); font-weight: 400;
+  font-size: 1.3rem; line-height: 1.25; letter-spacing: 0.01em;
+  color: var(--ink); margin-bottom: 12px;
+}
+.phase-title::before {
+  content: ""; flex: none; width: 23px; height: 21px;
+  background: var(--hex) center / contain no-repeat;
+}
+
+.step {
+  display: grid; grid-template-columns: 46px minmax(0, 1fr); gap: 0 16px;
+  padding: 15px 20px 14px 15px; margin-bottom: 12px;
+  background: var(--paper);
+  border: 1px solid var(--ink);
+}
+/* step numbers: the back cover's bevelled domain counters */
+.step-num {
+  width: 46px; height: 46px; border-radius: 50%;
+  display: grid; place-items: center;
+  font-family: var(--f-body); font-weight: 700; font-size: 1.1875rem; line-height: 1; color: var(--ink);
+  background: radial-gradient(circle, var(--paper) 54%, #c4c4c4 56%, #f7f7f7 67%, #8a8a8a 80%, #555555 90%);
+  border: 2px solid var(--ink);
+}
+.step-body { min-width: 0; }
+.step-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 2px 0 6px; }
+.step-head h4 { font-size: 1.1875rem; line-height: 1.3; font-weight: 700; }
+.step-text { max-width: 75ch; }
+.step-text p { margin-bottom: 8px; }
+.step-text b { font-weight: 700; }
+.step-text i { color: var(--ink-2); }
+
+/* lists: the rulebook's small square bullets and "1)" numbering */
+.step-text ul, .ref-body ul, .teach-panel ul { list-style: none; margin: 6px 0 8px; }
+.step-text ul > li, .ref-body ul > li, .teach-panel ul > li { position: relative; padding-left: 20px; margin-bottom: 6px; }
+.step-text ul > li::before, .ref-body ul > li::before, .teach-panel ul > li::before {
+  content: ""; position: absolute; left: 3px; top: 0.62em;
+  width: 7px; height: 7px; background: var(--ink);
+}
+.step-text ol, .ref-body ol, .teach-panel ol { list-style: none; counter-reset: rb; margin: 6px 0 8px; }
+.step-text ol > li, .ref-body ol > li, .teach-panel ol > li { counter-increment: rb; position: relative; padding-left: 28px; margin-bottom: 6px; }
+.step-text ol > li::before, .ref-body ol > li::before, .teach-panel ol > li::before {
+  content: counter(rb) ")"; position: absolute; left: 0; top: 0; font-weight: 700;
+}
+.step-text li ul, .ref-body li ul { margin-top: 4px; }
+.step-text li ul > li::before, .ref-body li ul > li::before { background: transparent; border: 1.5px solid var(--ink); }
+
+/* source tags: one look per box, distinguishable beyond colour */
+.tag {
+  display: inline-block; white-space: nowrap;
+  font-family: var(--f-body); font-size: 0.8125rem; line-height: 1.35; font-weight: 700;
+  letter-spacing: 0.09em; text-transform: uppercase;
+  padding: 1px 8px 1px; border: 1.5px solid var(--ink); border-radius: 0;
+}
+.tag-core { background: var(--ink); color: #ffffff; }                          /* solid black: the base game */
+.tag-he   { background: var(--imperial); color: #ffffff; border-color: var(--imperial); border-radius: 9px; }  /* red capsule: Hope's End */
+.tag-opt  { background: var(--paper); color: var(--ink); border-style: dashed; } /* dashed outline: optional rule */
+.tag-faq  { background: var(--plate); color: var(--ink); border-color: #6b6b6b; font-style: italic; } /* grey plate: FAQ ruling */
+
+/* citations */
+.src-line {
+  margin-top: 10px; padding-top: 7px;
+  border-top: 1px dotted #8c8c8c;
+  font-size: 0.875rem; line-height: 1.45; color: var(--ink-3);
+}
+.src-line::before {
+  content: "Source"; margin-right: 0.7em;
+  font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink);
+}
+
+/* map diagrams inside steps and reference */
+.figs { display: flex; flex-wrap: wrap; gap: 16px; margin: 12px 0 6px; }
+.map-fig {
+  flex: 0 1 300px; max-width: 100%;
+  background: var(--paper); border: 1px solid var(--ink); padding: 8px 8px 10px;
+}
+.map-fig img { display: block; width: 100%; height: auto; }
+.map-fig figcaption { font-size: 1rem; line-height: 1.5; margin-top: 8px; color: var(--ink-2); }
+
+/* ---- teaching script: a race sidebar (oval portrait over a halftone box) ------ */
+.teach-bar { margin: 4px 0 16px; }
+#teachBtn, .teach-copy {
+  min-height: 46px; padding: 10px 18px;
+  font-family: var(--f-display); font-size: 0.9375rem; line-height: 1.2; letter-spacing: 0.04em;
+  color: #ffffff; background: var(--ink);
+  border: 2px solid var(--ink); border-radius: 8px;   /* the Hope's End tech-tree boxes */
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s, box-shadow 0.15s;
+}
+#teachBtn:hover, .teach-copy:hover { background: #3a3a3a; box-shadow: 0 0 0 3px var(--paper), 0 0 0 5px var(--ink); }
+#teachBtn[aria-expanded="true"] { background: var(--sel); color: var(--ink); box-shadow: 3px 3px 0 var(--ink); }
+#teachBtn[aria-expanded="true"]::after { content: " ▴"; }
+#teachBtn[aria-expanded="false"]::after { content: " ▾"; }
+
+.teach-panel {
+  position: relative;
+  margin: 104px 0 26px; padding: 108px 28px 22px;
+  border: 2px solid #3c3c3c;
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(180deg, rgba(255, 255, 255, 0) 0, rgba(255, 255, 255, 0) 120px, #ffffff 200px),
+    radial-gradient(circle at 2px 2px, #b4b4b4 0.95px, transparent 1.25px);
+  background-size: 100% 100%, 4px 4px;
+  box-shadow: 4px 4px 0 #cfcfcf;
+}
+.teach-panel::before {
+  content: ""; position: absolute; top: -92px; left: 50%;
+  width: 150px; height: 190px; transform: translateX(-50%);
+  border-radius: 50%;
+  background: #1c2350 url("../images/oval-hacan.webp") center / cover no-repeat;
+  border: 3px solid var(--ink);
+  box-shadow: 0 0 0 4px var(--paper), 0 0 0 5px #3c3c3c;
+}
+.teach-top { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; margin-bottom: 14px; }
+.teach-top h3 { font-family: var(--f-display); font-weight: 400; font-size: 1.4rem; line-height: 1.25; color: var(--ink); }
+.teach-copy { background: var(--paper); color: var(--ink); min-height: 42px; padding: 8px 16px; font-size: 0.875rem; }
+.teach-copy:hover { background: var(--tint); }
+/* one centred reading column (≈ 72 characters of the body face) under the portrait */
+.teach-panel > :not(.teach-top) { max-width: 40rem; margin-left: auto; margin-right: auto; }
+.teach-note {
+  margin-bottom: 14px; padding-bottom: 12px;
+  font-size: 1.0625rem; font-style: italic; color: var(--ink-2);
+  border-bottom: 1px solid #9a9a9a;
+}
+.teach-note::first-letter {
+  float: left; font-style: normal; font-weight: 400;
+  font-size: 3.6em; line-height: 0.82; padding: 0.06em 0.09em 0 0; color: var(--ink);
+}
+.teach-panel h4 {
+  margin-top: 20px; margin-bottom: 6px;
+  font-family: var(--f-display); font-weight: 400; font-size: 1.0625rem; line-height: 1.3; letter-spacing: 0.01em;
+  color: var(--ink);
+}
+.teach-panel p { margin-bottom: 10px; }
+.teach-panel ul, .teach-panel ol { margin-top: 6px; margin-bottom: 10px; }
+.teach-panel b { font-weight: 700; }
+
+/* ---- reference: bordered boxes; an open box gets the tech tree's black title bar ---- */
+.ref {
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  margin-bottom: 12px;
+}
+.ref summary {
+  display: flex; align-items: center; gap: 12px;
+  min-height: 52px; padding: 12px 16px;
+  font-family: var(--f-display); font-weight: 400; font-size: 1.0625rem; line-height: 1.3; letter-spacing: 0.01em;
+  color: var(--ink);
+  cursor: pointer; list-style: none;
+  transition: background-color 0.15s, color 0.15s;
+}
+.ref summary::-webkit-details-marker { display: none; }
+.ref summary::before {
+  content: ""; flex: none; width: 23px; height: 21px;
+  background: var(--hex-open) center / contain no-repeat;
+}
+.ref summary::after {
+  content: "+"; margin-left: auto; flex: none;
+  width: 28px; height: 28px; display: grid; place-items: center;
+  font-family: var(--f-display); font-size: 1.1rem; line-height: 1;
+  border: 2px solid currentColor; border-radius: 50%;
+}
+.ref summary:hover { background: var(--tint); }
+.ref[open] > summary { background: var(--ink); color: #ffffff; }
+.ref[open] > summary::before { background-image: var(--hex-white); }
+.ref[open] > summary::after { content: "−"; }
+.ref[open] > summary:hover { background: #333333; }
+.ref-body { padding: 16px 22px 18px; }
+.ref-body > *:not(.tbl-wrap):not(.figs):not(.src-line) { max-width: 75ch; }
+.ref-body h4 {
+  margin: 18px 0 6px;
+  font-size: 1rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--ink);
+}
+.ref-body h4:first-child { margin-top: 2px; }
+.ref-body p { margin-bottom: 10px; }
+.ref-body b { font-weight: 700; }
+.ref-body i { color: var(--ink-2); }
+.callout {
+  background: var(--plate);
+  border: 1px solid var(--ink); border-left-width: 6px;
+  padding: 10px 14px; margin-bottom: 12px;
+}
+
+/* tables: the back cover's "Unit Values" box */
+.tbl-wrap { overflow-x: auto; margin: 8px 0 12px; -webkit-overflow-scrolling: touch; }
+.tbl { border-collapse: collapse; width: 100%; font-size: 1rem; line-height: 1.5; border: 2px solid var(--ink); background: var(--paper); }
+.tbl th, .tbl td { padding: 8px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--rule-soft); }
+.tbl thead th {
+  background: var(--tint);
+  font-weight: 700; font-size: 1rem;
+  text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 3px;
+  border-bottom: 2px solid var(--ink);
+}
+.tbl tbody th { font-weight: 700; white-space: nowrap; }
+.tbl tbody tr:last-child > * { border-bottom: 0; }
+.tbl td ul { margin: 0; }
+.tbl.tech tbody th { white-space: normal; min-width: 8.5em; }
+.tbl.compact { width: auto; }
+.tbl-note { font-size: 1rem; color: var(--ink-2); margin: 4px 0 12px; }
+
+/* technology colours (rules content: the chits' four colours) */
+.t-chip {
+  display: inline-block; margin: 2px 3px 2px 0; padding: 1px 8px;
+  font-family: var(--f-body); font-size: 0.875rem; font-weight: 700; line-height: 1.4; letter-spacing: 0.03em;
+  border: 1.5px solid var(--ink); border-radius: 0; text-transform: none;
+}
+.t-grn { background: #1f5c34; color: #ffffff; }
+.t-red { background: #8a2323; color: #ffffff; }
+.t-blu { background: #1f437f; color: #ffffff; }
+.t-yel { background: #f2cc3d; color: #141414; }
+
+/* ---- search ----------------------------------------------------------------- */
+.rsearch-wrap { margin-bottom: 16px; max-width: 760px; }
+#rsearch {
+  width: 100%; min-height: 52px; padding: 12px 16px 12px 48px;
+  font: inherit; font-size: 1.0625rem; color: var(--ink);
+  background: var(--paper) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='10' cy='10' r='6.5' fill='none' stroke='%23141414' stroke-width='2.4'/%3E%3Cpath d='m15 15 6 6' stroke='%23141414' stroke-width='2.8' stroke-linecap='round'/%3E%3C/svg%3E") 15px 50% / 21px no-repeat;
+  border: 2px solid var(--ink); border-radius: 0;
+  box-shadow: 3px 3px 0 #cfcfcf;
+  -webkit-appearance: none; appearance: none;
+}
+#rsearch::placeholder { color: #5c5c5c; font-style: italic; opacity: 1; }
+#rsearch::-webkit-search-cancel-button {
+  -webkit-appearance: none; appearance: none; width: 18px; height: 18px; cursor: pointer;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4 4l12 12M16 4 4 16' stroke='%23141414' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+#rsearch:focus { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+.rhint { font-style: italic; color: var(--ink-2); }
+.rhit {
+  max-width: 900px;
+  background: var(--paper); border: 1px solid var(--ink);
+  padding: 12px 16px 13px; margin-bottom: 10px;
+}
+.rhit-src {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.875rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink); margin-bottom: 5px;
+}
+.rhit-src::before { content: ""; flex: none; width: 14px; height: 13px; background: var(--hex) center / contain no-repeat; }
+.rhit-text { font-size: 1rem; line-height: 1.55; color: var(--ink-2); overflow-wrap: anywhere; }
+.rhit-text mark { background: var(--flame-4); color: var(--ink); padding: 0 2px; box-shadow: 0 1px 0 var(--ink); }
+
+/* ---- footer: the rulebook's page-foot battle scene ------------------------------ */
+.footer { margin-top: 30px; text-align: center; }
+.footer p {
+  max-width: 72ch; margin: 0 auto; padding: 18px 24px 0;
+  border-top: 1px solid var(--ink);
+  font-size: 1rem; font-style: italic; color: var(--ink-2);
+}
+.foot-band {
+  display: block; width: min(100%, 1185px); height: auto; margin: 10px auto 0;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 7%, #000 93%, transparent 100%);
+          mask-image: linear-gradient(90deg, transparent 0, #000 7%, #000 93%, transparent 100%);
+}
+
+/* ---- components glossary tokens (js/comp-widget.js + css/components.css) ---- */
+#components {
+  --comp-surface: #f4f4f4;      /* card: a light plate */
+  --comp-fig: #ffffff;          /* picture panel = the rulebook paper (median crop corner #ffffff) */
+  --comp-ink: #141414;
+  --comp-muted: #4d4d4d;        /* 7.9:1 on the card */
+  --comp-line: #141414;         /* 18.9:1 against the page */
+  --comp-accent: #141414;
+  --comp-accent-ink: #ffffff;   /* 18.9:1 */
+  --comp-head-font: "STIX Two Text", "Times New Roman", Times, serif;   /* the back cover's bold Times box heads */
+  --comp-radius: 0px;
+}
+
+/* ---- responsive ------------------------------------------------------------ */
+@media (max-width: 820px) {
+  .cover-text { width: min(520px, 64%); padding-left: 28px; }
+  .cover-art { width: 60%; }
+}
+@media (max-width: 640px) {
+  body { font-size: 16.5px; }
+  .runhead { padding: 10px 16px 7px; justify-content: center; letter-spacing: 0.18em; }
+  .runhead span:first-child { display: none; }
+  .cover {
+    max-width: none; margin: 0 16px; min-height: 0;
+    flex-direction: column; align-items: stretch;
+    outline-offset: 4px;
+  }
+  .cover-text { width: auto; padding: 18px 16px 4px; }
+  .cover-art {
+    position: relative; z-index: 0; order: 2;
+    width: 100%; height: 150px;
+    object-position: 50% 52%;
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 36%);
+            mask-image: linear-gradient(180deg, transparent 0%, #000 36%);
+    margin-top: -14px;
+  }
+  .brand-sub { margin-top: 12px; font-size: 1.28rem; }
+  .cover-kicker { margin-top: 8px; column-gap: 1.1em; font-size: 13px; letter-spacing: 0.12em; }
+  .cover-kicker i { display: none; }
+  main { padding: 0 16px 28px; }
+  .intro { margin-top: 22px; }
+  .sec { margin-top: 38px; }
+  .sec > h2 { font-size: 1.2rem; padding: 10px 50px 8px 14px; border-width: 3px; background-size: auto 28px; background-position: right 11px center; }
+  .cfg { padding: 14px 12px 16px; }
+  .mode-grid, .mods { grid-template-columns: 1fr; }
+  .chips > .chip { flex: 1 1 100%; }
+  .step { grid-template-columns: 38px minmax(0, 1fr); gap: 0 12px; padding: 13px 13px 12px 11px; }
+  .step-num { width: 38px; height: 38px; font-size: 0.95rem; }
+  .step-head h4 { font-size: 1.125rem; }
+  .phase-title { font-size: 1.15rem; }
+  .teach-panel { margin-top: 92px; padding: 96px 16px 18px; }
+  .teach-panel::before { width: 124px; height: 158px; top: -80px; }
+  .teach-top h3 { font-size: 1.2rem; }
+  .ref summary { padding: 11px 12px; font-size: 1rem; }
+  .ref-body { padding: 14px 14px 16px; }
+  .tbl th, .tbl td { padding: 6px 8px; }
+  .figs .map-fig { flex-basis: 100%; }
+  .footer p { margin: 0 16px; padding: 16px 0 0; }
+}
+/* short or very narrow phones: keep the masthead under ~half the first screen */
+@media (max-width: 640px) and (max-height: 720px), (max-width: 350px) {
+  .cover-art { height: 104px; }
+  .cover-text { padding-top: 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; }
+  html { scroll-behavior: auto; }
+}
+@media print {
+  .cover { outline: none; }
+  .teach-bar, .rsearch-wrap, #rresults, .foot-band { display: none; }
+}
