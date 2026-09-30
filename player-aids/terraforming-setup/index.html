@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terraforming Mars — Setup &amp; Reference Utility</title>
+  <meta name="description" content="Setup steps for 1–5 players on any of the seven maps, with Venus Next, Prelude, Prelude 2, Colonies, Turmoil, Milestones &amp; Awards and MarsBot, a full rules reference, a teaching script and a searchable index of every Terraforming Mars rulebook.">
+  <meta name="theme-color" content="#5f231c">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Russo One echoes the rulebooks' Prototype headings; Crimson Pro their Minion body; Source Sans 3 their Myriad labels -->
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400..700;1,400..700&family=Russo+One&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=2">
+  <link rel="stylesheet" href="css/components.css?v=1">
+</head>
+<body>
+  <!-- the Martian surface every rulebook page sits on (Valles Marineris, from the Milestones & Awards leaflet) -->
+  <div class="mars-bg" aria-hidden="true"></div>
+
+  <!-- the rulebook cover: a strip of terrain, the terraformed planet in space, then the title on Valles Marineris,
+       separated by the cover's cream rails -->
+  <header class="topbar">
+    <div class="band band-rim" aria-hidden="true"><div class="band-in"></div></div>
+    <div class="band band-space" aria-hidden="true">
+      <img class="planet" src="images/cover-space.webp" width="776" height="306" alt="" aria-hidden="true">
+    </div>
+    <div class="band band-title">
+      <div class="band-in">
+        <svg class='emblem' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg' aria-hidden='true' focusable='false'><g fill='none' stroke='currentColor'><circle cx='100' cy='104' r='50' stroke-width='7'/><ellipse cx='100' cy='104' rx='21' ry='50' stroke-width='5'/><path d='M100 54V154M50 104H150' stroke-width='5'/><path d='M57.3 78H142.7' stroke-width='4.5'/><path d='M57.3 130H142.7' stroke-width='4.5'/><path d='M135.4 68.6L169.4 34.6' stroke-width='8' stroke-linecap='square'/><path d='M145.4 30.6H173.4V58.6' stroke-width='8' stroke-linecap='square' stroke-linejoin='miter'/><path d='M86.8 178.8A76 76 0 0 1 59.7 39.5' stroke-width='3'/><path d='M113.2 178.8A76 76 0 0 0 169.4 73.1' stroke-width='3'/></g><g fill='currentColor'><ellipse cx='85.7' cy='171.5' rx='9.5' ry='3.6' transform='rotate(224.0 85.7 171.5)'/><ellipse cx='82.7' cy='185.2' rx='9.5' ry='3.6' transform='rotate(160.0 82.7 185.2)'/><ellipse cx='66.5' cy='164.3' rx='9.5' ry='3.6' transform='rotate(241.0 66.5 164.3)'/><ellipse cx='59.8' cy='176.6' rx='9.5' ry='3.6' transform='rotate(177.0 59.8 176.6)'/><ellipse cx='50.4' cy='151.9' rx='9.5' ry='3.6' transform='rotate(258.0 50.4 151.9)'/><ellipse cx='40.3' cy='161.7' rx='9.5' ry='3.6' transform='rotate(194.0 40.3 161.7)'/><ellipse cx='38.5' cy='135.3' rx='9.5' ry='3.6' transform='rotate(275.0 38.5 135.3)'/><ellipse cx='26.0' cy='141.7' rx='9.5' ry='3.6' transform='rotate(211.0 26.0 141.7)'/><ellipse cx='32.0' cy='116.0' rx='9.5' ry='3.6' transform='rotate(292.0 32.0 116.0)'/><ellipse cx='18.3' cy='118.4' rx='9.5' ry='3.6' transform='rotate(228.0 18.3 118.4)'/><ellipse cx='31.5' cy='95.6' rx='9.5' ry='3.6' transform='rotate(309.0 31.5 95.6)'/><ellipse cx='17.6' cy='93.9' rx='9.5' ry='3.6' transform='rotate(245.0 17.6 93.9)'/><ellipse cx='37.0' cy='75.9' rx='9.5' ry='3.6' transform='rotate(326.0 37.0 75.9)'/><ellipse cx='24.2' cy='70.2' rx='9.5' ry='3.6' transform='rotate(262.0 24.2 70.2)'/><ellipse cx='47.9' cy='58.7' rx='9.5' ry='3.6' transform='rotate(343.0 47.9 58.7)'/><ellipse cx='37.4' cy='49.5' rx='9.5' ry='3.6' transform='rotate(279.0 37.4 49.5)'/><ellipse cx='63.4' cy='45.5' rx='9.5' ry='3.6' transform='rotate(360.0 63.4 45.5)'/><ellipse cx='56.0' cy='33.6' rx='9.5' ry='3.6' transform='rotate(296.0 56.0 33.6)'/><ellipse cx='114.3' cy='171.5' rx='9.5' ry='3.6' transform='rotate(-44.0 114.3 171.5)'/><ellipse cx='117.3' cy='185.2' rx='9.5' ry='3.6' transform='rotate(20.0 117.3 185.2)'/><ellipse cx='133.5' cy='164.3' rx='9.5' ry='3.6' transform='rotate(-61.0 133.5 164.3)'/><ellipse cx='140.2' cy='176.6' rx='9.5' ry='3.6' transform='rotate(3.0 140.2 176.6)'/><ellipse cx='149.6' cy='151.9' rx='9.5' ry='3.6' transform='rotate(-78.0 149.6 151.9)'/><ellipse cx='159.7' cy='161.7' rx='9.5' ry='3.6' transform='rotate(-14.0 159.7 161.7)'/><ellipse cx='161.5' cy='135.3' rx='9.5' ry='3.6' transform='rotate(-95.0 161.5 135.3)'/><ellipse cx='174.0' cy='141.7' rx='9.5' ry='3.6' transform='rotate(-31.0 174.0 141.7)'/><ellipse cx='168.0' cy='116.0' rx='9.5' ry='3.6' transform='rotate(-112.0 168.0 116.0)'/><ellipse cx='181.7' cy='118.4' rx='9.5' ry='3.6' transform='rotate(-48.0 181.7 118.4)'/><ellipse cx='168.5' cy='95.6' rx='9.5' ry='3.6' transform='rotate(-129.0 168.5 95.6)'/><ellipse cx='182.4' cy='93.9' rx='9.5' ry='3.6' transform='rotate(-65.0 182.4 93.9)'/><ellipse cx='163.0' cy='75.9' rx='9.5' ry='3.6' transform='rotate(-146.0 163.0 75.9)'/><ellipse cx='175.8' cy='70.2' rx='9.5' ry='3.6' transform='rotate(-82.0 175.8 70.2)'/></g></svg>
+        <p class="kicker">A DFW Gaming Village player aid</p>
+        <h1 class="brand-title"><span class="bt-1">Terraforming</span> <span class="bt-2">Mars</span></h1>
+        <p class="brand-sub">Setup &amp; Reference Utility</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- rulebook p.2: the box painting, framed, above the announcement -->
+  <div class="announce">
+    <figure class="announce-art" aria-hidden="true">
+      <img src="images/box-painting.webp" width="602" height="247" alt="" loading="lazy" decoding="async">
+    </figure>
+    <p class="tagline">
+      Choose the sets on the table, the map, the mode and the player count — for exact setup steps,
+      a full rules reference with every expansion folded in, a teaching script and a searchable index
+      of every rulebook. The World Government is paying for results. Whose corporation will make Mars livable?
+    </p>
+  </div>
+
+  <main>
+    <section class="page" id="briefing" aria-labelledby="cfg-h">
+      <h2 id="cfg-h">Mission Briefing</h2>
+      <p class="sec-note">Select the sets on the table, the way to play, the player count, the map and any variants. Every step, ruling and script below adapts to your choices.</p>
+      <div class="cfg">
+        <div class="cfg-row">
+          <span class="cfg-label" id="lbl-sets">Sets in play <span class="hint">(the map boxes unlock their maps; Prelude 2 needs Prelude)</span></span>
+          <div id="expansions" class="chips" role="group" aria-labelledby="lbl-sets"></div>
+        </div>
+        <div class="cfg-row">
+          <span class="cfg-label" id="lbl-modes">Way to play</span>
+          <div id="modes" class="mode-grid" role="group" aria-labelledby="lbl-modes"></div>
+        </div>
+        <div class="cfg-row">
+          <span class="cfg-label" id="lbl-players">Players <span class="hint">(2–5 in the standard game; 1 in solo and against MarsBot)</span></span>
+          <div id="players" class="pbtns" role="group" aria-labelledby="lbl-players"></div>
+        </div>
+        <div class="cfg-row" id="maps-group">
+          <span class="cfg-label" id="lbl-maps">Map <span class="hint">— the board you play on</span></span>
+          <div id="maps" class="mode-grid" role="group" aria-labelledby="lbl-maps"></div>
+        </div>
+        <div class="cfg-row" id="modules-group">
+          <span class="cfg-label" id="lbl-mods">Options &amp; variants <span class="hint">— optional rules the rulebooks define</span></span>
+          <div id="modules" class="mods" role="group" aria-labelledby="lbl-mods"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="setup-sec" aria-labelledby="setup-h">
+      <h2 id="setup-h">Setup</h2>
+      <p class="sec-note">Follow the steps in order. Each cites its official source pages; where a newer book changes an older one, the newer rule is shown.</p>
+      <div class="teach-bar"><button id="teachBtn" type="button" aria-expanded="false" aria-controls="teach" title="A ~5 minute script to teach this exact setup aloud">📖 Teaching script</button></div>
+      <div id="teach" class="teach-panel" hidden></div>
+      <div id="setup"></div>
+    </section>
+
+    <section class="page" id="components" aria-labelledby="comp-h" hidden>
+      <h2 id="comp-h">Components</h2>
+      <p class="sec-note">Every component the rulebooks list for your sets, map and mode, with its count. Tap a picture to enlarge it; the base game, Venus Next, Colonies and Turmoil lists have no pictures.</p>
+      <div id="aid-comp"></div>
+    </section>
+
+    <section class="page" id="reference-sec" aria-labelledby="ref-h">
+      <h2 id="ref-h">Rules Reference</h2>
+      <p class="sec-note">Tap a heading to open it. Contents adapt to your sets, map, mode and player count.</p>
+      <div id="reference"></div>
+    </section>
+
+    <section class="page" id="search-sec" aria-labelledby="search-h">
+      <h2 id="search-h">Search the Rulebooks</h2>
+      <p class="sec-note">Full-text search across the base rulebook, plus the rulebooks and map-box texts for the sets selected above (the MarsBot books need the MarsBot set).</p>
+      <div class="rsearch-wrap">
+        <input id="rsearch" type="search" placeholder="e.g. greenery, milestone, trade fleet, delegate, floater, Noctis…" aria-label="Search the rulebooks">
+      </div>
+      <div id="rresults" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>
+      Setup and reference content grounded in the official Terraforming Mars rulebook, the Hellas &amp; Elysium,
+      Amazonis &amp; Vastitas and Utopia &amp; Cimmeria map boxes, the Milestones &amp; Awards, Venus Next, Prelude,
+      Prelude 2, Colonies and Turmoil rulebooks, and the three MarsBot (Automa) rulebooks.
+      The Venus Next, Prelude, Prelude 2, Colonies and Milestones &amp; Awards leaflets print no page numbers:
+      their page references count the leaflet’s pages from its cover (p.1). A fan-made play aid — not affiliated
+      with FryxGames or Stronghold Games.
+    </p>
+  </footer>
+
+  <script src="js/data.js?v=1"></script>
+  <!-- optional module file (MarsBot / Automa); the page works without it -->
+  <script src="js/data-automa.js?v=1"></script>
+  <script src="js/rules.js?v=1"></script>
+  <script src="js/components.js?v=1"></script>
+  <script src="js/comp-widget.js?v=1"></script>
+  <script src="js/app.js?v=2"></script>
+  <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
+  <script src="/site-analytics.js?v=20260607-analytics"></script>
+</body>
+</html>
