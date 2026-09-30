@@ -1,0 +1,614 @@
+/* =============================================================================
+   Warcraft: The Board Game — Setup & Reference Utility
+   Styled after the rulebooks (Rulebook Sept 2003, Expansion Set rulebook Oct 2004):
+   • Cover (Rules p.1): the black ground, the orc and the WARCRAFT logo, and the grey-green
+     stone "English Rules" plaque, which becomes the title plaque and the Teaching-script button.
+   • Interior pages: mint paper #ddeed8. The rulebook prints all its text in blue #054fa3;
+     the Expansion Set, the FAQ and the scenario sheets print it in black #231f20.
+     Headings are in Folkard (stand-in: MedievalSharp); body text is Times (stand-in: Tinos).
+   • Diagram panels (Rules p.4–12): orange parchment #e2a042 with torn side edges, between
+     riveted steel rails. They frame the War Council and the Teaching script here.
+   • Callouts (Rules p.3–4): a white disc, a black ring and a red numeral #ed1e25. They
+     number the setup steps and mark the selected player count and options.
+   • Race crests (Rules p.2–3 page corners): on black torn patches, and on the race chips.
+   ============================================================================= */
+
+:root {
+  --mint:      #ddeed8;   /* rulebook page (sampled) */
+  --card:      #f1f8ee;   /* cards laid on the page */
+  --card-2:    #e4f0de;   /* hover, open headings, table heads */
+  --hair:      #9dbf97;   /* decorative hairlines on the page */
+  --line-ctl:  #5f7a59;   /* borders of controls on the page (3.9:1 on the mint) */
+  --ink:       #231f20;   /* Expansion / FAQ black ink (sampled) */
+  --ink-2:     #394036;   /* secondary text on the page */
+  --blue:      #054fa3;   /* rulebook blue ink (sampled) */
+  --blue-dk:   #033a7a;
+  --blue-deep: #032f66;   /* blue for text on parchment and stone */
+  --red:       #ed1e25;   /* callout red (sampled): decoration only */
+  --red-txt:   #c8161d;   /* callout numerals, AA on white */
+  --parch:     #e2a042;   /* diagram parchment (sampled) */
+  --parch-ink: #2b2418;   /* secondary text on parchment */
+  --steel:     #1c1a18;   /* rail body */
+  --steel-2:   #3d3a35;   /* control borders on the page */
+  --stone:     #b2b8a6;   /* the cover's plaque, lightened */
+  --night:     #020000;   /* the cover's black (sampled) */
+  --bone:      #ded5c1;   /* light text on black */
+  --focus:     #054fa3;
+
+  /* race colours (Rules p.2: Human blue, Orc red, Undead purple, Night Elf green) */
+  --hu: #1d4f9e; --orc: #a3201b; --ud: #5e2e87; --ne: #2b6b2f;
+
+  --f-display: "MedievalSharp", "Palatino Linotype", Georgia, serif;
+  --f-body: "Tinos", "Times New Roman", Times, serif;
+
+  /* the riveted steel rail of the diagram panels (Rules p.4–12), redrawn so it stays crisp */
+  --rail: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='16' viewBox='0 0 40 16'%3E%3Crect width='40' height='16' fill='%231c1a18'/%3E%3Crect width='40' height='1.5' fill='%23aaa498'/%3E%3Crect y='1.5' width='40' height='1' fill='%234d4943'/%3E%3Crect y='13.5' width='40' height='1' fill='%234d4943'/%3E%3Crect y='14.5' width='40' height='1.5' fill='%23857f73'/%3E%3Crect x='4.5' y='4' width='8' height='8' fill='%232e2b28' stroke='%23d6d1c5' stroke-width='1.2'/%3E%3Crect x='7' y='6.5' width='3' height='3' fill='%23ebe7de'/%3E%3Cpath d='M17 11V5h6v4h-3M36 5v6h-6V7h3' fill='none' stroke='%238a8478' stroke-width='1.3'/%3E%3C/svg%3E");
+  /* torn parchment side edges (mask strips) */
+  --torn-l: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='96' viewBox='0 0 12 96'%3E%3Cpolygon points='12,0 6,0 7,4 6,8 6,12 7,16 3,20 2,24 2,28 7,32 6,36 1,40 3,44 2,48 1,52 6,56 3,60 2,64 1,68 7,72 1,76 0,80 3,84 5,88 6,92 6,96 12,96' fill='black'/%3E%3C/svg%3E");
+  --torn-r: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='96' viewBox='0 0 12 96'%3E%3Cpolygon points='0,0 6,0 5,4 6,8 6,12 5,16 9,20 10,24 10,28 5,32 6,36 11,40 9,44 10,48 11,52 6,56 9,60 10,64 11,68 5,72 11,76 12,80 9,84 7,88 6,92 6,96 0,96' fill='black'/%3E%3C/svg%3E");
+  --parch-img: url("../images/parchment.webp");
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--mint);
+  color: var(--ink);
+  font: 400 1.125rem/1.6 var(--f-body);
+  -webkit-text-size-adjust: 100%;
+}
+h1, h2, h3, h4, p, ul, ol, figure { margin: 0; }
+img { max-width: 100%; }
+
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+.vh {
+  position: absolute !important; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0;
+  overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+
+/* ---- the riveted steel rail ------------------------------------------------ */
+.rail {
+  position: relative; z-index: 2;
+  height: 16px;
+  background: var(--rail) left center / auto 100% repeat-x, var(--steel);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+/* ---- header: the rulebook cover ------------------------------------------- */
+.topbar {
+  position: relative;
+  background:
+    radial-gradient(ellipse 34% 70% at 78% 48%, rgba(120, 30, 8, 0.28), transparent 70%),
+    var(--night);
+  color: var(--bone);
+}
+.hero { display: flex; align-items: stretch; }
+.hero-art {
+  position: relative;
+  flex: 0 0 auto;
+  width: 578px;                  /* the 799 x 470 cover band at 340 px tall */
+  padding-bottom: 34px;          /* room for the plaque below the logo */
+}
+.hero-img {
+  display: block; width: 100%; height: auto;
+  -webkit-mask-image: linear-gradient(to bottom, #000 80%, transparent 100%), linear-gradient(to left, transparent 0, #000 5%);
+  -webkit-mask-composite: source-in;
+          mask-image: linear-gradient(to bottom, #000 80%, transparent 100%), linear-gradient(to left, transparent 0, #000 5%);
+          mask-composite: intersect;
+}
+.brand { font-size: 1rem; font-weight: 400; }
+/* the cover's stone plaque ("English Rules"), carrying the page title */
+.plaque {
+  position: absolute; left: 64.5%; top: calc(89.5% - 34px * 0.895);
+  transform: translateX(-50%);
+  display: block; white-space: nowrap;
+  padding: 7px 24px 8px;
+  font: 400 1.5rem/1.15 var(--f-display);
+  color: var(--blue-deep);
+  background: url("../images/plaque.webp") center / 100% 100% no-repeat, var(--stone);
+  border: 1px solid #000;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35), 0 0 0 1px rgba(222, 213, 193, 0.28), 0 8px 22px rgba(0, 0, 0, 0.7);
+}
+
+/* the four races, as their crests sit on the black patches in the rulebook's page corners */
+.hero-races {
+  flex: 1 1 auto;
+  display: flex; justify-content: center; align-items: center; flex-wrap: wrap;
+  gap: 18px 26px;
+  list-style: none; margin: 0; padding: 26px 24px 40px;
+}
+.hero-races li {
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  width: 104px;
+  font: 700 0.8125rem/1.3 var(--f-body); letter-spacing: 0.08em; text-transform: uppercase;
+  text-align: center; color: var(--bone);
+}
+.hero-races i {
+  display: block; width: 76px; height: 76px; border-radius: 50%;
+  background: #000 center / cover no-repeat;
+  box-shadow: 0 0 0 2px #77716a, 0 0 0 4px #000, 0 0 22px rgba(237, 30, 37, 0.22);
+}
+.hr-hu i,  .race-hu::before  { background-image: url("../images/crest-hu.webp"); }
+.hr-orc i, .race-orc::before { background-image: url("../images/crest-orc.webp"); }
+.hr-ud i,  .race-ud::before  { background-image: url("../images/crest-ud.webp"); }
+.hr-ne i,  .race-ne::before  { background-image: url("../images/crest-ne.webp"); }
+
+/* black torn corner patches with crests (Rules p.2–3), on wide screens only */
+.corner { display: none; position: absolute; z-index: 1; pointer-events: none; background: center / contain no-repeat; }
+
+/* ---- page ------------------------------------------------------------------ */
+main { max-width: 1000px; margin: 0 auto; padding: 30px 16px 64px; }
+
+.tagline {
+  max-width: 64ch; margin: 0 auto;
+  text-align: center; font-size: 1.1875rem; line-height: 1.6; color: var(--ink);
+}
+.tagline em { display: block; margin-top: 4px; color: var(--blue); }
+
+/* section headings: Folkard-style blue titles closed by a length of steel rail */
+section.book { margin-top: 48px; }
+section.book > h2 {
+  display: flex; align-items: center; gap: 18px;
+  margin: 0 0 6px;
+  font: 400 2.3rem/1.15 var(--f-display); color: var(--blue);
+}
+section.book > h2::after {
+  content: ""; flex: 1 1 auto; height: 11px; min-width: 40px;
+  background: var(--rail) left center / auto 100% repeat-x, var(--steel);
+}
+.sec-note { max-width: 75ch; margin: 0 0 18px; font-style: italic; color: var(--ink-2); }
+
+/* ---- the War Council: a parchment diagram panel between steel rails -------- */
+.council { margin-top: 28px; }
+.panel > .rail { margin: 0 -5px; }
+.parch, .teach-panel {
+  -webkit-mask:
+    var(--torn-l) left top / 12px 96px repeat-y,
+    var(--torn-r) right top / 12px 96px repeat-y,
+    linear-gradient(#000, #000) center / calc(100% - 24px) 100% no-repeat;
+          mask:
+    var(--torn-l) left top / 12px 96px repeat-y,
+    var(--torn-r) right top / 12px 96px repeat-y,
+    linear-gradient(#000, #000) center / calc(100% - 24px) 100% no-repeat;
+}
+.parch {
+  position: relative;
+  margin: -3px 0;
+  padding: 26px 32px 32px;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 35%, rgba(255, 238, 196, 0.34), transparent 75%),
+    linear-gradient(rgba(255, 238, 200, 0.2), rgba(255, 238, 200, 0.2)),
+    var(--parch-img) 0 0 / 480px 480px repeat,
+    var(--parch);
+}
+.council h2 {
+  margin: 0 0 4px;
+  text-align: center;
+  font: 400 2.25rem/1.2 var(--f-display); color: var(--blue-deep);
+}
+.council .sec-note { max-width: 60ch; margin: 0 auto 22px; text-align: center; color: var(--ink); }
+
+.cfg { display: flex; flex-direction: column; gap: 24px; }
+.cfg-label {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px;
+  margin: 0 0 10px;
+  font: 400 1.35rem/1.25 var(--f-display); color: var(--blue-deep);
+}
+.cfg-label .hint { font: italic 400 1rem/1.5 var(--f-body); color: var(--parch-ink); }
+
+.chips, .mods, .pbtns, .mode-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+
+/* cards laid on the parchment: pale, translucent; selected = bright card, black ring, callout tick */
+.chip, .mode-btn, .mod {
+  font: inherit; text-align: left; cursor: pointer;
+  color: var(--ink);
+  background: rgba(255, 248, 230, 0.74);
+  border: 1.5px solid #5a3e14;
+  border-radius: 4px;
+  box-shadow: 0 1px 0 rgba(90, 50, 5, 0.3);
+  transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+.chip:hover:not(:disabled), .mode-btn:hover:not(:disabled), .mod:hover {
+  background: rgba(255, 252, 243, 0.95); border-color: var(--ink);
+}
+.chip.on, .mode-btn.on, .mod.on {
+  background: #fffdf7;
+  border-color: var(--ink);
+  box-shadow: inset 0 0 0 1.5px var(--ink), 0 3px 9px rgba(80, 40, 0, 0.32);
+}
+/* the tick disc: an empty callout ring when off, a red tick when on */
+.chip b::before, .mode-btn b::before, .mod-name::before {
+  content: "";
+  display: inline-grid; place-items: center;
+  width: 1.1em; height: 1.1em; margin-right: 0.45em; vertical-align: -0.1em;
+  border: 2px solid var(--ink); border-radius: 50%; background: #fff;
+  font: 700 0.78em/1 var(--f-body); color: var(--red-txt); text-indent: 0;
+}
+.chip.on b::before, .mode-btn.on b::before, .mod.on .mod-name::before { content: "✓"; content: "✓" / ""; border-width: 2.5px; }
+/* wrapped names hang clear of the disc */
+.mode-btn b, .mod-name { padding-left: 1.55em; text-indent: -1.55em; }
+
+.chip {
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: center;
+  min-height: 48px; padding: 7px 16px 8px 12px;
+}
+.chip b { font: 400 1.12rem/1.25 var(--f-display); }
+.chip span { margin-top: 2px; padding-left: 1.74rem; font-size: 0.875rem; line-height: 1.35; color: var(--parch-ink); }
+.chip.lock, .chip:disabled { cursor: default; }
+.chip.rnd { border-style: dashed; }
+.chip.rnd b::before { content: none; }
+.chip.rnd span { padding-left: 0; }
+
+/* race chips: the race's crest medallion; selected = the race colour, a black ring and the tick on the crest */
+.chip.race {
+  position: relative;
+  display: grid; grid-template-columns: 42px auto; column-gap: 12px; align-items: center; align-content: center;
+  justify-content: start;
+  min-height: 58px; padding: 7px 18px 7px 8px;
+}
+.chip.race::before {
+  content: ""; grid-row: 1 / span 2;
+  width: 42px; height: 42px; border-radius: 50%;
+  background-color: #000; background-position: center; background-size: cover; background-repeat: no-repeat;
+  box-shadow: 0 0 0 2px #1c1a18, 0 0 0 3.5px rgba(255, 255, 255, 0.55);
+}
+.chip.race b::before { content: none; }
+.chip.race b, .chip.race span { grid-column: 2; }
+.chip.race span { padding-left: 0; }
+.race-hu { --race: var(--hu); } .race-orc { --race: var(--orc); } .race-ud { --race: var(--ud); } .race-ne { --race: var(--ne); }
+.chip.race.on { background: var(--race); border-color: #0d0b0a; color: #fff; }
+.chip.race.on span { color: #fff; }
+.chip.race.on::after {
+  content: "✓"; content: "✓" / "";
+  position: absolute; left: 35px; top: calc(50% + 3px);
+  display: grid; place-items: center;
+  width: 21px; height: 21px; border-radius: 50%;
+  background: #fff; border: 2.5px solid var(--ink);
+  font: 700 13px/1 var(--f-body); color: var(--red-txt);
+}
+
+/* scenario cards */
+.mode-group {
+  flex: 1 1 100%;
+  display: flex; align-items: center; gap: 12px;
+  margin: 10px 0 0;
+  font: 700 0.875rem/1.3 var(--f-body); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink);
+}
+.mode-group:first-child { margin-top: 0; }
+.mode-group::after { content: ""; flex: 1 1 auto; height: 2px; background: linear-gradient(90deg, rgba(35, 31, 32, 0.6), rgba(35, 31, 32, 0)); }
+.mode-btn { flex: 1 1 262px; max-width: 322px; padding: 11px 15px 13px; }
+.mode-btn b { display: block; margin-bottom: 4px; font: 400 1.2rem/1.25 var(--f-display); color: var(--ink); }
+.mode-btn span { display: block; font-size: 1rem; line-height: 1.5; color: var(--parch-ink); }
+.mode-btn .mode-meta { margin-top: 7px; font-size: 0.9375rem; font-style: italic; color: var(--blue-deep); }
+.mode-btn.on b { color: var(--blue-deep); }
+.mode-btn.other-count { border-style: dashed; }
+.mode-btn.off {
+  cursor: not-allowed;
+  background: rgba(255, 248, 230, 0.4);
+  border-style: dotted; border-color: #6a4a1c;
+  box-shadow: none;
+}
+.mode-btn.off b, .mode-btn.off span, .mode-btn.off .mode-meta { color: #45371f; }
+.mode-btn.off b::before { border-style: dotted; background: transparent; }
+.mode-btn.off::after {
+  content: "Needs the Expansion Set";
+  display: inline-block; margin-top: 8px; padding: 2px 8px;
+  font: 700 0.8125rem/1.3 var(--f-body); letter-spacing: 0.06em; text-transform: uppercase;
+  color: #6b1a0f; border: 1.5px solid #6b1a0f; border-radius: 3px;
+}
+
+/* player count: round tokens; the selected one becomes a rulebook callout */
+.pbtns { gap: 14px; }
+.pbtn {
+  display: grid; place-items: center;
+  width: 52px; height: 52px; border-radius: 50%;
+  font: 700 1.4rem/1 var(--f-body); color: var(--ink);
+  background: radial-gradient(circle at 50% 36%, #fffaf0 0%, #f2e0b9 100%);
+  border: 2px solid #3a2a12;
+  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.65), 0 2px 3px rgba(60, 30, 0, 0.35);
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.pbtn:hover { border-color: var(--ink); box-shadow: inset 0 0 0 3px #fff, 0 3px 6px rgba(60, 30, 0, 0.4); }
+.pbtn.on {
+  background: #fff; color: var(--red-txt);
+  border: 4px solid var(--ink);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.8), 0 4px 10px rgba(60, 30, 0, 0.45);
+  transform: scale(1.08);
+}
+
+/* optional rules */
+.mod { flex: 1 1 280px; max-width: 322px; padding: 11px 15px 13px; }
+.mod-name { display: block; margin-bottom: 4px; font: 400 1.12rem/1.3 var(--f-display); color: var(--ink); }
+.mod-sum { display: block; font-size: 1rem; line-height: 1.5; color: var(--parch-ink); }
+
+/* ---- teaching script: the stone plaque button and a parchment panel -------- */
+.teach-bar { margin: 6px 0 24px; }
+#teachBtn, .teach-copy {
+  min-height: 46px; padding: 9px 20px 10px;
+  font: 400 1.15rem/1.2 var(--f-display); color: var(--blue-deep);
+  background: url("../images/plaque.webp") center / 100% 100% no-repeat, var(--stone);
+  border: 2px solid var(--steel); border-radius: 3px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45), 0 2px 0 #0e0d0c, 0 4px 8px rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+}
+/* a drawn chevron (not a glyph, so screen readers don't announce it) */
+#teachBtn::after {
+  content: ""; display: inline-block; width: 0.42em; height: 0.42em; margin: 0 0.1em 0 0.6em; vertical-align: 0.22em;
+  border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg);
+}
+#teachBtn[aria-expanded="true"]::after { transform: rotate(-135deg); vertical-align: 0.02em; }
+#teachBtn:hover, .teach-copy:hover { filter: brightness(1.07); }
+#teachBtn[aria-expanded="true"] {
+  box-shadow: inset 0 0 0 2px var(--blue-deep), inset 0 2px 7px rgba(0, 0, 0, 0.3);
+  transform: translateY(1px);
+}
+.teach-copy { min-height: 42px; padding: 7px 16px 8px; font-size: 1.02rem; }
+
+.teach-panel {
+  position: relative;
+  margin: 0 0 26px;
+  /* a centred reading column inside the wide parchment */
+  padding: 34px max(32px, calc((100% - 75ch) / 2)) 36px;
+  background:
+    linear-gradient(rgba(255, 245, 224, 0.64), rgba(255, 245, 224, 0.64)),
+    var(--parch-img) 0 0 / 480px 480px repeat,
+    var(--parch);
+}
+.teach-panel::before, .teach-panel::after {
+  content: ""; position: absolute; left: 0; right: 0; height: 14px;
+  background: var(--rail) left center / auto 100% repeat-x, var(--steel);
+}
+.teach-panel::before { top: 0; }
+.teach-panel::after { bottom: 0; }
+.teach-panel[hidden] { display: none; }
+.teach-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px 16px; margin: 0 0 8px; }
+.teach-top h3 { font: 400 1.55rem/1.2 var(--f-display); color: var(--blue-deep); }
+.teach-note {
+  margin: 0 0 14px; padding-bottom: 12px;
+  border-bottom: 1px solid rgba(35, 31, 32, 0.35);
+  font-style: italic; color: var(--parch-ink);
+}
+.teach-panel h4 { margin: 20px 0 6px; font: 400 1.3rem/1.25 var(--f-display); color: var(--blue-deep); }
+.teach-panel p { margin: 0 0 10px; }
+.teach-panel ul { margin: 4px 0 12px; padding-left: 22px; }
+.teach-panel li { margin-bottom: 6px; }
+.teach-panel li::marker { color: var(--blue-deep); }
+.teach-panel b { color: var(--blue-deep); }
+
+/* ---- setup steps --------------------------------------------------------- */
+.phase { margin-top: 30px; }
+.phase:first-child { margin-top: 8px; }
+.phase-title { margin: 0 0 12px; font: 400 1.65rem/1.2 var(--f-display); color: var(--blue); }
+
+.step {
+  display: flex; gap: 16px;
+  margin-bottom: 12px; padding: 16px 20px 14px 16px;
+  background: var(--card);
+  border: 1px solid var(--hair); border-radius: 6px;
+  box-shadow: 0 1px 0 rgba(30, 70, 30, 0.1);
+}
+/* the rulebook's callout: white disc, black ring, red numeral */
+.step-num {
+  flex: 0 0 auto; display: grid; place-items: center;
+  width: 44px; height: 44px; margin-top: -1px;
+  border-radius: 50%; background: #fff; border: 3px solid var(--ink);
+  font: 700 1.35rem/1 var(--f-body); color: var(--red-txt);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+.step-body { flex: 1 1 auto; min-width: 0; }
+.step-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 0 0 6px; }
+.step-head h4 { font: 400 1.34rem/1.25 var(--f-display); color: var(--ink); }
+.step-text { max-width: 75ch; }
+.step-text p { margin: 0 0 8px; }
+.step-text ul, .step-text ol { margin: 4px 0 4px; padding-left: 22px; }
+.step-text li { margin-bottom: 5px; }
+.step-text li::marker { color: var(--blue); }
+.step-text b { color: var(--blue); }
+
+.board-fig { max-width: 492px; margin: 8px 0 12px; }
+/* a mint plate the size of the diagram: its torn corners are the same rulebook paper */
+.board-fig a { display: block; line-height: 0; padding: 6px; background: var(--mint); border: 1px solid var(--hair); border-radius: 4px; }
+.board-fig img { display: block; height: auto; }
+.board-fig figcaption { margin-top: 6px; font-size: 0.9375rem; line-height: 1.5; font-style: italic; color: var(--ink-2); }
+
+/* source tags: one look per book or sheet */
+.tag {
+  display: inline-block; white-space: nowrap; vertical-align: 2px;
+  padding: 3px 8px 2px;
+  font: 700 0.8125rem/1.2 var(--f-body); letter-spacing: 0.07em; text-transform: uppercase;
+  border: 1.5px solid transparent; border-radius: 3px;
+}
+.tag-core   { background: var(--blue); color: #fff; border-color: var(--blue-dk); }                /* the blue-ink rulebook */
+.tag-exp    { background: var(--ink); color: #f3e7c9; border-color: #000; }                         /* the black-ink Expansion */
+.tag-faq    { background: #fff; color: #b3161c; border-color: #b3161c; }                            /* errata in red pen */
+.tag-scen   { background: #3e7426; color: #fff; border-color: #2c5a18; }                            /* the board's green hexes */
+.tag-online { background: #fbfdf9; color: #2c6120; border: 1.5px dashed #2c6120; }                  /* the web sheets */
+.tag-opt    { background: var(--parch); color: var(--ink); border-color: #8a5410; }                 /* parchment option */
+.tag-gap    { background: #efefeb; color: #444440; border: 1.5px dotted #444440; }
+
+/* citations, marked with a rail stud */
+.src-line {
+  display: flex; align-items: baseline; gap: 9px;
+  margin-top: 9px;
+  font-size: 0.9375rem; line-height: 1.5; font-style: italic; color: var(--ink-2);
+}
+.src-line::before {
+  content: ""; flex: 0 0 auto; width: 10px; height: 10px; transform: translateY(0.5px);
+  background: var(--blue); border: 1.5px solid var(--blue); box-shadow: inset 0 0 0 2px #fff;
+}
+
+/* ---- rules reference ------------------------------------------------------- */
+.ref {
+  margin-bottom: 10px; overflow: hidden;
+  background: var(--card);
+  border: 1px solid var(--line-ctl); border-radius: 6px;
+}
+.ref summary {
+  position: relative; display: block; list-style: none; cursor: pointer;
+  min-height: 52px; padding: 13px 18px 13px 54px;
+  font: 400 1.3rem/1.3 var(--f-display); color: var(--blue);
+}
+.ref summary::-webkit-details-marker { display: none; }
+/* a board hex: + when closed, − when open */
+.ref summary::before {
+  content: ""; position: absolute; left: 17px; top: 50%; width: 23px; height: 26px; transform: translateY(-50%);
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 26'%3E%3Cpolygon points='12,1.5 22.5,7.2 22.5,18.8 12,24.5 1.5,18.8 1.5,7.2' fill='%23fff' stroke='%23054fa3' stroke-width='2'/%3E%3Cpath d='M12 8v10M7 13h10' stroke='%23054fa3' stroke-width='2.4'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.ref[open] summary::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 26'%3E%3Cpolygon points='12,1.5 22.5,7.2 22.5,18.8 12,24.5 1.5,18.8 1.5,7.2' fill='%23054fa3' stroke='%23033a7a' stroke-width='2'/%3E%3Cpath d='M7 13h10' stroke='%23fff' stroke-width='2.6'/%3E%3C/svg%3E");
+}
+.ref summary:hover { background: var(--card-2); }
+.ref summary:focus-visible { outline-offset: -4px; border-radius: 6px; }   /* inside the card, which clips overflow */
+.ref[open] summary { background: var(--card-2); border-bottom: 1px solid var(--line-ctl); }
+.ref-body { padding: 14px 22px 18px; }
+.ref-body > * { max-width: 75ch; }
+.ref-body h4 { margin: 16px 0 6px; font: 700 1.1rem/1.3 var(--f-body); color: var(--blue); }
+.ref-body h4:first-child { margin-top: 2px; }
+.ref-body p { margin: 0 0 10px; }
+.ref-body ul, .ref-body ol { margin: 4px 0 12px; padding-left: 22px; }
+.ref-body li { margin-bottom: 6px; }
+.ref-body li::marker { color: var(--blue); }
+.ref-body b { color: var(--blue); }
+.callout {
+  padding: 10px 14px;
+  background: #fbecc8;
+  border: 1px solid #c8913a; border-left: 5px solid var(--parch); border-radius: 3px;
+}
+.ref-table { width: 100%; max-width: none; margin: 6px 0 14px; border-collapse: collapse; font-size: 1rem; }
+.ref-table th, .ref-table td { padding: 7px 10px; text-align: left; vertical-align: top; border: 1px solid var(--hair); }
+.ref-table th { background: var(--card-2); font: 700 0.9375rem/1.3 var(--f-body); color: var(--blue); }
+.ref-table td:last-child { color: var(--ink-2); }
+
+/* ---- rulebook search -------------------------------------------------------- */
+.rsearch-wrap { margin-bottom: 16px; }
+#rsearch {
+  width: 100%; min-height: 52px;
+  padding: 12px 16px 12px 50px;
+  font: 400 1.125rem/1.3 var(--f-body); color: var(--ink);
+  background: #fbfdf9 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='10' cy='10' r='6.5' fill='none' stroke='%23054fa3' stroke-width='2.4'/%3E%3Cpath d='M15 15l6 6' stroke='%23054fa3' stroke-width='2.8' stroke-linecap='round'/%3E%3C/svg%3E") 16px center / 22px no-repeat;
+  border: 2px solid var(--steel-2); border-radius: 4px;
+  box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.08);
+  -webkit-appearance: none; appearance: none;
+}
+#rsearch::placeholder { color: #566052; font-style: italic; opacity: 1; }
+#rsearch:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-color: var(--blue); }
+.rhint { font-style: italic; color: var(--ink-2); }
+.rhit {
+  margin-bottom: 10px; padding: 12px 16px 13px;
+  background: var(--card);
+  border: 1px solid var(--hair); border-left: 4px solid var(--blue); border-radius: 5px;
+}
+.rhit-src { margin-bottom: 4px; font: 700 0.875rem/1.3 var(--f-body); letter-spacing: 0.06em; text-transform: uppercase; color: var(--blue); }
+.rhit-text { max-width: 75ch; color: var(--ink); }
+.rhit-text mark { padding: 0 2px; background: #f7c96b; color: var(--ink); border-radius: 2px; box-shadow: 0 1px 0 #b87d18; }
+
+/* ---- components glossary tokens (js/comp-widget.js; css/components.css) ---- */
+#components {
+  --comp-surface: #f1f8ee; --comp-fig: #ddeed8; --comp-ink: #231f20; --comp-muted: #394036;
+  --comp-line: #5f7a59; --comp-accent: #054fa3; --comp-accent-ink: #ffffff;
+  --comp-head-font: "MedievalSharp", "Palatino Linotype", Georgia, serif; --comp-radius: 6px;
+  font-synthesis: none;   /* MedievalSharp has one weight: show it as drawn, not smeared into a fake bold */
+}
+
+/* ---- footer: back to the black of the cover ------------------------------- */
+.footer {
+  position: relative;
+  padding: 0 0 36px;
+  background: var(--night);
+  color: var(--bone);
+  text-align: center;
+}
+.footer .rail { margin-bottom: 28px; }
+.footer p { max-width: 72ch; margin: 0 auto; padding: 0 18px; font-size: 1rem; line-height: 1.6; font-style: italic; }
+/* the four crests close the page where the corner patches don't show */
+.foot-crests { display: flex; justify-content: center; gap: 14px; margin: -6px 0 18px; }
+.foot-crests i {
+  display: block; width: 38px; height: 38px; border-radius: 50%;
+  background: #000 center / cover no-repeat;
+  box-shadow: 0 0 0 1.5px #77716a, 0 0 0 3px #000;
+}
+.foot-crests .hr-hu { background-image: url("../images/crest-hu.webp"); }
+.foot-crests .hr-orc { background-image: url("../images/crest-orc.webp"); }
+.foot-crests .hr-ud { background-image: url("../images/crest-ud.webp"); }
+.foot-crests .hr-ne { background-image: url("../images/crest-ne.webp"); }
+
+/* ---- wide screens: the rulebook's corner crests frame the page --------------- */
+@media (min-width: 1270px) {
+  .corner { display: block; }
+  .foot-crests { display: none; }
+  .corner-ne  { top: 100%; left: 0;  width: 133px; height: 92px; background-image: url("../images/patch-ne.webp"); background-position: left top; }
+  .corner-hu  { top: 100%; right: 0; width: 83px;  height: 97px; background-image: url("../images/patch-hu.webp"); background-position: right top; }
+  .corner-orc { bottom: 100%; left: 0;  width: 99px; height: 80px; background-image: url("../images/patch-orc.webp"); background-position: left bottom; }
+  .corner-ud  { bottom: 100%; right: 0; width: 81px; height: 88px; background-image: url("../images/patch-ud.webp"); background-position: right bottom; }
+}
+@media (min-width: 1500px) {
+  .corner-ne  { width: 190px; height: 132px; }
+  .corner-hu  { width: 118px; height: 138px; }
+  .corner-orc { width: 142px; height: 114px; }
+  .corner-ud  { width: 116px; height: 126px; }
+}
+
+/* ---- tablet ---------------------------------------------------------------- */
+@media (max-width: 1040px) {
+  .hero-art { width: 510px; }
+  .plaque { font-size: 1.3rem; }
+  .hero-races {
+    display: grid; grid-template-columns: repeat(2, auto); justify-content: center; align-content: center;
+    gap: 18px 22px; padding: 20px 16px 34px;
+  }
+  .hero-races li { width: auto; font-size: 0; gap: 0; }
+  .hero-races i { width: 62px; height: 62px; }
+}
+
+/* ---- phones -------------------------------------------------------------- */
+@media (max-width: 680px) {
+  body { font-size: 1.0625rem; }
+  .hero { display: block; }
+  .hero-art { width: 100%; padding-bottom: 30px; }
+  .hero-races { display: none; }
+  .plaque { top: calc(89.5% - 30px * 0.895); padding: 5px 14px 6px; font-size: 1.05rem; }
+  .rail { height: 13px; }
+
+  main { padding: 22px 14px 52px; }
+  .tagline { font-size: 1.0625rem; text-align: left; }
+  section.book { margin-top: 38px; }
+  /* the rail runs under the title on a phone, so long titles keep it */
+  section.book > h2 { display: block; font-size: 1.95rem; }
+  section.book > h2::after { display: block; height: 9px; margin-top: 8px; }
+
+  .parch { padding: 20px 16px 24px; }
+  .council h2 { font-size: 1.85rem; }
+  .council .sec-note { text-align: left; }
+  .cfg-label { font-size: 1.22rem; }
+  .mode-btn, .mod { flex-basis: 100%; max-width: none; }
+  .chip { flex: 1 1 auto; }
+  .chip.race, .chip.rnd { flex: 1 1 100%; }
+
+  .teach-panel { padding: 30px 18px 32px; }
+  .teach-top h3 { font-size: 1.35rem; }
+
+  .phase-title { font-size: 1.45rem; }
+  /* the callout sits beside the title; text and diagrams then use the card's full width */
+  .step { display: block; padding: 12px 13px 12px 12px; }
+  .step::after { content: ""; display: table; clear: both; }
+  .step-num { float: left; width: 38px; height: 38px; margin: 0 11px 6px 0; font-size: 1.15rem; border-width: 2.5px; }
+  .step-head { min-height: 38px; align-items: center; margin-bottom: 8px; }
+  .step-head h4 { font-size: 1.2rem; }
+  .step-text { clear: left; }
+  .board-fig a { padding: 4px; }
+  .ref summary { padding-left: 50px; font-size: 1.2rem; }
+  .ref summary::before { left: 14px; }
+  .ref-body { padding: 12px 14px 14px; }
+  .ref-table { font-size: 1rem; }
+  .ref-table th, .ref-table td { padding: 6px 7px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; }
+  html { scroll-behavior: auto; }
+  .pbtn.on, #teachBtn[aria-expanded="true"] { transform: none; }
+}
