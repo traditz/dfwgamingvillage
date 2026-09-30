@@ -54,8 +54,9 @@
     const body = JSON.stringify(buildPayload());
 
     if (navigator.sendBeacon) {
-      const blob = new Blob([body], { type: "application/json" });
-      if (navigator.sendBeacon(ENDPOINT, blob)) {
+      // A string body goes as text/plain, which needs no CORS preflight. An
+      // application/json Blob forces a credentialed preflight the worker rejects.
+      if (navigator.sendBeacon(ENDPOINT, body)) {
         return;
       }
     }
