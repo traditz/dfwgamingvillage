@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Warrior Knights — Setup &amp; Reference Utility</title>
+  <meta name="description" content="Setup steps for two to six Barons with the Crown and Glory variants and optional rules, a rules reference with the official FAQ errata applied, a teaching script and a search of the Warrior Knights rulebooks.">
+  <meta name="theme-color" content="#26261b">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Alegreya for the rulebook's book text. The headings are the rulebook's Lombardic uncials, set in capitals and
+       small capitals: Uncial Antiqua supplies them (subset below), except its eth-like D — the rulebook's D is Roman,
+       so that one letter comes from Cinzel. -->
+  <link href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&display=swap&text=ABCEFGHIJKLMNOPQRSTUVWXYZabcefghijklmnopqrstuvwxyz0123456789%20%26%27%E2%80%99%E2%80%98%E2%80%9C%E2%80%9D%22%2C.%3A%3B%21%3F%28%29%5B%5D%2F-%E2%80%93%E2%80%94%C2%B7%E2%80%A2%E2%80%A6%2B%3D%25%23%2A%C3%97" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap&text=Dd" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=2">
+  <link rel="stylesheet" href="css/components.css?v=1">
+</head>
+<body>
+  <!-- Masthead: the Rules of Play cover — the horned golden knight and the silver-and-crimson logo on the
+       murky olive wall, inside the cover's thin gold frame with star-point corners. It ends in the green
+       marble frieze with carved bosses that caps every rulebook page. -->
+  <header class="mast">
+    <span class="mast-frame" aria-hidden="true"></span>
+    <div class="mast-inner">
+      <img class="mast-knight" src="images/knight.webp" width="420" height="516" alt="" aria-hidden="true" decoding="async">
+      <div class="mast-title">
+        <p class="mast-kicker">A Game of Medieval Warfare and Diplomacy</p>
+        <h1 class="brand-title">
+          <img class="mast-logo" src="images/logo.webp" width="441" height="246" alt="Warrior Knights">
+          <span class="brand-sub">Setup &amp; Reference</span>
+        </h1>
+      </div>
+    </div>
+  </header>
+  <div class="frieze" aria-hidden="true"></div>
+
+  <main>
+    <div class="intro">
+      <p class="flavor">The King lies dead without an heir. Fortresses will fall, cities will be razed — and a King will be crowned.</p>
+      <p class="tagline">
+        Choose your player count, the Crown and Glory variants and any optional rules for exact setup steps,
+        a full rules reference with the official FAQ and errata applied, and a search of every rulebook.
+      </p>
+    </div>
+
+    <section class="sec sec-cfg" aria-label="Configuration">
+      <h2>The Barons Assemble</h2>
+      <p class="sec-note">Select the sets on the table, the number of Barons, and any variants. Every step, ruling and script below adapts to your choices.</p>
+      <div class="cfg">
+        <div class="cfg-group">
+          <p class="cfg-label" id="lbl-sets">Sets in play</p>
+          <div id="expansions" class="chips" role="group" aria-labelledby="lbl-sets"></div>
+        </div>
+        <div class="cfg-group">
+          <p class="cfg-label" id="lbl-players">Barons <span class="hint">(players: two to six)</span></p>
+          <div id="players" class="pbtns" role="group" aria-labelledby="lbl-players"></div>
+        </div>
+        <div id="modules-group" class="cfg-group">
+          <p class="cfg-label" id="lbl-mods">Crown and Glory variants <span class="hint">— use any combination; players agree before the game</span></p>
+          <div id="modules" class="mods" role="group" aria-labelledby="lbl-mods"></div>
+        </div>
+        <div class="cfg-group">
+          <p class="cfg-label" id="lbl-modes">Game length <span class="hint" id="len-hint"></span></p>
+          <div id="modes" class="mode-grid" role="group" aria-labelledby="lbl-modes"></div>
+        </div>
+        <div id="options-group" class="cfg-group">
+          <p class="cfg-label" id="lbl-vars">Optional rules <span class="hint">— from the rulebook (p.19–20) and the FAQ (p.3); all players agree on them at the start</span></p>
+          <div id="options" class="mods" role="group" aria-labelledby="lbl-vars"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec sec-setup" aria-label="Setup">
+      <h2>Setup</h2>
+      <p class="sec-note">Follow the steps in order; each cites its sources. Citations: Rules = the rulebook (printed page numbers), FAQ = the January 2007 FAQ, C&amp;G = the Crown and Glory rules sheet (unnumbered: its four pages are counted 1–4 in reading order). FAQ errata are already applied, and Crown and Glory's changes apply when a variant is selected.</p>
+      <div class="teach-bar"><button id="teachBtn" type="button" aria-expanded="false" aria-controls="teach" title="A ~5 minute script to teach this exact setup aloud">📖 Teaching script</button></div>
+      <div id="teach" class="teach-panel" hidden></div>
+      <div id="setup"></div>
+    </section>
+
+    <section class="sec sec-comp" id="components" aria-labelledby="comp-h" hidden>
+      <h2 id="comp-h">Components</h2>
+      <p class="sec-note">Every component the rulebooks list for the sets and variants you’ve selected, with its count (the FAQ’s corrected counts are used). Tap a picture to enlarge it.</p>
+      <div id="aid-comp"></div>
+    </section>
+
+    <section class="sec sec-ref" aria-label="Reference">
+      <h2>Rules Reference</h2>
+      <p class="sec-note">Tap a heading to open it. Contents adapt to your player count, variants and optional rules.</p>
+      <div id="reference"></div>
+    </section>
+
+    <section class="sec sec-search" aria-label="Rulebook search">
+      <h2>Search the Rulebooks</h2>
+      <p class="sec-note">Full-text search across the rulebook, the official FAQ and — when selected — the Crown and Glory rules.</p>
+      <div class="rsearch-wrap">
+        <input id="rsearch" type="search" placeholder="e.g. siege, breach, heir, expedition, revolt, Chairman, Scholar…" aria-label="Search the rulebooks">
+      </div>
+      <div id="rresults"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="frieze" aria-hidden="true"></div>
+    <div class="footer-inner">
+      <p>
+        Setup and reference content grounded in the official Warrior Knights rulebook, the Warrior Knights FAQ
+        (January 2007) and the Crown and Glory expansion rules. A fan-made play aid — not affiliated with
+        Fantasy Flight Games or Games Workshop.
+      </p>
+    </div>
+  </footer>
+
+  <script src="js/data.js?v=1"></script>
+  <script src="js/rules.js?v=1"></script>
+  <script src="js/components.js?v=1"></script>
+  <script src="js/comp-widget.js?v=1"></script>
+  <script src="js/app.js?v=1"></script>
+  <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
+  <script src="/site-analytics.js?v=20260607-analytics"></script>
+</body>
+</html>

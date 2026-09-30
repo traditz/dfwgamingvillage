@@ -1,0 +1,555 @@
+/* =============================================================================
+   Warrior Knights — Setup & Reference Utility
+   Styled after the Warrior Knights Rules of Play (FFG, 2006), its FAQ and the Crown and Glory sheet:
+   · masthead = the rulebook cover (Rules p.1): the horned golden knight and the silver-and-crimson logo on
+     the murky olive wall, inside the cover's thin gold frame with gold corner pieces;
+   · the green marble frieze with carved bosses that caps every rulebook page (top and bottom);
+   · light stone-parchment pages (#edebdc, sampled from Rules p.2), black Lombardic-uncial headings,
+     a book serif for the text, bold lead-ins and italic "Example:" paragraphs;
+   · two callout styles: the gold-cornered yellow paper of "Game Setup Overview" / "Drawing Fate Cards"
+     (Rules p.5–6) for the configurator, and the grey stone frame with bosses of "Strategy Tips" (Rules p.18)
+     for the teaching script;
+   · white heater shields with black numerals — the diagram callouts of Rules p.5 — as step numbers;
+   · the gold page-number cartouche (foot of every page) as the teaching-script button;
+   · the black spear-finial rule of Rules p.6 between sections.
+   Art (images/): knight.webp + logo.webp (cover), wall.webp (cover wall), frieze.webp (page frieze),
+   parchment.webp (page paper), stone-bar.webp (Strategy Tips frame). images/components/ is the glossary's.
+   ============================================================================= */
+
+:root {
+  /* paper and ink — sampled from the rendered rulebook */
+  --parch:      #edebdc;   /* page paper (median, Rules p.2) */
+  --parch-hi:   #f8f6ee;   /* raised card surface */
+  --stone-in:   #ebe7e4;   /* inside of the stone callout frame (Rules p.2, p.18) */
+  --gold-paper: #faeeb8;   /* gold-cornered callout paper (Rules p.5–6) */
+  --ink:        #1e1c16;   /* text */
+  --ink-head:   #14120e;   /* headings: the rulebook's black uncials */
+  --ink-2:      #4f4a3a;   /* secondary text */
+  --rule:       #77735c;   /* control borders: ≥ 3:1 on every paper */
+  --hair:       #cfcab4;   /* card hairlines (decorative) */
+  --vert:       #34422b;   /* frieze groove green, for sub-heads */
+  --vert-2:     #6c7561;   /* frieze stone green (decor) */
+  --gules:      #8c1323;   /* crimson of the cover cape — selected states */
+  --gules-deep: #5c0b16;   /* bold terms */
+  --or-line:    #9c7f48;   /* gold callout frame line */
+  --olive:      #26261b;   /* cover wall, dark */
+  --cream:      #f1e8c9;   /* "Rules of Play" lettering on the cover */
+  --focus:      #1f3f86;   /* focus ring (azure — never a selection colour) */
+
+  /* the rulebook's headings: Lombardic uncials in capitals + small capitals (Uncial Antiqua, Roman D from Cinzel).
+     Always used with font-variant-caps: small-caps — its lowercase t reads as a c. */
+  --f-display: "Uncial Antiqua", "Cinzel", Georgia, serif;
+
+  /* heraldic shield (step numbers, player count) — the white callout shields of Rules p.5 */
+  --shield-argent: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 46'%3E%3Cpath d='M3 2.5H37V19C37 31 29.5 38.8 20 43.5C10.5 38.8 3 31 3 19Z' fill='%23fbfaf3' stroke='%232b2923' stroke-width='2.2' stroke-linejoin='round'/%3E%3Cpath d='M6.6 6.1H33.4V19C33.4 28.4 27.7 34.8 20 39.2C12.3 34.8 6.6 28.4 6.6 19Z' fill='none' stroke='%23b9b4a0' stroke-width='1.1'/%3E%3C/svg%3E");
+  --shield-hover: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 46'%3E%3Cpath d='M3 2.5H37V19C37 31 29.5 38.8 20 43.5C10.5 38.8 3 31 3 19Z' fill='%23fffbe6' stroke='%232b2923' stroke-width='2.6' stroke-linejoin='round'/%3E%3Cpath d='M6.6 6.1H33.4V19C33.4 28.4 27.7 34.8 20 39.2C12.3 34.8 6.6 28.4 6.6 19Z' fill='none' stroke='%23c9a43c' stroke-width='1.4'/%3E%3C/svg%3E");
+  --shield-gules: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 46'%3E%3Cpath d='M3 2.5H37V19C37 31 29.5 38.8 20 43.5C10.5 38.8 3 31 3 19Z' fill='%238c1323' stroke='%232b0a0f' stroke-width='2.6' stroke-linejoin='round'/%3E%3Cpath d='M6.6 6.1H33.4V19C33.4 28.4 27.7 34.8 20 39.2C12.3 34.8 6.6 28.4 6.6 19Z' fill='none' stroke='%23e3c25a' stroke-width='1.5'/%3E%3C/svg%3E");
+
+  /* gold fleur-de-lis corner pieces (after the cover's and the callouts' gold corners) */
+  --fleur-tl: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 34'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23fff0a8'/%3E%3Cstop offset='.5' stop-color='%23d6ad45'/%3E%3Cstop offset='1' stop-color='%238a6420'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg transform='translate(17 17) rotate(-45) translate(-12 -15)' fill='url(%23g)' stroke='%234a3510' stroke-width='.55' stroke-linejoin='round'%3E%3Cpath d='M12 .8C15.2 4.4 15.7 8.8 13.3 12.6H10.7C8.3 8.8 8.8 4.4 12 .8Z'/%3E%3Cpath d='M13.5 13.3C14.6 9.7 17.7 7.5 20.9 8.3C23.3 8.9 23.9 12 22 13.4C21 11.7 19.1 11.5 17.9 12.6C16.9 13.6 16.7 15 17.1 16.4C15.5 16 14.1 14.9 13.5 13.3Z'/%3E%3Cpath d='M10.5 13.3C9.4 9.7 6.3 7.5 3.1 8.3C.7 8.9 .1 12 2 13.4C3 11.7 4.9 11.5 6.1 12.6C7.1 13.6 7.3 15 6.9 16.4C8.5 16 9.9 14.9 10.5 13.3Z'/%3E%3Cpath d='M10.9 15.6L12 22.8L13.1 15.6Z'/%3E%3Crect x='7.4' y='12.9' width='9.2' height='2.7' rx='.6'/%3E%3C/g%3E%3C/svg%3E");
+  --fleur-tr: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 34'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23fff0a8'/%3E%3Cstop offset='.5' stop-color='%23d6ad45'/%3E%3Cstop offset='1' stop-color='%238a6420'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg transform='matrix(-1 0 0 1 34 0)'%3E%3Cg transform='translate(17 17) rotate(-45) translate(-12 -15)' fill='url(%23g)' stroke='%234a3510' stroke-width='.55' stroke-linejoin='round'%3E%3Cpath d='M12 .8C15.2 4.4 15.7 8.8 13.3 12.6H10.7C8.3 8.8 8.8 4.4 12 .8Z'/%3E%3Cpath d='M13.5 13.3C14.6 9.7 17.7 7.5 20.9 8.3C23.3 8.9 23.9 12 22 13.4C21 11.7 19.1 11.5 17.9 12.6C16.9 13.6 16.7 15 17.1 16.4C15.5 16 14.1 14.9 13.5 13.3Z'/%3E%3Cpath d='M10.5 13.3C9.4 9.7 6.3 7.5 3.1 8.3C.7 8.9 .1 12 2 13.4C3 11.7 4.9 11.5 6.1 12.6C7.1 13.6 7.3 15 6.9 16.4C8.5 16 9.9 14.9 10.5 13.3Z'/%3E%3Cpath d='M10.9 15.6L12 22.8L13.1 15.6Z'/%3E%3Crect x='7.4' y='12.9' width='9.2' height='2.7' rx='.6'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  --fleur-bl: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 34'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23fff0a8'/%3E%3Cstop offset='.5' stop-color='%23d6ad45'/%3E%3Cstop offset='1' stop-color='%238a6420'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg transform='matrix(1 0 0 -1 0 34)'%3E%3Cg transform='translate(17 17) rotate(-45) translate(-12 -15)' fill='url(%23g)' stroke='%234a3510' stroke-width='.55' stroke-linejoin='round'%3E%3Cpath d='M12 .8C15.2 4.4 15.7 8.8 13.3 12.6H10.7C8.3 8.8 8.8 4.4 12 .8Z'/%3E%3Cpath d='M13.5 13.3C14.6 9.7 17.7 7.5 20.9 8.3C23.3 8.9 23.9 12 22 13.4C21 11.7 19.1 11.5 17.9 12.6C16.9 13.6 16.7 15 17.1 16.4C15.5 16 14.1 14.9 13.5 13.3Z'/%3E%3Cpath d='M10.5 13.3C9.4 9.7 6.3 7.5 3.1 8.3C.7 8.9 .1 12 2 13.4C3 11.7 4.9 11.5 6.1 12.6C7.1 13.6 7.3 15 6.9 16.4C8.5 16 9.9 14.9 10.5 13.3Z'/%3E%3Cpath d='M10.9 15.6L12 22.8L13.1 15.6Z'/%3E%3Crect x='7.4' y='12.9' width='9.2' height='2.7' rx='.6'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  --fleur-br: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 34'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23fff0a8'/%3E%3Cstop offset='.5' stop-color='%23d6ad45'/%3E%3Cstop offset='1' stop-color='%238a6420'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg transform='matrix(-1 0 0 -1 34 34)'%3E%3Cg transform='translate(17 17) rotate(-45) translate(-12 -15)' fill='url(%23g)' stroke='%234a3510' stroke-width='.55' stroke-linejoin='round'%3E%3Cpath d='M12 .8C15.2 4.4 15.7 8.8 13.3 12.6H10.7C8.3 8.8 8.8 4.4 12 .8Z'/%3E%3Cpath d='M13.5 13.3C14.6 9.7 17.7 7.5 20.9 8.3C23.3 8.9 23.9 12 22 13.4C21 11.7 19.1 11.5 17.9 12.6C16.9 13.6 16.7 15 17.1 16.4C15.5 16 14.1 14.9 13.5 13.3Z'/%3E%3Cpath d='M10.5 13.3C9.4 9.7 6.3 7.5 3.1 8.3C.7 8.9 .1 12 2 13.4C3 11.7 4.9 11.5 6.1 12.6C7.1 13.6 7.3 15 6.9 16.4C8.5 16 9.9 14.9 10.5 13.3Z'/%3E%3Cpath d='M10.9 15.6L12 22.8L13.1 15.6Z'/%3E%3Crect x='7.4' y='12.9' width='9.2' height='2.7' rx='.6'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+
+  /* small upright fleur (reference markers), in frieze green and in gules */
+  --fleur-vert: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg fill='%2334422b'%3E%3Cpath d='M12 .8C15.2 4.4 15.7 8.8 13.3 12.6H10.7C8.3 8.8 8.8 4.4 12 .8Z'/%3E%3Cpath d='M13.5 13.3C14.6 9.7 17.7 7.5 20.9 8.3C23.3 8.9 23.9 12 22 13.4C21 11.7 19.1 11.5 17.9 12.6C16.9 13.6 16.7 15 17.1 16.4C15.5 16 14.1 14.9 13.5 13.3Z'/%3E%3Cpath d='M10.5 13.3C9.4 9.7 6.3 7.5 3.1 8.3C.7 8.9 .1 12 2 13.4C3 11.7 4.9 11.5 6.1 12.6C7.1 13.6 7.3 15 6.9 16.4C8.5 16 9.9 14.9 10.5 13.3Z'/%3E%3Cpath d='M10.9 15.6L12 22.8L13.1 15.6Z'/%3E%3Crect x='7.4' y='12.9' width='9.2' height='2.7' rx='.6'/%3E%3C/g%3E%3C/svg%3E");
+  --fleur-gules: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg fill='%238c1323'%3E%3Cpath d='M12 .8C15.2 4.4 15.7 8.8 13.3 12.6H10.7C8.3 8.8 8.8 4.4 12 .8Z'/%3E%3Cpath d='M13.5 13.3C14.6 9.7 17.7 7.5 20.9 8.3C23.3 8.9 23.9 12 22 13.4C21 11.7 19.1 11.5 17.9 12.6C16.9 13.6 16.7 15 17.1 16.4C15.5 16 14.1 14.9 13.5 13.3Z'/%3E%3Cpath d='M10.5 13.3C9.4 9.7 6.3 7.5 3.1 8.3C.7 8.9 .1 12 2 13.4C3 11.7 4.9 11.5 6.1 12.6C7.1 13.6 7.3 15 6.9 16.4C8.5 16 9.9 14.9 10.5 13.3Z'/%3E%3Cpath d='M10.9 15.6L12 22.8L13.1 15.6Z'/%3E%3Crect x='7.4' y='12.9' width='9.2' height='2.7' rx='.6'/%3E%3C/g%3E%3C/svg%3E");
+
+  /* black spear finials of the Rules p.6 divider */
+  --finial-l: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 24'%3E%3Cg fill='%232a241c'%3E%3Cpath d='M1 12C5 8.4 9.6 7.5 14.6 10.3V13.7C9.6 16.5 5 15.6 1 12Z'/%3E%3Cpath d='M12.4 10.1C13.8 6.4 16.8 4.3 20.6 4.1C18.5 5.8 17.4 8 17.2 10.4Z'/%3E%3Cpath d='M12.4 13.9C13.8 17.6 16.8 19.7 20.6 19.9C18.5 18.2 17.4 16 17.2 13.6Z'/%3E%3Cpath d='M16.2 9.9H20V14.1H16.2Z'/%3E%3Cpath d='M19 11H30V13H19Z'/%3E%3C/g%3E%3Cpath d='M20 14H30V15H20Z' fill='%23b3a78e'/%3E%3C/svg%3E");
+  --finial-r: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 24'%3E%3Cg transform='matrix(-1 0 0 1 30 0)'%3E%3Cg fill='%232a241c'%3E%3Cpath d='M1 12C5 8.4 9.6 7.5 14.6 10.3V13.7C9.6 16.5 5 15.6 1 12Z'/%3E%3Cpath d='M12.4 10.1C13.8 6.4 16.8 4.3 20.6 4.1C18.5 5.8 17.4 8 17.2 10.4Z'/%3E%3Cpath d='M12.4 13.9C13.8 17.6 16.8 19.7 20.6 19.9C18.5 18.2 17.4 16 17.2 13.6Z'/%3E%3Cpath d='M16.2 9.9H20V14.1H16.2Z'/%3E%3Cpath d='M19 11H30V13H19Z'/%3E%3C/g%3E%3Cpath d='M20 14H30V15H20Z' fill='%23b3a78e'/%3E%3C/g%3E%3C/svg%3E");
+
+  /* gold arrow ends of the page-number cartouche */
+  --cart-l: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 30'%3E%3Cpath d='M17 3.5L2 15L17 26.5L12.6 15Z' fill='%23dcbb4f' stroke='%233b3220' stroke-width='1.3' stroke-linejoin='round'/%3E%3Cpath d='M13.6 8.2L6.4 15L13.6 21.8' fill='none' stroke='%23fff3b3' stroke-width='.9'/%3E%3C/svg%3E");
+  --cart-r: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 30'%3E%3Cg transform='matrix(-1 0 0 1 18 0)'%3E%3Cpath d='M17 3.5L2 15L17 26.5L12.6 15Z' fill='%23dcbb4f' stroke='%233b3220' stroke-width='1.3' stroke-linejoin='round'/%3E%3Cpath d='M13.6 8.2L6.4 15L13.6 21.8' fill='none' stroke='%23fff3b3' stroke-width='.9'/%3E%3C/g%3E%3C/svg%3E");
+
+  --check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8.6l3.1 3.1L13 4.7' fill='none' stroke='%23fff' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --cross: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M4.3.5h3.4L7 4.2l3.8-.7v5L7 7.8l.7 3.7H4.3L5 7.8l-3.8.7v-5L5 4.2z' fill='%238c1323'/%3E%3C/svg%3E");
+  --magnifier: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='8.2' cy='8.2' r='5.6' fill='none' stroke='%234f4a3a' stroke-width='2'/%3E%3Cpath d='M12.4 12.4L17.6 17.6' stroke='%234f4a3a' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scroll-behavior: smooth; }
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--parch) url("../images/parchment.webp") 0 0 / 800px 800px repeat;
+  color: var(--ink);
+  font-family: "Alegreya", Georgia, "Times New Roman", serif;
+  font-size: 1.125rem;          /* 18px */
+  line-height: 1.6;
+  font-variant-numeric: lining-nums;  /* full-height figures, as the rulebook's Times: counts must scan */
+  font-synthesis: style small-caps;   /* never fake a bold Uncial */
+}
+h1, h2, h3, h4, p, ul, ol { margin: 0; }
+img { max-width: 100%; }
+
+/* ---- masthead: the rulebook cover ------------------------------------------ */
+.mast {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  color: var(--cream);
+  background-color: var(--olive);
+  /* the two pools of light follow the content column, not the window */
+  --lamp: 420px 300px at calc(50% - 300px) 60%;
+  --lamp-2: 520px 280px at calc(50% + 190px) 46%;
+  background-image:
+    radial-gradient(var(--lamp), rgba(138, 138, 84, 0.6), rgba(138, 138, 84, 0) 100%),         /* light on the knight */
+    radial-gradient(var(--lamp-2), rgba(96, 96, 58, 0.35), rgba(96, 96, 58, 0) 100%),          /* behind the logo */
+    linear-gradient(180deg, rgba(10, 10, 6, 0.55) 0%, rgba(10, 10, 6, 0) 45%),                  /* the cover darkens upward */
+    radial-gradient(125% 115% at 50% 45%, rgba(8, 8, 5, 0) 40%, rgba(8, 8, 5, 0.7) 100%),       /* vignette */
+    url("../images/wall.webp");                                                                  /* the cover's stucco wall */
+  background-size: auto, auto, auto, auto, 309px 276px;
+}
+/* the cover's thin gold frame, with a gold fleur on each corner */
+.mast-frame {
+  position: absolute; inset: 16px 16px 12px; z-index: 2; pointer-events: none;
+  border: 1px solid rgba(201, 170, 96, 0.85);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(0, 0, 0, 0.4);
+}
+.mast-frame::before {
+  content: ""; position: absolute; inset: -22px;
+  background: var(--fleur-tl) left top / 44px 44px no-repeat, var(--fleur-tr) right top / 44px 44px no-repeat,
+              var(--fleur-bl) left bottom / 44px 44px no-repeat, var(--fleur-br) right bottom / 44px 44px no-repeat;
+}
+.mast-inner {
+  position: relative; z-index: 1;
+  max-width: 1000px; margin: 0 auto;
+  display: grid; grid-template-columns: minmax(0, 330px) minmax(0, 1fr); align-items: center; column-gap: 12px;
+  padding: 26px 48px 0;
+}
+.mast-knight { grid-column: 1; grid-row: 1; align-self: end; display: block; width: 100%; height: auto; }
+.mast-title { grid-column: 2; grid-row: 1; text-align: center; padding: 14px 0 40px; }
+.mast-kicker {
+  display: inline-block; margin: 0 0 16px;
+  padding: 4px 18px 5px;
+  font-style: italic; font-size: 1.0625rem; line-height: 1.3; letter-spacing: 0.01em;
+  color: var(--cream);
+  background: rgba(14, 14, 9, 0.72);
+  border: 1px solid rgba(201, 170, 96, 0.75);
+  box-shadow: inset 0 0 0 3px rgba(14, 14, 9, 0.72), inset 0 0 0 4px rgba(201, 170, 96, 0.35);
+}
+.brand-title { margin: 0; line-height: 1; font-weight: 400; }
+.mast-logo {
+  display: block; width: min(100%, 470px); height: auto; margin: 0 auto;
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.55));
+}
+.brand-sub {
+  display: block; margin-top: 14px;
+  font-family: var(--f-display); font-weight: 700; text-transform: uppercase;   /* as the cover's RULES OF PLAY */
+  font-size: clamp(1.1rem, 0.75rem + 1.15vw, 1.7rem); line-height: 1.2; letter-spacing: 0.08em;
+  color: var(--cream);
+  text-shadow: 1px 1px 0 #5c1a1e, -1px -1px 0 #5c1a1e, 1px -1px 0 #5c1a1e, -1px 1px 0 #5c1a1e,
+               0 1px 0 #5c1a1e, 0 -1px 0 #5c1a1e, 1px 0 0 #5c1a1e, -1px 0 0 #5c1a1e, 0 4px 10px rgba(0, 0, 0, 0.75);
+}
+
+/* the green marble frieze with carved bosses that caps every rulebook page */
+.frieze {
+  position: relative; z-index: 3;
+  height: 37px;
+  background: var(--vert-2) url("../images/frieze.webp") 50% 0 / auto 37px repeat-x;
+  box-shadow: 0 3px 6px rgba(28, 30, 18, 0.35);
+}
+
+/* ---- page ---------------------------------------------------------------- */
+main { max-width: 1000px; margin: 0 auto; padding: 0 24px 40px; }
+
+.intro { max-width: 66ch; margin: 38px auto 0; text-align: center; }
+.flavor { font-style: italic; font-size: 1.25rem; line-height: 1.5; color: #2a271f; }
+.tagline { margin-top: 10px; font-size: 1.0625rem; color: var(--ink-2); }
+
+/* sections open with the rulebook's spear-finial rule (Rules p.6) */
+.sec::before {
+  content: ""; display: block; height: 24px; margin: 42px 0 26px;
+  background:
+    var(--finial-l) left top / 30px 24px no-repeat,
+    var(--finial-r) right top / 30px 24px no-repeat,
+    linear-gradient(#2a241c, #2a241c) 50% 11px / calc(100% - 58px) 2px no-repeat,
+    linear-gradient(#b3a78e, #b3a78e) 50% 14px / calc(100% - 58px) 1px no-repeat;
+}
+.sec h2 {
+  font-family: var(--f-display); font-weight: 700; font-variant-caps: small-caps;
+  font-size: clamp(1.8rem, 1.35rem + 1.5vw, 2.4rem); line-height: 1.15;
+  color: var(--ink-head);
+  margin: 0 0 8px;
+}
+.sec-note { max-width: 75ch; margin: 0 0 20px; font-size: 1.0625rem; line-height: 1.55; font-style: italic; color: var(--ink-2); }
+
+/* ---- configurator: the gold-cornered callout (Game Setup Overview, Rules p.6) ---- */
+.cfg {
+  position: relative;
+  display: flex; flex-direction: column; gap: 26px;
+  padding: 30px 32px 30px;
+  background-color: var(--gold-paper);
+  background-image:
+    radial-gradient(90% 70% at 15% 0%, rgba(255, 251, 222, 0.75), rgba(255, 251, 222, 0) 70%),
+    radial-gradient(80% 90% at 100% 100%, rgba(232, 204, 120, 0.35), rgba(232, 204, 120, 0) 70%);
+  border: 1px solid var(--or-line);
+  box-shadow: inset 0 0 0 5px var(--gold-paper), inset 0 0 0 6px #b99c61, 0 2px 10px rgba(90, 70, 20, 0.12);
+}
+.cfg::before {
+  content: ""; position: absolute; inset: -18px; pointer-events: none;
+  background: var(--fleur-tl) left top / 36px 36px no-repeat, var(--fleur-tr) right top / 36px 36px no-repeat,
+              var(--fleur-bl) left bottom / 36px 36px no-repeat, var(--fleur-br) right bottom / 36px 36px no-repeat;
+}
+.cfg-group { min-width: 0; }
+.cfg-label {
+  display: block; margin: 0 0 10px;
+  font-family: var(--f-display); font-weight: 700; font-variant-caps: small-caps; font-size: 1.1875rem; line-height: 1.35;
+  color: var(--ink-head);
+}
+.cfg-label .hint { font-family: "Alegreya", Georgia, serif; font-weight: 400; font-variant-caps: normal; font-style: italic; font-size: 1rem; color: var(--ink-2); }
+
+/* sets in play: plaques; the chosen one turns to the gold of the page cartouche, with a sealed check */
+.chips { display: flex; flex-wrap: wrap; gap: 12px; }
+.chip {
+  position: relative;
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: center;
+  min-width: 214px; min-height: 58px; padding: 8px 20px 8px 50px;
+  background: #fffcf0; color: var(--ink);
+  border: 2px solid var(--rule); border-radius: 3px;
+  font: inherit; text-align: left; cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+.chip::before {
+  content: ""; position: absolute; left: 15px; top: 50%; width: 22px; height: 22px; margin-top: -11px;
+  border: 2px solid var(--rule); border-radius: 3px; background: #fff;
+}
+.chip b { font-family: var(--f-display); font-weight: 700; font-variant-caps: small-caps; font-size: 1.125rem; line-height: 1.25; }
+.chip span { font-size: 0.9375rem; line-height: 1.3; color: var(--ink-2); }
+.chip:hover { border-color: #3b3220; background-color: #fff7d6; }
+.chip.on {
+  background: linear-gradient(180deg, #fdf6c2 0%, #f3de80 55%, #e8ca62 100%);
+  border-color: #3b3220;
+  box-shadow: inset 0 0 0 1px #fff7cf, 0 1px 3px rgba(70, 50, 10, 0.3);
+}
+.chip.on::before { border-color: var(--gules-deep); background: var(--gules) var(--check) 50% 50% / 14px 14px no-repeat; }
+.chip.on span { color: #3d3526; }
+.chip.lock { cursor: default; }
+
+/* Barons: heraldic shields — argent to choose, gules with a gold bordure when chosen */
+.pbtns { display: flex; flex-wrap: wrap; gap: 12px; }
+.pbtn {
+  width: 48px; height: 56px; padding: 0 0 9px; border: 0; border-radius: 4px 4px 50% 50% / 4px 4px 42% 42%;
+  background: var(--shield-argent) 50% 50% / 100% 100% no-repeat;
+  color: var(--ink-head);
+  font-family: "Alegreya", Georgia, serif; font-weight: 700; font-size: 1.375rem; line-height: 1;
+  font-variant-numeric: lining-nums;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.pbtn:hover { background-image: var(--shield-hover); transform: translateY(-2px); }
+.pbtn.on { background-image: var(--shield-gules); color: #fff; }
+
+/* variants, optional rules and game length: cards sealed in crimson wax when chosen */
+.mods, .mode-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 262px), 1fr)); gap: 10px; }
+.mode-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 190px), 1fr)); }
+.mod, .mode-btn {
+  position: relative; display: flex; flex-direction: column; justify-content: flex-start; width: 100%;
+  min-height: 58px; padding: 10px 14px 12px 50px;
+  background: #fffcf0; color: var(--ink);
+  border: 2px solid var(--rule); border-radius: 3px;
+  font: inherit; text-align: left; cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+.mod::before, .mode-btn::before {
+  content: ""; position: absolute; left: 13px; top: 13px; width: 24px; height: 24px;
+  border: 2px solid var(--rule); border-radius: 50%; background: #fff;
+}
+.mod:hover, .mode-btn:hover { border-color: #3b3220; background-color: #fff7d6; }
+.mod.on, .mode-btn.on { border-color: var(--gules); box-shadow: inset 0 0 0 1px var(--gules); background-color: #fff6e0; }
+.mod.on:hover, .mode-btn.on:hover { background-color: #ffeecb; }
+.mod.on::before, .mode-btn.on::before {
+  border-color: #4a0710;
+  background: var(--check) 50% 50% / 13px 13px no-repeat,
+              radial-gradient(circle at 36% 32%, #d4404e 0%, #a3172a 45%, #6a0c18 100%);
+  box-shadow: 0 1px 2px rgba(60, 0, 10, 0.45);
+}
+.mod-name, .mode-btn b { display: block; font-weight: 700; font-size: 1.0625rem; line-height: 1.3; color: var(--ink-head); }
+.mod-name::before { content: none; }
+.mod-sum, .mode-btn span { display: block; margin-top: 3px; font-size: 1rem; line-height: 1.5; color: var(--ink-2); }
+
+/* ---- teaching script: the gold page cartouche opens a Strategy Tips stone frame ---- */
+.teach-bar { margin: 4px 0 20px; padding: 0 20px; }
+#teachBtn {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 8px;
+  min-height: 48px; padding: 8px 24px 9px;
+  font-family: var(--f-display); font-weight: 700; font-variant-caps: small-caps; font-size: 1.125rem; line-height: 1.2;
+  color: var(--ink-head);
+  background: linear-gradient(180deg, #fdf7c6 0%, #f4e184 48%, #dcbd50 100%);
+  border: 2px solid #3b3220; border-radius: 3px;
+  box-shadow: inset 0 0 0 2px #fbf0b0, inset 0 0 0 3px #b28f3a, 0 2px 0 rgba(60, 45, 10, 0.35);
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+#teachBtn::before, #teachBtn::after {
+  content: ""; position: absolute; top: 50%; width: 18px; height: 30px; margin-top: -15px;
+}
+#teachBtn::before { left: -17px; background: var(--cart-l) 0 0 / 100% 100% no-repeat; }
+#teachBtn::after { right: -17px; background: var(--cart-r) 0 0 / 100% 100% no-repeat; }
+#teachBtn:hover { transform: translateY(-1px); box-shadow: inset 0 0 0 2px #fbf0b0, inset 0 0 0 3px #b28f3a, 0 4px 6px rgba(60, 45, 10, 0.35); }
+#teachBtn[aria-expanded="true"] {
+  background: linear-gradient(180deg, #e6c95c 0%, #d4b146 100%);
+  box-shadow: inset 0 2px 4px rgba(60, 45, 10, 0.45), inset 0 0 0 3px #b28f3a;
+}
+
+.teach-panel {
+  position: relative;
+  margin: 0 0 28px; padding: 38px 32px 36px;
+  background: var(--stone-in) linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0) 40%);
+  border-left: 6px solid #a3a497; border-right: 6px solid #a3a497;
+  box-shadow: inset 1px 0 0 #6f7166, inset -1px 0 0 #6f7166, -1px 0 0 #6f7166, 1px 0 0 #6f7166;
+}
+.teach-panel::before, .teach-panel::after {
+  content: ""; position: absolute; left: -12px; right: -12px; height: 18px;
+  background: #97998d url("../images/stone-bar.webp") 50% 0 / auto 18px repeat-x;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+.teach-panel::before { top: 0; }
+.teach-panel::after { bottom: 0; }
+.teach-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px 16px; margin: 0 0 10px; }
+.teach-top h3 { font-family: var(--f-display); font-weight: 700; font-variant-caps: small-caps; font-size: 1.5rem; line-height: 1.2; color: var(--ink-head); }
+.teach-copy {
+  min-height: 44px; padding: 7px 16px;
+  font: inherit; font-weight: 700; font-size: 1rem; color: var(--ink-head);
+  background: #fbfaf5; border: 2px solid var(--rule); border-radius: 3px; cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+.teach-copy:hover { border-color: #3b3220; background-color: #fff7d6; }
+.teach-note { max-width: 75ch; margin: 0 0 6px; padding-bottom: 12px; border-bottom: 1px solid #b8b5a6; font-size: 1.0625rem; font-style: italic; color: var(--ink-2); }
+.teach-panel h4 { font-family: var(--f-display); font-weight: 700; font-variant-caps: small-caps; font-size: 1.1875rem; line-height: 1.3; color: var(--vert); margin: 22px 0 6px; }
+.teach-panel p { max-width: 72ch; margin: 0 0 10px; }
+.teach-panel ul, .teach-panel ol { max-width: 72ch; margin: 4px 0 12px 1.3em; padding: 0; }
+.teach-panel li { margin-bottom: 6px; padding-left: 2px; }
+.teach-panel b { color: var(--gules-deep); }
+
+/* ---- setup steps ----------------------------------------------------------- */
+.phase { margin-top: 34px; }
+.phase:first-child { margin-top: 6px; }
+.phase-title {
+  display: flex; align-items: center; gap: 14px;
+  margin: 0 0 14px;
+  font-family: var(--f-display); font-weight: 700; font-variant-caps: small-caps; font-size: 1.5rem; line-height: 1.2;
+  color: var(--ink-head);
+}
+.phase-title::after { content: ""; flex: 1 1 auto; min-width: 24px; height: 6px; border-top: 2px solid #2a241c; border-bottom: 1px solid #b3a78e; }
+
+.step {
+  display: grid; grid-template-columns: 44px minmax(0, 1fr); column-gap: 16px;
+  margin: 0 0 12px; padding: 16px 24px 14px 16px;
+  background: var(--parch-hi);
+  border: 1px solid var(--hair); border-radius: 3px;
+  box-shadow: 0 1px 0 rgba(70, 60, 30, 0.08), 0 2px 6px rgba(70, 60, 30, 0.05);
+}
+.step-num {
+  width: 44px; height: 51px; padding-bottom: 8px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--shield-argent) 50% 50% / 100% 100% no-repeat;
+  font-weight: 700; font-size: 1.1875rem; line-height: 1; font-variant-numeric: lining-nums;
+  color: var(--ink-head);
+}
+.step-body { min-width: 0; }
+.step-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 3px 0 6px; }
+.step-head h4 { font-weight: 700; font-size: 1.1875rem; line-height: 1.3; color: var(--ink-head); }
+.step-text { max-width: 72ch; }
+.step-text p { margin: 0 0 8px; }
+.step-text ul, .step-text ol { margin: 6px 0 6px 1.25em; padding: 0; }
+.step-text li { margin: 0 0 5px; padding-left: 2px; }
+.step-text b { color: var(--gules-deep); }
+.inline-note { margin-top: 6px; font-size: 1rem; font-style: italic; color: var(--ink-2); }
+
+/* source-box tags as heraldic tinctures (they must stay tellable apart) */
+.tag {
+  display: inline-block;
+  padding: 2px 9px 1px;
+  font-family: "Alegreya", Georgia, serif; font-weight: 700; font-size: 0.8125rem; line-height: 1.35;
+  letter-spacing: 0.07em; text-transform: uppercase; white-space: nowrap;
+  border: 1px solid; border-radius: 2px;
+  vertical-align: 2px;
+}
+.tag-base { background: #2f4a2c; color: #f6f3e4; border-color: #1b2c19; }   /* vert — the rulebook's green stone */
+.tag-faq  { background: #1f3f86; color: #ffffff; border-color: #132a5c; }   /* azure — the FAQ marks its changes in blue */
+.tag-cg   { background: #ecd26c; color: #231b08; border-color: #8a6d24; }   /* or — Crown and Glory's gold banner */
+.tag-fg   { background: #8c1323; color: #ffffff; border-color: #4a0710; }   /* gules */
+.tag-mis  { background: #5a2a6e; color: #ffffff; border-color: #3a1848; }   /* purpure */
+.tag-king { background: #1c1a14; color: #f0d573; border-color: #b8913f; }   /* sable and or */
+.tag-var  { background: #fbfaf4; color: #3a372c; border-color: #6f6b55; border-style: dashed; }   /* argent */
+
+.src-line {
+  margin-top: 10px; padding-top: 8px; border-top: 1px solid #ddd8c3;
+  font-size: 0.9375rem; line-height: 1.5; font-style: italic; color: var(--ink-2);
+}
+.src-line::before {
+  content: ""; display: inline-block; width: 12px; height: 12px; margin-right: 7px; vertical-align: -1px;
+  background: var(--cross) 0 0 / 12px 12px no-repeat;
+}
+
+/* ---- components glossary (js/comp-widget.js + css/components.css) ---------- */
+#components {
+  --comp-surface: #f8f6ee; --comp-fig: #eeebdc; --comp-ink: #1e1c16; --comp-muted: #4f4a3a; --comp-line: #77735c;
+  --comp-accent: #8c1323; --comp-accent-ink: #ffffff; --comp-head-font: "Alegreya", Georgia, serif; --comp-radius: 3px;
+}
+
+/* ---- rules reference -------------------------------------------------------- */
+#reference { display: grid; gap: 10px; }
+.ref {
+  background: var(--parch-hi);
+  border: 1px solid #c9c4ad; border-radius: 3px;
+  box-shadow: 0 1px 0 rgba(70, 60, 30, 0.08);
+}
+.ref summary {
+  display: flex; align-items: center; gap: 14px;
+  min-height: 54px; padding: 12px 18px 12px 14px;
+  list-style: none; cursor: pointer;
+  font-family: var(--f-display); font-weight: 700; font-variant-caps: small-caps; font-size: 1.1875rem; line-height: 1.3;
+  color: var(--ink-head);
+  border-radius: 3px;
+  transition: background-color 0.15s;
+}
+.ref summary::-webkit-details-marker { display: none; }
+.ref summary::before { content: ""; flex: none; width: 20px; height: 20px; background: var(--fleur-vert) 0 0 / 20px 20px no-repeat; }
+.ref summary::after {
+  content: ""; flex: none; margin-left: auto; width: 10px; height: 10px;
+  border-right: 2.5px solid var(--ink-2); border-bottom: 2.5px solid var(--ink-2);
+  transform: translateY(-3px) rotate(45deg);
+  transition: transform 0.2s;
+}
+.ref summary:hover { background-color: #f0ecdc; }
+.ref[open] summary { border-bottom: 1px solid #c9c4ad; border-radius: 3px 3px 0 0; background: #f1eee0; }
+.ref[open] summary::before { background-image: var(--fleur-gules); }
+.ref[open] summary::after { transform: translateY(3px) rotate(-135deg); }
+.ref-body { padding: 16px 24px 18px; overflow-x: auto; }
+.ref-body > * { max-width: 75ch; }
+.ref-body > .tbl { max-width: none; }
+.ref-body h4 { font-family: var(--f-display); font-weight: 700; font-variant-caps: small-caps; font-size: 1.125rem; line-height: 1.3; color: var(--vert); margin: 18px 0 6px; }
+.ref-body h4:first-child { margin-top: 2px; }
+.ref-body p { margin: 0 0 10px; }
+.ref-body ul, .ref-body ol { margin: 4px 0 12px 1.3em; padding: 0; }
+.ref-body li { margin-bottom: 6px; padding-left: 2px; }
+.ref-body ol ol, .ref-body ul ul, .step-text ul ul { margin-top: 5px; }
+.ref-body b { color: var(--gules-deep); }
+
+/* content helpers emitted by data.js */
+li.note, p.note, .ref-body .note { list-style: none; font-size: 1rem; font-style: italic; color: var(--ink-2); }
+li.note { margin-left: -1.25em; }
+li.caution {
+  list-style: none; position: relative;
+  margin: 8px 0 8px -1.25em; padding: 9px 14px 10px 40px;
+  background: var(--gold-paper); border: 1px solid var(--or-line); border-left: 4px solid #b8913f; border-radius: 2px;
+}
+li.caution::before {
+  content: "!"; position: absolute; left: 12px; top: 10px; width: 18px; height: 21px; padding-top: 1px;
+  background: var(--shield-gules) 0 0 / 100% 100% no-repeat;
+  color: #fff; font-weight: 700; font-size: 0.8125rem; line-height: 1.25; text-align: center;
+}
+.inplay {
+  display: inline-block; padding: 0 7px;
+  font-weight: 700; font-size: 0.8125rem; line-height: 1.45; letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--gules); background: #fff8ee; border: 1.5px solid var(--gules); border-radius: 2px;
+  vertical-align: 1px;
+}
+li.fg-li { padding-left: 10px; border-left: 3px solid var(--gules); }
+.tbl { width: 100%; border-collapse: collapse; margin: 8px 0 14px; font-size: 1rem; line-height: 1.5; background: #fffdf6; font-variant-numeric: lining-nums tabular-nums; }
+.tbl th, .tbl td { padding: 7px 10px; text-align: left; vertical-align: top; border: 1px solid #bdb8a1; }
+.tbl th { background: #dfdcca; font-weight: 700; color: var(--ink-head); }
+.tbl tr.cur td { background: #f6e6a0; font-weight: 700; }
+.tbl tr.cur td:first-child { box-shadow: inset 4px 0 0 var(--gules); }
+
+/* ---- rulebook search --------------------------------------------------------- */
+.rsearch-wrap { margin: 0 0 16px; }
+#rsearch {
+  display: block; width: 100%; min-height: 52px;
+  padding: 12px 16px 12px 48px;
+  font: inherit; font-size: 1.0625rem; color: var(--ink);
+  background: #fffdf5 var(--magnifier) 16px 50% / 20px 20px no-repeat;
+  border: 2px solid var(--rule); border-radius: 3px;
+  box-shadow: inset 0 1px 3px rgba(60, 50, 20, 0.12);
+  -webkit-appearance: none; appearance: none;
+  transition: border-color 0.15s;
+}
+#rsearch::placeholder { color: #625d4a; font-style: italic; opacity: 1; }
+#rsearch::-webkit-search-cancel-button {
+  -webkit-appearance: none; appearance: none; width: 18px; height: 18px; cursor: pointer;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M4 4L14 14M14 4L4 14' stroke='%235c0b16' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E") 50% 50% / 18px 18px no-repeat;
+}
+#rsearch:hover { border-color: #3b3220; }
+#rsearch:focus { border-color: #3b3220; }
+.rhint { font-style: italic; color: var(--ink-2); }
+.rhit {
+  margin: 0 0 10px; padding: 12px 18px 13px;
+  background: var(--parch-hi);
+  border: 1px solid var(--hair); border-left: 5px solid var(--vert-2); border-radius: 3px;
+}
+.rhit-src { margin-bottom: 4px; font-weight: 700; font-size: 0.875rem; line-height: 1.3; letter-spacing: 0.06em; text-transform: uppercase; color: var(--vert); }
+.rhit-text { max-width: 75ch; font-size: 1rem; line-height: 1.55; color: #2c2920; }
+.rhit-text mark { background: #f4dc6e; color: var(--ink-head); border-radius: 2px; padding: 0 2px; box-shadow: 0 0 0 1px #c9a43c; }
+
+/* ---- footer: the back cover ---------------------------------------------------- */
+.footer { margin-top: 30px; }
+.footer-inner {
+  position: relative;
+  background-color: var(--olive);
+  background-image: linear-gradient(rgba(14, 14, 9, 0.62), rgba(14, 14, 9, 0.62)), url("../images/wall.webp");
+  background-size: auto, 404px 440px;
+}
+.footer-inner p {
+  max-width: 72ch; margin: 0 auto; padding: 26px 22px 34px;
+  text-align: center; font-size: 1rem; line-height: 1.6; font-style: italic;
+  color: #e9e2c8;
+}
+
+/* ---- focus ------------------------------------------------------------------ */
+button:focus-visible, summary:focus-visible, input:focus-visible {
+  outline: 3px solid var(--focus); outline-offset: 2px;
+}
+#rsearch:focus-visible { outline-offset: 2px; }
+
+/* ---- responsive ---------------------------------------------------------------- */
+@media (max-width: 860px) {
+  .mast { --lamp: 330px 260px at 170px 62%; --lamp-2: 420px 240px at 64% 46%; }
+  .mast-inner { grid-template-columns: minmax(0, 260px) minmax(0, 1fr); padding: 22px 32px 0; }
+}
+@media (max-width: 640px) {
+  body { font-size: 1.0625rem; }   /* 17px */
+  main { padding: 0 16px 32px; }
+
+  .mast { --lamp: 190px 170px at 23% 62%; --lamp-2: 260px 150px at 70% 46%; }
+  .mast-frame { inset: 9px 9px 7px; }
+  .mast-frame::before { inset: -15px; background-size: 30px 30px; }
+  .mast-inner { grid-template-columns: 40% 60%; column-gap: 0; padding: 16px 16px 0; }
+  .mast-kicker { display: none; }
+  .mast-title { padding: 6px 4px 18px 0; }
+  .brand-sub { margin-top: 8px; font-size: 0.9375rem; letter-spacing: 0.03em; }
+  .frieze { height: 28px; background-size: auto 28px; }
+
+  .intro { margin-top: 26px; }
+  .flavor { font-size: 1.125rem; }
+  .sec::before { margin: 34px 0 20px; }
+
+  .cfg { padding: 24px 16px 22px; gap: 22px; }
+  .cfg::before { inset: -14px; background-size: 28px 28px; }
+  .chip { flex: 1 1 100%; min-width: 0; }
+
+  .teach-bar { padding: 0 18px; }
+  .teach-panel { padding: 34px 16px 32px; border-left-width: 4px; border-right-width: 4px; }
+  .teach-panel::before, .teach-panel::after { left: -8px; right: -8px; }
+
+  .phase-title { display: block; font-size: 1.3rem; }
+  .phase-title::after { display: block; margin-top: 8px; }
+  .step { grid-template-columns: 36px minmax(0, 1fr); column-gap: 12px; padding: 14px 14px 12px 12px; }
+  .step-num { width: 36px; height: 42px; padding-bottom: 7px; font-size: 1.0625rem; }
+  .step-head h4 { font-size: 1.125rem; }
+
+  .ref summary { font-size: 1.0625rem; padding: 11px 14px 11px 12px; gap: 12px; }
+  .ref-body { padding: 14px 16px 16px; }
+  .tbl th, .tbl td { padding: 6px 7px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition: none !important; }
+}
