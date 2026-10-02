@@ -3326,6 +3326,70 @@ async function handleGallery(request, env, cors) {
   );
 }
 
+// --- Private VFM dashboard ---------------------------------------------------
+// The VFM Discord bot pushes a snapshot of each Virtual Flea Market geeklist it
+// watches (POST /api/vfm-dash/push, bearer VFM_DASH_WRITE_TOKEN). The unlisted
+// vfm-dashboard.html page reads them back (GET /api/vfm-dash, bearer
+// VFM_DASH_READ_KEY, which only lives in the owner's link). One KV write per
+// changed snapshot; the index is rewritten only when the watched lists change.
+const VFM_INDEX_KEY = "vfm:index";
+const vfmListKey = (id) => `vfm:list:${id}`;
+
+function bearerToken(request) {
+  const authorization = request.headers.get("Authorization") || "";
+  return authorization.startsWith("Bearer ") ? authorization.slice(7).trim() : "";
+}
+
+function sameSecret(given, expected) {
+  if (!given || !expected || given.length !== expected.length) return false;
+  let diff = 0;
+  for (let i = 0; i < given.length; i++) diff |= given.charCodeAt(i) ^ expected.charCodeAt(i);
+  return diff === 0;
+}
+
+async function handleVfmDash(request, env, cors, url) {
+  if (!env.VFM_DASH) return jsonResponse({ error: "VFM dashboard storage is not configured" }, 503, cors);
+
+  if (url.pathname === "/api/vfm-dash/push") {
+    if (request.method !== "POST") return jsonResponse({ error: "POST only" }, 405, cors);
+    if (!sameSecret(bearerToken(request), env.VFM_DASH_WRITE_TOKEN)) return jsonResponse({ error: "unauthorized" }, 401, cors);
+    let body;
+    try { body = await request.json(); } catch { return jsonResponse({ error: "invalid JSON" }, 400, cors); }
+    const list = body && body.list;
+    if (!list || !/^\d{1,10}$/.test(String(list.id)) || !Array.isArray(list.items)) {
+      return jsonResponse({ error: "missing list" }, 400, cors);
+    }
+    const watched = (Array.isArray(body.watched) ? body.watched : [])
+      .filter((w) => /^\d{1,10}$/.test(String(w.id)))
+      .map((w) => ({ id: String(w.id), title: clampString(w.title, 200) }));
+    await env.VFM_DASH.put(vfmListKey(list.id), JSON.stringify(list));
+    const index = JSON.stringify(watched);
+    const previous = await env.VFM_DASH.get(VFM_INDEX_KEY);
+    if (previous !== index) {
+      await env.VFM_DASH.put(VFM_INDEX_KEY, index);
+      const keep = new Set(watched.map((w) => w.id));
+      let old = [];
+      try { old = JSON.parse(previous || "[]"); } catch { /* ignore */ }
+      await Promise.all(old.filter((w) => !keep.has(String(w.id))).map((w) => env.VFM_DASH.delete(vfmListKey(w.id))));
+    }
+    return jsonResponse({ ok: true }, 200, cors);
+  }
+
+  if (request.method !== "GET") return jsonResponse({ error: "GET only" }, 405, cors);
+  if (!sameSecret(bearerToken(request), env.VFM_DASH_READ_KEY)) return jsonResponse({ error: "unauthorized" }, 401, cors);
+  const listId = url.searchParams.get("list");
+  if (!listId) {
+    return jsonResponse({ lists: JSON.parse((await env.VFM_DASH.get(VFM_INDEX_KEY)) || "[]") }, 200, cors);
+  }
+  if (!/^\d{1,10}$/.test(listId)) return jsonResponse({ error: "bad list id" }, 400, cors);
+  const snapshot = await env.VFM_DASH.get(vfmListKey(listId));
+  if (!snapshot) return jsonResponse({ error: "no data for that list yet" }, 404, cors);
+  return new Response(snapshot, {
+    status: 200,
+    headers: { ...cors, "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" }
+  });
+}
+
 export default {
   async scheduled(event, env, ctx) {
     if (event.cron === DIGEST_CRON) {
@@ -3356,6 +3420,10 @@ export default {
 
     if (incomingUrl.pathname === "/api/analytics-summary") {
       return handleAnalyticsSummary(request, env, cors);
+    }
+
+    if (incomingUrl.pathname === "/api/vfm-dash" || incomingUrl.pathname === "/api/vfm-dash/push") {
+      return handleVfmDash(request, env, cors, incomingUrl);
     }
 
     // Token check for the unlisted admin dashboard (same token as analytics).

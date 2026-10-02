@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="referrer" content="no-referrer">
+    <title>DFWGV — VFM Dashboard</title>
+    <link rel="stylesheet" href="community.css?v=20260726-admin9">
+    <link rel="stylesheet" href="vfm-dashboard.css?v=20261002-1">
+    <link rel="icon" href="favicon.ico">
+</head>
+<body data-page="vfm-dashboard">
+    <div class="nav">
+        <a href="index.html">Home</a>
+    </div>
+
+    <main class="content vfm">
+        <div id="vfm-gate" class="vfm-gate" hidden>
+            <h1>VFM Dashboard</h1>
+            <p>This page needs its private link.</p>
+            <div class="vfm-gate-row">
+                <input type="password" id="vfm-key" placeholder="Dashboard key" autocomplete="off">
+                <button type="button" id="vfm-key-btn">Open</button>
+            </div>
+            <p id="vfm-gate-msg" class="vfm-dim"></p>
+        </div>
+
+        <div id="vfm-app" hidden>
+            <header class="vfm-head">
+                <div>
+                    <h1 id="vfm-title">VFM Dashboard</h1>
+                    <p class="vfm-dim"><a id="vfm-list-link" target="_blank" rel="noopener">Open geeklist on BGG</a> · <span id="vfm-updated"></span></p>
+                </div>
+                <label class="vfm-list-pick" id="vfm-list-pick" hidden>VFM
+                    <select id="vfm-list"></select>
+                </label>
+            </header>
+
+            <div class="vfm-stats" id="vfm-stats"></div>
+
+            <div class="vfm-controls">
+                <input type="search" id="vfm-search" placeholder="Search game or seller">
+                <div class="vfm-chips" id="vfm-status" role="group" aria-label="Status">
+                    <button type="button" data-status="0" class="on">Available</button>
+                    <button type="button" data-status="1">Likely claimed</button>
+                    <button type="button" data-status="2">Sold</button>
+                    <button type="button" data-status="all">All</button>
+                </div>
+                <label>Sort
+                    <select id="vfm-sort">
+                        <option value="deal">Best deal (vs. GeekMarket)</option>
+                        <option value="savings">Biggest $ savings</option>
+                        <option value="price-asc">Price: low to high</option>
+                        <option value="price-desc">Price: high to low</option>
+                        <option value="rating">BGG rating</option>
+                        <option value="rank">BGG rank</option>
+                        <option value="newest">Newest posts</option>
+                        <option value="oldest">Oldest posts</option>
+                        <option value="name">Game name</option>
+                    </select>
+                </label>
+                <label>Max $ <input type="number" id="vfm-max" min="0" step="1" inputmode="numeric"></label>
+                <label class="vfm-check"><input type="checkbox" id="vfm-deals-only"> Good deals only</label>
+                <label class="vfm-check"><input type="checkbox" id="vfm-hide-auctions"> Hide auctions</label>
+            </div>
+
+            <p id="vfm-count" class="vfm-dim"></p>
+            <div id="vfm-grid" class="vfm-grid"></div>
+            <div id="vfm-more-wrap" class="vfm-more-wrap"><button type="button" id="vfm-more" hidden>Show more</button></div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 DFW Gaming Village. All Rights Reserved.</p>
+    </footer>
+
+    <script src="vfm-dashboard.js?v=20261002-1"></script>
+</body>
+</html>

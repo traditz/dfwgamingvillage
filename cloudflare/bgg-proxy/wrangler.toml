@@ -13,6 +13,11 @@ database_id = "36785673-2da0-44ba-bc96-18482a742f95"
 binding = "HOT_HISTORY"
 id = "0c0b7bc80e824c35926a8fe63e360bc2"
 
+# Private VFM dashboard snapshots pushed by the VFM Discord bot (see handleVfmDash).
+[[kv_namespaces]]
+binding = "VFM_DASH"
+id = "429a333fb8be4c878ddb601c5fb1b506"
+
 [triggers]
 crons = [
   "0 */6 * * *", # every 6h — snapshot Hotness + check watchlist prices
