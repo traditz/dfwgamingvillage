@@ -5,76 +5,174 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
     <meta name="referrer" content="no-referrer">
-    <title>DFWGV — VFM Dashboard</title>
-    <link rel="stylesheet" href="community.css?v=20260726-admin9">
-    <link rel="stylesheet" href="vfm-dashboard.css?v=20261002-1">
+    <meta name="theme-color" content="#0b0c10">
+    <title>VFM Dashboard · DFWGV</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="vfm-dashboard.css?v=20261002-2">
     <link rel="icon" href="favicon.ico">
 </head>
-<body data-page="vfm-dashboard">
-    <div class="nav">
-        <a href="index.html">Home</a>
+<body>
+    <div id="gate" class="gate" hidden>
+        <div class="gate-card">
+            <div class="brand-mark">VFM</div>
+            <h1>VFM Dashboard</h1>
+            <p class="muted">Open this page with its private link, or paste your key.</p>
+            <form id="gate-form" class="gate-row">
+                <input type="password" id="gate-key" placeholder="Dashboard key" autocomplete="off" aria-label="Dashboard key">
+                <button type="submit" class="btn primary">Open</button>
+            </form>
+            <p id="gate-msg" class="gate-msg"></p>
+        </div>
     </div>
 
-    <main class="content vfm">
-        <div id="vfm-gate" class="vfm-gate" hidden>
-            <h1>VFM Dashboard</h1>
-            <p>This page needs its private link.</p>
-            <div class="vfm-gate-row">
-                <input type="password" id="vfm-key" placeholder="Dashboard key" autocomplete="off">
-                <button type="button" id="vfm-key-btn">Open</button>
-            </div>
-            <p id="vfm-gate-msg" class="vfm-dim"></p>
-        </div>
-
-        <div id="vfm-app" hidden>
-            <header class="vfm-head">
-                <div>
-                    <h1 id="vfm-title">VFM Dashboard</h1>
-                    <p class="vfm-dim"><a id="vfm-list-link" target="_blank" rel="noopener">Open geeklist on BGG</a> · <span id="vfm-updated"></span></p>
+    <div id="app" class="app" hidden>
+        <header class="topbar">
+            <div class="topbar-left">
+                <div class="brand-mark">VFM</div>
+                <div class="title-wrap">
+                    <select id="list-select" class="list-select" aria-label="Virtual Flea Market"></select>
+                    <h1 id="list-title" class="list-title"></h1>
                 </div>
-                <label class="vfm-list-pick" id="vfm-list-pick" hidden>VFM
-                    <select id="vfm-list"></select>
-                </label>
-            </header>
-
-            <div class="vfm-stats" id="vfm-stats"></div>
-
-            <div class="vfm-controls">
-                <input type="search" id="vfm-search" placeholder="Search game or seller">
-                <div class="vfm-chips" id="vfm-status" role="group" aria-label="Status">
-                    <button type="button" data-status="0" class="on">Available</button>
-                    <button type="button" data-status="1">Likely claimed</button>
-                    <button type="button" data-status="2">Sold</button>
-                    <button type="button" data-status="all">All</button>
-                </div>
-                <label>Sort
-                    <select id="vfm-sort">
-                        <option value="deal">Best deal (vs. GeekMarket)</option>
-                        <option value="savings">Biggest $ savings</option>
-                        <option value="price-asc">Price: low to high</option>
-                        <option value="price-desc">Price: high to low</option>
-                        <option value="rating">BGG rating</option>
-                        <option value="rank">BGG rank</option>
-                        <option value="newest">Newest posts</option>
-                        <option value="oldest">Oldest posts</option>
-                        <option value="name">Game name</option>
-                    </select>
-                </label>
-                <label>Max $ <input type="number" id="vfm-max" min="0" step="1" inputmode="numeric"></label>
-                <label class="vfm-check"><input type="checkbox" id="vfm-deals-only"> Good deals only</label>
-                <label class="vfm-check"><input type="checkbox" id="vfm-hide-auctions"> Hide auctions</label>
             </div>
+            <div class="topbar-right">
+                <span id="live" class="live" title=""><span class="dot"></span><span id="live-text">Loading…</span></span>
+                <a id="bgg-link" class="btn ghost sm" target="_blank" rel="noopener">BGG list <svg class="i" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>
+                <button id="refresh" class="btn ghost sm icon-only" type="button" aria-label="Refresh"><svg class="i" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg></button>
+            </div>
+        </header>
 
-            <p id="vfm-count" class="vfm-dim"></p>
-            <div id="vfm-grid" class="vfm-grid"></div>
-            <div id="vfm-more-wrap" class="vfm-more-wrap"><button type="button" id="vfm-more" hidden>Show more</button></div>
-        </div>
-    </main>
+        <section class="kpis" id="kpis" aria-label="Summary"></section>
 
-    <footer class="footer">
-        <p>&copy; 2026 DFW Gaming Village. All Rights Reserved.</p>
-    </footer>
+        <nav class="tabs" role="tablist">
+            <button class="tab" role="tab" data-tab="listings">Listings <span class="tab-count" id="tab-count-listings"></span></button>
+            <button class="tab" role="tab" data-tab="insights">Insights</button>
+            <button class="tab" role="tab" data-tab="sellers">Sellers <span class="tab-count" id="tab-count-sellers"></span></button>
+        </nav>
 
-    <script src="vfm-dashboard.js?v=20261002-1"></script>
+        <!-- Listings -->
+        <section class="panel" data-panel="listings">
+            <div class="listings">
+                <aside class="filters" id="filters">
+                    <div class="filters-head">
+                        <h2>Filters</h2>
+                        <button type="button" class="link-btn" id="clear-filters">Clear all</button>
+                    </div>
+                    <div class="fgroup">
+                        <label class="flabel">Status</label>
+                        <div class="seg" id="f-status">
+                            <button type="button" data-v="0">Available</button>
+                            <button type="button" data-v="1">Claimed</button>
+                            <button type="button" data-v="2">Sold</button>
+                            <button type="button" data-v="all">All</button>
+                        </div>
+                    </div>
+                    <div class="fgroup">
+                        <label class="flabel">Deal vs. GeekMarket</label>
+                        <div class="checks" id="f-deal"></div>
+                    </div>
+                    <div class="fgroup">
+                        <label class="flabel">Price</label>
+                        <div class="range-row">
+                            <input type="number" id="f-min" placeholder="Min $" min="0" inputmode="numeric">
+                            <span class="muted">–</span>
+                            <input type="number" id="f-max" placeholder="Max $" min="0" inputmode="numeric">
+                        </div>
+                    </div>
+                    <div class="fgroup">
+                        <label class="flabel" for="f-rating">Min BGG rating <span id="f-rating-out" class="muted"></span></label>
+                        <input type="range" id="f-rating" min="0" max="9" step="0.5">
+                    </div>
+                    <div class="fgroup">
+                        <label class="flabel" for="f-players">Plays with</label>
+                        <select id="f-players">
+                            <option value="">Any player count</option>
+                            <option value="1">1 player</option><option value="2">2 players</option><option value="3">3 players</option>
+                            <option value="4">4 players</option><option value="5">5 players</option><option value="6">6+ players</option>
+                        </select>
+                    </div>
+                    <div class="fgroup">
+                        <label class="flabel">Complexity</label>
+                        <div class="chips" id="f-weight">
+                            <button type="button" data-v="light">Light</button>
+                            <button type="button" data-v="medium">Medium</button>
+                            <button type="button" data-v="heavy">Heavy</button>
+                        </div>
+                    </div>
+                    <div class="fgroup">
+                        <label class="flabel">Condition</label>
+                        <div class="chips" id="f-cond">
+                            <button type="button" data-v="New">New</button>
+                            <button type="button" data-v="Like new">Like new</button>
+                            <button type="button" data-v="Very good">Very good</button>
+                            <button type="button" data-v="Good">Good</button>
+                            <button type="button" data-v="Played">Played</button>
+                        </div>
+                    </div>
+                    <div class="fgroup toggles">
+                        <label class="toggle"><input type="checkbox" id="f-new"><span></span>New since last visit</label>
+                        <label class="toggle"><input type="checkbox" id="f-noexp"><span></span>Hide expansions</label>
+                        <label class="toggle"><input type="checkbox" id="f-noauction"><span></span>Hide auctions</label>
+                    </div>
+                </aside>
+
+                <div class="results">
+                    <div class="toolbar">
+                        <div class="search">
+                            <svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                            <input type="search" id="search" placeholder="Search games or sellers" aria-label="Search">
+                        </div>
+                        <button type="button" class="btn ghost sm filters-toggle" id="filters-toggle"><svg class="i" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg> Filters</button>
+                        <select id="sort" aria-label="Sort">
+                            <option value="deal">Best deal</option>
+                            <option value="savings">Biggest $ savings</option>
+                            <option value="value">Best value (rating × deal)</option>
+                            <option value="price-asc">Price: low to high</option>
+                            <option value="price-desc">Price: high to low</option>
+                            <option value="rating">BGG rating</option>
+                            <option value="rank">BGG rank</option>
+                            <option value="weight">Complexity</option>
+                            <option value="comments">Most comments</option>
+                            <option value="newest">Newest</option>
+                            <option value="oldest">Oldest</option>
+                            <option value="name">Name</option>
+                        </select>
+                        <div class="view-toggle" role="group" aria-label="View">
+                            <button type="button" data-view="grid" aria-label="Card view"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg></button>
+                            <button type="button" data-view="table" aria-label="Table view"><svg class="i" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+                        </div>
+                    </div>
+                    <div class="active-filters" id="active-filters"></div>
+                    <p class="result-count" id="result-count"></p>
+                    <div id="results"></div>
+                    <div id="sentinel" class="sentinel"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Insights -->
+        <section class="panel" data-panel="insights" hidden>
+            <div class="insights" id="insights"></div>
+        </section>
+
+        <!-- Sellers -->
+        <section class="panel" data-panel="sellers" hidden>
+            <div class="card table-card"><div id="sellers"></div></div>
+        </section>
+
+        <footer class="app-foot">
+            <span>Prices vs. GeekMarket USD sales over the last 12 months. Box art and data: BoardGameGeek.</span>
+            <a href="index.html">DFW Gaming Village</a>
+        </footer>
+    </div>
+
+    <div id="drawer-backdrop" class="drawer-backdrop" hidden></div>
+    <aside id="drawer" class="drawer" aria-hidden="true" role="dialog" aria-label="Item details">
+        <button type="button" class="btn ghost sm icon-only drawer-close" id="drawer-close" aria-label="Close"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+        <div id="drawer-body"></div>
+    </aside>
+
+    <script src="vfm-dashboard.js?v=20261002-2"></script>
 </body>
 </html>
