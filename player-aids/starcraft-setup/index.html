@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StarCraft: The Board Game — Setup &amp; Reference Utility</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Squada+One&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=2">
+  <link rel="stylesheet" href="css/components.css?v=1">
+</head>
+<body>
+  <!-- Header: the box art in the rulebook cover's riveted frame, over the cover's dark-red "Rules of Play" band (Base p.1) -->
+  <header class="topbar">
+    <div class="cover">
+      <img class="cover-art" src="images/hero-box.webp" width="880" height="382" alt="" aria-hidden="true" fetchpriority="high">
+      <h1 class="cover-band"><span class="vh">StarCraft: The Board Game — </span><span class="band-text">Setup &amp; Reference</span><span class="vh"> Utility</span></h1>
+    </div>
+  </header>
+
+  <!-- The interior page: pale steel in the dark-red hull frame (Base p.2–48) -->
+  <main class="sheet">
+    <div class="intro">
+      <p class="tagline">
+        Pick your player count, factions, Brood War and its modes and options, for exact setup steps, a full rules
+        reference with the official FAQ and errata applied, a teaching script and a search of every rulebook.
+      </p>
+      <p class="flavor">In the StarCraft galaxy, only one thing is certain: <span>there will be war.</span></p>
+    </div>
+
+    <!-- Configuration: a black grid console like the rulebook's diagram sidebars (Base p.6, p.11, p.13) -->
+    <section class="console" aria-label="Configuration">
+      <h2>The War Room</h2>
+      <p class="sec-note">Select the sets on the table, the player count, the factions, the way you're playing and any variants. Every step, ruling and script below adapts to your choices.</p>
+      <div class="cfg">
+        <div>
+          <p class="cfg-label" id="lbl-sets">Sets in play</p>
+          <div id="expansions" class="chips" role="group" aria-labelledby="lbl-sets"></div>
+        </div>
+        <div>
+          <p class="cfg-label" id="lbl-players">Players <span class="hint">two to six; Team Play needs four or six</span></p>
+          <div id="players" class="pbtns" role="group" aria-labelledby="lbl-players"></div>
+        </div>
+        <div>
+          <p class="cfg-label" id="lbl-facs">Factions at the table <span class="hint" id="fac-count">(optional)</span></p>
+          <div id="factions" class="chips facs" role="group" aria-labelledby="lbl-facs"></div>
+          <p class="cfg-help">Mark the factions in play to tailor hand sizes, build limits, victory targets and faction notes. Leave them unmarked to see notes for every faction.</p>
+        </div>
+        <div>
+          <p class="cfg-label" id="lbl-modes">Way to play <span class="hint">Brood War's game modes change the victory conditions and other key rules; only one can be used</span></p>
+          <div id="modes" class="mode-grid" role="group" aria-labelledby="lbl-modes"></div>
+        </div>
+        <div id="modules-group">
+          <p class="cfg-label" id="lbl-mods">Variants &amp; optional rules <span class="hint">core variants combine with each other; Brood War's optional rules can't be used with a game mode</span></p>
+          <div id="modules" class="mods" role="group" aria-labelledby="lbl-mods"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec sec-setup" aria-label="Setup">
+      <h2>Setup</h2>
+      <p class="sec-note">Follow the steps in order. Each cites its official source pages; the FAQ &amp; errata (January 2009) are already applied, and Brood War rules apply only when Brood War is selected.</p>
+      <div class="teach-bar"><button id="teachBtn" type="button" aria-expanded="false" aria-controls="teach" title="A ~5 minute script to teach this exact setup aloud">📖 Teaching script</button></div>
+      <div id="teach" class="teach-panel" hidden></div>
+      <div id="setup"></div>
+    </section>
+
+    <section class="sec sec-comp" id="components" aria-labelledby="comp-h" hidden>
+      <h2 id="comp-h">Components</h2>
+      <p class="sec-note">Every component the rulebooks list for the sets you've selected, with its count. Tap a picture to enlarge it. Brood War swaps in new Faction Sheets and some building tokens and cards.</p>
+      <div id="aid-comp"></div>
+    </section>
+
+    <section class="sec sec-ref" aria-label="Reference">
+      <h2>Rules Reference</h2>
+      <p class="sec-note">Tap a heading to open it. Contents adapt to your sets, players, factions, mode and options. Citations: Base = core rulebook, BW = Brood War rulebook, FAQ = FAQ &amp; errata (2009), all by printed page.</p>
+      <div id="reference"></div>
+    </section>
+
+    <section class="sec sec-search" aria-label="Rulebook search">
+      <h2>Search the Rulebooks</h2>
+      <p class="sec-note">Full-text search across the core rulebook, the official FAQs and, when Brood War is selected, the Brood War rulebook and the FAQ's Brood War pages. FAQ v1.1 hits are marked superseded.</p>
+      <div class="rsearch-wrap">
+        <input id="rsearch" type="search" placeholder="e.g. splash damage, transport, force mine, assist, leadership…" aria-label="Search the rulebooks">
+      </div>
+      <div id="rresults"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    Setup and reference content grounded in the official StarCraft: The Board Game rulebook, the Brood War
+    expansion rulebook and the official FAQ &amp; errata. A fan-made play aid, not affiliated with
+    Fantasy Flight Games or Blizzard Entertainment.
+  </footer>
+
+  <script src="js/data.js?v=1"></script>
+  <script src="js/rules.js?v=1"></script>
+  <script src="js/components.js?v=1"></script>
+  <script src="js/comp-widget.js?v=1"></script>
+  <script src="js/app.js?v=1"></script>
+  <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
+  <script src="/site-analytics.js?v=20260607-analytics"></script>
+</body>
+</html>
