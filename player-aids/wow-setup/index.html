@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>World of Warcraft: The Board Game — Setup &amp; Reference Utility</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tinos:ital,wght@0,400;0,700;1,400;1,700&family=Ysabeau+Office:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=2">
+  <link rel="stylesheet" href="css/components.css?v=1">
+</head>
+<body>
+  <header class="masthead">
+    <!-- the Base rulebook cover (p.1): the World of Warcraft logo, "The Board Game" and the runic ring -->
+    <div class="mast-band">
+      <img class="mast-cover" src="images/hero-cover.webp" width="811" height="354" alt="" aria-hidden="true" fetchpriority="high">
+    </div>
+    <!-- the cover's "Rules of Play" plaque becomes the page title -->
+    <h1 class="mast-title">
+      <span class="vh">World of Warcraft: The Board Game — </span>
+      <span class="plaque">Setup &amp; Reference Utility</span>
+    </h1>
+    <p class="tagline">
+      Choose your sets, Overlord, player count and heroes for exact setup steps, a full rules reference with the
+      official FAQ and errata applied, and a search of every rulebook. Horde or Alliance — whose heroes will bring
+      down the Overlord first?
+    </p>
+  </header>
+
+  <main>
+    <section class="sec sec-cfg" aria-label="Configuration">
+      <h2>Muster the Factions</h2>
+      <p class="sec-note">Select the sets on the table, the Overlord, the player count and any variants. Every step, ruling and script below adapts to your choices.</p>
+      <div class="cfg">
+        <div class="cfg-row">
+          <p class="cfg-label" id="lbl-sets">Sets in play</p>
+          <div id="expansions" class="chips" role="group" aria-labelledby="lbl-sets"></div>
+        </div>
+        <div class="cfg-row" id="tbcmode-group" hidden>
+          <p class="cfg-label" id="lbl-tbc">The Burning Crusade <span class="hint">— with the Outland board, or the book’s lower-key “Playing Without Outland” option</span></p>
+          <div id="tbcmodes" class="mode-grid" role="group" aria-labelledby="lbl-tbc"></div>
+        </div>
+        <div class="cfg-row">
+          <p class="cfg-label" id="lbl-players">Players <span class="hint">(2–6; four or six characters)</span></p>
+          <div id="players" class="pbtns" role="group" aria-labelledby="lbl-players"></div>
+          <p id="teamline" class="hint-line"></p>
+        </div>
+        <div class="cfg-row">
+          <p class="cfg-label" id="lbl-ov">Overlord</p>
+          <div id="overlords" class="chips" role="group" aria-labelledby="lbl-ov"></div>
+          <p id="ovhint" class="hint-line"></p>
+        </div>
+        <div class="cfg-row" id="modules-group">
+          <p class="cfg-label" id="lbl-mods">Modules &amp; variants <span class="hint">— Shadow of War’s parts can be used separately; variants are optional</span></p>
+          <div id="modules" class="mods" role="group" aria-labelledby="lbl-mods"></div>
+        </div>
+        <div class="cfg-row" id="party-group">
+          <p class="cfg-label" id="lbl-party">Heroes <span class="hint">(optional)</span></p>
+          <p id="partyhint" class="hint-line"></p>
+          <div id="party" class="party" role="group" aria-labelledby="lbl-party"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec sec-setup" aria-label="Setup">
+      <h2>Setup</h2>
+      <p class="sec-note">Follow the steps in order — they follow the base game’s twelve setup steps with each expansion’s changes slotted in. Each cites its sources by printed page; the FAQ errata are already applied.</p>
+      <div class="teach-bar"><button id="teachBtn" type="button" aria-expanded="false" aria-controls="teach" title="A ~5 minute script to teach this exact setup aloud">📖 Teaching script</button></div>
+      <div id="teach" class="teach-panel" hidden></div>
+      <div id="setup"></div>
+    </section>
+
+    <section class="sec sec-comp" id="components" aria-labelledby="comp-h" hidden>
+      <h2 id="comp-h">Components</h2>
+      <p class="sec-note">Every component pictured in the rulebooks for the sets you’ve selected, with its count. Tap a picture to enlarge it.</p>
+      <div id="aid-comp"></div>
+    </section>
+
+    <section class="sec sec-ref" aria-label="Reference">
+      <h2>Rules Reference</h2>
+      <p class="sec-note">Tap a heading to open it. Contents adapt to your sets, Overlord, variants, player count and heroes. Newest ruling wins: FAQ, then The Burning Crusade, then Shadow of War, then the base rules.</p>
+      <div id="reference"></div>
+    </section>
+
+    <section class="sec sec-search" aria-label="Rulebook search">
+      <h2>Search the Rulebooks</h2>
+      <p class="sec-note">Full-text search across the base rulebook, every selected expansion rulebook, and the official FAQ &amp; errata.</p>
+      <div class="rsearch-wrap">
+        <input id="rsearch" type="search" placeholder="e.g. attrition, flight path, curse, dungeon, destiny, loot…" aria-label="Search the rulebooks">
+      </div>
+      <div id="rresults"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>
+      Setup and reference content grounded in the official World of Warcraft: The Board Game rulebook, the Shadow of War
+      and The Burning Crusade expansion rulebooks, and the official FAQ, errata and clarifications (v1.4). A fan-made
+      play aid — not affiliated with Fantasy Flight Games or Blizzard Entertainment.
+    </p>
+  </footer>
+
+  <script src="js/data.js?v=1"></script>
+  <script src="js/rules.js?v=1"></script>
+  <script src="js/components.js?v=1"></script>
+  <script src="js/comp-widget.js?v=1"></script>
+  <script src="js/app.js?v=1"></script>
+  <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
+  <script src="/site-analytics.js?v=20260607-analytics"></script>
+</body>
+</html>

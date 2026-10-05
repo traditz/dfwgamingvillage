@@ -1,0 +1,650 @@
+/* =============================================================================
+   World of Warcraft: The Board Game — Setup & Reference Utility
+   Styled after the rulebooks (base game 2005, Shadow of War 2006, The Burning Crusade 2007, FAQ v1.4):
+   • Cover (Base p.1): the World of Warcraft logo, "The Board Game" and the runic ring on the old map, and the
+     maroon "Rules of Play" plaque in its iron frame, which becomes the page title.
+   • Interior pages (Base p.2–39): yellow parchment #ecd985 with burnt, torn edges; black Times text
+     (stand-in: Tinos); headings in Albertus (stand-in: Ysabeau Office).
+   • Section banners (Base p.2 "Welcome", p.6 "Getting Started"; TBC p.7 "Setup"): maroon #800107 with a black
+     keyline and steep chamfered ends, gold #ffdb02 capitals.
+   • Sub-headings (Base p.2, p.6 "Game Setup"): black capitals over a maroon rule.
+   • Setup step numbers (Base p.6–7): the yellow lozenge with a black numeral.
+   • Sidebars (Base p.5, p.7; TBC p.7, p.24): royal blue #010069 map texture in a spiked iron frame, crowned by
+     the map medallion, white text. They frame the Teaching script.
+   • The Alliance and Horde quest tokens (Base p.5) and the red/blue sides of the character sheets (Base p.7)
+     mark the two factions in the hero builder.
+   • The "Page N" tab at the foot of every page (maroon #4e0004, gold type) labels search hits and citations.
+   ============================================================================= */
+
+:root {
+  /* the page */
+  --parch:     #ecd985;   /* interior page parchment (sampled, Base p.3); text contrast is checked against
+                            the darkest 1% of its mottle, #e6d375 */
+  --vellum:    #f7ecbf;   /* lighter slips laid on the page: controls, cards */
+  --vellum-2:  #fbf4d8;   /* fields */
+  --ink:       #160d04;   /* print black, a touch warm */
+  --ink-2:     #4a3312;   /* secondary text */
+  --rule:      #6e4f22;   /* control borders (5.3:1 on the parchment) */
+  --hair:      rgba(110, 79, 34, 0.38);   /* decorative hairlines */
+
+  /* banners and tabs */
+  --maroon:    #800107;   /* banner fill and sub-heading rule (sampled, Base p.2) */
+  --maroon-hi: #97131b;
+  --maroon-lo: #650006;
+  --tab:       #4e0004;   /* the page-number tab (sampled, Base p.6) */
+  --gold:      #ffdb02;   /* banner type (sampled, Base p.2) */
+  --pill:      #fff200;   /* setup step lozenge (Base p.6) */
+
+  /* sidebar */
+  --blue:      #010069;   /* sidebar blue (sampled, Base p.5) */
+  --blue-ink:  #ffffff;
+  --blue-ink-2:#dfe3ff;
+
+  /* faction */
+  --horde:     #800107;
+  --alliance:  #010069;
+
+  --focus:     #010069;   /* focus ring on the parchment (12:1) */
+
+  --f-display: "Ysabeau Office", "Optima", "Candara", "Segoe UI", sans-serif;
+  --f-body: "Tinos", "Times New Roman", Times, serif;
+
+  /* chamfered plaques, banners and the sidebar's iron frame, redrawn so they stay crisp */
+  --chip: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cpath d='M7 1.25H33L38.75 9.5V30.5L33 38.75H7L1.25 30.5V9.5Z' fill='%23f7ecbf' stroke='%236e4f22' stroke-width='2.0'/%3E%3C/svg%3E");
+  --chip-hover: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cpath d='M7 1.25H33L38.75 9.5V30.5L33 38.75H7L1.25 30.5V9.5Z' fill='%23fffadf' stroke='%23800107' stroke-width='2.4'/%3E%3C/svg%3E");
+  --chip-on: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%2396121a'/%3E%3Cstop offset='.5' stop-color='%23800107'/%3E%3Cstop offset='1' stop-color='%236a0006'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M7 1.25H33L38.75 9.5V30.5L33 38.75H7L1.25 30.5V9.5Z' fill='url(%23g)' stroke='%230a0302' stroke-width='2.5'/%3E%3C/svg%3E");
+  --chip-on-hover: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cpath d='M7 1.25H33L38.75 9.5V30.5L33 38.75H7L1.25 30.5V9.5Z' fill='%2399121b' stroke='%230a0302' stroke-width='2.5'/%3E%3C/svg%3E");
+  --chip-off: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cpath d='M7 1.25H33L38.75 9.5V30.5L33 38.75H7L1.25 30.5V9.5Z' fill='%23efe2a6' stroke='%236e4f22' stroke-width='1.6' stroke-dasharray='3 2.4'/%3E%3C/svg%3E");
+  --banner: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%2397131b'/%3E%3Cstop offset='.45' stop-color='%23800107'/%3E%3Cstop offset='1' stop-color='%23650006'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M9 1.3H39L46.7 12.5V35.5L39 46.7H9L1.3 35.5V12.5Z' fill='url(%23g)' stroke='%230a0302' stroke-width='2.6'/%3E%3C/svg%3E");
+  --plaque: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cdefs%3E%3CradialGradient id='g' cx='.5' cy='.35' r='.75'%3E%3Cstop offset='0' stop-color='%238f0d12'/%3E%3Cstop offset='1' stop-color='%235a0306'/%3E%3C/radialGradient%3E%3C/defs%3E%3Cpath d='M9 1.3H39L46.7 12.5V35.5L39 46.7H9L1.3 35.5V12.5Z' fill='url(%23g)'/%3E%3Cpath d='M9 1.3H39L46.7 12.5V35.5L39 46.7H9L1.3 35.5V12.5Z' fill='none' stroke='%230b0c0b' stroke-width='5.2'/%3E%3Cpath d='M9 1.3H39L46.7 12.5V35.5L39 46.7H9L1.3 35.5V12.5Z' fill='none' stroke='%238c938b' stroke-width='2.6'/%3E%3Cpath d='M9 1.3H39L46.7 12.5V35.5L39 46.7H9L1.3 35.5V12.5Z' fill='none' stroke='%23cfd5cd' stroke-width='.7' transform='translate(0 -.6)'/%3E%3C/svg%3E");
+  --iron-frame: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='88' height='88' viewBox='0 0 88 88'%3E%3Cdefs%3E %3ClinearGradient id='v' x1='0' y1='0' x2='1' y2='0'%3E%3Cstop offset='0' stop-color='%237f858e'/%3E%3Cstop offset='.35' stop-color='%233a3d44'/%3E%3Cstop offset='1' stop-color='%2315171b'/%3E%3C/linearGradient%3E %3ClinearGradient id='v2' x1='1' y1='0' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%235e636b'/%3E%3Cstop offset='.4' stop-color='%232b2e34'/%3E%3Cstop offset='1' stop-color='%23111316'/%3E%3C/linearGradient%3E %3ClinearGradient id='h' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%238a9099'/%3E%3Cstop offset='.35' stop-color='%2341454c'/%3E%3Cstop offset='1' stop-color='%2317191d'/%3E%3C/linearGradient%3E %3ClinearGradient id='h2' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%234b4f57'/%3E%3Cstop offset='.4' stop-color='%2325282d'/%3E%3Cstop offset='1' stop-color='%230f1013'/%3E%3C/linearGradient%3E %3ClinearGradient id='sp' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23e2e6ea'/%3E%3Cstop offset='.45' stop-color='%238b9199'/%3E%3Cstop offset='1' stop-color='%231d1f23'/%3E%3C/linearGradient%3E %3ClinearGradient id='sp2' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23cfd4d9'/%3E%3Cstop offset='.45' stop-color='%237b818a'/%3E%3Cstop offset='1' stop-color='%2317191c'/%3E%3C/linearGradient%3E %3C/defs%3E %3Crect x='10' y='10' width='68' height='10' fill='url(%23h)'/%3E %3Crect x='10' y='68' width='68' height='10' fill='url(%23h2)'/%3E %3Crect x='10' y='10' width='10' height='68' fill='url(%23v)'/%3E %3Crect x='68' y='10' width='10' height='68' fill='url(%23v2)'/%3E %3Crect x='10.4' y='10.4' width='67.2' height='67.2' fill='none' stroke='%23040404' stroke-width='.8'/%3E %3Crect x='19.6' y='19.6' width='48.8' height='48.8' fill='none' stroke='%23040404' stroke-width='.8'/%3E %3Ccircle cx='15' cy='15' r='2' fill='%23b9bfc7' stroke='%23050505' stroke-width='.7'/%3E%3Ccircle cx='73' cy='15' r='2' fill='%23b9bfc7' stroke='%23050505' stroke-width='.7'/%3E%3Ccircle cx='15' cy='73' r='2' fill='%23b9bfc7' stroke='%23050505' stroke-width='.7'/%3E%3Ccircle cx='73' cy='73' r='2' fill='%23b9bfc7' stroke='%23050505' stroke-width='.7'/%3E %3Cpath d='M40.8 17.2L44 13.0L47.2 17.2Z' fill='%23a9afb7' stroke='%23050505' stroke-width='.6'/%3E%3Cpath d='M40.8 70.8L44 75.0L47.2 70.8Z' fill='%23a9afb7' stroke='%23050505' stroke-width='.6'/%3E %3Cpath d='M10 38L0.6 44L10 50Z' fill='url(%23sp)' stroke='%23050505' stroke-width='.8'/%3E%3Cpath d='M78 38L87.4 44L78 50Z' fill='url(%23sp2)' stroke='%23050505' stroke-width='.8'/%3E %3C/svg%3E");
+  --magnifier: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='10' cy='10' r='6.5' fill='none' stroke='%234a3312' stroke-width='2.4'/%3E%3Cpath d='M15 15L21 21' stroke='%234a3312' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--f-body);
+  font-size: 1.125rem;            /* 18px: Times reads like a 16–17px Georgia */
+  line-height: 1.6;
+  color: var(--ink);
+  background-color: var(--parch);
+  /* the page: parchment with the burnt, torn outer edges of every interior page (Base p.2–39) */
+  background-image: url("../images/edge-left.webp"), url("../images/edge-right.webp"), url("../images/parchment.webp");
+  background-repeat: repeat-y, repeat-y, repeat;
+  background-position: left top, right top, 0 0;
+  background-size: 22px auto, 22px auto, 512px 512px;
+}
+
+p, h1, h2, h3, h4, ul, ol { margin: 0; }
+b, strong { font-weight: 700; }
+
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+
+.vh {
+  position: absolute !important; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0;
+  overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+
+/* ---- masthead: the cover (Base p.1) ----------------------------------------- */
+.masthead { position: relative; text-align: center; }
+.mast-band {
+  position: relative;
+  overflow: hidden;
+  padding: 18px 0 40px;
+  /* the cover's sepia map (sampled #7a5a38 / #5e381d at its edges), darkening towards the screen edges */
+  background:
+    radial-gradient(ellipse 46% 78% at 50% 44%, #6e5233 0%, #533b22 52%, rgba(83, 59, 34, 0) 100%),
+    linear-gradient(90deg, #160d06 0%, #2c1d0f 30%, #2c1d0f 70%, #160d06 100%);
+}
+.mast-cover {        /* its map melts into the band (alpha baked into the image) */
+  display: block;
+  width: min(100%, 811px); height: auto;
+  margin: 0 auto;
+}
+/* the torn, burnt edge of the page (Base p.3, top edge) */
+.mast-band::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 84px;
+  background:
+    url("../images/edge-top.webp") repeat-x left bottom / auto 44px,
+    linear-gradient(180deg, rgba(1, 1, 1, 0) 0, #010101 calc(100% - 40px));
+  pointer-events: none;
+}
+
+.mast-title { position: relative; z-index: 2; margin: -50px 16px 0; line-height: 1; }
+.plaque {        /* the cover's "Rules of Play" plaque: maroon in an iron frame (Base p.1) */
+  display: inline-block;
+  border-style: solid; border-width: 14px 16px;
+  border-image: var(--plaque) 14 fill / 14px 16px stretch;
+  padding: 2px 14px 4px;
+  font-family: var(--f-display); font-weight: 700;
+  font-size: clamp(1.2rem, 0.95rem + 1.35vw, 1.75rem);
+  line-height: 1.15; letter-spacing: 0.02em;
+  color: var(--gold);
+  text-shadow: 0 2px 0 #1a0000, 0 0 10px rgba(0, 0, 0, 0.45);
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.45));
+}
+
+.tagline {
+  max-width: 44rem; margin: 18px auto 0; padding: 0 20px;
+  font-size: 1.125rem; font-style: italic; line-height: 1.55;
+  color: var(--ink-2);
+}
+
+/* ---- layout ----------------------------------------------------------------- */
+main { position: relative; max-width: 940px; margin: 0 auto; padding: 8px 32px 64px; }
+
+.sec { margin-top: 54px; }
+.sec:first-child { margin-top: 34px; }
+
+/* section banner (Base p.2 "Welcome"; TBC p.7 "Setup") */
+.sec > h2 {
+  display: inline-block;
+  min-width: min(100%, 300px);
+  border-style: solid; border-width: 14px 16px;
+  border-image: var(--banner) 14 fill / 14px 16px stretch;
+  padding: 1px 22px 2px;
+  font-family: var(--f-display); font-weight: 800;
+  font-size: 1.5rem; line-height: 1.15; letter-spacing: 0.05em; text-transform: uppercase; text-align: center;
+  color: var(--gold);
+  text-shadow: 0 1px 0 #2a0000;
+  margin-bottom: 12px;
+}
+.sec-note { max-width: 40rem; margin: 0 0 20px; font-style: italic; color: var(--ink-2); }
+
+/* sub-heading: black capitals over a maroon rule (Base p.2, p.6 "Game Setup") */
+.phase-title, .ref-body h4 {
+  font-family: var(--f-display); font-weight: 800;
+  text-transform: uppercase; letter-spacing: 0.035em;
+  color: var(--ink);
+  border-bottom: 3px solid var(--maroon);
+}
+
+/* ---- configurator ----------------------------------------------------------- */
+.cfg { display: flex; flex-direction: column; gap: 26px; }
+.cfg-label {
+  margin: 0 0 10px;
+  font-family: var(--f-display); font-weight: 800; font-size: 1rem; line-height: 1.35;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--ink);
+}
+.cfg-label .hint {
+  font-family: var(--f-body); font-weight: 400; font-style: italic; font-size: 1.0625rem;
+  letter-spacing: 0; text-transform: none; color: var(--ink-2);
+}
+.hint-line { max-width: 40rem; margin-top: 9px; font-size: 1.0625rem; font-style: italic; line-height: 1.5; color: var(--ink-2); }
+#party-group .hint-line { margin: 0 0 14px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 10px 12px; }
+
+/* set and Overlord chips: chamfered plaques; the chosen ones become banners */
+.chip {
+  display: inline-flex; flex-direction: column; align-items: flex-start; justify-content: center;
+  min-height: 48px;
+  border-style: solid; border-width: 10px 9px;
+  border-image: var(--chip) 10 9 fill / 10px 9px stretch;
+  padding: 0 8px;
+  background: none;
+  font: inherit; text-align: left; color: var(--ink);
+  cursor: pointer;
+}
+.chip b {
+  font-family: var(--f-display); font-weight: 700; font-size: 1.0625rem; line-height: 1.25; letter-spacing: 0.01em;
+}
+.chip span { font-size: 0.9375rem; line-height: 1.3; color: var(--ink-2); }
+.chip:hover { border-image-source: var(--chip-hover); }
+.chip.on { border-image-source: var(--chip-on); color: var(--gold); }
+.chip.on:hover { border-image-source: var(--chip-on-hover); }
+.chip.on span { color: #fbeec2; }
+.chip.on b::before { content: "✓ "; content: "✓ " / ""; }
+.chip.lock { cursor: default; }
+.chip.lock:hover { border-image-source: var(--chip-on); }
+.chip.off, .chip.off:hover {
+  border-image-source: var(--chip-off);
+  color: #5c4a2a; cursor: not-allowed;
+}
+.chip.off span { color: #5c4a2a; }
+.chip.off b { text-decoration: line-through; text-decoration-thickness: 1px; }
+
+/* The Burning Crusade's two modes (radio) and the modules (toggles): slips; the chosen ones are bannered */
+.mode-grid, .mods { display: grid; grid-template-columns: repeat(auto-fill, minmax(255px, 1fr)); gap: 12px; }
+.mode-btn, .mod {
+  display: flex; flex-direction: column; align-items: stretch;
+  padding: 0 0 12px;
+  font: inherit; text-align: left; color: var(--ink);
+  background: var(--vellum);
+  border: 2px solid var(--rule); border-radius: 3px;
+  cursor: pointer;
+  overflow: hidden;
+}
+.mode-btn b, .mod-name {
+  position: relative; display: block;
+  padding: 9px 14px 8px 44px;
+  font-family: var(--f-display); font-weight: 700; font-size: 1.0625rem; line-height: 1.3;
+  color: var(--ink);
+  border-bottom: 1px solid var(--hair);
+}
+.mode-btn span, .mod-sum {
+  display: block; padding: 8px 14px 0;
+  font-size: 1.0625rem; line-height: 1.5; color: var(--ink-2);
+}
+/* the marker: an empty ring (mode) or an empty chamfered box (module); filled when chosen */
+.mode-btn b::before, .mod-name::before {
+  content: ""; position: absolute; left: 14px; top: 50%; translate: 0 -50%;
+  width: 18px; height: 18px;
+  border: 2px solid var(--rule); background: var(--vellum-2);
+}
+.mode-btn b::before { border-radius: 50%; }
+.mod-name::before { border-radius: 2px; }
+.mode-btn:hover, .mod:hover { border-color: var(--maroon); background: #fbf2cf; }
+.mode-btn.on, .mod.on { border-color: #0a0302; }
+.mode-btn.on b, .mod.on .mod-name {
+  color: var(--gold);
+  background: linear-gradient(180deg, var(--maroon-hi), var(--maroon) 50%, var(--maroon-lo));
+  border-bottom-color: #0a0302;
+}
+.mode-btn.on b::before {
+  border-color: var(--gold);
+  background: radial-gradient(circle, var(--gold) 0 4px, var(--maroon) 4.5px);
+}
+.mod.on .mod-name::before {
+  border-color: var(--gold); background: var(--gold);
+}
+.mod.on .mod-name::after {          /* the check */
+  content: ""; position: absolute; left: 19px; top: 50%;
+  width: 6px; height: 11px; translate: 0 -62%; rotate: 45deg;
+  border: solid var(--maroon); border-width: 0 3px 3px 0;
+}
+.mode-btn.on span, .mod.on .mod-sum { color: var(--ink); }
+
+/* player count: the numbered discs of the turn track (Base p.12); the chosen one carries the marker */
+.pbtns { display: flex; flex-wrap: wrap; gap: 10px; }
+.pbtn {
+  width: 50px; height: 50px; border-radius: 50%;
+  font-family: var(--f-display); font-weight: 800; font-size: 1.25rem; line-height: 1;
+  color: var(--ink);
+  background: radial-gradient(circle at 50% 38%, #fffbe8 0%, #f3e3a3 72%);
+  border: 3px solid #43474e;
+  box-shadow: inset 0 0 0 2px #a9afb7, 0 1px 2px rgba(40, 20, 0, 0.35);
+  cursor: pointer;
+}
+.pbtn:hover { border-color: var(--maroon); }
+.pbtn.on {
+  color: var(--gold);
+  background: radial-gradient(circle at 50% 35%, #a6141d 0%, #6a0006 78%);
+  border-color: #0a0302;
+  box-shadow: inset 0 0 0 2px var(--gold), 0 0 0 3px rgba(128, 1, 7, 0.28);
+  text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px;
+}
+
+/* heroes: the blue Alliance and red Horde sides of the character sheets (Base p.7), each with its
+   faction's quest token (Base p.5) */
+.party { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+.party-col {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 0 14px 16px;
+  background: var(--vellum);
+  border: 2px solid var(--rule); border-radius: 3px;
+  overflow: hidden;
+}
+.party-A { border-color: var(--alliance); }
+.party-H { border-color: var(--horde); }
+.party-head {
+  position: relative;
+  display: flex; align-items: center;
+  min-height: 60px; margin: 0 -14px 10px; padding: 8px 14px 8px 74px;
+  font-family: var(--f-display); font-weight: 800; font-size: 1.25rem; line-height: 1.2;
+  letter-spacing: 0.12em; text-transform: uppercase;
+}
+.party-head::before {
+  content: ""; position: absolute; left: 14px; top: 50%; translate: 0 -50%;
+  width: 50px; height: 44px;
+  background: center / contain no-repeat;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+}
+.party-A .party-head {
+  color: #fff;
+  background: var(--alliance) url("../images/sidebar-blue.webp") 0 0 / 256px;
+  border-bottom: 4px double #d9b44a;           /* the Alliance: a gilded double rule */
+}
+.party-A .party-head::before { background-image: url("../images/token-alliance.webp"); }
+.party-H .party-head {
+  color: var(--gold);
+  background: linear-gradient(180deg, var(--maroon-hi), var(--maroon) 55%, var(--maroon-lo));
+  border-bottom: 4px solid #0a0302;            /* the Horde: an iron edge with spikes below */
+}
+.party-H .party-head::before { background-image: url("../images/token-horde.webp"); }
+.party-H .party-head::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -11px; height: 7px;
+  background: linear-gradient(135deg, #0a0302 33%, transparent 34%) 0 0 / 12px 7px repeat-x,
+              linear-gradient(225deg, #0a0302 33%, transparent 34%) 0 0 / 12px 7px repeat-x;
+}
+.party-sel {
+  width: 100%; min-height: 46px; padding: 8px 10px;
+  font-family: var(--f-body); font-size: 1.0625rem; line-height: 1.3;
+  color: var(--ink); background-color: var(--vellum-2);
+  border: 2px solid var(--rule); border-radius: 3px;
+  cursor: pointer;
+}
+.party-sel:hover { border-color: var(--maroon); }
+.party-sel:not(:has(option[value=""]:checked)) { font-weight: 700; border-color: #2a1a08; }
+.party-tools { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 10px; }
+.party-btn {
+  min-height: 46px; padding: 8px 18px;
+  font-family: var(--f-display); font-weight: 700; font-size: 1.0625rem; line-height: 1.2;
+  color: var(--ink); background: var(--vellum);
+  border: 2px solid var(--rule); border-radius: 3px;
+  cursor: pointer;
+}
+.party-btn:hover:not(:disabled) { border-color: var(--maroon); background: #fffadf; }
+.party-btn:disabled { color: #5c4a2a; background: transparent; border-style: dashed; cursor: not-allowed; }
+
+/* ---- setup steps ------------------------------------------------------------ */
+.phase { margin-top: 30px; }
+.phase:first-child { margin-top: 10px; }
+.phase-title { font-size: 1.25rem; line-height: 1.3; padding-bottom: 5px; margin-bottom: 4px; }
+
+.step { display: flex; gap: 16px; padding: 18px 0 18px; border-top: 1px solid var(--hair); }
+.phase-title + .step { border-top: 0; padding-top: 14px; }
+/* the yellow lozenge (Base p.6) */
+.step-num {
+  flex: none; display: grid; place-items: center;
+  width: 48px; height: 31px; margin-top: 1px;
+  border-radius: 999px;
+  font-family: var(--f-display); font-weight: 800; font-size: 1.125rem; line-height: 1;
+  color: #000;
+  background: radial-gradient(60% 70% at 32% 22%, #ffffff 0%, rgba(255, 255, 255, 0) 62%), var(--pill);
+  box-shadow: 0 0 0 1.5px rgba(90, 66, 0, 0.62), 0 2px 3px rgba(70, 45, 0, 0.3);
+}
+.step-body { flex: 1; min-width: 0; }
+.step-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin-bottom: 6px; }
+.step-head h4 {
+  font-family: var(--f-display); font-weight: 700; font-size: 1.25rem; line-height: 1.3; color: var(--ink);
+}
+.step-text { max-width: 38rem; }
+.step-text p { margin-bottom: 8px; }
+.step-text ul, .step-text ol { margin: 4px 0 2px; padding-left: 24px; }
+.step-text li { margin-bottom: 6px; padding-left: 2px; }
+.step-text li::marker, .ref-body li::marker { color: var(--maroon); }
+.step-text ul ul, .step-text ol ol, .step-text ul ol, .step-text ol ul { margin-top: 6px; }
+
+/* source tags: hex-ended plaques after the quest tokens (Base p.5), one colour per book */
+.tag {
+  display: inline-block; white-space: nowrap;
+  padding: 3px 13px 3px;
+  font-family: var(--f-display); font-weight: 800; font-size: 0.8125rem; line-height: 1.3;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  clip-path: polygon(8px 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 8px 100%, 0 50%);
+}
+.tag-base  { background: var(--maroon); color: var(--gold); }                  /* the base banner */
+.tag-sow   { background: #2b2b33; color: #f3e6c4; }                            /* Shadow of War: iron grey */
+.tag-tbc   { background: #1f4a1c; color: #e0f59a; }                            /* The Burning Crusade: fel green */
+.tag-faq   { background: var(--blue); color: #fff; }                           /* FAQ: sidebar blue */
+.tag-var   {                                                                   /* variants: an outlined slip */
+  background:
+    linear-gradient(var(--maroon), var(--maroon)) top / 100% 2px no-repeat,
+    linear-gradient(var(--maroon), var(--maroon)) bottom / 100% 2px no-repeat,
+    var(--vellum-2);
+  color: var(--maroon);
+}
+.tag-guide { background: #dcdcd6; color: #a30000; }                            /* first game: grey page, red title (Base p.40) */
+
+/* citations: a small page tab, then the pages */
+.src-line {
+  margin-top: 8px;
+  font-size: 0.9375rem; font-style: italic; line-height: 1.45;
+  color: var(--ink-2);
+}
+.src-line::before {
+  content: ""; display: inline-block; width: 22px; height: 11px; margin-right: 8px; vertical-align: -0.5px;
+  background: linear-gradient(180deg, #6a0710, var(--tab));
+  clip-path: polygon(0 0, 100% 0, 84% 100%, 16% 100%);
+}
+
+/* ---- teaching script: the blue sidebar ------------------------------------- */
+.teach-bar { margin: 4px 0 18px; }
+#teachBtn {
+  display: inline-flex; align-items: center; gap: 8px;
+  min-height: 50px; padding: 10px 22px;
+  font-family: var(--f-display); font-weight: 800; font-size: 1.0625rem; line-height: 1.2; letter-spacing: 0.04em;
+  color: var(--blue-ink);
+  background: var(--blue) url("../images/sidebar-blue.webp") 0 0 / 256px;
+  border: 3px solid #2b2e34; border-radius: 2px;
+  box-shadow: inset 0 0 0 1px #8a9099, 0 0 0 1px #050505, 0 2px 3px rgba(40, 20, 0, 0.35);
+  cursor: pointer;
+}
+#teachBtn:hover { border-color: #5e636b; }
+#teachBtn[aria-expanded="true"] { box-shadow: inset 0 0 0 1px #8a9099, inset 0 0 0 3px var(--gold), 0 0 0 1px #050505; }
+#teachBtn[aria-expanded="true"]::after { content: "▲"; content: "▲" / ""; font-size: 0.7em; color: var(--gold); }
+#teachBtn[aria-expanded="false"]::after { content: "▼"; content: "▼" / ""; font-size: 0.7em; color: var(--blue-ink-2); }
+
+.teach-panel {
+  position: relative; isolation: isolate;
+  max-width: 780px;
+  margin: 112px 12px 34px;
+  padding: 26px 34px 24px;
+  color: var(--blue-ink);
+  background: var(--blue) url("../images/sidebar-blue.webp") 0 0 / 512px;
+  background-clip: padding-box;
+  border-style: solid; border-width: 10px;
+  border-image: var(--iron-frame) 20 / 20px / 10px round;
+}
+.teach-panel::before {     /* the map medallion crowning the frame (TBC p.7) */
+  content: ""; position: absolute; left: 50%; top: -101px; translate: -50% 0; z-index: 1;
+  width: 150px; height: 92px;
+  background: url("../images/medallion.webp") center bottom / contain no-repeat;
+  pointer-events: none;
+}
+.teach-panel::after {      /* the raised section of the frame behind it */
+  content: ""; position: absolute; left: 50%; top: -28px; translate: -50% 0; z-index: 0;
+  width: 250px; height: 19px;
+  background: linear-gradient(180deg, #8a9099 0%, #41454c 40%, #17191d 100%);
+  border: 1px solid #040404; border-bottom: 0; border-radius: 14px 14px 0 0;
+  box-shadow: inset 0 1px 0 #c3c8ce;
+  pointer-events: none;
+}
+.teach-top { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 10px; text-align: center; }
+.teach-top h3 {
+  font-family: var(--f-display); font-weight: 800; font-size: 1.45rem; line-height: 1.2;
+  letter-spacing: 0.04em; text-transform: uppercase; color: #fff;
+}
+.teach-copy {
+  min-height: 44px; padding: 8px 18px;
+  font-family: var(--f-display); font-weight: 700; font-size: 1rem; line-height: 1.2;
+  color: var(--ink); background: var(--vellum);
+  border: 2px solid #0a0302; border-radius: 3px;
+  cursor: pointer;
+}
+.teach-copy:hover { background: #fffadf; }
+.teach-panel :focus-visible { outline-color: var(--gold); }
+.teach-note {
+  max-width: 37rem; margin: 0 auto 14px; padding-bottom: 14px;
+  font-style: italic; color: var(--blue-ink-2); text-align: center;
+  border-bottom: 1px dashed rgba(223, 227, 255, 0.55);
+}
+.teach-panel h4 {   /* white capitals over a red rule (TBC p.24 Dungeon Reference) */
+  max-width: 37rem; margin: 20px auto 8px; padding-bottom: 3px;
+  font-family: var(--f-display); font-weight: 800; font-size: 1.0625rem; line-height: 1.3;
+  letter-spacing: 0.06em; text-transform: uppercase; color: #fff;
+  border-bottom: 2px solid #e0262e;
+}
+.teach-panel p { max-width: 37rem; margin: 0 auto 10px; }
+.teach-panel ul { max-width: 37rem; margin: 4px auto 12px; padding-left: 24px; }
+.teach-panel li { margin-bottom: 6px; }
+.teach-panel li::marker { color: var(--gold); }
+.teach-panel b { color: var(--gold); }
+
+/* ---- components glossary (js/comp-widget.js + css/components.css) ---------- */
+#components {
+  --comp-surface: var(--vellum);
+  --comp-fig: #ecd984;           /* median corner colour of the base crops (Shadow of War and TBC set their own) */
+  --comp-ink: var(--ink);
+  --comp-muted: var(--ink-2);
+  --comp-line: var(--rule);
+  --comp-accent: var(--maroon);
+  --comp-accent-ink: var(--gold);
+  --comp-head-font: var(--f-display);
+  --comp-radius: 3px;
+}
+
+/* ---- reference -------------------------------------------------------------- */
+#reference { display: flex; flex-direction: column; gap: 10px; }
+.ref {
+  background: var(--vellum);
+  border: 2px solid var(--rule); border-radius: 3px;
+}
+.ref summary {
+  position: relative;
+  display: flex; align-items: center; gap: 12px;
+  min-height: 52px; padding: 11px 16px 11px 50px;
+  font-family: var(--f-display); font-weight: 700; font-size: 1.1875rem; line-height: 1.3;
+  color: var(--ink);
+  list-style: none; cursor: pointer;
+}
+.ref summary::-webkit-details-marker { display: none; }
+.ref summary::before {     /* a small maroon plaque with an arrow */
+  content: ""; position: absolute; left: 14px; top: 50%; translate: 0 -50%;
+  width: 22px; height: 22px;
+  background:
+    linear-gradient(var(--gold), var(--gold)) center / 0 0 no-repeat,
+    var(--maroon);
+  clip-path: polygon(25% 0, 75% 0, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0 75%, 0 25%);
+}
+.ref summary::after {
+  content: ""; position: absolute; left: 22px; top: 50%;
+  width: 0; height: 0; translate: 0 -50%;
+  border-style: solid; border-width: 5px 0 5px 7px; border-color: transparent transparent transparent var(--gold);
+  transition: rotate 0.15s;
+}
+.ref summary:hover { background: #fffadf; }
+.ref summary:focus-visible { outline-offset: -5px; }
+.ref[open] > summary:focus-visible { outline-color: var(--gold); }
+.ref[open] { border-color: #0a0302; }
+.ref[open] > summary {
+  color: var(--gold);
+  background: linear-gradient(180deg, var(--maroon-hi), var(--maroon) 50%, var(--maroon-lo));
+  border-bottom: 2px solid #0a0302;
+}
+.ref[open] > summary::before { background: var(--gold); }
+.ref[open] > summary::after { rotate: 90deg; border-left-color: var(--maroon); }
+.ref-body { padding: 16px 22px 20px; overflow-x: auto; }
+.ref-body > p, .ref-body > ul, .ref-body > ol, .ref-body > h4, .ref-body > .src-line { max-width: 38rem; }
+.ref-body h4 { margin: 20px 0 8px; padding-bottom: 3px; font-size: 1.0625rem; line-height: 1.3; border-bottom-width: 2px; }
+.ref-body > h4:first-child { margin-top: 2px; }
+.ref-body p { margin-bottom: 10px; }
+.ref-body ul, .ref-body ol { margin: 4px 0 12px; padding-left: 24px; }
+.ref-body li { margin-bottom: 6px; padding-left: 2px; }
+.ref-body li > ul, .ref-body li > ol { margin: 6px 0 4px; }
+.ref-note { font-size: 1rem; font-style: italic; color: var(--ink-2); }
+.ref-table { width: 100%; border-collapse: collapse; margin: 6px 0 12px; font-size: 1.0625rem; line-height: 1.5; }
+.ref-table th {
+  text-align: left; vertical-align: bottom;
+  padding: 6px 12px 5px 0;
+  font-family: var(--f-display); font-weight: 800; font-size: 0.875rem; letter-spacing: 0.06em; text-transform: uppercase;
+  border-bottom: 2px solid var(--maroon);
+}
+.ref-table td { padding: 7px 12px 7px 0; vertical-align: top; border-bottom: 1px solid var(--hair); }
+
+/* ---- search ----------------------------------------------------------------- */
+.rsearch-wrap { max-width: 720px; margin-bottom: 18px; }
+#rsearch {
+  width: 100%; min-height: 52px;
+  padding: 12px 16px 12px 48px;
+  font-family: var(--f-body); font-size: 1.125rem; line-height: 1.3;
+  color: var(--ink);
+  background: var(--vellum-2) var(--magnifier) 16px 50% / 21px no-repeat;
+  border: 2px solid var(--rule); border-radius: 3px;
+}
+#rsearch:hover { border-color: var(--maroon); }
+#rsearch:focus-visible { border-color: var(--maroon); }
+#rsearch::placeholder { color: #5e4520; font-style: italic; opacity: 1; }
+
+.rhint { font-style: italic; color: var(--ink-2); }
+.rhit {
+  max-width: 820px; margin-bottom: 10px; padding: 12px 18px 14px;
+  background: var(--vellum);
+  border: 1px solid rgba(110, 79, 34, 0.55); border-left: 4px solid var(--maroon); border-radius: 2px;
+}
+.rhit-src {      /* the page tab (Base p.2–40) */
+  display: inline-block; margin-bottom: 7px; padding: 3px 18px 4px;
+  font-family: var(--f-display); font-weight: 700; font-size: 0.875rem; line-height: 1.3; letter-spacing: 0.03em;
+  color: var(--gold);
+  background: linear-gradient(180deg, #6a0710, var(--tab));
+  clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 100%, 8px 100%);
+}
+.rhit-text { max-width: 72ch; font-size: 1.0625rem; line-height: 1.55; color: var(--ink); overflow-wrap: anywhere; }
+.rhit-text mark { color: #000; background: var(--pill); padding: 0 2px; border-radius: 2px; box-shadow: 0 0 0 1px rgba(98, 74, 0, 0.45); }
+
+/* ---- footer: the foot of the page and its tab ------------------------------ */
+.footer {
+  position: relative;
+  padding: 64px 22px 34px;
+  text-align: center;
+  color: var(--parch);
+  background: #030201;
+}
+.footer::before {     /* the burnt bottom edge of the page (Base p.3) */
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 40px;
+  background: url("../images/edge-bottom.webp") repeat-x left top / auto 40px;
+}
+.footer::after {      /* the page tab */
+  content: ""; position: absolute; left: 50%; top: 20px; translate: -50% 0;
+  width: 120px; height: 22px;
+  background:
+    linear-gradient(var(--gold), var(--gold)) center 4px / 64px 1px no-repeat,
+    linear-gradient(180deg, #6a0710, var(--tab));
+  clip-path: polygon(0 0, 100% 0, calc(100% - 12px) 100%, 12px 100%);
+}
+.footer p { max-width: 38rem; margin: 0 auto; font-size: 1rem; font-style: italic; line-height: 1.6; }
+
+/* ---- responsive ------------------------------------------------------------- */
+@media (max-width: 760px) {
+  main { padding: 4px 22px 52px; }
+  .party { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  body { background-size: 10px auto, 10px auto, 512px 512px; }
+  main { padding: 2px 16px 48px; }
+  .mast-band { padding: 4px 0 30px; }
+  .mast-band::after { height: 64px; background-size: auto 34px, auto; }
+  .mast-cover { width: 114%; max-width: none; margin-left: -7%; }
+  .mast-title { margin-top: -40px; }
+  .plaque { border-width: 12px 13px; border-image-width: 12px 13px; padding: 1px 8px 3px; }
+  .tagline { margin-top: 10px; padding: 0 16px; font-size: 1rem; line-height: 1.5; }
+  .sec { margin-top: 44px; }
+  .sec:first-child { margin-top: 28px; }
+  .sec > h2 { min-width: 0; max-width: 100%; font-size: 1.3rem; padding: 0 12px 1px; }
+  .cfg { gap: 22px; }
+  .mode-grid, .mods { grid-template-columns: minmax(0, 1fr); }
+  .chip { max-width: 100%; }
+  /* the lozenge sits beside the title; the text below uses the full width */
+  .step { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0 12px; padding: 16px 0; }
+  .step-body { display: contents; }
+  .step-num { grid-column: 1; grid-row: 1; width: 40px; height: 28px; font-size: 1rem; }
+  .step-head { grid-column: 2; grid-row: 1; align-self: center; margin-bottom: 4px; }
+  .step-text, .step .src-line { grid-column: 1 / -1; }
+  .step-head h4 { font-size: 1.1875rem; }
+  .step-text ul, .step-text ol { padding-left: 20px; }
+  .teach-panel { margin: 104px 0 30px; padding: 22px 16px 20px; }
+  .teach-top h3 { font-size: 1.25rem; }
+  .ref summary { padding: 10px 12px 10px 46px; font-size: 1.125rem; }
+  .ref summary::before { left: 12px; }
+  .ref summary::after { left: 20px; }
+  .ref-body { padding: 14px 14px 16px; }
+  .ref-body ul, .ref-body ol { padding-left: 20px; }
+  .ref-table { font-size: 1rem; }
+  .rhit { padding: 11px 14px 13px; }
+  .footer { padding: 58px 16px 30px; }
+}
+@media (max-width: 360px) {
+  .sec > h2 { font-size: 1.15rem; letter-spacing: 0.03em; padding: 0 8px 1px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+  html { scroll-behavior: auto; }
+}
