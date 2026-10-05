@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Runewars — Setup &amp; Reference Utility</title>
+  <meta name="description" content="Setup steps for two to four factions of Runewars (Revised Edition), with Banners of War and its variants, a rules reference with the official changes and FAQ applied, a teaching script and a search of every rulebook.">
+  <meta name="theme-color" content="#d39c5e">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- The rulebook sets its headings in Ringbearer (capitals with small capitals) and its text in Adobe Garamond:
+       Almendra SC stands in for the headings, EB Garamond for the book text. -->
+  <link href="https://fonts.googleapis.com/css2?family=Almendra+SC&family=EB+Garamond:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=2">
+  <link rel="stylesheet" href="css/components.css?v=1">
+</head>
+<body>
+  <!-- Masthead: the Revised Edition rulebook cover — the iron-framed logo on mottled tan parchment with its gold
+       "Revised Edition" ribbon, a riveted steel rail, the cover battle (Latari elf against a Waiqar dark knight), a
+       second rail with a facedown rune token where the cover has its emblem, and a title band like "Rules of Play".
+       It ends in the steel braid and torn edge that cap every rulebook page. -->
+  <header class="mast">
+    <div class="mast-art" aria-hidden="true">
+      <img class="mast-art-img" src="images/hero.webp" width="853" height="410" alt="" decoding="async">
+    </div>
+    <h1 class="mast-title">
+      <img class="mast-logo" src="images/logo.webp" width="640" height="216" alt="Runewars">
+      <span class="mast-ed">Revised Edition</span>
+      <span class="mast-sub">Setup &amp; Reference Utility</span>
+    </h1>
+    <span class="mast-rune" aria-hidden="true"></span>
+  </header>
+
+  <main>
+    <p class="tagline">
+      Choose your copy, Banners of War and its variants, and the factions at the table for exact setup steps,
+      a full rules reference with the official changes and FAQ applied, a teaching script, and a search of every
+      rulebook. <em>Seven years to gather the dragon runes — and only some of them are real.</em>
+    </p>
+
+    <section class="sec sec-cfg" aria-label="Configuration">
+      <h2>The Council of War</h2>
+      <p class="sec-note">Select your copy, the sets on the table, the factions in play and any variants. Every step, ruling and script below adapts to your choices.</p>
+      <div class="cfg">
+        <div class="cfg-group">
+          <p class="cfg-label" id="lbl-copy">Your copy <span class="hint">— both play the revised rules; an original-edition box needs the Revised Gameplay sheet's changes</span></p>
+          <div id="modes" class="mode-grid" role="group" aria-labelledby="lbl-copy"></div>
+        </div>
+        <div class="cfg-group">
+          <p class="cfg-label" id="lbl-sets">Sets in play</p>
+          <div id="expansions" class="chips" role="group" aria-labelledby="lbl-sets"></div>
+        </div>
+        <div class="cfg-group">
+          <p class="cfg-label" id="lbl-facs">Factions at the table <span class="hint">— one per player, two to four; <b id="pcount">4 players</b></span></p>
+          <div id="factions" class="chips" role="group" aria-labelledby="lbl-facs"></div>
+        </div>
+        <div id="modules-group" class="cfg-group">
+          <p class="cfg-label" id="lbl-mods">Variants <span class="hint">— optional; players agree before the game. Banners of War's need the expansion; its Road to Victory is now standard</span></p>
+          <div id="modules" class="mods" role="group" aria-labelledby="lbl-mods"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec sec-setup" aria-label="Setup">
+      <h2>Setup</h2>
+      <p class="sec-note">Follow the steps in order; each cites its sources by printed page. Citations: Rules = the Revised Edition rulebook; Revised Gameplay = the May 2013 “Revised Edition Gameplay Changes” sheet; BoW = the Banners of War rules; FAQ 1.2 = the original-edition Errata and FAQ. Where they differ, the newest wins, and FAQ 1.2 is used only where the revised rules haven't changed or absorbed it.</p>
+      <div class="teach-bar"><button id="teachBtn" type="button" aria-expanded="false" aria-controls="teach" title="A ~5 minute script to teach this exact setup aloud">📖 Teaching script</button></div>
+      <div id="teach" class="teach-panel" hidden></div>
+      <div id="setup"></div>
+    </section>
+
+    <section class="sec sec-comp" id="components" aria-labelledby="comp-h" hidden>
+      <h2 id="comp-h">Components</h2>
+      <p class="sec-note">Every component the rulebooks list for the sets and variants you’ve selected, with its count. Tap a picture to enlarge it. The base-game list is the Revised Edition box’s, so it isn’t shown for an original-edition copy.</p>
+      <div id="aid-comp"></div>
+    </section>
+
+    <section class="sec sec-ref" aria-label="Reference">
+      <h2>Rules Reference</h2>
+      <p class="sec-note">Tap a heading to open it. Contents adapt to your copy, sets, factions and variants.</p>
+      <div id="reference"></div>
+    </section>
+
+    <section class="sec sec-search" aria-label="Rulebook search">
+      <h2>Search the Rulebooks</h2>
+      <p class="sec-note">Full-text search across the Revised Edition rulebook, the Revised Gameplay sheet, FAQ 1.2 and — when selected — the Banners of War rules.</p>
+      <div class="rsearch-wrap">
+        <input id="rsearch" type="search" placeholder="e.g. supremacy, rout, diplomacy, Victory card, desolation, Lost City…" aria-label="Search the rulebooks">
+      </div>
+      <div id="rresults"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span class="foot-rune" aria-hidden="true"></span>
+    <p>Setup and reference content grounded in the official Runewars Revised Edition rulebook, the Revised Edition
+    Gameplay Changes sheet, the Banners of War expansion rules and the original-edition Errata and FAQ 1.2.
+    A fan-made play aid — not affiliated with Fantasy Flight Games.</p>
+  </footer>
+
+  <script src="js/data.js?v=1"></script>
+  <script src="js/rules.js?v=1"></script>
+  <script src="js/components.js?v=1"></script>
+  <script src="js/comp-widget.js?v=1"></script>
+  <script src="js/app.js?v=1"></script>
+  <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
+  <script src="/site-analytics.js?v=20260607-analytics"></script>
+</body>
+</html>

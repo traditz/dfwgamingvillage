@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Star Wars: Rebellion — Setup &amp; Reference Utility</title>
+  <meta name="description" content="Star Wars: Rebellion setup steps for your player count and Rise of the Empire options, a rules reference with the official FAQ applied, a components glossary, a teaching script and a rulebook search.">
+  <meta name="theme-color" content="#332c37">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Russo+One&family=Saira:wdth,wght@100..125,600..700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=2">
+  <link rel="stylesheet" href="css/components.css?v=1">
+</head>
+<body>
+  <header class="topbar">
+    <!-- cover panorama: the Learn to Play cover (Empire) and the Rules Reference cover (Rebellion) -->
+    <div class="hero">
+      <h1 class="brand">
+        <img class="brand-logo" src="images/logo.webp" width="539" height="142" alt="Star Wars: Rebellion">
+        <span class="brand-sub">Setup &amp; Reference Utility</span>
+      </h1>
+    </div>
+
+    <!-- the rulebooks' page-top bar: indicator slots, jewel lights and hanging vents -->
+    <div class="techbar" aria-hidden="true">
+      <span class="tb-block"><i></i><i></i></span>
+      <span class="tb-slot w-s"></span>
+      <span class="tb-slot w-m"><b class="jw jw-b"></b><b class="jw jw-b"></b><b class="jw jw-g"></b></span>
+      <span class="tb-slot w-s hide-sm"></span>
+      <span class="tb-slot w-m tb-inset hide-sm"></span>
+      <span class="tb-slot w-s hide-sm"></span>
+      <span class="tb-slot w-l hide-sm"></span>
+      <span class="tb-grille"></span>
+      <span class="tb-slot w-m"><b class="jw jw-y"></b><b class="jw jw-p"></b><b class="jw jw-y"></b></span>
+      <span class="tb-slot w-xs hide-sm"></span>
+      <span class="tb-slot w-xs hide-sm"></span>
+      <span class="tb-slot tb-fill"></span>
+      <span class="tb-vents"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+      <span class="tb-block tb-end"><i></i><i></i><i></i></span>
+    </div>
+
+    <div class="intro">
+      <p class="tagline">
+        Choose your player count, first game or full game, and the Rise of the Empire options for exact setup steps,
+        a rules reference with the official FAQ &amp; errata applied, a teaching script and a search of every rulebook.
+      </p>
+      <p class="tagline crawl">The Empire is hunting for the hidden Rebel base. Can the Rebellion hold out long enough to spark a galactic revolt?</p>
+    </div>
+  </header>
+
+  <main>
+    <section aria-label="Configuration">
+      <h2>Mission Briefing</h2>
+      <p class="sec-note">Select the sets on the table, the kind of game and the player count. Every step, ruling and script below adapts to your choices.</p>
+      <div class="cfg">
+        <div>
+          <p class="cfg-label" id="lbl-sets">Sets in play</p>
+          <div id="expansions" class="chips" role="group" aria-labelledby="lbl-sets"></div>
+        </div>
+        <div>
+          <p class="cfg-label" id="lbl-modes">Kind of game <span class="hint">(the Learn to Play first-game setup is base game only; Rise of the Empire's setup changes are written for the full game)</span></p>
+          <div id="modes" class="mode-grid" role="group" aria-labelledby="lbl-modes"></div>
+        </div>
+        <div>
+          <p class="cfg-label" id="lbl-players">Players <span class="hint">(3 and 4 use the team game: <span class="role-adm">Admiral</span> and <span class="role-gen">General</span>)</span></p>
+          <div id="players" class="pbtns" role="group" aria-labelledby="lbl-players"></div>
+        </div>
+        <div id="modules-group">
+          <p class="cfg-label" id="lbl-mods">Rise of the Empire options <span class="hint">(optional)</span></p>
+          <div id="modules" class="mods" role="group" aria-labelledby="lbl-mods"></div>
+        </div>
+      </div>
+    </section>
+
+    <section aria-label="Setup">
+      <h2>Setup</h2>
+      <p class="sec-note">Follow the steps in order; the FAQ errata are already applied. Citations give printed page numbers: <b>LtP</b> = Learn to Play, <b>RR</b> = Rules Reference, <b>RotE</b> = Rise of the Empire rulesheet, <b>FAQ</b> = FAQ &amp; errata v2.1. Where they differ, the FAQ beats the expansion, the expansion beats the Rules Reference, and the Rules Reference beats the Learn to Play.</p>
+      <div class="teach-bar"><button id="teachBtn" type="button" aria-expanded="false" aria-controls="teach" title="A ~5 minute script to teach this exact setup aloud">📖 Teaching script</button></div>
+      <div id="teach" class="teach-panel" hidden></div>
+      <div id="setup"></div>
+    </section>
+
+    <section id="components" aria-labelledby="comp-h" hidden>
+      <h2 id="comp-h">Components</h2>
+      <p class="sec-note">Every component in the rulebooks' component lists for the sets you've selected, with its count. Tap a picture to enlarge it. Rise of the Empire replaces the base game's tactic cards.</p>
+      <div id="aid-comp"></div>
+    </section>
+
+    <section aria-label="Reference">
+      <h2>Rules Reference</h2>
+      <p class="sec-note">Tap a heading to open it. Contents adapt to your sets, kind of game and player count.</p>
+      <div id="reference"></div>
+    </section>
+
+    <section aria-label="Rulebook search">
+      <h2>Search the Rulebooks</h2>
+      <p class="sec-note">Full-text search of the Learn to Play, the Rules Reference, the FAQ &amp; errata and, when selected, the Rise of the Empire rulesheet (its two sides are split into left and right halves). The FAQ's Rise of the Empire answers (FAQ pp.6–8) are searchable only when Rise of the Empire is selected; the six general rulings on pp.7–8 that also apply to the base game are always searchable.</p>
+      <div class="rsearch-wrap">
+        <input id="rsearch" type="search" placeholder="e.g. retreat, probe, subjugation, Death Star Plans, transport…" aria-label="Search the rulebooks">
+      </div>
+      <div id="rresults" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footbar" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+    <p>
+      Setup and reference content grounded in the official Star Wars: Rebellion Learn to Play and Rules Reference,
+      the Rise of the Empire rulesheet, and the official FAQ &amp; errata v2.1. A fan-made play aid — not affiliated
+      with Fantasy Flight Games or Lucasfilm.
+    </p>
+  </footer>
+
+  <script src="js/data.js?v=1"></script>
+  <script src="js/rules.js?v=1"></script>
+  <script src="js/components.js?v=1"></script>
+  <script src="js/comp-widget.js?v=1"></script>
+  <script src="js/app.js?v=1"></script>
+  <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
+  <script src="/site-analytics.js?v=20260607-analytics"></script>
+</body>
+</html>

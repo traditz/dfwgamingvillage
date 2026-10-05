@@ -1,0 +1,658 @@
+/* =============================================================================
+   Runewars (Revised Edition) — Setup & Reference Utility
+   Styled after the Revised Edition rulebook (2012):
+     - pages:    pale pink-cream parchment (#f2e3d0) between tan bands capped by a steel braid with a torn edge
+                 (every interior page, e.g. Rules p.7–8); texture and braid are taken from the Revised Gameplay sheet
+     - headings: Ringbearer capitals-and-small-capitals in black (Almendra SC stands in); text in Adobe Garamond
+                 (EB Garamond), bold run-in labels as in "Choose First Player:" (Rules p.7)
+     - plaques:  the gold example boxes (#efb848) with a steel top rim, gilded filigree corners and a blue-grey
+                 pearl top and bottom (Rules p.8 "Puzzle-fit Pieces", p.10 "Setup Diagram", p.16)
+     - gems:     the red jewel medallions that number every diagram (Rules p.8–10) number the setup steps and mark
+                 every selected option
+     - cover:    logo plate on tan parchment, riveted steel rails and the battle painting (Rules p.1)
+     - factions: the four activation-token emblems (Rules p.17)
+   ============================================================================= */
+
+:root {
+  --page:    #f2e3d0;   /* rulebook page parchment (sampled) */
+  --card:    #fbf5ea;   /* raised parchment for cards */
+  --card-2:  #f5e8d4;   /* open headers, table stripes */
+  --line:    #c4a47e;   /* card hairlines */
+  --ctl:     #5a4029;   /* control borders (≥3:1 on the plaque's darkest gold) */
+  --ink:     #17100b;   /* the book's black */
+  --ink-2:   #4d3a2a;   /* notes */
+  --ink-3:   #5b4532;   /* citations */
+  --blood:   #7b1a12;   /* bold terms, sub-heads, focus */
+  --blood-2: #66110b;   /* the same red, deep enough for the gold plaques */
+  --gold:    #efb848;   /* example-box gold (sampled #f0b848) */
+  --gold-lo: #dd9d34;
+  --tan:     #d39c5e;   /* cover / band parchment */
+  --steel:   #7d8287;
+  --steel-dk:#34373a;
+  --bow:     #2e5428;   /* Banners of War green */
+  --gem: radial-gradient(circle at 27% 22%, #ffd2cc 0 4%, #c8364d 13%, #9a1d39 40%, #5a0d24 100%);   /* white on it ≥ 5.1:1 */
+  --socket: radial-gradient(circle at 50% 38%, #fffdf8 0, #f1e7d8 55%, #ddd0bd 100%);
+  --rail-lines: linear-gradient(180deg, #d8cfcc 0 1px, #4a4b4d 1px 2px, #0b1412 2px 4px, transparent 4px 9px,
+                #8a8d92 9px 10px, #dadbdf 10px 11px, #241e1d 11px 12px);
+  --rail-grate: linear-gradient(90deg, #7d8383 0 1.5px, #4e5357 1.5px 3px, #1b1e22 3px 6px);
+  --display: "Almendra SC", "EB Garamond", Georgia, serif;
+  --book: "EB Garamond", Garamond, "Times New Roman", Georgia, serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+body {
+  background:
+    linear-gradient(90deg, rgba(150, 96, 52, 0.13), rgba(150, 96, 52, 0) 7%, rgba(150, 96, 52, 0) 93%, rgba(150, 96, 52, 0.13)),
+    url(../images/parchment.webp) 0 0 / 760px,
+    var(--page);
+  color: var(--ink);
+  font-family: var(--book);
+  font-size: 1.1875rem;          /* 19px: EB Garamond reads like a 16–17px Georgia */
+  line-height: 1.55;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ============================================================================
+   Masthead — the rulebook cover
+   ============================================================================ */
+.mast {
+  --top-h: 162px;  --rail: 12px;  --art-h: 236px;  --sub-h: 54px;  --band-h: 49px;
+  position: relative; z-index: 2;
+  height: calc(var(--top-h) + 2 * var(--rail) + var(--art-h) + var(--sub-h));
+  margin-bottom: var(--band-h);
+  background:
+    radial-gradient(30% 55% at 14% 26%, rgba(255, 228, 176, 0.55), rgba(255, 228, 176, 0) 70%),
+    radial-gradient(26% 60% at 88% 18%, rgba(255, 222, 168, 0.35), rgba(255, 222, 168, 0) 70%),
+    radial-gradient(22% 46% at 4% 70%, rgba(104, 52, 16, 0.32), rgba(104, 52, 16, 0) 70%),
+    radial-gradient(28% 64% at 97% 46%, rgba(104, 52, 16, 0.36), rgba(104, 52, 16, 0) 72%),
+    radial-gradient(18% 40% at 66% 8%, rgba(120, 66, 26, 0.22), rgba(120, 66, 26, 0) 70%),
+    url(../images/parchment.webp) 0 0 / 520px,
+    var(--tan);
+  background-blend-mode: normal, normal, normal, normal, normal, multiply, normal;
+}
+/* the page band below: steel braid and torn edge */
+.mast::after {
+  content: ""; position: absolute; left: 0; right: 0; top: 100%; height: var(--band-h);
+  background: url(../images/band.webp) 0 0 / auto 100% repeat-x;
+  pointer-events: none;
+}
+
+/* the painting between two riveted rails */
+.mast-art {
+  position: absolute; left: 0; right: 0; top: var(--top-h);
+  height: calc(var(--art-h) + 2 * var(--rail));
+  overflow: hidden; background: #3b2a2a;
+}
+.mast-art::before {               /* soft, darkened copy that fills wide screens beyond the painting */
+  content: ""; position: absolute; left: -40px; right: -40px; top: var(--rail); bottom: var(--rail);
+  background: url(../images/hero.webp) center 30% / cover;
+  filter: blur(16px) brightness(0.72) saturate(1.1);
+}
+.mast-art::after {                /* the two rails */
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 2;
+  background:
+    var(--rail-lines) left top / 100% var(--rail) no-repeat,
+    var(--rail-lines) left bottom / 100% var(--rail) no-repeat,
+    var(--rail-grate) left top / 6px var(--rail) repeat-x,
+    var(--rail-grate) left bottom / 6px var(--rail) repeat-x;
+}
+.mast-art-img {
+  position: absolute; z-index: 1; top: var(--rail); left: 50%; transform: translateX(-50%);
+  width: min(100%, 1000px); height: var(--art-h);
+  object-fit: cover; object-position: 50% 21%;
+}
+
+/* the h1 spans the logo zone and the painting, so its subtitle can sit in the title band below */
+.mast-title {
+  position: relative; z-index: 3; text-align: center; font-weight: 400; line-height: 1;
+  height: calc(var(--top-h) + 2 * var(--rail) + var(--art-h));
+}
+.mast-logo {
+  display: block; margin: 0 auto; padding-top: 12px;
+  width: min(410px, 78vw); height: auto;
+  filter: drop-shadow(0 5px 6px rgba(52, 22, 4, 0.5));
+}
+/* the gold ribbon under the logo plate, straddling the rail as on the cover */
+.mast-ed {
+  position: absolute; z-index: 4; left: 50%; top: calc(var(--top-h) - 13px); transform: translateX(-50%);
+  padding: 5px 20px 6px;
+  font: 700 0.95rem/1 var(--book); font-variant-caps: small-caps; letter-spacing: 0.1em; white-space: nowrap;
+  color: #2c1806;
+  background: linear-gradient(180deg, #fbe39a 0%, #f0bf55 45%, #d4922c 100%);
+  border: 1px solid #4b2c0c; border-radius: 2px;
+  box-shadow: 0 2px 4px rgba(40, 18, 0, 0.45), inset 0 1px 0 rgba(255, 250, 220, 0.7);
+}
+.mast-ed::before, .mast-ed::after {   /* the ribbon's folded tails */
+  content: ""; position: absolute; top: 7px; width: 18px; height: 100%; z-index: -1;
+  background: linear-gradient(180deg, #e2a640, #a8681a);
+  border: 1px solid #4b2c0c;
+}
+.mast-ed::before { left: -13px; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 7px 50%); }
+.mast-ed::after  { right: -13px; clip-path: polygon(0 0, 100% 0, calc(100% - 7px) 50%, 100% 100%, 0 100%); }
+
+.mast-sub {
+  position: absolute; left: 0; right: 0; bottom: calc(-1 * var(--sub-h)); height: var(--sub-h);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--display); font-size: 1.95rem; letter-spacing: 0.03em; word-spacing: 0.16em;
+  color: #34100a;
+  -webkit-text-stroke: 0.3px currentColor;
+  text-shadow: 0 1px 0 rgba(255, 226, 170, 0.45);
+}
+
+.mast-rune {                       /* a facedown rune token where the cover carries its emblem */
+  position: absolute; z-index: 4; left: 50%;
+  top: calc(var(--top-h) + 1.5 * var(--rail) + var(--art-h));
+  width: 44px; height: 40px; transform: translate(-50%, -50%);
+  background: url(../images/rune.webp) center / contain no-repeat;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.55));
+}
+
+/* ============================================================================
+   Layout and section headings
+   ============================================================================ */
+main { position: relative; z-index: 1; max-width: 880px; margin: 0 auto; padding: 10px 20px 40px; }
+
+.tagline {
+  max-width: 40em; margin: 6px auto 0; text-align: center;
+  font-size: 1.1rem; font-style: italic; color: var(--ink-2);
+}
+.tagline em { color: var(--blood); }
+
+.sec { margin-top: 44px; }
+.sec > h2 {
+  font-family: var(--display); font-weight: 400;
+  font-size: 2.4rem; line-height: 1.1; letter-spacing: 0.01em; word-spacing: 0.16em;
+  color: var(--ink);
+  -webkit-text-stroke: 0.3px currentColor;     /* Ringbearer is a touch heavier */
+}
+.sec > h2::after {                /* the steel braid that bands every rulebook page */
+  content: ""; display: block; height: 11px; margin-top: 7px;
+  background: url(../images/rail.webp) 0 0 / auto 100% repeat-x;
+}
+.sec-note { margin: 10px 0 18px; max-width: 46em; font-size: 1.08rem; font-style: italic; color: var(--ink-2); }
+
+/* ============================================================================
+   The gold example plaque (configurator, teaching script)
+   ============================================================================ */
+.cfg, .teach-panel {
+  --fw: 72px; --fh: 48px;          /* gilded corner, 3/4 of the rulebook's */
+  position: relative;
+  background: radial-gradient(130% 95% at 50% 42%, #f7cc66 0%, var(--gold) 52%, var(--gold-lo) 100%);
+  border-radius: 58px / 47px;
+  box-shadow:
+    inset 10px 0 12px -10px rgba(104, 54, 4, 0.6),
+    inset -10px 0 12px -10px rgba(104, 54, 4, 0.6),
+    0 5px 12px -2px rgba(76, 38, 6, 0.28);
+}
+.cfg::before, .cfg::after, .teach-panel::before, .teach-panel::after {
+  content: ""; position: absolute; left: 0; right: 0; height: var(--fh); pointer-events: none;
+  background:
+    url(../images/frame-l.webp) left top / var(--fw) var(--fh) no-repeat,
+    url(../images/frame-r.webp) right top / var(--fw) var(--fh) no-repeat,
+    url(../images/frame-pearl.webp) center top / calc(var(--fw) * 1.042) calc(var(--fh) * 0.4375) no-repeat,
+    linear-gradient(180deg, #c6c6c6 0 1px, #8c8c8c 1px 2px, #1e1e1e 2px 3px, rgba(0, 0, 0, 0.16) 3px 4px, transparent 4px)
+      center top / calc(100% - 2 * var(--fw) + 24px) 4px no-repeat;
+}
+.cfg::before, .teach-panel::before { top: 0; }
+.cfg::after, .teach-panel::after { bottom: 0; transform: scaleY(-1); }
+
+/* ============================================================================
+   Configurator
+   ============================================================================ */
+.cfg { display: flex; flex-direction: column; gap: 24px; padding: 46px 34px 44px; }
+.cfg-label {
+  margin-bottom: 10px;
+  font-weight: 700; font-size: 1.12rem; line-height: 1.35;
+  font-variant-caps: small-caps; letter-spacing: 0.04em; color: var(--ink);
+}
+.cfg-label .hint {
+  font-weight: 400; font-style: italic; font-variant-caps: normal; letter-spacing: 0;
+  font-size: 1rem; color: #432508;
+}
+.cfg-label b { font-weight: 700; font-style: normal; color: var(--blood-2); }
+
+.chips, .mods, .mode-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+
+/* every option is a parchment card laid on the plaque; a steel socket holds a red gem when it is chosen */
+.chip, .mode-btn, .mod {
+  position: relative;
+  font: inherit; text-align: left; color: var(--ink);
+  background: var(--card);
+  border: 1.5px solid var(--ctl); border-radius: 6px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 2px 3px rgba(84, 44, 4, 0.22);
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s, transform 0.15s;
+}
+.chip:hover, .mode-btn:hover, .mod:hover {
+  border-color: #2e2116; background: #fffbf3;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 4px 7px rgba(84, 44, 4, 0.28);
+  transform: translateY(-1px);
+}
+.chip::before, .mode-btn::before, .mod::before {        /* the empty steel socket */
+  content: ""; position: absolute; left: 14px; top: 50%;
+  width: 20px; height: 20px; margin-top: -10px; border-radius: 50%;
+  background: var(--socket);
+  box-shadow: 0 0 0 2px var(--steel), 0 0 0 3px var(--steel-dk), inset 0 2px 3px rgba(0, 0, 0, 0.28);
+  font: 700 13px/20px var(--book); text-align: center; color: #fff;
+}
+.chip.on::before, .mode-btn.on::before, .mod.on::before {   /* …and the red gem with a check */
+  content: "✓";
+  background: var(--gem);
+  box-shadow: 0 0 0 2px #e6ad45, 0 0 0 3px #5b3a12, inset 0 -2px 3px rgba(40, 0, 12, 0.45);
+  text-shadow: 0 1px 1px rgba(40, 0, 10, 0.8);
+}
+.chip.on, .mode-btn.on, .mod.on {
+  border-color: var(--blood); background: #fffaf1;
+  box-shadow: inset 0 0 0 1.5px var(--blood), 0 3px 5px rgba(84, 44, 4, 0.28);
+}
+
+.chip { display: flex; flex-direction: column; justify-content: center; min-height: 54px; padding: 7px 18px 7px 48px; }
+.chip b { font-weight: 700; font-size: 1.05rem; line-height: 1.2; }
+.chip span { font-size: 0.95rem; line-height: 1.25; color: #573f2b; text-transform: capitalize; }
+
+/* factions: the activation-token emblem; a gem badge with a check marks the factions at the table */
+.chip.fac { padding-left: 56px; }
+.chip.fac::before {
+  content: ""; left: 10px; width: 34px; height: 34px; margin-top: -17px;
+  background: url(../images/emblems.webp) 0 0 / 400% 100% no-repeat;
+  box-shadow: 0 0 0 1.5px #6b5139, 0 1px 3px rgba(0, 0, 0, 0.3);
+  filter: grayscale(0.75) opacity(0.78);
+}
+.chip.fac.fac-blue::before   { background-position: 0 0; }
+.chip.fac.fac-green::before  { background-position: 33.333% 0; }
+.chip.fac.fac-purple::before { background-position: 66.667% 0; }
+.chip.fac.fac-red::before    { background-position: 100% 0; }
+.chip.fac.on::before {
+  content: ""; filter: none; text-shadow: none;
+  box-shadow: 0 0 0 2px #e6ad45, 0 0 0 3px #5b3a12, 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+.chip.fac.on::after {
+  content: "✓"; position: absolute; left: 33px; top: 50%; margin-top: 3px;
+  width: 17px; height: 17px; border-radius: 50%;
+  background: var(--gem);
+  box-shadow: 0 0 0 1.5px #e6ad45, 0 0 0 2.5px #5b3a12;
+  font: 700 11px/17px var(--book); text-align: center; color: #fff;
+  text-shadow: 0 1px 1px rgba(40, 0, 10, 0.8);
+}
+.chip.fac.pinned { cursor: default; }
+.chip.fac.pinned:hover { transform: none; }
+
+/* your copy */
+.mode-btn, .mod { display: flex; flex-direction: column; justify-content: flex-start; align-items: stretch; }
+.mode-btn { flex: 1 1 250px; max-width: 400px; padding: 11px 16px 12px 48px; }
+.mode-btn::before { top: 23px; }
+.mode-btn b { display: block; margin-bottom: 3px; font-weight: 700; font-size: 1.08rem; line-height: 1.25; }
+.mode-btn span { display: block; font-size: 1rem; line-height: 1.4; color: #4a3727; }
+
+/* variants */
+.mod { flex: 1 1 250px; max-width: 400px; padding: 11px 16px 12px 48px; }
+.mod::before { top: 23px; }
+.mod-name { display: block; margin-bottom: 3px; font-weight: 700; font-size: 1.05rem; line-height: 1.25; }
+.mod-sum { display: block; font-size: 1rem; line-height: 1.4; color: #4a3727; }
+.mod-set {
+  display: inline-block; margin-left: 6px; padding: 0 6px; vertical-align: 1px;
+  font-style: normal; font-weight: 600; font-size: 0.875rem; line-height: 1.4;
+  font-variant-caps: small-caps; letter-spacing: 0.04em; white-space: nowrap;
+  color: var(--bow); border: 1px solid var(--bow); border-radius: 3px;
+}
+/* always-on options (the base game, Road to Victory): a steel rivet instead of a gem */
+.mod.lock, .chip.lock { cursor: default; background: #efe5d4; border-color: #4e4a46; box-shadow: inset 0 0 0 1px #4e4a46, 0 2px 3px rgba(84, 44, 4, 0.18); }
+.mod.lock:hover, .chip.lock:hover { transform: none; background: #efe5d4; border-color: #4e4a46; }
+.mod.lock::before, .chip.lock::before {
+  content: "✓"; color: #1d1f21; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+  background: radial-gradient(circle at 38% 30%, #ffffff 0 10%, #c9cdd0 35%, #8d9297 100%);
+  box-shadow: 0 0 0 2px #5e6267, 0 0 0 3px #26282a, inset 0 -2px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================================================
+   Setup steps
+   ============================================================================ */
+.teach-bar { margin: 4px 0 18px; }
+#teachBtn, .teach-copy {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 46px;
+  font: 700 1.08rem/1.2 var(--book); font-variant-caps: small-caps; letter-spacing: 0.04em;
+  color: var(--ink); cursor: pointer;
+  background: linear-gradient(180deg, #fadb84 0%, var(--gold) 52%, #d8952e 100%);
+  border: 2px solid var(--steel-dk); border-radius: 999px;
+  padding: 9px 22px 10px 18px;
+  box-shadow: inset 0 1px 0 rgba(255, 249, 220, 0.75), 0 2px 4px rgba(64, 32, 0, 0.3);
+  transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+}
+#teachBtn::after { content: "▾"; font-size: 0.85em; }
+#teachBtn[aria-expanded="true"] {
+  background: linear-gradient(180deg, #d8952e 0%, var(--gold) 60%, #f3c95f 100%);
+  box-shadow: inset 0 2px 5px rgba(80, 40, 0, 0.5);
+}
+#teachBtn[aria-expanded="true"]::after { content: "▴"; }
+#teachBtn:hover, .teach-copy:hover { transform: translateY(-1px); box-shadow: inset 0 1px 0 rgba(255, 249, 220, 0.75), 0 4px 8px rgba(64, 32, 0, 0.35); }
+#teachBtn[aria-expanded="true"]:hover { transform: none; }
+
+.phase { margin-top: 30px; }
+.phase-title {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 14px;
+  font-family: var(--display); font-weight: 400; font-size: 1.6rem; line-height: 1.15; word-spacing: 0.16em;
+  color: var(--ink);
+}
+.phase-title::after { content: ""; flex: 1; min-width: 30px; height: 2px; background: linear-gradient(90deg, #6f5e50, rgba(111, 94, 80, 0)); }
+
+.step {
+  display: flex; gap: 18px;
+  background: var(--card);
+  border: 1px solid var(--line); border-radius: 6px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 2px 6px rgba(92, 56, 20, 0.12);
+  padding: 16px 24px 14px 16px; margin-bottom: 14px;
+}
+/* the rulebook's numbered red jewel in its gold setting */
+.step-num {
+  position: relative; flex: 0 0 auto;
+  width: 40px; height: 40px; margin: 2px 2px 0;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: var(--gem);
+  box-shadow: 0 0 0 2.5px #e6ad45, 0 0 0 4px #5b3a12, 0 3px 5px 1px rgba(70, 30, 0, 0.35), inset 0 -3px 5px rgba(40, 0, 12, 0.45);
+  font: 700 1.2rem/1 var(--book); color: #fff;
+  text-shadow: 0 1px 2px #3a0712, 0 0 1px #3a0712;
+}
+.step-num::before, .step-num::after {        /* the setting's points, top and bottom */
+  content: ""; position: absolute; left: 50%; width: 7px; height: 7px; margin-left: -3.5px;
+  background: linear-gradient(135deg, #f7d37a, #b77a22); border: 1px solid #5b3a12;
+  transform: rotate(45deg);
+}
+.step-num::before { top: -9px; }
+.step-num::after { bottom: -9px; }
+.step-body { min-width: 0; flex: 1; }
+.step-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; margin-bottom: 6px; }
+.step-head h4 { font-weight: 700; font-size: 1.25rem; line-height: 1.3; color: var(--ink); }
+.step-text { max-width: 74ch; }
+.step-text > ul, .step-text > ol { margin: 4px 0 2px 22px; }
+.step-text ul ul, .step-text ol ol, .step-text ul ol, .step-text ol ul { margin: 4px 0 4px 22px; }
+.step-text li { margin-bottom: 5px; padding-left: 2px; }
+.step-text li::marker { color: #765639; }
+.step-text b { font-weight: 700; color: var(--blood); }
+.step-text i { color: #3e2d20; }
+.inline-note { margin-top: 8px; font-size: 1rem; font-style: italic; color: var(--ink-2); }
+
+/* source tags: one per box, told apart by fill and edge, not by colour alone */
+.tag {
+  display: inline-block; padding: 1px 9px 2px; border-radius: 3px; white-space: nowrap;
+  font: 700 0.875rem/1.35 var(--book); font-variant-caps: small-caps; letter-spacing: 0.05em;
+}
+.tag-core { background: #8e1b13; color: #fff3e3; }                                        /* the logo's red */
+.tag-bow  { background: var(--bow); color: #f1f7e6; border-radius: 3px 10px 3px 10px; }  /* the expansion's green */
+.tag-var  { background: var(--gold); color: #2a1a06; box-shadow: inset 0 0 0 1px #6b4a12; }/* plaque gold */
+.tag-orig { background: #4a4f55; color: #f4f4f4; box-shadow: inset 0 0 0 1px #c9ccce, 0 0 0 1px #4a4f55; } /* old steel */
+.tag-faq  { background: transparent; color: #24434c; box-shadow: inset 0 0 0 1.5px #24434c; border-radius: 10px; } /* outlined */
+
+.src-line {
+  margin-top: 10px; padding-top: 7px; border-top: 1px dashed #d6bf9f;
+  font-size: 0.95rem; font-style: italic; line-height: 1.4; color: var(--ink-3);
+}
+.src-line::before {                /* a small red jewel */
+  content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 8px; vertical-align: 1px;
+  border-radius: 50%; background: var(--gem); box-shadow: 0 0 0 1.5px #c9922f;
+}
+
+/* ============================================================================
+   Teaching script (button above; panel is a gold plaque)
+   ============================================================================ */
+.teach-panel { padding: 44px 36px 44px; margin: 0 0 26px; }
+.teach-panel[hidden] { display: none; }
+.teach-top { display: flex; justify-content: space-between; align-items: center; gap: 10px 16px; flex-wrap: wrap; margin-bottom: 6px; }
+.teach-top h3 { font-family: var(--display); font-weight: 400; font-size: 1.6rem; line-height: 1.2; word-spacing: 0.16em; color: var(--ink); }
+.teach-copy {
+  min-height: 44px; padding: 7px 16px; font-size: 1rem;
+  background: var(--card); border: 2px solid var(--steel-dk);
+  box-shadow: 0 2px 3px rgba(64, 32, 0, 0.25);
+}
+.teach-copy:hover { background: #fffbf3; }
+.teach-note {
+  max-width: 60em; margin-bottom: 14px; padding-bottom: 12px;
+  border-bottom: 1px solid rgba(91, 52, 6, 0.45);
+  font-size: 1rem; font-style: italic; color: #3b2208;
+}
+.teach-panel h4 {
+  margin: 18px 0 6px;
+  font-weight: 700; font-size: 1.12rem; line-height: 1.3;
+  font-variant-caps: small-caps; letter-spacing: 0.05em; color: var(--blood-2);
+}
+.teach-panel p { margin-bottom: 10px; max-width: 74ch; }
+.teach-panel ul { margin: 4px 0 12px 24px; max-width: 72ch; }
+.teach-panel li { margin-bottom: 6px; }
+.teach-panel li::marker { color: var(--blood-2); }
+.teach-panel b { font-weight: 700; color: var(--blood-2); }
+.teach-panel i { color: #2e1a06; }
+
+/* ============================================================================
+   Rules reference
+   ============================================================================ */
+.ref {
+  background: var(--card);
+  border: 1px solid var(--line); border-radius: 6px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 2px 6px rgba(92, 56, 20, 0.12);
+  margin-bottom: 10px; overflow: hidden;
+}
+.ref summary {
+  position: relative; display: flex; align-items: center; min-height: 54px;
+  padding: 11px 18px 11px 56px;
+  list-style: none; cursor: pointer;
+  font-family: var(--display); font-weight: 400; font-size: 1.32rem; line-height: 1.25; word-spacing: 0.16em;
+  color: var(--ink);
+  transition: background-color 0.15s;
+}
+.ref summary::-webkit-details-marker { display: none; }
+.ref summary::before {          /* steel socket with + ; opens to a red gem with − */
+  content: "+"; position: absolute; left: 17px; top: 50%;
+  width: 22px; height: 22px; margin-top: -11px; border-radius: 50%;
+  background: var(--socket);
+  box-shadow: 0 0 0 2px var(--steel), 0 0 0 3px var(--steel-dk), inset 0 2px 3px rgba(0, 0, 0, 0.25);
+  font: 700 17px/21px var(--book); text-align: center; color: var(--steel-dk);
+}
+.ref summary:hover { background: #fff8ec; }
+.ref[open] summary { background: var(--card-2); border-bottom: 1px solid #d6bf9f; }
+.ref[open] summary::before {
+  content: "−"; color: #fff; background: var(--gem);
+  box-shadow: 0 0 0 2px #e6ad45, 0 0 0 3px #5b3a12, inset 0 -2px 3px rgba(40, 0, 12, 0.45);
+  text-shadow: 0 1px 1px rgba(40, 0, 10, 0.8);
+}
+.ref-body { padding: 14px 24px 18px; }
+.ref-body > p, .ref-body > ul, .ref-body > ol, .ref-body > h4 { max-width: 74ch; }
+.ref-body h4 {
+  margin: 16px 0 6px;
+  font-weight: 700; font-size: 1.1rem; line-height: 1.3;
+  font-variant-caps: small-caps; letter-spacing: 0.05em; color: var(--blood);
+}
+.ref-body > h4:first-child { margin-top: 2px; }
+.ref-body p { margin-bottom: 9px; }
+.ref-body ul, .ref-body ol { margin: 4px 0 12px 24px; }
+.ref-body ul ul, .ref-body ol ol, .ref-body ul ol, .ref-body ol ul { margin: 4px 0 4px 22px; }
+.ref-body li { margin-bottom: 6px; padding-left: 2px; }
+.ref-body li::marker { color: #765639; }
+.ref-body b { font-weight: 700; color: var(--blood); }
+.ref-body i { color: #3e2d20; }
+.ref-body .src-line { margin-top: 12px; }
+.ref-body ol ol, .step-text ol ol { list-style-type: lower-alpha; }
+
+/* factions not at the table, in lists that cover all four */
+.ref-body li.dim, .step-text li.dim { color: #6a5848; }
+.ref-body li.dim b, .step-text li.dim b { color: #7e5146; }
+
+/* reference tables: a gold header row, like the plaques */
+.tbl-wrap { overflow-x: auto; margin: 10px 0 14px; -webkit-overflow-scrolling: touch; border: 1px solid #b08c62; border-radius: 4px; }
+.rtable { width: 100%; min-width: 540px; border-collapse: collapse; font-size: 1rem; line-height: 1.45; }
+.rtable th, .rtable td { padding: 7px 10px; text-align: left; vertical-align: top; border: 1px solid #d3b994; }
+.rtable tr > :first-child { border-left: 0; }
+.rtable tr > :last-child { border-right: 0; }
+.rtable thead th {
+  border-top: 0;
+  font-weight: 700; font-variant-caps: small-caps; letter-spacing: 0.04em; color: #1b1206;
+  background: linear-gradient(180deg, #f6cd66, var(--gold));
+  border-color: #c08a35;
+}
+.rtable tbody tr:nth-child(even) td { background: #f7ecdb; }
+.rtable tbody tr:last-child td { border-bottom: 0; }
+.rtable td:first-child { white-space: nowrap; font-weight: 700; }
+.rtable:has(thead th:nth-child(4)) td:first-child { text-align: center; }   /* the numbered Order table */
+
+/* ============================================================================
+   Rulebook search
+   ============================================================================ */
+.rsearch-wrap { position: relative; margin-bottom: 16px; }
+.rsearch-wrap::before {          /* a magnifier drawn in the book's ink */
+  content: ""; position: absolute; left: 17px; top: 50%; width: 14px; height: 14px; margin-top: -10px;
+  border: 2.5px solid var(--steel-dk); border-radius: 50%; pointer-events: none;
+}
+.rsearch-wrap::after {
+  content: ""; position: absolute; left: 30px; top: 50%; width: 8px; height: 2.5px; margin-top: 4px;
+  background: var(--steel-dk); transform: rotate(45deg); transform-origin: left center; pointer-events: none;
+}
+#rsearch {
+  width: 100%; min-height: 52px; padding: 11px 16px 11px 48px;
+  font: inherit; font-size: 1.1rem; color: var(--ink);
+  background: #fffaf2;
+  border: 2px solid #5e5a55; border-radius: 6px;
+  box-shadow: inset 0 2px 3px rgba(80, 50, 20, 0.12);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+#rsearch::placeholder { color: #6b5541; font-style: italic; opacity: 1; }
+#rsearch::-webkit-search-cancel-button {
+  -webkit-appearance: none; appearance: none; width: 18px; height: 18px; cursor: pointer;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M4 4l10 10M14 4L4 14' stroke='%237b1a12' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E") center / 18px no-repeat;
+}
+#rsearch:focus { outline: none; }
+#rsearch:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; border-color: var(--steel-dk); }
+
+.rhint { font-style: italic; color: var(--ink-2); }
+.rhit {
+  background: var(--card);
+  border: 1px solid var(--line); border-left: 4px solid var(--steel); border-radius: 6px;
+  padding: 11px 16px 12px; margin-bottom: 10px;
+  box-shadow: 0 2px 5px rgba(92, 56, 20, 0.1);
+}
+.rhit-src {
+  margin-bottom: 3px;
+  font-weight: 700; font-size: 1rem; font-variant-caps: small-caps; letter-spacing: 0.05em; color: var(--blood);
+}
+.rhit-text { font-size: 1.02rem; line-height: 1.5; color: #2d2017; }
+.rhit-text mark { background: #f4c656; color: var(--ink); padding: 0 2px; border-radius: 2px; box-shadow: inset 0 -1px 0 #b07a1c; }
+
+/* ============================================================================
+   Components glossary (standard widget, themed by tokens)
+   ============================================================================ */
+#components {
+  --comp-surface: var(--card); --comp-fig: #f2e4d2; --comp-ink: var(--ink); --comp-muted: #574535;
+  --comp-line: #8c6b4a; --comp-accent: #8e1b13; --comp-accent-ink: #fff3e3;
+  --comp-head-font: var(--book); --comp-radius: 6px;   /* Almendra SC has no bold: the widget's 700-weight labels stay in the book face */
+}
+
+/* ============================================================================
+   Footer — the foot of a rulebook page
+   ============================================================================ */
+.footer {
+  position: relative; z-index: 1;
+  margin-top: 70px; padding: 30px 20px 34px;
+  text-align: center;
+  background:
+    radial-gradient(40% 90% at 20% 80%, rgba(255, 230, 178, 0.4), rgba(255, 230, 178, 0) 70%),
+    url(../images/parchment.webp) 0 0 / 520px,
+    var(--tan);
+  background-blend-mode: normal, multiply, normal;
+}
+.footer::before {                 /* torn edge and steel braid, upside down as at the foot of each page */
+  content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 49px;
+  background: url(../images/band.webp) 0 0 / auto 100% repeat-x;
+  transform: scaleY(-1);
+}
+.footer p { max-width: 50em; margin: 0 auto; font-size: 1.06rem; font-style: italic; line-height: 1.5; color: #2d1a0b; }
+.foot-rune {
+  position: absolute; left: 50%; top: -24px; width: 40px; height: 36px; transform: translate(-50%, -50%);
+  background: url(../images/rune.webp) center / contain no-repeat;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5));
+}
+
+/* ============================================================================
+   Focus, motion, small screens
+   ============================================================================ */
+button:focus-visible, summary:focus-visible {
+  outline: 3px solid var(--ink); outline-offset: 3px;
+}
+.ref summary:focus-visible { outline-offset: -4px; }
+
+@media (min-width: 1001px) {
+  .mast-art-img { -webkit-mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent); mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent); }
+}
+
+@media (min-width: 1360px) {
+  .sec-cfg, .sec-setup { position: relative; }
+  .sec-cfg::before, .sec-setup::before {
+    content: ""; position: absolute; pointer-events: none;
+    width: clamp(200px, calc((100vw - 900px) / 2), 270px);
+  }
+  .sec-cfg::before {             /* an Uthuk warrior raises his axe beside the council (Revised Gameplay p.1) */
+    right: calc(100% + 26px); top: 168px; aspect-ratio: 300 / 287;
+    background: url(../images/fig-warrior.webp) right top / contain no-repeat;
+  }
+  .sec-setup::before {           /* a sorcerer with a burning skull (Revised Gameplay p.2) */
+    left: calc(100% + 30px); top: 60px; aspect-ratio: 260 / 349;
+    width: clamp(180px, calc((100vw - 920px) / 2), 240px);
+    background: url(../images/fig-wizard.webp) left top / contain no-repeat;
+  }
+}
+
+@media (max-width: 720px) {
+  .mast { --top-h: 128px; --rail: 10px; --art-h: 168px; --sub-h: 48px; --band-h: 40px; }
+  .mast-logo { width: min(330px, 80vw); padding-top: 10px; }
+  .mast-sub { font-size: 1.55rem; }
+  .mast-art-img { object-position: 50% 22%; }
+}
+
+@media (max-width: 640px) {
+  body { font-size: 1.125rem; }                  /* 18px */
+  main { padding: 6px 14px 30px; }
+  .tagline { font-size: 1.04rem; }
+  .sec { margin-top: 38px; }
+  .sec > h2 { font-size: 2rem; }
+  .sec > h2::after { height: 9px; }
+  .cfg, .teach-panel { --fw: 54px; --fh: 36px; border-radius: 44px / 35px; }
+  .cfg { padding: 36px 16px 34px; gap: 20px; }
+  .teach-panel { padding: 34px 18px 34px; }
+  .mode-btn, .mod { max-width: none; flex-basis: 100%; }
+  .chips { gap: 8px; }
+  .chip { padding-right: 14px; }
+  #expansions .chip { flex: 1 1 auto; padding-right: 10px; }
+  #factions .chip { flex: 1 1 150px; padding-left: 52px; padding-right: 10px; }
+  #factions .chip::before { left: 9px; }
+  #factions .chip.on::after { left: 31px; }
+  .phase-title { font-size: 1.45rem; }
+  /* phones: the jewel sits beside the step title and the text takes the card's full width */
+  .step { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0 12px; padding: 14px 14px 12px 12px; }
+  .step-body { display: contents; }
+  .step-num { grid-column: 1; grid-row: 1; align-self: start; width: 34px; height: 34px; font-size: 1.05rem; }
+  .step-head { grid-column: 2; grid-row: 1; align-self: center; margin-bottom: 4px; }
+  .step-text, .step-body > .src-line { grid-column: 1 / -1; }
+  .step-text { margin-top: 8px; }
+  .step-num::before { top: -8px; } .step-num::after { bottom: -8px; }
+  .step-head h4 { font-size: 1.12rem; }
+  .step-text > ul, .step-text > ol { margin-left: 18px; }
+  .ref summary { font-size: 1.2rem; padding: 10px 14px 10px 50px; }
+  .ref summary::before { left: 14px; }
+  .ref-body { padding: 12px 14px 16px; }
+  .ref-body ul, .ref-body ol { margin-left: 20px; }
+  .teach-top h3 { font-size: 1.4rem; }
+  .footer { padding: 26px 16px 30px; }
+}
+
+@media (max-width: 400px) {
+  .mast { --top-h: 112px; --art-h: 146px; --sub-h: 46px; }
+  .mast-logo { width: min(290px, 78vw); }
+  .mast-ed { font-size: 0.86rem; padding: 4px 16px 5px; }
+  .mast-sub { font-size: 1.4rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; }
+  html { scroll-behavior: auto; }
+  .chip:hover, .mode-btn:hover, .mod:hover, #teachBtn:hover, .teach-copy:hover { transform: none; }
+}
