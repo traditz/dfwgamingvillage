@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Horus Heresy — Setup &amp; Reference Utility</title>
+  <meta name="description" content="Setup steps, a rules reference with the official FAQ and errata applied, a teaching script and a rulebook search for Fantasy Flight Games' Horus Heresy (2010).">
+  <meta name="theme-color" content="#1c0403">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- The rulebook sets its headings in Agency FB Bold (Agdasima is its Google Fonts match) and its text in
+       Bell Gothic Bold/Black (Overpass, an open American signage gothic, stands in for it). -->
+  <link href="https://fonts.googleapis.com/css2?family=Agdasima:wght@700&family=Overpass:ital,wght@0,500;0,700;0,800;1,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=2">
+  <link rel="stylesheet" href="css/components.css?v=1">
+</head>
+<body data-seat="both">
+  <a class="skip" href="#setup-sec">Skip to setup</a>
+
+  <!-- Masthead: the Rules of Play cover. The Warhammer 40,000 / Horus Heresy logo (rulebook p.2) on the cover's
+       blood-red ground, with the Warmaster in his armour from the cover painting. It ends on the rusted frame
+       rail with its row of skulls and yellow glow strip that runs round every interior page. -->
+  <header class="mast">
+    <div class="mast-art" aria-hidden="true">
+      <img src="images/horus.webp" width="880" height="557" alt="" decoding="async">
+    </div>
+    <div class="mast-inner">
+      <h1 class="brand-title">
+        <img class="mast-logo" src="images/logo.webp" width="960" height="359" alt="Horus Heresy">
+        <span class="brand-sub">Setup &amp; Reference Utility</span>
+      </h1>
+    </div>
+  </header>
+  <div class="rail rail-top" aria-hidden="true"><span class="skulls"></span></div>
+
+  <main>
+    <div class="intro">
+      <p class="flavor">The fleet of Horus hangs in orbit over the ravaged world. The defenders of Terra stand ready.</p>
+      <p class="tagline">
+        Choose your scenario, sides and seat for exact setup steps, a rules reference with the official
+        FAQ and errata applied, a teaching script and a search of the rulebook.
+      </p>
+    </div>
+
+    <section class="sec sec-cfg" aria-labelledby="cfg-h">
+      <h2 id="cfg-h">The War Council</h2>
+      <p class="sec-note">Horus Heresy is a two-player game: the Imperial player defends Terra, the Traitor player leads Horus’s assault. Pick how you are choosing scenario and sides, whether the pieces still need building, and whose screen this is. Every step, ruling and script below adapts.</p>
+      <div class="cfg frame">
+        <div class="cfg-group">
+          <p class="cfg-label" id="lbl-modes">Scenario &amp; sides <span class="hint">the rulebook’s three situations (Rules p.12)</span></p>
+          <div id="modes" class="mode-grid" role="group" aria-labelledby="lbl-modes"></div>
+        </div>
+        <div class="cfg-group">
+          <p class="cfg-label" id="lbl-pieces">Playing pieces <span class="hint">first game assembly or reset (Rules p.10–11)</span></p>
+          <div id="pieces" class="mode-grid" role="group" aria-labelledby="lbl-pieces"></div>
+        </div>
+        <div class="cfg-group">
+          <p class="cfg-label" id="lbl-seat">Your seat <span class="hint">marks your side’s tasks — nothing in the setup is hidden; the teaching script gives your side’s tip</span></p>
+          <div id="seats" class="mode-grid" role="group" aria-labelledby="lbl-seat"></div>
+        </div>
+        <div id="modules-group" class="cfg-group">
+          <p class="cfg-label" id="lbl-mods">Optional table aids <span class="hint">memory aids the rulebook suggests; no rule changes</span></p>
+          <div id="modules" class="mods" role="group" aria-labelledby="lbl-mods"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec sec-setup" id="setup-sec" aria-labelledby="setup-h">
+      <h2 id="setup-h">Setup</h2>
+      <p class="sec-note">Follow the steps in order. Each cites its source pages (Rules = the rulebook, FAQ = FAQ and Errata v1.0); the FAQ’s errata are already applied. The scenario-setup steps follow your scenario in the Scenario Guide.</p>
+      <div class="teach-bar"><button id="teachBtn" type="button" aria-expanded="false" aria-controls="teach" title="A ~5 minute script to teach this exact setup aloud">📖 Teaching script</button></div>
+      <div id="teach" class="teach-panel frame" hidden></div>
+      <div id="setup"></div>
+    </section>
+
+    <section class="sec sec-comp" id="components" aria-labelledby="comp-h" hidden>
+      <h2 id="comp-h">Components</h2>
+      <p class="sec-note">Every playing component in the rulebook’s list (the Scenario Guide booklet is left out), with its count and, where the rulebook pictures it, its picture. Tap a picture to enlarge it.</p>
+      <div id="aid-comp"></div>
+    </section>
+
+    <section class="sec sec-ref" aria-labelledby="ref-h">
+      <h2 id="ref-h">Rules Reference</h2>
+      <p class="sec-note">Tap a heading to open it. FAQ errata and rulings are applied and labelled; where the FAQ and the rulebook differ, the FAQ wins.</p>
+      <div id="reference"></div>
+    </section>
+
+    <section class="sec sec-search" aria-labelledby="search-h">
+      <h2 id="search-h">Search the Rulebook</h2>
+      <p class="sec-note">Full-text search of the rulebook and the official FAQ and Errata, page by page.</p>
+      <div class="rsearch-wrap">
+        <input id="rsearch" type="search" placeholder="e.g. coexistence, crevasse, drop pods, wounded, spaceport…" aria-label="Search the rulebook and FAQ">
+      </div>
+      <div id="rresults" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="rail rail-foot" aria-hidden="true"><span class="skulls"></span></div>
+    <p class="footer-inner">
+      Setup and reference content grounded in the official Horus Heresy rulebook (Rules of Play) and the
+      official FAQ and Errata v1.0. A fan-made play aid — not affiliated with Fantasy Flight Games or Games Workshop.
+    </p>
+  </footer>
+
+  <script src="js/data.js?v=1"></script>
+  <script src="js/rules.js?v=1"></script>
+  <script src="js/components.js?v=1"></script>
+  <script src="js/comp-widget.js?v=1"></script>
+  <script src="js/app.js?v=1"></script>
+  <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
+  <script src="/site-analytics.js?v=20260607-analytics"></script>
+</body>
+</html>

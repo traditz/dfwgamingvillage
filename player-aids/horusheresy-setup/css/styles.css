@@ -1,0 +1,689 @@
+/* =============================================================================
+   Horus Heresy — Setup & Reference Utility
+   Theme: the Rules of Play rulebook (Fantasy Flight Games, 2010).
+   - Cover (p.1): the Warhammer 40,000 / Horus Heresy logo on a blood-red ground, Horus in his armour,
+     a riveted steel frame → the masthead.
+   - Interior pages (p.2–44): white stock with soft grey horizontal stripes (#ffffff / #f2f1ef), held in a
+     rusted machinery frame with a row of skulls (top left) and a yellow glow strip along its inner edge;
+     headings in Agency FB Bold, plum #530832, the first level ruled underneath (p.2, p.14); body in
+     Bell Gothic Bold, ink #221f1f; sub-heads in plum capitals (p.3, p.8); "»" sub-bullets (p.3);
+     page numbers set as ‹ 14 › on a steel plate.
+   - Callout boxes (p.6, p.17, p.24, p.27): a rusted girder frame capped by a capsule of skulls.
+   - The two sides: the initiative markers (p.8) — Imperial = white aquila on blue in a steel ring,
+     Traitor = white Chaos star on red in a bronze ring.
+   - The board's initiative track (p.14–15): steel grille cells; Event (red-black, yellow type),
+     Order (orange square), Refresh (cyan ring), Spaceport Victory (yellow).
+   ============================================================================= */
+
+:root {
+  /* rulebook page */
+  --paper:    #ffffff;
+  --stripe:   #f1f0ee;   /* the darker of the page stripes (sampled) */
+  --ink:      #221f1f;   /* body text (sampled) */
+  --ink-2:    #4b4446;   /* secondary text */
+  --plum:     #530832;   /* headings, captions, rules (sampled) */
+  --plum-2:   #7d1d4f;   /* hover */
+  --plum-wash:#f8eef3;   /* selected tint */
+  --line:     #857c77;   /* control borders */
+  --hair:     #d6cfc8;   /* decorative hairlines */
+  --panel-2:  #f7f5f2;   /* table row headers / alt rows */
+
+  /* frame metal (sampled from the page frame and the cover frame) */
+  --rust:     #584a3e;
+  --rust-dk:  #2b221c;
+  --steel:    #8e908c;
+  --steel-dk: #3c3d3b;
+  --glow:     #d9a62e;   /* the frame's yellow glow strip */
+  --brass:    #f1e4c2;   /* pale lettering on metal */
+
+  /* cover */
+  --gold:     #d8cb8a;   /* logo gold */
+
+  /* the two sides (initiative markers, p.8) */
+  --imp:      #1d4e72;   /* Imperial steel blue */
+  --imp-bg:   #e4eef6;
+  --trt:      #8c1a12;   /* Traitor blood red */
+  --trt-bg:   #f9e5e1;
+
+  --head: "Agdasima", "Agency FB", "Arial Narrow", sans-serif;
+  --body: "Overpass", "Bell Gothic Std", "Segoe UI", Arial, sans-serif;
+
+  --rust-tex: url("../images/rust.webp");
+  --measure: 36em;       /* ≈ 80 characters a line in Overpass (its "0" is wide, so ch would run long) */
+  --card-line: #8c827b;  /* card edges: ≥ 3:1 on the page and its stripes */
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+body {
+  /* the rulebook's striped stock: soft grey bands on white */
+  background: repeating-linear-gradient(180deg, var(--paper) 0, var(--paper) 5px, var(--stripe) 8.5px, var(--paper) 12px) var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  font-weight: 500;
+  font-size: 17px;
+  line-height: 1.55;
+  min-height: 100vh;
+}
+b, strong { font-weight: 700; }
+
+:focus-visible { outline: 3px solid var(--plum); outline-offset: 3px; }
+
+.skip { position: absolute; left: -9999px; top: 10px; z-index: 20; background: var(--paper); color: var(--plum); padding: 8px 14px; border: 2px solid var(--plum); font-weight: 700; }
+.skip:focus { left: 12px; }
+.vh { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+
+/* ---- masthead: the cover ------------------------------------------------------------ */
+.mast {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 55% 85% at 30% 42%, rgba(132, 20, 14, 0.62), rgba(132, 20, 14, 0) 72%),
+    radial-gradient(ellipse 45% 90% at 82% 40%, rgba(38, 34, 70, 0.55), rgba(38, 34, 70, 0) 70%),
+    linear-gradient(180deg, #2c0706 0%, #1a0403 60%, #110202 100%);
+  border-top: 6px solid var(--steel-dk);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+/* the cover's scratched red ground: the frame texture, multiplied into the red */
+.mast::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: var(--rust-tex) 0 0 / 144px auto;
+  mix-blend-mode: soft-light; opacity: 0.55;
+}
+.mast-art {
+  position: absolute; top: 0; bottom: 0;
+  right: max(0px, calc(50% - 640px));
+  width: min(60%, 720px);
+  pointer-events: none;
+}
+.mast-art img {                /* feathered to nothing at both sides, so the painting melts into the red ground */
+  display: block; width: 100%; height: 100%;
+  object-fit: cover; object-position: 50% 24%;
+  -webkit-mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0) 0, rgba(0, 0, 0, 0.55) 15%, #000 31%, #000 86%, rgba(0, 0, 0, 0) 100%);
+          mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0) 0, rgba(0, 0, 0, 0.55) 15%, #000 31%, #000 86%, rgba(0, 0, 0, 0) 100%);
+}
+.mast-inner {
+  position: relative;
+  max-width: 1180px; margin: 0 auto;
+  padding: 30px 28px 40px;
+}
+.brand-title { width: min(620px, 58%); text-align: center; font-weight: 400; }
+.mast-logo {
+  display: block; width: 100%; height: auto;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.6));
+}
+.brand-sub {
+  display: inline-block; margin-top: 10px;
+  font-family: var(--head); font-weight: 700;
+  font-size: 1.55rem; line-height: 1.1;
+  letter-spacing: 0.26em; text-transform: uppercase;
+  color: var(--gold);
+  text-shadow: 0 2px 3px #000;
+  padding: 3px 0 2px 0.26em;
+  border-top: 1px solid rgba(216, 203, 138, 0.45);
+  border-bottom: 1px solid rgba(216, 203, 138, 0.45);
+}
+
+/* ---- the frame rail: rusted plate, yellow glow strip, capsule of skulls --------------- */
+.rail {
+  position: relative; height: 16px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0, rgba(255, 255, 255, 0) 3px, rgba(0, 0, 0, 0) 9px, rgba(0, 0, 0, 0.5) 100%),
+    var(--rust-tex) 0 0 / 144px auto, var(--rust);
+  border-top: 1px solid #0d0806;
+  border-bottom: 1px solid #0d0806;
+}
+.rail-top { box-shadow: 0 4px 0 -1px var(--glow), 0 5px 0 -1px #6b4a0e, 0 7px 8px rgba(0, 0, 0, 0.28); }
+.rail-top::after {           /* glow strip highlights, like the frame's lit tube */
+  content: ""; position: absolute; left: 0; right: 0; bottom: -5px; height: 3px;
+  background: linear-gradient(90deg, rgba(255, 244, 170, 0) 0, rgba(255, 244, 170, 0.75) 18%, rgba(255, 244, 170, 0) 30%, rgba(255, 244, 170, 0.6) 62%, rgba(255, 244, 170, 0) 80%);
+}
+.skulls {
+  position: absolute; left: 50%; top: 50%; z-index: 1;
+  width: 250px; height: 48px; transform: translate(-50%, -50%);
+  background: url("../images/skulls.webp") center / contain no-repeat;
+  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.55));
+}
+
+/* ---- layout ---------------------------------------------------------------------------- */
+main { max-width: 1060px; margin: 0 auto; padding: 34px 20px 70px; }
+
+.intro { text-align: center; max-width: 38em; margin: 6px auto 0; }
+.intro p { text-wrap: balance; }
+.flavor {                    /* the grey Bell Gothic Black flavour text of p.2 */
+  font-weight: 800; font-size: 1.2rem; line-height: 1.4;
+  color: #5c5c5f;
+  text-shadow: 1px 1px 0 #ffffff, 2px 2px 3px rgba(0, 0, 0, 0.18);
+}
+.tagline { margin-top: 10px; color: var(--ink-2); }
+
+.sec { margin-top: 50px; }
+.sec > h2 {                  /* first-level heading: plum Agency, ruled underneath (p.2, p.14) */
+  font-family: var(--head); font-weight: 700;
+  font-size: 2.6rem; line-height: 1.05; letter-spacing: 0.01em;
+  color: var(--plum);
+  padding-bottom: 3px; margin-bottom: 12px;
+  border-bottom: 2px solid var(--plum);
+}
+.sec-note { color: var(--ink-2); max-width: var(--measure); margin-bottom: 18px; }
+
+/* ---- callout frame (p.6, p.17, p.24, p.27): rusted girders, capsule of skulls --------- */
+.frame {
+  position: relative;
+  border: 12px solid transparent;
+  background:
+    linear-gradient(var(--paper), var(--paper)) padding-box,
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(0, 0, 0, 0.28)) border-box,
+    var(--rust-tex) 0 0 / 144px auto border-box,
+    var(--rust) border-box;
+  box-shadow:
+    inset 0 0 0 1px #1b1410,
+    inset 0 0 0 3px rgba(217, 166, 46, 0.55),
+    0 0 0 1px #1b1410,
+    0 3px 8px rgba(0, 0, 0, 0.22);
+}
+.frame::before {             /* the skull capsule straddling the top girder */
+  content: ""; position: absolute; left: 50%; top: -30px; z-index: 1;
+  width: 230px; height: 44px; transform: translateX(-50%);
+  background: url("../images/skulls.webp") center / contain no-repeat;
+  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.45));
+  pointer-events: none;
+}
+.frame::after {              /* corner bolts */
+  content: ""; position: absolute; inset: -12px; pointer-events: none;
+  --bolt: radial-gradient(circle, #e2e3df 0 1.4px, #8a8c88 2.2px, #3a3b39 3.2px, #120d0a 4px, rgba(0, 0, 0, 0) 4.6px);
+  background: var(--bolt) 1px 1px / 10px 10px no-repeat, var(--bolt) calc(100% - 1px) 1px / 10px 10px no-repeat,
+              var(--bolt) 1px calc(100% - 1px) / 10px 10px no-repeat, var(--bolt) calc(100% - 1px) calc(100% - 1px) / 10px 10px no-repeat;
+}
+
+/* ---- configurator ---------------------------------------------------------------------- */
+.cfg { display: flex; flex-direction: column; gap: 22px; padding: 30px 24px 24px; margin-top: 34px; }
+.cfg-label {
+  font-family: var(--head); font-weight: 700;
+  font-size: 1.5rem; line-height: 1.15;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--plum);
+  margin-bottom: 10px;
+}
+.cfg-label .hint {
+  font-family: var(--body); font-weight: 500; font-style: italic;
+  font-size: 0.95rem; letter-spacing: 0; text-transform: none;
+  color: var(--ink-2); margin-left: 4px;
+}
+
+.mods, .mode-grid { display: flex; flex-wrap: wrap; gap: 12px; }
+
+.mode-btn, .mod {
+  position: relative;
+  flex: 1 1 240px; max-width: 360px; min-height: 64px;
+  text-align: left; font: inherit; color: var(--ink);
+  background: var(--paper);
+  border: 2px solid var(--line); border-radius: 3px;
+  padding: 11px 14px 12px 52px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s, box-shadow 0.15s;
+}
+.mode-btn b, .mod .mod-name {
+  display: block;
+  font-family: var(--head); font-weight: 700;
+  font-size: 1.32rem; line-height: 1.12; letter-spacing: 0.01em;
+  color: var(--ink);
+}
+.mode-btn span, .mod .mod-sum { display: block; margin-top: 3px; font-size: 1rem; line-height: 1.42; color: var(--ink-2); }
+@media (hover: hover) {
+  .mode-btn:not(.on):hover, .mod:not(.on):hover { border-color: var(--plum-2); background-color: #fdf8fa; }
+}
+
+/* the socket: an empty steel grille cell of the initiative track; lit like the Start space when chosen */
+.mode-btn::before, .mod::before {
+  content: ""; position: absolute; left: 13px; top: 13px;
+  width: 26px; height: 26px;
+  border: 3px solid var(--steel);
+  background: radial-gradient(#6b6d69 0.9px, rgba(0, 0, 0, 0) 1.3px) 0 0 / 4px 4px, var(--steel-dk);
+  box-shadow: 0 0 0 1px #2a2b29, inset 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+.mode-btn::before { border-radius: 50%; }
+.mod::before { border-radius: 2px; }
+
+.mode-btn.on, .mod.on {
+  border: 3px solid var(--plum);
+  padding: 10px 13px 11px 51px;
+  background: var(--plum-wash);
+  box-shadow: 0 2px 0 rgba(83, 8, 50, 0.25);
+}
+.mode-btn.on::before {
+  left: 12px; top: 12px;
+  border-color: #5b5d5a;
+  background: radial-gradient(circle at 50% 45%, #fff6cf 0 2px, #ffc24a 4.5px, #e2581c 8px, #8d1b0b 11px);
+  box-shadow: 0 0 0 1px #2a2b29, 0 0 8px 1px rgba(226, 88, 28, 0.55);
+}
+.mod.on::before {            /* the Order Phase plate: amber, with a check */
+  left: 12px; top: 12px;
+  border-color: #6d4a1a;
+  background: linear-gradient(135deg, #fbe7a6, #eab45c 55%, #c9782c);
+  box-shadow: 0 0 0 1px #2a2b29;
+}
+.mod.on::after {
+  content: "✓"; position: absolute; left: 12px; top: 12px;
+  width: 26px; height: 26px; line-height: 26px; text-align: center;
+  font-weight: 800; font-size: 1rem; color: #2a1503;
+}
+
+/* your seat: each side's initiative marker (p.8) */
+#seats .mode-btn { padding-right: 70px; }
+#seats .mode-btn::after {
+  content: ""; position: absolute; right: 12px; top: 50%;
+  width: 46px; height: 46px; transform: translateY(-50%);
+  background: center / contain no-repeat;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.35));
+}
+#seats .mode-btn:nth-child(1)::after {
+  background-image: url("../images/marker-imp.webp"), url("../images/marker-trt.webp");
+  background-size: 31px 31px; background-position: 0 0, 15px 15px;
+}
+#seats .mode-btn:nth-child(2)::after { background-image: url("../images/marker-imp.webp"); }
+#seats .mode-btn:nth-child(3)::after { background-image: url("../images/marker-trt.webp"); }
+#seats .mode-btn:nth-child(2).on { border-color: var(--imp); background: var(--imp-bg); box-shadow: 0 2px 0 rgba(29, 78, 114, 0.3); }
+#seats .mode-btn:nth-child(3).on { border-color: var(--trt); background: var(--trt-bg); box-shadow: 0 2px 0 rgba(140, 26, 18, 0.3); }
+
+/* ---- teaching script ---------------------------------------------------------------- */
+.teach-bar { margin: 4px 0 18px; }
+#teachBtn, .teach-copy {
+  font-family: var(--head); font-weight: 700;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--brass);
+  background:
+    linear-gradient(180deg, rgba(74, 60, 50, 0.5), rgba(24, 18, 14, 0.82)),
+    var(--rust-tex) 0 0 / 144px auto, var(--rust);
+  border: 2px solid #1b1410; border-radius: 3px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), inset 0 -2px 0 rgba(0, 0, 0, 0.35), 0 2px 0 #1b1410;
+  text-shadow: 0 1px 1px #000;
+  cursor: pointer;
+}
+#teachBtn { font-size: 1.4rem; line-height: 1.1; padding: 10px 22px 9px; min-height: 50px; }
+.teach-copy { font-size: 1.15rem; line-height: 1.1; padding: 8px 16px 7px; min-height: 44px; }
+@media (hover: hover) { #teachBtn:hover, .teach-copy:hover { filter: brightness(1.18); } }
+#teachBtn[aria-expanded="true"] {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(0, 0, 0, 0.3)), var(--plum);
+  color: #ffffff;
+}
+
+.teach-panel { padding: 30px 26px 22px; margin: 34px 0 26px; }
+.teach-panel[hidden] { display: none; }
+.teach-top { display: flex; justify-content: space-between; align-items: center; gap: 10px 16px; flex-wrap: wrap; margin-bottom: 6px; }
+.teach-top h3 {
+  font-family: var(--head); font-weight: 700;
+  font-size: 1.85rem; line-height: 1.1; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--plum);
+}
+.teach-note { font-style: italic; color: var(--ink-2); max-width: var(--measure); margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--hair); }
+.teach-panel h4 {
+  font-family: var(--head); font-weight: 700;
+  font-size: 1.5rem; line-height: 1.15; letter-spacing: 0.01em;
+  color: var(--plum);
+  margin: 18px 0 6px;
+}
+.teach-panel p { margin-bottom: 10px; max-width: var(--measure); }
+.teach-panel ul, .teach-panel ol { margin: 4px 0 12px; padding-left: 24px; max-width: var(--measure); }
+.teach-panel li { margin-bottom: 6px; }
+
+/* ---- setup steps --------------------------------------------------------------------- */
+.phase { margin-top: 34px; }
+.phase:first-child { margin-top: 10px; }
+.phase-title {               /* second-level heading: plum Agency, no rule ("The Action Step", p.14) */
+  font-family: var(--head); font-weight: 700;
+  font-size: 1.85rem; line-height: 1.1;
+  color: var(--plum);
+  margin-bottom: 12px;
+}
+
+.step {
+  display: flex;
+  background: var(--paper);
+  border: 1px solid var(--card-line);
+  border-radius: 2px;
+  margin-bottom: 14px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+.step-num {                  /* a post of the page frame: rusted plate, glow strip, bolt */
+  flex: 0 0 52px;
+  display: flex; justify-content: center; align-items: flex-start;
+  padding-top: 10px;
+  font-family: var(--head); font-weight: 700;
+  font-size: 2rem; line-height: 1;
+  color: var(--brass);
+  text-shadow: 0 1px 2px #000;
+  background:
+    radial-gradient(circle, #d9dad6 0 1.4px, #7f817d 2.3px, #2b2c2a 3.2px, rgba(0, 0, 0, 0) 3.8px) 50% calc(100% - 8px) / 10px 10px no-repeat,
+    linear-gradient(90deg, rgba(0, 0, 0, 0.58), rgba(0, 0, 0, 0.34) 45%, rgba(0, 0, 0, 0.62)),
+    var(--rust-tex) 0 0 / 144px auto, var(--rust);
+  border-right: 3px solid var(--glow);
+  box-shadow: inset -1px 0 0 #6b4a0e;
+  min-height: 60px;
+}
+.step-body { min-width: 0; flex: 1; padding: 13px 18px 12px; }
+.step-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin-bottom: 6px; }
+.step-head h4 {
+  font-family: var(--head); font-weight: 700;
+  font-size: 1.6rem; line-height: 1.12; letter-spacing: 0.01em;
+  color: var(--plum);
+}
+.step-text p { margin-bottom: 8px; max-width: var(--measure); }
+.step-text ul, .step-text ol { margin: 4px 0 6px; padding-left: 24px; max-width: calc(var(--measure) + 24px); }
+.step-text li { margin-bottom: 6px; }
+.step-text li::marker, .ref-body li::marker, .teach-panel li::marker { color: var(--plum); }
+.step-text ul ul > li::marker, .ref-body ul ul > li::marker { content: "»  "; font-weight: 700; }   /* the rulebook's sub-bullets (p.3) */
+.step-text h4 { font-weight: 800; font-size: 0.95rem; letter-spacing: 0.07em; text-transform: uppercase; color: var(--plum); margin: 12px 0 4px; }
+.step-text li.note, .note { color: var(--ink-2); font-style: italic; }
+.step-text b, .ref-body b, .teach-panel b { color: var(--plum); font-weight: 700; }
+
+/* citations */
+.src-line {
+  margin-top: 10px; padding-top: 8px;
+  border-top: 1px solid var(--hair);
+  font-size: 0.9rem; line-height: 1.45; color: var(--ink-2);
+}
+.src-line::before {
+  content: "Source";
+  font-family: var(--head); font-weight: 700; font-size: 1.08rem;
+  letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--plum);
+  margin-right: 8px;
+}
+
+/* step tags: stencilled plates (who carries the step out) */
+.tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--body); font-weight: 800;
+  font-size: 0.8125rem; line-height: 1.3;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  white-space: nowrap;
+  padding: 3px 9px 2px;
+  border: 1.5px solid currentColor; border-radius: 2px;
+}
+.tag-table { color: #34363a; background: #e7e8e5; }
+.tag-both  { color: #5a3711; background: #f6ebdc; }
+.tag-imp   { color: var(--imp); background: var(--imp-bg); padding-left: 4px; }
+.tag-trt   { color: var(--trt); background: var(--trt-bg); padding-left: 4px; }
+.tag-first { color: #0c5459; background: #def0f0; }
+.tag-opt   { color: #683e00; background: #fcefd3; }
+.tag-imp::before, .tag-trt::before {
+  content: ""; flex: none; width: 18px; height: 18px;
+  background: center / contain no-repeat;
+}
+.tag-imp::before { background-image: url("../images/marker-imp.webp"); }
+.tag-trt::before { background-image: url("../images/marker-trt.webp"); }
+
+/* per-side bullets: the side's marker and name; your side is boxed and marked "you" (text, not only colour) */
+li.side {
+  list-style: none;
+  margin: 6px 0 6px -24px;
+  padding: 7px 10px 7px 12px;
+  border-left: 5px solid;
+  border-radius: 0 3px 3px 0;
+}
+li.side-imp { border-left-color: var(--imp); background: var(--imp-bg); }
+li.side-trt { border-left-color: var(--trt); background: var(--trt-bg); }
+li.side-imp.mine { box-shadow: inset 0 0 0 2px var(--imp); }
+li.side-trt.mine { box-shadow: inset 0 0 0 2px var(--trt); }
+li.side.theirs { background: transparent; border-left-width: 3px; padding-left: 14px; }
+li.side-imp.theirs { border-left-color: #6f8faa; }
+li.side-trt.theirs { border-left-color: #c4766b; }
+.who {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--body); font-weight: 800;
+  font-size: 0.8125rem; line-height: 1.55;
+  letter-spacing: 0.07em; text-transform: uppercase;
+  padding: 0 8px 0 2px; margin-right: 5px;
+  border-radius: 2px;
+  color: #ffffff;
+  vertical-align: 1px;
+  white-space: nowrap;
+}
+.who::before { content: ""; flex: none; width: 18px; height: 18px; background: center / contain no-repeat; }
+.who-imp { background: var(--imp); }
+.who-trt { background: var(--trt); }
+.who-imp::before { background-image: url("../images/marker-imp.webp"); }
+.who-trt::before { background-image: url("../images/marker-trt.webp"); }
+li.side.theirs .who { background: var(--paper); border: 1.5px solid currentColor; line-height: 1.4; }
+li.side-imp.theirs .who { color: var(--imp); }
+li.side-trt.theirs .who { color: var(--trt); }
+
+/* ---- tables ---------------------------------------------------------------------------- */
+.tbl-wrap { overflow-x: auto; margin: 10px 0 12px; -webkit-overflow-scrolling: touch; }
+table.mini, table.ref-tbl { border-collapse: collapse; width: 100%; font-size: 1rem; line-height: 1.45; background: var(--paper); }
+table.mini caption, table.ref-tbl caption {
+  text-align: left; padding: 0 0 5px;
+  font-family: var(--head); font-weight: 700; font-size: 1.3rem; line-height: 1.15;
+  color: var(--plum);
+}
+table.mini th, table.mini td, table.ref-tbl th, table.ref-tbl td { border: 1px solid #cbc3bc; padding: 7px 10px; text-align: left; vertical-align: top; }
+table.mini thead th, table.ref-tbl thead th {   /* the rulebook's capital column heads (p.10) */
+  background: #f0ebe6; color: var(--plum);
+  font-weight: 800; font-size: 0.875rem; letter-spacing: 0.07em; text-transform: uppercase;
+  border-bottom: 2px solid var(--plum);
+}
+table.ref-tbl tbody th { font-weight: 700; color: var(--ink); background: var(--panel-2); }
+table.ref-tbl.units thead th:not(:first-child), table.ref-tbl.units td:not(:first-child) { width: 1%; white-space: nowrap; }   /* count, rank, move: as narrow as their content */
+table.ref-tbl td .sub { display: block; font-size: 0.9rem; color: var(--ink-2); margin-top: 2px; }
+table.ref-tbl tr.grp th {
+  background: var(--steel-dk);
+  color: #ffffff;
+  font-family: var(--head); font-weight: 700; font-size: 1.25rem; letter-spacing: 0.06em; text-transform: uppercase;
+  border-color: #1b1410;
+  padding-top: 6px; padding-bottom: 5px;
+}
+/* the units table opens with the Imperial group and later starts the Traitor group: each side's marker and colour */
+table.ref-tbl tr.grp:first-child th { background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(0, 0, 0, 0.18)), var(--imp); }
+table.ref-tbl tr.grp:not(:first-child) th { background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.2)), var(--trt); }
+table.ref-tbl tr.grp th::before {
+  content: ""; display: inline-block; vertical-align: -5px;
+  width: 24px; height: 24px; margin-right: 8px;
+  background: center / contain no-repeat;
+}
+table.ref-tbl tr.grp:first-child th::before { background-image: url("../images/marker-imp.webp"); }
+table.ref-tbl tr.grp:not(:first-child) th::before { background-image: url("../images/marker-trt.webp"); }
+
+/* initiative track as on the board: steel grille cells and the special-phase icons (p.14–15) */
+.ref-body .itrack, .step-text .itrack { max-width: none; padding: 8px; }
+.ref-body .htrack, .step-text .htrack { max-width: none; padding: 0; }
+.itrack {
+  list-style: none;
+  display: flex; flex-wrap: wrap; gap: 5px;
+  margin: 12px 0 14px; padding: 8px;
+  background: linear-gradient(180deg, rgba(40, 41, 39, 0.55), rgba(10, 10, 9, 0.8)), var(--rust-tex) 0 0 / 144px auto, var(--steel-dk);
+  border: 1px solid #0f0c0a; border-radius: 3px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 2px 4px rgba(0, 0, 0, 0.25);
+}
+.it {
+  width: 74px; min-height: 74px; padding: 4px 3px 5px;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start; text-align: center;
+  color: #f1f1ee;
+  background: radial-gradient(#6a6c68 0.9px, rgba(0, 0, 0, 0) 1.3px) 0 0 / 4px 4px, #3c3d3b;
+  border: 2px solid #8c8e8a; border-radius: 50%;
+  box-shadow: inset 0 0 0 2px #222321;
+}
+.it-n { font-weight: 800; font-size: 0.8125rem; line-height: 1.25; }
+.it-l { font-weight: 700; font-size: 0.8125rem; line-height: 1.12; }
+.it-ev { background: radial-gradient(circle at 50% 40%, #5a1d1a, #2a0d0b); border-color: #9b9d98; color: #f3e16e; border-style: dashed; }   /* Event: red-black skull in a cog, yellow type */
+.it-or { background: linear-gradient(135deg, #fbe0a0, #eeb055 60%, #d98a37); border-color: #6b4a1c; color: #2b1402; border-radius: 2px; box-shadow: inset 0 0 0 2px #fff1c9; }   /* Order Phase: orange plate */
+.it-rf { background: radial-gradient(circle at 50% 40%, #b9ecef, #7fcdd4 70%); border-color: #156f74; color: #062f33; border-width: 3px; }   /* Refresh Phase: cyan ring */
+.it-sp { width: auto; min-width: 92px; background: radial-gradient(circle at 50% 40%, #fff3a6, #f2d34c 75%); border-color: #7d6a00; color: #2a2200; border-width: 3px; border-radius: 22px; }   /* Spaceport Victory */
+.it-iv { width: auto; min-width: 84px; background: var(--imp); border: 3px solid #a9c9de; color: #ffffff; border-radius: 4px; }   /* Imperial Victory */
+.it-start { background: radial-gradient(circle at 50% 40%, #b8381a, #7c1a0b 80%); border-color: #d9a62e; color: #ffffff; }
+
+/* Hero damage track */
+.htrack { list-style: none; display: flex; flex-wrap: wrap; gap: 5px; margin: 12px 0 14px; }
+.ht {
+  min-width: 80px; min-height: 54px; padding: 4px 10px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+  border: 2px solid var(--steel); border-radius: 27px;
+  background: #f4f4f2;
+}
+.ht-n { font-weight: 800; font-size: 0.9rem; line-height: 1.2; color: var(--ink); }
+.ht-l { font-weight: 700; font-size: 0.8125rem; line-height: 1.15; color: var(--ink-2); }
+.ht-start { background: #e3e4e1; border-color: #5f615e; border-style: dashed; min-width: 92px; }
+.ht-wd { background: var(--trt-bg); border-color: var(--trt); }
+.ht-wd .ht-l { color: var(--trt); }
+.ht-dead { background: #4d0b0b; border-color: #1b0303; }
+.ht-dead .ht-n, .ht-dead .ht-l { color: #ffffff; }
+
+dl.terms { display: grid; grid-template-columns: minmax(9rem, max-content) 1fr; gap: 8px 16px; }
+dl.terms dt { font-weight: 700; color: var(--plum); }
+dl.terms dd { margin: 0; }
+
+/* ---- components glossary (js/comp-widget.js + css/components.css) ---------------------- */
+#components {
+  --comp-surface: #ffffff;
+  --comp-fig: #faf9f8;          /* median corner colour of the rulebook crops */
+  --comp-ink: #221f1f;
+  --comp-muted: #4b4446;        /* 9.5:1 on surface */
+  --comp-line: #857c77;         /* 4.1:1 on the white page, 3.6:1 on its stripe */
+  --comp-accent: #530832;       /* rulebook plum */
+  --comp-accent-ink: #ffffff;   /* 14.5:1 on accent */
+  --comp-head-font: "Overpass", "Bell Gothic Std", "Segoe UI", Arial, sans-serif;   /* the book's text face: Agdasima is too condensed at the widget's 14–18px */
+  --comp-radius: 3px;
+}
+
+/* ---- rules reference ------------------------------------------------------------------- */
+.ref {
+  background: var(--paper);
+  border: 1px solid var(--card-line); border-radius: 2px;
+  margin-bottom: 10px; overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+.ref summary {
+  cursor: pointer; list-style: none; position: relative;
+  font-family: var(--head); font-weight: 700;
+  font-size: 1.55rem; line-height: 1.15; letter-spacing: 0.01em;
+  color: var(--ink);
+  padding: 13px 16px 12px 58px; min-height: 52px;
+}
+.ref summary::-webkit-details-marker { display: none; }
+.ref summary::before {       /* steel socket */
+  content: ""; position: absolute; left: 14px; top: 50%;
+  width: 28px; height: 28px; margin-top: -14px;
+  border: 3px solid var(--steel); border-radius: 2px;
+  background: radial-gradient(#6b6d69 0.9px, rgba(0, 0, 0, 0) 1.3px) 0 0 / 4px 4px, var(--steel-dk);
+  box-shadow: 0 0 0 1px #2a2b29;
+}
+.ref summary::after {        /* chevron */
+  content: ""; position: absolute; left: 24px; top: 50%;
+  width: 8px; height: 8px; margin-top: -6px;
+  border-right: 3px solid var(--brass); border-bottom: 3px solid var(--brass);
+  transform: rotate(-45deg);
+  transition: transform 0.15s;
+}
+@media (hover: hover) { .ref summary:hover { color: var(--plum); background: #fbf6f8; } }
+.ref summary:focus-visible { outline-offset: -5px; }   /* inset: .ref clips overflow */
+.ref[open] summary { color: var(--plum); border-bottom: 2px solid var(--plum); }
+.ref[open] summary::before { background: linear-gradient(135deg, #8d2a5c, var(--plum)); border-color: #5b5d5a; }
+.ref[open] summary::after { transform: rotate(45deg); margin-top: -8px; border-color: #ffffff; }
+.ref-body { padding: 14px 20px 16px; }
+.ref-body > *:first-child { margin-top: 0; }
+.ref-body h4 {               /* the rulebook's plum capital sub-heads ("GAME BOARD", p.3) */
+  font-weight: 800; font-size: 0.95rem; line-height: 1.3;
+  letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--plum);
+  margin: 16px 0 5px;
+}
+.ref-body p { margin-bottom: 8px; max-width: var(--measure); }
+.ref-body ul, .ref-body ol { margin: 4px 0 10px; padding-left: 24px; max-width: calc(var(--measure) + 24px); }
+.ref-body li { margin-bottom: 6px; }
+.ref-body li ul, .ref-body li ol { margin-top: 5px; margin-bottom: 4px; }
+
+/* ---- search ---------------------------------------------------------------------------- */
+.rsearch-wrap { margin-bottom: 16px; }
+#rsearch {
+  width: 100%; min-height: 54px;
+  padding: 12px 16px 12px 50px;
+  font: inherit; color: var(--ink);
+  background: var(--paper) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23530832' stroke-width='2.6' stroke-linecap='round'%3E%3Ccircle cx='10' cy='10' r='6.5'/%3E%3Cpath d='M15 15l6 6'/%3E%3C/svg%3E") 16px 50% / 22px 22px no-repeat;
+  border: 2px solid var(--steel-dk); border-radius: 3px;
+  box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.12), 0 0 0 3px #d9d6d2;
+}
+#rsearch:focus-visible { border-color: var(--plum); outline-offset: 4px; }
+#rsearch::placeholder { color: #635c5e; font-style: italic; opacity: 1; }
+.rhint { color: var(--ink-2); font-style: italic; }
+.rhit {
+  background: var(--paper);
+  border: 1px solid var(--card-line); border-left: 5px solid var(--rust);
+  border-radius: 2px;
+  padding: 10px 16px 12px; margin-bottom: 10px;
+}
+.rhit-src {
+  font-family: var(--head); font-weight: 700;
+  font-size: 1.2rem; letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--plum); margin-bottom: 2px;
+}
+.rhit-src::before, .rhit-src::after { font-family: var(--body); font-weight: 800; font-size: 1.05rem; }
+.rhit-src::before { content: "‹ "; }      /* the rulebook's page plate: ‹ 14 › */
+.rhit-src::after { content: " ›"; }
+.rhit-text { color: var(--ink); }
+.rhit-text mark { background: #f7da8b; color: var(--ink); border-radius: 2px; padding: 0 2px; box-shadow: inset 0 -2px 0 #d9a62e; }
+
+/* ---- footer: the bottom of the frame ------------------------------------------------- */
+.footer {
+  margin-top: 30px;
+  background: linear-gradient(180deg, rgba(22, 17, 14, 0.86), rgba(12, 9, 7, 0.93)), var(--rust-tex) 0 0 / 144px auto, var(--rust-dk);
+  color: #efe6d8;
+  text-align: center;
+}
+.rail-foot { box-shadow: 0 -4px 0 -1px var(--glow), 0 -5px 0 -1px #6b4a0e; }
+.footer-inner { max-width: 860px; margin: 0 auto; padding: 40px 20px 38px; font-size: 1rem; line-height: 1.6; }
+
+/* ---- responsive -------------------------------------------------------------------------- */
+@media (max-width: 860px) {
+  .brand-title { width: min(560px, 64%); }
+  .mast-art { width: 60%; }
+}
+@media (max-width: 640px) {
+  body { font-size: 16px; }
+  .mast-art { width: 100%; right: 0; opacity: 0.5; }
+  .mast-art img { object-position: 62% 22%;
+    -webkit-mask-image: linear-gradient(180deg, #000 55%, rgba(0, 0, 0, 0) 100%);
+            mask-image: linear-gradient(180deg, #000 55%, rgba(0, 0, 0, 0) 100%); }
+  .mast-inner { padding: 20px 14px 30px; }
+  .brand-title { width: 100%; max-width: 420px; margin: 0 auto; }
+  .brand-sub { font-size: 1.2rem; letter-spacing: 0.2em; padding-left: 0.2em; background: rgba(17, 2, 2, 0.72); padding-right: 6px; }
+  .skulls { width: 196px; height: 38px; }
+  main { padding: 24px 14px 56px; }
+  .flavor { font-size: 1.08rem; }
+  .sec { margin-top: 40px; }
+  .sec > h2 { font-size: 2.15rem; }
+  .frame { border-width: 9px; }
+  .frame::before { width: 190px; height: 36px; top: -24px; }
+  .frame::after { inset: -9px; }
+  .cfg { padding: 26px 12px 16px; gap: 20px; }
+  .cfg-label { font-size: 1.35rem; }
+  .mode-btn, .mod { max-width: none; flex-basis: 100%; }
+  .teach-panel { padding: 26px 14px 16px; }
+  .teach-top h3 { font-size: 1.55rem; }
+  .phase-title { font-size: 1.6rem; }
+  .step-num { flex-basis: 34px; font-size: 1.5rem; padding-top: 11px; border-right-width: 2px; }
+  .step-body { padding: 11px 12px 10px 12px; }
+  .step-head h4 { font-size: 1.42rem; }
+  .step-text ul, .step-text ol { padding-left: 20px; }
+  li.side { margin-left: -20px; padding: 6px 8px 6px 9px; }
+  .ref summary { font-size: 1.35rem; padding-left: 52px; }
+  .ref summary::before { left: 12px; }
+  .ref summary::after { left: 22px; }
+  .ref-body { padding: 12px 12px 14px; }
+  .ref-body ul, .ref-body ol { padding-left: 20px; }
+  .step-text .tbl-wrap, .ref-body .tbl-wrap { margin-left: -8px; margin-right: -8px; }   /* tables may use the card's side padding */
+  table.mini th, table.mini td, table.ref-tbl th, table.ref-tbl td { padding: 6px 6px; -webkit-hyphens: auto; hyphens: auto; }
+  table.mini thead th, table.ref-tbl thead th { font-size: 0.8125rem; letter-spacing: 0; }
+  table.mini caption, table.ref-tbl caption { padding-left: 8px; }
+  .ref-body .itrack, .step-text .itrack { padding: 6px; gap: 4px; }
+  .it { width: 58px; min-height: 62px; padding: 3px 1px 4px; }
+  .it-sp, .it-iv { width: auto; min-width: 0; padding-left: 6px; padding-right: 6px; }
+  .ht { min-width: 0; }
+  dl.terms { grid-template-columns: 1fr; gap: 2px; }
+  dl.terms dd { margin-bottom: 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+  html { scroll-behavior: auto; }
+}
