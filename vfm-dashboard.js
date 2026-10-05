@@ -103,6 +103,10 @@
   // A rating from a handful of votes (unreleased games) isn't meaningful for ranking.
   const MIN_VOTES = 50;
   const trustedRating = (it) => (it.r && (it.rc || 0) >= MIN_VOTES ? it.r : null);
+  // Market stats come from the last 12 months, or the last 3 years when a game
+  // had fewer than 3 sales in the past year (m[4] === 36).
+  const isOlder = (it) => !!(it.m && it.m[4] === 36);
+  const windowLabel = (it) => (isOlder(it) ? '3 yr' : '12 mo');
   const weightClass = (w) => (w == null ? null : w < 2 ? 'light' : w < 3.5 ? 'medium' : 'heavy');
   function prepare(raw) {
     return raw.map((it) => ({
@@ -351,7 +355,7 @@
         <p class="item-name" style="${it.st ? 'padding-right:84px' : ''}">${esc(it.n)}</p>
         <div class="facts">${facts(it)}</div></div></div>
       <div class="price-line"><span class="price">${esc(it.pt)}</span>${it.op ? `<span class="was">${esc(it.op)}</span>` : ''}${dealPill(it)}${tags}</div>
-      ${it.m ? `<div><div class="market-row">GeekMarket median <b>${money(it.m[0])}</b> · ${it.m[3]} sales</div>${gauge(it)}</div>` : ''}
+      ${it.m ? `<div><div class="market-row">GeekMarket median <b>${money(it.m[0])}</b> · ${it.m[3]} sales${isOlder(it) ? ' <span class="pill neutral" title="Fewer than 3 sales in the last year, so this uses the last 3 years" style="padding:0 6px;font-size:11px">3 yr</span>' : ''}</div>${gauge(it)}</div>` : ''}
       <div class="item-foot"><span>${icon('user')}${esc(it.s)}</span><span>${it.cc ? `${icon('chat')}${it.cc} · ` : ''}${ago(it.t)}</span></div>
     </article>`;
   }
@@ -409,9 +413,10 @@
       <div class="d-section">
         <div class="d-status s${it.st}">● ${STATUS[it.st]}${it.sn ? ` <span class="muted" style="font-weight:400">· ${esc(it.sn)}</span>` : ''}</div>
         <div class="d-price" style="margin-top:8px"><span class="price">${esc(it.pt)}</span>${it.op ? `<span class="was">${esc(it.op)}</span>` : ''}${dealPill(it)}</div>
-        ${it.m ? `<p class="muted" style="margin:6px 0 0;font-size:13px">${t.k === 'auction' ? 'Auction: the price is a starting bid.' : it.d != null ? `${t.label}: ${Math.abs(Math.round(it.d))}% ${it.d < 0 ? 'below' : 'above'} the GeekMarket median${it._sav > 0 ? `, about ${money(Math.round(it._sav), 0)} under` : ''}.` : 'Several prices in this post, so no single comparison.'}</p>
+        ${it.m ? `<p class="muted" style="margin:6px 0 0;font-size:13px">${t.k === 'auction' ? 'Auction: the price is a starting bid.' : it.d != null ? `${t.label}: ${Math.abs(Math.round(it.d))}% ${it.d < 0 ? 'below' : 'above'} the GeekMarket ${isOlder(it) ? '3-year ' : ''}median${it._sav > 0 ? `, about ${money(Math.round(it._sav), 0)} under` : ''}.` : 'Several prices in this post, so no single comparison.'}</p>
           ${gauge(it)}
-          <div class="d-market"><div><b>${money(it.m[0])}</b><span>Median</span></div><div><b>${money(Math.round(it.m[1]), 0)}</b><span>Typical low</span></div><div><b>${money(Math.round(it.m[2]), 0)}</b><span>Typical high</span></div><div><b>${it.m[3]}</b><span>Sales (12 mo)</span></div></div>`
+          <div class="d-market"><div><b>${money(it.m[0])}</b><span>Median</span></div><div><b>${money(Math.round(it.m[1]), 0)}</b><span>Typical low</span></div><div><b>${money(Math.round(it.m[2]), 0)}</b><span>Typical high</span></div><div><b>${it.m[3]}</b><span>Sales (${windowLabel(it)})</span></div></div>
+          ${isOlder(it) ? '<p class="muted" style="margin:8px 0 0;font-size:12px">Fewer than 3 sales in the last year, so this uses the last 3 years. Older prices may differ from today&rsquo;s market.</p>' : ''}`
           : '<p class="muted" style="margin:6px 0 0;font-size:13px">No GeekMarket sales data for this game yet.</p>'}
       </div>
       <div class="d-section"><h3>Listing</h3>${dl([
