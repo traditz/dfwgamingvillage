@@ -1,11 +1,13 @@
 /* =============================================================================
    Horus Heresy (Fantasy Flight Games, 2010) — Setup & Reference Utility · data
    Sources (citations use PRINTED page numbers, which equal the PDF page numbers):
-     Rules — Horus Heresy "Rules of Play" rulebook (this edition © 2010 per its p.42; PDF dated 2009–10; 44 pp)
-     FAQ   — Horus Heresy FAQ and Errata, Version 1.0 (updated 7/13/2010, 3 pp)
-   Precedence: the FAQ's errata and rulings override the rulebook (applied throughout).
-   The Scenario Guide booklet is NOT among the sources, so scenario particulars are referred to it.
-   c = { mode, first, seat, mod(id), has(id) } — see js/app.js
+     Rules     — Horus Heresy "Rules of Play" rulebook (this edition © 2010 per its p.42; PDF dated 2009–10; 44 pp)
+     Scenarios — the Scenario Guide booklet (a 20-page scan: the six scenarios p.3–10, "The Siege of Terra" p.11–20)
+     FAQ       — Horus Heresy FAQ and Errata, Version 1.0 (updated 7/13/2010, 3 pp)
+   Precedence: the FAQ's errata and rulings override both books (applied throughout; the one that bears on scenario
+   setup, that the Traitor may execute his setup orders on his first turn, FAQ p.2, is in the order card setup step).
+   c = { mode, scen, first, seat, mod(id), has(id) } — see js/app.js. scen is "bab" (Brother Against Brother)
+   unless mode is "veteran", when it is the scenario picked in the configurator.
    ============================================================================= */
 var HH = {};
 
@@ -26,8 +28,35 @@ HH.modes = [
   { id: "mentor", name: "Teaching a new player",
     blurb: "“Brother Against Brother”, with the experienced player on the Traitor side." },
   { id: "veteran", name: "Two experienced players",
-    blurb: "Any of the six scenarios. Settle scenario and sides by one of the rulebook’s three methods." }
+    blurb: "Any of the six scenarios: pick it below. Settle scenario and sides by one of the rulebook’s three methods." }
 ];
+
+/* the Scenario Guide's six scenarios (Scenarios p.2–10). corr / bomb = the Traitor's corruption draws and orbital
+   bombardments at setup; imp = impassible areas (p.7); tok = special tokens (p.8). */
+HH.scenarios = [
+  { id: "bab", n: 1, name: "Brother Against Brother", pg: "p.3–5", corr: 12, bomb: 4,
+    blurb: "The introductory scenario: everything starts where the book’s setup diagram shows (Scenarios p.3–5).",
+    premise: "Well balanced, with a roughly historical setup: a complete unit setup and an event deck that is both simple and fair. The book highly recommends it as new players’ first game." },
+  { id: "hu", n: 2, name: "Heresy Unheralded", pg: "p.6", corr: 12, bomb: 4,
+    blurb: "Like Brother Against Brother, but both sides choose how to deploy (Scenarios p.6).",
+    premise: "Like the strictly historical Brother Against Brother, but both players make more choices about how their starting forces are arrayed. Not recommended for first-time players: good choices need a feel for what the units can do." },
+  { id: "hta", n: 3, name: "Holy Terra Asunder", pg: "p.7", corr: 8, bomb: 6, imp: true,
+    blurb: "Four impassible areas, and a battlefield that changes as you play (Scenarios p.7).",
+    premise: "The invaders’ bombardments have wracked Holy Terra almost beyond recognition. The battlefield itself changes over the course of the game, and both players must adapt to it." },
+  { id: "ffb", n: 4, name: "Fortune Favors the Bold", pg: "p.8", corr: 12, bomb: 4, tok: true,
+    blurb: "Special tokens cut initiative costs, and the Imperial hold-out victory is imperiled (Scenarios p.8).",
+    premise: "Events give both players chances to do more: place more orders and push their units further and harder. The Imperial victory by holding out is imperiled, and late events throw the Emperor and Horus closer together, for a wider-ranging, more dynamic game." },
+  { id: "lug", n: 5, name: "Like Unto Gods", pg: "p.9", corr: 12, bomb: 4,
+    blurb: "Each of you picks event cards for the deck, four extra starting orders and the freest deployment (Scenarios p.9).",
+    premise: "The most latitude: each player contributes event cards of his choice, deploys with the greatest freedom and picks extra starting orders. Setup takes a bit longer than usual." },
+  { id: "cha", n: 6, name: "Cry Havoc", pg: "p.10", corr: 8, bomb: 4, imp: true, tok: true,
+    blurb: "Everything at once: impassible areas, special tokens and ten random events (Scenarios p.10).",
+    premise: "Everything in the box, in a massive free-for-all where just about anything can happen. Great fun for some, but the book warns that such anarchy is not to every player’s taste." }
+];
+HH.sc = function (c) {
+  for (var i = 0; i < HH.scenarios.length; i++) if (HH.scenarios[i].id === c.scen) return HH.scenarios[i];
+  return HH.scenarios[0];
+};
 
 HH.pieces = [
   { id: "assemble", name: "First time out of the box",
@@ -95,6 +124,86 @@ HH.heroTrackHtml = function () {
   return "<ol class='htrack' aria-label='Hero damage track: damage points and state'>" + cells.join("") + "</ol>";
 };
 
+/* ---- scenario helpers (Scenario Guide) ------------------------------------------------- */
+HH.scIs = function (c) { var ids = [].slice.call(arguments, 1); return ids.indexOf(c.scen) !== -1; };
+// The page that holds the chosen scenario's setup text, and the citation for steps that follow it
+HH.scPage = function (c) { return c.scen === "bab" ? "p.3" : HH.sc(c).pg; };
+// Unit setup: Heresy Unheralded's procedure (p.6) is reused by scenarios 3–6; Cry Havoc takes its impassible areas from p.7
+HH.huSrc = function (c, rules) {
+  return "Scenarios " + ({ hu: "p.6", hta: "p.7, p.6", ffb: "p.8, p.6", lug: "p.9, p.6", cha: "p.10, p.6–7" })[c.scen] + " · Rules " + rules;
+};
+
+// Event decks built act by act (Scenarios p.3, p.6, p.7, p.8). use = how many random cards of the list; 0 = all.
+HH.evActs = {
+  bab: [ { use: 0, cards: ["Apocalypse Rains Down", "The Righteous Heed the Call", "Tendrils of the Traitor", "The Vicissitudes of Chaos"] },
+         { use: 0, cards: ["Apocalypse Rains Down", "Command Decisions (×2)", "The Sky Fortress Rises"] },
+         { use: 0, cards: ["Titans Stride the Earth (×2)"] } ],
+  hta: [ { use: 3, cards: ["Apocalypse Rains Down", "Cyclones Rage and the Air Itself Burns", "Doom Flies Astray", "Lava Boils and Terra is Torn Asunder"] },
+         { use: 5, cards: ["An Unholy Portal is Opened", "Apocalypse Rains Down", "Blocked With Corpses", "Command Decisions", "The Sky Fortress Rises", "The Unwavering Will to Act"] },
+         { use: 0, cards: ["Titans Stride the Earth (×2)"] } ],
+  ffb: [ { use: 3, cards: ["Command Decisions (×2)", "The Strength of Conviction", "The Unwavering Will to Act"] },
+         { use: 2, cards: ["Horus’s Irresistible Gambit", "The Strength of Conviction", "The Warp Claims a Mighty Armada"] },
+         { use: 5, cards: ["An Unholy Portal is Opened", "The Sky Fortress Rises", "Thrown to Terra by his Mighty Hand", "Titans Stride the Earth", "The Unwavering Will to Act (×3)"] } ]
+};
+HH.evActs.hu = HH.evActs.bab;   // identical lists (Scenarios p.6)
+HH.evCount = function (cards) {
+  return cards.reduce(function (n, x) { var m = x.match(/\(×(\d+)\)/); return n + (m ? +m[1] : 1); }, 0);
+};
+HH.evHtml = function (c) {
+  if (c.scen === "cha") {
+    return "<ul><li>Shuffle <b>all 30 event cards</b> together and deal <b>10</b> of them into a facedown pile: that pile is the event deck.</li>" +
+      "<li>The other 20 aren’t used this game. The event deck is <b>never reshuffled</b>.</li></ul>";
+  }
+  if (c.scen === "lug") {
+    return "<p>Like Unto Gods builds its three acts its own way:</p><ol>" +
+      "<li><b>Share out the event cards.</b><ul>" +
+        HH.li(c, "imp", "takes Blocked With Corpses, Cyclones Rage and the Air Itself Burns, Doom Flies Astray, Lava Boils and Terra is Torn Asunder, The Righteous Heed the Call, The Sky Fortress Rises (×2) and The Vicissitudes of Chaos (×2): 9 cards.") +
+        HH.li(c, "trt", "takes Apocalypse Rains Down (×2), Tendrils of the Traitor (×2), A Traitor Within the Walls (×2) and An Unholy Portal is Opened (×2): 8 cards.") +
+        "<li><b>Not used:</b> The Warp Claims a Mighty Armada, Horus’s Irresistible Gambit and Thrown to Terra by his Mighty Hand.</li>" +
+        "<li><b>Neutral pile:</b> shuffle the remaining 10 facedown: Command Decisions (×2), The Strength of Conviction (×2), Titans Stride the Earth (×2) and The Unwavering Will to Act (×4).</li></ul></li>" +
+      "<li><b>Choose.</b> Each player, choosing freely from his own cards, puts <b>2</b> facedown in the <b>Act I</b> pile, <b>2</b> in the <b>Act II</b> pile and <b>1</b> in the <b>Act III</b> pile. Return the unchosen cards to the box facedown.</li>" +
+      "<li><b>Add neutral cards.</b> Add 2 random cards from the top of the neutral pile to Act I and 2 to Act II. Return the rest of the neutral pile to the box facedown.</li>" +
+      "<li><b>Shuffle</b> each of the three act piles separately.</li>" +
+      "<li><b>Trim.</b> Discard 2 random cards to the box, facedown, from Act I and 2 from Act II.</li>" +
+      "<li><b>Stack</b> the three piles together to form the event deck, Act I on top as the rulebook stacks acts: 10 cards (4 + 4 + 2). It is <b>never reshuffled</b>.</li></ol>";
+  }
+  var acts = HH.evActs[c.scen], names = ["Act I", "Act II", "Act III"], total = 0, random = false;
+  var rows = acts.map(function (a, i) {
+    var n = HH.evCount(a.cards);
+    total += a.use || n;
+    if (a.use) random = true;
+    return "<tr><th scope='row'>" + names[i] + "</th><td>" + (a.use ? "<b>" + a.use + " random</b> of these " + n + ": " : "<b>All " + n + "</b>: ") +
+      a.cards.join(", ") + "</td></tr>";
+  }).join("");
+  return "<ul><li>For each act, find the cards listed and shuffle them facedown." +
+    (random ? " Where only some are used, keep that many and return the rest to the box without looking at them." : "") + "</li></ul>" +
+    "<div class='tbl-wrap'><table class='mini'><caption>Event cards by act</caption>" +
+    "<thead><tr><th scope='col'>Act</th><th scope='col'>Cards</th></tr></thead><tbody>" + rows + "</tbody></table></div>" +
+    "<ul><li>Stack the piles with <b>Act I on top</b>, then Act II, then Act III: a <b>" + total + "-card</b> event deck.</li>" +
+    "<li>Event cards not selected aren’t part of this game’s event deck. The deck is <b>never reshuffled</b>: it holds exactly as many cards as the game can need.</li></ul>";
+};
+
+// "Brother Against Brother" setup diagram (Scenarios p.4–5), cropped from the scan at its native resolution.
+HH.fig = function (file, w, h, alt, cap) {
+  return "<figure class='scen-fig'><a href='images/" + file + "' target='_blank' rel='noopener' title='Open the diagram full size'>" +
+    "<img src='images/" + file + "' width='" + w + "' height='" + h + "' alt='" + alt + "' loading='lazy' decoding='async'></a>" +
+    "<figcaption>" + cap + "</figcaption></figure>";
+};
+HH.babFigs = function () {
+  return HH.fig("scen-bab-terra.webp", 1139, 1272,
+      "Brother Against Brother setup diagram for Terra: a labelled group of units, Heroes and defense lasers for each starting area, with a line to that area. The next two steps list them.",
+      "<b>Terra</b> · Scenarios p.4 · blue labels are Imperial, red labels Traitor. Tap a diagram to open it full size.") +
+    HH.fig("scen-bab-vs.webp", 1160, 494, "Brother Against Brother setup diagram for the Vengeful Spirit, listed in the Traitor step below.",
+      "<b>The Vengeful Spirit</b> · Scenarios p.5") +
+    HH.fig("scen-bab-palace.webp", 1160, 655, "Brother Against Brother setup diagram for the Palace, listed in the Imperial step below.",
+      "<b>The Palace</b> · Scenarios p.5");
+};
+HH.areaTable = function (cap, rows, cls) {
+  return "<div class='tbl-wrap'><table class='mini areas" + (cls ? " " + cls : "") + "'><caption>" + cap + "</caption>" +
+    "<thead><tr><th scope='col'>Area</th><th scope='col'>Starts with</th></tr></thead><tbody>" +
+    rows.map(function (r) { return "<tr><th scope='row'>" + r[0] + "</th><td>" + r[1] + "</td></tr>"; }).join("") + "</tbody></table></div>";
+};
+
 /* =============================================================================
    SETUP — phases and steps (rulebook order: First Game Setup p.10–11, then Setup steps 1–8, p.12–13)
    ============================================================================= */
@@ -133,24 +242,24 @@ HH.phases = [
       { when: () => true, who: "both",
         t: "Choose the scenario and sides",
         d: (c) => {
-          var d = "<ul>";
+          var s = HH.sc(c), d = "<ul>";
           if (c.mode === "first") {
-            d += "<li>Play <b>“Brother Against Brother”</b> (Scenario Guide p.3). The rulebook highly recommends it for first-time players; it is meant to introduce the game.</li>" +
+            d += "<li>Play <b>“Brother Against Brother”</b> (Scenarios p.3). The rulebook highly recommends it for first-time players; it is meant to introduce the game. The Scenario Guide calls it well balanced and roughly historical, with a complete unit setup and a simple, fair event deck.</li>" +
                  "<li>Choose sides <b>at random</b> or <b>by agreement</b>.</li>";
           } else if (c.mode === "mentor") {
-            d += "<li>The rulebook recommends <b>“Brother Against Brother”</b> (Scenario Guide p.3), the introductory scenario…</li>" +
+            d += "<li>The rulebook recommends <b>“Brother Against Brother”</b> (Scenarios p.3), the introductory scenario…</li>" +
                  "<li>…with the <b>experienced player controlling the Traitor</b>, so the new player commands the Imperium.</li>";
           } else {
             d += "<li>Choose a scenario and sides by one of three methods:<ol>" +
                  "<li><b>Agree the scenario, draw for sides.</b> Shuffle the bombardment deck, pick one player and reveal the top card. An <b>Imperial Eagle</b> makes that player Imperial; a <b>Chaos Star</b> makes him the Traitor.</li>" +
                  "<li><b>Flip a coin.</b> The winner chooses any scenario; the loser then chooses which side to control.</li>" +
-                 "<li><b>Simply agree</b> on a scenario and sides.</li></ol></li>";
+                 "<li><b>Simply agree</b> on a scenario and sides.</li></ol></li>" +
+                 "<li>This page is set to <b>Scenario " + s.n + ": “" + s.name + "”</b> (Scenarios " + s.pg + "). " + s.premise + " Pick another under Scenario, above.</li>";
           }
-          d += "<li>The six scenarios are in the <b>Scenario Guide</b> booklet, each with its own setup instructions. Keep your scenario open: the scenario-setup steps below follow its particulars.</li>" +
-               "<li class='note'>The Scenario Guide isn’t among this page’s sources, so scenario details (where units start, event acts, how many corruptions and bombardments, extra order setup, special tokens) aren’t reproduced here.</li></ul>";
+          d += "<li>The Scenario Guide’s six scenarios each have their own unit setup, event deck, corruption and bombardment; the steps below are this scenario’s. The rulebook’s general setup still applies, and every scenario uses the rulebook’s victory conditions.</li></ul>";
           return d;
         },
-        src: (c) => "Rules p.12 · p.9" },
+        src: (c) => "Rules p.12 · p.9 · Scenarios p.2" + (c.mode === "veteran" && c.scen !== "bab" ? ", " + HH.sc(c).pg : ", p.3") },
       { when: () => true, who: "table",
         t: "Assemble the board",
         d: "<ul><li>Lay the plastic <b>fortifications</b> (<b>3 factories, 6 fortresses and the palace</b>) on the table in the rough arrangement shown in the rulebook’s diagram, matching the holes in the board.</li>" +
@@ -169,56 +278,155 @@ HH.phases = [
           "<li>Put both <b>initiative markers</b> on the first space of the <b>initiative track</b>, with the <b>Traitor marker on top</b> of the Imperial marker.</li>" +
           "<li>Place the remaining markers and tokens within reach of both players.</li>" +
           "<li>Each player takes his <b>order deck</b> but sets it aside until order card setup.</li></ul>",
-        src: "Rules p.12 · p.3, p.5, p.11, p.32" }
+        src: "Rules p.12 · p.3, p.5, p.11, p.32" },
+      { when: (c) => HH.scIs(c, "hta", "cha"), who: "both",
+        t: "Mark four impassible areas",
+        d: (c) => "<ul>" +
+          "<li>After general component setup, the players take turns rendering <b>four areas impassible</b>:</li>" +
+          HH.li(c, "trt", "chooses the first area; then the players alternate until four have been chosen.") +
+          "<li>Mark each one with a <b>special token</b>.</li>" +
+          "<li>No two impassible areas may be <b>adjacent</b> to each other.</li>" +
+          "<li><b>Never impassible:</b> the Inner Palace, the four spaceports and the two areas of the Vengeful Spirit. Any other area is fair game.</li>" +
+          "<li>An impassible area can’t be entered by units or Heroes, can’t be the target of a bombardment and can’t be the subject of any game effect at all. As far as the game is concerned, it doesn’t exist.</li>" +
+          (c.scen === "cha" ? "<li>Cry Havoc uses Holy Terra Asunder’s procedure, and these areas work the same way.</li>" : "") + "</ul>",
+        src: (c) => c.scen === "cha" ? "Scenarios p.10, p.7" : "Scenarios p.7" },
+      { when: (c) => HH.scIs(c, "ffb", "cha"), who: "both",
+        t: "Take three special tokens each",
+        d: (c) => "<ul>" +
+          "<li>Each player takes <b>3 special tokens</b>." +
+          (c.scen === "cha" ? " Keep them apart from the impassible-area markers: in Cry Havoc special tokens have two different uses, and they aren’t interchangeable." : "") + "</li>" +
+          "<li>Whenever you <b>place</b> one of your orders on the strategic map, <b>execute</b> one of your orders from the strategic map, or <b>execute</b> one from your hand, you may spend <b>one</b> token (never more) to reduce that placement’s or execution’s initiative cost by 1, to a minimum of 0.</li>" +
+          "<li>A spent token is removed from play for the rest of the game.</li></ul>",
+        src: (c) => c.scen === "cha" ? "Scenarios p.10, p.8" : "Scenarios p.8" }
     ]
   },
   {
-    title: "Scenario setup (rulebook steps 4–8: follow your scenario)",
+    title: (c) => "Scenario setup: " + HH.sc(c).name + " (rulebook steps 4–8)",
     steps: [
-      { when: () => true, who: "both",
-        t: "Unit setup",
-        d: "<ul><li>Each player places units and Heroes on the main map board as the scenario’s <b>unit setup</b> instructions direct.</li>" +
-          "<li>Everything not placed (units, loose figures and bases, Heroes) forms each player’s <b>stockpile</b>.</li>" +
-          "<li>Heroes the scenario doesn’t place start in the stockpile. They can be brought in whenever their owner may place units from his stockpile.</li></ul>",
-        src: "Rules p.12 · p.31" },
+      /* ---- unit setup: Brother Against Brother's diagram (Scenarios p.3–5) ---- */
+      { when: (c) => c.scen === "bab", who: "both",
+        t: "Unit setup: the setup diagram",
+        d: (c) => "<ul><li>Both players place their starting units, Heroes and defense lasers exactly as the <b>“Brother Against Brother” setup diagram</b> shows. The next two steps list each side’s pieces area by area.</li></ul>" +
+          HH.babFigs(),
+        src: "Scenarios p.3–5 · Rules p.12" },
+      { when: (c) => c.scen === "bab", who: "imp",
+        t: "Unit setup: Imperial forces",
+        d: (c) => "<ul>" + HH.li(c, "imp", "places all 5 of his Heroes, all 6 defense lasers and these units (the diagram’s blue labels).") + "</ul>" +
+          HH.areaTable("The Palace (Scenarios p.5)", [
+            ["Inner Palace", "<b>the Emperor</b>, 3 Adeptus Custodes"],
+            ["Imperial Fists Fortress Monastery", "<b>Rogal Dorn</b>, 3 Imperial Fists Space Marines, defense laser"],
+            ["Forbidden Fortress", "<b>Sanguinius</b>, 3 Blood Angels Space Marines, defense laser"],
+            ["Outer Palace, north-west", "Adeptus Arbites, 1 Blood Angels Space Marines, defense laser"],
+            ["Outer Palace, north-east", "Adeptus Arbites"],
+            ["Outer Palace, south-east", "Adeptus Arbites"],
+            ["Outer Palace, south-west", "1 Imperial Fists Space Marines"]]) +
+          HH.areaTable("Terra: named areas (Scenarios p.4)", [
+            ["Librarium Technologicus", "<b>Jaghatai Khan</b>, 2 White Scars Space Marines, 1 Imperial Army"],
+            ["Fortress of Truth", "2 White Scars Space Marines, 1 Imperial Army, defense laser"],
+            ["Tower of Shadows", "2 Imperial Armies, defense laser"],
+            ["The Black Ministry", "2 Imperial Armies, defense laser"],
+            ["Citadel of Justice", "1 Imperial Army"],
+            ["Bastion Eternal", "1 Imperial Army"],
+            ["Volcanus Factory Complex", "<b>the Fabricator General</b>, Adeptus Mechanicus"],
+            ["Crucible Factory Complex", "Adeptus Mechanicus"],
+            ["Factory north-east of the Palace", "Adeptus Mechanicus"],
+            ["Lions Gate Spaceport", "3 Imperial Armies, 1 Imperial Tank Division"],
+            ["Spaceport Damocles", "3 Imperial Armies, 1 Imperial Tank Division"]]) +
+          HH.areaTable("Terra: open areas (Scenarios p.4, follow the diagram)", [
+            ["South of Spaceport Primus, west of the Volcanus Factory Complex", "2 Imperial Titans, 2 Imperial Tank Divisions"],
+            ["East of the factory north-east of the Palace, north of Lions Gate Spaceport", "1 Imperial Titan, 1 Imperial Army"],
+            ["South-west of the Palace, between Eternity Wall Spaceport and the Librarium Technologicus", "1 Imperial Army, 2 Imperial Tank Divisions"],
+            ["The two areas just north of Spaceport Primus, between the Fortress of Truth and the Librarium Technologicus (a white line running north from the spaceport divides them)", "1 Imperial Army in each"],
+            ["Just south of the Palace, below its south-west Outer Palace (west of the white line that runs south from the Palace)", "1 Imperial Army"],
+            ["South-east of the Palace: just south of the Forbidden Fortress (the Palace’s east end) and south-west of Lions Gate Spaceport", "1 Imperial Army"]], "open") +
+          "<ul><li>That is 20 of the 24 Imperial Armies, 6 of the 12 Tank Divisions and every other Imperial unit. The other <b>4 Imperial Armies</b> and <b>6 Tank Divisions</b> form the Imperial <b>stockpile</b>.</li>" +
+          "<li class='note'>The diagram points at areas without naming them. The names here are the board’s, as the rulebook pictures it (Rules p.4, p.33, p.38). Open areas have no names, and the factory north-east of the Palace has a label too small to read in the rulebook’s pictures, so those are given by position.</li></ul>",
+        src: "Scenarios p.4–5 · Rules p.4, p.33, p.38" },
+      { when: (c) => c.scen === "bab", who: "trt",
+        t: "Unit setup: Traitor forces",
+        d: (c) => "<ul>" + HH.li(c, "trt", "places Horus, Mortarion, Angron and these 13 units (the diagram’s red labels).") + "</ul>" +
+          HH.areaTable("The Vengeful Spirit (Scenarios p.5) and Terra (p.4)", [
+            ["Vengeful Spirit Command Center", "<b>Horus</b>, 2 Daemon Hordes (Slaanesh, purple), Emperor’s Children Chaos Space Marines"],
+            ["Vengeful Spirit Catacombs", "2 Chaos Warbands (Slaanesh, purple), 1 Chaos Warband (Tzeentch, blue), 1 Daemon Horde (Nurgle, green)"],
+            ["Eternity Wall Spaceport", "<b>Mortarion</b>, Death Guard Chaos Space Marines, Chaos Titan (Nurgle, green), Chaos Warband (Nurgle, green)"],
+            ["Spaceport Primus", "<b>Angron</b>, World Eaters Chaos Space Marines, Daemon Horde (Khorne, red), Chaos Warband (Khorne, red)"]]) +
+          "<ul><li>Everything else is the Traitor <b>stockpile</b>: <b>Fulgrim</b>, <b>Magnus the Red</b>, 13 Chaos Space Marines (all 4 Thousand Sons among them), 3 Chaos Titans, all 8 Thunderhawk Flights and 8 Cultists, 3 Chaos Warbands, 4 Daemon Hordes and the 12 spare black bases.</li>" +
+          "<li>A stockpiled Hero can be brought in whenever his owner may place units from his stockpile.</li></ul>",
+        src: "Scenarios p.4–5 · Rules p.12, p.31" },
+
+      /* ---- unit setup: Heresy Unheralded's procedure (Scenarios p.6), used by scenarios 2–6 ---- */
+      { when: (c) => c.scen !== "bab", who: "both",
+        t: (c) => "Unit setup 1: claim the spaceports" + (c.scen === "hu" ? "" : " (as in Heresy Unheralded)"),
+        d: (c) => "<ul>" +
+          HH.li(c, "trt", "first chooses one of the four <b>spaceports</b> and places a <b>Chaos Warband</b> of his choice there.") +
+          HH.li(c, "imp", "then chooses two of the remaining three spaceports and places <b>3 Imperial Armies</b> on each.") +
+          HH.li(c, "trt", "then places a Chaos Warband of his choice on the <b>fourth</b> spaceport.") +
+          "<li>The spaceports are Eternity Wall Spaceport, Lions Gate Spaceport, Spaceport Damocles and Spaceport Primus.</li>" +
+          (HH.scIs(c, "hta", "cha") ? "<li><b>Impassible areas:</b> nothing can be placed in one. A unit the setup says must go in an impassible area is destroyed instead of placed.</li>" : "") +
+          "</ul>",
+        src: (c) => HH.huSrc(c, "p.12, p.41") },
+      { when: (c) => c.scen !== "bab", who: "imp",
+        t: "Unit setup 2: the Imperial deployment",
+        d: (c) => "<ul>" +
+          HH.li(c, "imp", "places the rest of his starting forces. None may break an area’s <b>stacking limit</b> (6 units; 3 in a fortified area), go in either spaceport holding a Traitor Warband, or go on the <b>Vengeful Spirit</b>.") +
+          "<li><b>1 Imperial Army</b> in each fortress area: the Tower of Shadows, Librarium Technologicus, Bastion Eternal, Fortress of Truth, Citadel of Justice and Black Ministry." +
+            (HH.scIs(c, "hta", "cha") ? " If a fortress is impassible, its Army is destroyed instead of placed." : "") + "</li>" +
+          "<li><b>6 defense lasers</b>, in six different areas.</li>" +
+          "<li><b>3 Adeptus Custodes</b>, <b>3 Adeptus Arbites</b> and <b>the Emperor</b>, in any area(s) of the Palace region.</li>" +
+          "<li><b>3 Adeptus Mechanicus</b> and <b>the Fabricator General</b>, in any factory area(s).</li>" +
+          "<li><b>3 Imperial Titans</b>, in any factory area(s) or area(s) adjacent to a factory.</li>" +
+          "<li>All <b>12 Space Marines</b> and their Primarchs, in any area(s): 4 Blood Angels and Sanguinius, 4 Imperial Fists and Rogal Dorn, 4 White Scars and Jaghatai Khan.</li>" +
+          "<li><b>8 Imperial Armies</b> and <b>4 Imperial Tank Divisions</b>, in any area(s).</li>" +
+          "<li>Imperial units not placed form the Imperial <b>stockpile</b>.</li></ul>",
+        src: (c) => HH.huSrc(c, "p.12, p.38") },
+      { when: (c) => c.scen !== "bab", who: "trt",
+        t: "Unit setup 3: the Traitor deployment",
+        d: (c) => "<ul>" +
+          HH.li(c, "trt", "places the rest of his starting forces:") +
+          "<li><b>Horus</b> and any <b>3 Traitor units</b> in the Vengeful Spirit <b>Command Center</b>.</li>" +
+          "<li>Any <b>4 Traitor units</b> in the Vengeful Spirit <b>Catacombs</b>.</li>" +
+          "<li>Any <b>4 Traitor units</b> in each of the two spaceports his Warbands claimed: 8 more units in all.</li>" +
+          "<li>Any of his other <b>Heroes</b> he chooses, in any area(s) already holding Traitor units.</li>" +
+          "<li>All unused units, figures, bases and Heroes form each player’s <b>stockpile</b>. A stockpiled Hero can be brought in whenever his owner may place units from his stockpile.</li></ul>",
+        src: (c) => HH.huSrc(c, "p.12, p.31") },
+
       { when: () => true, who: "table",
         t: "Build the event deck",
-        d: "<ul><li>For <b>each act</b> in the scenario’s event card lists:<ol>" +
-          "<li>Find the event cards named.</li><li>Shuffle them facedown.</li>" +
-          "<li>If the list says to use only some (e.g. “Use three random cards from the following list:”), do so and return the rest to the box without looking at them.</li>" +
-          "<li>Leave the pile facedown.</li></ol></li>" +
-          "<li>Stack the piles with <b>Act I on top</b>, Act II below it, then Act III, and so on.</li>" +
-          "<li>Some scenarios build the event deck another way; follow their instructions instead.</li>" +
-          "<li>Unselected event cards are not part of this game. The event deck is <b>never reshuffled</b>: it holds exactly as many cards as the game can need.</li></ul>",
-        src: "Rules p.13 · p.5, p.39" },
+        d: (c) => HH.evHtml(c),
+        src: (c) => "Scenarios " + HH.scPage(c) + (c.scen === "cha" ? " · Rules p.5, p.39" : " · Rules p.5, p.13, p.39") },
       { when: () => true, who: "trt",
-        t: "Corruption",
-        d: (c) => "<ul>" + HH.li(c, "trt", "repeats this as many times as the scenario specifies:<ol>" +
+        t: (c) => "Corruption: " + HH.sc(c).corr + " draws",
+        d: (c) => "<ul>" + HH.li(c, "trt", "makes <b>" + HH.sc(c).corr + " corruption draws</b>. For each:<ol>" +
           "<li>Choose an <b>Imperial Army</b> or <b>Imperial Tank Division</b> on the main map board. They are the only unit types that can be corrupted, and each Imperial unit can be put in jeopardy only <b>once</b> during setup.</li>" +
           "<li>Draw the top <b>bombardment card</b>. <b>Imperial Eagle</b>: no effect. <b>Chaos Star</b>: the unit is corrupted.</li>" +
           "<li>Move a corrupted unit’s figure from its gray base onto a <b>black Traitor base</b> (rank I for an Army, rank II for a Tank Division). It stays in the same area and is now a Traitor unit. The gray base goes to the Imperial stockpile. Discard the drawn card.</li></ol>") +
           "<li>Only the 12 spare black bases can be used. With none of the right rank left, that unit type can’t be corrupted.</li>" +
           HH.li(c, "imp", "watches which of his Armies and Tank Divisions change sides.") + "</ul>",
-        src: "Rules p.13 · p.37" },
+        src: (c) => "Scenarios " + HH.scPage(c) + " · Rules p.13, p.37" },
       { when: () => true, who: "trt",
-        t: "Bombardment",
-        d: (c) => "<ul>" + HH.li(c, "trt", "repeats this as many times as the scenario specifies:<ol>" +
-          "<li>Choose an area on the main map board. It may <b>not</b> be a fortified area, e.g. a factory, a fortress or an area of the palace.</li>" +
+        t: (c) => "Bombardment: " + HH.sc(c).bomb + " orbital bombardments",
+        d: (c) => "<ul>" + HH.li(c, "trt", "makes <b>" + HH.sc(c).bomb + " orbital bombardments</b>. For each:<ol>" +
+          "<li>Choose an area on the main map board. It may <b>not</b> be a fortified area, e.g. a factory, a fortress or an area of the palace." +
+            (HH.scIs(c, "hta", "cha") ? " Nor may it be an impassible area." : "") + "</li>" +
           "<li>Declare the bombardment <b>precise</b> or <b>reckless</b>.</li>" +
           "<li>Draw the top bombardment card and apply its <b>orbital</b> result of the type chosen to that area. Discard the card.</li></ol>") +
           "<li><b>Damage</b> is divided among the units in the area as the bombarding player chooses, and all of it must be assigned if possible. Once every enemy unit there is destroyed, the rest hits his own units. <b>Heroes are never damaged</b> by orbital bombardment.</li>" +
           "<li>A <b>breach</b> result breaches one adjacent fortified border segment (the bombarding player picks which, if there are several). FAQ: the breach marker is placed even though you didn’t target the fortification itself.</li>" +
           "<li>The same area may be bombarded more than once, up to the scenario’s total.</li>" +
           "<li>Each damaged survivor gets a <b>damage token</b> showing its total damage, slotted into its base by its owner.</li></ul>",
-        src: "Rules p.13 · p.30, p.35 · FAQ p.2" },
+        src: (c) => "Scenarios " + HH.scPage(c) + (c.scen === "cha" ? ", p.7" : "") + " · Rules p.13, p.30, p.35 · FAQ p.2" },
       { when: () => true, who: "both",
         t: "Order card setup",
         d: (c) => "<ul>" +
           "<li>Each player removes all of his <b>starting orders</b> from his order deck. They have a <b>green skull icon</b> in the lower left corner, and by default they are his <b>starting hand</b>.</li>" +
-          "<li>Follow any extra order setup in your scenario, such as placing certain orders on the strategic map at no initiative cost, or adding cards to your starting hand.</li>" +
-          "<li>Shuffle your remaining order cards into a facedown <b>order deck</b> near you.</li>" +
-          HH.li(c, "trt", "may execute orders placed on the strategic map during setup on his first turn.") + "</ul>",
-        src: "Rules p.13 · FAQ p.2" }
+          HH.li(c, "trt", "places exactly <b>4</b> of his <b>Port Landing</b> and/or <b>Drop Pods</b> starting orders, in any combination, on the strategic map at no initiative cost, in any region(s) he chooses. " +
+            (c.scen === "lug" ? "He returns his other Port Landing and Drop Pods starting orders to his order deck." : "He shuffles his other Port Landing and Drop Pods starting orders into his order deck.")) +
+          (c.scen === "lug" ? "<li>Then each player chooses <b>any 4 order cards</b> from his order deck and adds them to his starting hand.</li>" +
+            "<li>Finally, each player shuffles his order deck and puts it facedown near him.</li>"
+            : "<li>Shuffle your remaining order cards into a facedown <b>order deck</b> near you.</li>") +
+          (c.scen === "cha" ? "<li>Then each player adds <b>1 random card</b> from his order deck to his starting hand.</li>" : "") +
+          HH.li(c, "trt", "may execute the orders he placed on the strategic map during setup on his first turn.") + "</ul>",
+        src: (c) => "Scenarios " + HH.scPage(c) + " · Rules p.13 · FAQ p.2" }
     ]
   },
   {
@@ -250,14 +458,67 @@ HH.reference = [
     title: "Winning the game",
     open: true,
     when: () => true,
-    html: () => "<p><b>Every victory condition is immediate:</b> the game ends the moment one is met, even mid-action and before any special phases.</p><ul>" +
+    html: (c) => "<p><b>Every victory condition is immediate:</b> the game ends the moment one is met, even mid-action and before any special phases.</p><ul>" +
       "<li><b>Death of the Emperor or of Horus.</b> If the Emperor is eliminated, the Traitor wins. If Horus is eliminated, the Imperial player wins.</li>" +
       "<li><b>Spaceport victory (either player).</b> Once at least one initiative marker has moved onto or past the <b>Spaceport Victory</b> space, a player wins by being the only side with units on all four spaceports: <b>Eternity Wall Spaceport, Lions Gate Spaceport, Spaceport Damocles</b> and <b>Spaceport Primus</b>.<ul>" +
         "<li>A spaceport with units of both sides, or with no units at all, blocks this for both players.</li>" +
         "<li>Heroes are not units, so an unsupported Hero doesn’t hold a spaceport.</li>" +
         "<li>If you already hold all four when a marker reaches that space, you win at once in that advance initiative marker step.</li></ul></li>" +
-      "<li><b>Imperial hold-out victory.</b> If either initiative marker moves onto the last space of the track (“Imperial Victory”), the Imperial player wins: relief legions have arrived.</li></ul>",
-    src: () => "Rules p.2, p.39–41"
+      "<li><b>Imperial hold-out victory.</b> If either initiative marker moves onto the last space of the track (“Imperial Victory”), the Imperial player wins: relief legions have arrived.</li></ul>" +
+      "<ul><li>All six scenarios share these victory conditions." +
+        (c.scen === "ffb" ? " In <b>Fortune Favors the Bold</b> the book warns that the hold-out victory is imperiled: both players should read the event card <b>The Warp Claims a Mighty Armada</b> before the game begins." : "") + "</li></ul>",
+    src: (c) => "Rules p.2, p.39–41 · Scenarios p.2" + (c.scen === "ffb" ? ", p.8" : "")
+  },
+  {
+    title: "Your scenario: special rules & setup",
+    when: () => true,
+    html: (c) => {
+      var s = HH.sc(c), h = "<h4>Scenario " + s.n + ": " + s.name + "</h4><p>" + s.premise + "</p>";
+      if (s.imp) h += "<h4>Impassible areas</h4><ul>" +
+        "<li>Four areas, chosen in turn before deployment (Traitor first), never two adjacent, never the Inner Palace, a spaceport or a Vengeful Spirit area. Each is marked with a special token.</li>" +
+        "<li>A unit the unit setup would place in an impassible area is destroyed instead of placed.</li>" +
+        "<li>Units and Heroes can’t enter an impassible area, it can’t be the target of a bombardment, and it can’t be the subject of <b>any</b> game effect at all: functionally, it doesn’t exist.</li></ul>";
+      if (s.tok) h += "<h4>Special tokens</h4><ul>" +
+        "<li>Each player has 3. When you place one of your orders on the strategic map, or execute one of your orders from the strategic map or from your hand, you may spend <b>one</b> to cut that cost by 1 (minimum 0).</li>" +
+        "<li>Only one token per placement or execution. A spent token is out for the rest of the game.</li>" +
+        (s.id === "cha" ? "<li>Cry Havoc also uses special tokens to mark impassible areas; the two uses aren’t interchangeable.</li>" : "") + "</ul>";
+      if (s.id === "ffb") h += "<h4>Before you start</h4><ul>" +
+        "<li>Both players should read and understand the event card <b>The Warp Claims a Mighty Armada</b>: it imperils the Imperial hold-out victory. It may or may not come out during the game (it is one of three cards for Act II, of which two are used).</li>" +
+        "<li>Late in the game, extra events designed to throw the Emperor and Horus closer together may come into play.</li></ul>";
+      if (!s.imp && !s.tok) h += "<ul><li><b>No special rules.</b> Once setup is done, the rulebook’s rules apply unchanged.</li></ul>";
+      h += "<h4>Setup at a glance</h4><ul>" +
+        "<li><b>Units:</b> " + (s.id === "bab" ? "as the book’s setup diagram shows (Traitor beachheads at Eternity Wall Spaceport and Spaceport Primus)." : "deployed by the players" + (s.id === "hu" ? "" : ", as in Heresy Unheralded") + ": the Traitor’s Warbands claim two spaceports, the Imperium garrisons the other two, then each side places the rest under the book’s limits.") + "</li>" +
+        "<li><b>Corruption:</b> " + s.corr + " draws. <b>Bombardment:</b> " + s.bomb + " orbital bombardments.</li>" +
+        "<li><b>Events:</b> " + ({ bab: "10 known cards in three acts", hu: "10 known cards in three acts, the same as Brother Against Brother", hta: "10 cards in three acts, the first two partly random", ffb: "10 cards in three acts, each partly random", lug: "10 cards in three acts, built largely from cards the players choose", cha: "10 cards dealt at random from all 30" })[s.id] + ". The event deck is never reshuffled.</li>" +
+        "<li><b>Orders:</b> the Traitor starts with 4 Port Landing and/or Drop Pods orders on the strategic map, which he may execute on his first turn" +
+          (s.id === "lug" ? "; each player also adds 4 order cards of his choice to his starting hand" : s.id === "cha" ? "; each player also adds 1 random order to his starting hand" : "") + ".</li>" +
+        "<li><b>Victory:</b> the rulebook’s, as in every scenario (see Winning the game).</li></ul>";
+      return h;
+    },
+    src: (c) => "Scenarios p.2, " + HH.sc(c).pg + ({ bab: "", hu: "", hta: ", p.6", ffb: ", p.6", lug: ", p.6", cha: ", p.6–8" })[c.scen] +
+      " · Rules p.39 · FAQ p.2"
+  },
+  {
+    title: "The six scenarios",
+    when: () => true,
+    html: (c) => {
+      var glance = {
+        bab: "Setup diagram · 12 corruption draws · 4 bombardments · set event acts",
+        hu: "Players deploy · 12 corruption draws · 4 bombardments · Brother Against Brother’s events",
+        hta: "4 impassible areas · deploy as Heresy Unheralded · 8 corruption draws · 6 bombardments · partly random events",
+        ffb: "3 special tokens each · deploy as Heresy Unheralded · 12 corruption draws · 4 bombardments · partly random events",
+        lug: "Players build the event deck · deploy as Heresy Unheralded · 12 corruption draws · 4 bombardments · 4 chosen extra orders",
+        cha: "Impassible areas and special tokens · deploy as Heresy Unheralded · 8 corruption draws · 4 bombardments · 10 random events · 1 random extra order"
+      };
+      return "<p>From the Scenario Guide. Every scenario follows the rulebook’s general setup and uses its victory conditions.</p>" +
+        "<dl class='terms scen-dl'>" +
+        HH.scenarios.map(function (s) {
+          var on = s.id === c.scen ? " class='on'" : "";
+          return "<dt" + on + ">" + s.n + ". " + s.name + "<span class='sub'>Scenarios " + s.pg + (on ? " · your scenario" : "") + "</span></dt>" +
+            "<dd" + on + ">" + s.premise + "<span class='sub'>" + glance[s.id] + "</span></dd>";
+        }).join("") + "</dl>";
+    },
+    src: () => "Scenarios p.2–10"
   },
   {
     title: "The round, step by step",
@@ -276,7 +537,7 @@ HH.reference = [
   {
     title: "The five actions",
     when: () => true,
-    html: () => "<div class='tbl-wrap'><table class='ref-tbl'><thead><tr><th scope='col'>Action</th><th scope='col'>Cost</th><th scope='col'>What you do</th></tr></thead><tbody>" +
+    html: (c) => "<div class='tbl-wrap'><table class='ref-tbl'><thead><tr><th scope='col'>Action</th><th scope='col'>Cost</th><th scope='col'>What you do</th></tr></thead><tbody>" +
       "<tr><th scope='row'>Place an order</th><td>1</td><td>Put an order card from your hand <b>facedown</b> on top of one of the 7 order stacks.</td></tr>" +
       "<tr><th scope='row'>Execute order from strategic map</th><td>1</td><td>Execute one of <b>your</b> orders from the top of a stack, whatever its printed cost. <b>Not</b> one placed since the most recent change of initiative.</td></tr>" +
       "<tr><th scope='row'>Execute order from hand</th><td>0–3</td><td>Pay one point per cost icon on the card and execute it in the region of your choice. Its strategic effect is ignored.</td></tr>" +
@@ -284,8 +545,10 @@ HH.reference = [
       "<tr><th scope='row'>Draw an order</th><td>1</td><td>Take one card of your choice from your reserve, or the top card of your order deck. Not allowed with six order cards in hand.</td></tr>" +
       "</tbody></table></div>" +
       "<ul><li>You may always ignore an executed order’s effects. You still pay the cost, but place no activation markers.</li>" +
-      "<li>An executed order goes to your discard pile, or to your <b>reserve</b> if it has the recycle symbol.</li></ul>",
-    src: () => "Rules p.14, p.18–20, p.44"
+      "<li>An executed order goes to your discard pile, or to your <b>reserve</b> if it has the recycle symbol.</li>" +
+      (HH.scIs(c, "ffb", "cha") ? "<li><b>" + HH.sc(c).name + ":</b> when you place an order or execute one (from the map or from hand), you may spend one of your special tokens to cut that cost by 1, to a minimum of 0. One token per placement or execution; a spent token is gone for good.</li>" : "") +
+      "</ul>",
+    src: (c) => "Rules p.14, p.18–20, p.44" + (HH.scIs(c, "ffb", "cha") ? " · Scenarios p.8" + (c.scen === "cha" ? ", p.10" : "") : "")
   },
   {
     title: "Initiative track & special phases",
@@ -606,9 +869,9 @@ HH.reference = [
     src: () => "Rules p.3–4, p.17–18, p.41"
   },
   {
-    title: "Cards named in the rulebook & FAQ",
+    title: "Cards named in the rulebooks & FAQ",
     when: () => true,
-    html: () => "<p class='note'>Each side has 40 order cards, 32 combat cards and 8 Hero combat cards, and there are 30 event cards. The rulebook doesn’t list them all; these are the ones it pictures or rules on. Always read the card in hand.</p>" +
+    html: () => "<p class='note'>Each side has 40 order cards, 32 combat cards and 8 Hero combat cards, and there are 30 event cards. The rulebook doesn’t list them all; these are the ones it pictures or rules on, plus the names of all 30 event cards from the Scenario Guide. Always read the card in hand.</p>" +
       "<h4>Orders</h4><ul>" +
       "<li><b>Assemble</b> (cost 1; both sides have one): move units and Heroes from any number of areas to one destination area in the region; activate it. Strategic effect: don’t activate it.</li>" +
       "<li><b>Redeploy</b> (pictured as an Imperial order; cost 2): move units and Heroes from any number of areas to any number of destinations in the region; activate each destination.</li>" +
@@ -643,8 +906,15 @@ HH.reference = [
       "<li><b>Apocalypse Rains Down</b> (do immediately): the Traitor chooses 1 area and inflicts an orbital bombardment there.</li>" +
       "<li><b>The Sky Fortress Rises</b>: moves units without regard to activation and without activating; it also lets a player draw several bombardment cards and pick one.</li>" +
       "<li><b>The Righteous Heed the Call</b>: places units from the stockpile (Heroes may enter).</li>" +
-      "<li><b>Thrown to Terra by his Mighty Hand</b>, <b>Vicissitudes of Chaos</b>, <b>Titans Stride the Earth</b>: see the FAQ rulings in Area types, Activation markers and Movement.</li></ul>",
-    src: () => "Rules p.3, p.5–7, p.13, p.16–17, p.20–21, p.24, p.26–29, p.31, p.36–37 · FAQ p.1–3"
+      "<li><b>Thrown to Terra by his Mighty Hand</b>, <b>Vicissitudes of Chaos</b>, <b>Titans Stride the Earth</b>: see the FAQ rulings in Area types, Activation markers and Movement.</li></ul>" +
+      "<h4>All 30 event cards (Scenario Guide)</h4>" +
+      "<p>The scenarios’ event lists name every card; Like Unto Gods shares out the whole set (9 Imperial, 8 Traitor, 10 neutral, 3 left out). The Scenario Guide doesn’t say what the cards do.</p><ul>" +
+      ["A Traitor Within the Walls ×2", "An Unholy Portal is Opened ×2", "Apocalypse Rains Down ×2", "Blocked With Corpses", "Command Decisions ×2",
+       "Cyclones Rage and the Air Itself Burns", "Doom Flies Astray", "Horus’s Irresistible Gambit", "Lava Boils and Terra is Torn Asunder",
+       "Tendrils of the Traitor ×2", "The Righteous Heed the Call", "The Sky Fortress Rises ×2", "The Strength of Conviction ×2",
+       "The Unwavering Will to Act ×4", "The Vicissitudes of Chaos ×2", "The Warp Claims a Mighty Armada", "Thrown to Terra by his Mighty Hand",
+       "Titans Stride the Earth ×2"].map(function (n) { return "<li>" + n + "</li>"; }).join("") + "</ul>",
+    src: () => "Rules p.3, p.5–7, p.13, p.16–17, p.20–21, p.24, p.26–29, p.31, p.36–37 · Scenarios p.3, p.6–9 · FAQ p.1–3"
   },
   {
     title: "Deck management",
@@ -701,7 +971,7 @@ HH.reference = [
   {
     title: "Key terms",
     when: () => true,
-    html: () => "<dl class='terms'>" +
+    html: (c) => "<dl class='terms'>" +
       "<dt>Act</dt><dd>A portion of the event deck, used when building it at setup.</dd>" +
       "<dt>Active / passive</dt><dd>In each iteration, the side that can deal damage / the side that resists it.</dd>" +
       "<dt>Attacker / defender</dt><dd>The side that started the battle with an order / the other side. In coexistence battles the Imperial player is always the attacker and the Traitor the defender.</dd>" +
@@ -713,16 +983,18 @@ HH.reference = [
       "<dt>Destination · origin · target area</dt><dd>Where moving units may go · where engaged attackers attack from · the area being attacked.</dd>" +
       "<dt>Eliminate (kill) · sacrifice</dt><dd>Remove a unit from play · voluntarily eliminate one of your own.</dd>" +
       "<dt>Free effect</dt><dd>A special effect with the free effect icon; any number may be used each iteration.</dd>" +
+      (HH.scIs(c, "hta", "cha") ? "<dt>Impassible area</dt><dd>" + HH.sc(c).name + ": an area marked with a special token at setup. It can’t be entered, bombarded or affected by anything; functionally, it doesn’t exist.</dd>" : "") +
       "<dt>Neutral · contested · friendly · enemy area</dt><dd>No units · both sides’ units · only your units · only your opponent’s units.</dd>" +
       "<dt>Precise · reckless</dt><dd>The two kinds of orbital bombardment.</dd>" +
       "<dt>Regular damage</dt><dd>Damage from the active player’s cards’ attack values, as opposed to special effects.</dd>" +
       "<dt>Reserve</dt><dd>Your faceup recyclable orders, taken back into hand in a draw orders phase or with a draw action.</dd>" +
       "<dt>Retreat · rout</dt><dd>Leave a battle voluntarily · involuntarily.</dd>" +
+      (HH.scIs(c, "ffb", "cha") ? "<dt>Special token</dt><dd>" + HH.sc(c).name + ": each player’s 3 one-use tokens, each cutting the initiative cost of one order placement or execution by 1." + (c.scen === "cha" ? " (Special tokens also mark the impassible areas.)" : "") + "</dd>" : "") +
       "<dt>Stockpile</dt><dd>Your units, figures, bases and Heroes that aren’t in play but may enter or re-enter it (not ones returned to the box).</dd>" +
       "<dt>Terra</dt><dd>The main map board except the Vengeful Spirit region.</dd>" +
       "<dt>Unsupported</dt><dd>A Hero with no friendly unit in his area.</dd>" +
       "<dt>Wounded · defeated</dt><dd>Hero damage states: one fewer Hero combat card · removed from the game.</dd></dl>",
-    src: () => "Rules p.40–41 · FAQ p.1"
+    src: (c) => "Rules p.40–41 · FAQ p.1" + ({ hta: " · Scenarios p.7", ffb: " · Scenarios p.8", cha: " · Scenarios p.7–8, p.10" }[c.scen] || "")
   },
   {
     title: "Table aids you’ve agreed on",
@@ -736,12 +1008,17 @@ HH.reference = [
   {
     title: "What these sources don’t cover",
     when: () => true,
-    html: () => "<ul>" +
-      "<li><b>The six scenarios</b> (unit setup, event acts, corruption and bombardment counts, extra order setup, special tokens, and the story “The Siege of Terra”) are in the <b>Scenario Guide</b>, which isn’t among this page’s sources.</li>" +
+    html: (c) => "<ul>" +
+      "<li><b>What the event cards do.</b> The Scenario Guide names the cards in each scenario’s event deck but doesn’t print their text; the rulebook pictures or describes only a few, and the FAQ rules on some others. Read each card as it is drawn" +
+        (c.scen === "ffb" ? ", and read The Warp Claims a Mighty Armada together before you start, as the book asks" : "") + ".</li>" +
       "<li><b>Each Hero’s individual abilities</b> are printed only on the two <b>reference sheets</b>, which also list units’ special abilities such as flying and fast movement.</li>" +
-      "<li><b>Full card lists</b>: only the order, combat and event cards named above appear in the rulebook and FAQ.</li>" +
+      "<li><b>Full order and combat card lists</b>: only the order and combat cards named above appear in the rulebook and FAQ.</li>" +
+      (c.scen === "bab" ? "<li><b>Area names on the setup diagram.</b> The Brother Against Brother diagram points at areas without naming them. This page names them from the rulebook’s pictures of the board (Rules p.4, p.33, p.38). It describes by position the open areas, which have no names, and the factory north-east of the Palace, whose label is too small to read there.</li>" : "") +
+      (HH.scIs(c, "hta", "cha") ? "<li><b>“Destroyed instead of placed.”</b> A unit that must be placed in an impassible area is destroyed instead" +
+        (c.scen === "cha" ? " (Holy Terra Asunder’s unit-setup rule: Cry Havoc doesn’t repeat it, but says its impassible areas work the same way)" : "") +
+        ". The book doesn’t say whether it then goes to the stockpile or back to the box.</li>" : "") +
       "<li><b>Defense lasers out of the 1–4 range</b>: every bombardment card pictured in the rulebook prints laser results for 1, 2, 3 and 4 lasers only. The rulebook doesn’t say what happens with none in range or with more than four.</li></ul>",
-    src: () => "Rules p.5–6, p.9, p.12, p.31, p.36"
+    src: (c) => "Rules p.5–6, p.9, p.12, p.31, p.36" + (c.scen === "bab" ? ", p.4, p.33, p.38" : "") + " · Scenarios p.3–10"
   }
 ];
 
@@ -749,8 +1026,18 @@ HH.reference = [
    TEACHING SCRIPT — teaching order: hook & win → shape of a turn → actions & why →
    central mechanic → battles/Heroes/orbit → inserts for the options selected → "don't worry yet"
    ============================================================================= */
+// Teaching-script insert for each scenario (Scenarios p.3–10)
+HH.teachScen = {
+  bab: "<p>The book’s setup diagram puts everything in place. The Imperium holds the Palace, every fortress, the factories and two spaceports, Lions Gate and Damocles, with all five of its Heroes on the board. Mortarion holds Eternity Wall Spaceport, Angron holds Spaceport Primus, and Horus waits aboard the Vengeful Spirit. The event deck is ten set cards in three acts.</p>",
+  hu: "<p>In Heresy Unheralded we deploy by choice. The Traitor claims one spaceport with a Warband, the Imperium garrisons two others with three Imperial Armies each, and a second Warband takes the last. Then the Imperium places the rest within the book’s limits, and the Traitor puts Horus and seven units aboard the Vengeful Spirit and four more units on each of his spaceports. The events are the same as Brother Against Brother’s.</p>",
+  hta: "<p>In Holy Terra Asunder the battlefield itself changes over the course of the game. First we take turns, Traitor first, marking four impassible areas with special tokens: never two side by side, and never the Inner Palace, a spaceport or the Vengeful Spirit. Nothing can enter, bombard or affect an impassible area. Then we deploy by choice, as in Heresy Unheralded: Warbands and Imperial Armies claim the four spaceports, each side places the rest within the book’s limits, and a unit that would have to go into an impassible area is destroyed instead.</p>",
+  ffb: "<p>In Fortune Favors the Bold each of us gets three special tokens. When you place one of your orders, or execute one from the map or your hand, you may spend one token to make it cost one less, down to zero: only one token at a time, and a spent token is gone. Before we start, we both read the event card The Warp Claims a Mighty Armada: it threatens the Imperial hold-out victory, though it may never come out. We deploy by choice, as in Heresy Unheralded: Warbands and Imperial Armies claim the four spaceports, then each side places the rest within the book’s limits.</p>",
+  lug: "<p>Like Unto Gods gives us the most choice. We deploy by choice, as in Heresy Unheralded: Warbands and Imperial Armies claim the four spaceports, then each side places the rest within the book’s limits. Then we build the event deck together: the Imperial player has nine event cards and the Traitor eight, and each of us puts two facedown in Act I, two in Act II and one in Act III. Random neutral cards are added and others trimmed, leaving acts of four, four and two. Each of us also adds any four order cards he likes to his starting hand.</p>",
+  cha: "<p>Cry Havoc throws in everything. Four impassible areas, chosen in turn as in Holy Terra Asunder, simply don’t exist for the game. Each of us has three special tokens, as in Fortune Favors the Bold: spend one to make placing or executing an order cost one less. We deploy by choice, as in Heresy Unheralded: Warbands and Imperial Armies claim the four spaceports, then each side places the rest within the book’s limits. The event deck is ten event cards dealt at random from all thirty, and each of us adds one random order from his deck to his starting hand.</p>"
+};
+
 HH.teach = {
-  intro: "A ~5-minute teach for the scenario, sides and options selected above. Read it aloud, or copy it and adapt it. Every rule in it comes from the rulebook and FAQ cited on this page.",
+  intro: "A ~5-minute teach for the scenario, sides and options selected above. Read it aloud, or copy it and adapt it. Every rule in it comes from the rulebook, the Scenario Guide and the FAQ cited on this page.",
   sections: [
     {
       h: "The hook — and how each side wins",
@@ -760,12 +1047,17 @@ HH.teach = {
         "<li><b>Run out the clock.</b> If either initiative marker reaches the last space of the track, relief legions arrive and the Imperial player wins.</li></ul>"
     },
     {
-      h: (c) => c.mode === "veteran" ? "Tonight’s scenario" : "Tonight’s scenario: Brother Against Brother",
-      body: (c) => c.mode === "first"
-        ? "<p>We’re playing <b>Brother Against Brother</b>, the rulebook’s recommended first scenario (Scenario Guide page 3), with sides chosen at random or by agreement. It sets where everything starts, the event cards, and how much the Traitor corrupts and bombards before play.</p>"
-        : c.mode === "mentor"
-        ? "<p>We’re playing <b>Brother Against Brother</b>, the learning scenario (Scenario Guide page 3), and as the rulebook suggests, the experienced player takes the Traitor. It sets where everything starts, the event cards, and how much the Traitor corrupts and bombards before play.</p>"
-        : "<p>We chose one of the six Scenario Guide scenarios, and settled sides by agreement, a coin toss or a revealed bombardment card. The scenario sets the board, the event cards, and how much the Traitor corrupts and bombards before play.</p>"
+      h: (c) => "Tonight’s scenario: " + HH.sc(c).name,
+      body: (c) => {
+        var s = HH.sc(c);
+        return (c.mode === "first"
+          ? "<p>We’re playing <b>Brother Against Brother</b>, the rulebook’s recommended first scenario, with sides chosen at random or by agreement.</p>"
+          : c.mode === "mentor"
+          ? "<p>We’re playing <b>Brother Against Brother</b>, the learning scenario, and as the rulebook suggests, the experienced player takes the Traitor.</p>"
+          : "<p>We settled scenario and sides by agreement, a coin toss or a revealed bombardment card: tonight is Scenario " + s.n + ", <b>" + s.name + "</b>.</p>") +
+          HH.teachScen[s.id] +
+          "<p>Before play, the Traitor gets a head start: <b>" + s.corr + " corruption draws</b>, turning Imperial Armies or Tank Divisions of his choice Traitor on a Chaos Star; <b>" + s.bomb + " orbital bombardments</b>; and four Port Landing or Drop Pods orders placed free on the strategic map, ready for his first turn.</p>";
+      }
     },
     {
       h: "The shape of a turn — the initiative track",
@@ -819,7 +1111,7 @@ HH.teach = {
     },
     {
       h: "Don’t worry about these until they come up",
-      body: () => "<p>Flying and transport, the fine print on crevasses and breaches, retreat and rout markers, the bombardment card tables, the Traitor’s 12 spare bases for corruption, Hero ability timing, and individual card rulings. They’re all in the reference below.</p>"
+      body: () => "<p>Flying and transport, the fine print on crevasses and breaches, retreat and rout markers, the bombardment card tables, the Traitor’s 12 spare bases for corruption, Hero ability timing, and individual card rulings. They’re all in the reference below. And each event card explains itself: we read it out when it’s drawn.</p>"
     }
   ]
 };

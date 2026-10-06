@@ -1,13 +1,15 @@
 /* =============================================================================
    Horus Heresy — Setup & Reference Utility · app logic
-   Configurator: scenario & sides (Rules p.12), playing pieces (p.10–11), seat (a view filter that
-   marks one side's tasks), and the rulebook's optional table aids (p.15, p.19, p.20).
+   Configurator: scenario & sides (Rules p.12) with the scenario itself for two experienced players
+   (Scenario Guide p.2–10), playing pieces (p.10–11), seat (a view filter that marks one side's tasks),
+   and the rulebook's optional table aids (p.15, p.19, p.20).
    ============================================================================= */
 (function () {
   "use strict";
 
   const state = {
     mode: "first",          // first | mentor | veteran
+    scen: "bab",            // bab | hu | hta | ffb | lug | cha — chosen only when mode is "veteran"
     pieces: "assemble",     // assemble | ready
     seat: "both",           // both | imp | trt
     mods: new Set()         // rotate | pending | tuck
@@ -16,6 +18,7 @@
 
   const ctx = () => ({
     mode: state.mode,
+    scen: state.mode === "veteran" ? state.scen : "bab",   // first games play Brother Against Brother (Rules p.12)
     first: state.pieces === "assemble",
     seat: state.seat,
     mod: (id) => state.mods.has(id),
@@ -33,6 +36,7 @@
 
   function normalize() {
     if (!HH.modes.some(m => m.id === state.mode)) state.mode = "first";
+    if (!HH.scenarios.some(m => m.id === state.scen)) state.scen = "bab";
     if (!HH.pieces.some(m => m.id === state.pieces)) state.pieces = "assemble";
     if (!HH.seats.some(m => m.id === state.seat)) state.seat = "both";
     for (const id of [...state.mods]) if (!HH.modules.some(m => m.id === id)) state.mods.delete(id);
@@ -80,7 +84,7 @@
       const steps = phase.steps.filter(s => s.when(c));
       if (!steps.length) continue;
       const ph = el("div", "phase");
-      ph.appendChild(el("h3", "phase-title", phase.title));
+      ph.appendChild(el("h3", "phase-title", resolve(phase.title, c)));
       for (const s of steps) {
         n++;
         const who = resolve(s.who, c);
@@ -119,7 +123,7 @@
   }
 
   function docVisible(x) {
-    return x === "rules" || x === "faq";   // both documents apply to every configuration
+    return x === "rules" || x === "faq" || x === "scen";   // every document applies to every configuration
   }
 
   function doSearch() {
@@ -128,7 +132,7 @@
     const out = $("#rresults");
     out.innerHTML = "";
     if (q.length < 3) {
-      out.innerHTML = "<p class='rhint'>Type at least 3 characters to search the rulebook and the FAQ and Errata.</p>";
+      out.innerHTML = "<p class='rhint'>Type at least 3 characters to search the rulebook, the Scenario Guide and the FAQ and Errata.</p>";
       return;
     }
     const hits = [];
@@ -141,7 +145,7 @@
       if (hits.length >= 40) break;
     }
     if (!hits.length) {
-      out.innerHTML = "<p class='rhint'>No matches in the rulebook or the FAQ.</p>";
+      out.innerHTML = "<p class='rhint'>No matches in the rulebook, the Scenario Guide or the FAQ.</p>";
       return;
     }
     const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -194,6 +198,8 @@
     const c = ctx();
     document.body.setAttribute("data-seat", state.seat);
     renderChoice("#modes", HH.modes, "mode");
+    renderChoice("#scens", HH.scenarios, "scen");
+    $("#scen-group").hidden = state.mode !== "veteran";
     renderChoice("#pieces", HH.pieces, "pieces");
     renderChoice("#seats", HH.seats, "seat");
     renderModules();

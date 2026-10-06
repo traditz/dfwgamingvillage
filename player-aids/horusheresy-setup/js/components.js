@@ -7,7 +7,9 @@
    rulebook's own embedded board art (p.3) without its caption overlays and outline frames; the
    bases picture keeps the book's "Rank I–IV" labels on purpose. The Scenario Guide booklet is a
    rules booklet, so it is left out; the two reference sheets have no picture in the rulebook.
-   The game has no expansions or modules, so nothing here is gated.
+   The game has no expansions or modules. The one gated item is the special tokens: "their use varies by
+   scenario" (Rules p.9), and only Holy Terra Asunder, Fortune Favors the Bold and Cry Havoc use them
+   (Scenarios p.7, p.8, p.10), so they show only for those scenarios (c.scen, see js/app.js).
    ============================================================================= */
 window.AID_COMPONENTS = {
   sets: [
@@ -59,6 +61,8 @@ window.AID_COMPONENTS = {
     { set: "core", qty: "6", name: "Fortification markers", img: "core-fortification.webp", w: 320, h: 281 },
     { set: "core", qty: "12", name: "Breach markers", img: "core-breach.webp", w: 320, h: 146 },
     { set: "core", qty: "1", name: "Combat iteration token", img: "core-iteration.webp", w: 270, h: 252 },
-    { set: "core", qty: "10", name: "Special tokens", note: "Their use varies by scenario", img: "core-special.webp", w: 215, h: 190 }
+    { set: "core", qty: "10", name: "Special tokens", note: "Their use varies by scenario: impassible areas in Holy Terra Asunder, initiative-cost tokens in Fortune Favors the Bold, both in Cry Havoc",
+      img: "core-special.webp", w: 215, h: 190, src: "Rules p.3, p.9 · Scenarios p.7–8, p.10",
+      when: (c) => ["hta", "ffb", "cha"].indexOf(c.scen) !== -1 }
   ]
 };

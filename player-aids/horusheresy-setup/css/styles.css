@@ -534,6 +534,36 @@ dl.terms { display: grid; grid-template-columns: minmax(9rem, max-content) 1fr; 
 dl.terms dt { font-weight: 700; color: var(--plum); }
 dl.terms dd { margin: 0; }
 
+/* ---- scenarios (Scenario Guide) -------------------------------------------------------------- */
+/* the "Brother Against Brother" setup diagram (p.4–5): the scan on a plain card that opens full size;
+   as wide as the step allows, so its small print labels stay legible */
+.scen-fig { margin: 12px 0 14px; max-width: 860px; }
+.scen-fig a {
+  display: block; line-height: 0; padding: 4px;
+  background: var(--paper);
+  border: 1px solid var(--card-line); border-radius: 2px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+  cursor: zoom-in;
+}
+@media (hover: hover) { .scen-fig a:hover { border-color: var(--plum-2); box-shadow: 0 0 0 1px var(--plum-2); } }
+.scen-fig img { display: block; width: 100%; height: auto; }
+.scen-fig figcaption { margin-top: 6px; font-size: 0.9375rem; line-height: 1.45; color: var(--ink-2); }
+.scen-fig figcaption b { color: var(--plum); }
+/* area-by-area start tables: the area name as a row header, like the reference tables */
+table.mini.areas tbody th { font-weight: 700; color: var(--ink); background: var(--panel-2); width: 36%; }
+table.mini.areas.open tbody th { width: 60%; }   /* open areas are described by position: the longer column */
+/* the six scenarios (a key-terms list): your scenario is tinted and edged in plum, and says so in words */
+dl.terms.scen-dl { gap: 0; }
+dl.scen-dl dt, dl.scen-dl dd { padding: 8px 10px; border-top: 1px solid var(--hair); }
+dl.scen-dl dd { padding-left: 16px; }
+dl.scen-dl .sub { display: block; margin-top: 2px; font-weight: 500; font-size: 0.9rem; color: var(--ink-2); }
+dl.scen-dl .on { background: var(--plum-wash); }
+dl.scen-dl dt.on { box-shadow: inset 4px 0 0 var(--plum); }
+@media (max-width: 640px) {   /* one column: each name sits on its own description, as one block */
+  dl.scen-dl dd { border-top: 0; padding-top: 0; padding-left: 10px; }
+  dl.scen-dl dd.on { box-shadow: inset 4px 0 0 var(--plum); }
+}
+
 /* ---- components glossary (js/comp-widget.js + css/components.css) ---------------------- */
 #components {
   --comp-surface: #ffffff;
