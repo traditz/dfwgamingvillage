@@ -632,44 +632,12 @@
       default: return true;
     }
   }
-  function doSearch() {
-    const input = $("#rsearch"), out = $("#rresults");
-    const fold = (s) => s.replace(/[\u2018\u2019\u02BC]/g, "'").replace(/[\u201C\u201D]/g, "\"");   // curly quotes match straight ones
-    const raw = input.value.trim();
-    const q = fold(raw.toLowerCase());
-    out.innerHTML = "";
-    if (q.length < 3) {
-      out.innerHTML = "<p class='rhint'>Type at least 3 characters to search every rulebook for the selected sets and mode, plus the errata and the TI4 Wiki FAQ.</p>";
-      return;
-    }
-    const c = ctx();
-    const words = q.split(/\s+/).filter((w) => w.length > 1);
-    const hits = [], loose = [];
-    for (const pg of TI.rulesIndex || []) {
-      if (!docVisible(pg.x, c)) continue;
-      const t = fold(pg.t.toLowerCase());
-      const idx = t.indexOf(q);
-      if (idx !== -1) hits.push({ pg, idx, len: q.length });
-      else if (words.length > 1 && words.every((w) => t.indexOf(w) !== -1)) loose.push({ pg, idx: t.indexOf(words[0]), len: words[0].length });
-    }
-    const all = hits.concat(loose).slice(0, 60);
-    if (!all.length) {
-      out.innerHTML = "<p class='rhint'>No matches in the documents for the selected sets and mode.</p>";
-      return;
-    }
-    out.appendChild(el("p", "rhint", all.length + (hits.length + loose.length > all.length ? "+" : "") + " matching page" + (all.length === 1 ? "" : "s") + (loose.length && !hits.length ? " (all words, not the exact phrase)" : "") + "."));
-    const rxWords = (hits.length ? [q] : words).map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/'/g, "['\u2018\u2019\u02BC]").replace(/"/g, "[\"\u201C\u201D]"));
-    const rx = new RegExp("(" + rxWords.join("|") + ")", "ig");
-    for (const { pg, idx, len } of all) {
-      const start = Math.max(0, idx - 130);
-      const end = Math.min(pg.t.length, idx + len + 220);
-      let snip = (start > 0 ? "…" : "") + pg.t.slice(start, end) + (end < pg.t.length ? "…" : "");
-      snip = esc(snip).replace(rx, "<mark>$1</mark>");
-      const hit = el("div", "rhit");
-      hit.appendChild(el("div", "rhit-src", esc(pg.b) + (pg.p !== null && pg.p !== undefined ? " <span class='rhit-page'>— p." + esc(pg.p) + "</span>" : "")));
-      hit.appendChild(el("div", "rhit-text", snip));
-      out.appendChild(hit);
-    }
+  /* Rendered by js/search-widget.js (search standard v1): this page's own answers first, then the ranked
+     rulebook pages that docVisible allows. (Guarded so app.js still loads in Node for TI._debug harnesses.) */
+  if (typeof window !== "undefined") {
+    window.AID_SEARCH = { index: TI.rulesIndex || [], visible: docVisible,
+      hint: () => "Search this page, every rulebook for the selected sets and mode, the errata and the TI4 Wiki FAQ. Type a word, a phrase or a question.",
+      noMatch: () => "No matches on this page or in the documents for the selected sets and mode." };
   }
 
   /* ---------------- main ---------------- */
@@ -684,8 +652,7 @@
     renderSetup(c);
     renderReference(c);
     renderTeach(c);
-    doSearch();
-    document.dispatchEvent(new CustomEvent("aid:config", { detail: c }));   // components glossary (js/comp-widget.js)
+    document.dispatchEvent(new CustomEvent("aid:config", { detail: c }));   // components glossary and rulebook search (js/comp-widget.js, js/search-widget.js)
   }
 
   TI._debug = {
@@ -696,7 +663,6 @@
 
   if (typeof document !== "undefined" && document.addEventListener) {
     document.addEventListener("DOMContentLoaded", () => {
-      $("#rsearch").addEventListener("input", doSearch);
       $("#teachBtn").addEventListener("click", () => {
         const p = $("#teach");
         p.hidden = !p.hidden;

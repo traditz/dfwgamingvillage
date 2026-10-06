@@ -12,6 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Saira:wdth,wght@112.5..125,500..700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,700;1,8..60,400;1,8..60,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css?v=2">
   <link rel="stylesheet" href="css/components.css?v=2">
+  <link rel="stylesheet" href="css/search.css?v=1">
 </head>
 <body>
   <!-- Masthead: the rulebook covers — the logo band over deep space, a portrait planet in its orbit rings
@@ -92,11 +93,11 @@
 
     <section class="sec sec-search" aria-label="Rulebook search">
       <h2>Search the Rulebooks</h2>
-      <p class="sec-note">Full-text search across every rulebook for the sets and mode selected, plus the official errata and the TI4 Wiki FAQ.</p>
+      <p class="sec-note">Answers from this page come first, then every matching page of the rulebooks for the sets and mode selected, plus the official errata and the TI4 Wiki FAQ.</p>
       <div class="rsearch-wrap">
-        <input id="rsearch" type="search" placeholder="e.g. command token, gravity rift, custodians, retreat, relic…" aria-label="Search the rulebooks">
+        <input id="rsearch" type="search" placeholder="e.g. command token, gravity rift, retreat… or ask a question" aria-label="Search this page and the rulebooks">
       </div>
-      <div id="rresults" aria-live="polite"></div>
+      <div id="rresults"></div>
     </section>
   </main>
 
@@ -117,7 +118,8 @@
   <script src="js/rules.js?v=1"></script>
   <script src="js/components.js?v=2"></script>
   <script src="js/comp-widget.js?v=1"></script>
-  <script src="js/app.js?v=3"></script>
+  <script src="js/search-widget.js?v=1"></script>
+  <script src="js/app.js?v=4"></script>
   <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
   <script src="/site-analytics.js?v=20260607-analytics"></script>
 </body>

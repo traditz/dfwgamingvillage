@@ -274,51 +274,16 @@
     }
   }
 
-  function doSearch() {
-    const fold = (s) => s.replace(/[‘’ʼ]/g, "'").replace(/[“”]/g, "\"");   // curly quotes match straight ones
-    const q = fold($("#rsearch").value.trim().toLowerCase());
-    const out = $("#rresults");
-    out.innerHTML = "";
-    const c = ctx();
-    if (q.length < 3) {
-      out.innerHTML = "<p class='rhint'>Type at least 3 characters to search the rulebook, the FAQ &amp; Errata, the Scenario Creation Guide" +
-        (c.has("exp") ? ", the Expansion Set rulebook" : "") +
-        (["orcsale", "goldrush", "plague"].indexOf(c.scen) !== -1 ? " and this scenario’s sheet" : "") + ".</p>";
-      return;
-    }
-    const hits = [];
-    for (const pg of WC.rulesIndex) {
-      if (!docVisible(pg.x, c)) continue;
-      const t = fold(pg.t.toLowerCase());
-      const idx = t.indexOf(q);
-      if (idx === -1) continue;
-      hits.push({ pg, idx });
-      if (hits.length >= 40) break;
-    }
-    if (!hits.length) {
-      out.innerHTML = "<p class='rhint'>No matches in the documents for this setup.</p>";
-      return;
-    }
-    const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    const highlight = (raw) => {
-      const lower = fold(raw.toLowerCase());
-      let html = "", i = 0, j;
-      while ((j = lower.indexOf(q, i)) !== -1) {
-        html += esc(raw.slice(i, j)) + "<mark>" + esc(raw.slice(j, j + q.length)) + "</mark>";
-        i = j + q.length;
-      }
-      return html + esc(raw.slice(i));
-    };
-    for (const { pg, idx } of hits) {
-      const start = Math.max(0, idx - 130);
-      const end = Math.min(pg.t.length, idx + q.length + 200);
-      const snip = (start > 0 ? "…" : "") + highlight(pg.t.slice(start, end)) + (end < pg.t.length ? "…" : "");
-      const hit = el("div", "rhit");
-      hit.appendChild(el("div", "rhit-src", esc(pg.b) + " — p." + pg.p));
-      hit.appendChild(el("div", "rhit-text", snip));
-      out.appendChild(hit);
-    }
-  }
+  /* Rulebook search: rendered by js/search-widget.js (search standard v1). */
+  window.AID_SEARCH = {
+    index: WC.rulesIndex,
+    visible: docVisible,
+    hint: (c) => "Search this page, the rulebook, the FAQ & Errata, the Scenario Creation Guide" +
+      (c.has("exp") ? ", the Expansion Set rulebook" : "") +
+      (["orcsale", "goldrush", "plague"].indexOf(c.scen) !== -1 ? " and this scenario’s sheet" : "") +
+      ". Type a word, a phrase or a question.",
+    noMatch: () => "No matches on this page or in the documents for this setup."
+  };
 
   function renderTeach(c) {
     const box = $("#teach");
@@ -355,12 +320,10 @@
     renderSetup(c);
     renderReference(c);
     renderTeach(c);
-    doSearch();
-    document.dispatchEvent(new CustomEvent("aid:config", { detail: c }));   // components glossary (js/comp-widget.js)
+    document.dispatchEvent(new CustomEvent("aid:config", { detail: c }));   // components glossary and rulebook search (js/comp-widget.js, js/search-widget.js)
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    $("#rsearch").addEventListener("input", doSearch);
     $("#teachBtn").addEventListener("click", () => {
       const p = $("#teach");
       p.hidden = !p.hidden;

@@ -506,8 +506,9 @@ section.book > h2::after {
 .rhit-text { max-width: 75ch; color: var(--ink); }
 .rhit-text mark { padding: 0 2px; background: #f7c96b; color: var(--ink); border-radius: 2px; box-shadow: 0 1px 0 #b87d18; }
 
-/* ---- components glossary tokens (js/comp-widget.js; css/components.css) ---- */
-#components {
+/* ---- components glossary and rulebook search tokens (js/comp-widget.js, css/components.css;
+        js/search-widget.js, css/search.css) ---- */
+#components, .aid-srch {
   --comp-surface: #f1f8ee; --comp-fig: #ddeed8; --comp-ink: #231f20; --comp-muted: #394036;
   --comp-line: #5f7a59; --comp-accent: #054fa3; --comp-accent-ink: #ffffff;
   --comp-head-font: "MedievalSharp", "Palatino Linotype", Georgia, serif; --comp-radius: 6px;
