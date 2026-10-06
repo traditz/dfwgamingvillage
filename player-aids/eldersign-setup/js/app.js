@@ -1,7 +1,8 @@
 /* =============================================================================
    Elder Sign — Setup & Reference Utility · app logic
    Renders the configurator (sets, mode, players, modules), the filtered
-   setup sequence, the reference sections, and the rulebook search.
+   setup sequence and the reference sections, and registers the rulebook search
+   (rendered by js/search-widget.js).
    ============================================================================= */
 (function () {
   "use strict";
@@ -150,45 +151,19 @@
     }
   }
 
-  /* ---- rulebook search ---- */
+  /* ---- rulebook search: rendered by js/search-widget.js (search standard v1) ---- */
+  /* Each document belongs to a set; the FAQ (and any unlisted document) counts as base, so it and the
+     Rules of Play are always searched, and an expansion's rules only when that set is selected. */
   const bookOfSet = { base: "base", faq: "base", uf: "uf", goa: "goa", ooi: "ooi", gc: "gc", ootd: "ootd", ootp: "ootp" };
-  function doSearch() {
-    const fold = (s) => s.replace(/[\u2018\u2019\u02BC]/g, "'").replace(/[\u201C\u201D]/g, "\"");   // curly quotes match straight ones
-    const q = fold($("#rsearch").value.trim().toLowerCase());
-    const out = $("#rresults");
-    out.innerHTML = "";
-    if (q.length < 3) {
-      out.innerHTML = "<p class='rhint'>Type at least 3 characters to search every rulebook and the FAQ.</p>";
-      return;
-    }
-    const c = ctx();
-    const hits = [];
-    for (const pg of ES.rulesIndex) {
-      const set = bookOfSet[pg.x] || "base";
-      if (set !== "base" && !c.has(set)) continue;
-      const t = fold(pg.t.toLowerCase());
-      let idx = t.indexOf(q);
-      if (idx === -1) continue;
-      hits.push({ pg, idx });
-      if (hits.length >= 40) break;
-    }
-    if (!hits.length) {
-      out.innerHTML = "<p class='rhint'>No matches in the selected sets' rulebooks.</p>";
-      return;
-    }
-    for (const { pg, idx } of hits) {
-      const start = Math.max(0, idx - 130);
-      const end = Math.min(pg.t.length, idx + q.length + 200);
-      let snip = (start > 0 ? "…" : "") + pg.t.slice(start, end) + (end < pg.t.length ? "…" : "");
-      snip = snip.replace(/</g, "&lt;");
-      const rx = new RegExp("(" + q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/'/g, "['\u2018\u2019\u02BC]").replace(/"/g, "[\"\u201C\u201D]") + ")", "ig");
-      snip = snip.replace(rx, "<mark>$1</mark>");
-      const hit = el("div", "rhit");
-      hit.appendChild(el("div", "rhit-src", pg.b + " — p." + pg.p));
-      hit.appendChild(el("div", "rhit-text", snip));
-      out.appendChild(hit);
-    }
-  }
+  window.AID_SEARCH = {
+    index: ES.rulesIndex,
+    visible: (x, c) => {
+      const s = bookOfSet[x] || "base";
+      return s === "base" || c.has(s);
+    },
+    hint: () => "Search this page, every rulebook and the FAQ. Type a word, a phrase or a question.",
+    noMatch: () => "No matches on this page or in the selected sets' rulebooks."
+  };
 
   /* ---- master update ---- */
 
@@ -225,12 +200,10 @@
     renderSetup(c);
     renderReference(c);
     renderTeach(c);
-    doSearch();
-    document.dispatchEvent(new CustomEvent("aid:config", { detail: c }));   // components glossary (js/comp-widget.js)
+    document.dispatchEvent(new CustomEvent("aid:config", { detail: c }));   // components glossary and rulebook search (js/comp-widget.js, js/search-widget.js)
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    $("#rsearch").addEventListener("input", doSearch);
     $("#teachBtn").addEventListener("click", () => {
       const p = $("#teach");
       p.hidden = !p.hidden;

@@ -658,7 +658,9 @@ section:first-of-type > h2 { margin-top: 34px; }
   font-family: var(--f-type); font-size: .875rem; letter-spacing: .06em; text-transform: uppercase;
   color: var(--crimson); margin-bottom: 5px;
 }
-.rhit-text { font-size: 1.0625rem; line-height: 1.5; color: var(--ink); }
+/* the search widget (js/search-widget.js) lists its answers and rulebook pages in one column, so the
+   text keeps a reading measure (the cards used to sit two to a row from 900px) */
+.rhit-text { max-width: 75ch; font-size: 1.0625rem; line-height: 1.5; color: var(--ink); }
 .rhit-text mark {
   background: #f4d86a; color: var(--ink);
   padding: 0 2px; border-radius: 2px;
@@ -718,12 +720,6 @@ section:first-of-type > h2 { margin-top: 34px; }
     -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 34%, #000 86%, transparent 100%);
             mask-image: linear-gradient(90deg, transparent 0%, #000 34%, #000 86%, transparent 100%);
   }
-}
-
-@media (min-width: 900px) {
-  #rresults { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; align-items: start; }
-  #rresults .rhint { grid-column: 1 / -1; }
-  .rhit { margin-bottom: 0; }
 }
 
 @media (max-width: 1239px) {
@@ -814,10 +810,10 @@ section:first-of-type > h2 { margin-top: 34px; }
   .chip:hover, .ao-btn:hover, .pbtn:hover, .mod:hover, #teachBtn:hover, .teach-copy:hover { transform: none; }
 }
 
-/* Components glossary (css/components.css) — tokens from this page's palette: card parchment, the
-   rulebook's crimson sidebar ink for the count badges, the page's display face. --comp-fig is the median
-   corner colour of the crops (the rulebook paper), so no box shows around each picture. */
-#components {
+/* Components glossary (css/components.css) and rulebook search (css/search.css) — tokens from this page's
+   palette: card parchment, the rulebook's crimson sidebar ink for the count badges, the page's display face.
+   --comp-fig is the median corner colour of the crops (the rulebook paper), so no box shows around each picture. */
+#components, .aid-srch {
   --comp-surface: var(--card); --comp-fig: #f5e7d5; --comp-ink: var(--ink); --comp-muted: var(--ink-soft);
   --comp-line: var(--ctl); --comp-accent: var(--crimson); --comp-accent-ink: #fdf8ee;
   --comp-head-font: var(--f-head); --comp-radius: 6px;

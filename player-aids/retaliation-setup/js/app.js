@@ -182,43 +182,18 @@
     }
   }
 
-  function doSearch() {
-    const fold = (s) => s.replace(/[\u2018\u2019\u02BC]/g, "'").replace(/[\u201C\u201D]/g, "\"");   // curly quotes match straight ones
-    const q = fold($("#rsearch").value.trim().toLowerCase());
-    const out = $("#rresults");
-    out.innerHTML = "";
-    if (q.length < 3) {
-      out.innerHTML = "<p class='rhint'>Type at least 3 characters to search every selected rulebook and the FAQ.</p>";
-      return;
-    }
-    const c = ctx();
-    const hits = [];
-    for (const pg of RT.rulesIndex) {
-      const set = (pg.x === "faq" || pg.x === "rooms" || pg.x === "obj") ? "base" : pg.x;
-      if (set !== "base" && !c.has(set)) continue;
-      const t = fold(pg.t.toLowerCase());
-      const idx = t.indexOf(q);
-      if (idx === -1) continue;
-      hits.push({ pg, idx });
-      if (hits.length >= 40) break;
-    }
-    if (!hits.length) {
-      out.innerHTML = "<p class='rhint'>No matches in the selected sets' documents.</p>";
-      return;
-    }
-    for (const { pg, idx } of hits) {
-      const start = Math.max(0, idx - 130);
-      const end = Math.min(pg.t.length, idx + q.length + 200);
-      let snip = (start > 0 ? "…" : "") + pg.t.slice(start, end) + (end < pg.t.length ? "…" : "");
-      snip = snip.replace(/</g, "&lt;");
-      const rx = new RegExp("(" + q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/'/g, "['\u2018\u2019\u02BC]").replace(/"/g, "[\"\u201C\u201D]") + ")", "ig");
-      snip = snip.replace(rx, "<mark>$1</mark>");
-      const hit = el("div", "rhit");
-      hit.appendChild(el("div", "rhit-src", pg.b + " — p." + pg.p));
-      hit.appendChild(el("div", "rhit-text", snip));
-      out.appendChild(hit);
-    }
-  }
+  /* Rulebook search: rendered by js/search-widget.js (search standard v1). The FAQ and the room and
+     objective sheets count as base, so they and the base rulebook are always searched; a booster's rules
+     only when that set is selected. */
+  window.AID_SEARCH = {
+    index: RT.rulesIndex,
+    visible: (x, c) => {
+      const set = (x === "faq" || x === "rooms" || x === "obj") ? "base" : x;
+      return set === "base" || c.has(set);
+    },
+    hint: () => "Search this page, every selected rulebook and the FAQ. Type a word, a phrase or a question.",
+    noMatch: () => "No matches on this page or in the selected sets' documents."
+  };
 
 
   function renderTeach(c) {
@@ -255,12 +230,10 @@
     renderSetup(c);
     renderReference(c);
     renderTeach(c);
-    doSearch();
-    document.dispatchEvent(new CustomEvent("aid:config", { detail: c }));   // components glossary (js/comp-widget.js)
+    document.dispatchEvent(new CustomEvent("aid:config", { detail: c }));   // components glossary and rulebook search (js/comp-widget.js, js/search-widget.js)
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    $("#rsearch").addEventListener("input", doSearch);
     $("#teachBtn").addEventListener("click", () => {
       const p = $("#teach");
       p.hidden = !p.hidden;

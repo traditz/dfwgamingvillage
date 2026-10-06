@@ -529,10 +529,13 @@ main { position: relative; z-index: 1; max-width: 1060px; margin: 0 auto; paddin
 #rsearch::placeholder { color: #5a6f95; opacity: 1; font-style: italic; }
 #rsearch:focus { outline: 3px solid var(--focus); outline-offset: 2px; }
 
-#rresults { display: grid; gap: 10px; max-width: 820px; margin: 0 auto; }
+#rresults { max-width: 820px; margin: 0 auto; }
 .rhint { text-align: center; font-style: italic; color: var(--ink-2); }
+/* the search widget (js/search-widget.js) groups the cards inside #rresults, so each card carries its own
+   10px spacing (it used to come from a grid gap on #rresults) */
 .rhit {
   position: relative;
+  margin-bottom: 10px;
   padding: 12px 20px 14px 24px;
   background: var(--card);
   border: 1px solid var(--hair); border-radius: 16px;
@@ -609,8 +612,8 @@ main { position: relative; z-index: 1; max-width: 1060px; margin: 0 auto; paddin
   html { scroll-behavior: auto; }
 }
 
-/* Components glossary (css/components.css) — tokens from this page's palette */
-#components {
+/* Components glossary (css/components.css) and rulebook search (css/search.css) — tokens from this page's palette */
+#components, .aid-srch {
   --comp-surface: var(--card); --comp-fig: #dbe0ed; --comp-ink: var(--ink); --comp-muted: var(--ink-2);
   --comp-line: var(--ctl); --comp-accent: var(--navy); --comp-accent-ink: var(--gold);
   --comp-head-font: var(--serif); --comp-radius: 16px;

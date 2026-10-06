@@ -618,8 +618,8 @@ section > h2::after {                     /* the glowing light rule after every 
   html { scroll-behavior: auto; }
 }
 
-/* Components glossary (css/components.css) — tokens from this page's palette */
-#components {
+/* Components glossary (css/components.css) and rulebook search (css/search.css) — tokens from this page's palette */
+#components, .aid-srch {
   --comp-surface: var(--hull); --comp-fig: #030a11; --comp-ink: var(--text); --comp-muted: var(--text-3);
   --comp-line: #4a7fb2; --comp-accent: var(--blue-hi); --comp-accent-ink: #04121f;
   --comp-head-font: var(--body); --comp-radius: 12px;

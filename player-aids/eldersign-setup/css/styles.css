@@ -1012,10 +1012,11 @@ button:focus-visible,
   .chip:hover, .mode-btn:hover, .pbtn:hover, .mod:hover, #teachBtn:hover, .teach-copy:hover { transform: none; }
 }
 
-/* Components glossary (css/components.css) — tokens from this page's palette.
-   --i-clock12 is re-pointed inside #components so its heading clock reads half past four,
-   keeping the section clocks advancing (Setup III, Components 4:30, Reference VI). */
-#components {
+/* Components glossary (css/components.css) and rulebook search (css/search.css) — tokens from this page's
+   palette. --i-clock12 is re-pointed inside #components so its heading clock reads half past four,
+   keeping the section clocks advancing (Setup III, Components 4:30, Reference VI); the search results
+   have no section > h2, so it does nothing there. */
+#components, .aid-srch {
   --comp-surface: var(--card); --comp-fig: #c7cbbc; --comp-ink: var(--ink); --comp-muted: var(--ink-soft);
   --comp-line: var(--ctl); --comp-accent: var(--mahogany); --comp-accent-ink: #ffffff;
   --comp-head-font: var(--f-display); --comp-radius: 5px;

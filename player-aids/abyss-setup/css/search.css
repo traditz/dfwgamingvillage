@@ -1,0 +1,220 @@
+/* =============================================================================
+   Rulebook search: the standard stylesheet for every DFWGV player-aid page (v1.0).
+   Use it unchanged. The results keep the page's own classes (.rhint, .rhit, .rhit-src,
+   .rhit-text, mark; or .rs-* on the older pages), so the page's theme applies; this file
+   styles only the new parts. Their colours come from the page's Components tokens: the
+   token block's selector becomes `#components, .aid-srch {` in the page's styles.css.
+   A page can override any of them with --srch-* tokens:
+     --srch-surface / --comp-surface       buttons, the whole-page box
+     --srch-ink / --comp-ink                button text, group headings
+     --srch-muted / --comp-muted            counts and citations. Needs ≥ 4.5:1 on the card.
+     --srch-line / --comp-line              heading rule, whole-page box border
+     --srch-accent / --comp-accent          button borders, count badges, focus rings, links
+     --srch-accent-ink / --comp-accent-ink  text on the accent (badges, hovered buttons)
+     --srch-head-font / --comp-head-font    group headings and buttons
+     --srch-radius / --comp-radius          corners
+     --srch-mark                            highlight where the page sets none (pages usually do)
+     --srch-flash                           the outline that marks a jumped-to answer
+   ============================================================================= */
+.aid-srch {
+  --s-surface: var(--srch-surface, var(--comp-surface, #ffffff));
+  --s-ink: var(--srch-ink, var(--comp-ink, #1f1f24));
+  --s-muted: var(--srch-muted, var(--comp-muted, #4b4b55));
+  --s-line: var(--srch-line, var(--comp-line, #85858f));
+  --s-accent: var(--srch-accent, var(--comp-accent, #2b4c7e));
+  --s-accent-ink: var(--srch-accent-ink, var(--comp-accent-ink, #ffffff));
+  --s-head: var(--srch-head-font, var(--comp-head-font, inherit));
+  --s-radius: var(--srch-radius, var(--comp-radius, 8px));
+  --s-mark: var(--srch-mark, #ffe27a);
+  --s-flash: var(--srch-flash, var(--s-accent));
+}
+/* the widget shows and hides parts with the hidden attribute: keep it winning over display rules */
+.aid-srch [hidden] { display: none !important; }
+
+/* ---- status line, groups, headings ---- */
+.aid-srch .aid-srch-status { margin-top: 4px; margin-bottom: 10px; }
+.aid-srch .aid-srch-status.is-count { font-style: normal; }
+.aid-srch .aid-srch-group { margin: 8px 0 24px; }
+.aid-srch .aid-srch-h {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px;
+  margin: 18px 0 10px; padding: 0 0 6px;
+  font: 700 1.125rem/1.25 var(--s-head);
+  color: var(--s-ink);
+  border-bottom: 1px solid var(--s-line);
+}
+.aid-srch .aid-srch-tierh .aid-srch-count { margin-left: 4px; }
+.aid-srch .aid-srch-count {
+  display: inline-block;
+  padding: 4px 9px;
+  font: 700 0.875rem/1 var(--s-head);
+  color: var(--s-accent-ink);
+  background: var(--s-accent);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.aid-srch .aid-srch-sub { margin: 0 0 10px; }
+.aid-srch .aid-srch-subh { margin: 18px 0 8px; font: 700 1rem/1.3 var(--s-head); color: var(--s-ink); }
+.aid-srch .aid-srch-note { margin-top: 10px; }
+
+/* ---- cards: the page's .rhit / .rs-item, plus these parts ---- */
+.aid-srch .aid-srch-ctx,
+.aid-srch .aid-srch-unit,
+.aid-srch .aid-srch-snip,
+.aid-srch .aid-srch-full { overflow-wrap: anywhere; }
+.aid-srch .aid-srch-n { font-weight: 400; letter-spacing: 0.02em; text-transform: none; color: var(--s-muted); white-space: nowrap; }
+.aid-srch .aid-srch-unit .tag,
+.aid-srch .aid-srch-unit .etag { vertical-align: 1px; }
+/* a glossary answer keeps its count badge (components.css styles it only inside #aid-comp) */
+.aid-srch .aid-comp-qty {
+  display: inline-block;
+  min-width: 1.6em; padding: 1px 7px;
+  font-size: 0.875rem; line-height: 1.35; font-weight: 700; text-align: center;
+  color: var(--s-accent-ink);
+  background: var(--s-accent);
+  border-radius: 999px;
+  vertical-align: 1px;
+}
+.aid-srch .aid-srch-foot {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 14px;
+  margin-top: 10px;
+}
+.aid-srch .aid-srch-cite { flex: 1 1 12rem; font-size: 0.9375rem; line-height: 1.45; font-style: italic; color: var(--s-muted); }
+/* on-page answers on the older pages are not expandable */
+.aid-srch .rs-item.aid-srch-answer .rs-sum,
+.aid-srch .rs-item.aid-srch-whole .rs-sum { cursor: auto; }
+.aid-srch .rs-item.aid-srch-answer .rs-sum:hover,
+.aid-srch .rs-item.aid-srch-whole .rs-sum:hover { background: transparent; }
+
+/* ---- buttons: Show, Show more, Back, Previous/Next match ---- */
+.aid-srch .aid-srch-show,
+.aid-srch .aid-srch-more,
+.aid-srch .aid-srch-nav button,
+.aid-srch.aid-srch-back {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 44px; margin: 0; padding: 8px 18px;
+  font: 700 1rem/1.2 var(--s-head);
+  color: var(--s-ink);
+  background: var(--s-surface);
+  border: 2px solid var(--s-accent);
+  border-radius: var(--s-radius);
+  cursor: pointer;
+  text-decoration: none;
+}
+.aid-srch .aid-srch-show { min-width: 6rem; }
+.aid-srch .aid-srch-more { display: flex; margin: 6px 0 0; }
+.aid-srch.aid-srch-back { margin: 10px 0 4px; }
+.aid-srch .aid-srch-show:hover,
+.aid-srch .aid-srch-more:hover,
+.aid-srch .aid-srch-nav button:hover:not(:disabled),
+.aid-srch.aid-srch-back:hover { color: var(--s-accent-ink); background: var(--s-accent); }
+.aid-srch .aid-srch-nav button:disabled { cursor: default; opacity: 0.55; }
+.aid-srch .aid-srch-show:focus-visible,
+.aid-srch .aid-srch-more:focus-visible,
+.aid-srch .aid-srch-nav button:focus-visible,
+.aid-srch.aid-srch-back:focus-visible,
+.aid-srch .aid-srch-page > summary:focus-visible,
+.aid-srch .aid-srch-full:focus-visible,
+.aid-srch .aid-srch-answer:focus-visible,
+.aid-srch .aid-srch-hit:focus-visible {
+  outline: 3px solid var(--s-accent);
+  outline-offset: 2px;
+}
+
+/* ---- "Read the whole page" ---- */
+.aid-srch .aid-srch-page { margin-top: 6px; }
+.aid-srch .aid-srch-page > summary {
+  display: inline-flex; align-items: center; gap: 10px;
+  min-height: 44px; padding: 0 6px 0 2px;
+  font: 700 1rem/1.2 var(--s-head);
+  color: var(--s-accent);
+  cursor: pointer;
+  list-style: none;
+}
+.aid-srch .aid-srch-page > summary::-webkit-details-marker { display: none; }
+.aid-srch .aid-srch-page > summary::before {
+  content: ""; flex: none;
+  width: 0.5em; height: 0.5em;
+  border-right: 2px solid currentColor; border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 0.15s ease;
+}
+.aid-srch .aid-srch-page[open] > summary::before { transform: rotate(45deg) translate(-2px, -2px); }
+.aid-srch .aid-srch-page > summary:hover { text-decoration: underline; text-underline-offset: 3px; }
+.aid-srch .aid-srch-nav { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 4px 0 8px; }
+.aid-srch .aid-srch-pos { margin-right: auto; font-size: 0.9375rem; color: var(--s-muted); }
+.aid-srch .aid-srch-full {
+  position: relative;
+  max-width: none;                 /* the box spans the card like its button bar; its paragraphs keep 75ch */
+  max-height: min(60vh, 34rem);
+  overflow: auto;
+  overscroll-behavior: contain;
+  margin: 0;
+  padding: 10px 16px 2px;
+  font-size: 1rem; line-height: 1.6;
+  color: var(--s-ink);
+  background: var(--s-surface);
+  border: 1px solid var(--s-line);
+  border-radius: calc(var(--s-radius) * 0.6);
+}
+.aid-srch .aid-srch-full p { margin: 0 0 12px; max-width: 75ch; }
+/* older pages: the box is the card's .rs-full; the match bar stays at its top while the text scrolls */
+.aid-srch .rs-full.aid-srch-full { padding-top: 0; }
+.aid-srch .aid-srch-full > .aid-srch-nav {
+  position: sticky; top: 0; z-index: 1;
+  margin: 0 -16px 8px; padding: 8px 16px;
+  background: var(--s-surface);
+  border-bottom: 1px solid var(--s-line);
+}
+
+/* ---- highlights ---- */
+:where(.aid-srch) mark { background: var(--s-mark); color: inherit; }
+.aid-srch mark.aid-srch-syn {
+  background: transparent; box-shadow: none; padding: 0;
+  text-decoration: underline dotted; text-decoration-thickness: 2px; text-underline-offset: 3px;
+}
+.aid-srch mark.is-current { outline: 2px solid var(--s-ink); outline-offset: 1px; }
+
+/* ---- the jumped-to answer on the page (the widget sets --aid-srch-flash from the results' accent) ---- */
+.aid-srch-flash {
+  outline: 3px solid var(--aid-srch-flash, #2b4c7e) !important;
+  outline-offset: 3px;
+  animation: aid-srch-pulse 0.7s ease-out 1;
+}
+@keyframes aid-srch-pulse {
+  0% { outline-offset: 12px; outline-width: 6px; }
+  100% { outline-offset: 3px; outline-width: 3px; }
+}
+/* a table row: browsers don't paint an outline on a <tr>, so its cells carry the frame */
+tr.aid-srch-flash { outline: none !important; animation: none; }
+tr.aid-srch-flash > td, tr.aid-srch-flash > th {
+  box-shadow: inset 0 3px 0 var(--aid-srch-flash, #2b4c7e), inset 0 -3px 0 var(--aid-srch-flash, #2b4c7e) !important;
+}
+tr.aid-srch-flash > :first-child {
+  box-shadow: inset 3px 0 0 var(--aid-srch-flash, #2b4c7e), inset 0 3px 0 var(--aid-srch-flash, #2b4c7e), inset 0 -3px 0 var(--aid-srch-flash, #2b4c7e) !important;
+}
+tr.aid-srch-flash > :last-child {
+  box-shadow: inset -3px 0 0 var(--aid-srch-flash, #2b4c7e), inset 0 3px 0 var(--aid-srch-flash, #2b4c7e), inset 0 -3px 0 var(--aid-srch-flash, #2b4c7e) !important;
+}
+tr.aid-srch-flash > :only-child { box-shadow: inset 0 0 0 3px var(--aid-srch-flash, #2b4c7e) !important; }
+
+/* ---- phones: the Show button gets its own row ---- */
+@media (max-width: 520px) {
+  .aid-srch .aid-srch-foot { flex-direction: column; align-items: stretch; }
+  .aid-srch .aid-srch-cite { flex: none; }
+  .aid-srch .aid-srch-show, .aid-srch .aid-srch-more { width: 100%; }
+  .aid-srch .aid-srch-full { padding: 8px 12px 2px; max-height: min(65vh, 30rem); }
+  .aid-srch .aid-srch-full > .aid-srch-nav { margin: 0 -12px 8px; padding: 8px 12px; }
+  .aid-srch .aid-srch-pos { flex: 1 1 100%; }
+  .aid-srch .aid-srch-nav button { flex: 1 1 0; min-width: 0; padding-left: 8px; padding-right: 8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aid-srch-flash { animation: none; }
+  .aid-srch .aid-srch-page > summary::before { transition: none; }
+}
+
+@media print {
+  .aid-srch .aid-srch-show, .aid-srch .aid-srch-more, .aid-srch .aid-srch-page, .aid-srch .aid-srch-nav,
+  .aid-srch.aid-srch-back { display: none !important; }
+  .aid-srch .aid-srch-full { max-height: none; overflow: visible; }
+}
