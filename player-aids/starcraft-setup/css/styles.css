@@ -620,8 +620,8 @@ body {
 .console :focus-visible, .teach-panel :focus-visible, .ref[open] > summary:focus-visible { outline-color: var(--gold); }
 .ref summary:focus-visible { outline-offset: -4px; }
 
-/* ---- Components glossary tokens (css/components.css reads these) ---- */
-#components {
+/* ---- Components glossary and rulebook search tokens (css/components.css and css/search.css read these) ---- */
+#components, .aid-srch {
   --comp-surface: #f3f6f8; --comp-fig: #e1e6ea; --comp-ink: #19171b; --comp-muted: #444c55;
   --comp-line: #6c7680; --comp-accent: #0b3d1f; --comp-accent-ink: #c6e59a;
   --comp-head-font: "Chakra Petch", "Segoe UI", Roboto, Arial, sans-serif; --comp-radius: 10px;

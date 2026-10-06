@@ -468,8 +468,9 @@ section > h2::after {
 .teach-panel b { color: #ffffff; }
 .teach-panel i { color: inherit; }
 
-/* ---- components glossary tokens (js/comp-widget.js + css/components.css) ------- */
-#components {
+/* ---- components glossary and rulebook search tokens (js/comp-widget.js + css/components.css;
+        js/search-widget.js + css/search.css) ---------------------------------------- */
+#components, .aid-srch {
   --comp-surface: #f2f1ef; --comp-fig: #e8e8e8; --comp-ink: #292627; --comp-muted: #4f4a4b;
   --comp-line: #6e6a6c; --comp-accent: #670821; --comp-accent-ink: #ffffff;
   --comp-head-font: "Saira", "Segoe UI", system-ui, sans-serif; --comp-radius: 6px;

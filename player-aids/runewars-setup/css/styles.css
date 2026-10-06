@@ -539,9 +539,10 @@ main { position: relative; z-index: 1; max-width: 880px; margin: 0 auto; padding
 .rhit-text mark { background: #f4c656; color: var(--ink); padding: 0 2px; border-radius: 2px; box-shadow: inset 0 -1px 0 #b07a1c; }
 
 /* ============================================================================
-   Components glossary (standard widget, themed by tokens)
+   Components glossary and rulebook search (standard widgets, themed by tokens:
+   js/comp-widget.js, css/components.css; js/search-widget.js, css/search.css)
    ============================================================================ */
-#components {
+#components, .aid-srch {
   --comp-surface: var(--card); --comp-fig: #f2e4d2; --comp-ink: var(--ink); --comp-muted: #574535;
   --comp-line: #8c6b4a; --comp-accent: #8e1b13; --comp-accent-ink: #fff3e3;
   --comp-head-font: var(--book); --comp-radius: 6px;   /* Almendra SC has no bold: the widget's 700-weight labels stay in the book face */

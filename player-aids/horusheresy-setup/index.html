@@ -13,6 +13,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Agdasima:wght@700&family=Overpass:ital,wght@0,500;0,700;0,800;1,500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css?v=3">
   <link rel="stylesheet" href="css/components.css?v=1">
+  <link rel="stylesheet" href="css/search.css?v=1">
 </head>
 <body data-seat="both">
   <a class="skip" href="#setup-sec">Skip to setup</a>
@@ -91,11 +92,11 @@
 
     <section class="sec sec-search" aria-labelledby="search-h">
       <h2 id="search-h">Search the Rulebook</h2>
-      <p class="sec-note">Full-text search of the rulebook, the Scenario Guide (its six scenarios and “The Siege of Terra”) and the official FAQ and Errata, page by page.</p>
+      <p class="sec-note">Answers from this page come first, then every matching page of the rulebook, the Scenario Guide (its six scenarios and “The Siege of Terra”) and the official FAQ and Errata.</p>
       <div class="rsearch-wrap">
-        <input id="rsearch" type="search" placeholder="e.g. coexistence, crevasse, drop pods, impassible, spaceport…" aria-label="Search the rulebook, Scenario Guide and FAQ">
+        <input id="rsearch" type="search" placeholder="e.g. coexistence, crevasse, drop pods, spaceport… or ask a question" aria-label="Search this page, the rulebook, Scenario Guide and FAQ">
       </div>
-      <div id="rresults" aria-live="polite"></div>
+      <div id="rresults"></div>
     </section>
   </main>
 
@@ -111,7 +112,8 @@
   <script src="js/rules.js?v=2"></script>
   <script src="js/components.js?v=2"></script>
   <script src="js/comp-widget.js?v=1"></script>
-  <script src="js/app.js?v=2"></script>
+  <script src="js/search-widget.js?v=1"></script>
+  <script src="js/app.js?v=3"></script>
   <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
   <script src="/site-analytics.js?v=20260607-analytics"></script>
 </body>

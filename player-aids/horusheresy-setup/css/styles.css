@@ -564,8 +564,9 @@ dl.scen-dl dt.on { box-shadow: inset 4px 0 0 var(--plum); }
   dl.scen-dl dd.on { box-shadow: inset 4px 0 0 var(--plum); }
 }
 
-/* ---- components glossary (js/comp-widget.js + css/components.css) ---------------------- */
-#components {
+/* ---- components glossary (js/comp-widget.js + css/components.css) and rulebook search
+        (js/search-widget.js + css/search.css) ---------------------------------------------- */
+#components, .aid-srch {
   --comp-surface: #ffffff;
   --comp-fig: #faf9f8;          /* median corner colour of the rulebook crops */
   --comp-ink: #221f1f;
