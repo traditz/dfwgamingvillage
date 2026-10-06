@@ -179,9 +179,6 @@ function renderDetail() {
     cyl: cylonLeaderInPlay
   };
 
-  // Active rulebooks for this setup (drives the search scope + suppression).
-  BSG._searchCtx = { exps: ["base", "pegasus", "exodus", "daybreak"].filter(expEnabled) };
-
   // --- Config-aware section list for the jump-nav ---
   const faqItems = BSG.faq.filter(f => !f.when || f.when(c));
   const hasReckless = BSG.reckless.when(c);
@@ -315,29 +312,15 @@ function buildSearchPanel(c) {
   const books = ["base", "pegasus", "exodus", "daybreak"].filter(expEnabled).map(e => BSG.expMeta[e].name);
   return `<section class="rules-search" id="sec-search">
       <h3>Search the Rulebooks</h3>
-      <p class="rs-sub">Searches the ${books.join(", ")} rulebook${books.length > 1 ? "s" : ""}, the official FFG <b>FAQ &amp; Errata</b>, and a community <b>Unofficial FAQ</b> — scoped to this setup. Each result cites its source; newer expansions supersede older rules, official sources rank above unofficial, and you can expand any result for the full passage. (The v4.4 combined reference is intentionally excluded.)</p>
-      <input type="search" id="rules-q" class="rs-input" placeholder="Ask a question or search a rule — e.g. “how do I win as a Cylon?”" oninput="bsgSearch(this.value)" autocomplete="off" spellcheck="false">
-      <div id="rules-results" class="rs-results"><p class="rs-hint">Type at least 2 characters to search.</p></div>
+      <p class="rs-sub">Searches this page first, then the ${books.join(", ")} rulebook${books.length > 1 ? "s" : ""}, the official FFG <b>FAQ &amp; Errata</b>, and a community <b>Unofficial FAQ</b> — scoped to this setup. Each result cites its source; newer expansions supersede older rules, official sources rank above unofficial, and “Read the whole page” opens any result’s full text. (The v4.4 combined reference is intentionally excluded.)</p>
+      <input type="search" id="rules-q" class="rs-input" placeholder="Ask a question or search a rule — e.g. “how do I win as a Cylon?”" autocomplete="off" spellcheck="false">
+      <div id="rules-results" class="rs-results"></div>
     </section>`;
 }
 
-/* ---- Live rulebook search -------------------------------------------------
-   Scopes to the rulebooks in play, suppresses superseded versions of curated
-   conflict topics (newest in-play book governs), cites book + page. --------- */
-function _escHtml(s) { return s.replace(/[&<>]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[ch])); }
-function _escReg(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
-
-/* ---- Smart search: BM25 relevance + stop-words + light stemming + synonyms.
-   Fully client-side (no API): handles natural-language questions while keeping
-   precise multi-word term matching. ----------------------------------------- */
-const _STOP = new Set(("a an the and or but if then of to in on for from with as at by be is are was were " +
-  "do does did can could should would will may might must have has had this that these those it its it's i you " +
-  "he she they we me my your our their what when where which who whom why how whats hows than into over under " +
-  "about your yours during while there here not no yes get got make use using used such per each any all some " +
-  "you're i'm we're they're").split(" "));
-
-/* Small BSG vocabulary map so questions hit the right rules. Keys and values
-   are in the same (plural-normalised) form the stemmer below produces. */
+/* Small BSG vocabulary map so questions hit the right rules. The shared search
+   (js/search-widget.js) takes it as `synonyms`: a synonym scores at 0.45 and never
+   counts toward "all your words". */
 const _SYN = {
   win: ["winning", "victory", "objective", "distance"], winning: ["win", "victory", "objective"],
   victory: ["win", "objective"], lose: ["losing", "defeat", "destroyed"], losing: ["lose", "defeat"],
@@ -349,226 +332,38 @@ const _SYN = {
   president: ["quorum", "title"], admiral: ["nuke", "title"], mutineer: ["mutiny"], mutiny: ["mutineer"]
 };
 
-/* Plural-only stemmer: safe normalisation (raiders->raider, checks->check)
-   without the over-stemming that breaks pairs like win / winning. */
-function _stem(w) {
-  if (w.length <= 3) return w;
-  w = w.replace(/('s|s')$/, "");
-  if (/ies$/.test(w) && w.length > 4) return w.slice(0, -3) + "y";
-  if (/(ches|shes|sses|xes|zes)$/.test(w)) return w.slice(0, -2);
-  if (/s$/.test(w) && !/(ss|us|is|as|os)$/.test(w)) return w.slice(0, -1);
-  return w;
-}
-/* Content tokens (lowercased, stop-words removed, stemmed). */
-function _tok(text) {
-  const out = [];
-  (text.toLowerCase().match(/[a-z0-9]+/g) || []).forEach(w => {
-    if (_STOP.has(w) || w.length < 2) return;
-    const s = _stem(w);
-    if (s.length >= 2) out.push(s);
-  });
-  return out;
-}
-
-/* Build the inverted index once (lazily, on first search). */
-function _buildSearchIndex() {
-  if (BSG._si) return BSG._si;
-  const docs = [], inv = new Map();
-  let total = 0;
-  BSG.rulesIndex.forEach((e, idx) => {
-    const flat = e.t.replace(/\n/g, " ");
-    const toks = _tok(flat);
-    const tf = new Map();
-    toks.forEach(t => tf.set(t, (tf.get(t) || 0) + 1));
-    tf.forEach((c, t) => { (inv.get(t) || inv.set(t, []).get(t)).push([idx, c]); });
-    docs.push({ len: toks.length || 1, flatLower: _fold(flat.toLowerCase()) });
-    total += toks.length;
-  });
-  BSG._si = { docs, inv, N: docs.length, avgdl: total / Math.max(1, docs.length) };
-  return BSG._si;
-}
-
-/* Curly quotes match straight ones (the rulebook text keeps the PDFs' curly apostrophes). */
-const _fold = (s) => s.replace(/[\u2018\u2019\u02BC]/g, "'").replace(/[\u201C\u201D]/g, "\"");
-
-/* Highlight every query-term occurrence (prefix match) in an HTML-escaped string. */
-function _hlTerms(text, terms) {
-  let s = _escHtml(text);
-  const alt = terms.filter(t => t.length >= 3).map(t => _escReg(t) + "\\w*");
-  if (alt.length) s = s.replace(new RegExp("\\b(" + alt.join("|") + ")", "gi"), "<mark>$1</mark>");
-  return s;
-}
-/* Char index of the tightest window that covers the most distinct query terms,
-   so the snippet centres on the passage that's actually about the question. */
-function _bestPos(lt, qterms) {
-  const occ = [];
-  qterms.forEach((t, ti) => {
-    if (t.length < 3) return;
-    const re = new RegExp("\\b" + _escReg(t) + "\\w*", "g");
-    let m, n = 0;
-    while ((m = re.exec(lt)) !== null && n < 200) { occ.push([m.index, ti]); n++; }
-  });
-  if (!occ.length) return -1;
-  if (occ.length === 1) return occ[0][0];
-  occ.sort((a, b) => a[0] - b[0]);
-  const count = new Map();
-  let distinct = 0, l = 0, best = 0, bestSpan = 1e9, mid = occ[0][0];
-  for (let r = 0; r < occ.length; r++) {
-    const tr = occ[r][1];
-    count.set(tr, (count.get(tr) || 0) + 1);
-    if (count.get(tr) === 1) distinct++;
-    while (count.get(occ[l][1]) > 1) { count.set(occ[l][1], count.get(occ[l][1]) - 1); l++; }
-    const span = occ[r][0] - occ[l][0];
-    if (distinct > best || (distinct === best && span < bestSpan)) { best = distinct; bestSpan = span; mid = (occ[l][0] + occ[r][0]) >> 1; }
-  }
-  return mid;
-}
-function _snip(text, terms, phrase) {
-  const lt = _fold(text.toLowerCase());
-  let pos = phrase && phrase.includes(" ") && lt.includes(phrase) ? lt.indexOf(phrase) : _bestPos(lt, terms);
-  if (pos < 0) pos = 0;
-  const start = Math.max(0, pos - 115), end = Math.min(text.length, pos + 160);
-  const s = (start > 0 ? "… " : "") + text.slice(start, end) + (end < text.length ? " …" : "");
-  return _hlTerms(s, terms);
-}
-function _fullPassage(text, terms) {
-  return text.split("\n").map(p => `<p>${_hlTerms(p, terms)}</p>`).join("");
-}
-
-/* Proximity score: how tightly the distinct query terms cluster in the passage.
-   Returns ~(#distinct terms in the tightest window) scaled by closeness — a
-   passage that says "reveal … cylon … player" in one sentence scores far higher
-   than one that scatters those words across the page. */
-function _proximity(lt, qterms) {
-  if (qterms.length < 2) return 0;
-  const occ = [];
-  qterms.forEach((t, ti) => {
-    if (t.length < 3) return;
-    const re = new RegExp("\\b" + _escReg(t) + "\\w*", "g");
-    let m, n = 0;
-    while ((m = re.exec(lt)) !== null && n < 200) { occ.push([m.index, ti]); n++; }
-  });
-  if (occ.length < 2) return 0;
-  occ.sort((a, b) => a[0] - b[0]);
-  // Sliding window: most distinct terms within the smallest character span.
-  const count = new Map();
-  let distinct = 0, l = 0, best = 0, bestSpan = 1e9;
-  for (let r = 0; r < occ.length; r++) {
-    const tr = occ[r][1];
-    count.set(tr, (count.get(tr) || 0) + 1);
-    if (count.get(tr) === 1) distinct++;
-    while (count.get(occ[l][1]) > 1) { count.set(occ[l][1], count.get(occ[l][1]) - 1); l++; }
-    const span = occ[r][0] - occ[l][0];
-    if (distinct > best || (distinct === best && span < bestSpan)) { best = distinct; bestSpan = span; }
-  }
-  if (best < 2) return 0;
-  return (best - 1) * (1 / (1 + bestSpan / 140));   // ~140 chars ≈ one sentence
-}
-
-function bsgSearch(q) {
-  const box = document.getElementById("rules-results");
-  if (!box) return;
-  const phrase = _fold((q || "").trim().toLowerCase()).replace(/\s+/g, " ");
-  if (phrase.length < 2) { box.innerHTML = `<p class="rs-hint">Type at least 2 characters, or ask a question.</p>`; return; }
-  if (!BSG.rulesIndex) { box.innerHTML = `<p class="rs-hint">Loading rulebook index…</p>`; return; }
-  const si = _buildSearchIndex();
-
-  const rawWords = phrase.match(/[a-z0-9]+/g) || [];
-  let qterms = [...new Set(rawWords.filter(w => !_STOP.has(w)).map(_stem).filter(s => s.length >= 2))];
-  if (!qterms.length) qterms = [...new Set(rawWords.map(_stem).filter(s => s.length >= 2))];
-  if (!qterms.length) { box.innerHTML = `<p class="rs-hint">Try a more specific word.</p>`; return; }
-  // Question vs. exact-term mode (the latter requires every term, as before).
-  const isQuestion = /\b(how|what|why|when|where|who|which|can|do|does|should|is|are|will|if)\b/.test(phrase) || phrase.includes("?");
-  const termMode = !isQuestion && qterms.length <= 3;
-  // Synonyms are optional, lower-weighted extra terms.
-  const synTerms = [];
-  qterms.forEach(t => (_SYN[t] || []).forEach(s => { if (!qterms.includes(s) && !synTerms.includes(s)) synTerms.push(s); }));
-  const allTerms = qterms.concat(synTerms);
-
-  const active = new Set((BSG._searchCtx || { exps: ["base"] }).exps);
-  // A topic hides the older books' passages only when the search itself is about that topic.
-  const gov = BSG.rulesSuppress.map(s => { if (!s.kw.some(kw => phrase.includes(kw))) return null; const ip = s.chain.filter(e => active.has(e)); return ip.length ? ip[ip.length - 1] : null; });
-  const prec = BSG.precedence, k1 = 1.5, b = 0.75;
-
-  // BM25 accumulation over candidate docs (union of postings).
-  const acc = new Map();
-  allTerms.forEach((t, ti) => {
-    const post = si.inv.get(t); if (!post) return;
-    const idf = Math.log(1 + (si.N - post.length + 0.5) / (post.length + 0.5));
-    const w = ti < qterms.length ? 1 : 0.45;
-    post.forEach(([idx, tf]) => {
-      const dl = si.docs[idx].len;
-      const s = idf * (tf * (k1 + 1)) / (tf + k1 * (1 - b + b * dl / si.avgdl)) * w;
-      let cur = acc.get(idx); if (!cur) { cur = { score: 0, hits: new Set() }; acc.set(idx, cur); }
-      cur.score += s; if (ti < qterms.length) cur.hits.add(t);
-    });
-  });
-
-  // Candidate gather: BM25 weighted by how many distinct query terms a passage
-  // covers (so a passage matching ALL of "reveal/cylon/player" beats one with
-  // just a common word).
-  const cand = [];
-  for (const [idx, info] of acc) {
-    const e = BSG.rulesIndex[idx];
-    if (!active.has(e.x)) continue;
-    if (termMode && info.hits.size < qterms.length) continue;       // require all terms in term mode
-    const lt = si.docs[idx].flatLower;
-    if (!e.s) {  // suppress superseded rulebook passages only
-      let sup = false;
-      for (let k = 0; k < BSG.rulesSuppress.length; k++) {
-        const s = BSG.rulesSuppress[k], g = gov[k];
-        if (g && e.x !== g && s.chain.includes(e.x) && s.kw.some(kw => lt.includes(kw))) { sup = true; break; }
-      }
-      if (sup) continue;
-    }
-    const coverage = info.hits.size / qterms.length;
-    cand.push({ e, lt, base: info.score * (0.25 + 0.75 * coverage * coverage) });
-  }
-  // Re-rank each source tier's strongest candidates with proximity (query words
-  // near each other) + an exact-phrase boost — this is where the full-question
-  // context pays off — then keep the most relevant of each tier.
-  const tier = e => (e.s === "u" ? 2 : e.s === "f" ? 1 : 0);
-  const byTier = [[], [], []];
-  cand.forEach(r => byTier[tier(r.e)].push(r));
-  const rankTier = (list, cap) => {
-    list.sort((a, b) => b.base - a.base);
-    const sub = list.slice(0, 40);
-    sub.forEach(r => {
-      let s = r.base;
-      if (phrase.length >= 3 && r.lt.includes(phrase)) s *= 2.4;
-      s *= 1 + _proximity(r.lt, qterms) * 0.7;
-      s += (prec[r.e.x] || 0) * 0.003;
-      r.score = s;
-    });
-    sub.sort((a, b) => b.score - a.score);
-    return sub.slice(0, cap);
-  };
-  // Rulebooks for this setup first, then official FAQ, then the unofficial FAQ.
-  const groups = [
-    { label: "From the rulebooks", items: rankTier(byTier[0], 22) },
-    { label: "Official FAQ &amp; Errata", items: rankTier(byTier[1], 12) },
-    { label: "Community Unofficial FAQ", items: rankTier(byTier[2], 8) }
-  ].filter(g => g.items.length);
-  const shown = groups.reduce((n, g) => n + g.items.length, 0);
-
-  if (!shown) { box.innerHTML = `<p class="rs-hint">No matches in the rulebooks or FAQ for this setup. Try different words.</p>`; return; }
-  const item = e => {
-    const m = BSG.expMeta[e.x];
-    const loc = e.s === "u" ? e.sec : "p." + e.p;
-    const badge = e.s === "u" ? `<span class="rs-badge rs-unofficial">Unofficial</span>`
-                : e.s === "f" ? `<span class="rs-badge rs-faq">FAQ · Errata</span>` : "";
-    return `<details class="rs-item${e.s === "u" ? " is-unofficial" : ""}">
-        <summary class="rs-sum">
-          <div class="rs-meta"><span class="etag ${m.cls}">${m.name}</span>${badge} <span class="rs-page">${e.b} · ${loc}</span><span class="rs-toggle">Full passage</span></div>
-          <div class="rs-snip">${_snip(e.t.replace(/\n/g, " "), qterms, phrase)}</div>
-        </summary>
-        <div class="rs-full">${_fullPassage(e.t, qterms)}</div>
-      </details>`;
-  };
-  box.innerHTML =
-    `<div class="rs-count">${cand.length} result${cand.length > 1 ? "s" : ""}${cand.length > shown ? ` · showing ${shown}` : ""}</div>` +
-    groups.map(g => `<div class="rs-group">${g.label}</div>` + g.items.map(r => item(r.e)).join("")).join("");
-}
+/* Rulebook search: rendered by js/search-widget.js (search standard v1). Once a setup card is picked it
+   answers from this page first (setup steps, loyalty deck, how to play, reckless checks, locations, FAQ,
+   combat reference and the Components glossary), then ranks the rulebooks for this setup, the official
+   FAQ & Errata and the community Unofficial FAQ in that order, each tier paged on its own. The query
+   survives configuration changes (renderAll re-renders the panel; the widget re-mounts on the new
+   #rules-q / #rules-results after each aid:config). _SYN feeds its synonyms, BSG.rulesSuppress hides an
+   older book's rulebook passages on a topic a newer book in play governs, and BSG.precedence breaks ties. */
+window.AID_SEARCH = {
+  index: BSG.rulesIndex,
+  visible: (x, c) => c.has(x),
+  skin: "rs", input: "#rules-q", results: "#rules-results", headingLevel: 4, sticky: ".jump-nav", partial: "always",
+  synonyms: _SYN, suppress: BSG.rulesSuppress, precedence: BSG.precedence,
+  tiers: [{ label: "From the rulebooks", test: (pg) => !pg.s, cls: "rs-group" },
+          { label: "Official FAQ & Errata", test: (pg) => pg.s === "f", cls: "rs-group" },
+          { label: "Community Unofficial FAQ", test: (pg) => pg.s === "u", cls: "rs-group" }],
+  label: (pg) => {
+    const m = BSG.expMeta[pg.x] || { name: pg.b, cls: "e-base" };
+    return { tag: { text: m.name, cls: "etag " + m.cls },
+             badge: pg.s === "u" ? { text: "Unofficial", cls: "rs-badge rs-unofficial" }
+                  : pg.s === "f" ? { text: "FAQ · Errata", cls: "rs-badge rs-faq" } : null };
+  },
+  cardClass: (pg) => pg.s === "u" ? "is-unofficial" : "",
+  onPage: "detail",
+  onPageExtra: [
+    { name: "Loyalty deck", section: "#sec-loyalty", title: "h3", units: ".loy-total, .note2, .loy-adj li", cite: ".src", exclude: ".src-line, .ssrc, .src" },
+    { name: "Reckless checks", section: "#sec-reckless", title: "h3", units: ".rk-intro, li", cite: ".src", exclude: ".src-line, .ssrc, .src" },
+    { name: "Combat", section: "#sec-charts .cc-sec", title: "h5" }
+  ],
+  hint: () => "Type at least 2 characters, or ask a question.",
+  noMatch: () => "No matches on this page or in the rulebooks and FAQs for this setup. Try different words.",
+  testHash: "#p=5&s=kobol"   /* search_ui_check.py loads the page with a setup card picked (search standard v1.1) */
+};
 
 /* How to Play — mode rules + core loop + active-module rules.
    Items may be strings or { t, when?, tag?, src? }. A `tag` (expansion id or a

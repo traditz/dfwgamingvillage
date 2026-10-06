@@ -150,9 +150,6 @@ function renderDetail() {
   const wrap = $("#detail");
   const c = ctx();
 
-  // Active rulebooks for this setup (drives search scope).
-  DW._searchCtx = { exps: DW.expansions.map(e => e.id).filter(expEnabled) };
-
   const expNames = DW.expansions.filter(e => expEnabled(e.id)).map(e => e.short);
   const modChips = DW.modules.filter(m => state.modules.has(m.id)).map(m => m.name);
   const modeLine = c.wc
@@ -323,26 +320,15 @@ function buildSearchPanel(c) {
   const books = DW.expansions.filter(e => expEnabled(e.id)).map(e => e.short + " rulebook");
   return `<section class="rules-search" id="sec-search">
       <h3>Search the Rulebooks</h3>
-      <p class="rs-sub">Searches the ${books.join(", ")} for this setup — type keywords <i>or ask a plain question</i> (“what happens when an entrance is overrun?”). Results are ranked by relevance and cite their book and page; expand any result for the full passage.</p>
-      <input type="search" id="rules-q" class="rs-input" placeholder="Ask a question, or search a rule or component…" oninput="dwSearch(this.value)" autocomplete="off" spellcheck="false">
-      <div id="rules-results" class="rs-results"><p class="rs-hint">Type a few words — or ask a question.</p></div>
+      <p class="rs-sub">Searches this page first, then the ${books.join(", ")} for this setup — type keywords <i>or ask a plain question</i> (“what happens when an entrance is overrun?”). Rulebook results are ranked by relevance and cite their book and page; “Read the whole page” opens the full text.</p>
+      <input type="search" id="rules-q" class="rs-input" placeholder="Ask a question, or search a rule or component…" autocomplete="off" spellcheck="false">
+      <div id="rules-results" class="rs-results"></div>
     </section>`;
 }
 
-function _escHtml(s) { return s.replace(/[&<>]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[ch])); }
-function _escReg(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
-
-/* ---- Smart search: BM25 relevance + stop-words + light stemming + synonyms.
-   Fully client-side: handles natural-language questions while keeping precise
-   multi-word term matching. -------------------------------------------------- */
-const _STOP = new Set(("a an the and or but if then of to in on for from with as at by be is are was were " +
-  "do does did can could should would will may might must have has had this that these those it its it's i you " +
-  "he she they we me my your our their what when where which who whom why how whats hows than into over under " +
-  "about yours during while there here not no yes get got make use using used such per each any all some many much " +
-  "you're i'm we're they're do i").split(" "));
-
-/* Dead of Winter vocabulary map so plain questions hit the right rules. Keys
-   and values are in the (plural-normalised) form the stemmer produces. */
+/* Dead of Winter vocabulary map so plain questions hit the right rules. The shared
+   search (js/search-widget.js) takes it as `synonyms`: a synonym scores at 0.45 and
+   never counts toward "all your words". */
 const _SYN = {
   zombie: ["standee", "overrun", "kill", "entrance"], walker: ["zombie"], undead: ["zombie"], horde: ["zombie"],
   morale: ["track", "lose", "colony"], round: ["track", "tracker", "phase"],
@@ -386,144 +372,21 @@ const _SYN = {
   grocery: ["food", "store"]
 };
 
-/* Plural-only stemmer: safe normalisation (zombies->zombie, crises->crisis-ish)
-   without over-stemming that breaks pairs like win / winning. */
-function _stem(w) {
-  if (w.length <= 3) return w;
-  w = w.replace(/('s|s')$/, "");
-  if (/ies$/.test(w) && w.length > 4) return w.slice(0, -3) + "y";
-  if (/(ches|shes|sses|xes|zes)$/.test(w)) return w.slice(0, -2);
-  if (/s$/.test(w) && !/(ss|us|is|as|os)$/.test(w)) return w.slice(0, -1);
-  return w;
-}
-/* Content tokens (lowercased, stop-words removed, stemmed). */
-function _tok(text) {
-  const out = [];
-  (text.toLowerCase().match(/[a-z0-9]+/g) || []).forEach(w => {
-    if (_STOP.has(w) || w.length < 2) return;
-    const s = _stem(w);
-    if (s.length >= 2) out.push(s);
-  });
-  return out;
-}
-
-/* Build the inverted index once (lazily, on first search). */
-function _buildSearchIndex() {
-  if (DW._si) return DW._si;
-  const docs = [], inv = new Map();
-  let total = 0;
-  DW.rulesIndex.forEach((e, idx) => {
-    const flat = e.t.replace(/\n/g, " ");
-    const toks = _tok(flat);
-    const tf = new Map();
-    toks.forEach(t => tf.set(t, (tf.get(t) || 0) + 1));
-    tf.forEach((cnt, t) => { (inv.get(t) || inv.set(t, []).get(t)).push([idx, cnt]); });
-    docs.push({ len: toks.length || 1, flatLower: _fold(flat.toLowerCase()) });
-    total += toks.length;
-  });
-  DW._si = { docs, inv, N: docs.length, avgdl: total / Math.max(1, docs.length) };
-  return DW._si;
-}
-
-/* Curly quotes match straight ones (the rulebook text keeps the PDFs' curly apostrophes). */
-const _fold = (s) => s.replace(/[\u2018\u2019\u02BC]/g, "'").replace(/[\u201C\u201D]/g, "\"");
-
-/* Highlight every query-term occurrence (prefix match) in an HTML-escaped string. */
-function _hlTerms(text, terms) {
-  let s = _escHtml(text);
-  const alt = terms.filter(t => t.length >= 3).map(t => _escReg(t) + "\\w*");
-  if (alt.length) s = s.replace(new RegExp("\\b(" + alt.join("|") + ")", "gi"), "<mark>$1</mark>");
-  return s;
-}
-function _snip(text, terms, phrase) {
-  const lt = _fold(text.toLowerCase());
-  let pos = phrase && phrase.includes(" ") && lt.includes(phrase) ? lt.indexOf(phrase) : -1;
-  if (pos < 0) for (const t of terms) { const m = lt.search(new RegExp("\\b" + _escReg(t))); if (m >= 0 && (pos < 0 || m < pos)) pos = m; }
-  if (pos < 0) pos = 0;
-  const start = Math.max(0, pos - 80), end = Math.min(text.length, pos + 210);
-  const s = (start > 0 ? "… " : "") + text.slice(start, end) + (end < text.length ? " …" : "");
-  return _hlTerms(s, terms);
-}
-function _fullPassage(text, terms) {
-  return text.split("\n").map(p => `<p>${_hlTerms(p, terms)}</p>`).join("");
-}
-
-function dwSearch(q) {
-  const box = document.getElementById("rules-results");
-  if (!box) return;
-  const phrase = _fold((q || "").trim().toLowerCase()).replace(/\s+/g, " ");
-  if (phrase.length < 2) { box.innerHTML = `<p class="rs-hint">Type a few words — or ask a question.</p>`; return; }
-  if (!DW.rulesIndex) { box.innerHTML = `<p class="rs-hint">Loading rulebook index…</p>`; return; }
-  const si = _buildSearchIndex();
-
-  const rawWords = phrase.match(/[a-z0-9]+/g) || [];
-  let qterms = [...new Set(rawWords.filter(w => !_STOP.has(w)).map(_stem).filter(s => s.length >= 2))];
-  if (!qterms.length) qterms = [...new Set(rawWords.map(_stem).filter(s => s.length >= 2))];
-  if (!qterms.length) { box.innerHTML = `<p class="rs-hint">Try a more specific word.</p>`; return; }
-  // Question vs. exact-term mode (the latter requires every term).
-  const isQuestion = /\b(how|what|why|when|where|who|which|can|do|does|should|is|are|will|if)\b/.test(phrase) || phrase.includes("?");
-  const termMode = !isQuestion && qterms.length <= 3;
-  // Synonyms are optional, lower-weighted extra terms.
-  const synTerms = [];
-  qterms.forEach(t => (_SYN[t] || []).forEach(s => { if (!qterms.includes(s) && !synTerms.includes(s)) synTerms.push(s); }));
-  const allTerms = qterms.concat(synTerms);
-
-  const active = new Set((DW._searchCtx || { exps: ["base"] }).exps);
-  // A topic hides the older books' passages only when the search itself is about that topic.
-  const gov = (DW.rulesSuppress || []).map(s => { if (!s.kw.some(kw => phrase.includes(kw))) return null; const ip = s.chain.filter(e => active.has(e)); return ip.length ? ip[ip.length - 1] : null; });
-  const prec = DW.precedence, k1 = 1.5, b = 0.75;
-
-  // BM25 accumulation over candidate docs (union of postings).
-  const acc = new Map();
-  allTerms.forEach((t, ti) => {
-    const post = si.inv.get(t); if (!post) return;
-    const idf = Math.log(1 + (si.N - post.length + 0.5) / (post.length + 0.5));
-    const w = ti < qterms.length ? 1 : 0.45;
-    post.forEach(([idx, tf]) => {
-      const dl = si.docs[idx].len;
-      const s = idf * (tf * (k1 + 1)) / (tf + k1 * (1 - b + b * dl / si.avgdl)) * w;
-      let cur = acc.get(idx); if (!cur) { cur = { score: 0, hits: new Set() }; acc.set(idx, cur); }
-      cur.score += s; if (ti < qterms.length) cur.hits.add(t);
-    });
-  });
-
-  const results = [];
-  for (const [idx, info] of acc) {
-    const e = DW.rulesIndex[idx];
-    if (!active.has(e.x)) continue;
-    if (termMode && info.hits.size < qterms.length) continue;          // require all terms in term mode
-    const lt = si.docs[idx].flatLower;
-    // suppress superseded rulebook passages on curated conflict topics
-    let sup = false;
-    for (let k = 0; k < (DW.rulesSuppress || []).length; k++) {
-      const s = DW.rulesSuppress[k], g = gov[k];
-      if (g && e.x !== g && s.chain.includes(e.x) && s.kw.some(kw => lt.includes(kw))) { sup = true; break; }
-    }
-    if (sup) continue;
-    let score = info.score;
-    if (phrase.length >= 3 && lt.includes(phrase)) score *= 2.4;        // exact phrase boost
-    score *= 1 + (info.hits.size - 1) * 0.15;                           // reward covering more query terms
-    score += (prec[e.x] || 0) * 0.003;                                  // tiny recency tiebreak among books
-    results.push({ e, score });
-  }
-  results.sort((a, b2) => b2.score - a.score);
-  const top = results.slice(0, 30);
-
-  if (!top.length) { box.innerHTML = `<p class="rs-hint">No matches in the rulebooks for this setup. Try different words.</p>`; return; }
-  const countLine = `<div class="rs-count">${results.length} matching page${results.length === 1 ? "" : "s"}${results.length > top.length ? ` · showing top ${top.length}` : ""}</div>`;
-  box.innerHTML = countLine +
-    top.map(r => {
-      const e = r.e;
-      const m = DW.expMeta[e.x] || { name: e.b, cls: "e-base" };
-      return `<details class="rs-item">
-          <summary class="rs-sum">
-            <div class="rs-meta"><span class="etag ${m.cls}">${m.name}</span> <span class="rs-page">${e.b} · p.${e.p}</span><span class="rs-toggle">Full passage</span></div>
-            <div class="rs-snip">${_snip(e.t.replace(/\n/g, " "), qterms, phrase)}</div>
-          </summary>
-          <div class="rs-full">${_fullPassage(e.t, qterms)}</div>
-        </details>`;
-    }).join("");
-}
+/* Rulebook search: rendered by js/search-widget.js (search standard v1). It answers from this page's
+   setup steps, references and Components glossary first, then ranks every rulebook page for this setup,
+   and keeps the query through configuration changes (renderAll re-renders the panel; the widget
+   re-mounts on the new #rules-q / #rules-results after each aid:config). _SYN feeds its synonyms,
+   DW.rulesSuppress hides an older book's passages on a topic a newer book in play governs, and
+   DW.precedence breaks ties toward the newer book. */
+window.AID_SEARCH = {
+  index: DW.rulesIndex,
+  visible: (x, c) => c.has(x),
+  skin: "rs", input: "#rules-q", results: "#rules-results", headingLevel: 4, sticky: ".jump-nav", partial: "always",
+  synonyms: _SYN, suppress: DW.rulesSuppress, precedence: DW.precedence, onPage: "detail",
+  label: (pg) => { const m = DW.expMeta[pg.x] || { name: pg.b, cls: "e-base" }; return { tag: { text: m.name, cls: "etag " + m.cls } }; },
+  hint: () => "Type a few words — or ask a question.",
+  noMatch: () => "No matches on this page or in the rulebooks for this setup. Try different words."
+};
 
 /* ---- Shareable / bookmarkable config (URL hash) -------------------------- */
 function encodeState() {

@@ -1,5 +1,7 @@
 /* =============================================================================
-   Rulebook search: the standard stylesheet for every DFWGV player-aid page (v1.0).
+   Rulebook search: the standard stylesheet for every DFWGV player-aid page (v1.1).
+   v1.1: a card's match count takes the colour of its source line (some pages draw that line as a dark tab);
+   result cards are spaced 10 px apart on every page.
    Use it unchanged. The results keep the page's own classes (.rhint, .rhit, .rhit-src,
    .rhit-text, mark; or .rs-* on the older pages), so the page's theme applies; this file
    styles only the new parts. Their colours come from the page's Components tokens: the
@@ -53,15 +55,20 @@
   white-space: nowrap;
 }
 .aid-srch .aid-srch-sub { margin: 0 0 10px; }
-.aid-srch .aid-srch-subh { margin: 18px 0 8px; font: 700 1rem/1.3 var(--s-head); color: var(--s-ink); }
 .aid-srch .aid-srch-note { margin-top: 10px; }
 
 /* ---- cards: the page's .rhit / .rs-item, plus these parts ---- */
+/* the cards sit in .aid-srch-list, out of reach of a page's own list gap (.rs-results): space them here. Adjacent
+   vertical margins collapse, so a page's own .rhit margin isn't doubled (v1.1) */
+.aid-srch .aid-srch-list > .rhit + .rhit,
+.aid-srch .aid-srch-list > .rs-item + .rs-item { margin-top: 10px; }
 .aid-srch .aid-srch-ctx,
 .aid-srch .aid-srch-unit,
 .aid-srch .aid-srch-snip,
 .aid-srch .aid-srch-full { overflow-wrap: anywhere; }
-.aid-srch .aid-srch-n { font-weight: 400; letter-spacing: 0.02em; text-transform: none; color: var(--s-muted); white-space: nowrap; }
+/* the match count sits on the page's own source line, which some pages draw as a dark chip or tab (WoW, Hellas):
+   it takes that line's colour, at normal weight (v1.1) */
+.aid-srch .aid-srch-n { font-weight: 400; letter-spacing: 0.02em; text-transform: none; color: inherit; white-space: nowrap; }
 .aid-srch .aid-srch-unit .tag,
 .aid-srch .aid-srch-unit .etag { vertical-align: 1px; }
 /* a glossary answer keeps its count badge (components.css styles it only inside #aid-comp) */

@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Tinos:ital,wght@0,400;0,700;1,400;1,700&family=Ysabeau+Office:wght@700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css?v=2">
   <link rel="stylesheet" href="css/components.css?v=1">
+  <link rel="stylesheet" href="css/search.css?v=1.1">
 </head>
 <body>
   <header class="masthead">
@@ -85,9 +86,9 @@
 
     <section class="sec sec-search" aria-label="Rulebook search">
       <h2>Search the Rulebooks</h2>
-      <p class="sec-note">Full-text search across the base rulebook, every selected expansion rulebook, and the official FAQ &amp; errata.</p>
+      <p class="sec-note">Answers from this page come first, then every matching page of the base rulebook, every selected expansion rulebook, and the official FAQ &amp; errata.</p>
       <div class="rsearch-wrap">
-        <input id="rsearch" type="search" placeholder="e.g. attrition, flight path, curse, dungeon, destiny, loot…" aria-label="Search the rulebooks">
+        <input id="rsearch" type="search" placeholder="e.g. attrition, flight path, curse, dungeon… or ask a question" aria-label="Search this page and the rulebooks">
       </div>
       <div id="rresults"></div>
     </section>
@@ -105,7 +106,8 @@
   <script src="js/rules.js?v=1"></script>
   <script src="js/components.js?v=1"></script>
   <script src="js/comp-widget.js?v=1"></script>
-  <script src="js/app.js?v=1"></script>
+  <script src="js/search-widget.js?v=1.1"></script>
+  <script src="js/app.js?v=2"></script>
   <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
   <script src="/site-analytics.js?v=20260607-analytics"></script>
 </body>

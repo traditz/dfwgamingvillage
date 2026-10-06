@@ -479,8 +479,9 @@ main { position: relative; max-width: 940px; margin: 0 auto; padding: 8px 32px 6
 .teach-panel li::marker { color: var(--gold); }
 .teach-panel b { color: var(--gold); }
 
-/* ---- components glossary (js/comp-widget.js + css/components.css) ---------- */
-#components {
+/* ---- components glossary (js/comp-widget.js + css/components.css) and rulebook search
+        (js/search-widget.js + css/search.css) ------------------------------------ */
+#components, .aid-srch {
   --comp-surface: var(--vellum);
   --comp-fig: #ecd984;           /* median corner colour of the base crops (Shadow of War and TBC set their own) */
   --comp-ink: var(--ink);

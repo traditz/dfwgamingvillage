@@ -604,8 +604,8 @@ ol > li::marker { color: var(--ochre-ink); font-family: var(--head); font-weight
   .mode-btn:hover, .chip:hover, .pbtn:hover, .mod:hover, #teachBtn:hover, .teach-copy:hover { transform: none; }
 }
 
-/* Components glossary (css/components.css) — tokens from this page's palette */
-#components {
+/* Components glossary and rulebook search (css/components.css, css/search.css) — tokens from this page's palette */
+#components, .aid-srch {
   --comp-surface: var(--cream); --comp-fig: #e4d7c5; --comp-ink: var(--ink); --comp-muted: var(--ink-soft);
   --comp-line: var(--ctl-edge); --comp-accent: var(--brown); --comp-accent-ink: var(--orange);
   --comp-head-font: var(--head); --comp-radius: 3px;

@@ -1,5 +1,7 @@
 /* =============================================================================
-   Rulebook search: the standard for every DFWGV player-aid page (v1.0, October 2026).
+   Rulebook search: the standard for every DFWGV player-aid page (v1.1, October 2026).
+   v1.1: words split by a space after a PDF ligature or soft hyphen are joined; on-page answers keep a space
+   where a nested list or table is left out.
    The same file is used unchanged on every page. Don't edit it per page.
    Contract and registration reference: tools/search/SEARCH_STANDARD.md.
 
@@ -29,7 +31,7 @@
 (function (G) {
   "use strict";
 
-  var VERSION = "1.0";
+  var VERSION = "1.1";
   var errors = [];
   function logErr(where, e) {
     var msg = where + ": " + (e && e.message ? e.message : String(e));
@@ -72,7 +74,7 @@
     var s = String(w);
     if (/[^\x00-\x7F]/.test(s)) {
       if (s.normalize) { try { s = s.normalize("NFKD"); } catch (e) { /* keep */ } }
-      s = s.replace(MARKS_RE, "").replace(/[­​-‍]/g, "").toLowerCase()
+      s = s.replace(MARKS_RE, "").replace(/[\u00AD\u200B-\u200D]/g, "").toLowerCase()
         .replace(SPECIAL_RE, function (c) { return SPECIAL[c]; }).replace(/[‘’ʼ]/g, "'");
     } else s = s.toLowerCase();
     if (s.indexOf("'") !== -1) s = s.replace(/'s$/, "").replace(/'/g, "");
@@ -124,6 +126,19 @@
     "they're his her him").split(" ");
   var STOP = new Set(), STOP_STEMS = new Set();
   STOP_LIST.forEach(function (w) { var n = normWord(w); STOP.add(n); STOP_STEMS.add(stem(n)); });
+
+  /* repairText (v1.1): some indexes store words split by a space after a ligature or a soft hyphen, as the PDFs
+     were extracted ("Conﬂ ict", "Inﬂ uence", "ﬁ rst", "Shufﬂ e", "Lead­ ership"). The space goes when a
+     lower-case letter follows, so matching, snippets and the whole-page view all see the word. A word-final
+     ﬀ/ﬅ/ﬆ before a standalone word keeps its space: "oﬀ the board", "pays oﬀ later". (Only ﬀ ends English
+     words in practice; "the shorter ﬂ at edge" is "flat".) */
+  var JOIN_STOP = new Set("the a an of to and or in on at by for from with as is if later it".split(" "));
+  var WORD_END_LIG = "\uFB00\uFB05\uFB06";
+  var SPLIT_RE = re("([\\uFB00-\\uFB06\\u00AD]) (?=\\p{Ll})(\\p{L}*)", "([\\uFB00-\\uFB06\\u00AD]) (?=[a-z\\u00DF-\\u00FF])([A-Za-z\\u00C0-\\u024F]*)", "g");
+  function repairText(t) {
+    if (typeof t !== "string" || !/[\uFB00-\uFB06\u00AD] /.test(t)) return t;
+    return t.replace(SPLIT_RE, function (m, c, w) { return WORD_END_LIG.indexOf(c) !== -1 && JOIN_STOP.has(w) ? m : c + w; });
+  }
 
   function squash(s) { return String(s == null ? "" : s).replace(/\s+/g, " ").trim(); }
   function esc(s) {
@@ -320,7 +335,7 @@
     var t0 = now(), D = newDict(), post = [], last = [], docs = [], total = 0, tokens = 0;
     entries = Array.isArray(entries) ? entries : [];
     for (var i = 0; i < entries.length; i++) {
-      var e = entries[i], t = e && typeof e.t === "string" ? e.t : "";
+      var e = entries[i], t = e && typeof e.t === "string" ? repairText(e.t) : "";
       var tk = tokenize(t, D, true, true), len = 0;
       for (var j = 0; j < tk.n; j++) {
         var id = tk.id[j];
@@ -332,14 +347,16 @@
       }
       tokens += tk.n;
       total += len;
-      docs.push({ tk: tk, len: Math.max(1, len), sents: null, paras: null, folded: null });
+      docs.push({ text: t, tk: tk, len: Math.max(1, len), sents: null, paras: null, folded: null });
     }
     return { D: D, post: post, docs: docs, entries: entries, N: entries.length,
              avgdl: Math.max(1, total / Math.max(1, entries.length)), tokens: tokens, ms: now() - t0 };
   }
-  function docSents(I, d) { var doc = I.docs[d]; if (!doc.sents) doc.sents = sentenceStarts(I.entries[d].t); return doc.sents; }
-  function docParas(I, d) { var doc = I.docs[d]; if (!doc.paras) doc.paras = paragraphs(I.entries[d].t, docSents(I, d)); return doc.paras; }
-  function docFolded(I, d) { var doc = I.docs[d]; if (doc.folded === null) doc.folded = foldQ(I.entries[d].t); return doc.folded; }
+  /* a page's text as indexed (repaired): token offsets, sentences, snippets and the whole-page view all use it */
+  function docText(I, d) { return I.docs[d].text; }
+  function docSents(I, d) { var doc = I.docs[d]; if (!doc.sents) doc.sents = sentenceStarts(doc.text); return doc.sents; }
+  function docParas(I, d) { var doc = I.docs[d]; if (!doc.paras) doc.paras = paragraphs(doc.text, docSents(I, d)); return doc.paras; }
+  function docFolded(I, d) { var doc = I.docs[d]; if (doc.folded === null) doc.folded = foldQ(doc.text); return doc.folded; }
 
   /* ============================================================= §C query === */
   var QSTART = new Set("how what why when where who which can do does should is are will if must may".split(" "));
@@ -569,7 +586,7 @@
     for (var k = 0; k < list.length; k++) {
       var a = list[k], p = num(prec[I.entries[a.i].x], 0) * 0.003;
       if (k < top) {
-        var sc = scanDoc(I.docs[a.i].tk, CQ, String(I.entries[a.i].t || ""));
+        var sc = scanDoc(I.docs[a.i].tk, CQ, docText(I, a.i));
         a.phrase = sc.phrase; a.prox = sc.prox; a.head = sc.head;
         a.score = a.base * (sc.phrase ? 2.4 : 1) * (1 + 0.7 * sc.prox) * (1 + 0.35 * sc.head) + p;
       } else a.score = a.base + p;
@@ -721,7 +738,7 @@
   function snippet(I, d, CQ, opt) {
     opt = opt || {};
     var max = opt.max || 450, min = opt.min || 160, cap = 600;
-    var text = String(I.entries[d].t == null ? "" : I.entries[d].t), tk = I.docs[d].tk;
+    var text = docText(I, d), tk = I.docs[d].tk;
     var M = matchInfo(I.D, tk, CQ, true, text);
     if (text.length <= max) return { html: spansHtml(text, M.spans, 0, text.length).trim(), whole: true, len: text.length };
     var SS = docSents(I, d), S = SS.s, lo, hi, cutL = false, cutR = false;
@@ -794,7 +811,7 @@
   }
   /* fullPage(I, d, CQ) → { html, marks }: the page in paragraphs with every match marked */
   function fullPage(I, d, CQ) {
-    var text = String(I.entries[d].t == null ? "" : I.entries[d].t), M = matchInfo(I.D, I.docs[d].tk, CQ);
+    var text = docText(I, d), M = matchInfo(I.D, I.docs[d].tk, CQ);
     var P = docParas(I, d), html = "";
     for (var k = 0; k < P.length; k++) html += "<p>" + spansHtml(text, M.spans, P[k][0], P[k][1]) + "</p>";
     return { html: html, marks: M.spans.length };
@@ -954,23 +971,20 @@
             continue;
           }
           var saved = curSub;
+          /* the text before and after a nested unit or block reads as two words, never "bag:Place" (v1.1) */
+          var gap = function () { if (unit) unit.buf.push(" "); else if (strays.has(blockEl)) strays.get(blockEl).buf.push(" "); };
           if (matches(ch, g.units)) {
+            gap();
             var u = newUnit(ch, unit, false);
             visit(ch, u, ch);
             curSub = saved;
-            if (unit) unit.buf.push(" ");
+            gap();
             continue;
           }
           var isBlock = BLOCK.has(tag), chip = !isBlock && typeof ch.className === "string" && /\S/.test(ch.className);
-          if (unit) {
-            if (isBlock || chip) unit.buf.push(" ");
-            visit(ch, unit, blockEl);
-            if (isBlock || chip) unit.buf.push(" ");
-          } else {
-            if (chip && strays.has(blockEl)) strays.get(blockEl).buf.push(" ");
-            visit(ch, null, isBlock ? ch : blockEl);
-            if (chip && strays.has(blockEl)) strays.get(blockEl).buf.push(" ");
-          }
+          if (isBlock || chip) gap();
+          visit(ch, unit, unit ? blockEl : (isBlock ? ch : blockEl));
+          if (isBlock || chip) gap();
           if (isBlock) curSub = saved;          // a sub-heading's scope ends with its parent element
         }
       }
@@ -1103,7 +1117,11 @@
         if (ch.nodeType === 3) { segs.push({ t: ch.nodeValue }); continue; }
         if (ch.nodeType !== 1) continue;
         var tag = ch.localName;
-        if ((U && U.els.has(ch)) || matches(ch, DROP) || (g.exclude && matches(ch, g.exclude)) || matches(ch, g.units)) continue;
+        if ((U && U.els.has(ch)) || matches(ch, DROP) || (g.exclude && matches(ch, g.exclude)) || matches(ch, g.units)) {
+          /* a left-out list, table or nested answer still separates the text around it (v1.1) */
+          segs.push(BLOCK.has(tag) || (U && U.els.has(ch)) || matches(ch, g.units) ? { blk: 1 } : { t: " " });
+          continue;
+        }
         if (tag === "br") { segs.push({ br: 1 }); continue; }
         if (KEEP[tag]) { segs.push({ o: tag }); walk(ch); segs.push({ c: tag }); continue; }
         if (tag === "span" && typeof ch.className === "string" && /\S/.test(ch.className) &&
@@ -1200,12 +1218,35 @@
     } catch (e) { /* none */ }
     return h;
   }
-  function scrollToEl(el, extra) {
-    var R = S.R || {};
-    var top = el.getBoundingClientRect().top + (G.pageYOffset || document.documentElement.scrollTop || 0) -
-              stickyHeight(R.sticky) - (extra === undefined ? Math.min(96, (G.innerHeight || 800) * 0.15) : extra);
-    try { G.scrollTo({ top: Math.max(0, top), behavior: reducedMotion() ? "auto" : "smooth" }); }
+  function scrollGap() { return stickyHeight((S.R || {}).sticky) + Math.min(96, (G.innerHeight || 800) * 0.15); }
+  function scrollToEl(el, instant) {
+    var top = el.getBoundingClientRect().top + (G.pageYOffset || document.documentElement.scrollTop || 0) - scrollGap();
+    var root = document.documentElement, was = root.style.scrollBehavior;
+    if (instant) root.style.scrollBehavior = "auto";       // a page's `html { scroll-behavior: smooth }` would animate it
+    try { G.scrollTo({ top: Math.max(0, top), behavior: instant || reducedMotion() ? "auto" : "smooth" }); }
     catch (e) { G.scrollTo(0, Math.max(0, top)); }
+    if (instant) root.style.scrollBehavior = was;
+  }
+  /* once the scroll has settled, put the target back where it was meant to land if the page moved under it
+     (lazy images loading above it during a smooth scroll: BSG's Combat panel grows 700 px), and restart its
+     highlight so it runs from arrival, not from the click. Once only, and never after the reader has scrolled,
+     clicked or typed. (v1.1) */
+  function settleOn(el, flashEl) {
+    var token = ++S.jumpToken, last = -1, same = 0, ticks = 0, touched = false, EV = ["wheel", "touchstart", "keydown", "mousedown"];
+    var mark = function () { touched = true; };
+    var done = function () { EV.forEach(function (t) { G.removeEventListener(t, mark, true); }); };
+    EV.forEach(function (t) { G.addEventListener(t, mark, true); });
+    var tick = function () {
+      if (token !== S.jumpToken || touched) return done();
+      var y = G.pageYOffset || 0;
+      same = y === last ? same + 1 : 0;
+      last = y;
+      if (same < 3 && ++ticks < 40) return void setTimeout(tick, 100);
+      done();
+      if (el.isConnected && Math.abs(el.getBoundingClientRect().top - scrollGap()) > 24) scrollToEl(el, true);
+      if (flashEl && flashEl.isConnected) flash(flashEl);
+    };
+    setTimeout(tick, 150);
   }
   function flash(el) {
     var col = "";
@@ -1251,7 +1292,7 @@
         return false;
       });
       var target = show || S.input;
-      if (target) { scrollToEl(target); try { target.focus({ preventScroll: true }); } catch (e) { target.focus(); } }
+      if (target) { scrollToEl(target); settleOn(target); try { target.focus({ preventScroll: true }); } catch (e) { target.focus(); } }
     });
     if (after && host.parentNode) host.parentNode.insertBefore(b, host.nextSibling);
     else if (first) host.insertBefore(b, host.firstChild);
@@ -1271,6 +1312,7 @@
      scroll it into view below any sticky bar, flash it, focus it and offer "Back to search results" */
   function jump(ans) {
     var R = S.R || {}, el = ans.el;
+    removeBack();                      // a leftover Back button above the target would shift it after the scroll (v1.1)
     if (!el || !el.isConnected) {
       el = refind(ans);
       if (!el) { run("stale"); return null; }
@@ -1290,6 +1332,7 @@
     }
     var focusEl = el.localName === "details" ? (el.querySelector("summary") || el) : el;
     scrollToEl(focusEl);
+    settleOn(focusEl, el);
     flash(el);
     if (!focusEl.hasAttribute("tabindex") && !/^(a|button|input|select|textarea|summary)$/.test(focusEl.localName)) {
       focusEl.setAttribute("tabindex", "-1");
@@ -1536,57 +1579,61 @@
     return div;
   }
 
-  function tierGroup(T, ti, model) {
-    var lvl = model.level, rs = model.rs, list = T.full.concat(T.partial), total = list.length;
-    var sec = h("section", "aid-srch-group aid-srch-books" + (T.cls ? " aid-srch-tier" : ""));
-    sec.setAttribute("aria-label", T.label);
-    if (rs && T.cls) {
-      var head = h("div", T.cls + " aid-srch-tierh");
-      if (/rs-divider/.test(T.cls)) head.appendChild(h("span", null, T.label)); else head.textContent = T.label;
+  /* a group of rulebook cards with its own heading, total and paging. Each tier's full matches get one, in tier
+     order; then every tier's partial matches share one "Pages with some of your words" group (v1.1: a page holding
+     all your words never sits below one holding only some of them) */
+  function pagesGroup(model, label, cls, list, subBase, key, show, kindCls) {
+    var lvl = model.level, rs = model.rs, total = list.length;
+    var sec = h("section", "aid-srch-group aid-srch-books " + kindCls + (cls ? " aid-srch-tier" : ""));
+    sec.setAttribute("aria-label", label);
+    if (rs && cls) {
+      var head = h("div", cls + " aid-srch-tierh");
+      if (/rs-divider/.test(cls)) head.appendChild(h("span", null, label)); else head.textContent = label;
       head.appendChild(document.createTextNode(" "));
       head.appendChild(h("span", "aid-srch-count", String(total)));
       sec.appendChild(head);
-    } else sec.appendChild(groupHead(lvl, T.label, String(total)));
-    var shownN = Math.min(total, S.view.tiers[ti] || num(T.show, model.pageSize));
-    var nf = T.full.length, np = T.partial.length, n = model.CQ.n;
-    var subTxt;
-    if (nf && !np) subTxt = (n === 1 ? plural(nf, "page matches", "pages match") + " “" + model.CQ.terms[0].label + "”"
-                                     : plural(nf, "page contains", "pages contain") + " all your words");
-    else if (nf && np) subTxt = plural(nf, "page contains", "pages contain") + " all your words; " + np + " more " + (np === 1 ? "has" : "have") + " some of them";
-    else subTxt = "No page contains all your words; " + plural(np, "page has", "pages have") + " some of them";
-    if (total > shownN) subTxt += " · showing " + shownN;
-    var sub = h(rs ? "div" : "p", (rs ? "rs-hint" : "rhint") + " aid-srch-sub", subTxt);
+    } else sec.appendChild(groupHead(lvl, label, String(total)));
+    var cur = Math.min(total, S.view.more[key] || num(show, model.pageSize));
+    var subText = function () { return subBase + (total > cur ? " · showing " + cur : ""); };
+    var sub = h(rs ? "div" : "p", (rs ? "rs-hint" : "rhint") + " aid-srch-sub", subText());
     sec.appendChild(sub);
     var box = h("div", "aid-srch-list");
     sec.appendChild(box);
-    var subhShown = false;
-    function add(k) {
-      if (k >= nf && !subhShown) {
-        subhShown = true;
-        box.appendChild(h(headTag(lvl + 1), "aid-srch-subh", "Pages with some of your words"));
-      }
-      var c = hitCard(T, list[k], model);
-      box.appendChild(c);
-      return c;
-    }
-    for (var k = 0; k < shownN; k++) add(k);
-    if (total > shownN) {
+    for (var k = 0; k < cur; k++) box.appendChild(hitCard(null, list[k], model));
+    if (total > cur) {
       var more = moreButton("");
-      var cur = shownN;
-      var label = function () { var left = total - cur; more.textContent = "Show " + Math.min(model.pageSize, left) + " more (" + left + " left)"; };
-      label();
+      var label2 = function () { var left = total - cur; more.textContent = "Show " + Math.min(model.pageSize, left) + " more (" + left + " left)"; };
+      label2();
       more.addEventListener("click", function () {
         var to = Math.min(total, cur + model.pageSize), firstNew = null;
-        for (var k2 = cur; k2 < to; k2++) { var c = add(k2); if (!firstNew) firstNew = c; }
+        for (var k2 = cur; k2 < to; k2++) { var c = hitCard(null, list[k2], model); box.appendChild(c); if (!firstNew) firstNew = c; }
         cur = to;
-        S.view.tiers[ti] = cur;
-        sub.textContent = subTxt.replace(/ · showing \d+$/, "") + (total > cur ? " · showing " + cur : "");
-        if (cur >= total) more.parentNode.removeChild(more); else label();
+        S.view.more[key] = cur;
+        sub.textContent = subText();
+        if (cur >= total) more.parentNode.removeChild(more); else label2();
         focusCard(firstNew);
       });
       sec.appendChild(more);
     }
     return sec;
+  }
+  function bookGroups(model) {
+    var res = model.res, CQ = model.CQ, out = [], partial = [], cls = "";
+    res.tiers.forEach(function (T, ti) {
+      if (T.cls && !cls) cls = T.cls;
+      partial = partial.concat(T.partial);
+      if (!T.full.length) return;
+      var nf = T.full.length;
+      var sub = CQ.n === 1 ? plural(nf, "page matches", "pages match") + " “" + CQ.terms[0].label + "”"
+                           : plural(nf, "page contains", "pages contain") + " all your words";
+      out.push(pagesGroup(model, T.label, T.cls, T.full, sub, "t" + ti, T.show, "aid-srch-full-matches"));
+    });
+    if (partial.length) {
+      var np = partial.length;
+      var sub2 = (res.full ? "" : "No page contains all your words; ") + plural(np, "page has", "pages have") + " some of them";
+      out.push(pagesGroup(model, "Pages with some of your words", cls, partial, sub2, "partial", null, "aid-srch-partial"));
+    }
+    return out;
   }
 
   function render(model) {
@@ -1595,17 +1642,19 @@
     if (model.kind === "hint") { setStatus(model.text, "hint"); return; }
     if (model.kind === "stop") { setStatus("Try a more specific word.", "hint"); return; }
     var A = model.ans, res = model.res, pages = res.full + res.partial;
+    /* a page with its own tiers (FAQ, unofficial FAQ…) counts "pages", not "rulebook pages" (v1.1) */
+    var noun = Array.isArray(R.tiers) && R.tiers.length > 1 ? ["page", "pages"] : ["rulebook page", "rulebook pages"];
     if (!A.total && !pages) {
       setStatus(call(R.noMatch, c, "No matches on this page or in the rulebooks."), "hint");
     } else {
       var bits = [];
       if (A.total) bits.push((A.total > 30 ? "30+" : A.total) + (A.total === 1 ? " answer" : " answers") + " on this page");
-      if (res.full) bits.push(plural(res.full, "rulebook page", "rulebook pages"));
-      else if (res.partial) bits.push(plural(res.partial, "rulebook page", "rulebook pages") + " with some of your words");
-      else bits.push("no rulebook pages");
+      if (res.full) bits.push(plural(res.full, noun[0], noun[1]));
+      else if (res.partial) bits.push(plural(res.partial, noun[0], noun[1]) + " with some of your words");
+      else bits.push("no " + noun[1]);
       setStatus(bits.join(" · "), "count");
       if (A.total) S.out.appendChild(onPageGroup(model));
-      res.tiers.forEach(function (T, ti) { if (T.full.length || T.partial.length) S.out.appendChild(tierGroup(T, ti, model)); });
+      bookGroups(model).forEach(function (g) { S.out.appendChild(g); });
     }
     var note = call(R.note, c, "");
     if (note) S.out.appendChild(h(model.rs ? "div" : "p", (model.rs ? "rs-hint" : "rhint") + " aid-srch-note", note));
@@ -1614,11 +1663,11 @@
   /* ========================================================= §I lifecycle === */
   var S = { R: null, input: null, out: null, status: null, q: "", qKey: null, ctx: null, gen: 0, pending: false, t: 0,
             I: null, Isrc: null, mask: null, maskKey: null, vis: null, U: null, Ukey: null,
-            view: { onpage: 5, tiers: [], open: new Set() }, last: null, lastJump: null, back: null, flashEl: null, flashT: 0,
+            view: { onpage: 5, more: {}, open: new Set() }, last: null, lastJump: null, back: null, flashEl: null, flashT: 0, jumpToken: 0,
             stats: { buildMs: null, unitsMs: null, queries: [] } };
 
   function registration() { var R = G.AID_SEARCH; return R && typeof R === "object" ? R : null; }
-  function freshView() { return { onpage: 5, tiers: [], open: new Set() }; }
+  function freshView() { return { onpage: 5, more: {}, open: new Set() }; }
   function context() {
     var R = S.R || {};
     if (isFn(R.context)) { try { var c = R.context(); if (c) return c; } catch (e) { logErr("context", e); } }
@@ -1747,7 +1796,7 @@
   /* ---------------------------------------------------------------- export --- */
   G.AidSearch = {
     version: VERSION,
-    core: { normWord: normWord, stem: stem, tokenize: tokenize, sentenceStarts: sentenceStarts, paragraphs: paragraphs,
+    core: { normWord: normWord, stem: stem, tokenize: tokenize, repairText: repairText, docText: docText, sentenceStarts: sentenceStarts, paragraphs: paragraphs,
             buildIndex: buildIndex, compile: compile, searchDocs: searchDocs, snippet: snippet, fullPage: fullPage,
             extractUnits: extractUnits, answer: answer, answerHtml: answerHtml, esc: esc, foldQ: foldQ, newDict: newDict,
             STOP: STOP, defaultLoc: defaultLoc, visibility: visibility, maskFor: maskFor,
