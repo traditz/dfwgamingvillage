@@ -627,9 +627,10 @@ ul.cols > li { break-inside: avoid; }
 .rhit-text mark { padding: 0 2px; border-radius: 2px; background: #f6d23e; color: var(--ink); box-shadow: inset 0 0 0 1px #d2a318; }
 
 /* =============================================================================
-   Components glossary (css/components.css) — tokens from this page's palette
+   Components glossary (css/components.css) and rulebook search (css/search.css) — tokens from this
+   page's palette
    ============================================================================= */
-#components {
+#components, .aid-srch {
   --comp-surface: var(--paper-2);
   --comp-fig: #e3dfce;
   --comp-ink: var(--ink);

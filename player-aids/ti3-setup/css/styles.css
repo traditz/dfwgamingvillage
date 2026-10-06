@@ -677,9 +677,9 @@ main { max-width: 1000px; margin: 0 auto; padding: 22px 16px 64px; }
 .rhit-text mark { color: #000; background: var(--yellow); border-radius: 2px; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3); }
 
 /* =============================================================================
-   Components glossary tokens (css/components.css reads these)
+   Components glossary and rulebook search tokens (css/components.css and css/search.css read these)
    ============================================================================= */
-#components {
+#components, .aid-srch {
   --comp-surface: #fdf0ca;  --comp-fig: #fad575;  --comp-ink: #16120a;  --comp-muted: #4b3c12;
   --comp-line: #7a5e14;     --comp-accent: #0003b7;  --comp-accent-ink: #ffffff;
   --comp-head-font: "Arimo", Arial, "Helvetica Neue", Helvetica, sans-serif;  --comp-radius: 6px;

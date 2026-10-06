@@ -412,46 +412,21 @@
     return false;
   }
 
-  function doSearch() {
-    const fold = (s) => s.replace(/[\u2018\u2019\u02BC]/g, "'").replace(/[\u201C\u201D]/g, "\"");   // curly quotes match straight ones
-    const q = fold($("#rsearch").value.trim().toLowerCase());
-    const out = $("#rresults");
-    out.innerHTML = "";
-    if (q.length < 3) {
-      out.innerHTML = "<p class='rhint'>Type at least 3 characters to search the rulebooks for the sets selected above.</p>";
-      return;
-    }
-    const c = ctx();
-    const hits = [];
-    // Say what is hidden without saying whether it matched (a count would leak spoilers).
-    const gated = !c.has("rof") ? "" : c.camp
-      ? " Rise of Fenris pages for episodes you haven't reached (and rewards not yet unlocked) are left out."
-      : (c.modOpen ? " Rise of Fenris campaign episode pages are left out (open the campaign gate to include them)."
-                   : " Rise of Fenris campaign and module pages are left out until you open a spoiler gate above.");
-    for (const pg of SY.rulesIndex) {
-      if (!docVisible(pg.x, c)) continue;
-      const t = fold(pg.t.toLowerCase());
-      const idx = t.indexOf(q);
-      if (idx === -1) continue;
-      hits.push({ pg, idx });
-      if (hits.length >= 40) break;
-    }
-    if (!hits.length) {
-      out.innerHTML = "<p class='rhint'>No matches in the selected sets' documents." + gated + "</p>";
-      return;
-    }
-    const rx = new RegExp("(" + q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/'/g, "['\u2018\u2019\u02BC]").replace(/"/g, "[\"\u201C\u201D]") + ")", "ig");
-    for (const { pg, idx } of hits) {
-      const start = Math.max(0, idx - 130);
-      const end = Math.min(pg.t.length, idx + q.length + 200);
-      let snip = (start > 0 ? "…" : "") + pg.t.slice(start, end) + (end < pg.t.length ? "…" : "");
-      snip = snip.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(rx, "<mark>$1</mark>");
-      const hit = el("div", "rhit" + (pg.x === "for" ? " fan" : ""));
-      hit.appendChild(el("div", "rhit-src", pg.b + " — p." + pg.p));
-      hit.appendChild(el("div", "rhit-text", snip));
-      out.appendChild(hit);
-    }
-    if (gated) out.appendChild(el("p", "rhint", gated.trim()));
+  /* Rulebook search: rendered by js/search-widget.js (search standard v1). docVisible keeps every
+     spoiler-gated page out of the results; the note says what is left out without saying whether it
+     matched (a count would leak spoilers). (Guarded so app.js still loads in Node for SY._debug harnesses.) */
+  if (typeof window !== "undefined") {
+    window.AID_SEARCH = {
+      index: SY.rulesIndex,
+      visible: docVisible,
+      cardClass: (pg) => pg.x === "for" ? "fan" : "",
+      hint: () => "Search this page and the rulebooks for the sets selected above. Type a word, a phrase or a question.",
+      noMatch: () => "No matches on this page or in the selected sets' documents.",
+      note: (c) => !c.has("rof") ? "" : c.camp
+        ? "Rise of Fenris pages for episodes you haven't reached (and rewards not yet unlocked) are left out."
+        : (c.modOpen ? "Rise of Fenris campaign episode pages are left out (open the campaign gate to include them)."
+                     : "Rise of Fenris campaign and module pages are left out until you open a spoiler gate above.")
+    };
   }
 
   function renderTeach(c) {
@@ -490,15 +465,13 @@
     renderSetup(c);
     renderReference(c);
     renderTeach(c);
-    doSearch();
-    document.dispatchEvent(new CustomEvent("aid:config", { detail: Object.assign({}, c, { spoil: (x) => docVisible(x, c) }) }));   // components glossary (js/comp-widget.js); c carries the spoiler gates, spoil(x) = the search's gate
+    document.dispatchEvent(new CustomEvent("aid:config", { detail: Object.assign({}, c, { spoil: (x) => docVisible(x, c) }) }));   // components glossary and rulebook search (js/comp-widget.js, js/search-widget.js); c carries the spoiler gates, spoil(x) = the search's gate
   }
 
   // expose a read-only hook for the test harness
   SY._debug = { state, ctx, normalize, docVisible };
 
   document.addEventListener("DOMContentLoaded", () => {
-    $("#rsearch").addEventListener("input", doSearch);
     $("#teachBtn").addEventListener("click", () => {
       const p = $("#teach");
       p.hidden = !p.hidden;

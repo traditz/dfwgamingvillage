@@ -685,8 +685,8 @@ main { position: relative; z-index: 1; }
   html { scroll-behavior: auto; }
 }
 
-/* Components glossary (css/components.css) — tokens from this page's palette */
-#components {
+/* Components glossary (css/components.css) and rulebook search (css/search.css) — tokens from this page's palette */
+#components, .aid-srch {
   --comp-surface: #f4f5fb; --comp-fig: #daece2; --comp-ink: var(--ink); --comp-muted: #4a4466;
   --comp-line: #6b6688; --comp-accent: var(--purple); --comp-accent-ink: #ffffff;
   --comp-head-font: "Aladin", "Arial Narrow", sans-serif; --comp-radius: 8px;

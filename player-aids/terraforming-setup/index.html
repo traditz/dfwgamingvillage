@@ -12,6 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400..700;1,400..700&family=Russo+One&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css?v=2">
   <link rel="stylesheet" href="css/components.css?v=1">
+  <link rel="stylesheet" href="css/search.css?v=1">
 </head>
 <body>
   <!-- the Martian surface every rulebook page sits on (Valles Marineris, from the Milestones & Awards leaflet) -->
@@ -96,11 +97,11 @@
 
     <section class="page" id="search-sec" aria-labelledby="search-h">
       <h2 id="search-h">Search the Rulebooks</h2>
-      <p class="sec-note">Full-text search across the base rulebook, plus the rulebooks and map-box texts for the sets selected above (the MarsBot books need the MarsBot set).</p>
+      <p class="sec-note">Answers from this page come first, then every matching page of the base rulebook, plus the rulebooks and map-box texts for the sets selected above (the MarsBot books need the MarsBot set).</p>
       <div class="rsearch-wrap">
-        <input id="rsearch" type="search" placeholder="e.g. greenery, milestone, trade fleet, delegate, floater, Noctis…" aria-label="Search the rulebooks">
+        <input id="rsearch" type="search" placeholder="e.g. greenery, milestone, trade fleet, delegate… or ask a question" aria-label="Search this page and the rulebooks">
       </div>
-      <div id="rresults" aria-live="polite"></div>
+      <div id="rresults"></div>
     </section>
   </main>
 
@@ -121,7 +122,8 @@
   <script src="js/rules.js?v=1"></script>
   <script src="js/components.js?v=1"></script>
   <script src="js/comp-widget.js?v=1"></script>
-  <script src="js/app.js?v=2"></script>
+  <script src="js/search-widget.js?v=1"></script>
+  <script src="js/app.js?v=3"></script>
   <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
   <script src="/site-analytics.js?v=20260607-analytics"></script>
 </body>

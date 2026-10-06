@@ -178,50 +178,17 @@
     }
   }
 
-  function doSearch() {
-    const fold = (s) => s.replace(/[‘’ʼ]/g, "'").replace(/[“”]/g, "\"");   // curly quotes match straight ones
-    const q = fold($("#rsearch").value.trim().toLowerCase());
-    const out = $("#rresults");
-    out.innerHTML = "";
-    if (q.length < 3) {
-      out.innerHTML = "<p class='rhint'>Type at least 3 characters to search the Learn to Play, the Rules Reference" +
-        (state.exps.has("fta") ? ", the From the Abyss rulebook" : "") + " and the Unofficial FAQ.</p>";
-      return;
-    }
-    const c = ctx();
-    const hits = [];
-    for (const pg of UF.rulesIndex) {
-      if (!docVisible(pg.x, c)) continue;
-      const t = fold(pg.t.toLowerCase());
-      const idx = t.indexOf(q);
-      if (idx === -1) continue;
-      hits.push({ pg, idx });
-      if (hits.length >= 40) break;
-    }
-    if (!hits.length) {
-      out.innerHTML = "<p class='rhint'>No matches in the selected sets’ documents.</p>";
-      return;
-    }
-    const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    const highlight = (raw) => {
-      const lower = fold(raw.toLowerCase());
-      let html = "", i = 0, j;
-      while ((j = lower.indexOf(q, i)) !== -1) {
-        html += esc(raw.slice(i, j)) + "<mark>" + esc(raw.slice(j, j + q.length)) + "</mark>";
-        i = j + q.length;
-      }
-      return html + esc(raw.slice(i));
-    };
-    for (const { pg, idx } of hits) {
-      const start = Math.max(0, idx - 130);
-      const end = Math.min(pg.t.length, idx + q.length + 200);
-      const snip = (start > 0 ? "…" : "") + highlight(pg.t.slice(start, end)) + (end < pg.t.length ? "…" : "");
-      const hit = el("div", "rhit" + (pg.s === "u" ? " rhit-ufaq" : ""));
-      hit.appendChild(el("div", "rhit-src", pg.b + (pg.p ? " — p." + pg.p : (pg.sec ? " — " + pg.sec : ""))));
-      hit.appendChild(el("div", "rhit-text", snip));
-      out.appendChild(hit);
-    }
-  }
+  /* Rulebook search: rendered by js/search-widget.js (search standard v1). Unofficial FAQ entries
+     (p "" plus a sec label, which the default label shows) keep their rhit-ufaq card style. */
+  window.AID_SEARCH = {
+    index: UF.rulesIndex,
+    visible: docVisible,
+    cardClass: (pg) => pg.s === "u" ? "rhit-ufaq" : "",
+    hint: (c) => "Search this page, the Learn to Play, the Rules Reference" +
+      (c.has("fta") ? ", the From the Abyss rulebook" : "") +
+      " and the Unofficial FAQ. Type a word, a phrase or a question.",
+    noMatch: () => "No matches on this page or in the selected sets’ documents."
+  };
 
   function renderTeach(c) {
     const box = $("#teach");
@@ -257,12 +224,10 @@
     renderSetup(c);
     renderReference(c);
     renderTeach(c);
-    doSearch();
-    document.dispatchEvent(new CustomEvent("aid:config", { detail: c }));   // components glossary (js/comp-widget.js)
+    document.dispatchEvent(new CustomEvent("aid:config", { detail: c }));   // components glossary and rulebook search (js/comp-widget.js, js/search-widget.js)
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    $("#rsearch").addEventListener("input", doSearch);
     $("#teachBtn").addEventListener("click", () => {
       const p = $("#teach");
       p.hidden = !p.hidden;

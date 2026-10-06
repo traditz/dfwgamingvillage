@@ -388,8 +388,9 @@ main { max-width: 1000px; margin: 0 auto; padding: 0 24px 40px; }
   background: var(--cross) 0 0 / 12px 12px no-repeat;
 }
 
-/* ---- components glossary (js/comp-widget.js + css/components.css) ---------- */
-#components {
+/* ---- components glossary and rulebook search (js/comp-widget.js + css/components.css;
+        js/search-widget.js + css/search.css) ---- */
+#components, .aid-srch {
   --comp-surface: #f8f6ee; --comp-fig: #eeebdc; --comp-ink: #1e1c16; --comp-muted: #4f4a3a; --comp-line: #77735c;
   --comp-accent: #8c1323; --comp-accent-ink: #ffffff; --comp-head-font: "Alegreya", Georgia, serif; --comp-radius: 3px;
 }
