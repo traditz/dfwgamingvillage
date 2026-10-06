@@ -10,6 +10,7 @@
   <link rel="preload" as="image" href="images/anachrony-logo.webp">
   <link rel="stylesheet" href="css/styles.css?v=3">
   <link rel="stylesheet" href="css/components.css?v=1">
+  <link rel="stylesheet" href="css/search.css?v=1">
 </head>
 <body>
   <!-- hex-grid linework in the page corner, as on every rulebook page -->
@@ -81,9 +82,9 @@
 
     <section aria-label="Rulebook search">
       <h2>Search the Rulebooks</h2>
-      <p class="sec-note">Full-text search across the Essential Edition rulebook and every selected expansion (plus the solo rulebook in solo games).</p>
+      <p class="sec-note">Answers from this page come first, then every matching page of the Essential Edition rulebook and every selected expansion (plus the solo rulebook in solo games).</p>
       <div class="rsearch-wrap">
-        <input id="rsearch" type="search" placeholder="e.g. paradox, exosuit, warp, morale, evacuation, blink…" aria-label="Search the rulebooks">
+        <input id="rsearch" type="search" placeholder="e.g. paradox, exosuit, warp, morale… or ask a question" aria-label="Search this page and the rulebooks">
       </div>
       <div id="rresults"></div>
     </section>
@@ -102,7 +103,8 @@
   <script src="js/rules.js?v=1"></script>
   <script src="js/components.js?v=1"></script>
   <script src="js/comp-widget.js?v=1"></script>
-  <script src="js/app.js?v=4"></script>
+  <script src="js/search-widget.js?v=1"></script>
+  <script src="js/app.js?v=5"></script>
   <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
   <script src="/site-analytics.js?v=20260607-analytics"></script>
 </body>
