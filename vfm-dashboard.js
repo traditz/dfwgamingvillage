@@ -30,7 +30,7 @@
   const DEFAULT_PREFS = {
     list: null, tab: 'listings', view: 'grid', sort: 'deal', search: '', seller: '',
     status: '0', deal: [], min: '', max: '', rating: 0, players: '', weight: [], cond: [],
-    newOnly: false, noExp: false, noAuction: false,
+    newOnly: false, noExp: false, noAuction: false, extrasOnly: false,
   };
 
   const $ = (id) => document.getElementById(id);
@@ -105,14 +105,18 @@
   const trustedRating = (it) => (it.r && (it.rc || 0) >= MIN_VOTES ? it.r : null);
   // Market stats come from the last 12 months, or the last 3 years when a game
   // had fewer than 3 sales in the past year (m[4] === 36).
-  const isOlder = (it) => !!(it.m && it.m[4] === 36);
+  const isOlder = (it) => (it.mx ? it.mx[5] === 36 : !!(it.m && it.m[4] === 36));
+  // What the asking price is compared with: the GeekMarket value of all parts
+  // when the listing includes extras (it.mx), otherwise the game's own median.
+  const reference = (it) => (it.mx ? { median: it.mx[0], low: it.mx[1], high: it.mx[2] } : it.m ? { median: it.m[0], low: it.m[1], high: it.m[2] } : null);
+  const extrasCount = (it) => (it.xt ? it.xt.length : 0);
   const windowLabel = (it) => (isOlder(it) ? '3 yr' : '12 mo');
   const weightClass = (w) => (w == null ? null : w < 2 ? 'light' : w < 3.5 ? 'medium' : 'heavy');
   function prepare(raw) {
     return raw.map((it) => ({
       ...it,
       _tier: tierOf(it),
-      _sav: it.m && it.p != null && !it.a ? it.m[0] - it.p : null,
+      _sav: reference(it) && it.p != null && !it.a ? reference(it).median - it.p : null,
       _value: trustedRating(it) && it.d != null ? trustedRating(it) * (1 - it.d / 100) : null,
       _tr: trustedRating(it),
       _lc: `${it.n} ${it.s}`.toLowerCase(),
@@ -210,6 +214,7 @@
     if (prefs.newOnly && !it._new) return false;
     if (prefs.noExp && it.x) return false;
     if (prefs.noAuction && it.a) return false;
+    if (prefs.extrasOnly && !extrasCount(it)) return false;
     return true;
   }
   const by = (f, desc) => (a, b) => {
@@ -291,7 +296,7 @@
     $('f-players').value = prefs.players;
     document.querySelectorAll('#f-weight button').forEach((b) => b.classList.toggle('on', prefs.weight.includes(b.dataset.v)));
     document.querySelectorAll('#f-cond button').forEach((b) => b.classList.toggle('on', prefs.cond.includes(b.dataset.v)));
-    $('f-new').checked = prefs.newOnly; $('f-noexp').checked = prefs.noExp; $('f-noauction').checked = prefs.noAuction;
+    $('f-new').checked = prefs.newOnly; $('f-noexp').checked = prefs.noExp; $('f-noauction').checked = prefs.noAuction; $('f-extras').checked = prefs.extrasOnly;
     $('search').value = prefs.search; $('sort').value = prefs.sort;
     document.querySelectorAll('.view-toggle button').forEach((b) => b.classList.toggle('on', b.dataset.view === prefs.view));
     renderActiveFilters();
@@ -311,6 +316,7 @@
     if (prefs.newOnly) add('New since last visit', { newOnly: false });
     if (prefs.noExp) add('No expansions', { noExp: false });
     if (prefs.noAuction) add('No auctions', { noAuction: false });
+    if (prefs.extrasOnly) add('Includes extras', { extrasOnly: false });
     $('active-filters').innerHTML = chips.map((c, i) => `<span class="af">${esc(c.label)}<button type="button" data-i="${i}" aria-label="Remove filter">×</button></span>`).join('');
     $('active-filters').querySelectorAll('button').forEach((b) => b.addEventListener('click', () => update(chips[Number(b.dataset.i)].clear)));
   }
@@ -323,12 +329,13 @@
     return `<span class="pill ${t.k}">${t.k === 'great' ? '🔥 ' : ''}${Math.abs(Math.round(it.d))}% ${it.d < 0 ? 'below' : 'above'}</span>`;
   }
   function gauge(it) {
-    if (!it.m || it.p == null || it.a) return '';
-    const [med, low, high] = it.m;
+    const ref = reference(it);
+    if (!ref || it.p == null || it.a) return '';
+    const { median: med, low, high } = ref;
     const lo = Math.min(low, it.p), hi = Math.max(high, it.p);
     if (hi <= lo) return '';
     const pos = (v) => ((v - lo) / (hi - lo)) * 100;
-    return `<div class="gauge" title="Typical ${money(Math.round(low))}–${money(Math.round(high))} · median ${money(med)} · asking ${money(it.p)}">
+    return `<div class="gauge" title="Typical ${money(Math.round(low))}–${money(Math.round(high))} · ${it.mx ? 'parts value' : 'median'} ${money(med)} · asking ${money(it.p)}">
       <span class="range" style="left:${pos(low)}%;width:${Math.max(1, pos(high) - pos(low))}%"></span>
       <span class="median" style="left:${pos(med)}%"></span><span class="ask" style="left:${pos(it.p)}%"></span></div>`;
   }
@@ -347,15 +354,26 @@
     return f.join('');
   }
 
+  const olderTag = (it) => (isOlder(it) ? ' <span class="pill neutral" title="Fewer than 3 sales in the last year, so this uses the last 3 years" style="padding:0 6px;font-size:11px">3 yr</span>' : '');
+  function marketRow(it) {
+    if (it.mx) {
+      const base = it.m ? `game ${money(it.m[0])} + ` : '';
+      return `<div><div class="market-row">Parts value <b>${money(it.mx[0])}</b> · ${base}${it.mx[3]} of ${it.mx[4]} extras priced${olderTag(it)}</div>${gauge(it)}</div>`;
+    }
+    if (!it.m) return '';
+    return `<div><div class="market-row">GeekMarket median <b>${money(it.m[0])}</b> · ${it.m[3]} sales${olderTag(it)}</div>${gauge(it)}</div>`;
+  }
+
   function card(it) {
-    const tags = [it._new ? '<span class="pill new">New</span>' : '', it.c ? `<span class="pill neutral">${esc(it.c)}</span>` : '', it.x ? '<span class="pill neutral">Expansion</span>' : ''].join('');
+    const tags = [it._new ? '<span class="pill new">New</span>' : '', extrasCount(it) ? `<span class="pill extras" title="${esc(it.xt.map((x) => x[1]).join(', '))}">+${extrasCount(it)} extra${extrasCount(it) === 1 ? '' : 's'}</span>` : '',
+      it.c ? `<span class="pill neutral">${esc(it.c)}</span>` : '', it.x ? '<span class="pill neutral">Expansion</span>' : ''].join('');
     return `<article class="card item${it.st === 2 ? ' is-sold' : ''}" tabindex="0" data-id="${esc(it.i)}">
       ${it.st ? `<span class="status-tag s${it.st}">${STATUS[it.st]}</span>` : ''}
       <div class="item-top">${art(it)}<div style="min-width:0">
         <p class="item-name" style="${it.st ? 'padding-right:84px' : ''}">${esc(it.n)}</p>
         <div class="facts">${facts(it)}</div></div></div>
       <div class="price-line"><span class="price">${esc(it.pt)}</span>${it.op ? `<span class="was">${esc(it.op)}</span>` : ''}${dealPill(it)}${tags}</div>
-      ${it.m ? `<div><div class="market-row">GeekMarket median <b>${money(it.m[0])}</b> · ${it.m[3]} sales${isOlder(it) ? ' <span class="pill neutral" title="Fewer than 3 sales in the last year, so this uses the last 3 years" style="padding:0 6px;font-size:11px">3 yr</span>' : ''}</div>${gauge(it)}</div>` : ''}
+      ${marketRow(it)}
       <div class="item-foot"><span>${icon('user')}${esc(it.s)}</span><span>${it.cc ? `${icon('chat')}${it.cc} · ` : ''}${ago(it.t)}</span></div>
     </article>`;
   }
@@ -370,7 +388,7 @@
     const head = COLUMNS.map((c) => `<th class="${c.num ? 'num' : ''} ${c.sort && prefs.sort.startsWith(c.sort.split('-')[0]) ? 'sorted' : ''}" ${c.sort ? `data-sort="${c.sort}"` : ''}>${c.label}</th>`).join('');
     const body = rows.map((it) => `<tr data-id="${esc(it.i)}" class="${it.st === 2 ? 'is-sold' : ''}">
       <td><div class="t-game">${art(it)}<span>${esc(it.n)}</span>${it._new ? '<span class="pill new">New</span>' : ''}</div></td>
-      <td class="num"><b>${esc(it.pt)}</b></td><td class="num">${it.m ? money(it.m[0]) : '—'}</td>
+      <td class="num"><b>${esc(it.pt)}</b></td><td class="num">${reference(it) ? money(reference(it).median) + (it.mx ? ` <span class="muted" title="Parts value: game + ${extrasCount(it)} extras">+${extrasCount(it)}</span>` : '') : '—'}</td>
       <td class="num">${it._tier === 'none' ? '—' : dealPill(it)}</td><td class="num">${it.r ? it.r.toFixed(1) : '—'}</td>
       <td class="num">${it.rk ? '#' + it.rk.toLocaleString() : '—'}</td><td class="num">${it.w ? it.w.toFixed(1) : '—'}</td>
       <td>${players(it) || '—'}</td><td>${esc(it.c || '—')}</td><td>${esc(it.s)}</td><td>${ago(it.t)}</td>
@@ -413,12 +431,18 @@
       <div class="d-section">
         <div class="d-status s${it.st}">● ${STATUS[it.st]}${it.sn ? ` <span class="muted" style="font-weight:400">· ${esc(it.sn)}</span>` : ''}</div>
         <div class="d-price" style="margin-top:8px"><span class="price">${esc(it.pt)}</span>${it.op ? `<span class="was">${esc(it.op)}</span>` : ''}${dealPill(it)}</div>
-        ${it.m ? `<p class="muted" style="margin:6px 0 0;font-size:13px">${t.k === 'auction' ? 'Auction: the price is a starting bid.' : it.d != null ? `${t.label}: ${Math.abs(Math.round(it.d))}% ${it.d < 0 ? 'below' : 'above'} the GeekMarket ${isOlder(it) ? '3-year ' : ''}median${it._sav > 0 ? `, about ${money(Math.round(it._sav), 0)} under` : ''}.` : 'Several prices in this post, so no single comparison.'}</p>
+        ${reference(it) ? `<p class="muted" style="margin:6px 0 0;font-size:13px">${t.k === 'auction' ? 'Auction: the price is a starting bid.' : it.d != null ? `${t.label}: ${Math.abs(Math.round(it.d))}% ${it.d < 0 ? 'below' : 'above'} ${it.mx ? `the GeekMarket value of its parts (the game plus ${extrasCount(it)} extra${extrasCount(it) === 1 ? '' : 's'})` : `the GeekMarket ${isOlder(it) ? '3-year ' : ''}median`}${it._sav > 0 ? `, about ${money(Math.round(it._sav), 0)} under` : ''}.` : 'Several prices in this post, so no single comparison.'}</p>
           ${gauge(it)}
-          <div class="d-market"><div><b>${money(it.m[0])}</b><span>Median</span></div><div><b>${money(Math.round(it.m[1]), 0)}</b><span>Typical low</span></div><div><b>${money(Math.round(it.m[2]), 0)}</b><span>Typical high</span></div><div><b>${it.m[3]}</b><span>Sales (${windowLabel(it)})</span></div></div>
-          ${isOlder(it) ? '<p class="muted" style="margin:8px 0 0;font-size:12px">Fewer than 3 sales in the last year, so this uses the last 3 years. Older prices may differ from today&rsquo;s market.</p>' : ''}`
+          ${it.mx
+            ? `<div class="d-market"><div><b>${money(it.mx[0])}</b><span>Parts value</span></div><div><b>${it.m ? money(it.m[0]) : '—'}</b><span>Game alone</span></div><div><b>${money(Math.round(it.mx[1]), 0)}–${money(Math.round(it.mx[2]), 0)}</b><span>Typical range</span></div><div><b>${it.mx[3]}/${it.mx[4]}</b><span>Extras priced</span></div></div>`
+            : `<div class="d-market"><div><b>${money(it.m[0])}</b><span>Median</span></div><div><b>${money(Math.round(it.m[1]), 0)}</b><span>Typical low</span></div><div><b>${money(Math.round(it.m[2]), 0)}</b><span>Typical high</span></div><div><b>${it.m[3]}</b><span>Sales (${windowLabel(it)})</span></div></div>`}
+          ${isOlder(it) ? `<p class="muted" style="margin:8px 0 0;font-size:12px">${it.mx ? 'Some parts had fewer than 3 sales in the last year, so their values use the last 3 years.' : 'Fewer than 3 sales in the last year, so this uses the last 3 years.'} Older prices may differ from today&rsquo;s market.</p>` : ''}`
           : '<p class="muted" style="margin:6px 0 0;font-size:13px">No GeekMarket sales data for this game yet.</p>'}
       </div>
+      ${extrasCount(it) ? `<div class="d-section"><h3>Included extras</h3><ul class="parts">
+        ${it.xt.map(([id, name, med]) => `<li><a href="https://boardgamegeek.com/boardgame/${encodeURIComponent(id)}" target="_blank" rel="noopener">${esc(name)}</a><span>${med != null ? money(med) : '<span class="muted">no sales data</span>'}</span></li>`).join('')}
+        ${it.mx ? `<li class="total"><span>Parts value${it.m ? ` (game ${money(it.m[0])} + extras)` : ''}</span><span>${money(it.mx[0])}</span></li>` : ''}</ul>
+        <p class="muted" style="margin:8px 0 0;font-size:12px">Found from the items the seller linked or named in the post. Bundles often sell for a little less than their parts bought separately${it.mx && it.mx[3] < it.mx[4] ? ', and extras without sales data aren\u2019t counted, so the real value may be higher' : ''}.</p></div>` : ''}
       <div class="d-section"><h3>Listing</h3>${dl([
         ['Seller', `<a href="https://boardgamegeek.com/user/${encodeURIComponent(it.s)}" target="_blank" rel="noopener">${esc(it.s)}</a>`],
         ['Posted', `${dateTime(it.t)} (${ago(it.t)})`], ['Condition', esc(it.c || 'Not stated')],
@@ -575,7 +599,8 @@
   $('f-new').addEventListener('change', (e) => update({ newOnly: e.target.checked }));
   $('f-noexp').addEventListener('change', (e) => update({ noExp: e.target.checked }));
   $('f-noauction').addEventListener('change', (e) => update({ noAuction: e.target.checked }));
-  $('clear-filters').addEventListener('click', () => update({ status: '0', deal: [], min: '', max: '', rating: 0, players: '', weight: [], cond: [], newOnly: false, noExp: false, noAuction: false, search: '', seller: '' }));
+  $('f-extras').addEventListener('change', (e) => update({ extrasOnly: e.target.checked }));
+  $('clear-filters').addEventListener('click', () => update({ status: '0', deal: [], min: '', max: '', rating: 0, players: '', weight: [], cond: [], newOnly: false, noExp: false, noAuction: false, extrasOnly: false, search: '', seller: '' }));
   let searchTimer;
   $('search').addEventListener('input', (e) => { clearTimeout(searchTimer); searchTimer = setTimeout(() => update({ search: e.target.value.trim() }), 150); });
   $('sort').addEventListener('change', (e) => update({ sort: e.target.value }));
