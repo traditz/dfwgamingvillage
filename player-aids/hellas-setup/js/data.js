@@ -27,7 +27,7 @@ LH.expansions = [
 
 LH.modes = [
   { id: "standard", requires: "base", name: "Standard game", blurb: "The competitive base game for 2–6 players — first to any victory condition wins." },
-  { id: "kronos", requires: "kronos", name: "Kronos Rebellion", blurb: "One player frees the titan; the other Heroes team up to stop him. 2–4 players, alternate board." },
+  { id: "kronos", requires: "kronos", name: "Kronos Rebellion", blurb: "One player frees the titan; the other Heroes team up to stop him. 2–4 players, alternate board. Kronos's board uses the 3 Atlantis (Dark Ages) 5th-player Attribute tokens (Kronos p.3)." },
   { id: "solo", requires: "base", name: "Solo Campaign", blurb: "The two-act Persian Invasion for 1 player, on the back of the game board." }
 ];
 
@@ -51,12 +51,12 @@ LH.modules = [
     description: "Adds the Apollo Monument in Messenia and the Muses. For experienced players.", src: "Apollo p.3" },
   { id: "apolloS", requires: "apollo", group: "hermes", excludes: ["apolloM"], name: "Apollo (Simple mode)", summary: "Apollo replaces Hermes — no Muse rules",
     description: "The Apollo Monument replaces Hermes in Acarnania; Muses aren't used. Usable in any game.", src: "Apollo p.4" },
-  { id: "atlasO", requires: "atlas", group: "messenia", excludes: ["atlasH"], name: "Atlas: Overload", summary: "A doomsday timer the players feed with Hoplites",
+  { id: "atlasO", requires: "atlas", group: "messenia", excludes: ["atlasH"], name: "Atlas: Overload", summary: "A doomsday timer: Hoplites on Atlas slow it, and the most there win when it hits 0",
     description: "Atlas stands in Messenia holding the Overload track — when it hits 0 the game ends and the most Hoplites on Atlas wins. For experienced players.", src: "Atlas p.3" },
   { id: "atlasH", requires: "atlas", group: "messenia", excludes: ["atlasO"], name: "Atlas: Hesperides Garden", summary: "Send Hoplites to Atlas for Golden Apples",
     description: "Atlas stands in Messenia holding 15 Golden Apples — spend them for Army Strength, healing or temporary Attributes. For experienced players.", src: "Atlas p.4" },
   { id: "orichalkum", requires: "da", name: "Orichalkum & Constructs", summary: "A resource that recharges Artifacts and buys Constructs",
-    description: "Orichalkum tokens appear in City Regions; spend them to recharge Artifacts or use one-shot Construct cards. Combinable with Poseidon and Atlantis.", src: "Dark Ages p.4" },
+    description: "Orichalkum tokens appear in City Regions; spend them to recharge Artifacts or use one-shot Construct cards. For experienced players: the manual suggests only one (!)-icon expansion per game, but Orichalkum can be combined with Poseidon and Atlantis.", src: "Dark Ages p.4" },
   { id: "heroesmonsters", requires: "da", name: "Heroes & Monsters", summary: "Cassandra & Odysseus, Typhon & Python",
     description: "Two extra Heroes and two extra Monsters. Usable in any game.", src: "Dark Ages p.6" },
   { id: "combatcards", requires: "da", name: "Additional Combat Cards", summary: "Six new cards shuffled into the Combat deck",
@@ -64,7 +64,7 @@ LH.modules = [
   { id: "chiron", requires: "da", name: "Chiron", summary: "A friendly-ish centaur offering Training Quests",
     description: "Chiron appears like a Monster; his Training Quests award permanent Combat-Card-like Training cards. Usable in any game.", src: "Dark Ages p.7" },
   { id: "opportunity", requires: "da", name: "Opportunity Cards", summary: "One-shot event offers anyone can grab",
-    description: "Shuffled into the Events deck; a face-up Opportunity waits on the deck until someone uses it. Usable in any game.", src: "Dark Ages p.7" },
+    description: "Shuffled into the Events deck; a drawn Opportunity sits face up on the deck. Any player may use it at the start of their Turn (then draw a new Event); if unused, it is discarded at the start of the next Event Phase. Usable in any game.", src: "Dark Ages p.7" },
   { id: "armyupgrade", requires: "cos", name: "Army Upgrade", summary: "Asymmetric army powers earned during play",
     description: "Each player's army color has an Upgrade board; earn up to two upgrades via Blessing Drafts or by controlling the most Cities. Usable in any game.", src: "City of Steel p.4" }
 ];
@@ -132,7 +132,7 @@ LH.phases = [
         t: "City of Steel — the 6th-player board",
         d: "<ul><li>You must also set up the <b>Poseidon and Atlantis</b> expansions to play City of Steel.</li>" +
           "<li>Place the <b>City of Steel board</b> on the upper-right side of the main board, directly above the Atlantis board. Its Sea Trails connect to the main board and Atlantis board, both ways.</li>" +
-          "<li><b>Troy</b> is a super-city: its controller holds up to <b>5</b> Combat Cards, may Recruit 1 Hoplite in each controlled Region of the Troad, and every Hoplite in Troy counts as Fortified. City/Sparta rules also apply to Troy.</li></ul>",
+          "<li><b>Troy</b> is a super-city: its controller may hold up to <b>5</b> Combat Cards (instead of 4); when they perform the <b>Recruit</b> Special Action they may also Recruit up to 1 Hoplite in each Region of the <b>Troad</b> (the brown Land on the City of Steel board) they control; and every Hoplite in Troy counts as Fortified (+1 Army Strength when defending). City/Sparta rules also apply to Troy.</li></ul>",
         src: "City of Steel p.3" }
     ]
   },
@@ -192,14 +192,21 @@ LH.phases = [
           if (c.mod("orichalkum")) s.push("Dark Ages p.4");
           return s.join(" · ");
         } },
-      { when: (c) => c.mode === "standard", exp: (c) => c.mod("orichalkum") ? "mod" : "base",
+      { when: (c) => c.mode === "standard", exp: (c) => (c.mod("orichalkum") || c.mod("chiron") || c.mod("opportunity")) ? "mod" : "base",
         t: "Prepare starting events",
         d: (c) => "<ul><li>Draw <b>7 cards</b> from the Events Deck and resolve them in order:</li>" +
           "<li><b>Quest cards:</b> place the card in a Quest Slot and its Quest Token in the indicated Region. Once three Quests are out, ignore further Quest cards (they still count toward the 7).</li>" +
           "<li><b>Monster cards:</b> place the Monster's miniature in the indicated Region, with its Monster Tray and assigned Artifact beside the board. If the Monster is already out, ignore the card and draw a replacement.</li>" +
+          (c.mod("chiron") ? "<li><b>Chiron:</b> if his Monster card is drawn, place him like any Monster and put the top Training Card on the first empty Quest slot (if none is empty, discard the first Quest card with no Hero on it).</li>" : "") +
           "<li>Shuffle the resolved Event cards back into the Events Deck (Quests on the slots stay).</li>" +
+          (c.mod("opportunity") ? "<li><b>Opportunity cards:</b> an Opportunity drawn here is not shuffled back. After the shuffle, it sits face up on top of the Events Deck until a player uses it at the start of their Turn (drawing a new Event card), or it is discarded at the start of the next Event Phase.</li>" : "") +
           (c.mod("orichalkum") ? "<li><b>Orichalkum:</b> draw <b>3 Construct cards</b> and set them face up next to the board.</li>" : "") + "</ul>",
-        src: (c) => c.mod("orichalkum") ? "Base p.6 · Dark Ages p.4" : "Base p.6" }
+        src: (c) => {
+          const s = ["Base p.6"];
+          if (c.mod("orichalkum")) s.push("Dark Ages p.4");
+          if (c.mod("chiron") || c.mod("opportunity")) s.push("Dark Ages p.7");
+          return s.join(" · ");
+        } }
     ]
   },
   {
@@ -207,31 +214,35 @@ LH.phases = [
     steps: [
       { when: (c) => c.mode === "standard" && c.mod("armyupgrade"), exp: "mod",
         t: "Army Upgrade — choose army colors first",
-        d: "<ul><li><b>Before selecting Heroes</b>, players choose their army color by picking one of the six <b>Army Upgrade boards</b>, starting with the first player and going <b>counter-clockwise</b>. Each player takes two <b>Upgrade tokens</b>.</li></ul>",
-        src: "City of Steel p.4" },
+        d: "<ul><li>After every player has drawn their starting Combat Card, taken a Help Tray and the starting player is decided (first bullet of the next step), but <b>before selecting Heroes</b>: starting with the starting player and going <b>counter-clockwise</b>, each player chooses their army color by picking one of the six <b>Army Upgrade boards</b>, and takes two <b>Army Upgrade tokens</b>.</li>" +
+          "<li>When everyone has a color, choose Heroes by the standard rules (next step), using the army color you already picked instead of choosing an Army board.</li></ul>",
+        src: "City of Steel p.4 · Base p.8" },
       { when: (c) => c.mode === "standard", exp: (c) => (c.p >= 5 || c.mod("heroesmonsters")) ? "mod" : "base",
         t: "Pick Heroes & starting positions",
         d: (c) => {
           const pool = ["Helen", "Achilles", "Heracles", "Perseus"];
           if (c.mod("heroesmonsters")) pool.push("Cassandra", "Odysseus");
-          if (c.p >= 5) pool.push("Cleito (Atlantis)");
-          if (c.p === 6) pool.push("Hector (City of Steel)");
+          if (c.has("da")) pool.push(c.p >= 5 ? "Cleito (Atlantis)" : "Cleito (Atlantis — may replace a base-game Hero)");
+          if (c.has("cos")) pool.push(c.p === 6 ? "Hector (City of Steel)" : "Hector (City of Steel — may replace a base-game Hero)");
           return "<ul><li>Every player draws <b>1 Combat Card</b> (kept secret) and takes a <b>Help Tray</b>. Decide a starting player.</li>" +
-            "<li>Heroes available: <b>" + pool.join(", ") + "</b>. The starting player picks a Hero and an Army board, takes that color's components (Hoplites, Priests, Control Tokens, colored ring), puts the ring on the Hero's base, takes <b>6 Used Action Tokens</b> and <b>3 Attribute Tokens</b> set to <b>1</b> on Leadership, Strength and Speed, and resolves the Hero's <b>starting bonus</b>.</li>" +
+            "<li>Heroes available: <b>" + pool.join(", ") + "</b>. The starting player " + (c.mod("armyupgrade") ? "picks a Hero, takes the Army board of the color they chose with their Army Upgrade board and that color's components" : "picks a Hero and an Army board, takes that color's components") + " (Hoplites, Priests, Control Tokens, colored ring), puts the ring on the Hero's base, takes <b>6 Used Action Tokens</b> and <b>3 Attribute Tokens</b> set to <b>1</b> on Leadership, Strength and Speed, and resolves the Hero's <b>starting bonus</b>.</li>" +
+            (c.mod("hades") ? "<li><b>Hades:</b> when choosing your Hero, also take 1 <b>Warrior of Hades</b> and place it in any Region. Hoplites and Heroes are deployed only after the Warriors of Hades are placed.</li>" : "") +
             "<li>They place their Hero with <b>2 Hoplites</b> in any Region (Quest/Monster Regions allowed — FAQ); if its Population Strength is 2 or less, they place their Control Token.</li>" +
             "<li>Continuing <b>counter-clockwise</b>, each next player does the same — but may not start in a Region holding another Hero. The <b>last player to place begins the game</b>; turns then run clockwise.</li></ul>";
         },
         src: (c) => {
           const s = ["Base p.8"];
           if (c.mod("heroesmonsters")) s.push("Dark Ages p.6");
-          if (c.p >= 5) s.push("Dark Ages p.3");
-          if (c.p === 6) s.push("City of Steel p.2");
+          if (c.mod("hades")) s.push("Dark Ages p.4");
+          if (c.has("da")) s.push("Dark Ages p.3");
+          if (c.has("cos")) s.push("City of Steel p.2–3");
+          if (c.mod("armyupgrade")) s.push("City of Steel p.4");
           s.push("FAQ p.1");
           return s.join(" · ");
         } },
       { when: (c) => c.mode === "standard" && c.mod("hades"), exp: "mod",
         t: "Hades — Warriors & Gates",
-        d: "<ul><li>When choosing their Hero, each player also takes 1 <b>Warrior of Hades</b> and places it in any Region (before deploying Hoplites and Hero).</li>" +
+        d: "<ul><li>Each player's <b>Warrior of Hades</b> is placed while picking Heroes (see the step above), before their Hoplites and Hero.</li>" +
           "<li>After all Heroes are placed, each player places 1 <b>Gate of Hades</b> in their Hero's starting Region.</li></ul>",
         src: "Dark Ages p.4" },
       { when: (c) => c.mode === "standard" && (c.mod("hephaestus") || c.mod("apolloM")), exp: "mod",
@@ -267,10 +278,11 @@ LH.phases = [
       { when: (c) => c.mode === "kronos", exp: "kronos",
         t: "The Hero players",
         d: "<ul><li>Each Hero player picks a Hero and covers its printed ability with that Hero's matching <b>Hero Special Ability token</b> (one of nine; starting bonuses are ignored entirely in this mode).</li>" +
+          "<li>Each takes their Hero's miniature and colored ring, Army board, Hoplites, Priests, Used Action Tokens, Control Tokens and 3 Attribute tokens — set at <b>1</b> on Leadership, Strength and Speed as in the base game.</li>" +
           "<li>Each places their Hero in a Region of their choice with <b>3 Hoplites</b> (2 Heroes in play) or <b>2 Hoplites</b> (3 Heroes).</li>" +
           "<li>The first Hero player takes the <b>Current Player token</b>. <b>Kronos always takes the first Turn</b>, and takes a Turn after every Hero's Turn.</li>" +
           "<li><i>1 vs 1:</i> one player is Kronos, the other controls two Heroes.</li></ul>",
-        src: "Kronos p.3" }
+        src: "Kronos p.3 · Base p.8" }
     ]
   },
   {
@@ -298,16 +310,17 @@ LH.phases = [
     steps: [
       { when: (c) => c.mode === "standard", exp: "base",
         t: "Start the first Turn",
-        d: "<ul><li>The last player who placed their Hero begins; turns proceed <b>clockwise</b>.</li><li>On your Turn: any <b>Regular Actions</b> (each at most once), then exactly one <b>Special Action</b>.</li></ul>",
-        src: "Base p.8–9" },
+        d: (c) => "<ul><li>The last player who placed their Hero begins; turns proceed <b>clockwise</b>.</li><li>On your Turn: any <b>Regular Actions</b> (each at most once), then exactly one <b>Special Action</b>.</li>" +
+          (c.p === 2 ? "<li><b>2 players:</b> just before your Build Monument Special Action you may also perform one of your already-used Special Actions (only the player building gets this bonus).</li>" : "") + "</ul>",
+        src: (c) => c.p === 2 ? "Base p.8–9 · Base p.15 · FAQ p.2" : "Base p.8–9" },
       { when: (c) => c.mode === "kronos", exp: "kronos",
         t: "Start — Kronos moves first",
         d: "<ul><li>The Kronos player takes the first Turn, then Turns alternate: Kronos → Hero 1 → Kronos → Hero 2 → …</li></ul>",
         src: "Kronos p.3" },
       { when: (c) => c.mode === "solo", exp: "solo",
         t: "Start Act I",
-        d: "<ul><li>Each Turn: <b>Player Phase</b> (4 Regular Actions + 1 Special Action) then <b>Events Phase</b> — flip the Used Action Token you just spent and read the matching numbered <b>Script</b> for the current Act.</li></ul>",
-        src: "Solo Campaign p.3" }
+        d: "<ul><li>Each Turn: <b>Player Phase</b> (up to 4 Regular Actions, then 1 Special Action) then <b>Events Phase</b> — flip the Used Action Token you just spent (after a Pass that cleared every token, flip a fresh one from the pile), apply its numbered <b>Script</b> for the current Act, working through its lines from the top, then check whether the Act ends.</li></ul>",
+        src: "Solo Campaign p.3, p.6, p.10" }
     ]
   }
 ];
@@ -329,19 +342,22 @@ LH.reference = [
   },
   {
     title: "Your Turn — Regular Actions",
-    when: (c) => c.mode !== "solo",
+    when: () => true,
     html: (c) => "<ul><li>Take any of these, in any order, <b>each at most once</b> per Turn; then end with one Special Action.</li>" +
-      "<li><b>Use Artifacts:</b> use any number of your charged Artifacts <b>at once</b> (one Regular Action — you can't split them around other actions). Used Artifacts recharge when anyone performs Build Monument.</li>" +
-      "<li><b>Hoplite Movement:</b> move up to <b>Leadership</b> Hoplites, each one Region (no Hoplite moves twice). You may <b>Fortify</b> one Hoplite in each controlled City/Sparta (+1/+2 Army Strength defending there; one Fortified Hoplite per City — FAQ; Fortified die last). Entering a Region with enemy Hoplites starts a <b>Battle</b>; entering an enemy-controlled but empty Region takes control with even 1 Hoplite. Resolve all moves, then fight Battles in the order the mover chooses.</li>" +
+      "<li><b>Use Artifacts:</b> use any number of your charged Artifacts <b>at once</b> (one Regular Action — you can't split them around other actions). " + (c.mode === "solo" ? "Used Artifacts recharge when you <b>Pass</b> and at the start of Act II (Solo FAQ)." : "Used Artifacts recharge when anyone performs Build Monument.") + "</li>" +
+      "<li><b>Hoplite Movement:</b> move up to <b>Leadership</b> Hoplites, each one Region (no Hoplite moves twice). You may <b>Fortify</b> one Hoplite in each controlled City/Sparta (+1/+2 Army Strength defending there; one Fortified Hoplite per City — FAQ; Fortified die last). " +
+        (c.mode === "solo" ? "Ending up in a Region with Persian Hoplites <b>or</b> a Persian (green) Control Token starts a <b>Battle</b> (see Battles); several Battles at once are fought in Region-number order.</li>" : "Entering a Region with enemy Hoplites starts a <b>Battle</b>; entering an enemy-controlled but empty Region takes control with even 1 Hoplite. Resolve all moves, then fight Battles in the order the mover chooses.</li>") +
       "<li><b>Hero Movement:</b> move your Hero up to <b>Speed</b> Regions — Heroes ignore Hoplites, enemy Heroes and Monsters, but can't act in Regions they pass through. Ending on a Quest Token may start the <b>Quest</b>; on a Quest you move 1 Quest Step per turn instead.</li>" +
-      "<li><b>Prayer:</b> send 1 Priest (max 1 per Turn) from your Priest Pool to any Monument with a free spot: permanently raise that God's <b>Attribute</b> by 1 and use the <b>God Power</b> of the Monument's current level. The Priest stays until the next Build Monument.</li>" +
-      (c.mod("hades") ? "<li><b>Resurrection (Hades):</b> take up to <b>Raise</b> of your Hoplites from the Underworld board and place them in a Region with a <b>Gate of Hades</b> (this can start a Battle) or your supply.</li>" : "") +
+      (c.mode === "solo" ? "<li><b>Act II — Remove a Spy:</b> instead of your Hero Movement, a Hero in a Region with one of Xerxes' Spies removes it to the first free space from the right on Xerxes' Command Track.</li>" : "") +
+      "<li><b>Prayer:</b> send 1 " + (c.mode === "solo" ? "<b>blue</b> " : "") + "Priest (max 1 per Turn) from your Priest Pool to any Monument with a free spot: permanently raise that God's <b>Attribute</b> by 1 and use the <b>God Power</b> of the Monument's current level. " + (c.mode === "solo" ? "The Priest stays: Pass doesn't return it, and all Priests leave the Monuments only in the Act I Aftermath (Solo FAQ)." : "The Priest stays until the next Build Monument.") + "</li>" +
+      (c.mod("hades") ? "<li><b>Resurrection (Hades):</b> take a number of your Hoplites equal to your <b>Raise</b> from the Underworld board and place them in a Region with a <b>Gate of Hades</b> (this can start a Battle) or your supply.</li>" : "") +
       (c.mod("apolloM") ? "<li><b>Muse Movement (Apollo):</b> move your Muse up to your Hero's Speed.</li>" : "") +
-      (c.p >= 5 ? "<li><b>Talos (Atlantis):</b> the Inner Circle's controller may take 1 extra Talos Regular Action — move Talos 1 Region or use its Region Attack.</li>" : "") +
-      (c.mod("orichalkum") ? "<li><b>Orichalkum (start of Turn):</b> spend tokens to recharge that many Artifacts, or pay a face-up <b>Construct</b> card's cost to use it (once ever; refilled to 3 in the Event Phase).</li>" : "") +
+      (c.p >= 5 ? "<li><b>Talos (Atlantis):</b> once the Factory is built, whoever controls the Inner Circle controls Talos and may take 1 extra Talos Regular Action each turn — move Talos 1 Region or use its Region Attack.</li>" : "") +
+      (c.mod("orichalkum") ? "<li><b>Orichalkum:</b> when your Hero ends a Hero Movement in a Region with an Orichalkum token (and doesn't start a Quest), you may take it. At the start of your Turn (before any Action) you may spend tokens to recharge that many Artifacts, and you may use 1 of the 3 face-up <b>Construct</b> cards by paying its cost (a Construct is then removed from the game; the offer refills to 3 in the Event Phase).</li>" : "") +
       (c.mod("opportunity") ? "<li><b>Opportunity (start of Turn):</b> you may use the face-up Opportunity card on the Events deck, then draw a new Event card. Unused Opportunities are discarded at the next Event Phase.</li>" : "") + "</ul>",
     src: (c) => {
       const s = ["Base p.9 · FAQ p.2"];
+      if (c.mode === "solo") s.push("Solo Campaign p.3, p.8–9 · Solo FAQ p.1");
       if (c.mod("hades")) s.push("Dark Ages p.4");
       if (c.mod("apolloM")) s.push("Apollo p.4");
       if (c.p >= 5) s.push("Dark Ages p.3");
@@ -352,28 +368,40 @@ LH.reference = [
   },
   {
     title: "Special Actions",
-    when: (c) => c.mode !== "solo",
-    html: (c) => "<ul><li>End your Turn with <b>one</b> Special Action and cover it with a Used Action Token — it stays locked until anyone performs <b>Build Monument</b>.</li>" +
+    when: () => true,
+    html: (c) => c.mode === "solo"
+      ? "<ul><li>End your Turn with <b>one</b> Special Action and cover it with a token from the face-down pile — it stays locked until you <b>Pass</b>, and that token is never reused.</li>" +
+        "<li><b>Recruit:</b> 1 Hoplite in every controlled City Region (2 in Sparta), coloured by that Region's Control Token (blue or yellow).</li>" +
+        "<li><b>March:</b> move any number of Hoplites from one Region to one neighboring Region (even Hoplites that already moved; not Fortified ones).</li>" +
+        "<li><b>Build Temple:</b> in a Region with a Shrine and your blue or yellow Control Token — place a Temple and add 1 <b>blue</b> Priest to your pool (a Temple in a yellow, Allied Region still gives a blue Priest). No Blessing Draft and no Temple Cards.</li>" +
+        "<li><b>Prepare:</b> choose any two (repeats allowed): heal 1 Injury · draw a Combat Card · recruit 1 <b>yellow</b> Hoplite where your Hero stands (not while on a Quest).</li>" +
+        "<li><b>Usurp:</b> with the Glory Token matching your Hero's Region's Land: take control instantly, recruit 1 Hoplite (may be Fortified), enemy Hoplites withdraw with no losses. You keep the Glory Token. <i>Solo:</i> never in the northernmost (red-bordered) Land; in a Loyal Land you may Usurp any Region.</li>" +
+        "<li><b>Hunt:</b> fight a Monster sharing your Hero's Region (see Hunts).</li>" +
+        "<li><b>Pass</b> (replaces Build Monument): remove all Used Action Tokens from your Hero Board and recharge your Artifacts. Priests stay on the Monuments and you gain no new ones. Pass is itself covered with a Used Action Token, then the Events Phase follows.</li></ul>"
+      : "<ul><li>End your Turn with <b>one</b> Special Action and cover it with a Used Action Token — it stays locked until anyone performs <b>Build Monument</b>.</li>" +
       "<li><b>Recruit:</b> up to 2 Hoplites in every controlled City Region (4 in Sparta" + (c.p === 6 ? "; Troy's controller may also Recruit 1 in each controlled Troad Region" : "") + "); one may arrive already Fortified. Each player has only 15 Hoplites — with none left in supply you can't place more, and you may never pull Hoplites off the map to re-place them.</li>" +
       "<li><b>March:</b> move any number of Hoplites from one Region to one neighboring Region (even Hoplites that already moved; not Fortified ones).</li>" +
-      "<li><b>Build Temple:</b> in a controlled Region with a Shrine — place a Temple and add 1 Priest to your pool (max 4 Priests). The <b>Oracle of Delphi</b> grants the Temple Card's extra reward. A red <b>“Draft”</b> frame under the Temple slot triggers a Blessing Draft.</li>" +
+      "<li><b>Build Temple:</b> in a controlled Region with a Shrine — place a Temple and add 1 Priest to your pool (max 4 Priests). The <b>Oracle of Delphi</b> grants the Temple Card's extra reward. A red <b>“Draft”</b> frame under the Temple slot triggers a Blessing Draft." + (c.mode === "kronos" ? " <i>Kronos Rebellion: not available — Heroes can't build or rebuild Temples; Priests come only from Hunt rewards or from controlling Temple Regions when you Build Monument.</i>" : "") + "</li>" +
       "<li><b>Prepare:</b> choose any two (repeats allowed): heal 1 Injury · draw a Combat Card · recruit 1 Hoplite where your Hero stands (not while on a Quest, and not into a Region with enemy Hoplites — but an empty enemy Region works and flips control).</li>" +
       "<li><b>Usurp:</b> with the Glory Token matching your Hero's Region's Land: take control instantly, recruit 1 Hoplite (may be Fortified), enemy Hoplites withdraw with no losses. You keep the Glory Token.</li>" +
       "<li><b>Hunt:</b> fight a Monster sharing your Hero's Region (see Hunts).</li>" +
-      "<li><b>Build Monument:</b> add a level to <b>any</b> Monument (ownership irrelevant — FAQ). All Priests leave all Monuments to their owners' supplies (not pools); <b>you</b> gain 1 Priest per Temple you control (Oracle counts). Then everyone removes Used Action Tokens and recharges Artifacts, and you run the <b>Monster Phase</b> and <b>Event Phase</b>. Usable even with other actions still open. In a <b>2-player game</b>, you may first perform one of your used Special Actions again.</li></ul>",
-    src: (c) => c.p === 6 ? "Base p.10, p.15 · City of Steel p.3 · FAQ p.2" : "Base p.10, p.15 · FAQ p.2"
+      "<li><b>Build Monument:</b> add a level to <b>any</b> Monument (ownership irrelevant — FAQ). All Priests leave all Monuments to their owners' supplies (not pools); <b>you</b> gain 1 Priest per Temple you control (Oracle counts). Then everyone removes Used Action Tokens and recharges Artifacts" + (c.mode === "kronos" ? "; in Kronos Rebellion the Monster and Event Phases are <b>skipped</b> — instead Kronos gains Anger and may Break a Chain (see Kronos Rebellion below)" : ", and you run the <b>Monster Phase</b> and <b>Event Phase</b>") + ". Usable even with other actions still open. In a <b>2-player game</b>, you may first perform one of your used Special Actions (one with a Used Action Token) again; once every Monument is fully built, Build Monument can still be used — everything except adding a level.</li></ul>",
+    src: (c) => c.mode === "solo" ? "Base p.10 · FAQ p.2 · Solo Campaign p.3–4 · Solo FAQ p.1"
+      : (c.p === 6 ? "Base p.10, p.15 · City of Steel p.3 · FAQ p.2" : "Base p.10, p.15 · FAQ p.2") + (c.mode === "kronos" ? " · Kronos p.4" : "")
   },
   {
     title: "Monster Phase & Event Phase",
     when: (c) => c.mode === "standard",
     html: (c) => "<ul><li><b>Monster Phase</b> (run by the Build Monument player): roll the Monster Die for each Monster on the map, in an order of their choosing — <b>Nothing</b> / <b>Region Attack</b> (per its Tray) / <b>Move</b> (roller picks the adjacent Region) / <b>Move or Action</b> (roller decides). The roller makes any extra decisions.</li>" +
+      (c.p >= 5 ? "<li><b>Talos (Atlantis):</b> don't roll the Monster Die for Talos — its controller (whoever holds the Inner Circle) instead takes an additional Talos Regular Action (move 1 Region or Region Attack).</li>" : "") +
       "<li><b>Event Phase:</b> draw 1 Event card. <b>Quest:</b> goes to a free Quest Slot with its token (discard if all 3 slots are full). <b>Monster:</b> if it's on the map it <b>Evolves</b> (permanently, until slain); if unslain and absent, it spawns in the shown Region; if slain, discard and draw again. A Monster can Evolve twice only if it was out from the start of the game (FAQ).</li>" +
       (c.mod("opportunity") ? "<li><b>Opportunity cards</b> drawn here sit face up on the Events deck until someone uses one at the start of their Turn (drawing a replacement Event), or it's discarded at the next Event Phase.</li>" : "") +
-      (c.mod("chiron") ? "<li><b>Chiron</b> arrives like a Monster; when he appears, place a <b>Training Card</b> on the first free Quest slot (bumping a Hero-less Quest if needed). Completed Trainings are permanent Combat-Card-like cards, recharged like Artifacts; if Chiron is killed, discard the current Training card.</li>" : "") +
+      (c.mod("chiron") ? "<li><b>Chiron</b> arrives like a Monster (at setup or in any Event Phase). When he appears, draw a <b>Training Card</b> onto the first empty Quest slot. If no slot is empty, discard the first Quest with no Hero on it; if every Quest has a Hero, set the Training aside until the first Quest is done. Trainings work like Quests, but to start one you must hold (and show) the Combat Cards it lists. A completed Training goes next to your Hero board: it is played like a Combat Card but not discarded, and is recharged like an Artifact (it isn't an Artifact and doesn't count against your hand limit). A new Training card then fills the slot. If Chiron is killed, discard the current Training card; any Hero on it returns to Chiron's Region.</li>" : "") +
       (c.mod("orichalkum") ? "<li><b>Constructs:</b> refill the face-up Construct offer to 3 during the Event Phase.</li>" : "") +
       (c.mod("hephaestus") ? "<li><b>Relics:</b> refill the face-up Relic offer to 3 during the Event Phase (the Lightning deck is always available).</li>" : "") + "</ul>",
     src: (c) => {
       const s = ["Base p.11 · FAQ p.3"];
+      if (c.p >= 5) s.push("Dark Ages p.3");
       if (c.mod("orichalkum")) s.push("Dark Ages p.4");
       if (c.mod("hephaestus")) s.push("Dark Ages p.5");
       if (c.mod("opportunity") || c.mod("chiron")) s.push("Dark Ages p.7");
@@ -385,22 +413,22 @@ LH.reference = [
     when: () => true,
     html: (c) => "<ul>" +
       (c.mode === "kronos" ? "<li><i>Kronos Rebellion:</i> Hero players' Hoplites never fight one another — they may share a Region (but never combine to control it).</li>" : "") +
-      (c.mode === "solo" ? "<li><i>Solo:</i> you fight only Persia — a Battle starts when your Hoplites meet Persian Hoplites <b>or</b> a Persian Control Token; Persian strength and cards work as in the Solo Campaign section.</li>" : "") +
+      (c.mode === "solo" ? "<li><i>Solo:</i> you fight only Persia — see <b>Battles vs Persia</b> in the Solo Campaign section. Army Strength, Casualty symbols, the hand limit and the Hero rule below apply to <b>your</b> side. Ignore the alternating card play and the loser/winner bullet: there you play all your cards, then Persia draws, and losses and retreats follow the Solo rules.</li>" : "") +
       "<li>A Battle starts whenever two players' Hoplites share a Region; all Hoplites there fight. The defender may play one Combat Card (resolve its effect, add its Strength), then the attacker, alternating until both pass (passing is final).</li>" +
       "<li><b>Army Strength</b> = 1 per Hoplite + played card values + Fortification (+1 City / +2 Sparta) + Blessings, Artifacts and Hero abilities" + (c.mod("poseidon") ? " + your <b>Fleet</b> value in Port Regions (capped by your Hoplites in the Battle)" : "") + ". Highest wins; <b>defender wins ties</b>.</li>" +
       "<li><b>Casualty symbols</b> on cards you played kill that many of <b>your own</b> Hoplites after the Battle (you can't play cards whose total Casualties exceed your Hoplites in the fight).</li>" +
-      "<li>The loser kills one extra Hoplite and <b>withdraws</b> together to one neighboring Region without enemy presence (attacker: back where they came from); if impossible, all die. Fortified Hoplites die last. The winner takes control; an attacker left with no Hoplites (<b>Pyrrhic victory</b>) doesn't.</li>" +
+      "<li>The loser kills one extra Hoplite and <b>withdraws</b> all survivors together to one neighboring Region that is neither controlled by another player nor holding another player's Hoplites (attacker: back where they came from); if impossible, all die. Fortified Hoplites die last. The winner takes control; an attacker left with no Hoplites (<b>Pyrrhic victory</b>) doesn't.</li>" +
       "<li><b>Hand limit:</b> 4 Combat Cards (unlimited during a Hunt; trim to 4 right after).</li>" +
       "<li>Heroes never fight Battles alone — they only add bonuses (FAQ).</li>" +
-      (c.mod("hades") ? "<li><b>Warriors of Hades:</b> join any Army of their Region's controller (+1 Strength each, move freely with it, kill 1 enemy Hoplite before the Battle when attacking, raise Population Strength by 1, can't die, always stay in the Battle Region).</li>" : "") +
+      (c.mod("hades") ? "<li><b>Warriors of Hades:</b> join any Army of their Region's controller (+1 Strength each; they move freely with it and raise their Region's Population Strength by 1). An attacking Army with any number of Warriors kills 1 enemy Hoplite before the Battle. Warriors aren't Hoplites: they can't die, ignore effects on Hoplites and always stay in the Battle Region.</li>" : "") +
       (c.mod("atlasH") ? "<li><b>Golden Apples:</b> once per Battle, spend 1 Apple instead of playing a Combat Card for +1 Army Strength.</li>" : "") + "</ul>",
     src: (c) => {
-      const s = ["Base p.13 · FAQ p.3"];
+      const s = ["Base p.9, p.13 · FAQ p.3"];
       if (c.mod("poseidon")) s.push("Dark Ages p.2");
       if (c.mod("hades")) s.push("Dark Ages p.4");
       if (c.mod("atlasH")) s.push("Atlas p.4");
       if (c.mode === "kronos") s.push("Kronos p.4");
-      if (c.mode === "solo") s.push("Solo Campaign p.4");
+      if (c.mode === "solo") s.push("Solo Campaign p.3–4");
       return s.join(" · ");
     }
   },
@@ -419,19 +447,19 @@ LH.reference = [
     title: "Quests, Blessings, Artifacts & Glory",
     when: (c) => c.mode !== "kronos",
     html: (c) => "<ul>" +
-      (c.mode === "solo" ? "<li><i>Solo:</i> Quests can be completed only in Act I and their printed rewards are ignored — instead pick 1 of 2 Artifacts and move that Land's Population Attitude up one step. No Blessing Drafts; Artifacts recharge when you Pass.</li>" : "") +
+      (c.mode === "solo" ? "<li><i>Solo:</i> Quests can be completed only in Act I and their printed rewards are ignored — instead pick 1 of 2 Artifacts and move that Land's Population Attitude one step up. You take the Land's Glory Token only if its Attitude was already Neutral, not automatically as below. Quests still open when Act I ends trigger their Failed Quest penalties. No Blessing Drafts — Blessings come only from slaying Monsters. Artifacts recharge when you Pass and at the start of Act II (Solo FAQ). Only the 3 God's Artifacts and the 7 Quest Artifacts (Ambrosia, Apollo's Arrow, Ariadne's Thread, Eye of Graeae, Feme's Trumpet, Harpe, Horn of Plenty) are in play.</li>" : "") +
       "<li><b>Quests:</b> end a Hero Movement on the Quest Token meeting any <b>Step's</b> requirement (requirements matter only for starting — FAQ) to board the Quest card. Each later turn, move 1 Step instead of moving your Hero (you can't abandon it; you're not “in” any Region while questing). Reaching Step 3 completes it: return to the token's Region (no move this turn), take the reward, the Land's <b>Glory Token</b>, and remove the token. Rivals can hop on at a higher Step and beat you to it.</li>" +
       "<li><b>Blessings:</b> a “Draft” Temple slot triggers a draft — builder draws players+1 cards, keeps one, passes right. Permanent, public.</li>" +
       "<li><b>Artifacts:</b> permanent, public, one use per charge; recharge on every Build Monument. <b>God's Artifacts</b> follow control of their Monument's Region (arriving charged). Timed Artifacts may be used outside your Use Artifacts action when their timing says so (FAQ).</li>" +
       "<li><b>Glory Tokens</b> are stealable prizes (slaying that Land's Monster or questing there takes it from a rival) and fuel <b>Usurp</b>.</li>" +
-      (c.mod("armyupgrade") ? "<li><b>Army Upgrades:</b> upgrade during a Blessing Draft (instead of taking a card) or after any Build Monument (most Cities controlled; Sparta/Troy count double; ties share). First upgrade must be the top option; max 2 per game.</li>" : "") +
+      (c.mod("armyupgrade") ? "<li><b>Army Upgrades:</b> upgrade during a Blessing Draft (instead of taking a card) or after any Build Monument, once the builder has gained their Priests (most Cities controlled; Sparta/Troy count double; ties all upgrade; if the leader already has 2 Upgrades, the next-most-Cities player may upgrade instead). First upgrade must be the top option; the second is any one lower option; max 2 per game.</li>" : "") +
       (c.mod("hephaestus") ? "<li><b>Relics (Hephaestus):</b> Pray at the Hephaestus Monument to <b>Reforge</b> — discard a Combat Card with the matching symbol for its Relic. Relics fight like Combat Cards but stay with you, recharging like Artifacts (they aren't Artifacts and don't count against the hand limit). <b>Lightning</b> Relics need no discard, are one-shot, and you may hold only one.</li>" : "") +
-      (c.mod("apolloM") ? "<li><b>Muses (Apollo):</b> Praying at Apollo's Monument picks one of the two face-up Muse cards; your Muse enters at your Hero's Region (1 Muse, 1 card max). Each Muse has a Land-wide power, and in your Muse's Region you may <b>Usurp without a Glory Token</b> (removing the Muse; not against a player holding that Land's Glory Token).</li>" : "") +
-      (c.mod("atlasH") ? "<li><b>Golden Apples (Atlas):</b> send a Hoplite from a Port Region to Atlas during Hoplite Movement for 1 Apple; each Build Monument pays 1 Apple to everyone with a Hoplite on Atlas (+1 to the biggest garrison, no tie bonus), then clears the Hoplites. Spend at the start of your Turn: heal 1 Injury, or +1 to an Attribute for the turn.</li>" : "") +
-      (c.mod("atlasO") ? "<li><b>Overload (Atlas):</b> each Build Monument: remove all Hoplites from Atlas, then send up to 1 Hoplite per Port Region to Atlas (in Port-number order), award the <b>Atlas Bonus token</b> (+1 to an Attribute) to the biggest garrison, then draw 2 Combat Cards and advance the Overload token by their total minus 1 per Hoplite on Atlas (never backward). A Hero ending a move at Atlas may leave the board to pull the token back by their Strength (returning after the next Build Monument).</li>" : "") + "</ul>",
+      (c.mod("apolloM") ? "<li><b>Muses (Apollo):</b> Praying at Apollo's Monument picks one of the two face-up Muse cards; your Muse enters at your Hero's Region (1 Muse, 1 card max); if your Muse is already out, you may swap your Muse card for the new one (the old card leaves the game) and your Muse moves to your Hero's Region. The unchosen card is shuffled back and 2 new Muse cards are turned face up. Each Muse has a Land-wide power, and in your Muse's Region you may <b>Usurp without a Glory Token</b> (removing the Muse; not against a player holding that Land's Glory Token).</li>" : "") +
+      (c.mod("atlasH") ? "<li><b>Golden Apples (Atlas):</b> send a Hoplite from a Port Region to Atlas during Hoplite Movement for 1 Apple; each Build Monument pays 1 Apple to everyone with a Hoplite on Atlas (+1 to the biggest garrison, no tie bonus), then clears the Hoplites. Spend at the start of your Turn: heal 1 Injury, or +1 to an Attribute for the turn. Spent Apples leave the game; there are never more than 15. The Atlas Monument has 6 slots, for Hoplites, not Priests (see the Atlas Help card).</li>" : "") +
+      (c.mod("atlasO") ? "<li><b>Overload (Atlas):</b> each Build Monument: remove all Hoplites from Atlas, then send up to 1 Hoplite per Port Region to Atlas (in Port-number order), award the <b>Atlas Bonus token</b> (+1 to one Attribute while held; an Injury there counts as 2) to the biggest garrison (on a tie the current holder keeps it), then draw 2 Combat Cards and advance the Overload token by their total minus 1 per Hoplite on Atlas (never backward). A Hero ending a move at Atlas may leave the board to pull the token back by their Strength (returning after the next Build Monument). The Atlas Monument has 6 slots, for Hoplites, not Priests (see the Atlas Help card).</li>" : "") + "</ul>",
     src: (c) => {
       const s = ["Base p.14–15 · FAQ p.3–4"];
-      if (c.mode === "solo") s.push("Solo Campaign p.3–4");
+      if (c.mode === "solo") s.push("Solo Campaign p.3–4, p.8 · Solo FAQ p.1");
       if (c.mod("armyupgrade")) s.push("City of Steel p.4");
       if (c.mod("hephaestus")) s.push("Dark Ages p.5");
       if (c.mod("apolloM")) s.push("Apollo p.3–4");
@@ -444,8 +472,12 @@ LH.reference = [
     title: "God Powers at the Monuments",
     when: (c) => c.mode === "standard",
     html: (c) => {
-      let d = "<ul><li>Praying uses the God Power of the Monument's <b>current level</b> and permanently raises that God's related <b>Hero Attribute</b> by 1 — all God Powers and their Attributes are listed on your <b>Help Tray</b>.</li>" +
-        "<li>The FAQ confirms the base gods' powers: <b>Zeus</b> (level 2+) draws Combat Cards; <b>Athena</b> (level 2+) Recruits Hoplites (normal Recruit rules — they may arrive Fortified); <b>Hermes</b> (level 2+) moves an Army — real movement, not teleport: it triggers Battles and Monster effects along the way, and you choose how many Hoplites move.</li>";
+      let d = "<ul><li>Praying uses the God Power of the Monument's <b>current level</b> and permanently raises that God's related <b>Hero Attribute</b> by 1 — all God Powers and their Attributes are listed on your <b>Help Tray</b>.</li>";
+      const baseGods = [];
+      if (!(c.mod("hadesS") || c.mod("hephaestusS"))) baseGods.push("<b>Zeus</b> (level 2+) draws Combat Cards");
+      if (!c.mod("poseidonS")) baseGods.push("<b>Athena</b> (level 2+) Recruits Hoplites (normal Recruit rules — they may arrive Fortified)");
+      if (!c.mod("apolloS")) baseGods.push("<b>Hermes</b> (level 2+) moves an Army — real movement, not teleport: the Army passes through each Region (only Neutral ones or your own), triggering Monster effects on the way, and its move ends in the first Region with enemy Hoplites (Battle) or under enemy control; you choose how many Hoplites move");
+      if (baseGods.length) d += "<li>The FAQ confirms the base gods' powers: " + baseGods.join("; ") + ".</li>";
       if (c.mod("poseidon")) d += "<li><b>Poseidon</b> (red-corner Help card): each Prayer raises <b>Fleet</b> by 1. Level I has no power; levels II–V Recruit Hoplites equal to your <b>Fleet</b> value in any one controlled <b>Port</b> Region.</li>";
       if (c.mod("hades")) d += "<li><b>Hades</b> (red-corner Help card): each Prayer raises <b>Raise</b> by 1. Level I has no power; level II <b>Moves</b> a chosen Monster; III has it Move <i>or</i> make a <b>Region Attack</b>; IV–V Move <i>and</i> Region Attack (the card uses the Monster Die's Move and Region Attack symbols).</li>";
       if (c.mod("hephaestus")) d += "<li><b>Hephaestus</b> (red-corner Help card): Reforge a Combat Card at every level; levels II / III / IV–V also draw 1 / 2 / 3 Artifact cards and keep one, which arrives used (uncharged). The card shows no Attribute increase.</li>";
@@ -466,15 +498,15 @@ LH.reference = [
     title: "Poseidon — Ports & the Fleet",
     when: (c) => c.mode === "standard" && (c.mod("poseidon") || c.mod("poseidonS")),
     html: (c) => "<ul><li><b>Port Regions</b> are all connected to each other — but: Monsters can't move Port-to-Port; Hoplite Movement can't use Ports; <b>Hero Movement, March and Hermes' God Power</b> can (each Port hop counts as 1 Region).</li>" +
-      (c.mod("poseidon") ? "<li><b>Fleet</b> (a 5th basic Attribute, max 5): add your Fleet value to your Army Strength in any Battle in a Port Region — capped by the number of your Hoplites in that Battle.</li>" : "<li><i>Simple mode:</i> Ports are in play, but the Fleet Attribute is not used.</li>") + "</ul>",
+      (c.mod("poseidon") ? "<li><b>Fleet</b> (a new Attribute alongside Leadership, Strength and Speed, counted as a basic Attribute; starts at 1, max 5): add your Fleet value to your Army Strength in any Battle in a Port Region — capped by the number of your Hoplites in that Battle.</li>" : "<li><i>Simple mode:</i> Ports are in play, but the Fleet Attribute is not used.</li>") + "</ul>",
     src: () => "Dark Ages p.2"
   },
   {
     title: "Hades — the Underworld",
     when: (c) => c.mode === "standard" && c.mod("hades"),
     html: () => "<ul><li>All killed Hoplites (any cause) go to the <b>Underworld board</b>.</li>" +
-      "<li><b>Raise</b> (a 5th basic Attribute, max 5) powers the <b>Resurrection</b> Regular Action: return up to Raise Hoplites from the Underworld to a Region with a <b>Gate of Hades</b> (Battles allowed) or to your supply.</li>" +
-      "<li><b>Warriors of Hades</b> are not Hoplites: they can't die, aren't affected by Hoplite effects, add +1 Population Strength to their Region, and fight for whoever controls their Region (+1 Strength; attacking armies with one kill an enemy Hoplite pre-Battle; they never withdraw).</li></ul>",
+      "<li><b>Raise</b> (a new Attribute alongside Leadership, Strength and Speed, counted as a basic Attribute; starts at 1, max 5) powers the <b>Resurrection</b> Regular Action: take a number of your Hoplites equal to your Raise from the Underworld board and place them in a Region with a <b>Gate of Hades</b> (this may start a Battle) or in your Hoplite Pool (supply).</li>" +
+      "<li><b>Warriors of Hades</b> are not Hoplites: they can't die, aren't affected by effects on Hoplites, and add +1 Population Strength to their Region. They automatically join any Army in their Region whose player controls that Region (+1 Army Strength each) and move freely with that Army (not counted as Hoplites). When that Army enters a Region containing another player's Army, they stay with it at least until the end of the Battle. An attacking Army with any Warriors kills 1 enemy Hoplite before the Battle. After a Battle, Warriors always stay in the Region where it took place, even if their Hoplites withdraw or are all killed.</li></ul>",
     src: () => "Dark Ages p.4"
   },
   {
@@ -484,45 +516,52 @@ LH.reference = [
       "<li><b>The Factory:</b> the Inner Circle's controller may Build Temple there. It counts as a Temple (Priests, Favored of the Gods) — and puts <b>Talos</b> into play in the Inner Circle.</li>" +
       "<li><b>Talos</b> is a Monster controlled by whoever holds the Inner Circle: its controller can't Hunt it, gets a <b>Talos Regular Action</b> each turn (move 1 Region or Region Attack), and in each Monster Phase takes another Talos action instead of rolling for it. Its Tray lists no Reward (there's no Talos Artifact).</li>" +
       "<li><b>Cleito</b> (Atlantis Hero): starts with 1 Priest; may heal 1 Injury instead of Hero Movement." + (c.p === 6 ? " <b>Hector</b> (City of Steel): starts with 2 Leadership; his Fortified Hoplites get an extra +1." : "") + "</li>" +
-      (c.p === 6 ? "<li><b>Troy:</b> its controller holds 5 Combat Cards, Recruits 1 per controlled Troad Region, and all Hoplites in Troy count as Fortified.</li>" : "") + "</ul>",
+      (c.p === 6 ? "<li><b>Troy:</b> its controller's Combat Card hand limit is 5 (instead of 4); during the Recruit Special Action they may also Recruit up to 1 Hoplite in each Troad Region they control; and all Hoplites in Troy count as Fortified.</li>" : "") + "</ul>",
     src: (c) => c.p === 6 ? "Dark Ages p.3 · City of Steel p.2–3" : "Dark Ages p.3"
   },
   {
     title: "Kronos Rebellion — How It Plays",
     when: (c) => c.mode === "kronos",
     html: () => "<ul><li><b>Kronos wins</b> by setting Population Attitude to Hostile in 5 Lands, or destroying all 3 Monuments. <b>Heroes win</b> by killing Kronos, controlling 3 Lands, or killing every Monster (after completing “Closing of Tartar Gates”).</li>" +
-      "<li><b>Kronos' Turn:</b> one Action paid in <b>Anger Points</b> — Monster Movement (1: move Authority-many Monsters 1 Region), Region Attack (2 or 3 by Monster; +1 kill per Attitude level below Neutral), Terror (1 + 1 per 2 Hoplites in the Land: drop the Land's Attitude and strip Control Tokens from Hoplite-less Regions), Destroy Temple (4: remove a Temple where a Monster stands unopposed — Kronos raises an Attribute; Temples can't be rebuilt), Play Order Card (0/2: spawn or command Monsters). The <b>Kronos Wrath</b> card allows a second Action.</li>" +
+      "<li><b>Kronos' Region:</b> Hoplites can't enter it (Heroes and Monsters can), and it isn't needed when checking the Heroes' “Control 3 Lands” victory.</li>" +
+      "<li><b>Kronos' Turn:</b> one Action paid in <b>Anger Points</b> — Monster Movement (1: move Authority-many Monsters 1 Region), Region Attack (2 or 3 by Monster; +1 kill per Attitude level below Neutral), Terror (1 + 1 per 2 Hoplites in that Land: pick a Monster — its Land's Attitude drops 1 step, and Regions there without Hoplites lose their Control Tokens), Destroy Temple (4: a Monster in a Temple Region with no Hoplites removes that Temple — Kronos raises an Attribute by 1; Temples can't be rebuilt), Play Order Card (0 while the Finding Omphalos Quest is active, 2 after: place that Monster in one of the card's two Regions — then you may make one extra Terror Action, paid as normal — or, if it's already out, Evolve it or carry out the Order), or <b>Pass</b> (0: instead of an Action, restore Anger Points up to the level the Anger Track shows for the number of Regions the Heroes control: 0–3 → 13, 4 → 12, 5 → 11, 6 → 10, 7–8 → 9, 9–11 → 8, 12–14 → 7, 15+ → 6). The <b>Kronos Wrath</b> card allows a second Action.</li>" +
       "<li><b>Attributes:</b> Might (added to Kronos' Monster Attack cards), Anger (Anger Points gained per Build Monument), Authority (Monsters moved per Monster Movement).</li>" +
       "<li><b>Chains:</b> broken by raising an Attribute to 3, or by holding 8+ Anger at a Build Monument (resetting Anger). Broken Chains reveal Active/Passive powers — and add their Wound symbols to Kronos. Breaking the last Chain unlocks the <b>Final Actions</b> (Kronos Movement, Kronos Terror, Kronos Destroy Monument and Monster Destroy Monument — cost 4 each).</li>" +
+      "<li><b>Final Actions</b> (4 each, after the last Chain breaks): <b>Kronos Movement</b> — move Kronos 1 Region, killing all Hoplites there, destroying its Temple and removing its Control Token (he can't enter a Region with a Monument unless it's DESTROYED); <b>Kronos Terror</b> — set his Land to Hostile and remove Control Tokens from its Regions without Hoplites; <b>Kronos Destroy Monument</b> — remove 2 levels of a Monument in a Region next to Kronos; <b>Monster Destroy Monument</b> — a Monster removes 1 level of the Monument in its Region. Lost levels can be rebuilt, but a Monument that loses its base is DESTROYED — removed with its God's Artifact for good. Chain <b>Passive</b> powers cut Action costs; <b>Active</b> powers work like Artifacts (turned when used, refreshed at any Build Monument).</li>" +
       "<li><b>Hunting Kronos:</b> only after the “Blessing of Rea” Quest. He starts at 8 Wound symbols (board + Wrath card); dealing all Wounds on a Broken Chain card destroys it and its powers. His special attack ends the Hunt, deals 1 Injury and teleports the Hero anywhere. He's immune to Monster-targeting abilities.</li>" +
-      "<li><b>Hero changes:</b> no Build Temple action; Hoplites of different Heroes coexist (never combine for control); Hunt rewards shift Population Attitude and draw Blessings (a drawn Blessing may be discarded for a Priest); Build Monument skips Monster/Event Phases — instead Kronos gains Anger, may Break a Chain at 8+, draws Orders, and refreshes Chains. Only God's Artifacts exist. Destroying the Oracle lets Kronos drop any Attitude one step.</li></ul>",
-    src: () => "Kronos p.2–4"
+      "<li><b>Kronos Quests</b> (all three are available from the start; their cards have no Quest Tokens or rewards): while active, each gives Kronos a Passive power — <b>Finding Omphalos</b> (Phocis): Play Order Card costs 0; <b>Blessing of Rea</b> (Chalkidiki): Kronos can't suffer any Wound (and can't be Hunted until it's finished); <b>Closure of the Tartar Door</b> (Arkadia; “Closing of Tartar Gates” in the rules): Monsters killed by Heroes return to their pool and can come back. Finishing one discards it (Kronos loses that power) and moves that Land's Glory Token 1 step up (already Neutral: you may take the Glory Token onto your Hero board and use Usurp). Otherwise Quest Steps work as in the base game.</li>" +
+      "<li><b>Hero changes:</b> no Build Temple action; Hoplites of different Heroes coexist (never combine for control); Hunt rewards: <b>slaying</b> moves that Land's Glory Token 1 step up <i>and</i> draws a Blessing; <b>wounding only</b> gives one reward of your choice from the Wounds you dealt — a Priest-symbol Wound draws a Blessing, an Artifact-symbol Wound moves the Glory Token 1 step up. Any drawn Blessing may be discarded for a Priest; if the Attitude is already Neutral when it would rise, you may take that Glory Token onto your Hero board and use Usurp. Build Monument skips Monster/Event Phases — instead Kronos gains Anger, may Break a Chain at 8+, draws Orders, and refreshes Chains. Only God's Artifacts exist. <b>Oracle of Delphi:</b> the first Hero player to control Phocis draws a Blessing; if it's destroyed, Kronos may lower any one Land's Attitude 1 step. After each Hero Turn, pass the Current Player token clockwise to the next Hero player.</li></ul>",
+    src: () => "Kronos p.2–4 · Base p.14"
   },
   {
     title: "Solo Campaign — the Persian Invasion",
     when: (c) => c.mode === "solo",
     html: () => "<ul><li><b>Two Acts:</b> gather allies and stall the vanguard in Act I; face Xerxes' full invasion in Act II. Your 24 Used Action Tokens are the clock — each Special Action flips one and triggers its numbered <b>Script</b>.</li>" +
+      "<li><b>Act I ends</b> (finish the Events Phase first) when the Vanguard reaches Phocis (the Oracle is destroyed), all Persian Hoplites are gone, or the Invasion Counter reaches 10. <b>Between the Acts:</b> remove every Hoplite and all Priests on Monuments (keep Control Tokens, Monsters, Glory Tokens, Spies) · Oracle lost: remove it and put 1 yellow Priest on each Monument, each blocking a space; Oracle saved: gain 1 blue Priest · if the Invasion Counter hit 10, Act II begins with an Events Phase (draw a token and apply its Script) · clear your Used Action Tokens and recharge Artifacts (Solo FAQ) · Mobilization token to the first space; your blue Control Token on the green token's Invasion Track space becomes the <b>Victory Counter</b> · Quests: a Quest you're on counts as completed but gives nothing (return your Hero to its Region and remove its card and token); every other unfinished Quest applies its <b>Failed Quest</b> penalty (below) · Persian Control Token in Macedonia; remove yours from the red Land · 1 yellow Hoplite on every yellow Region, 1 blue on every blue Region (2 in Laconia if it's blue).</li>" +
+      "<li><b>Failed Quests:</b> <i>Cattle of Geryon</i> — Mobilization Counter starts on the 3rd space · <i>Aid to Atlas</i> — start Act II with Recruit covered by a spent Act I token · <i>Kill Stymphalian Birds</i> — every Attitude track 1 step worse · <i>Clean Augean Stables</i> — Persian Spy in Elis (already one there: Persian Control Token in Elis instead) · <i>Calydonian Hunt</i> — destroy 1 level of each Monument, unless it's its last level · <i>Amazon Queen</i> — green Control Token in Chalkidiki · <i>Expedition for the Golden Fleece</i> — your units can't use Sea Trails except Boeotia–Euboea and Crete–Argolis · <i>Saving Prometheus</i> — your Hero takes 2 Injuries.</li>" +
       "<li><b>Armies:</b> blue = your Spartans, yellow = Allies (command them normally), green = Persians — each green Hoplite counts as <b>2</b> (strength and Population Strength).</li>" +
       "<li><b>Actions:</b> Build Monument is replaced by <b>Pass</b> (clear your Used Action Tokens and recharge Artifacts — but Priests stay on Monuments and you gain none). Recruit yields 1 Hoplite per City (2 in Sparta), colored by the Region's Control Token; Prepare recruits yellow. No Blessing Drafts — Blessings come from slaying Monsters. You can't Usurp the northernmost Land.</li>" +
-      "<li><b>Battles vs Persia:</b> field armies add 2 Strength per green Hoplite; conquered Regions (green Control Token) defend at the <b>Persian Invasion Track</b> value. Persian card draws equal their <b>Command</b> value — highest value counts, effects ignored. Draws favor the defender. You can't retreat into Persian Regions.</li>" +
-      "<li><b>Population Attitude</b> per Land: quests and monster-slaying move it up (at Neutral you claim the Glory Token; a second claim flips the Land's yellow tokens to blue); Monster terror and Persian meddling move it down (if it must drop below Hostile, you remove your yellow Control Tokens from that Land instead).</li>" +
-      "<li><b>Monsters</b> never touch Persians; their Region Attacks simply kill 1 Hoplite. Slaying one lets you pick 1 of 2 Blessings and raise Attitude.</li>" +
-      "<li><b>Win:</b> Victory Counter reaches 0 (Act II), survive the last token with more Regions than Persia, or remove every Persian Control Token. <b>Lose:</b> Persians control 2 full Lands, a Monument is destroyed, or their 13th Control Token is placed.</li></ul>",
-    src: () => "Solo Campaign p.2–5, p.11 · Solo FAQ p.1"
+      "<li><b>Battles vs Persia:</b> a Battle starts whenever your Hoplites end up in a Region with Persian Hoplites or a green Control Token (several at once: Region-number order). Persian strength = 2 per green Hoplite, or the <b>Persian Invasion Track</b> value in a conquered Region (green Control Token); +2 in a Hostile Land, +1 in a Wary Land. Play all your Combat Cards first (their Casualties may not exceed your Hoplites in the Battle). Then draw Persian cards equal to their <b>Command</b> value and add the highest value, ignoring its effect and Casualties. Ties go to the defender. You always lose your cards' Casualties. If you lose the Battle, lose 1 more Hoplite and retreat, never into a Region with Persian Hoplites or a Persian Control Token (no way out: the whole army dies). If Persia loses: <b>Act I</b>, the Vanguard loses 1 Hoplite and retreats one step (Phocis → Locris → Thessaly → Macedonia → Chalkidiki). At 0 Hoplites, or when beaten in Chalkidiki, remove it and Act I ends. <b>Act II</b>, remove either all Persian Hoplites or the Persian Control Token there, and move your <b>Victory Counter</b> 1 space toward 0. Card changes: <i>Flank Attack</i> against a Persian-controlled Region treats half the Invasion Track value (rounded up) as their Hoplites; <i>Tactical Maneuver</i> uses Xerxes' Command Track as his Leadership.</li>" +
+      "<li><b>Mobilization:</b> each Script's Mobilization value moves the Mobilization Counter right. On <b>March!</b>, reset it and — <b>Act I</b>: the whole Vanguard advances one step along Chalkidiki → Macedonia → Thessaly → Locris → Phocis; <b>Act II</b>: in Region-number order, place 1 Persian Hoplite in every Region adjacent to each Persian-controlled Region (not already Persian), fight the Battles, remove your Control Tokens wherever Persian Hoplites remain, then wherever Persian strength (2 per Hoplite) ≥ Population Strength, replace the Hoplites with a green Control Token.</li>" +
+      "<li><b>Spies:</b> in Act I they only raise Xerxes' Command value. A Script's <b>Spying Phase</b> (Act II) checks each Spy's Region: blue token → yellow · yellow token → removed and your army retreats · no token → green token placed and your army retreats · green token → that Spy leaves the game. <b>Remove a Spy</b> (Act II): give up your Hero Movement Action with your Hero in its Region; it returns to the first free space from the right on Xerxes' Command Track.</li>" +
+      "<li><b>Population Attitude</b> per Land: <b>Hostile</b> = +2 Population Strength (for your actions) and +2 Persian Army Strength in Battles there · <b>Wary</b> = +1 / +1 · <b>Neutral</b> = no effect · <b>Loyal</b> (you hold that Land's Glory Token) = Usurp any Region there, and Regions you take may get blue Control Tokens. Elsewhere, any Region you take control of gets a <b>yellow</b> Control Token. Attitude never changes Population Strength for Persian conquest. Completing a Quest or slaying a Monster moves the token one step toward Neutral; if it's already Neutral, claim the Glory Token, and if you already hold it you <i>may</i> switch that Land's yellow Control Tokens to blue. Monster terror (a Nothing roll) and Scripts move it down; at Hostile, a further drop removes all your yellow Control Tokens in that Land instead. Falling Attitude never turns blue tokens yellow — only Spies do (Solo FAQ).</li>" +
+      "<li><b>Monsters</b> never affect Persian units or Control Tokens. About half the Scripts call a <b>Monster Phase</b>: roll the Monster Die for each Monster in Region-number order — <b>Nothing</b>: terror, that whole Land's Population Attitude drops 1 · <b>Region Attack</b>: kill 1 Hoplite there (no Hoplites: it Moves instead) · <b>Move</b>: follow the map's arrows toward its Monument; there it stops and destroys 1 Monument level each time it must move · <b>Action + Move</b>: attack, then move (never twice). A completely destroyed Monument loses the game. Slaying a Monster: pick 1 of 2 drawn Blessings and move that Land's Attitude one step up.</li>" +
+      "<li><b>Win</b> (Act II, at once): your Victory Counter on the Invasion Track reaches 0, or all Persian Control Tokens are removed from the map, or you reveal the last Used Action Token holding more Regions (blue and yellow) than Persia. <b>Lose</b> (at once): any Monument is <b>completely</b> destroyed (in either Act), or in Act II Persia controls 2 full Lands or places its 13th Control Token (the two green tokens used as the Invasion and Mobilization counters count toward the 13).</li></ul>",
+    src: () => "Solo Campaign p.2–6, p.8–9, p.11 · Solo FAQ p.1"
   },
   {
     title: "Key Rulings — FAQ v1.0",
     when: (c) => c.mode !== "solo",
     html: (c) => "<ul><li><b>Control:</b> taking a neutral Region needs Hoplites ≥ its Population Strength (any movement does it; Heroes don't count); taking an enemy's <b>empty</b> Region needs just 1 Hoplite, ignoring Population Strength.</li>" +
-      "<li><b>Fortify:</b> 1 Hoplite per City; not in the same action that moved it in (March or a later action can).</li>" +
-      "<li><b>King of Kings:</b> only the first-completed Monument counts; the countdown's end crowns whoever controls that Region first, even later; the Activation Card never changes hands; a token comes off even for free Build Monuments.</li>" +
-      "<li><b>Hunts:</b> shuffle the Monster Attack deck for each new Hunt; you may play multiple Combat Cards per round and end your own Hunt voluntarily; one reward per Hunt (plus Glory and the miniature when slaying).</li>" +
+      "<li><b>Fortify:</b> 1 Hoplite per City; not in the same action that moved it in (March or a later action can). A Hoplite recruited by Prepare may arrive Fortified only if you already controlled that Region before the Prepare.</li>" +
+      (c.mode !== "kronos" ? "<li><b>King of Kings:</b> only the first-completed Monument counts; the countdown's end crowns whoever controls that Region first, even later; the Activation Card never changes hands; a token comes off even for free Build Monuments.</li>" : "") +
+      "<li><b>Hunts:</b> shuffle the Monster Attack deck for each new Hunt; you may play multiple Combat Cards per round and end your own Hunt voluntarily; " + (c.mode === "kronos" ? "one reward per Hunt — Kronos mode's slaying rewards are in Kronos Rebellion below.</li>" : "one reward per Hunt (plus Glory and the miniature when slaying).</li>") +
       "<li><b>Quests:</b> Step requirements apply only when boarding; questing Heroes aren't in any Region (no Prepare-recruit, no Usurp); Priests spent for Quests must come from your <b>pool</b> — not from Monuments; two Heroes can share a Quest Step.</li>" +
       "<li><b>Battles:</b> a second Battle can happen in the same Region if a different action triggers it; if Blessings kill the last enemy Hoplite first, no Battle happens; Phalanx counts only your own Hoplites.</li>" +
-      "<li><b>Hermes' God Power</b> is real movement, not teleport — it triggers Battles and Monster effects along the way, and you choose how many Hoplites move.</li>" +
+      "<li><b>Hermes' God Power</b> is real movement, not teleport — the Army passes through each Region (only Neutral ones or your own), triggering Monster effects on the way, and its move ends in the first Region with enemy Hoplites (Battle) or under enemy control. As with March, you choose how many Hoplites move.</li>" +
       "<li><b>Timing duels</b> (e.g. Harpe vs Caduceus): the active player decides who resolves first.</li>" +
-      "<li><b>Blessings:</b> Shoot to Kill and Exile work only on your own Turn; Shoot to Kill (one bow card), Exile (once per turn) and Hero's Wrath (no extra discards) can't be repeated for a bigger effect.</li></ul>",
-    src: () => "FAQ v1.0 (2018-03-27) p.1–4"
+      "<li><b>Blessings:</b> Shoot to Kill and Exile work only on your own Turn; " + (c.mode === "kronos" ? "Shoot to Kill (one bow card) and Exile (once per turn)" : "Shoot to Kill (one bow card), Exile (once per turn) and Hero's Wrath (no extra discards)") + " can't be repeated for a bigger effect.</li></ul>",
+    src: () => "FAQ v1.0 (2018-03-27) p.1–4 · Base p.9"
   }
 ];
 
@@ -537,38 +576,42 @@ LH.teach = {
       body: (c) => c.mode === "kronos"
         ? "<p>The titan <b>Kronos</b> has stirred beneath Hellas — and one of us is playing him. Kronos wins by turning <b>five Lands hostile</b> or smashing all <b>three Monuments</b>; the rest of us are Heroes who win by <b>killing Kronos</b>, controlling <b>three Lands</b>, or — after closing the Tartar Gates — slaying <b>every monster</b> he commands. It's asymmetric and it's a knife fight: the titan grows stronger with every Temple he burns.</p>"
         : c.mode === "solo"
-        ? "<p>This is the <b>Persian Invasion</b> — a two-act solo campaign. You are Achilles: in Act I you rally allies and slow Xerxes' vanguard; in Act II the Great King himself lands with the largest army the ancient world has seen. Your clock is a face-down pile of 24 tokens — every Special Action you take uses one, and flipping it triggers a story <b>Script</b>. Win by driving your Victory Counter down the Invasion Track to zero, outlasting the clock with more of Greece than Persia holds, or throwing every Persian banner into the sea.</p>"
-        : "<p>Strange gods have descended on Bronze-Age Greece, and we are the Heroes carving up what's left. The twist: there are <b>" + (c.p === 2 ? "three" : "four") + " ways to win, and the first to any of them ends the game instantly</b> — control <b>" + (c.p === 2 ? "3 Lands</b> (in our two-player game)" : "2 Lands</b> (whole color groups of regions)") + ", control <b>5 Temples</b>, " + (c.p === 2 ? "or slay <b>3 Monsters</b> — the Monument countdown is switched off with two players." : "slay <b>3 Monsters</b>, or hold the Region of the first finished <b>Monument</b> when its countdown ends.") + " Every rival is racing a different clock, so watch what everyone is building toward — the game is won by the player nobody blocked.</p>"
+        ? "<p>This is the <b>Persian Invasion</b> — a two-act solo campaign. You are Achilles: in Act I you rally allies and slow Xerxes' vanguard; in Act II the Great King himself lands with the largest army the ancient world has seen. Your clock is a face-down pile of 24 tokens — every Special Action you take uses one, and flipping it triggers a story <b>Script</b>. Win by driving your Victory Counter down the Invasion Track to zero, outlasting the clock with more of Greece than Persia holds, or throwing every Persian banner into the sea. You lose the moment any Monument is completely destroyed — monsters march on them — or, in Act II, when Persia holds two whole Lands or places its 13th Control Token. Act I ends when the vanguard reaches Delphi in Phocis, when you wipe it out, or when the Invasion Track hits 10.</p>"
+        : "<p>Strange gods have descended on Bronze-Age Greece, and we are the Heroes carving up what's left. The twist: there are <b>" + (c.p === 2 ? "three" : "four") + " ways to win, and the first to any of them ends the game instantly</b> — control <b>" + (c.p === 2 ? "3 Lands</b> (in our two-player game)" : "2 Lands</b> (whole color groups of regions" + (c.p === 3 ? "; with three of us the blue Land doesn't count" : "") + ")") + ", control <b>5 Temples</b>, " + (c.p === 2 ? "or slay <b>3 Monsters</b> — the Monument countdown is switched off with two players." : "slay <b>3 Monsters</b>, or hold the Region of the first finished <b>Monument</b> when its countdown ends.") + (c.mod("atlasO") ? " Tonight Atlas adds one more: if his Overload track reaches zero, whoever has the most Hoplites on him wins." : "") + " Every rival is racing a different clock, so watch what everyone is building toward — the game is won by the player nobody blocked.</p>"
     },
     {
       h: "The shape of a turn",
       body: (c) => c.mode === "kronos"
-        ? "<p>Kronos moves <b>first and between every Hero's turn</b>, spending <b>Anger Points</b> on one action — marching monsters, region attacks, terror, burning Temples, or playing Order cards. Heroes play normal turns: Regular Actions, then one Special Action. Every time a Hero builds a Monument level, Kronos feeds on it — gaining Anger and possibly <b>breaking a Chain</b>, which unlocks new powers and toughens him — its Wound symbols join his total, though a Hero who deals all of them destroys that Chain and its powers.</p>"
+        ? "<p>Kronos moves <b>first and between every Hero's turn</b>, spending <b>Anger Points</b> on one action — marching monsters, region attacks, terror, burning Temples, or playing Order cards. Heroes play normal turns: Regular Actions, then one Special Action (but no Build Temple). Every time a Hero builds a Monument level, Kronos feeds on it — gaining Anger and possibly <b>breaking a Chain</b>, which unlocks new powers and toughens him — its Wound symbols join his total, though a Hero who deals all of them destroys that Chain and its powers.</p>"
         : c.mode === "solo"
-        ? "<p>On your turn you take any of your <b>Regular Actions</b> — each once: move your <b>Hero</b> (Speed), move <b>Hoplites</b> (Leadership), send a <b>Priest to pray</b>, use your Artifacts — then end with exactly one <b>Special Action</b>, covered by a token from the pile. Flip that token and read its numbered <b>Script</b> for the current Act. There's no Build Monument — the Monuments start fully built. Instead, <b>Pass</b> clears your used actions and recharges your Artifacts, but your Priests stay on the Monuments and you gain no new ones.</p>"
+        ? "<p>On your turn you take any of your <b>Regular Actions</b> — each once: move your <b>Hero</b> (Speed), move <b>Hoplites</b> (Leadership), send a <b>Priest to pray</b>, use your Artifacts — then end with exactly one <b>Special Action</b>, covered by a token from the pile. In Act II, your Hero can also give up his move to root out one of Xerxes' Spies in his Region. Flip that token and read its numbered <b>Script</b> for the current Act. There's no Build Monument — the Monuments start fully built. Instead, <b>Pass</b> clears your used actions and recharges your Artifacts, but your Priests stay on the Monuments and you gain no new ones.</p>"
         : "<p>On your turn you take any of your <b>Regular Actions</b> — each once: move your <b>Hero</b> (Speed), move <b>Hoplites</b> (Leadership), send a <b>Priest to pray</b>, use your Artifacts" + (c.mod("hades") ? ", resurrect the dead" : "") + " — then end with exactly one <b>Special Action</b>, which locks behind a token until someone performs <b>Build Monument</b>. That's the engine of the whole game: actions run out, and the player who builds a Monument level resets everyone… while feeding the endgame.</p>"
     },
+    { when: (c) => c.mode === "kronos",
+      h: "Heroes vs. the titan",
+      body: () => "<p>Heroes, it's nearly the base game: <b>Leadership</b> moves Hoplites, <b>Speed</b> moves your Hero, <b>Strength</b> draws Combat Cards when you hunt, and <b>Prayer</b> at a Monument raises an Attribute and fires that god's power. But there's <b>no Build Temple</b> — every Temple starts on the map, and you gain Priests only by controlling Temple Regions when you Build Monument, or from hunts. Our Hoplites never fight each other and can share Regions, but only one Hero's troops count for control, and none may enter Kronos' own Region. Slaying a monster raises its Land's Population Attitude and draws a Blessing (swap it for a Priest if you like). Three <b>Kronos Quests</b> feed him powers — free Order cards, immunity to Wounds, monsters that come back — until we finish them; we can't even hunt Kronos until <b>Blessing of Rea</b> is done.</p>" +
+        "<p>Kronos, instead of taking an action you can <b>Pass</b>: your Anger refills to a level that's higher the fewer Regions we hold. Break your last Chain and the <b>Final Actions</b> open — you walk the map crushing Hoplites and Temples, and start tearing Monuments down.</p>" },
     { when: (c) => c.mode !== "kronos",
       h: "Your Hero and your army",
       body: (c) => "<p>Your Hero has three Attributes: <b>Leadership</b> moves Hoplites, <b>Speed</b> moves the Hero, <b>Strength</b> draws Combat Cards for monster hunts" + (c.mod("poseidon") ? ", plus <b>Fleet</b> for battles in Port Regions" : "") + (c.mod("hades") ? ", plus <b>Raise</b> for resurrection" : "") + ". The main way to grow them is <b>Prayer</b>: park a Priest at a Monument, permanently raise that god's Attribute, and fire the god's power at the Monument's current level. Priests come from building <b>Temples</b> — so the temple game and the hero game are the same game.</p>" +
         (c.mode === "solo"
-          ? "<p>Your troops come in two colors — blue <b>Spartans</b> and yellow <b>Allies</b> — and you command both. Match a Region's Population Strength to control it; Persia's green Hoplites count double. Cities recruit one Hoplite, <b>Sparta</b> two, and new troops take the color of their Region's Control Token (Prepare always brings yellow).</p>"
+          ? "<p>Your troops come in two colors — blue <b>Spartans</b> and yellow <b>Allies</b> — and you command both. Match a Region's Population Strength to control it; Persia's green Hoplites count double. Cities recruit one Hoplite, <b>Sparta</b> two, and new troops take the color of their Region's Control Token (Prepare always brings yellow). Any Region you take gets a yellow Control Token unless that Land is Loyal to you.</p>"
           : "<p>Your <b>Hoplites</b> hold Regions: match a Region's Population Strength to control it, or slip one soldier into an enemy Region left unguarded. Cities recruit; <b>Sparta</b> recruits double and fortifies harder.</p>") },
     { when: (c) => c.mode !== "kronos",
       h: "Battles and hunts",
       body: (c) => c.mode === "solo"
-        ? "<p><b>Battles</b> are only against Persia. You count 1 per Hoplite plus bonuses and the Combat Cards you play — big cards kill your own troops as <b>Casualties</b>. Persia counts 2 per green Hoplite, or the Invasion Track value in a Region it has conquered, plus the best of the cards drawn for its <b>Command</b> value. Ties go to the defender; if you lose, you lose one extra Hoplite and retreat — a beaten Persian force suffers whatever the current Act says. <b>Hunts</b> work as usual — draw cards equal to Strength, match the <b>Wound symbols</b> on the beast's tray, survive its counterattacks — and a kill earns 1 of 2 Blessings and warms that Land's <b>Population Attitude</b> toward you.</p>"
+        ? "<p><b>Battles</b> are only against Persia. You count 1 per Hoplite plus bonuses and the Combat Cards you play — big cards kill your own troops as <b>Casualties</b>. Persia counts 2 per green Hoplite, or the Invasion Track value in a Region it has conquered, plus 2 in a Hostile Land or 1 in a Wary one, plus the best of the cards drawn for its <b>Command</b> value. Ties go to the defender; if you lose, you lose one extra Hoplite and retreat — a beaten Persian force suffers whatever the current Act says. <b>Hunts</b> work as usual — draw cards equal to Strength, match the <b>Wound symbols</b> on the beast's tray, survive its counterattacks — and a kill earns 1 of 2 Blessings and warms that Land's <b>Population Attitude</b> toward you.</p>"
         : "<p><b>Battles</b> are quick and mean: 1 Strength per Hoplite, then alternate Combat Cards until both sides pass — defender wins ties, big cards kill your own troops as <b>Casualties</b>, and the loser retreats and bleeds one extra. <b>Hunts</b> are your monster-slaying mini-game: draw cards equal to Strength, match the <b>Wound symbols</b> on the beast's tray, survive its counterattacks. Even failed hunts can pay, wounds persist between hunters — and the killing blow steals the <b>Glory Token</b>, which fuels <b>Usurp</b>: flipping a whole Region to you without a fight.</p>" },
     { when: (c) => c.mode === "standard",
       h: "The Build Monument clock",
-      body: (c) => "<p>One Special Action rules them all: <b>Build Monument</b>. It adds a level to any Monument (making its god's Prayer stronger), returns everyone's Priests, hands the builder a Priest per Temple they control, unlocks everyone's used actions, recharges Artifacts — and then the <b>monsters act</b> and a new <b>Event</b> lands." + (c.p === 2 ? " With two of us there's no King of Kings countdown, but before your Build Monument you may perform one of your used Special Actions again." : " When the <b>first</b> Monument finishes, a three-turn countdown starts: hold its Region at zero and you're King of Kings.") + " Time your builds; every one of them is a gift to the whole table.</p>" },
+      body: (c) => "<p>One Special Action rules them all: <b>Build Monument</b>. It adds a level to any Monument (making its god's Prayer stronger), clears every Priest off the Monuments (back to each player's supply, not their Priest Pool), hands the builder a Priest per Temple they control, unlocks everyone's used actions, recharges Artifacts — and then the <b>monsters act</b> and a new <b>Event</b> lands." + (c.p === 2 ? " With two of us there's no King of Kings countdown, but before your Build Monument you may perform one of your used Special Actions again." : " When the <b>first</b> Monument finishes, a three-turn countdown starts: hold its Region at zero — or be the first to take it after that — and you're King of Kings.") + " Time your builds; every one of them is a gift to the whole table.</p>" },
     { when: (c) => c.mode === "standard" && (c.mod("poseidon") || c.mod("poseidonS")),
       h: "Poseidon",
       body: (c) => "<p><b>Ports</b> knit the coasts together — Heroes and Marching armies can hop Port-to-Port as one step" + (c.mod("poseidon") ? ", and the new <b>Fleet</b> Attribute adds up to its value to any Battle at a Port (never more than your Hoplites there). Poseidon's Prayer builds Fleet and recruits at the docks" : " (Simple mode: Poseidon replaces Athena, no Fleet rules)") + ".</p>" },
     { when: (c) => c.mode === "standard" && (c.mod("hades") || c.mod("hadesS")),
       h: "Hades",
       body: (c) => c.mod("hades")
-        ? "<p>The dead don't leave the game — they go to the <b>Underworld</b>, and the <b>Resurrection</b> action pulls up to your <b>Raise</b> value back out through a <b>Gate of Hades</b>. Each of us also places a <b>Warrior of Hades</b>: an unkillable giant that fights for whoever controls its Region — +1 strength, and attacking with one executes an enemy Hoplite before the fight. Hades' own Prayer raises Raise and, from level II, lets you <b>move a chosen monster</b> — at level III it may attack a Region instead, and from level IV it does both.</p>"
+        ? "<p>The dead don't leave the game — they go to the <b>Underworld</b>, and the <b>Resurrection</b> Regular Action brings back Hoplites equal to your <b>Raise</b> value — onto any Region with a <b>Gate of Hades</b> (even into a fight) or into your Hoplite Pool. Each of us also places a <b>Warrior of Hades</b>: an unkillable giant that fights for whoever controls its Region — +1 strength, and attacking with one executes an enemy Hoplite before the fight. Hades' own Prayer raises Raise and, from level II, lets you <b>move a chosen monster</b> — at level III it may attack a Region instead, and from level IV it does both.</p>"
         : "<p>Hades replaces Zeus tonight (Simple mode): no Underworld bookkeeping — his gray-corner Help card lists his powers.</p>" },
     { when: (c) => c.mode === "standard" && (c.mod("hephaestus") || c.mod("hephaestusS")),
       h: "Hephaestus",
@@ -578,7 +621,7 @@ LH.teach = {
     { when: (c) => c.mode === "standard" && (c.mod("apolloM") || c.mod("apolloS")),
       h: "Apollo",
       body: (c) => c.mod("apolloM")
-        ? "<p>Pray to Apollo and a <b>Muse</b> joins you — a wandering enchantress whose power blankets the whole <b>Land</b> she stands in, from cheaper conquests to stolen Glory — and a new <b>Muse Movement</b> Regular Action walks her around at your Hero's Speed. Better yet, in her Region you may <b>Usurp without a Glory Token</b>, burning the Muse. One Muse each, choose from two face-up cards, swap when you pray again.</p>"
+        ? "<p>Pray to Apollo and a <b>Muse</b> joins you — a wandering enchantress whose power blankets the whole <b>Land</b> she stands in, from cheaper conquests to stolen Glory — and a new <b>Muse Movement</b> Regular Action walks her around at your Hero's Speed. Better yet, in her Region you may <b>Usurp without a Glory Token</b>, burning the Muse — but not in a Region controlled by a player who holds that Land's Glory Token. One Muse each, choose from two face-up cards, swap when you pray again.</p>"
         : "<p>Apollo replaces Hermes tonight (Simple mode): no Muse miniatures — his gray-corner Help card lists his powers.</p>" },
     { when: (c) => c.mode === "standard" && (c.mod("atlasO") || c.mod("atlasH")),
       h: "Atlas",
@@ -587,7 +630,7 @@ LH.teach = {
         : "<p>Atlas holds the <b>Hesperides Garden</b>: ferry Hoplites from Port Regions to his Monument and harvest <b>Golden Apples</b> — spend one for +1 in a Battle, a heal, or a temporary Attribute boost. Fifteen apples, never more; when they're gone, they're gone.</p>" },
     { when: (c) => c.mode === "standard" && c.mod("orichalkum"),
       h: "Orichalkum & Constructs",
-      body: (c) => "<p><b>Orichalkum</b> nuggets sit in every City Region except Sparta" + (c.p === 6 ? " and Troy" : "") + " — end your Hero's move on one to pocket it. Spend them at the start of your turn to <b>recharge Artifacts</b> without waiting for a Monument, or to buy one of the three face-up <b>Constructs</b>: one-shot war machines like the Trojan Horse. First come, first served.</p>" },
+      body: (c) => "<p><b>Orichalkum</b> nuggets sit in every City Region except Sparta" + (c.p === 6 ? " and Troy" : "") + " — end your Hero's move on one (without starting a Quest there) to pocket it. Spend them at the start of your turn to <b>recharge Artifacts</b> without waiting for a Monument, or to buy one of the three face-up <b>Constructs</b>: one-shot war machines like the Trojan Horse. First come, first served.</p>" },
     { when: (c) => c.mode === "standard" && (c.mod("heroesmonsters") || c.mod("chiron") || c.mod("opportunity") || c.mod("combatcards")),
       h: "Extra content in the box tonight",
       body: (c) => "<ul>" +
@@ -600,7 +643,7 @@ LH.teach = {
       body: () => "<p>Your army color matters tonight: each has an <b>Upgrade board</b> with unique powers. Earn up to <b>two upgrades</b> — by skipping a pick in a Blessing Draft, or by controlling the most Cities when a Monument gets built (Sparta and Troy count double). Top power first, then choose.</p>" },
     { when: (c) => c.mode === "standard" && c.p >= 5,
       h: (c) => c.p === 6 ? "Atlantis & Troy — six players" : "Atlantis — five players",
-      body: (c) => "<p>The map grows: <b>Atlantis</b> floats off the coast, wired to the mainland by sea trails. Its Inner Circle hides the <b>Factory</b> — a buildable Temple that awakens <b>Talos</b>, a bronze colossus obeying whoever holds the Circle. Expect him on your border.</p>" +
+      body: (c) => "<p>The map grows: <b>Atlantis</b> floats off the coast, wired to the mainland by sea trails. Its Inner Circle hides the <b>Factory</b> — a buildable Temple (it counts toward the five) that awakens <b>Talos</b>, a bronze colossus obeying whoever holds the Circle: that player gets an extra <b>Talos Regular Action</b> each turn (move him 1 Region or use his Region Attack) and another in each Monster Phase instead of rolling for him, but can't Hunt him. Expect him on your border.</p>" +
         (c.p === 6 ? "<p>And to the east, <b>Troy</b>: its ruler holds five Combat Cards, recruits across the Troad, and every defender inside counts as fortified. The City of Steel is the best castle on the map — and everyone knows it.</p>" : "") },
     {
       h: "Don't worry about these until they come up",
@@ -619,7 +662,7 @@ LH.teach = {
         }
         if (c.mode === "solo") {
           items.push("<li><b>The Script Book</b> — every flipped token reads you one paragraph; that's the campaign.</li>");
-          items.push("<li><b>Spying Phase and Mobilization</b> — the Scripts drive them; just follow along.</li>");
+          items.push("<li><b>Spying Phase and Mobilization</b> — the Scripts tell you when; the steps are in the Solo Campaign reference.</li>");
         }
         items.push("<li><b>Quest step requirements</b> — printed on the card; they only matter when you board it.</li>");
         return "<ul>" + items.join("") + "</ul>";

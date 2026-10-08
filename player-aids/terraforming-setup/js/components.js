@@ -132,7 +132,7 @@ window.AID_COMPONENTS = {
     { set: "automa", qty: "46", name: "MarsBot corporation cards", note: "Used with the MarsBot corporations option (Automa A p.3; Automa B p.1)",
       img: "automa-corporations.webp", w: 234, h: 216, when: (c) => c.mod("mb-corps") },
     { set: "automa", qty: "6", name: "Board reference cards",
-      note: "Set out the one for your map: Tharsis (Automa A p.3), or Hellas, Elysium, Terra Cimmeria, Utopia Planitia or Vastitas Borealis (Automa C p.8)",
+      note: "Set out the one for your map: Tharsis (Automa A p.3), or Hellas, Elysium, Terra Cimmeria, Utopia Planitia or Vastitas Borealis (Automa C p.8). With the Milestones & Awards tiles, always the Tharsis card and MarsBot board, whatever the map (Automa C p.13)",
       img: "automa-board-refs.webp", w: 300, h: 219 },
     { set: "automa", qty: "32", name: "MarsBot bonus cards", img: "automa-bonus-cards.webp", w: 212, h: 243 }
   ]

@@ -29,9 +29,9 @@ UF.expansions = [
 
 UF.modes = [
   { id: "standard", name: "Standard game",
-    blurb: "Rules Reference Appendix IV setup: a secret loyalty card from the start, 3 starting skill cards of your choice, the Cultist at 4 and 6 players." },
+    blurb: "Rules Reference Appendix IV setup: a secret loyalty card from the start, 3 starting skill cards chosen from your character’s skill set (the current player starts with none), the Cultist at 4 and 6 players." },
   { id: "learning", name: "Learning game (your first game)",
-    blurb: "Learn to Play setup: full 5-card starting hands, no loyalty cards until everyone has taken one turn, no Cultist." }
+    blurb: "Learn to Play setup: full 5-card starting hands (the current player starts with none), no loyalty cards until everyone has taken one turn, no Cultist." }
 ];
 
 /* Modules & variants. requires: set id; needs: another module; excludes: rival modules;
@@ -169,7 +169,7 @@ UF.phases = [
         t: "Set the tracks",
         d: "<ul><li>Place the <b>travel track token</b> and the <b>ritual track token</b> on the <b>Start</b> space of their tracks.</li>" +
            "<li>Each track runs Start → three spaces → <b>Arrive</b> (travel) or <b>Cast</b> (ritual), so four advances reach the end.</li></ul>",
-        src: "Rules Ref p.20 (step 2) · Learn to Play p.5, p.14" },
+        src: "Rules Ref p.20 (step 2) · Learn to Play p.5, p.14–15" },
       { when: () => true, exp: (c) => (UF.dials(c).nc || UF.dials(c).d) ? "vari" : "core",
         t: "Set the resource dials",
         d: (c) => {
@@ -190,7 +190,7 @@ UF.phases = [
           const D = UF.dials(c);
           const lrn46 = c.mode === "learning" && (c.p === 4 || c.p === 6);
           return UF.src("Rules Ref p.20 (step 3)", "Learn to Play p.5" + (lrn46 ? ", p.28" : ""),
-            (D.nc || D.d || lrn46) ? "Rules Ref p.18 (Appendix " + (D.nc && D.d ? "I–II" : D.nc ? "I" : D.d && lrn46 ? "I–II" : D.d ? "II" : "I") + ")" : "", "Rules Ref p.12 (§36.1)");
+            (D.nc || D.d || lrn46) ? "Rules Ref p.18 (Appendix " + (D.nc && D.d ? "I–II" : D.nc ? "I" : D.d && lrn46 ? "I–II" : D.d ? "II" : "I") + ")" : "", "Rules Ref p.11 (§29.5–29.6)", "Rules Ref p.12 (§36.1)");
         } },
       { when: () => true, exp: "core",
         t: "Create the supply",
@@ -327,7 +327,7 @@ UF.phases = [
             "Shuffle the <b>day</b>, <b>twilight</b> and <b>night</b> prelude cards separately.",
             "Draw <b>1 day</b> card, read it aloud and resolve it; then <b>1 twilight</b> card; then <b>1 night</b> card.",
             "Then <b>remove all prelude cards</b> from the game.",
-            "Day cards favor the humans (e.g. Favorable Conditions: advance the travel track 2 spaces without moving anything in the water); twilight cards affect everyone (e.g. Valuable Lessons: each player takes a random unused feat card); night cards favor the hybrids (e.g. Boarding Party: a Deep One spawns in deck spaces 3 and 4, and their passengers move to the closest water space)."
+            "Day cards favor the humans (e.g. Favorable Conditions: advance the travel track 2 spaces without moving anything in the water); twilight cards affect everyone (e.g. Valuable Lessons: each player takes a random unused feat card); night cards favor the hybrids (e.g. Boarding Party: spawn 1 Deep One in deck space 3 and 1 in deck space 4, and each passenger in those spaces moves to its closest water space)."
           ];
           if (c.mod("prelHum")) items.push("<b>Balance — favor the humans</b> (everyone agrees): replace the night card with a twilight card and/or the twilight card with a day card.");
           if (c.mod("prelHyb")) items.push("<b>Balance — favor the hybrids</b> (everyone agrees): replace the day card with a twilight card and/or the twilight card with a night card.");
@@ -445,13 +445,13 @@ UF.reference = [
         (L.cult ? " “Distance 12+” includes a game that ends while resolving the waypoint card that brings the total to 12." : " No Cultist in this game" + (L.cultSlot ? "" : " — the Cultist is used only at 4 and 6 players") + ".") + "</p>";
       return h;
     },
-    src: (c) => UF.src("Rules Ref p.7–8 (§18)", "Rules Ref p.9 (§25)", "Rules Ref p.11 (§29)", "Rules Ref p.23", c.mode === "learning" ? "Learn to Play p.7, p.28" : "Learn to Play p.28", c.mod("nocult") ? "Rules Ref p.18" : "", "Learn to Play p.21–23")
+    src: (c) => UF.src("Rules Ref p.7–8 (§18)", "Rules Ref p.5 (§7.3)", "Rules Ref p.9 (§25)", "Rules Ref p.11 (§29)", "Rules Ref p.12 (§38.3)", "Rules Ref p.23", c.mode === "learning" ? "Learn to Play p.7, p.28" : "Learn to Play p.28", c.mod("nocult") ? "Rules Ref p.18" : "", "Learn to Play p.21–23")
   },
   {
     title: "Turn structure — humans and revealed traitors",
     when: () => true,
     html: (c) => "<h4>Human (and hidden traitor) turn</h4>" + UF.ol([
-        "<b>Receive Skills</b> — draw the types and numbers of skill cards in your skill set (on your character sheet). In the <b>Sick Bay</b>: draw only <b>one</b> card of your choice from it. In the <b>Brig</b>: your full set. Switch your active Improvement item first, if you like — before drawing.",
+        "<b>Receive Skills</b> — draw the types and numbers of skill cards in your skill set (on your character sheet). In the <b>Sick Bay</b>: draw only <b>one</b> card of your choice from it. In the <b>Brig</b>: your full set, but your active Improvement adds no card there. Switch your active Improvement item first, if you like — before drawing.",
         "<b>Action</b> — perform <b>two actions</b>, one at a time; repeats allowed. Abilities that say “Then perform 1 action” give you more.",
         "<b>Mythos</b> — draw and resolve the top mythos card (in the Brig: only its icons).",
         "<b>Discard</b> — <b>every</b> player with more than 10 skill cards discards down to 10."
@@ -461,7 +461,7 @@ UF.reference = [
         "<b>Action</b> — two actions (revealed-traitor options).",
         "<b>Discard</b> — everyone down to 10."
       ]) + "<p>A revealed traitor has <b>no Mythos step</b>. Reveal during your own turn and you finish your remaining actions but skip that turn’s Mythos step.</p>",
-    src: (c) => "Rules Ref p.17–18 (§53) · Rules Ref p.6 (§9.7, §9.12), p.9 (§24.10), p.12 (§38.8), p.13 (§40.1) · Learn to Play p.10–13, p.24"
+    src: (c) => "Rules Ref p.17–18 (§53) · Rules Ref p.6 (§9.6, §9.7, §9.12), p.9 (§24.10), p.12 (§38.8), p.13 (§40.1) · Learn to Play p.10–13, p.24"
   },
   {
     title: "Actions",
@@ -484,7 +484,7 @@ UF.reference = [
         "<b>Use an “Action:” ability</b> on a card in your hand or play area — never your character sheet or your space."
       ]) + "<p class='note'>Some treachery cards are played at the <b>start</b> of your Action step and “end your Action step”: after one, you take no actions and play no other start-of-Action cards that turn.</p>";
     },
-    src: (c) => UF.src("Rules Ref p.2–3 (§2–3)", "Rules Ref p.12 (§35)", "Rules Ref p.17 (§52.2)", "Learn to Play p.10–11, p.25", c.has("fta") ? "From the Abyss p.2 (updated sheets), p.4, p.7" : "")
+    src: (c) => UF.src("Rules Ref p.2–3 (§2–3)", "Rules Ref p.12 (§32.7, §35)", "Rules Ref p.17 (§52.2)", "Learn to Play p.10–11, p.25", c.has("fta") ? "From the Abyss p.2 (updated sheets), p.4, p.7" : "")
   },
   {
     title: "The ship — spaces and interior actions",
@@ -494,9 +494,9 @@ UF.reference = [
       return "<div class='tbl-wrap'><table class='tbl space-table'><thead><tr><th scope='col'>Die #</th><th scope='col'>Interior space</th><th scope='col'>Action ability (once per space per turn)</th></tr></thead><tbody>" +
         "<tr><td>1–2</td><th scope='row'>Bridge</th><td>Risk a passenger to look at the top 2 cards of the <b>mythos</b> or <b>waypoint</b> deck; put 1 on top of that deck and 1 on the bottom. (No passengers left to risk → can’t be used.)</td></tr>" +
         "<tr><td>3</td><th scope='row'>Chapel</th><td>Choose 1: <b>retreat</b> the ritual track 1 space; <b>or</b> discard 1 <b>lore</b> card and roll — if roll + the card’s value is <b>6 or less</b>, lose 1 sanity; then <b>advance</b> the ritual track 1 space.</td></tr>" +
-        "<tr><td>4</td><th scope='row'>Captain’s Cabin</th><td><b>Skill check 8</b> — supporting <b>influence</b> + <b>observation</b>. Choose " + (f ? "a human (updated sheet; the Rules Reference says another human)" : "a character (the Rules Reference says another human)") + "; if the check passes, move them to the <b>Brig</b>. Every player may add cards. A failed space check has no effect.</td></tr>" +
+        "<tr><td>4</td><th scope='row'>Captain’s Cabin</th><td><b>Skill check 8</b> — supporting <b>influence</b> + <b>observation</b>. Choose " + (f ? "a human (updated sheet; the Rules Reference says another human)" : "<b>another human</b> (Rules Ref §9.1; the base reference sheet prints “a character”)") + "; if the check passes, move them to the <b>Brig</b>. Every player may add cards. A failed space check has no effect.</td></tr>" +
         "<tr><td>5</td><th scope='row'>Cargo Hold</th><td>Look at the top 2 item cards; put 1 on the bottom and the other in your play area. (Only 1 card left: keep it or return it.)</td></tr>" +
-        "<tr><td>6</td><th scope='row'>Galley</th><td>Draw up to <b>5</b> skill cards from any non-treachery deck(s); then roll — if the result is <b>less than</b> the number of cards drawn, lose 1 food.</td></tr>" +
+        "<tr><td>6</td><th scope='row'>Galley</th><td>Draw up to <b>5</b> skill cards from any non-treachery deck(s)" + (f ? " (not boons — they’re drawn only when an ability says “boon”)" : "") + "; then roll — if the result is <b>less than</b> the number of cards drawn, lose 1 food.</td></tr>" +
         "<tr><td>7–8</td><th scope='row'>Boiler Room</th><td>Discard 1 <b>strength</b> card and roll — if roll + the card’s value is <b>6 or less</b>, lose 1 fuel; then <b>advance</b> the travel track 1 space.</td></tr>" +
         "<tr><td>—</td><th scope='row'>Sick Bay</th><td>You draw only 1 skill card during Receive Skills. Can’t be damaged; Deep Ones" + (f ? ", horrors and allies" : "") + " can’t enter; no voluntary moves in.</td></tr>" +
         "<tr><td>—</td><th scope='row'>Brig</th><td>Characters here follow Brig rules. Action: <b>skill check 8</b> — supporting <b>lore</b> + <b>strength</b>; if it passes, move to any ship space. Everyone may add cards; a revealed traitor here doesn’t block it.</td></tr>" +
@@ -511,7 +511,7 @@ UF.reference = [
           "<b>The Deep</b> is not a board space and is adjacent to nothing; monsters there can’t activate or be affected by player abilities."
         ]);
     },
-    src: (c) => UF.src("Learn to Play p.11 (player reference sheet), p.9, p.16", "Rules Ref p.4 (§5)", "Rules Ref p.5–6 (§9)", "Rules Ref p.7 (§14–15)", "Rules Ref p.11 (§32.6)", "Rules Ref p.13 (§40)", "Rules Ref p.14–15 (§44)", "Rules Ref p.8 (§24.4)", c.has("fta") ? "From the Abyss p.2, p.5, p.7" : "")
+    src: (c) => UF.src("Learn to Play p.11 (player reference sheet), p.9, p.16", "Rules Ref p.3 (§4.4)", "Rules Ref p.4 (§5)", "Rules Ref p.5–6 (§9)", "Rules Ref p.7 (§14–15)", "Rules Ref p.11 (§32.6)", "Rules Ref p.13 (§40)", "Rules Ref p.14–15 (§44)", "Rules Ref p.8 (§24.4)", c.has("fta") ? "From the Abyss p.2, p.4, p.5, p.7, p.8" : "")
   },
   {
     title: "Mythos cards and crises",
@@ -524,7 +524,7 @@ UF.reference = [
         "<b>Combination</b> — the chooser picks either the skill check or the other option (a chosen option means no check). Both are read aloud first.",
         "On a mythos card, “you/your” means the current player, or the chooser on a choice for someone else.",
         c.has("fta") ? "<b>From the Abyss:</b> no green character-specific cards in the deck; <b>Personal Crisis</b> cards send a player to their own facedown character-specific card (see From the Abyss — Personal Crisis)." :
-          "<b>Green</b> cards are <b>character-specific</b>: if that character isn’t in the game, is in the Brig or has revealed as a traitor, discard it and draw another. If you’re looking at mythos cards in secret and see one of these, reveal and discard it, then look at that many more.",
+          "<b>Green</b> cards are <b>character-specific</b>: if that character isn’t in the game, is in the Brig or has revealed as a traitor, discard it and draw another. If you’re looking at mythos cards in secret and any of them are green cards that would be discarded this way, reveal and discard them, then look at that many more cards (repeat if any of the new cards would also be discarded).",
         "Some crises go into a player’s play area and grant abilities while they stay there."
       ]) + "<h4>Icons (lower-right corner)</h4>" + UF.ul([
         "<b>Activation</b>: Deep Ones · Father Dagon · Mother Hydra" + (c.has("fta") ? " · Shoggoth · Drowned Spirit · Grasping Tendril · the generic horror icon" : "") + ". Activation icons printed in a crisis’s text resolve left to right.",
@@ -537,7 +537,7 @@ UF.reference = [
     title: "Skill checks and the chaos deck",
     when: () => true,
     html: (c) => UF.ol([
-        "<b>Announce</b> the target number and supporting skills (every other skill type opposes). “Before any cards are added” abilities are used now.",
+        "<b>Announce</b> the target number and supporting skills (every other skill type opposes" + (c.has("fta") ? "; <b>boon</b> cards always support" : "") + "). “Before any cards are added” abilities are used now.",
         "<b>Chaos cards</b> — the current player puts the top <b>2</b> chaos cards facedown to start the skill check pile.",
         "<b>Add cards</b> — starting with the player to the current player’s <b>left</b> and ending with the current player, each player gets <b>one</b> chance to add any number of cards facedown (or none). Humans in the Brig and revealed traitors: <b>1 card max</b>.",
         "<b>Shuffle</b> the pile.",
@@ -545,7 +545,7 @@ UF.reference = [
         "<b>Total</b> = supporting values − opposing values. ≥ target: <b>pass</b>. Below target but ≥ the partial number (“8+”): resolve the <b>partial</b> result (counts as neither pass nor fail). Otherwise: <b>fail</b>.",
         "<b>Discard</b> all the cards to their discard piles."
       ]) + UF.ul([
-        "<b>Treachery</b> cards always oppose" + (c.has("fta") ? " (unless a card such as Revelation makes them supporting)" : "") + ".",
+        "<b>Treachery</b> cards always oppose" + (c.has("fta") ? " (unless the 0-value boon <i>Revelation</i> is in the check, making them supporting); <b>boon</b> cards always support" : "") + ".",
         "Chaos deck: " + (c.has("fta") ? "2 of each of influence, lore, observation, strength and will, plus <b>2 boon and 2 treachery</b>" : "2 of each non-treachery type (10 cards)") + ". When the last card is taken, build a new one the same way; skip any type whose deck plus discard pile holds fewer than 2 cards. “Shuffle X treachery cards into the chaos deck” means the top X of the treachery deck.",
         "Open information: how many cards each player adds and how many are in the check — never which ones.",
         "The Captain’s Cabin and Brig checks only say what happens on a pass; if they fail, nothing happens."
@@ -572,7 +572,7 @@ UF.reference = [
         "Monsters in the Deep can’t activate. Deep Ones can’t spawn in or move to the Brig or Sick Bay.",
         "If Deep Ones must spawn and the supply (20 figures) is short, the game ends — a Deep One victory."
       ]),
-    src: (c) => UF.src("Rules Ref p.3–4 (§4)", "Rules Ref p.7 (§14, §16.2)", "Rules Ref p.8 (§21)", "Rules Ref p.9 (§26)", "Rules Ref p.15 (§45)", "Learn to Play p.18, p.20, p.28", c.has("fta") ? "From the Abyss p.10" : "")
+    src: (c) => UF.src("Rules Ref p.3–4 (§4)", "Rules Ref p.7 (§14, §16.2)", "Rules Ref p.8 (§21)", "Rules Ref p.9 (§26)", "Rules Ref p.15 (§44.20, §45)", "Learn to Play p.3, p.9, p.18, p.20, p.28", c.has("fta") ? "From the Abyss p.10" : "")
   },
   {
     title: "Attacks, dice and defeat",
@@ -650,7 +650,7 @@ UF.reference = [
         "<b>Defeat</b>: flip it, lose 1 of each resource per matching icon, remove it from the game (X = no loss). A dial hitting 0 this way ends the game.",
         "Deep Ones and revealed traitors can’t defeat a passenger while a <b>human</b> is in its space.",
         "Passengers are <b>not humans</b> for any game effect.",
-        c.has("fta") ? "<b>From the Abyss:</b> passengers can spawn in or be moved into <b>water spaces</b>; the travel track pushes them toward the back, and one already at the back is <b>defeated</b>. The ritual’s banishment defeats passengers in water too." : "",
+        c.has("fta") ? "<b>From the Abyss:</b> passengers can spawn in or be moved into <b>water spaces</b>; the travel track pushes them toward the back, and one already at the back is <b>defeated</b>. The ritual’s banishment defeats passengers in water too. <b>Rescue</b> now saves <b>each</b> passenger in your space, or <b>one</b> passenger in an adjacent water space, and spawns <b>one ally</b> in your space. A revealed traitor may also defeat a passenger in an <b>adjacent water space</b>, but only if no human is in the <b>traitor’s</b> space." : "",
         "The box has 9 passenger tokens; how many are in the supply is open information."
       ]),
     src: (c) => UF.src("Rules Ref p.11–12 (§32)", "Rules Ref p.11 (§30.3)", "Learn to Play p.3, p.11, p.21", c.has("fta") ? "From the Abyss p.2, p.4" : "")
@@ -672,7 +672,7 @@ UF.reference = [
         "Leave with a normal move. Moved out before your turn (e.g. a granted action)? You draw your full set.",
         "Defeated here → you stay. It can’t be damaged; Deep Ones" + (c.has("fta") ? ", horrors and allies" : "") + " can’t enter; no voluntary moves in."
       ]) + "<p class='note'>Sending an innocent human to the Brig makes the game harder for the humans; it can neutralize a hidden traitor.</p>",
-    src: (c) => UF.src("Rules Ref p.5–6 (§9)", "Rules Ref p.13 (§40)", "Learn to Play p.13, p.25", c.has("fta") ? "From the Abyss p.5, p.7" : "")
+    src: (c) => UF.src("Rules Ref p.5–6 (§9)", "Rules Ref p.13 (§40)", "Learn to Play p.11, p.13, p.25", c.has("fta") ? "From the Abyss p.5, p.7" : "")
   },
   {
     title: "Titles — Captain and Keeper of the Tome",
@@ -702,14 +702,14 @@ UF.reference = [
       ]) + "<p>The turn then resumes. There is no going back to being hidden.</p>" +
       "<h4>Revealed traitor rules</h4>" + UF.ul([
         "May attack and be attacked by humans; may draw and use treachery cards.",
-        "Blocks humans from using the action ability of your space — and any damage card there.",
+        "Blocks humans from using the action ability of your space — and any damage card there. Exception: the Brig — a revealed traitor there does not stop a human using the Brig’s action to get out.",
         "At most 1 card to each skill check; no character sheet or space abilities; no Mythos step.",
-        "Deep Ones never attack you" + (c.has("fta") ? "; allies in your space flee unless a human is there too" : "") + "."
+        "Deep Ones" + (c.has("fta") ? " and horrors" : "") + " never attack you" + (c.has("fta") ? "; allies in your space flee unless a human is there too" : "") + "."
       ]) + "<h4>Hidden or revealed?</h4>" + UF.ul([
         "Hidden: sabotage skill checks (more than two opposing cards flipped means a traitor added some), play inefficiently, lie about your cards, stack decks you get to arrange, abuse a title.",
         "Revealing lets you attack humans, use treachery cards, block a room, escape the Brig more easily, and (before 12 distance) hand a spare Hybrid to another player to recruit a fellow traitor. It costs you the Mythos step, extra cards in checks, your sheet’s abilities — and makes you a target."
       ]),
-    src: (c) => UF.src("Rules Ref p.12–13 (§37–39)", "Learn to Play p.22–25", c.has("fta") ? "From the Abyss p.5" : "")
+    src: (c) => UF.src("Rules Ref p.12–13 (§37–39)", "Rules Ref p.3–5 (§2.3, §4.14, §9.4)", "Learn to Play p.22–25", c.has("fta") ? "From the Abyss p.5–6" : "")
   },
   {
     title: "Cards — skills, items, spells and feats",
@@ -815,7 +815,7 @@ UF.reference = [
         "A horror that would be defeated is <b>repelled</b> instead: move it to an adjacent space, then you may discard skill cards worth <b>4+</b> to move it one more space.",
         "Who repels: the attacker; the player who used the skill, spell, ally or feat card; for a mythos card, the player who made the choice — otherwise the current player.",
         "Humans attack horrors normally; <b>6+</b> repels one.",
-        "Only the tracks remove horrors: a horror already at the back when the travel track advances, or in a deck or water space when the ritual is cast, is <b>defeated</b> — back to the supply. If no horrors remain, put the horror token on Start.",
+        "Only the tracks remove horrors: each time the travel track advances, horrors in water spaces move 1 space toward the back, and a horror already in a <b>water space</b> at the back of the ship is <b>defeated</b>; when the ritual is cast, each horror in a deck or water space is <b>defeated</b>. Defeated horrors go back to the supply. If no horrors remain, put the horror token on Start.",
         "No space action while a horror is in the space; horrors can’t spawn in or enter the Brig or Sick Bay; with fewer than 4 cards to remove, remove what’s there and still move."
       ]),
     src: () => "From the Abyss p.2, p.6–7, p.12"
@@ -872,7 +872,7 @@ UF.reference = [
         "The Rules Reference’s ability rules cover all game text that isn’t flavor or rules text — skill cards, mythos cards, character sheets, interior space abilities and the rest; “ability” and “effect” mean the same thing.",
         "Timing windows exist mainly to break stalemates (the current player decides). Whenever the game state changes, players should get a chance to respond; you may use several abilities in one window and can get a second chance to act.",
         "Removed-from-the-game components — defeated passengers included — are not open information (matching Rules Ref §34).",
-        "“Risk N passengers <i>to</i> …” with fewer than N in the supply: you may still pick that option; risk as many as there are, and the effect after “to” doesn’t happen (consistent with Rules Ref §1.5, §28.13, §32.5).",
+        "“Risk N passengers <i>to</i> …” on a <b>mythos card</b> option with fewer than N in the supply: you may still pick that option (unless it says otherwise); risk as many as there are, and the effect after “to” doesn’t happen (consistent with Rules Ref §1.5, §28.13, §32.5). This doesn’t apply when risking passengers is a <b>cost</b>: an ability such as the Bridge action can’t be used at all without enough passengers (Rules Ref §32.6).",
         "Abilities that grant an extra action “refund” an action rather than nesting one — so, e.g., a basic attack taken with it still gets Kitchen Knife’s +1.",
         "All defeat-prevention effects share one timing; the current player chooses which resolves (e.g. Flesh Ward stays if something else prevents the defeat).",
         "Choices on a waypoint card are made by whoever chose the card — normally the Captain; the Keeper for Open the Gate; whoever chose Fog Bank for the waypoint after it."
@@ -889,7 +889,7 @@ UF.reference = [
       ]) + (c.has("fta") ? "<h4>From the Abyss</h4>" + UF.ul([
         "Horrors are <b>enemies</b> of the humans and block repairs just as a Deep One does.",
         "Repelling a horror an extra space: allies flee from <b>each</b> space it enters.",
-        "The Grasping Tendril’s spawn roll always lands on the <b>1–4 or 5–8</b> water space (and the adjacent deck space).",
+        "The Grasping Tendril’s spawn roll always lands on the <b>1–4 or 5–8</b> water space at the front of the ship (and the adjacent deck space); any effect meant to place the Tendril in another water space refers to the adjacent deck space instead.",
         "If a horror card’s activation is cancelled (Temporal Barrier, Sardaana’s Alarm) and no horror appears, put the horror token back on Start.",
         "Personal Crisis passing clockwise skips humans in the Brig; if all remaining are in the Brig, go to step 3. A Personal Crisis drawn with Predictive Analytics isn’t discarded; set-aside character-specific cards may be consulted any time.",
         "The greater banishment (and Price of Power) defeats passengers in water spaces too — as the updated reference sheet says.",
@@ -915,7 +915,7 @@ UF.teach = {
         let s = "<p>It’s 1913, aboard the steamship <b>SS Atlantica</b>, bound for Boston — and <b>Deep Ones</b> are climbing aboard, led by two giant monarchs, <b>Father Dagon</b> and <b>Mother Hydra</b>. Most of us are human. Some of us are secretly <b>traitors</b>: hybrids with Deep One blood.</p>";
         s += "<p><b>The humans win</b> by finishing the voyage: at each arrival the Captain picks a waypoint worth 2 to 4 distance, and once we’ve covered <b>12</b>, the next arrival brings us home. <b>The traitors win</b> if the ship fails first — any resource (<b>fuel, food, sanity or souls</b>) hits zero, <b>six rooms</b> are damaged at once, or the Deep Ones need to spawn and <b>not enough are left</b>. Either way the game ends instantly and everyone flips their loyalty cards.</p>";
         s += "<p>With " + UF.word(c.p) + " of us, the loyalty deck is <b>" + L.hyb + " Hybrid</b>" + (L.cult ? ", <b>1 Cultist</b>" : "") + " and <b>" + L.hum + " Human</b> — two each: one " + (c.mode === "learning" ? "after everyone’s first turn" : "now") + ", one at the <b>awakening</b>, when we’ve covered 6 distance. Hold even one Hybrid and you’re a traitor, whatever your other card says.";
-        if (L.cult) s += " The <b>Cultist</b> is a traitor too, but only wins if the ship sinks <i>after</i> covering 12 distance — they want to see land first.";
+        if (L.cult) s += " The <b>Cultist</b> is a traitor too, but only wins if the ship sinks <i>after</i> covering 12 distance — they want to see land first. (Hold a Hybrid as well, and the Hybrid’s win condition applies.)";
         return s + "</p>";
       }
     },
@@ -930,7 +930,7 @@ UF.teach = {
     },
     {
       h: "The heart of it — crises and skill checks",
-      body: (c) => "<p>Every mythos card brings a <b>crisis</b>. Some are a choice for the current player, the Captain or the Keeper of the Tome; others are <b>skill checks</b> — a target number and two or three helpful colors — and some let the chooser pick between a check and a penalty. Two random <b>chaos</b> cards go in face down, then, from the current player’s left, each of us adds any number of cards face down. Shuffle and flip: helping colors add, all others subtract. That’s where traitors sabotage, with the chaos cards as cover — so table talk stays vague: “I’m helping a lot,” never “I put in a strength five.” After the crisis, a <b>monster activates</b> and a <b>track advances</b>.</p>"
+      body: (c) => "<p>Every mythos card brings a <b>crisis</b>. Some are a choice for the current player, the Captain or the Keeper of the Tome; others are <b>skill checks</b> — a target number and two or more helpful colors — and some let the chooser pick between a check and a penalty. Two random <b>chaos</b> cards go in face down, then, from the current player’s left, each of us adds any number of cards face down. Shuffle and flip: helping colors add, all others subtract. That’s where traitors sabotage, with the chaos cards as cover — so table talk stays vague: “I’m helping a lot,” never “I put in a strength five.” After the crisis, a <b>monster activates</b> and a <b>track advances</b>.</p>"
     },
     {
       h: "Monsters and the two tracks",
@@ -946,8 +946,8 @@ UF.teach = {
     },
     { when: (c) => c.has("fta"),
       h: "From the Abyss",
-      body: () => "<p><b>Rescue</b> is stronger: one action saves every passenger in your space, or one in an adjacent water space, and each rescue calls an <b>ally</b> into your space. Before or after an action, discard skill cards worth at least an ally’s number to use it — one ally per human per turn — then it wanders off. Allies flee from monsters, revealed traitors and damage unless a human is with them.</p>" +
-        "<p>The <b>horrors</b> — Shoggoth, Drowned Spirit and Grasping Tendril — can’t be killed: a 6 or better only <b>repels</b> one a space, and discarding cards worth 4 or more pushes it one space further. Only the travel track, at the stern, or the ritual’s banishment removes them — and, like a Deep One, a horror in a room shuts down its action. A <b>horror icon</b> advances the horror track while none are out — at Spawn one arrives — and activates one once they’re here.</p>" +
+      body: () => "<p><b>Rescue</b> is stronger: one action saves every passenger in your space, or one in an adjacent water space, and each rescue calls an <b>ally</b> into your space. Before or after an action, discard skill cards worth at least an ally’s number to use an ally <b>in your space</b> — one ally per human per turn — then it wanders off. Allies flee from monsters, revealed traitors and damage unless a human is with them. Passengers can now end up in the water: each travel-track step drifts them astern, and one already at the back is lost. The banishment also defeats passengers in the water and any allies on deck.</p>" +
+        "<p>The <b>horrors</b> — Shoggoth, Drowned Spirit and Grasping Tendril — can’t be killed: a 6 or better only <b>repels</b> one a space, and discarding cards worth 4 or more pushes it one space further. Only two things remove them: the travel track, for a horror already in the water at the stern, and the ritual’s banishment, for a horror on deck or in the water but not one inside the ship. And, like a Deep One, a horror in a room shuts down its action. A <b>horror icon</b> advances the horror track while none are out — at Spawn one arrives — and activates one once they’re here.</p>" +
         "<p><b>Boon</b> cards always help a check, but you only draw them when a card says “boon”. Humans can now end up holding <b>treachery</b> cards and may add them to checks; only revealed traitors use their text. <b>Personal Crisis</b> cards make you resolve your own character’s crisis card, face down in front of you. And the Keeper now looks at three spells and resolves one.</p>"
     },
     { when: (c) => c.has("fta") && c.mod("prelude"),

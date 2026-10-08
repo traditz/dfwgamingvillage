@@ -320,12 +320,12 @@ TM.phases = [
           if (off.length) it.push("Some tiles count pieces from expansions you aren’t using: " + off.join(", ") + ". The leaflet has a replace rule only for Geologist — for these it says nothing beyond the general rule that you may change goals until everyone agrees.");
           if (U.automa(c)) it.push("<b>Against MarsBot</b>, leave <b>Terraformer</b> out — it isn’t supported against the automa.");
           if (c.has("venus")) it.push("<b>Venus Next:</b> add <b>Hoverlord</b> and <b>Venuphile</b> as normal (next step).");
-          if (c.has("turmoil") && m.id === "tharsis") it.push("<b>Turmoil:</b> its TR 26 Terraformer tile replaces the <i>printed</i> Tharsis Terraformer; the books give no Turmoil change for the M&amp;A Terraformer tile (29 TR).");
+          if (c.has("turmoil") && m.id === "tharsis" && !U.automa(c)) it.push("<b>Turmoil:</b> its TR 26 Terraformer tile replaces the <i>printed</i> Tharsis Terraformer; the books give no Turmoil change for the M&amp;A Terraformer tile (29 TR).");
           return U.ul(it);
         },
         src: (c) => { const U = TM.u, m = U.map(c);
           if (U.solo(c)) return "Base p.13";
-          return U.src("M&A p.1, p.2–4", U.automa(c) && "Automa C p.14", c.has("venus") && "Venus p.3", c.has("turmoil") && m.id === "tharsis" && "Turmoil p.2"); } },
+          return U.src("M&A p.1, p.2–4", U.automa(c) && "Automa C p.14", c.has("venus") && "Venus p.3", c.has("turmoil") && m.id === "tharsis" && !U.automa(c) && "Turmoil p.2"); } },
 
       { id: "venus-setup", when: (c) => c.has("venus"), exp: "venus",
         t: "Venus Next — the Venus board",
@@ -459,6 +459,7 @@ TM.phases = [
           if (c.has("colonies")) decks.push("<b>5 Colonies</b> corporations");
           it.push("Shuffle the corporation cards: " + decks.join(", ") + ".");
           if (c.has("turmoil")) it.push("Turmoil’s box also holds <b>5 corporation cards</b> (its components list), but its setup text doesn’t mention them. Venus Next, Prelude and Colonies each say to shuffle their corporations into the corporation deck (Venus p.2, Prelude p.2, Colonies p.2); Turmoil’s book doesn’t say.");
+          if (c.has("prelude2")) it.push("<b>Prelude 2 corporations:</b> Prelude 2’s rulebook has no components list and doesn’t say to shuffle any corporations into the deck, though Automa B’s FAQ names <b>Ecotec</b> as a Prelude 2 corporation. The books give no instruction for adding them; the rulebook says only that cards with expansion marks need those expansions in play (Prelude 2 p.2).");
           const n = c.mod("p2-extended") ? 3 : 2;
           const who = c.p === 1 ? (c.mod("beginner") ? "yourself — unless you took the Beginner Corporation —" : "yourself") : (c.mod("beginner") ? "each remaining player" : "each player");
           const deal = U.corpDeal(c);
@@ -470,7 +471,7 @@ TM.phases = [
           return U.ul(it);
         },
         src: (c) => TM.u.src("Base p.7", c.mod("ce") && "Base p.13", c.has("venus") && "Venus p.2", c.has("prelude") && "Prelude p.2",
-          c.has("colonies") && "Colonies p.2, p.4", c.has("turmoil") && "Turmoil back cover", c.mod("p2-extended") && "Prelude 2 p.3") },
+          c.has("colonies") && "Colonies p.2, p.4", c.has("turmoil") && "Turmoil back cover", c.has("prelude2") && "Prelude 2 p.2", c.mod("p2-extended") && "Prelude 2 p.3", c.has("prelude2") && "Automa B p.4") },
 
       { id: "base-setup-6", exp: "base",
         t: "Starting-hand options",
@@ -490,6 +491,7 @@ TM.phases = [
         t: "Starting conditions — choose & reveal",
         d: (c) => {
           const U = TM.u, it = [];
+          if (c.p === 1 && c.mod("beginner")) it.push("<b>Took the Beginner Corporation?</b> Skip the corporation and project-card choice and the 3 M€ payments — its 10 cards are already your starting hand" + (U.preludeCards(c) ? (c.mode === "automa" && c.mod("mb-corps") ? " (you still choose 2 of your Prelude cards, after MarsBot’s corporation is drawn — see the MarsBot corporation step)" : " (you still keep 2 of your Prelude cards)") : "") + ".");
           it.push(U.you(c, "Players choose", "Choose") + " the corporation to play and which of the 10 project cards to keep" + (U.preludeCards(c) && !(c.mode === "automa" && c.mod("mb-corps")) ? ", plus the 2 Preludes" : "") + ".");
           it.push("Discard the rest — cards are always discarded <b>face down</b>! " + (c.has("prelude2")
             ? "<b>Prelude 2:</b> discarded corporations and Preludes go face down on <b>their own discard piles</b> (instead of back in the box); if one of those decks runs out, shuffle its discard pile into a new deck."
@@ -500,7 +502,7 @@ TM.phases = [
           it.push("Money will be tight for the first few generations, until your economy gets going.");
           return U.ul(it);
         },
-        src: (c) => TM.u.src("Base p.7", c.has("prelude2") && "Prelude 2 p.3", TM.u.solo(c) && c.has("colonies") && "Colonies p.3 · Base p.6") },
+        src: (c) => TM.u.src("Base p.7", TM.u.preludeCards(c) && !(c.mode === "automa" && c.mod("mb-corps")) && "Prelude p.2", c.p === 1 && c.mod("beginner") && TM.u.preludeCards(c) && c.mode === "automa" && c.mod("mb-corps") && "Automa B p.1", c.has("prelude2") && "Prelude 2 p.3", TM.u.solo(c) && c.has("colonies") && "Colonies p.3 · Base p.6") },
 
       { id: "prelude-setup", when: (c) => TM.u.preludeCards(c), exp: (c) => (c.has("prelude2") ? "prelude2" : "prelude"),
         t: "Play your Preludes (step 7b)",
@@ -538,7 +540,7 @@ TM.phases = [
         },
         src: (c) => { const U = TM.u;
           return U.src("Base p.6–8", c.has("turmoil") && "Turmoil p.2, p.6", c.mod("draft") && "Base p.13", U.solo(c) && "Base p.13",
-            U.solo(c) && (U.preludeCards(c) || c.mod("tr-solo")) && "Prelude p.3", U.solo(c) && c.has("venus") && "Venus p.3"); } }
+            U.solo(c) && (U.preludeCards(c) || c.mod("tr-solo")) && "Prelude p.3", U.solo(c) && c.mod("tr-solo") && c.has("turmoil") && "Turmoil p.7", U.solo(c) && c.has("venus") && !c.mod("tr-solo") && "Venus p.3"); } }
     ]
   }
 ];
@@ -622,7 +624,7 @@ TM.reference = [
           : "<b>C · Claim a milestone</b> — meet its condition and pay <b>8 M€</b>" + (U.mandaTiles(c) ? " (Briber: +12 M€)" : "") + "; each can be claimed once, and only <b>3 of " + n + "</b> in total. 5 VP each.",
         noMA ? "<b>D · Fund an award</b> — <i>not used in solo</i>."
           : "<b>D · Fund an award</b> — no requirement; costs <b>8, then 14, then 20 M€</b>; each award once, only 3 in total. Scored for everyone at the end, whoever funded it.",
-        "<b>E · Use a blue card’s action</b> (red arrow) — once per generation per card: pay the cost left of the arrow, take what it points to, and mark the card with a player marker.",
+        "<b>E · Use a card action</b> (red arrow) on a blue card or your corporation" + (c.has("prelude2") && U.preludeCards(c) ? " or a Prelude 2 Prelude (these work like blue cards but never count as blue cards)" : "") + " — once per generation per card: pay the cost left of the arrow, take what it points to, and mark the card with a player marker.",
         "<b>F · Convert 8 plants</b> into a greenery tile — raises oxygen 1 step (and your TR).",
         "<b>G · Convert 8 heat</b> into a 1-step temperature raise (and your TR)."
       ];
@@ -634,7 +636,7 @@ TM.reference = [
       return "<p>On your turn take <b>1 or 2 actions</b> — any mix, even the same one twice — or pass and sit out the rest of the generation.</p>" + U.ul(it) +
         (noMA ? "" : "<p>One action lets you wait and watch; two let you beat " + (U.automa(c) ? "MarsBot" : "the others") + " to a goal or bonus.</p>");
     },
-    src: (c) => TM.u.src("Base p.8–11", c.has("venus") && "Venus p.3", TM.u.mandaTiles(c) && "M&A p.2", c.has("colonies") && "Colonies p.2", c.has("turmoil") && "Turmoil p.4, p.6")
+    src: (c) => TM.u.src("Base p.8–11", c.has("venus") && "Venus p.3", TM.u.mandaTiles(c) && "M&A p.2", c.has("prelude2") && TM.u.preludeCards(c) && "Prelude 2 p.2", c.has("colonies") && "Colonies p.2", c.has("turmoil") && "Turmoil p.4, p.6")
   },
   {
     id: "ref-standard-projects",
@@ -710,15 +712,15 @@ TM.reference = [
         "<b>Placement bonus:</b> take what’s printed on the area, plus <b>2 M€ for each adjacent ocean tile</b> (even when placing an ocean).",
         "<b>Ocean:</b> only on ocean-reserved areas; +1 TR; owned by nobody.",
         "<b>Greenery:</b> must go next to one of your own tiles if possible (otherwise anywhere available); your marker on it; raises oxygen and your TR — if oxygen is maxed, no TR. Worth 1 VP, plus 1 VP to each adjacent city.",
-        "<b>City:</b> never next to another city (exception: Noctis City always goes on its reserved area); your marker on it; 1 VP per adjacent greenery, whoever owns it. (Capital also scores adjacent oceans, as its card says.)",
+        "<b>City:</b> never next to another city" + (m.id === "tharsis" ? " (exception: Noctis City always goes on its reserved area)" : "") + "; your marker on it; 1 VP per adjacent greenery, whoever owns it. (Capital also scores adjacent oceans, as its card says.)",
         "<b>Special tiles</b> (brown symbol): placed and restricted as the card says; your marker on it."
       ];
       it.push("<b>" + m.name + ":</b> " + m.special.filter((s) => /Noctis|volcan/i.test(s)).join(" "));
       if (c.has("venus")) it.push("<b>Venus board</b> city areas, for specific cards only: Maxwell Base, Stratopolis, Luna Metropolis and Dawn City.");
-      if (c.has("turmoil")) it.push("<b>Turmoil policies</b>, only while that party rules: Mars First — 1 steel whenever you place any tile on Mars; Greens — 4 M€ whenever you place a greenery.");
+      if (c.has("turmoil")) it.push("<b>Turmoil policies</b>, only during the Action phase while that party rules: Mars First — 1 steel whenever you place any tile on Mars; Greens — 4 M€ whenever you place a greenery.");
       return U.ul(it);
     },
-    src: (c) => TM.u.src("Base p.4–5, p.15", TM.u.map(c).id !== "tharsis" && TM.u.map(c).specialSrc, c.has("venus") && "Venus p.2", c.has("turmoil") && "Turmoil p.6")
+    src: (c) => TM.u.src("Base p.4–5, p.15", TM.u.map(c).id !== "tharsis" && TM.u.map(c).specialSrc, c.has("venus") && "Venus p.2", c.has("turmoil") && "Turmoil p.4, p.6")
   },
   {
     id: "ref-map",
@@ -874,7 +876,7 @@ TM.reference = [
       return U.ul([
         "The <b>Venus scale</b> is a fourth global parameter (“Venus” on the cards), from <b>0 % to 30 %</b> in 15 steps. Each step raises your TR like any parameter; once maxed it gives no TR." +
           (U.map(c).id === "amazonis" ? " (These are the standard Venus board’s values: the Amazonis &amp; Vastitas box’s optional Venus board has a longer track that its wrap doesn’t describe.)" : ""),
-        "<b>Not an end condition</b>" + (U.solo(c) ? " — except in solo, where Venus must be maxed too." : ": only temperature, oxygen and oceans end the game."),
+        "<b>Not an end condition</b>" + (U.solo(c) ? (c.mod("tr-solo") ? " — and in TR solo it isn’t part of your goal either: only reaching TR 63 counts." : " — but in solo it is part of your goal: all four parameters, Venus included, must be maxed by the end of the last generation to win.") : ": only temperature, oxygen and oceans end the game."),
         "<b>Bonus steps:</b> reach <b>8 %</b> — draw a card for free; reach <b>16 %</b> — an extra TR.",
         "<b>Air Scrapping</b> standard project: 15 M€ to raise Venus 1 step (+1 TR).",
         "Cards that change global requirements (Adaptation Technology, Special Design, the Inventrix corporation) also affect Venus requirements.",
@@ -887,7 +889,7 @@ TM.reference = [
         "Venus Next may be played with or without the Corporate Era and any other expansion."
       ]);
     },
-    src: (c) => TM.u.src("Venus p.2–3", TM.u.map(c).id === "amazonis" && "A&V wrap", TM.u.automa(c) && "Automa C p.3")
+    src: (c) => TM.u.src("Venus p.2–3", TM.u.solo(c) && "Base p.13", TM.u.solo(c) && c.mod("tr-solo") && "Prelude p.3", TM.u.map(c).id === "amazonis" && "A&V wrap", TM.u.automa(c) && "Automa C p.3")
   },
   {
     id: "ref-prelude",
@@ -953,8 +955,9 @@ TM.reference = [
         "<b>Project card requirements</b> showing a party icon: playable only while that party rules, <b>or</b> if you have at least 2 delegates in it.",
         "<b>Turmoil step</b> (Solar phase step 4)" + U.ol([
           "<b>TR revision</b> — " + (U.automa(c) ? "you lose 1 TR; <b>MarsBot doesn’t</b>." : "all players lose 1 TR."),
-          "<b>Global Event</b> — resolve the Current Global Event, with influence.",
-          "<b>New Government</b> — the Dominant party becomes ruling (its Policy tile on top) · its <b>ruling bonus</b> goes to all players · the old Chairman and the ruling party’s non-leader delegates return to their reserves · its Party Leader becomes <b>Chairman</b> and its owner gains <b>1 TR</b> · the Dominance marker moves to the party with the most delegates (tie: the first one clockwise from the new ruling party) · refill the Lobby so each player has 1 delegate there.",
+          U.automa(c) ? "<b>Global Event</b> — resolve the Current Global Event, with influence; it <b>affects only you</b> (you make any first-player choices)."
+            : "<b>Global Event</b> — resolve the Current Global Event, with influence.",
+          "<b>New Government</b> — the Dominant party becomes ruling (its Policy tile on top) · " + (U.automa(c) ? "its <b>ruling bonus</b> goes to you (<b>MarsBot ignores it</b>)" : "its <b>ruling bonus</b> goes to all players") + " · the old Chairman and the ruling party’s non-leader delegates return to their reserves · its Party Leader becomes <b>Chairman</b> and its owner gains <b>1 TR</b>" + (U.automa(c) ? " (MarsBot too)" : "") + " · the Dominance marker moves to the party with the most delegates (tie: the first one clockwise from the new ruling party) · " + (U.automa(c) ? "refill your Lobby delegate (never MarsBot’s)." : "refill the Lobby so each player has 1 delegate there."),
           "<b>Changing Times</b> — the Coming event goes on top of the Current one (add its mid-right neutral delegate) · the Distant event moves to Coming · reveal a new Distant event, add its top-left neutral delegate and read its flavor text."
         ]),
         "<b>Special cases:</b> a maxed global parameter can’t be affected again for the rest of the game. If Volcanic Eruptions triggers the 0 °C ocean bonus, the first player places the ocean but gets no bonus. If Snow Cover drops the temperature below 0 °C, nothing happens — but the ocean bonus can trigger again when it’s raised.",
@@ -978,11 +981,11 @@ TM.reference = [
         ["Reds", "The player with the lowest TR gains 1 TR (friendly ties)" + (TM.u.solo(c) ? "; <b>solo:</b> you gain 1 TR if your TR is 20 or below" : "; in solo, 1 TR if your TR is 20 or below"), "You lose 3 M€ for each step your TR is raised; with less than 3 M€ you may not raise your TR."],
         ["Kelvinists", "1 M€ per heat production", "Pay 10 M€ to raise your heat and energy production 1 step each — any number of times."]
       ];
-      return "<table class='rtable'><thead><tr><th scope='col'>Party</th><th scope='col'>Ruling bonus (all players, when it takes power)</th><th scope='col'>Ruling policy (Action phase, while it rules)</th></tr></thead><tbody>" +
+      return "<table class='rtable'><thead><tr><th scope='col'>Party</th><th scope='col'>" + (TM.u.automa(c) ? "Ruling bonus (when it takes power; MarsBot ignores it)" : "Ruling bonus (all players, when it takes power)") + "</th><th scope='col'>Ruling policy (Action phase, while it rules)</th></tr></thead><tbody>" +
         rows.map((r) => "<tr><th scope='row'>" + r[0] + "</th><td>" + r[1] + "</td><td>" + r[2] + "</td></tr>").join("") + "</tbody></table>" +
         TM.u.ul(["Greens rule the first generation (their Policy tile starts on top)."]);
     },
-    src: () => "Turmoil p.2–3, p.6"
+    src: (c) => TM.u.src("Turmoil p.2–3, p.6", TM.u.automa(c) && "Automa C p.7")
   },
   {
     id: "ref-symbols",
@@ -993,9 +996,9 @@ TM.reference = [
       return U.ul([
         "Cards have <b>0–3 tags</b>; tags have no rules of their own — other cards and goals refer to them.",
         "<b>Building</b> (steel may pay) · <b>Space</b> (titanium may pay) · <b>Power</b> · <b>Science</b> · <b>Jovian</b> (the outer solar system) · <b>Earth</b> · <b>Plant</b> · <b>Microbe</b> · <b>Animal</b> (generates VP) · <b>City</b> (places a city tile) · <b>Event</b> (one-time; red cards, face down after play)" +
-          (c.has("venus") ? " · <b>Venus</b>" : "") + (c.has("prelude") ? " · <b>Wild</b> (a round ?) — a tag of your choice when you act (never for awards)" : "") + ".",
+          (c.has("venus") ? " · <b>Venus</b>" : "") + (c.has("prelude") ? " · <b>Wild</b> (a round ?) — after it is played, a tag of your choice whenever you take an action (e.g. to claim a milestone); it triggers nothing when the card is played and never counts for awards" : "") + ".",
         "A resource icon means resource cubes; the same icon inside a <b>brown box</b> means production of it.",
-        "A <b>red border</b> means any player (you or an opponent) — for resources, production, tiles and tags.",
+        "A <b>red border</b> means any player (you or an opponent): removed resources come from any one player (optional, or only partly); a production decrease must be performed — if no opponent has that production, lower your own or don’t play the card; a red tile icon targets any or all players’ tiles; a red tag icon counts every card with that tag, yours and everyone else’s.",
         "Temperature, oxygen and ocean icons each mean a 1-step raise (and 1 TR); greenery and city hexes mean you place that tile with your marker; brown hexes are special tiles.",
         "Not sure what a card does? Read the text in parentheses."
       ]);
@@ -1017,7 +1020,7 @@ TM.reference = [
         "<b>No hand limit</b>, and cards are always discarded <b>face down</b>.",
         "Steel and titanium can pay for a card along with M€, but overpaying gives no change.",
         c.has("colonies") ? "Colonies: 3 colonies per Colony tile, no exceptions." : "",
-        c.has("prelude") && U.preludeCards(c) ? "Prelude: a wild tag never counts for awards." : ""
+        c.has("prelude") ? "Prelude: a wild tag triggers nothing when its card is played and never counts for awards, but counts as any tag you choose when you take an action (e.g. claiming a milestone)." : ""
       ]);
     },
     src: (c) => TM.u.src("Base p.3, p.5–12", c.has("turmoil") && "Turmoil p.6", c.has("colonies") && "Colonies p.2", c.has("prelude") && "Prelude p.3")
@@ -1137,7 +1140,7 @@ TM.teach = {
       body: (c) => "<p><b>Colonies</b> puts moons and dwarf planets on the table, with a new standard project and a new action. <b>Build a colony</b> — a standard project for 17 — to take the tile’s placement bonus and a share of every future trade there. Or <b>trade</b>: send your trade fleet to a tile, paying 9 MegaCredits, 3 energy or 3 titanium, and take whatever its marker points to; " + (TM.u.solo(c) ? "if you have a colony there, you also get its colony bonus." : "everyone with a colony there gets a bonus too.") + " Each tile holds three colonies and one fleet at a time, and its marker creeps up every generation — the longer nobody trades there, the richer the haul." +
         (TM.u.solo(c) ? " Solo, you start with 2 less MegaCredit production and 3 colony tiles in play." : "") + "</p>" },
     { id: "turmoil", when: (c) => c.has("turmoil"), h: "Turmoil",
-      body: (c) => "<p><b>Turmoil</b> adds politics. Six parties sit in the Terraforming Committee, and each generation the party with the most delegates takes power: " + (c.p === 1 ? "you get" : "everyone gets") + " its <b>ruling bonus</b>, its <b>policy</b> — an effect, or an extra action you can pay for — applies during the next action phase, and its party leader becomes <b>Chairman</b>, worth 1 TR. You place delegates by <b>lobbying</b> — free from the lobby, or 5 MegaCredits from your reserve. <b>Global Events</b> are visible three generations ahead, and your influence softens or sharpens them. The catch: the Committee takes <b>1 TR from " + (c.p === 1 ? "you" : "everyone") + " every generation</b>" + (TM.u.automa(c) && !TM.u.automaModule() ? " — MarsBot never loses it" : "") + ". " +
+      body: (c) => "<p><b>Turmoil</b> adds politics. Six parties sit in the Terraforming Committee, and each generation the party with the most delegates takes power: " + (c.p === 1 ? "you get its <b>ruling bonus</b>" : "its <b>ruling bonus</b> pays out (to everyone for most parties, but the Reds give 1 TR only to whoever has the lowest TR)") + ", its <b>policy</b> — an effect, or an extra action you can pay for — applies during the next action phase, and its party leader becomes <b>Chairman</b>, worth 1 TR. You place delegates by <b>lobbying</b> — free from the lobby, or 5 MegaCredits from your reserve. <b>Global Events</b> are visible three generations ahead, and your influence softens or sharpens them. The catch: the Committee takes <b>1 TR from " + (c.p === 1 ? "you" : "everyone") + " every generation</b>" + (TM.u.automa(c) && !TM.u.automaModule() ? " — MarsBot never loses it" : "") + ". " +
         (TM.u.solo(c) ? "In solo, when the Reds take power they give you 1 TR if your rating is 20 or below. Any party leaders and Chairman you own are worth a point each at the end." : "Party leaders and the Chairman are worth a point each at the end.") + "</p>" },
     { id: "solo", when: (c) => TM.u.solo(c), h: "Playing solo",
       body: (c) => "<p>Solo, you start at TR 14 with no free production, there are <b>no milestones or awards</b>" + (c.has("ma") ? " — the Milestones &amp; Awards tiles stay in the box —" : ",") + " and two <b>neutral cities</b> with greeneries are already on the map. There’s a <b>neutral opponent</b> you can steal from, or reduce any resource or production of — so cards that hit someone else always have a target." +

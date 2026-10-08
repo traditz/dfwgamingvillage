@@ -5,7 +5,7 @@
    from p.3–7. Gating:
    - The Burning Crusade's two Creature Reference Sheets replace the base sheets (TBC p.7–8, even without
      Outland); its Paladin/Shaman sheets replace the base single-sided sheets (TBC p.4, p.7 step 3 — part
-     of the Outland setup, which "Playing Without Outland" replaces, TBC p.19).
+     of the Outland setup, which "Playing Without Outland" replaces, TBC p.19); FAQ v1.4 p.4 suggests keeping the old Orc Shaman sheet.
    - Overlord-specific pieces (Kel'Thuzad Event cards, Overlord counters, Ragnaros token) show only for that
      Overlord (Base p.5, p.8; TBC p.4–5).
    - Shadow of War's card groups follow its five parts (it may be used in part, SoW p.2).
@@ -25,6 +25,7 @@ window.AID_COMPONENTS = {
     { set: "base", qty: "7", name: "Double-sided character sheets", note: "Horde character on the red side, Alliance on the blue side, same class", img: "base-char-sheets.webp", w: 320, h: 232 },
     { set: "base", qty: "2", name: "Single-sided character sheets", note: "The Shaman (Horde) and the Paladin (Alliance). With Outland, The Burning Crusade’s sheets replace them (TBC p.4)",
       img: "base-char-sheets.webp", w: 320, h: 232, when: (c) => !c.mod("outland") },
+    { set: "base", qty: "1", name: "Single-sided Shaman sheet (Orc)", note: "With Outland, FAQ v1.4 p.4 suggests using this old sheet in place of the new Horde Shaman, whose racial and Lightning Bolt need errata", img: "base-char-sheets.webp", w: 320, h: 232, when: (c) => c.mod("outland") },
     { set: "base", qty: "63", name: "Character counters", note: "7 for each class", img: "base-counters.webp", w: 320, h: 104 },
     { set: "base", qty: "15", name: "Cardboard Stun tokens", img: "base-stun.webp", w: 169, h: 173 },
     { set: "base", qty: "15", name: "Cardboard Curse tokens", img: "base-curse.webp", w: 166, h: 176 },
@@ -38,7 +39,7 @@ window.AID_COMPONENTS = {
     { set: "base", qty: "47", name: "Event cards", img: "base-event-cards.webp", w: 320, h: 208 },
     { set: "base", qty: "5", name: "Kel’Thuzad Event cards", note: "Used only when Kel’Thuzad is the Overlord (Base p.8)",
       when: (c) => c.mod("ov-kt") },
-    { set: "base", qty: "3", name: "Overlord sheets", note: "Kel’Thuzad, Nefarian and Lord Kazzak; a 4-character and a 6-character side", img: "base-overlord-sheets.webp", w: 320, h: 200 },
+    { set: "base", qty: "3", name: "Overlord sheets", note: "Kel’Thuzad, Nefarian and Lord Kazzak; a 4-character and a 6-character side", img: "base-overlord-sheets.webp", w: 320, h: 200, when: (c) => !c.mod("outland") },
     { set: "base", qty: "58", name: "Energy tokens", note: "In 1’s and 3’s", img: "base-energy.webp", w: 291, h: 261 },
     { set: "base", qty: "58", name: "Health tokens", note: "In 1’s and 3’s", img: "base-health.webp", w: 294, h: 258 },
     { set: "base", qty: "138", name: "Gold tokens", note: "In 1’s and 3’s", img: "base-gold.webp", w: 320, h: 165 },
@@ -70,7 +71,7 @@ window.AID_COMPONENTS = {
     { set: "tbc", name: "Outland game board", note: "The seven areas of Outland; carries its own Experience Track", img: "tbc-board.webp", w: 318, h: 320, when: (c) => c.mod("outland") },
     { set: "tbc", qty: "51", name: "Plastic creature figures", note: "Abominations, Arakkoas, Fungal Giants, Mo’arg, Shivan, Wrath Guards and Yeti: 1 green, 1 red, 1 purple, 1 blue each; Oozes and Ravagers: 2 green, 1 red, 1 purple, 1 blue each; plus 1 purple of each of the 13 base creature types", img: "tbc-creatures.webp", w: 320, h: 223 },
     { set: "tbc", qty: "2", name: "Plastic character figures", note: "Alliance Shaman (Draenei) and Horde Paladin (Blood Elf)", img: "tbc-char-figures.webp", w: 320, h: 249, when: (c) => c.mod("outland") },
-    { set: "tbc", qty: "2", name: "Character sheets", note: "Replace the base game’s Shaman and Paladin sheets (TBC p.4)", img: "tbc-char-sheets.webp", w: 320, h: 169, when: (c) => c.mod("outland") },
+    { set: "tbc", qty: "2", name: "Character sheets", note: "Replace the base game’s Shaman and Paladin sheets (TBC p.4). Errata (FAQ v1.4 p.4): the Horde Shaman’s racial reads “Bloodfury: ATTRITION +1” and its Lightning Bolt costs 1 Energy (the easiest fix is to use the old Orc Shaman sheet); the Draenei Shaman’s Lightning Bolt also costs 1", img: "tbc-char-sheets.webp", w: 320, h: 169, when: (c) => c.mod("outland") },
     { set: "tbc", qty: "9", name: "Level 6 character sheet extensions", note: "1 for each of the 9 classes", img: "tbc-extension.webp", w: 121, h: 320, when: (c) => c.mod("outland") },
     { set: "tbc", qty: "14", name: "Character counters", note: "7 for each new character", img: "tbc-counters.webp", w: 320, h: 117, when: (c) => c.mod("outland") },
     { set: "tbc", qty: "15", name: "Poison tokens", img: "tbc-poison.webp", w: 260, h: 261 },

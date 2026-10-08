@@ -97,6 +97,8 @@
       const b = el("button", "pbtn" + (state.players === i ? " on" : "") + (ok ? "" : " off"), String(i));
       b.type = "button";
       if (ok) b.addEventListener("click", () => { state.players = i; update(); });
+      else if (state.mode === "kronos") b.title = "The Kronos Rebellion is for 2–4 players";
+      else if (state.mode === "solo") b.title = "The Solo Campaign is for 1 player";
       else if (i === 5) b.title = "5 players requires the Atlantis expansion (Dark Ages) + Poseidon";
       else if (i === 6) b.title = "6 players requires City of Steel (+ Atlantis and Poseidon)";
       else if (i === 1) b.title = "1 player is the Solo Campaign mode";
@@ -212,7 +214,7 @@
       .filter(s => s.html);
     LH._teachText = secs.map(s =>
       s.h.toUpperCase() + "\n" +
-      s.html.replace(/<li>/g, "• ").replace(/<\/p>\s*<p>/g, "\n\n")
+      s.html.replace(/<li>/g, "\n• ").replace(/<\/p>\s*<p>/g, "\n\n")
             .replace(/<[^>]+>/g, "").replace(/\n{3,}/g, "\n\n").trim()
     ).join("\n\n");
     box.innerHTML = "<div class='teach-top'><h3>📖 Teaching Script — this setup</h3><button type='button' class='teach-copy' id='teachCopy'>📋 Copy script</button></div>" +

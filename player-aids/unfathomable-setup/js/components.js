@@ -48,7 +48,7 @@ window.AID_COMPONENTS = {
     { set: "fta", qty: "2", name: "Ship damage cards", img: "fta-ship-damage.webp", w: 255, h: 215 },
     { set: "fta", qty: "15", name: "Prelude cards", note: "Used with the Preludes option (From the Abyss p.3, p.9)", img: "fta-preludes.webp", w: 320, h: 270, when: (c) => c.mod("prelude") },
     { set: "fta", qty: "72", name: "Mythos cards", img: "fta-mythos.webp", w: 320, h: 262 },
-    { set: "fta", qty: "8", name: "Character-specific mythos cards", note: "Kept out of the mythos deck: each player takes the one that matches their character (From the Abyss p.3)", img: "fta-char-mythos.webp", w: 320, h: 260 },
+    { set: "fta", qty: "8", name: "Character-specific mythos cards", note: "Kept out of the mythos deck along with the base game’s character-specific (green) mythos cards: all 18 are set aside. Each player takes the one that matches their character and places it facedown in their play area; the rest go back in the box (From the Abyss p.3, p.9)", img: "fta-char-mythos.webp", w: 320, h: 260 },
     { set: "fta", qty: "1", name: "Captain title card", note: "Updated version: replaces the base game’s (From the Abyss p.3)", img: "fta-captain.webp", w: 176, h: 261 },
     { set: "fta", qty: "1", name: "Keeper of the Tome title card", note: "Updated version: replaces the base game’s (From the Abyss p.3)", img: "fta-keeper.webp", w: 178, h: 261 },
     { set: "fta", qty: "3", name: "Expansion reference sheets", img: "fta-expansion-refs.webp", w: 320, h: 227 },

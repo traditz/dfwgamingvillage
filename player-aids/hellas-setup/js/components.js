@@ -1,7 +1,7 @@
 /* =============================================================================
    Lords of Hellas — Components glossary data (standard v1.1; rendered by js/comp-widget.js)
    Sources: Base p.3–4 (Game Components; Cards; Miniatures; Tokens) · Dark Ages p.2–7 (each module's own
-   components, and the Kickstarter extras on p.7) · City of Steel p.2–4 · Apollo p.2–3 · Atlas p.2 · Kronos p.2.
+   components, and the Kickstarter extras on p.7) · City of Steel p.2–4 · Apollo p.2–3 · Atlas p.2 · Kronos p.2–3.
    Pictures cropped from those pages. The Apollo and Atlas manuals print no page numbers: they are counted from
    the cover as p.1, as elsewhere on this page. The Solo Campaign book has no components list (it uses the core box).
    Gating: each god's parts follow its module; Simple modes hide the parts their rules say aren't used (Fleet;
@@ -31,7 +31,7 @@ window.AID_COMPONENTS = {
     { id: "armyupgrade", name: "Army Upgrade (City of Steel)", src: "City of Steel p.4", when: (c) => c.mod("armyupgrade") },
     { id: "apollo", name: "Apollo — Lord of the Sun", src: "Apollo p.2–3", when: (c) => c.mod("apolloM") || c.mod("apolloS") },
     { id: "atlas", name: "Atlas", src: "Atlas p.2", when: (c) => c.mod("atlasO") || c.mod("atlasH") },
-    { id: "kronos", name: "Kronos", src: "Kronos p.2", when: (c) => c.mode === "kronos" }
+    { id: "kronos", name: "Kronos", src: "Kronos p.2–3", when: (c) => c.mode === "kronos" }
   ],
   items: [
     /* ---- Core box (Base p.3–4) ---- */
@@ -62,7 +62,8 @@ window.AID_COMPONENTS = {
     { set: "base", qty: "1", name: "Monument Activation card", img: "core-monument-activation.webp", w: 227, h: 184 },
     { set: "base", qty: "4", name: "Heroes", note: "Heracles, Perseus, Achilles, Helen", img: "core-heroes.webp", w: 320, h: 112, when: (c) => c.mode !== "solo" },
     { set: "base", qty: "4", name: "Heroes", note: "Heracles, Perseus, Achilles, Helen. Solo Campaign: only Achilles is used (Solo Campaign p.2)", img: "core-heroes.webp", w: 320, h: 112, when: (c) => c.mode === "solo" },
-    { set: "base", qty: "3", name: "Five-piece Monuments", note: "Zeus, Athena, Hermes", img: "core-monuments.webp", w: 320, h: 182 },
+    { set: "base", qty: "3", name: "Five-piece Monuments", note: "Zeus, Athena, Hermes", img: "core-monuments.webp", w: 320, h: 182, when: (c) => !(c.mod("poseidonS") || c.mod("hadesS") || c.mod("hephaestusS") || c.mod("apolloS")) },
+    { set: "base", qty: "3", name: "Five-piece Monuments", note: "Zeus, Athena, Hermes. Each Simple-mode god’s Monument replaces one of these, which isn’t used: Poseidon replaces Athena (Attica), Hades or Hephaestus replaces Zeus (Thessaly), Apollo replaces Hermes (Acarnania) (Dark Ages p.2, p.4, p.5 · Apollo p.4)", img: "core-monuments.webp", w: 320, h: 182, when: (c) => c.mod("poseidonS") || c.mod("hadesS") || c.mod("hephaestusS") || c.mod("apolloS") },
     { set: "base", qty: "60", name: "Hoplites", note: "15 per player", img: "core-hoplites-priests.webp", w: 320, h: 79, when: (c) => c.mode !== "solo" },
     { set: "base", qty: "60", name: "Hoplites", note: "15 per player. Solo Campaign: the red ones aren’t used (Solo Campaign p.2)", img: "core-hoplites-priests.webp", w: 320, h: 79, when: (c) => c.mode === "solo" },
     { set: "base", qty: "16", name: "Priests", note: "4 per player", img: "core-hoplites-priests.webp", w: 320, h: 79, when: (c) => c.mode !== "solo" },
@@ -74,8 +75,11 @@ window.AID_COMPONENTS = {
     { set: "base", qty: "60", name: "Control tokens", note: "15 per player. Solo Campaign: the red ones aren’t used (Solo Campaign p.2)", img: "core-control.webp", w: 320, h: 91, when: (c) => c.mode === "solo" },
     { set: "base", qty: "12", name: "Attribute tokens", note: "3 per player", img: "core-attribute.webp", w: 319, h: 224 },
     { set: "base", qty: "9", name: "Quest tokens", img: "core-quest-tokens.webp", w: 320, h: 127, when: (c) => c.mode !== "kronos" },
-    { set: "base", qty: "8", name: "Temple tokens", note: "With plastic stands", img: "core-temples.webp", w: 320, h: 144 },
-    { set: "base", qty: "24", name: "Used Action tokens", note: "6 per player", img: "core-used-action.webp", w: 320, h: 164 },
+    { set: "base", qty: "8", name: "Temple tokens", note: "With plastic stands", img: "core-temples.webp", w: 320, h: 144, when: (c) => c.mode === "kronos" || (c.mode === "standard" && c.p >= 4) },
+    { set: "base", qty: "8", name: "Temple tokens", note: "With plastic stands. 2–3 players: only the first 6 Temples are placed (Base p.6)", img: "core-temples.webp", w: 320, h: 144, when: (c) => c.mode === "standard" && c.p <= 3 },
+    { set: "base", qty: "8", name: "Temple tokens", note: "With plastic stands. Solo Campaign: only 6 Temples are used, set on the Temple track; 2 are left over (Solo Campaign p.2 · Solo FAQ p.1)", img: "core-temples.webp", w: 320, h: 144, when: (c) => c.mode === "solo" },
+    { set: "base", qty: "24", name: "Used Action tokens", note: "6 per player", img: "core-used-action.webp", w: 320, h: 164, when: (c) => c.mode !== "solo" },
+    { set: "base", qty: "24", name: "Used Action tokens", note: "6 per player. Solo Campaign: all 24 are shuffled face down as the campaign’s clock and are never returned (Solo Campaign p.2)", img: "core-used-action.webp", w: 320, h: 164, when: (c) => c.mode === "solo" },
     { set: "base", qty: "5", name: "Glory tokens", note: "1 per Land color", img: "core-glory.webp", w: 320, h: 80 },
     { set: "base", qty: "15", name: "Monster Wound tokens", img: "core-wounds.webp", w: 320, h: 164 },
     { set: "base", qty: "1", name: "Oracle of Delphi token", note: "With plastic stand", img: "core-oracle.webp", w: 166, h: 196 },
@@ -203,7 +207,7 @@ window.AID_COMPONENTS = {
     { set: "atlas", qty: "1", name: "Atlas Bonus token", img: "atlas-bonus.webp", w: 120, h: 96, when: (c) => c.mod("atlasO") },
     { set: "atlas", qty: "15", name: "Golden Apple token", img: "atlas-apples.webp", w: 288, h: 129, when: (c) => c.mod("atlasH") },
 
-    /* ---- Kronos (Kronos p.2) ---- */
+    /* ---- Kronos (Kronos p.2; Atlantis Attribute tokens: Kronos p.3) ---- */
     { set: "kronos", qty: "1", name: "Kronos", img: "kronos-figure.webp", w: 320, h: 294 },
     { set: "kronos", qty: "1", name: "Kronos board", img: "kronos-board.webp", w: 320, h: 236 },
     { set: "kronos", qty: "1", name: "Anger Points counter", img: "kronos-anger.webp", w: 117, h: 123 },
@@ -211,6 +215,7 @@ window.AID_COMPONENTS = {
     { set: "kronos", qty: "7", name: "Kronos Chain cards", img: "kronos-chains.webp", w: 320, h: 173 },
     { set: "kronos", qty: "3", name: "Kronos Event cards", img: "kronos-events.webp", w: 320, h: 170 },
     { set: "kronos", qty: "9", name: "Hero Special Ability tokens", img: "kronos-hero-tokens.webp", w: 320, h: 74 },
-    { set: "kronos", qty: "1", name: "Current Player token", img: "kronos-current-player.webp", w: 154, h: 144 }
+    { set: "kronos", qty: "1", name: "Current Player token", img: "kronos-current-player.webp", w: 154, h: 144 },
+    { set: "kronos", qty: "3", name: "Attribute tokens (Atlantis 5th player)", note: "Not in the Kronos box: Kronos marks Might, Anger and Authority with the 5th player’s Attribute tokens from the Atlantis expansion (Dark Ages) (Kronos p.3)", img: "atlantis-attribute.webp", w: 310, h: 135 }
   ]
 };

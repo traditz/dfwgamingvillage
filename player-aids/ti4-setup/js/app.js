@@ -345,7 +345,12 @@
       const m = M.modules.find((x) => x.id === id);
       if (!modAvailable(m, c)) state.mods.delete(id);
     }
-    const on = [...state.mods].sort((a, b) => state.order.lastIndexOf(b) - state.order.lastIndexOf(a)); // newest first
+    // a module may switch on another it is built for (`forces`, e.g. TE's "Red vs Blue" map → the Alliance variant, TE p.15)
+    for (const id of [...state.mods]) {
+      const m = M.modules.find((x) => x.id === id);
+      for (const f of arr(m && m.forces)) if (!state.mods.has(f) && modAvailable(M.modules.find((x) => x.id === f), c)) state.mods.add(f);
+    }
+    const on =[...state.mods].sort((a, b) => state.order.lastIndexOf(b) - state.order.lastIndexOf(a)); // newest first
     const keep = [];
     for (const id of on) {
       const m = M.modules.find((x) => x.id === id);
@@ -436,11 +441,12 @@
     const box = $("#players");
     box.innerHTML = "";
     const [lo, hi] = playerRange();
+    const pm = modeById(state.mode), modeHi = pm && pm.maxPlayers ? pm.maxPlayers : 8;
     for (let i = 3; i <= 8; i++) {
       const ok = i >= lo && i <= hi;
       const on = state.players === i;
       const b = button("pbtn" + (on ? " on" : "") + (ok ? "" : " off"), String(i), on, ok ? () => { state.players = i; update(); } : null,
-        ok ? i + " players" : (i > maxPlayers() ? i + " players needs Prophecy of Kings" : i + " players isn’t available in this mode"));
+        ok ? i + " players" : (i > maxPlayers() && i <= modeHi ? i + " players needs Prophecy of Kings" : i + " players isn’t available in this mode"));
       if (!ok) { b.disabled = true; b.setAttribute("aria-disabled", "true"); }
       box.appendChild(b);
     }
@@ -622,6 +628,8 @@
       case "lrr": case "rr": case "ltp": case "errata": case "wiki": return true;
       case "pok": case "wiki-pok": return c.has("pok");
       case "wiki-base-only": return !c.has("pok");
+      case "wiki-pok-preomega": return c.has("pok") && !c.has("codex3") && !c.has("te");   // PoK cards Codex III Ω / TE replace (Codex III p.13–14; TE p.4)
+      case "wiki-pre-te": return !c.has("te");                                              // Warfare card TE replaces (TE p.4–5)
       case "codex1": case "codex2": case "codex3": case "codex4": case "te": return c.has(x);
       case "wiki-codex1": return c.has("codex1") || c.has("te");
       case "wiki-codex2": return c.has("codex2") || c.has("te");

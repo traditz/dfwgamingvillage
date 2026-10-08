@@ -253,7 +253,7 @@ var TI_TE = (function () {
   var modes = [
     { id: "twilightsfall", name: "Twilight’s Fall",
       blurb: "Thunder’s Edge’s game mode for advanced players: everyone is a Mahact King from a dark future. Faction cards only set your seat, home system and starting units; you splice together abilities, unit upgrades and genomes as you play. Eight new strategy cards, edicts instead of agendas, no technology deck.",
-      requires: ["te"], src: "TF p.6" }
+      requires: ["te"], src: "TF p.6–8, p.10" }
   ];
 
   var mapExcl = function (id) {
@@ -277,10 +277,10 @@ var TI_TE = (function () {
       requires: ["te", "pok"], modes: ["standard"], excludes: mapExcl("te-map-subjugation"), minPlayers: 6, maxPlayers: 6, src: "TE p.14 · TF p.6" },
     { id: "te-map-redvsblue", name: "Map: “Red vs Blue”",
       summary: "A 2v2 alliance deathmatch — west team against east team",
-      description: "From the Thunder’s Edge map appendix: four players in two alliances, the two western seats against the two eastern seats, on a board with two hyperlane rings. Each team has only two kinds of technology specialties nearby. Requires Prophecy of Kings; pair it with the Alliance game variant. Standard game only: the book designs it for the Alliance variant, whose rules are written for the standard setup (Twilight’s Fall has none).",
-      requires: ["te", "pok"], modes: ["standard"], excludes: mapExcl("te-map-redvsblue"), minPlayers: 4, maxPlayers: 4, src: "TE p.13, p.15" },
+      description: "From the Thunder’s Edge map appendix: four players in two alliances, the two western seats against the two eastern seats, on a board with two hyperlane rings. Each team has only two kinds of technology specialties nearby. Requires Prophecy of Kings; choosing it switches on the Alliance game variant. Standard game only: the book designs it for the Alliance variant, whose rules are written for the standard setup (Twilight’s Fall has none).",
+      requires: ["te", "pok"], modes: ["standard"], excludes: mapExcl("te-map-redvsblue"), forces: ["alliance"], minPlayers: 4, maxPlayers: 4, src: "TE p.13, p.15" },
     { id: "te-map-legendary", name: "Map: “Legendary”",
-      summary: "Off-balance six-player arena with every legendary system in ring 1",
+      summary: "Off-balance six-player arena: the ring around Mecatol Rex is all legendary systems",
       description: "From the Thunder’s Edge map appendix: an off-balance six-player arena that drives players toward the galactic centre — the systems equidistant from the home systems, all legendary, form the ring around Mecatol Rex. Requires Prophecy of Kings.",
       requires: ["te", "pok"], modes: ["standard", "twilightsfall"], excludes: mapExcl("te-map-legendary"), minPlayers: 6, maxPlayers: 6, src: "TE p.15" }
   ];
@@ -456,7 +456,7 @@ var TI_TE = (function () {
           "<li>All other components are compatible with this game mode.</li>" +
           "</ul>";
       },
-      src: function () { return "TF p.6"; } },
+      src: function () { return "TF p.6–7"; } },
 
     { id: "tf-draft-1", after: "lrr-setup-1:replace", exp: "twilightsfall",
       when: function (c) { return uses(c) && tf(c); },
@@ -558,7 +558,7 @@ var TI_TE = (function () {
           "<li>Keep the <b>ability</b>, <b>unit upgrade</b>, <b>genome</b> and <b>paradigm</b> cards as separate shuffled decks — splices draw from, and shuffle back into, “their respective decks”.</li>" +
           "</ul>";
       },
-      src: function (c) { return "TF p.8–9 · LRR p.5 · TE p.6"; } },
+      src: function (c) { return "TF p.6, p.8–9 · LRR p.5 · TE p.6"; } },
 
     { id: "tf-supply", after: "lrr-setup-9", exp: "twilightsfall",
       when: function (c) { return uses(c) && tf(c); },
@@ -610,7 +610,7 @@ var TI_TE = (function () {
           "<li>Genomes ready during each status phase, with your other exhausted cards.</li>" +
           "<li>First time at the table? Open the Teaching script above.</li></ul>";
       },
-      src: function (c) { return "TF p.9–10 · LRR p.19" + (c.p <= 4 ? ", p.32" : ""); } }
+      src: function () { return "TF p.9–10 · LRR p.19, p.32"; } }
   ];
 
   /* ---------------- rules reference ---------------- */
@@ -706,14 +706,15 @@ var TI_TE = (function () {
       html: function (c) {
         return "<h4>Relics</h4><ul>" +
           "<li>When you gain a planet card <b>from the planet deck</b> that has a <b>relic icon</b>, or an effect tells you to draw a relic: draw the top card of the relic deck and place it faceup in your play area.</li>" +
-          (c.has("pok") ? "" : "<li>Thunder’s Edge uses the relic deck even without Prophecy of Kings.</li>") +
+          (c.has("pok") ? "" : "<li>Thunder’s Edge uses the relic deck even without Prophecy of Kings.</li><li>If the relic deck is empty, you don’t gain a relic. Relics can’t be traded.</li>") +
           "</ul><h4>Legendary planets</h4><ul>" +
           "<li>Many Thunder’s Edge planets are <b>legendary</b> (legendary icon). When you take control of one, also place its <b>legendary planet ability card</b> in your play area.</li>" +
           "<li>If you gain control of an <b>exhausted</b> legendary planet ability card, it stays exhausted.</li>" +
+          (c.has("pok") ? "" : "<li>An ability card taken from the deck is <b>readied</b>. If a legendary planet’s planet card is purged, its ability card is purged too.</li>") +
           "<li>Thunder’s Edge’s <b>Mecatol Rex</b> system tile carries a legendary planet icon.</li>" +
           "<li>Example — <b>Styx</b> (in The Fracture), “A Song Like Marrow”: when you gain this card, gain 1 victory point; when you lose it, lose 1 victory point.</li></ul>";
       },
-      src: function () { return "TE p.4, p.9–10"; } },
+      src: function (c) { return c.has("pok") ? "TE p.4, p.9–10" : "TE p.4, p.6, p.9–10 · LRR §53 p.22, §73 p.28"; } },
 
     { id: "te-neutral", title: "Neutral units",
       when: function (c) { return uses(c); },
@@ -767,9 +768,9 @@ var TI_TE = (function () {
           "<h4>Dual planet traits</h4><ul><li>Count as having <b>both</b> traits." + (c.has("pok") ? " When exploring one, draw from the deck of <b>either</b> trait (not both)." : "") + "</li></ul>" +
           "<h4>Dual technology specialties</h4><ul><li>" + (tf(c) ? "Some planets have two technology specialties. <i>Twilight’s Fall has no researching, so Thunder’s Edge’s rule for them (exhaust the planet when researching to satisfy either or both prerequisites) doesn’t come up; how specialty planets count toward technology objectives is under “faction technology, specialties &amp; paradigms”.</i>"
             : "Exhaust the planet when researching to satisfy <b>either or both</b> prerequisites at once.") + "</li></ul>" +
-          "<h4>Purge</h4><ul><li>A purged component is removed from the game and returned to the box.</li></ul>";
+          "<h4>Purge</h4><ul><li>A purged component is removed from the game and returned to the box." + (c.has("pok") ? "" : " It can never be used or brought back by any means, and it is purged even if its ability only partly resolved.") + "</li></ul>";
       },
-      src: function (c) { return "TE p.10–11" + (tf(c) ? " · TF p.10" : ""); } },
+      src: function (c) { return "TE p.10–11" + (c.has("pok") ? "" : " · LRR §70 p.27") + (tf(c) ? " · TF p.10" : ""); } },
 
     { id: "te-coexist", title: "Coexisting units",
       when: function (c) { return uses(c); },
@@ -853,7 +854,7 @@ var TI_TE = (function () {
           "<li>When your ally activates a system, you may simultaneously perform a tactical action there (spend and place a tactic-pool token as normal).</li>" +
           "<li>If your ally allows it, you may <b>transport, support and commit</b> their fighters and ground forces using your units with capacity. <b>TE:</b> adds “support and commit”.</li></ul>" +
           "<h4>Combat & unit abilities</h4><ul>" +
-          "<li>When you and your ally both have units in a combat roll or a unit-ability roll, you both roll together; hits are assigned as normal. The allies decide together how hits against them are assigned; if they can’t agree, the active player assigns them.</li>" +
+          "<li>When you and your ally both have units in a combat roll or a unit-ability roll, you <b>may</b> both take part in the same roll; your rolls are combined and hits are assigned as normal. The allies decide together how hits against them are assigned; if they can’t agree, the active player assigns them.</li>" +
           "<li>Hits an opponent assigns against an allied pair may go to either ally’s units in any combination.</li></ul>" +
           "<h4>Abilities & effects</h4><ul>" +
           "<li>Your ally’s units count as <b>neither</b> your units nor other players’ units for abilities and effects.</li>" +
@@ -924,10 +925,10 @@ var TI_TE = (function () {
           "<li><b>No agenda phase</b>: the <b>benediction phase</b> (edicts, chosen by the tyrant) replaces it.</li>" +
           "<li><b>No technology deck</b>: abilities count as technologies, specialty planets help score technology objectives, and each King has two faction technologies.</li>" +
           "<li><b>Eight new strategy cards</b> (Lux, Noctis, Tyrannus, Civitas, Amicus, Calamitas, Magus, Aeterna) and <b>Twilight’s Fall action cards</b>.</li>" +
-          "<li>Not used: standard strategy and action cards, agendas, technologies, promissory notes, standard faction sheets, leaders, standard mechs, faction tokens, breakthroughs, galactic events, the Thunder’s Edge token (see setup).</li>" +
+          "<li>Not used: standard strategy and action cards, agendas, technologies, promissory notes, standard faction sheets, leaders, standard mechs, faction command and control tokens, breakthroughs, galactic events, the Thunder’s Edge token (see setup).</li>" +
           "<li>Each King technology’s second ability is marked with the Prophecy of Kings icon — " + (c.has("pok") ? "active in this game (you play with PoK)" : "<b>inactive</b> in this game (no PoK)") + ".</li></ul>";
       },
-      src: function () { return "TF p.6–10"; } },
+      src: function () { return "TF p.6–11"; } },
 
     { id: "tf-splicing", title: "Splicing — abilities, unit upgrades & genomes",
       when: function (c) { return uses(c) && tf(c); },

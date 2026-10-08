@@ -183,7 +183,7 @@
       .filter(s => s.html);
     DI._teachText = secs.map(s =>
       s.h.toUpperCase() + "\n" +
-      s.html.replace(/<li>/g, "• ").replace(/<\/p>\s*<p>/g, "\n\n")
+      s.html.replace(/<\/p>\s*<p>/g, "\n\n").replace(/<\/?(p|ul)>/g, "\n").replace(/<li>/g, "\n• ")
             .replace(/<[^>]+>/g, "").replace(/\n{3,}/g, "\n\n").trim()
     ).join("\n\n");
     box.innerHTML = "<div class='teach-top'><h3>📖 Teaching Script — this setup</h3><button type='button' class='teach-copy' id='teachCopy'>📋 Copy script</button></div>" +

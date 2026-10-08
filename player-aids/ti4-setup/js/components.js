@@ -8,7 +8,8 @@
    · Twilight's Fall (TF p.6): its own components show only in that mode, and the standard components it
      returns to the box (strategy, action, agenda, technology and promissory cards, standard faction sheets,
      leaders, standard mechs, faction command and control tokens, breakthroughs, galactic events and the
-     Thunder's Edge token) are hidden there. The one exception: in a normal Thunder's Edge game any player
+     Thunder's Edge token) are hidden there; the boxed "Maw of Worlds", "Prophet's Tears" and "The Quantumcore"
+     relics and four secret objectives are noted on the relic and objective items. The one exception: in a normal Thunder's Edge game any player
      may use TF's colour-based command and control tokens instead of their faction's (TE p.6), so those two
      show there too, marked optional. TE's 74 Codex cards mix kinds TF keeps and kinds it boxes (TE p.4 lists
      them: 20 action, 3 relic, 6 exploration, 1 planet, 1 legendary, 11 leader, 2 mech, 6 promissory, 21
@@ -40,10 +41,12 @@ window.AID_COMPONENTS = (function () {
       { set: "base", qty: "354", name: "Plastic units", note: "59 units in 6 colors", img: "base-plastic-units.webp", w: 320, h: 163 },
       { set: "base", qty: "8", name: "Strategy cards", img: "base-strategy-cards.webp", w: 300, h: 306, when: notTF },
       { set: "base", qty: "8", name: "Ten-sided dice", img: "base-dice.webp", w: 271, h: 159 },
-      { set: "base", qty: "1", name: "Victory point track", note: "Two sides: 10 and 14 spaces (RR p.3)", img: "base-vp-track.webp", w: 320, h: 59, when: notFirst },
+      { set: "base", qty: "1", name: "Victory point track", note: "Two sides: 10 and 14 spaces (LRR p.5 · RR p.3)", img: "base-vp-track.webp", w: 320, h: 59, when: (c) => notFirst(c) && !c.has("pok") },
+      { set: "base", qty: "1", name: "Victory point track", note: "Two sides: 10 and 14 spaces (LRR p.5)", img: "base-vp-track.webp", w: 320, h: 59, when: (c) => notFirst(c) && c.has("pok") },
       { set: "base", qty: "1", name: "Victory point track", note: "The first game uses its 0–10 side (LtP p.7)", img: "base-vp-track.webp", w: 320, h: 59, when: (c) => c.mode === "firstgame" },
       { set: "base", qty: "59", name: "Planet cards", img: "base-planet-cards.webp", w: 275, h: 237 },
-      { set: "base", qty: "40", name: "Objective cards", img: "base-objective-cards.webp", w: 275, h: 237 },
+      { set: "base", qty: "40", name: "Objective cards", img: "base-objective-cards.webp", w: 275, h: 237, when: notTF },
+      { set: "base", qty: "40", name: "Objective cards", note: "Twilight’s Fall doesn’t use the secret objectives “Betray a Friend”, “Dictate Policy”, “Drive the Debate” or “Strengthen Bonds”, whichever box they come from: return them to the box before setup (TF p.6)", img: "base-objective-cards.webp", w: 275, h: 237, when: isTF },
       { set: "base", qty: "80", name: "Action cards", img: "base-action-cards.webp", w: 273, h: 237, when: notTF },
       { set: "base", qty: "50", name: "Agenda cards", img: "base-agenda-cards.webp", w: 273, h: 238, when: notTF },
       { set: "base", qty: "41", name: "Promissory note cards", img: "base-promissory-notes.webp", w: 276, h: 237, when: notTFnotFirst },
@@ -112,7 +115,8 @@ window.AID_COMPONENTS = (function () {
       { set: "te", qty: "20", name: "Action cards", img: "te-action-cards.webp", w: 275, h: 237, when: notTF },
       { set: "te", qty: "30", name: "Breakthrough cards", img: "te-breakthrough-cards.webp", w: 244, h: 247, when: notTF },
       { set: "te", qty: "10", name: "Legendary planet ability cards", img: "te-legendary-cards.webp", w: 241, h: 247 },
-      { set: "te", qty: "10", name: "Relic cards", img: "te-relic-cards.webp", w: 273, h: 237 },
+      { set: "te", qty: "10", name: "Relic cards", img: "te-relic-cards.webp", w: 273, h: 237, when: notTF },
+      { set: "te", qty: "10", name: "Relic cards", note: "Twilight’s Fall doesn’t use the “Maw of Worlds”, “Prophet’s Tears” or “The Quantumcore” relics, whichever box they come from: return them to the box before setup (TF p.6)", img: "te-relic-cards.webp", w: 273, h: 237, when: isTF },
       { set: "te", qty: "6", name: "Promissory note cards", img: "te-promissory-notes.webp", w: 275, h: 237, when: notTF },
       { set: "te", qty: "10", name: "Faction technology cards", img: "te-faction-technology.webp", w: 242, h: 247, when: notTF },
       { set: "te", qty: "16", name: "Faction mechanic cards", note: "5 Firmament plot cards, 5 Deepwrought ocean cards, and 6 Helios cards", img: "te-faction-mechanic-cards.webp", w: 320, h: 220 },
@@ -139,7 +143,7 @@ window.AID_COMPONENTS = (function () {
       /* ---- Twilight's Fall game mode: TF p.6 (TE box; not used in a normal game, TE p.4, except the
               colour-based command and control tokens, which any player may choose in a normal game, TE p.6) ---- */
       { set: "tf", qty: "8", name: "Twilight’s Fall faction sheets", note: "The Mahact Kings, used instead of the standard faction sheets (TF p.6–7)", img: "tf-faction-sheets.webp", w: 320, h: 226, when: (c) => isTF(c) && c.has("pok") },
-      { set: "tf", qty: "8", name: "Twilight’s Fall faction sheets", note: "The Mahact Kings, used instead of the standard faction sheets. Without Prophecy of Kings, use the side without mech units (TF p.6–7)", img: "tf-faction-sheets.webp", w: 320, h: 226, when: (c) => isTF(c) && !c.has("pok") },
+      { set: "tf", qty: "8", name: "Twilight’s Fall faction sheets", note: "The Mahact Kings, used instead of the standard faction sheets. Without Prophecy of Kings, use the side without mech units; the pink and orange Kings can still be played with an unused colour of plastic (TF p.6–7)", img: "tf-faction-sheets.webp", w: 320, h: 226, when: (c) => isTF(c) && !c.has("pok") },
       { set: "tf", qty: "8", name: "Twilight’s Fall strategy cards", note: "Used instead of the standard strategy cards (TF p.8)", img: "tf-strategy-cards.webp", w: 297, h: 314, when: isTF },
       { set: "tf", qty: "10", name: "Edict cards", note: "The tyrant draws three and resolves one in the benediction phase, which replaces the agenda phase (TF p.10)", img: "tf-edict-cards.webp", w: 275, h: 237, when: isTF },
       { set: "tf", qty: "50", name: "Twilight’s Fall action cards", note: "Used instead of the standard action cards (TF p.8)", img: "tf-action-cards.webp", w: 276, h: 237, when: isTF },
@@ -152,7 +156,8 @@ window.AID_COMPONENTS = (function () {
       { set: "tf", qty: "31", name: "Genome cards", note: "Without Prophecy of Kings, “Brutal Genome” and “Curious Genome” aren’t used (TF p.6)", img: "tf-genome-cards.webp", w: 244, h: 232, when: (c) => isTF(c) && !c.has("pok") },
       { set: "tf", qty: "31", name: "Paradigm cards", img: "tf-paradigm-cards.webp", w: 241, h: 232, when: (c) => isTF(c) && c.has("pok") },
       { set: "tf", qty: "31", name: "Paradigm cards", note: "Without Prophecy of Kings, “Forge Legend” and “Opening the Eye” aren’t used (TF p.6)", img: "tf-paradigm-cards.webp", w: 241, h: 232, when: (c) => isTF(c) && !c.has("pok") },
-      { set: "tf", qty: "16", name: "Twilight’s Fall faction technology cards", note: "Each King’s wavelength and antimatter technologies; there is no technology deck (TF p.10)", img: "tf-faction-technology.webp", w: 243, h: 232, when: isTF },
+      { set: "tf", qty: "16", name: "Twilight’s Fall faction technology cards", note: "Each King’s wavelength and antimatter technologies; there is no technology deck (TF p.10)", img: "tf-faction-technology.webp", w: 243, h: 232, when: (c) => isTF(c) && c.has("pok") },
+      { set: "tf", qty: "16", name: "Twilight’s Fall faction technology cards", note: "Each King’s wavelength and antimatter technologies; there is no technology deck. Without Prophecy of Kings, only each card’s first ability is active: the second, marked with the Prophecy of Kings icon, isn’t (TF p.10)", img: "tf-faction-technology.webp", w: 243, h: 232, when: (c) => isTF(c) && !c.has("pok") },
       { set: "tf", qty: "2", name: "Echo cards", note: "Taken by a player who uses the Ghosts of Creuss or Crimson Rebellion home system (TF p.7)", img: "tf-echo-cards.webp", w: 243, h: 232, when: isTF },
       { set: "tf", qty: "136", name: "Color-based control tokens", note: "Used instead of the faction control tokens (TF p.6–7)", img: "tf-control-tokens.webp", w: 187, h: 117, when: isTF },
       { set: "tf", qty: "136", name: "Color-based control tokens", note: "Optional in a normal game: a player may use these instead of their faction’s control tokens (TE p.6)", img: "tf-control-tokens.webp", w: 187, h: 117, when: notTF },

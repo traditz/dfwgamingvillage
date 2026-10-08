@@ -208,7 +208,7 @@ SY.triumphList = function (c) {
   if (c.triumph === "war") return "<ul><li>Complete 6 upgrades <b>or</b> build 4 structures (a star for one, not both)</li><li>Deploy all 4 mechs</li><li>Enlist all 4 recruits</li><li>Reveal 1 completed objective</li><li>Win combat: <b>up to 4 stars</b> for everyone (Saxony: unlimited combat and objective stars)</li><li>Reach 16 power</li><li>Have <b>8 combat cards</b> in hand at the end of your turn</li><li>No stars for 8 workers or for maximum popularity</li></ul>";
   if (c.triumph === "peace") return "<ul><li>Complete 6 upgrades</li><li>Build all 4 structures</li><li>Deploy 4 mechs <b>or</b> enlist 4 recruits (not both)</li><li>All 8 workers on the board</li><li>Objectives: <b>2 stars</b> for everyone; after your objective star, draw a new objective card instead of discarding your other one (if any remain; don't reshuffle discards)</li><li>Reach <b>13</b> popularity</li><li>Claim <b>3 encounter tokens</b></li><li>Gain a <b>Factory card</b> (place the star the turn you gain it)</li><li>Control <b>16 resources</b> in total (any territories)</li><li>No stars for combat victories or 16 power</li></ul>";
   if (c.triumph === "tiles") return c.coop
-    ? "<ul><li>Triumph Tiles replace the track: reveal " + SY.desolationTiles(c.p) + " of the 21 tiles (including the 5 Desolation-only tiles). The team wins when every tile holds at least one star.</li></ul>"
+    ? "<ul><li>Triumph Tiles replace the track: reveal " + SY.desolationTiles(c.p) + " of the 21 tiles (including the 5 Desolation-only tiles)" + (c.p === 1 ? "; solo: don't use the 5-star tile, and if you reveal 2 objective tiles, draw and discard another" : "") + ". The team wins when every tile holds at least one star.</li></ul>"
     : "<ul><li>10 random Triumph Tiles (of 16) cover the 10 slots: read each one before you start.</li><li>Known tiles include: 8 combat cards in hand on your turn · claiming 3 encounter tokens (star after the encounter) · gaining a Factory card (star when you gain it, at end of turn) · controlling 16 resources.</li><li>Saxony keeps its unlimited objective and combat stars even with no tile for them.</li></ul>";
   return "<ul><li>Complete all 6 upgrades</li><li>Deploy all 4 mechs</li><li>Build all 4 structures</li><li>Enlist all 4 recruits</li><li>Have all 8 workers on the board</li><li>Reveal 1 completed objective card</li><li>Win combat (two spaces: up to 2 times)</li><li>Have 18 popularity</li><li>Have 16 power</li></ul>";
 };
@@ -393,7 +393,7 @@ SY.episodes = [
     ],
     setupSrc: "Rise of Fenris p.34",
     special: "<ul><li>Follow the Rivals or Alliances rules, as set up.</li><li>Whenever you have an encounter, <b>keep its token</b> on your faction mat: encounter tokens are how you search for Tesla.</li><li><b>To find Tesla</b>, collect this many encounter tokens: solo 6 · 2 players 6 · 3 players 5 · 4 players 5 · 5 players 4 · 6 players 4 · 7 players 3.</li><li>The first player to reach that number: discards all their encounter tokens, opens <b>Box E</b>, and the game ends immediately.</li><li>Otherwise the game ends at a 6th star.</li><li>At the end, <b>encounter territories</b> (those that started with an encounter token, including the Factory this game) are worth <b>+1 territory</b> each.</li></ul>",
-    specialSrc: "Rise of Fenris p.34",
+    specialSrc: "Rise of Fenris p.34–35",
     goals: "Have encounters to find Tesla · win the game",
     ends: "The game ends immediately when a player finds Tesla or places their 6th star.",
     skip: "War track: all four combat spaces and 16 power · Peace track: 3 encounter tokens and the Factory card",
@@ -511,7 +511,7 @@ SY.phases = [
             "<li><b>Wealth:</b> after each game add your final coins; spend Wealth on Mods and Perks ($15). Wealth never decides the campaign winner.</li>" +
             "<li><b>Setup Bonuses:</b> permanent extras for every later episode: coins, power (max 3) and popularity (max 3).</li>" +
             "<li><b>Perks</b> (once per campaign, 1 per episode, bought during setup): +$5 · +3 power · +2 objective cards · +2 popularity · +2 resources · +2 combat cards · +1 worker. The resources and the worker go on one of your starting territories. If Perk choices matter to others, choose in player order.</li>" +
-            "<li><b>Triumph Log:</b> after each game tick one box per category you placed a star in (even Saxony ticks one objective box per game). Every completed row or column is a $25 end-of-campaign bonus.</li>" +
+            "<li><b>Triumph Log:</b> after each game tick one box per category you placed a star in (even Saxony ticks one objective box per game): tick Row 1 the first time you earn that Triumph, Row 2 the second time, and so on. Every completed row or column is a $25 end-of-campaign bonus.</li>" +
             "<li>Players can join (unused faction, a fair log), sit out (set their log aside) or leave (return their mat and tokens) mid-campaign.</li></ul>";
         },
         src: "Rise of Fenris p.2–4" },
@@ -522,7 +522,7 @@ SY.phases = [
       { when: function (c) { return c.camp && !!c.ep; }, exp: "camp",
         t: function (c) { return c.ep.name + " — episode setup"; },
         d: function (c) {
-          return "<p class='inline-note'>Step 1 (“set up the game as usual”) is the normal setup in the phases below; the other steps adjust it. " + c.ep.date + ".</p><ol>" +
+          return "<p class='inline-note'>The “set up as usual” step is the normal setup in the phases below; the other steps adjust it. " + c.ep.date + ".</p><ol>" +
             c.ep.setup.map(function (s) { return "<li>" + s + "</li>"; }).join("") + "</ol>";
         },
         src: function (c) { return c.ep.setupSrc; } },
@@ -550,9 +550,9 @@ SY.phases = [
         d: function (c) {
           return "<ul><li>Unfold the board. The <b>Triumph Track</b>, <b>Popularity Track</b> and <b>Power Track</b> run along it.</li>" +
             "<li>Seven home bases ring the map: one per core faction and two placeholders for expansion factions" + (c.has("ifa") ? " (the board shows Albion's and Togawa's emblems on them)" : "") + ". A home base is not a territory.</li>" +
-            ((c.act("vesna") || c.act("fenris")) ? "<li>" + (c.act("vesna") && c.act("fenris") ? "Vesna's and Fenris's home base tiles go" : c.act("vesna") ? "Vesna's home base tile goes" : "Fenris's home base tile goes") + " over an unused home base (see " + (c.act("vesna") && c.act("fenris") ? "their steps" : "its step") + " below).</li>" : "") + "</ul>";
+            ((c.act("vesna") || c.act("fenris")) ? "<li>" + (c.act("vesna") && c.act("fenris") ? "If Vesna or Fenris is at the table, that faction's home base tile goes" : c.act("vesna") ? "If Vesna is at the table, her home base tile goes" : "If Fenris is at the table, its home base tile goes") + (c.camp ? " over the location the campaign gave it (see " : " over an unused home base (see ") + (c.act("vesna") && c.act("fenris") ? "their steps" : "its step") + " below).</li>" : "") + "</ul>";
         },
-        src: "Core p.4, p.6" },
+        src: function (c) { return SY.src("Core p.4, p.6", c.act("vesna") ? "Rise of Fenris p.22" : "", c.act("fenris") ? "Rise of Fenris p.30" : ""); } },
       { when: function (c) { return c.board === "mod"; }, exp: "mb",
         t: "Modular board",
         d: function (c) {
@@ -562,7 +562,7 @@ SY.phases = [
           if (!c.has("rof")) hb = "use all 8 home base tiles, including the inactive one.";
           else if (c.modOpen) hb = "with The Rise of Fenris, use 7 of these home base tiles plus the 2 new faction tiles, Vesna's and Fenris's (after the random placement one faction is left out), and leave out the inactive tile." +
             (v && f ? "" : v || f ? " These rules only cover using both new factions: switch on the " + (v ? "Fenris" : "Vesna") + " module too, so its rules appear on this page."
-              : " Switch on the Vesna and Fenris modules above to play this way, so their rules appear on this page; without those factions, use all 8 of these tiles, including the inactive one.");
+              : " Switch on the Vesna and Fenris modules above so their rules appear on this page (either faction can be drafted if its tile lands on the board; an undrafted faction tile is just an inactive home base). If you'd rather leave both factions out, the closest fit (not covered by the rules) is all 8 of these tiles, including the inactive one.");
           else if (c.camp) hb = (v || f
               ? "the rules for Rise of Fenris owners also randomize that expansion's faction tiles, which clashes with the campaign's own home-base rules. The closest fit (not covered by the rules): all 8 of these tiles, including the inactive one, then lay " + (v && f ? "Vesna's and Fenris's home base tiles over the locations the campaign gave them (see their steps)" : (v ? "Vesna's" : "Fenris's") + " home base tile over the location the campaign gave it (see its step)") + "."
               : "the rules for Rise of Fenris owners add faction tiles that the campaign reveals later, so they don't fit here. The closest fit (not covered by the rules) is the setup without The Rise of Fenris: all 8 of these tiles, including the inactive one.");
@@ -592,7 +592,7 @@ SY.phases = [
           return "<ul><li>Shuffle the 12 Factory cards (purple), deal " + n + " face down onto the board, and return the rest to the box unseen.</li>" +
             (ep3 ? "<li><b>Episode 3:</b> also shuffle the Vesna card and <b>4 more</b> Factory cards into this deck" + (c.solo ? "" : ": " + (c.p + 6) + " cards in all") + ". This episode nobody looks through the whole deck (see its special rules).</li>"
                  : "<li>The first character to reach the Factory looks at all of them and keeps one; each later visitor sees one fewer.</li>") +
-            (c.act("vesna") ? "<li><b>Vesna" + (c.camp ? " (if she is at the table)" : "") + ":</b> then draw 3 more at random from the cards not in use and place them face up beside Vesna's player mat.</li>" : "") +
+            (c.act("vesna") ? "<li><b>Vesna (if she is at the table):</b> then draw 3 more at random from the cards not in use and place them face up beside Vesna's player mat.</li>" : "") +
             "</ul>";
         },
         src: function (c) { return SY.src("Core p.2, p.6, p.25", "QRG p.1", c.act("vesna") ? "Rise of Fenris p.22" : "", c.camp && c.epId === "3" ? "Rise of Fenris p.20" : ""); } },
@@ -630,18 +630,18 @@ SY.phases = [
           var mats = c.has("ifa") ? "7 player mats (including 2a and 3a)" : "5 player mats";
           var deal = "<li>Shuffle the faction mats in play (" + SY.inPlayNames(c) + ") and the " + mats + " separately, and deal each player <b>one of each</b>.</li>";
           if (c.camp && c.ep) {
-            if (c.epId === "1") deal = "<li><b>Episode 1:</b> select or randomize faction mats (you keep your faction in later episodes) and deal the " + mats + " at random.</li>";
+            if (c.epId === "1") deal = "<li><b>Episode 1:</b> select or randomize faction mats (you keep your faction until the rulebook says otherwise) and deal the " + mats + " at random.</li>";
             else if (c.epId === "8a" || c.epId === "8b") deal = "<li><b>Keep your faction.</b> This episode players <b>choose</b> player mats, highest total Wealth first (see the episode setup).</li>";
-            else deal = "<li><b>Keep your faction mat</b> from the last episode; deal the " + mats + " at random.</li>";
+            else deal = "<li><b>Keep your current faction</b> (the rulebook tells you when you may change) and deal the " + mats + " at random.</li>";
           }
           return "<ul>" + deal +
             ((c.epId === "8a" || c.epId === "8b") ? "<li><b>Banned pairs:</b> Rusviet may not choose the <b>Industrial</b> player mat and Crimea may not choose the <b>Patriotic</b> mat.</li>"
               : "<li><b>Banned pairs:</b> Rusviet may not have the <b>Industrial</b> player mat and Crimea may not have the <b>Patriotic</b> mat. Whoever is dealt one discards that player mat and takes another at random.</li>") +
             "<li>Sit by your faction's home base with both mats in front of you. Core seating, clockwise from the top: Nordic, Rusviet, Crimea, Saxony, Polania.</li>" +
             (c.has("ifa") && (!c.camp || c.epId === "1") ? "<li>Players new to Scythe should take one of the original factions, not Albion or Togawa.</li>" : "") +
-            (c.opt("matorder") ? "<li><b>Variant:</b> deal the player mats clockwise <b>by number</b> instead of at random. (Starting resources are staggered for turn order and playtest results, but the effect is very, very small.)</li>" : "") + "</ul>";
+            (c.opt("matorder") ? ((c.epId === "8a" || c.epId === "8b") ? "<li><b>Player mats in number order:</b> this episode players choose their player mats, so the deal-clockwise-by-number variant doesn't apply.</li>" : "<li><b>Variant:</b> deal the player mats clockwise <b>by number</b> instead of at random. (Starting resources are staggered for turn order and playtest results, but the effect is very, very small.)</li>") : "") + "</ul>";
         },
-        src: function (c) { return SY.src("Core p.6", "QRG p.1", c.has("ifa") ? "Invaders p.1, p.3" : "", c.opt("matorder") ? "Wind Gambit p.7" : "", c.camp && c.ep ? "Rise of Fenris " + c.ep.setupSrc.match(/p\.\d+/)[0] : ""); } },
+        src: function (c) { return SY.src("Core p.6", "QRG p.1", c.has("ifa") ? "Invaders p.1, p.3" : "", c.opt("matorder") ? "Wind Gambit p.7" : "", c.camp && c.ep ? "Rise of Fenris p.3, " + c.ep.setupSrc.match(/p\.\d+/)[0] : ""); } },
       { when: function (c) { return c.board === "mod"; }, exp: "mb",
         t: "Deal player mats, then choose factions",
         d: function (c) {
@@ -650,9 +650,9 @@ SY.phases = [
             "<ul><li><b>Think about Riverwalk</b> when choosing, especially a faction with metal nearby (for mechs) but no wood (for a Mine). Experienced players may need to guide new ones.</li>" +
             "<li><b>Banned:</b> the Industrial mat may not choose Rusviet; the Patriotic mat may not choose Crimea.</li>" +
             (c.opt("matorder") ? "<li><b>Player mats in number order:</b> the Modular Board deals mats at random and seats everyone by the faction they choose, so The Wind Gambit's deal-clockwise-by-number variant doesn't fit this setup.</li>" : "") +
-            (c.camp ? "<li><b>Campaign:</b> you keep your faction between episodes, so only player mats change.</li>" : "") + "</ul>";
+            (c.camp ? "<li><b>Campaign:</b> " + (!c.ep || c.epId === "1" ? "factions are chosen this way only in Episode 1; after that everyone keeps their faction unless an episode says otherwise." : (c.epId === "8a" || c.epId === "8b") ? "keep your faction from the last episode (skip the faction choice above). This episode players <b>choose</b> player mats instead, highest total Wealth first (see the episode setup)." : "keep your faction from the last episode unless this episode says otherwise (skip the faction choice above) and sit by its home base; only the player mats are dealt at random.") + "</li>" : "") + "</ul>";
         },
-        src: function (c) { return SY.src("Modular Board p.2", c.opt("matorder") ? "Wind Gambit p.7" : ""); } },
+        src: function (c) { return SY.src("Modular Board p.2", c.opt("matorder") ? "Wind Gambit p.7" : "", c.camp ? "Rise of Fenris p.3" + (c.ep ? ", " + c.ep.setupSrc.match(/p\.\d+/)[0] : "") : ""); } },
       { when: function (c) { return c.p >= 6; }, exp: "ifa",
         t: function (c) { return c.board === "mod" ? "6–7 players: Polania's ability swap" : "6–7 players: Crimea's and Polania's ability swaps"; },
         d: function (c) {
@@ -697,15 +697,15 @@ SY.phases = [
       { when: function () { return true; }, exp: "core",
         t: "Starting power, combat cards, popularity and coins",
         d: function (c) {
-          return "<p>Each mat has a box at its far right:</p><ul>" +
-            "<li><b>Faction mat:</b> put your power token on that number on the Power Track, and draw that many combat cards (how many you hold is public; what they are is secret).</li>" +
-            "<li><b>Player mat:</b> put your popularity token (heart) on that number on the Popularity Track, take that many coins (keep them on your faction mat; you never have to reveal your total), and draw that many objective cards (secret). Then return the objective deck to the board.</li>" +
+          return "<p>Each mat has a box at its far right showing several numbers:</p><ul>" +
+            "<li><b>Faction mat</b> (power symbol and yellow combat card): put your power token on the power number on the Power Track, and draw the number of combat cards shown on the yellow card " + (c.coop ? "(in Desolation, combat cards are public knowledge)" : "(how many you hold is public; what they are is secret)") + ".</li>" +
+            "<li><b>Player mat</b> (objective card, heart, coin): put your popularity token on the heart's number on the Popularity Track, take the coins shown (keep them on your faction mat; you never have to reveal your total), and draw the objective cards shown " + (c.coop ? "(in Desolation, objectives are public knowledge)" : "(secret)") + ". Then return the objective deck to the board.</li>" +
             (c.triumph === "peace" ? "<li><b>Peace Triumph Track:</b> Saxony draws <b>3</b> objective cards instead of 2.</li>" : "") +
             (c.camp && c.epi >= 3 ? "<li><b>Campaign:</b> add your Setup Bonuses, plus any Perk you buy.</li>" : "") +
             (c.camp && c.epi >= 0 && c.epi < 3 ? "<li><b>Campaign:</b> add any Perk you use this episode.</li>" : "") +
             "</ul>" + SY.factionTable(c);
         },
-        src: function (c) { return SY.src("Core p.7, p.15–17 (mats)", "QRG p.1", c.has("ifa") ? "Invaders p.5, p.7" : "", c.act("vesna") ? "Rise of Fenris p.22" : "", c.act("fenris") ? "Rise of Fenris p.31" : "", c.triumph === "peace" ? "Rise of Fenris p.18" : "", c.camp ? "Rise of Fenris p.4" : ""); } },
+        src: function (c) { return SY.src("Core p.7, p.15–17 (mats)", "QRG p.1", c.has("ifa") ? "Invaders p.5, p.7" : "", c.act("vesna") ? "Rise of Fenris p.22" : "", c.act("fenris") ? "Rise of Fenris p.31" : "", c.triumph === "peace" ? "Rise of Fenris p.18" : "", c.camp ? "Rise of Fenris p.4" : "", c.coop ? "Rise of Fenris p.46" : ""); } },
       { when: function () { return true; }, exp: "core",
         t: "Character, workers and faction mat",
         d: function (c) {
@@ -843,9 +843,9 @@ SY.phases = [
           return "<ul><li>Solo play is against the <b>Automa</b>. Its rules are in a separate <b>Automa rulebook</b>, which is not among this page's sources, so <b>this page does not cover them</b> (The Wind Gambit's component list includes an Automa rulebook). Set up the Automa from that book; where it changes a step here, it wins.</li>" +
             (c.board === "mod" ? "<li><b>Modular Board:</b> on the normal board, water holds the Automa back early on; a random layout may not, so choose the starting home bases carefully (or take on the challenge).</li>" : "") +
             SY.autoModNote(c) +
-            (mods ? "<li><b>Mods:</b> the Automa “buys” " + mods + ". Remove the Spy Infrastructure Mods.</li>" : "") + "</ul>";
+            (mods ? "<li><b>Mods:</b> the Automa “buys” " + mods + "." + (c.act("inframods") ? " Remove the Spy Infrastructure Mods." : "") + "</li>" : "") + "</ul>";
         },
-        src: function (c) { return SY.src("Core p.1", "Wind Gambit p.2", c.board === "mod" ? "Modular Board p.3" : "", c.modOpen ? "Rise of Fenris p.50" : "", (c.act("mechmods") || c.act("inframods")) ? "p.6" : ""); } }
+        src: function (c) { return SY.src("Core p.1", "Wind Gambit p.2", c.board === "mod" ? "Modular Board p.3" : "", c.has("rof") ? "Rise of Fenris p.3" : "", c.modOpen ? "Rise of Fenris p.50" : "", (c.act("mechmods") || c.act("inframods")) ? "Rise of Fenris p.6" : ""); } }
     ]
   },
 
@@ -861,9 +861,9 @@ SY.phases = [
             "<li>Higher-numbered mats start a little richer, because those players are likely to get one turn fewer.</li>" +
             (c.act("madtesla") ? "<li><b>Mad Tesla</b> takes his turn after the last player each round.</li>" : "") +
             (c.coop ? "<li><b>Desolation</b> takes the last turn each round.</li>" : "") +
-            "<li>No rounds or phases: turns simply rotate until the game ends. Start your turn as soon as the player on your right begins a bottom-row action.</li></ul>";
+            "<li>No rounds or phases: turns simply rotate until the game ends. You may start your turn once the player on your right begins a bottom-row action.</li></ul>";
         },
-        src: function (c) { return SY.src("Core p.8, p.10, p.14", "QRG p.1", c.has("ifa") ? "Invaders p.3" : ""); } },
+        src: function (c) { return SY.src("Core p.8, p.10, p.14", "QRG p.1", c.has("ifa") ? "Invaders p.3" : "", c.act("madtesla") ? "Rise of Fenris p.40" : "", c.coop ? "Rise of Fenris p.46" : ""); } },
       { when: function (c) { return c.opt("firstgame"); }, exp: "var",
         t: "First game: a sample scoring round",
         d: "<ul><li>After any player places their first star, pause and let everyone work out their current score, just to get a feel for end-game scoring. It doesn't count.</li></ul>",
@@ -930,18 +930,18 @@ SY.reference = [
     html: function (c) {
       if (c.coop) return "<ul><li><b>Desolation is cooperative:</b> you all win together or lose together.</li><li><b>Win</b> immediately if every Triumph Tile holds at least 1 star, or you destroy all 6 Desolation units.</li><li><b>Lose</b> immediately if Desolation has 6 stars on its tile, or its popularity (the timer) reaches 0.</li></ul>";
       var end = "<li>The game ends <b>immediately</b> when a player places their <b>6th star</b>, even if they or others could still do things that turn. Nothing else happens except end-game scoring.</li>";
-      if (c.res) end = "<li><b>Resolution tile:</b> ignore the usual sixth-star ending; the tile says when and how the game ends. Some tiles let you place stars on the tile (or on objective cards, etc.); those count as if on the Triumph Track. Nobody can place more than 6 stars, but with some tiles several players may reach 6.</li>";
+      if (c.res) end = "<li><b>Resolution tile:</b> ignore the usual sixth-star ending; the tile says when and how the game ends. Some tiles let you place stars on the tile (or on objective cards, etc.); those count for end-game scoring as if they were on the Triumph Track. Nobody can place more than 6 stars, but with some tiles several players may reach 6.</li>";
       if (c.camp && c.ep) end = "<li><b>" + c.ep.name.split(":")[0] + ":</b> " + c.ep.ends + "</li>" + (c.boxc ? "<li><b>Box C:</b> defeating the Annihilator in combat also ends the game immediately.</li>" : "") + (c.res ? end : "");
       return "<ul><li>The winner is the richest faction: your <b>coins</b> at the end are your score (a typical winning fortune is around $75). Most of them come from end-game scoring.</li>" +
         "<li>You earn <b>stars</b> for achievements on the Triumph Track; you have only 6.</li>" + end +
         (c.act("madtesla") ? "<li><b>Mad Tesla:</b> the game also ends immediately when he is destroyed (the destroyer completes their turn first)" + (c.camp ? "" : ", unless your group chose to play on to a 6th star") + ".</li>" : "") +
-        "</ul><h4>End-of-game edge cases</h4><ul>" +
+        "</ul><h4>End-of-game edge cases</h4><ul>" + (c.res ? "<li><b>Resolution tile:</b> a 6th star doesn't end the game by itself, so the 6th-star lines below apply only if your tile ends the game when a 6th star is placed.</li>" : "") +
         "<li>If your 6th star comes from a bottom-row action, take its main benefit, the coins and the recruit ongoing bonus before placing the star.</li>" +
         "<li>Any of your units left on a territory with an opponent's units (from a Move) go back to where they moved from.</li>" +
         "<li>A popularity or power star earned from a recruit bonus on an opponent's turn is placed after they finish that action (in clockwise order), and only if their action didn't place their own 6th star.</li>" +
         "<li>If your 6th star is placed while you still have a combat to fight this turn, the game ends and the units you moved to start that combat go back where they came from.</li></ul>";
     },
-    src: function (c) { return c.coop ? "Rise of Fenris p.46–47" : SY.src("Core p.1, p.23, p.27–28, p.31", "QRG p.1", c.res ? "Wind Gambit p.6" : "", c.act("madtesla") ? "Rise of Fenris p.40–41" : "", c.camp && c.ep ? "Rise of Fenris " + c.ep.pages.match(/p\.\d+/)[0] + (c.boxc ? ", p.28" : "") : ""); }
+    src: function (c) { return c.coop ? "Rise of Fenris p.46–47" : SY.src("Core p.1, p.23, p.27–28, p.31", "QRG p.1", c.res ? "Wind Gambit p.6" : "", c.act("madtesla") ? (c.camp ? "Rise of Fenris p.40–41" : "Rise of Fenris p.40–41, p.51") : "", c.camp && c.ep ? "Rise of Fenris " + c.ep.pages.match(/p\.\d+/)[0] + (c.boxc ? ", p.28" : "") : ""); }
   },
   {
     title: "Your turn",
@@ -987,7 +987,7 @@ SY.reference = [
         "<li>Move different units, one at a time; you may use only part of a Move action. No limit to your units on a territory.</li></ul>" +
         "<h4>Terrain</h4><ul><li><b>Rivers</b> (borders between land territories) and <b>lakes</b> block movement unless an ability says otherwise. A lake counts as touching every adjacent shoreline.</li>" +
         "<li><b>Tunnels:</b> all tunnel territories are adjacent to each other for every unit's moves. Your <b>Mine</b> is a tunnel only you can use (even if an opponent controls its territory).</li>" +
-        (c.board === "mod" ? "<li><b>Modular Board:</b> water on a non-lake territory that connects to an adjacent lake is part of that lake.</li>" : "") + "</ul>" +
+        (c.board === "mod" ? "<li><b>Modular Board:</b> water on a non-lake territory that connects to an adjacent lake is part of that lake (you don't need Riverwalk to cross it, but you do need a lakewalk ability).</li>" : "") + "</ul>" +
         "<h4>Moving into an opponent's territory</h4><ul><li><b>Only their workers there:</b> your character or mech stops; each of their workers retreats to its home base, leaving its resources, and you lose 1 popularity per worker (they retreat even if you can't lose more). Another of your units may then move through. Your workers can't move alone into territories controlled by opponent workers.</li>" +
         "<li><b>Only their structure there:</b> any unit may enter, and you now control the territory.</li>" +
         "<li><b>Their character and/or mechs:</b> your character or mech stops there (they still control it for now). After all your moves, you fight. Your workers can't move alone into or out of territories controlled by opponent characters or mechs.</li>" +
@@ -1020,7 +1020,7 @@ SY.reference = [
         "<ul><li><b>When:</b> at the end of your Move action, if your character or mechs share a territory with an opponent's character or mechs. With several, the attacker chooses the order. Only the two players involved fight; others may try to bribe them with coins. You may fight with 0 power and 0 popularity.</li>" +
         "<li>Mech abilities that affect combat: the attacker uses theirs first, then the defender.</li></ul>" +
         "<h4>1 · Select power</h4><ul><li>Both players secretly set their Power Dial: <b>0–7</b>, and no more than their power on the Power Track (the track goes to 16).</li>" +
-        "<li>Tuck up to <b>1 combat card per character or mech</b> you have in the fight behind the dial (even with 0 on the dial). How many cards you hold is public; whether you used any can stay hidden.</li></ul>" +
+        "<li>By default, tuck up to <b>1 combat card per character or mech</b> you have in the fight behind the dial (even with 0 on the dial); some abilities let you play more. How many cards you hold is public; whether you used any can stay hidden.</li></ul>" +
         "<h4>2 · Reveal</h4><ul><li>Total = dial + combat cards. <b>Highest wins; ties go to the attacker.</b></li><li>Both players pay the power on their dials; discard the used cards face up (cards are only a temporary boost).</li></ul>" +
         "<h4>3 · Results</h4><ul><li><b>Winner</b> gains or keeps the territory and every resource on it" +
           (c.coop ? ", and one of the players involved places a combat star if a combat Triumph Tile is available (see Desolation)"
@@ -1045,31 +1045,34 @@ SY.reference = [
         "<li>Everything gained goes on your character's territory (so no structure if one already stands there). An encounter's gains cost nothing extra, give nothing extra and trigger no recruit bonuses.</li>" +
         "<li>If your character had to fight there, the encounter happens only if you win; otherwise the token stays.</li>" +
         (c.triumph === "peace" ? "<li><b>Peace Triumph Track:</b> a star for claiming 3 encounter tokens.</li>" : "") +
-        (c.triumph === "tiles" ? "<li><b>Triumph Tile for 3 encounter tokens</b> (if it is in play): place the star after completing the encounter.</li>" : "") + "</ul>" +
+        (c.triumph === "tiles" ? "<li><b>Triumph Tile for 3 encounter tokens</b> (if it is in play): place the star after completing the encounter.</li>" : "") +
+        (c.camp && c.epId === "7" ? "<li><b>Episode 7:</b> keep each encounter token on your faction mat instead of discarding it (they are how you find Tesla), and the Factory also holds an encounter token: see “This episode: special rules”.</li>" : "") + "</ul>" +
         "<h4>The Factory</h4><ul><li>The Factory produces nothing and counts as <b>3 territories</b> at the end for whoever controls it.</li>" +
         "<li>When your Move action is completely over (combat won if needed) and your character is on the Factory <b>for the first time this game</b>, look at the Factory cards on the board, keep 1, and put the rest back. The first visitor sees players + 1 cards; each later visitor, one fewer. One Factory card per player, kept for good.</li>" +
+        (c.act("vesna") ? "<li><b>Vesna</b> starts with 3 Factory cards and returns each Factory card to the box after using it, including the one she gains at the Factory (still only 1 from the Factory per game).</li>" : "") +
         "<li>A Factory card is a <b>fifth section</b> of your player mat: top and/or bottom action as usual. It never gives recruit bonuses, structure bonuses or the coins of similar mat actions.</li>" +
         "<li>Every Factory card's bottom action is <b>Move one unit up to twice</b>. Normal movement rules still apply (stopping at encounters and opponents); your Mine works; with Speed, one mech or your character may go up to 3 territories.</li>" +
         (c.air ? "<li>An airship using a Factory card's Move gets +1 range.</li>" : "") +
-        (c.camp && (c.epId === "3" || c.epId === "5" || c.epId === "7") ? "<li><b>" + c.ep.name.split(":")[0] + " changes the Factory:</b> see “This episode: special rules”.</li>" : "") + "</ul>";
+        (c.camp && (c.epId === "3" || c.epId === "5") ? "<li><b>" + c.ep.name.split(":")[0] + " changes the Factory:</b> see “This episode: special rules”.</li>" : "") + "</ul>";
     },
-    src: function (c) { return SY.src("Core p.21, p.24–25, p.31", "QRG p.2", c.air ? "Wind Gambit p.5" : "", c.triumph === "peace" ? "Rise of Fenris p.18" : "", c.triumph === "tiles" ? "Rise of Fenris p.37" : ""); }
+    src: function (c) { return SY.src("Core p.21, p.24–25, p.31", "QRG p.2", c.air ? "Wind Gambit p.5" : "", c.triumph === "peace" ? "Rise of Fenris p.18" : "", c.triumph === "tiles" ? "Rise of Fenris p.37" : "", c.act("vesna") ? "Rise of Fenris p.22–23" : "", c.camp && c.epId === "7" ? "Rise of Fenris p.34" : ""); }
   },
   {
     title: "Objectives, deals & bribes",
     when: function () { return true; },
     html: function (c) {
-      return "<ul><li>" + (c.coop ? "In Desolation (co-op) objective cards are public knowledge, but each player completes their own without sharing resources, units or territory." : "Your objective cards are secret.") + " On your own turn, before or after a top- or bottom-row action (never during one), reveal a completed objective: place a star on the objective space and discard it and your other objective to the bottom of the deck.</li>" +
+      return "<ul><li>" + (c.coop ? "In Desolation (co-op) objective cards are public knowledge, but each player completes their own without sharing resources, units or territory." : "Your objective cards are secret.") + " On your own turn, before or after a top- or bottom-row action (never during one), reveal a completed objective: place a star on the objective space and discard it and your other objective to the bottom of the deck. (The Quick Reference Guide says “at any time”; follow this rulebook timing.)</li>" +
         (c.triumph === "tiles"
           ? "<li><b>Triumph Tiles:</b> objective stars go on an objective tile, if one is in play. <b>Saxony</b> doesn't discard its second card and may score both, even with no objective tile.</li>"
           : "<li>Only <b>1</b> objective star each" + (c.triumph === "peace" ? " (<b>Peace track: 2 each</b>; after the first, draw a new objective instead of discarding your other card, while any remain)" : "") + ". " +
             (c.triumph === "peace" ? "<b>Saxony</b> starts with <b>3</b> objective cards on this track, and its faction ability sets no limit to its objective stars.</li>"
                                    : "<b>Saxony</b> doesn't discard its second card and may score both (up to 2 objective stars; its faction ability sets no limit).</li>")) +
+        (c.camp && c.epId === "1" ? "<li><b>Episode 1:</b> one extra objective card is revealed beside the Triumph Track. Anyone may also achieve it and place a star on it, in addition to their own objective star on the Triumph Track.</li>" : "") +
         "<li>You may wait to reveal, but you must meet the whole requirement at the moment you reveal it.</li>" +
         (c.act("vesna") ? "<li>Vesna's 3 starting Factory cards don't count toward objectives.</li>" : "") +
         "<li><b>Deals:</b> informal, unenforceable agreements are fine; only coins may change hands (never in tournament play). You can't pay your way out of a combat once it has begun.</li></ul>";
     },
-    src: function (c) { return SY.src("Core p.21, p.26", "Wind Gambit p.7", c.triumph === "peace" ? "Rise of Fenris p.18" : "", c.triumph === "tiles" && !c.coop ? "Rise of Fenris p.37" : "", c.coop ? "Rise of Fenris p.37, p.46" : "", c.act("vesna") ? "Rise of Fenris p.23" : ""); }
+    src: function (c) { return SY.src("Core p.21, p.26", "Wind Gambit p.7", "QRG p.1", c.camp && c.epId === "1" ? "Rise of Fenris p.14" : "", c.triumph === "peace" ? "Rise of Fenris p.18" : "", c.triumph === "tiles" && !c.coop ? "Rise of Fenris p.37" : "", c.coop ? "Rise of Fenris p.37, p.46" : "", c.act("vesna") ? "Rise of Fenris p.23" : ""); }
   },
   {
     title: "Triumph Track: placing stars",
@@ -1084,7 +1087,7 @@ SY.reference = [
         (c.camp && c.epId === "1" ? "<li><b>Episode 1:</b> the revealed objective card beside the track is an extra place for a star; first stars in each category take its Influence token.</li>" : "") +
         (c.camp && c.epId === "8a" ? "<li><b>Episode 8a:</b> 3 of your stars must be fetched from the board before you can place them.</li>" : "") + "</ul>";
     },
-    src: function (c) { return SY.src("Core p.27", "QRG p.1", ({ std: "", war: "Rise of Fenris p.16", peace: "Rise of Fenris p.18", tiles: c.coop ? "Rise of Fenris p.37, p.46" : "Rise of Fenris p.37" })[c.triumph]); }
+    src: function (c) { return SY.src("Core p.27", "QRG p.1", ({ std: "", war: "Rise of Fenris p.16", peace: "Rise of Fenris p.18", tiles: c.coop ? "Rise of Fenris p.37, p.46" : "Rise of Fenris p.37" })[c.triumph], c.act("rivals") && c.triumph !== "war" ? "Rise of Fenris p.16" : "", c.camp && c.epId === "1" ? "Rise of Fenris p.14" : ""); }
   },
   {
     title: "End-game scoring",
@@ -1145,6 +1148,7 @@ SY.reference = [
           var ab = f.ability, mechs = f.mechs.slice();
           if (c.p >= 6 && f.id === "polania") ab = "<b>6–7 players:</b> “Pick up to 2 options per encounter card. At end of game, gain $3 for each encounter territory you control.” (replaces Meander)";
           if (c.p >= 6 && f.id === "crimea" && c.board !== "mod") mechs[1] = "<b>6–7 players:</b> “Move to any unoccupied farm.” (replaces Wayfare)";
+          if (c.p >= 6 && f.id === "crimea" && c.board === "mod") mechs[1] += " (6–7 players on the Modular Board: keep Wayfare; any inactive home base qualifies)";
           if (c.camp && c.epId === "3" && f.id === "rusviet") mechs[1] = "<b>Township (revised tile, required this episode)</b>: use the revised Township tile from the punchboard instead of the printed ability (or cover it with a Mech Mod, if unlocked); its text is on the tile";
           if (c.camp && c.epId === "5" && f.id === "rusviet") mechs[1] = "<b>Township (revised tile, required this episode)</b>: move from any village you control to either another village you control or any unoccupied village";
           return "<h4>" + f.name + " <span class='who'>(" + (f.who ? f.who + " · " : "") + "starts " + f.power + " power, " + f.cards + " combat card" + (f.cards === 1 ? "" : "s") + ")</span></h4>" +
@@ -1152,7 +1156,7 @@ SY.reference = [
         }).join("") +
         "<p class='inline-note'>Riverwalk lets you cross any river onto the two named terrains. Lake abilities (Seaworthy, Submerge, Suiton) don't need Riverwalk. Units can't leave workers or resources on a lake after moving off it, and nobody builds or deploys on a lake.</p>";
     },
-    src: function (c) { return SY.src("Core p.11, p.15–17, p.21, p.30", c.has("ifa") ? "Invaders p.3–7" : "", c.act("vesna") ? "Rise of Fenris p.22–23" : "", c.act("fenris") ? "Rise of Fenris p.30–31" : "", c.camp && c.epId === "3" ? "Rise of Fenris p.20" : "", c.camp && c.epId === "5" ? "Rise of Fenris p.26" : ""); }
+    src: function (c) { return SY.src("Core p.11, p.15–17, p.21, p.30–31", c.has("ifa") ? "Invaders p.3–7" : "", c.p >= 6 && c.board === "mod" ? "Modular Board p.2" : "", c.act("vesna") ? "Rise of Fenris p.22–23" : "", c.act("fenris") ? "Rise of Fenris p.30–31" : "", c.camp && c.epId === "3" ? "Rise of Fenris p.20" : "", c.camp && c.epId === "5" ? "Rise of Fenris p.26" : ""); }
   },
   {
     title: "Invaders from Afar: Flags & Traps",
@@ -1241,7 +1245,7 @@ SY.reference = [
         (c.act("vesna") ? "<li>Some of Vesna's mech ability tokens are clarified here too.</li>" : "") + "</ul>" +
         (c.automa ? "<h4>Automa</h4>" + (c.camp ? SY.autoCampMods : SY.autoNotes.mods) : "");
     },
-    src: function (c) { return SY.src(c.camp ? (c.automa ? "Rise of Fenris p.6–7" : "Rise of Fenris p.6") : "Rise of Fenris p.51, p.6", c.automa && !c.camp ? "p.7, p.50" : ""); }
+    src: function (c) { return SY.src(c.camp ? (c.automa ? "Rise of Fenris p.6–7" : "Rise of Fenris p.6") : "Rise of Fenris p.51, p.6", c.automa && !c.camp ? "p.7, p.50" : "", c.act("vesna") ? "Rise of Fenris p.23" : ""); }
   },
   {
     title: "Infrastructure Mods",
@@ -1447,7 +1451,7 @@ SY.reference = [
     html: function (c) {
       return c.ep.rewards + (c.automa && c.ep.automaRewards ? "<h4>Automa</h4>" + c.ep.automaRewards : "");
     },
-    src: function (c) { return c.ep.rewardsSrc; }
+    src: function (c) { return SY.src(c.ep.rewardsSrc, c.automa && c.ep.automaRewards ? c.ep.automaSrc : ""); }
   },
   {
     title: "Campaign finale: the winner and your leadership",
@@ -1481,7 +1485,7 @@ SY.reference = [
         "<li><b>Rusviet:</b> The Wind Gambit offered as a variant that Relentless can't repeat a Factory card and that Rusviet never pairs with Industrial. The 2022 rulebook makes both rules official, and also bans Crimea with Patriotic (Core p.6, p.21).</li>" +
         "<li><b>Player mat order variant:</b> starting resources are staggered by turn order and playtest data, with a very small effect; you may deal the mats clockwise by number (Wind Gambit p.7).</li>" +
         "<li><b>Delay of Game variant:</b> stalling the game for more than 10 seconds to calculate scores costs 2 popularity (Core p.28).</li>" +
-        (c.has("ifa") ? "<li><b>6–7 players:</b> Invaders from Afar swaps Crimea's Wayfare and Polania's Meander; the later Modular Board rules keep Wayfare when playing on the modular board.</li>" : "") +
+        (c.has("ifa") ? "<li><b>6–7 players:</b> Invaders from Afar replaces Crimea's Wayfare mech ability with ‘Move to any unoccupied farm’ and Polania's Meander with ‘Pick up to 2 options per encounter card; at end of game, gain $3 for each encounter territory you control’ (punchboard tokens). The later Modular Board rules keep Crimea's original Wayfare when playing on the modular board.</li>" : "") +
         "<li><b>Scoring table wording:</b> 18 popularity scores the top rates (the track shows 13–18, although the example text on p.28 says 13–17).</li>" +
         "<li><b>Tiebreaker wording:</b> the QRG says “units and structures”; the 2022 rulebook says workers, mechs and structures. Everyone has one character, so both give the same result.</li></ul>";
     },
@@ -1496,7 +1500,7 @@ SY.reference = [
       var infer = function (t, p) { return "<li class='flagged'><span class='flag'>Inferred</span> " + t + " <span class='cite'>" + p + "</span></li>"; };
       var s = "<p class='inline-note'>“Frequently Overlooked Rules v4.0” looks <b>unofficial</b>: it has no Stonemaier branding or copyright line, was made in Apple Pages (2018), and cites rulebook pages and an online “Scythe FAQ”. Each reminder below points to the rulebook pages that support it. <b>Inferred</b> marks a point the sheet adds that follows from the rules without being stated; <b>Not in the rulebooks</b> marks one they don't support. The rulebooks always win.</p>" +
         "<h4>Turns & setup</h4><ul>" +
-        ok("Your 2 starting workers go on the 2 territories next to your home base.", "Core p.7") +
+        ok("Your 2 starting workers go on the 2 territories connected to your home base by land.", "Core p.7") +
         ok("You may take one action, both (top first) or neither, but must still move your action token.", "Core p.10") +
         ok("Benefits are always optional (including parts of an encounter option); a finished bottom-row action can still be paid for its coins, and you may refuse the coins.", "Core p.10, p.14, p.24") +
         ok("Objectives: reveal before or after an action, never in the middle.", "Core p.26 · Wind Gambit p.7") +
@@ -1523,10 +1527,10 @@ SY.reference = [
         "</ul>" +
         (c.has("ifa") ? "<h4>Albion & Togawa</h4><ul>" +
           ok("Place a Flag or Trap after your character's move; if combat or an encounter is due there, only after it's resolved. One faction token per territory; never moved.", "Invaders p.4, p.6") +
-          ok("Flags don't give control; an armed Trap does. A structure + Trap territory belongs to the structure's owner at the end. Flag scoring conditions; Trap penalties.", "Invaders p.4, p.6") +
+          ok("Flags don't give control; an armed Trap counts as Togawa control for end-game scoring only. A structure + Trap territory belongs to the structure's owner at the end. Flag scoring conditions; Trap penalties.", "Invaders p.4, p.6") +
           infer("An Albion Flag on the Factory, if Albion controls it at the end, makes it worth 4 territories (3 for the Factory + 1 for the Flag).", "Overlooked Rules p.1 (fan) · cf. Invaders p.4, Core p.25") + "</ul>" : "") +
-        (c.has("wg") ? "<h4>Airships</h4><ul>" +
-          ok("Each game airships carry resources or workers, never both; they don't control or occupy territory, use mech abilities, tunnels or Mines, add combat cards or trigger Traps; they fly anywhere, any number per territory.", "Wind Gambit p.3–5") +
+        (c.air ? "<h4>Airships</h4><ul>" +
+          ok("Each airship carries resources or workers, never both, as its aggressive tile says (shared by all airships, or each player's own tile with the advanced variant); they don't control or occupy territory, use mech abilities, tunnels or Mines, add combat cards or trigger Traps; they fly over rivers and lakes onto any territory within the passive tile's range (never onto a home base), any number per territory.", "Wind Gambit p.3–5") +
           ok("Pick up and drop off only as part of the airship's move; never take resources from opponents' territories; worker drop-off limits; Albion's Rally ignores workers aboard.", "Wind Gambit p.3–4") +
           flag("The sheet says airships may drop off resources anywhere except an <i>empty</i> lake. The official QRG says resources are never dropped off on lakes (and a character or mech with a lake ability can't leave resources on a lake after moving off it), so don't drop them on any lake.", "Overlooked Rules p.3 (fan) · cf. QRG p.2, Core p.16") +
           flag("An airship tile called “Safe Haven” that lets an airship occupy and control a territory. The Wind Gambit rulebook doesn't show or describe that tile (airships never control territory by its rules), so check the tile itself.", "Overlooked Rules p.3 (fan) · cf. Wind Gambit p.3") + "</ul>" : "");
@@ -1543,7 +1547,7 @@ SY.reference = [
         "<li><b>Invaders</b>: Invaders from Afar rulebook. <b>Wind Gambit</b>: The Wind Gambit rulebook. <b>Rise of Fenris</b>: The Rise of Fenris rulebook. Printed page numbers.</li>" +
         "<li><b>Modular Board</b>: Modular Board rules; the English rules are its 2nd and 3rd PDF pages (no printed numbers).</li>" +
         "<li><b>Overlooked Rules (fan)</b>: an unofficial community reminder sheet (3 unnumbered pages). Used only to point back to the rulebooks; never overrides them.</li>" +
-        "<li>Not covered: the Automa rulebook(s), the online FAQ, and the text on individual cards and tiles (encounter, Factory, objective, airship, resolution" + (c.modOpen || (c.camp && c.epi >= 7) ? ", Mod and Triumph Tile" : " and Mod") + ").</li></ul>";
+        "<li>Not covered: the Automa rulebook(s), the online FAQ, and the text on individual cards and tiles (encounter, Factory, objective, airship, resolution" + (c.modOpen || (c.camp && c.epId === "8a") ? ", Mod and Triumph Tile" : " and Mod") + ").</li></ul>";
     },
     src: "Core · QRG · Invaders · Wind Gambit · Modular Board · Rise of Fenris · Overlooked Rules (fan)"
   }
@@ -1577,7 +1581,7 @@ SY.teach = {
     {
       h: "The shape of a turn",
       body: function (c) {
-        return "<p>No rounds: we just take turns clockwise. Your player mat has four sections. On your turn, move your action token to a <b>different section</b> from last turn and take its top action, its bottom action, both (top first), or neither. Red boxes are the cost, green boxes the reward: pay it all, then take as much reward as you like.</p>" +
+        return "<p>" + (c.coop ? "We take turns clockwise, and Desolation takes the last turn each round." : c.act("madtesla") ? "We take turns clockwise, and Mad Tesla is always last in turn order: his turn comes after the last player's." : "No rounds: we just take turns clockwise.") + " Your player mat has four sections. On your turn, move your action token to a <b>different section</b> from last turn and take its top action, its bottom action, both (top first), or neither. Red boxes are the cost, green boxes the reward: pay it all, then take as much reward as you like.</p>" +
           "<p>Say your bottom action out loud (you'll see why). Once you start it, the next player can begin.</p>" +
           (c.has("ifa") ? "<p>First player is the lowest-numbered player mat; with the Invaders from Afar mats the order is 1, 2, 2a, 3, 3a, 4, 5.</p>" : "<p>The lowest-numbered player mat goes first.</p>");
       }
@@ -1611,7 +1615,7 @@ SY.teach = {
       body: function (c) {
         if (c.coop) return "<p>We never fight each other. Fights are against Desolation's units, and they work like normal Scythe combat: dial 0 to 7 power (no more than you have) and add one combat card per character or mech of yours in the fight, higher total wins, ties go to the attacker, and you pay the power you dialled. The difference is that it's all done openly, and Desolation adds a die roll to its cards.</p>";
         return "<p>End a move with your character or mech where an opponent's character or mech is, and you fight. Workers alone just get sent home, but each costs you a popularity. In a fight, both players secretly dial 0 to 7 power (no more than you have) and may add one combat card per character or mech involved. Reveal: higher total wins, ties go to the attacker, and both pay the power they dialled.</p>" +
-          "<p>The winner takes the territory and its resources" + (c.triumph === "peace" ? " (tonight's Peace track gives no combat stars)" : " and places a combat star" + (c.triumph === "war" ? " (up to four each on the War track)" : c.triumph === "tiles" ? " (one per combat tile on the track, though Saxony has no limit)" : " (twice a game at most, though Saxony has no limit)")) + "; the loser goes home and, if they committed anything, draws a combat card. Usually the threat of a fight matters more than the fight.</p>";
+          "<p>The winner takes the territory and its resources" + (c.triumph === "peace" ? " (tonight's Peace track gives no combat stars)" : " and places a combat star" + (c.triumph === "war" ? " (up to four each on the War track, though Saxony has no limit)" : c.triumph === "tiles" ? " (one per combat tile on the track, though Saxony has no limit)" : " (twice a game at most, though Saxony has no limit)")) + "; the loser's units, workers included, all go home, and a winning attacker loses a popularity for each of those workers. If the loser committed anything, they draw a combat card. Usually the threat of a fight matters more than the fight.</p>";
       }
     },
     { when: function (c) { return c.p === 2; }, h: "Just the two of us",
@@ -1632,7 +1636,7 @@ SY.teach = {
     { when: function (c) { return c.has("mb"); }, h: function (c) { return c.board === "mod" ? "The modular board" : "Extra structure bonus tiles"; },
       body: function (c) {
         if (c.board !== "mod") return "<p>We own the Modular Board, so its 8 extra <b>structure bonus tiles</b> were shuffled into the pile; check what tonight's tile rewards.</p>";
-        return "<p>The map is random tonight: a <b>modular board</b> with shuffled hex tiles and home bases. We dealt player mats first and picked factions from the highest-numbered mat down; Riverwalk matters more than usual, so check you can reach wood as well as metal. Its 8 extra structure bonus tiles are in the mix too." + (c.opt("mbvar") ? " With fewer players we left some modular tiles off, so parts of the board are empty." : "") + "</p>";
+        return "<p>The map is random tonight: a <b>modular board</b> with shuffled hex tiles and home bases. We dealt player mats first and picked factions from the highest-numbered mat down; Riverwalk matters more than usual, so check you can reach wood as well as metal. Its 8 extra structure bonus tiles are in the mix too." + (c.opt("mbvar") && c.p >= 2 && c.p <= 4 ? " With fewer players we left some modular tiles off, so parts of the board are empty." : "") + "</p>";
       } },
     { when: function (c) { return c.triumph !== "std" && !c.coop; }, h: "Tonight's Triumph Track",
       body: function (c) {
@@ -1673,14 +1677,14 @@ SY.teach = {
             ? "<p>This is the last game: leftover Wealth is crossed off during setup, and at the end your $25 Triumph Log bonuses are added to your doubled coins. We read the campaign finale once the game is over.</p>"
             : "<p>Your end-game coins go onto your Campaign Log as Wealth, to spend on Mods and Perks between episodes; stars you place get ticked on your Triumph Log. We don't read this episode's rewards until it's over.</p>");
       } },
-    { when: function (c) { return c.opt("firstgame") || c.opt("delay") || c.opt("matorder"); }, h: "Tonight's variants",
+    { when: function (c) { return c.opt("firstgame") || (c.opt("delay") && !c.coop) || c.opt("matorder"); }, h: "Tonight's variants",
       body: function (c) {
         var a = [];
-        if (c.opt("firstgame")) a.push("Grab a <b>quick-start card</b>: it suggests something to do on each of your first five turns. After the first star is placed we'll pause for a practice scoring round that doesn't count.");
-        if (c.opt("delay")) a.push("<b>Delay of Game:</b> anyone who stalls more than ten seconds totting up scores loses 2 popularity.");
+        if (c.opt("firstgame")) a.push("Grab a <b>quick-start card</b>: it suggests something to do on each of your first five turns." + (c.coop ? "" : " After the first star is placed we'll pause for a practice scoring round that doesn't count."));
+        if (c.opt("delay") && !c.coop) a.push("<b>Delay of Game:</b> anyone who stalls more than ten seconds totting up scores loses 2 popularity.");
         if (c.opt("matorder")) a.push(c.board === "mod"
           ? "Dealing the player mats clockwise <b>by number</b> doesn't fit the modular board: mats were dealt at random and we're seated by the factions we chose."
-          : "We dealt the player mats clockwise <b>by number</b> instead of at random.");
+          : (c.epId === "8a" || c.epId === "8b") ? "This episode we chose our player mats, so dealing them by number doesn't apply." : "We dealt the player mats clockwise <b>by number</b> instead of at random.");
         return "<p>" + a.join(" ") + "</p>";
       } },
     {

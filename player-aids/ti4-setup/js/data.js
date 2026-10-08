@@ -172,7 +172,7 @@ TI.sets = [
 TI.modes = [
   { id: "standard", name: "Standard game", requires: ["base"],
     blurb: "Complete Setup from the Rules Reference — build the galaxy, choose factions, race to 10 (or 14) victory points.",
-    src: "LRR p.4–5" },
+    src: "LRR p.4–5 · RR p.2–3" },
   { id: "firstgame", name: "First game (Learn to Play)", requires: ["base"], baseOnly: true, minPlayers: 3, maxPlayers: 6,
     blurb: "The abridged First-Game Setup: a preset galaxy, six starter factions dealt at random, one secret objective, no promissory notes. Base game only.",
     src: "LtP p.6–7, p.21–23" }
@@ -216,7 +216,7 @@ TI.galaxy = [
     avail: (c) => c.mode !== "firstgame" && !(c.has("te") && (c.p === 5 || (c.p === 4 && c.has("pok")))),
     name: (c) => c.p === 5 ? "Build it — no hyperlanes" : c.p === 7 ? "Build it — 4 rings with hyperlanes" : c.p === 8 ? "Build it — 4 rings" : "Build it — deal & place tiles",
     blurb: (c) => { const d = TI.DEAL[c.p + ":deal"]; return d ? "Each player is dealt " + d.b + " blue and " + d.r + " red system tiles and you take turns placing them" + (d.extra ? "; the speaker first adds " + d.extra + " next to Mecatol Rex" : "") + (d.tg ? "; three crowded seats get bonus trade goods" : "") + "." : ""; },
-    src: "LRR p.4–6" },
+    src: "LRR p.4–6 · RR p.2–3" },
   { id: "hyper5",
     avail: (c) => c.mode !== "firstgame" && c.p === 5 && (c.has("pok") || c.has("te")),
     name: () => "Build it — with hyperlanes",
@@ -232,7 +232,7 @@ TI.galaxy = [
   { id: "large",
     avail: (c) => c.mode !== "firstgame" && c.p === 6 && c.has("pok"),
     name: () => "Large galaxy (4 rings)",
-    blurb: () => "Every tile from both boxes: 6 blue and 3 red tiles each; the 14-point track is recommended.",
+    blurb: (c) => c.has("te") ? "Four rings: 6 blue and 3 red tiles each; the 14-point track is recommended." : "Every tile from both boxes: 6 blue and 3 red tiles each; the 14-point track is recommended.",
     src: "PoK p.12 · LRR p.5" },
   { id: "alt",
     avail: (c) => c.mode !== "firstgame" && (c.p === 7 || c.p === 8) && c.has("pok"),
@@ -260,7 +260,7 @@ TI.modules = [
     when: (c) => !TI.isAlliance(c),   /* the Alliance variant always uses the 14 side (Codex II p.13, TE p.13) */
     summary: "Play to 14 victory points on the other side of the track",
     description: "As a group, players decide whether to use the 10- or 14-space side of the victory point track; the 14-space side is for a longer game. Prophecy of Kings recommends it for the six-player large galaxy.",
-    src: "LRR p.5, §98 p.37 · LtP p.21 · PoK p.6, p.12" }
+    src: "LRR p.5, §98 p.37 · RR p.3, §87 p.29 · LtP p.21 · PoK p.6, p.12" }
 ];
 
 /* =============================================================================
@@ -288,7 +288,7 @@ TI.phases = [
       { id: "lrr-setup-1", anchor: "lrr-setup-1", when: () => true, exp: (c) => c.mode === "firstgame" ? "ltp" : "base",
         t: "Determine the speaker",
         d: (c) => "<ul><li>Randomly determine one player to take the <b>speaker token</b>; that player is the speaker" + (c.mode === "firstgame" ? " and will go first when the game begins" : "") + ".</li>" +
-          "<li>The speaker chooses the first strategy card each round, prepares the objectives during setup (step 12), and reveals the agendas, votes last and breaks ties in the agenda phase.</li></ul>",
+          "<li>The speaker chooses the first strategy card each round, prepares the objectives during setup (see “Prepare the objectives” below), reveals a new public objective in each status phase, and reveals the agendas, votes last and breaks ties in the agenda phase.</li></ul>",
         src: (c) => c.mode === "firstgame" ? TI.cite(c, ["speaker"]) : (c.has("pok") ? "LRR p.4 · " : "LRR p.4 · RR p.2 · ") + TI.cite(c, ["speaker"]) },
 
       { id: "lrr-setup-2", anchor: "lrr-setup-2", when: () => true, exp: (c) => c.mode === "firstgame" ? "ltp" : "base",
@@ -357,6 +357,7 @@ TI.phases = [
           if (c.has("pok")) s.push(c.galaxy === "alt" ? "PoK p.8, p.12, p.15" : c.galaxy === "large" ? "PoK p.8, p.12" : ((c.galaxy === "hyper5" && !te) || c.p >= 7 ? "PoK p.8–9" : "PoK p.8"));
           if (c.galaxy === "hyper5" && !te) s.push("PoK p.11");
           if (te) s.push(d.hlDiagram ? "TE p.7, p.12, p.15" : "TE p.7, p.12");
+          if (c.has("te") && c.galaxy === "large") s.push("TE p.4");
           if (c.p === 5 && c.galaxy === "deal") s.push("LtP p.23");
           if (c.mod("ge-minorFactions") === true) s.push("Codex IV p.15");
           s.push(TI.cite(c, ["anomalies"].concat(d.hl || d.hlDiagram ? ["hyperlanes"] : [], ["gameboard"])));
@@ -482,7 +483,7 @@ TI.galaxyStep = function (c) {
     " Systems connected by a hyperlane line are adjacent; hyperlane tiles are not systems.</li>";
   /* TE p.7 names only 119A–124A, but its four-player board has two six-tile rings and needs PoK (TE p.7, p.12);
      TE's own four-player map "Red vs Blue" (TE p.15) fills the second ring with PoK's 83A–88A */
-  if (d.hlDiagram) s += "<li><b>Hyperlanes:</b> place the hyperlane tiles exactly as shown in the Thunder’s Edge <i>Four-Player Setup</i> diagram (" + d.hlSrc + "): tiles <b>119A–124A</b> and, for the second ring, Prophecy of Kings’ <b>83A–88A</b> (TE names only 119A–124A; the second set is inferred from Thunder’s Edge’s own four-player map, TE p.15). Tile-by-tile positions: see the step before. Systems connected by a hyperlane line are adjacent; hyperlane tiles are not systems.</li>";
+  if (d.hlDiagram) s += "<li><b>Hyperlanes:</b> place the hyperlane tiles exactly as shown in the Thunder’s Edge <i>Four-Player Setup</i> diagram (" + d.hlSrc + "): tiles <b>119A–124A</b> for the lower hyperlane formation and Prophecy of Kings’ <b>83A–88A</b> for the upper one (TE names only 119A–124A; the second set is inferred from Thunder’s Edge’s own four-player map, TE p.15). Tile-by-tile positions: see the step before. Systems connected by a hyperlane line are adjacent; hyperlane tiles are not systems.</li>";
   if (pok) s += "<li><b>Wormhole nexus:</b> place it in the common play area with its <b>gamma-only side</b> faceup, and the <b>3 gamma wormhole tokens</b> beside it.</li>";
   s += "<li><b>Separate</b> the system tiles by the color of their backs into a <b>blue</b> pile and a <b>red</b> pile (green-backed tiles are home systems and stay out of both).</li>";
   const mf = c.mod("ge-minorFactions") === true;   /* Codex IV galactic event (js/data-codex.js choice): "players are dealt 1 fewer blue tile" (Codex IV p.15) */
@@ -494,7 +495,9 @@ TI.galaxyStep = function (c) {
   s += "<li>After all dealt tiles are placed, attach the <b>home systems</b> to the galaxy.</li>";
   if (d.tg) s += "<li><b>Five players without hyperlanes:</b> three seats are at a slight disadvantage, so after the board is built those players take trade goods as the diagram shows: <b>+2, +4, +2</b> — the +4 goes to the middle seat, which is closest to two other players, and the seats either side of it take 2 each.</li>";
   if (c.galaxy === "hyper5") s += "<li>" + (d.te ? "With hyperlanes, the five-player starting-position trade goods are not given." : "Hyperlanes balance the starting positions, so no one receives the five-player starting trade goods.") + "</li>";
-  if (c.galaxy === "large") s += "<li>The large galaxy uses every tile from the base game and Prophecy of Kings; with this much to go around, the 14-point victory track is recommended.</li>";
+  if (c.galaxy === "large") s += c.has("te")
+    ? "<li>The large galaxy was designed around every base-game and Prophecy of Kings tile (PoK p.12). With Thunder’s Edge’s tiles shuffled into the piles (TE p.4) you still deal only 6 blue and 3 red each, so some tiles stay in the box. With this much to go around, the 14-point victory track is recommended.</li>"
+    : "<li>The large galaxy uses every tile from the base game and Prophecy of Kings; with this much to go around, the 14-point victory track is recommended.</li>";
   s += "<li><b>Ghosts of Creuss:</b> their home system isn’t connected to the rest of the galaxy — follow the faction sheet; it still counts as part of the game board, on its edge.</li>";
   return s + "</ol>";
 };
@@ -522,7 +525,9 @@ TI.reference = [
       "<li>Then the speaker places <b>1 trade good</b> from the supply on each card nobody chose." + (c.p === 4 || c.p === 8 ? " (With " + c.p + " players every card is chosen, so none get trade goods.)" : "") + "</li>" +
       "<li><b>Initiative order</b> runs from the lowest-numbered chosen card upward (unchosen cards are ignored); it sets turn order in the action and status phases." + (c.p <= 4 ? " With 3 or 4 players only your <b>lowest</b>-numbered card counts." : "") + " The Naalu “0” token gives its holder initiative 0.</li>" +
       (c.p >= 5 ? "<li>If eliminations shrink a game that began with five or more players to four or fewer, players still take only one card each.</li>" : "") + "</ul>",
-    src: (c) => TI.cite(c, ["strategyphase", "initiative"].concat(c.p >= 5 ? ["elimination"] : []))
+    src: (c) => { let s = TI.cite(c, ["strategyphase", "initiative"]);
+      if (c.p >= 5) s = s.replace("§48 p.20–21", "§48 p.20–21, §33 p.17");   /* the 5+ → 4-or-fewer rule is LRR §33.9 only (RR §31 has no such clause) */
+      return c.p <= 4 ? s.replace("LtP p.8", "LtP p.8, p.12") : s; }
   },
   {
     id: "ref-action-phase", title: "Action phase — actions, passing & turn order", when: () => true,
@@ -533,7 +538,8 @@ TI.reference = [
       "<li>You <b>can’t pass</b> until you have performed the strategic action of your strategy card" + (c.p <= 4 ? " — with " + c.p + " players, until <b>both</b> of your cards are exhausted" : "") + ". If you can’t perform any action, you must pass.</li>" +
       "<li>After passing you take no more turns this phase, but you can still resolve the secondary abilities of other players’ strategy cards. On the turn you pass you can still make transactions, use “at the start of your turn” abilities and resolve “end of turn” abilities.</li>" +
       "<li>If everyone else has passed, you may take several actions in a row. When all players have passed, go to the status phase.</li></ul>",
-    src: (c) => TI.cite(c, ["actionphase", "activeplayer", "strategic", "strategycard", "componentaction"], ["Wiki FAQ (Passing)"].concat(TI.isTF(c) ? ["TF p.9"] : c.has("te") && !c.has("pok") ? ["TE p.10"] : []))
+    src: (c) => { const s = TI.cite(c, ["actionphase", "activeplayer", "strategic", "strategycard", "componentaction"], ["Wiki FAQ (Passing)"].concat(TI.isTF(c) ? ["TF p.9"] : c.has("te") && !c.has("pok") ? ["TE p.10"] : []));
+      return c.p <= 4 ? s.replace("LtP p.8–10", "LtP p.8–10, p.12") : s; }
   },
   {
     id: "ref-cards", title: "The eight strategy cards", when: (c) => !TI.isTF(c),
@@ -574,7 +580,7 @@ TI.reference = [
       "<li>A ship <b>can’t move through</b> a system containing another player’s ships — <b>fighters count</b> (they block movement).</li>" +
       "<li>A ship <b>can’t move at all</b> if it starts in another system that contains one of your command tokens; it <b>can</b> move through systems with your own tokens.</li>" +
       "<li>Only the destination is moved “into”; every other system is moved “through”. When several paths exist (wormholes or ordinary adjacency) the mover chooses.</li>" +
-      "<li>Abilities that move units outside the Move Ships step follow their own text; move values and these rules don’t apply.</li></ul>" +
+      "<li>Abilities that move units outside the Movement step of a tactical action follow their own text; move values and these rules don’t apply.</li></ul>" +
       "<h4>Transport &amp; capacity</h4><ul>" +
       "<li><b>Fighters and ground forces don’t move on their own</b> — the standard fighter and infantry have no move value — so they travel by being transported. Ground forces are always on a planet or in a space area with your ships that have capacity. (A unit upgrade’s printed values replace the faction sheet’s.)</li>" +
       "<li>A ship with <b>capacity</b> carries up to that many fighters and ground forces in any mix. During a tactical action it may pick them up in the system it starts in, each system it moves through, and the active system — but not from a system containing your command token, other than the active system. They stay with it, in the space area, until it finishes moving; ground forces land during the invasion.</li>" +
@@ -630,7 +636,7 @@ TI.reference = [
       "<li><b>Assign hits</b> — each player chooses and destroys one of their own ships per hit scored against them; <b>Sustain Damage</b> may cancel hits first.</li>" +
       "<li><b>Retreat</b> — a player who announced a retreat (and still has an eligible system) must retreat: move all their ships that have a move value to <b>one adjacent system</b> that contains their units and/or a planet they control and <b>no other player’s ships</b>. Retreating ships may transport fighters and ground forces up to their capacity — including ground forces picked up from planets in the active system. Fighters and ground forces that can’t move or be transported are removed. Place a command token from reinforcements in that system (from your command sheet if you have none; none if one is already there). If the opponent has no ships left, the combat simply ends.</li></ol>" +
       "<ul><li>While both players still have ships, repeat from <b>Announce retreats</b>. The player with ships left is the <b>winner</b>; if neither has any, it is a draw. The winner then removes fighters and ground forces beyond their ships’ capacity.</li>" +
-      "<li><b>Sustain Damage</b>: before assigning hits, a unit with this ability may cancel 1 hit and is turned on its side (damaged). A damaged unit works normally but can’t sustain again until repaired in the status phase. It works against any hit the unit could take (combat, space cannon…) — not against anti-fighter barrage on a non-fighter, and not against effects that directly “destroy”.</li>" +
+      "<li><b>Sustain Damage</b>: immediately before assigning hits, each of your units in the active system with this ability may cancel 1 hit and is turned on its side (damaged). A damaged unit works normally but can’t sustain again until it is repaired (in the status phase or by another game effect). It works against any hit the unit could take (combat, space cannon…) — not against anti-fighter barrage on a non-fighter, and not against effects that directly “destroy”.</li>" +
       "<li><b>Rerolls</b>: the same ability can’t reroll the same die twice, but several abilities can each reroll it. A “0” on the die is a 10.</li>" +
       "<li>If neither side can possibly win (e.g. certain Non-Euclidean Shielding and Duranium Armor combinations), the attacker must retreat; if they can’t, their units in the combat are destroyed.</li>" +
       "<li>“Start of combat” and “start of combat round” effects share a window in round 1; “end of combat” and “end of combat round” share one in the last round.</li>" +
@@ -644,7 +650,7 @@ TI.reference = [
         "<b>Mecatol Rex:</b> no one can land there while the <b>custodians token</b> is on it. Just before this step the active player may spend <b>6 influence</b> to remove it — they must then land at least one ground force there. They take the token and gain <b>1 victory point</b>" + (TI.isTF(c) ? "." : ", and the agenda phase joins every round from now on (including this one).")) + "</li></ul></li>" +
       "<li><b>Space cannon defense</b> — see Space cannon.</li>" +
       "<li><b>Ground combat</b> — on each planet where you and another player both have ground forces (you choose the order): each player rolls one die per ground force (hits on results ≥ its combat value), then destroys one of their own ground forces per hit; repeat until one side (or neither) is left.</li>" +
-      "<li><b>Establish control</b> — you gain control of each planet you committed to that still has your ground forces: take its planet card <b>exhausted</b>; other players’ structures there are destroyed. If everyone on both sides died, the <b>defender</b> keeps the planet and marks it with a control token." + (c.has("pok") ? " Gaining a planet no one controlled before means you <b>explore</b> it." : "") + "</li></ol>" +
+      "<li><b>Establish control</b> — you gain control of each planet you committed to that still has your ground forces: take its planet card <b>exhausted</b>; other players’ structures there are destroyed. If everyone on both sides died, the <b>defender</b> keeps the planet and marks it with a control token." + (c.has("pok") ? " Gaining control of a planet that no other player controls means you <b>explore</b> it." : "") + "</li></ol>" +
       "<ul><li>A PDS or space dock on a planet with another player’s units and none of its owner’s ground forces is destroyed.</li>" +
       "<li>You keep control of a planet with no units on it (mark it with a control token) until another player puts units there.</li></ul>",
     src: (c) => TI.cite(c, ["invasion", "bombardment", "planetaryshield", "groundcombat", "control", "pds", "spacedock", "custodians"].concat(c.has("pok") ? ["exploration"] : []), ["Wiki FAQ (The L1Z1X Mindnet)"].concat(TI.isTF(c) ? ["TF p.10"] : [])) + TI.scenarioSrc(c)
@@ -690,7 +696,7 @@ TI.reference = [
   {
     id: "ref-economy", title: "Planets, resources, influence, trade goods & commodities", when: () => true,
     html: (c) => "<ul><li>Each planet shows a <b>resource</b> value (left, yellow border) and an <b>influence</b> value (right, blue border). " + (TI.isTF(c) ? "Resources pay for units and other resource costs; influence pays for command tokens and other influence costs." : "Resources buy units and technology; influence buys command tokens and, in the agenda phase, votes.") + "</li>" +
-      "<li>To spend a planet’s resources <b>or</b> influence, <b>exhaust</b> its card (flip it facedown). Exhausted cards can’t be used until readied — all are readied in the status phase" + (TI.isTF(c) ? "" : ", and planets again at the end of the agenda phase") + ".</li>" +
+      "<li>To spend a planet’s resources <b>or</b> influence, <b>exhaust</b> its card (flip it facedown). Until it is readied, an exhausted card can’t be exhausted again and you can’t spend its resources or influence or resolve its abilities (its passive abilities still apply) — all are readied in the status phase" + (TI.isTF(c) ? "" : ", and planets again at the end of the agenda phase") + ".</li>" +
       "<li>When you <b>gain control</b> of a planet, take its card <b>exhausted</b> — from the planet deck if nobody held it, otherwise from its previous controller.</li>" +
       "<li><b>Traits</b> (cultural, hazardous, industrial) have no effect on their own" + (c.has("pok") ? " but decide which exploration deck you draw from" : "") + "; " + (TI.isTF(c) ? "in Twilight’s Fall nothing is researched — when scoring objectives, a planet with a <b>technology specialty</b> can be exhausted to count as one technology of that color (TF p.10)." : "a <b>technology specialty</b> can be exhausted to ignore one matching prerequisite when researching.") + "</li>" +
       "<li><b>Trade goods</b> spend as 1 resource or 1 influence, or pay for effects that ask for trade goods — at any time" + (TI.isTF(c) ? "" : ", but <b>never as votes</b>") + ".</li>" +
@@ -703,7 +709,7 @@ TI.reference = [
     html: (c) => "<ul><li>You start with <b>8</b> on your command sheet — <b>3 tactic, 3 fleet, 2 strategy</b> — " + (TI.isTF(c) ? "and the rest of your color-based Twilight’s Fall command tokens are your reinforcements.</li>" : "and 8 more in reinforcements (16 per faction).</li>") +
       "<li><b>Tactic pool:</b> spend one to perform a tactical action (it is placed in the activated system).</li>" +
       "<li><b>Strategy pool:</b> spend one to resolve another player’s strategy card secondary" + (TI.isTF(c) ? "" : " (not needed for Leadership)") + ".</li>" +
-      "<li><b>Fleet pool</b> (ship silhouette up): not spent — its size is your ship limit in each system.</li>" +
+      "<li><b>Fleet pool</b> (ship silhouette up): not spent — its size is the most <b>non-fighter ships</b> you may have in each system (units on planets, units counting against capacity and units being transported through don’t count).</li>" +
       "<li>When you <b>gain</b> a token, choose its pool. You can’t gain more than your reinforcements hold. If an effect places your token from reinforcements and you have none, take one from your command sheet (unless the system already contains one of your tokens). A token that would go where you already have one goes to your reinforcements instead — its effect still happens.</li>" +
       "<li><b>Status phase:</b> remove all your tokens from the board, gain 2, and redistribute all tokens on your sheet — then check your fleet limit in every system.</li>" +
       (TI.isTF(c) ? "" : "<li>Leadership is the main source of extra tokens: 3 on the primary, plus 1 per 3 influence spent (primary or secondary).</li>") + "</ul>",
@@ -717,8 +723,8 @@ TI.reference = [
       "<li><b>Technology specialty:</b> exhaust a planet with that symbol to ignore one prerequisite of the matching color — but an exhausted planet can’t be used this way, and a planet exhausted for its specialty can’t also pay resources.</li>" +
       "<li>You can’t research another faction’s faction technology.</li>" +
       "<li>“<b>Gain</b>” a technology: take it, ignoring prerequisites. “<b>Research</b>”: prerequisites apply. You can’t resolve an ability that gains a technology you already own (Wiki FAQ).</li>" +
-      (c.has("te") ? "<li><b>Thunder’s Edge:</b> a planet with <b>two</b> technology specialties can be exhausted to satisfy either or both prerequisites at once (TE p.11); a breakthrough’s <b>synergy</b> lets a technology or specialty of one of its two colors count as the other when researching — as one color at a time (TE p.8).</li>" : "") + "</ul>",
-    src: (c) => TI.cite(c, ["technology", "techcard", "upgrades"], ["LRR p.34 (color icons)", "LtP p.18", "Wiki FAQ (Technology)"].concat(c.has("te") ? ["TE p.8, p.11"] : []))
+      (c.has("te") ? "<li><b>Thunder’s Edge:</b> a planet with <b>two</b> technology specialties can be exhausted to satisfy either or both prerequisites at once (TE p.11); a breakthrough’s <b>synergy</b> lets a technology or specialty of one of its two colors count as the other when researching and when scoring technology objectives — as one color at a time (TE p.8).</li>" : "") + "</ul>",
+    src: (c) => TI.cite(c, ["technology", "techcard", "upgrades"], ["LRR p.34 (color icons)"].concat(c.mode === "firstgame" ? [] : ["LtP p.18"]).concat(["Wiki FAQ (Technology)"]).concat(c.has("te") ? ["TE p.8, p.11"] : []))
   },
   {
     id: "ref-actioncards", title: "Action cards", when: () => true,
@@ -733,7 +739,7 @@ TI.reference = [
   {
     id: "ref-diplomacy", title: (c) => TI.isTF(c) ? "Neighbors, transactions & deals" : "Neighbors, transactions, deals & promissory notes", when: () => true,
     html: (c) => "<ul><li><b>Neighbors:</b> two players with units or controlled planets in the same system or in adjacent systems (wormhole adjacency counts).</li>" +
-      "<li><b>Transactions:</b> during your turn, at any time (even in combat), you may make <b>one transaction with each neighbor</b>: give any number of trade goods and commodities" + (c.has("pok") ? " and relic fragments" : "") + (c.mode === "firstgame" || TI.isTF(c) ? "" : " plus up to <b>1 promissory note</b>") + ", for any number of the same in return. Nothing else can be exchanged (the Emirates of Hacan may also trade action cards). It needn’t be even; agree the terms first — once exchanged it can’t be undone.</li>" +
+      "<li><b>Transactions:</b> during your turn, at any time (even in combat), you may make <b>one transaction with each neighbor</b>: give any number of trade goods and commodities" + (c.has("pok") ? " and relic fragments" : "") + (c.mode === "firstgame" || TI.isTF(c) ? "" : " plus up to <b>1 promissory note</b>") + ", for any number of the same in return. Nothing else can be exchanged (the Emirates of Hacan may also trade action cards" + (c.has("pok") || TI.isTF(c) ? ", and a captured non-fighter ship or mech may be returned to its owner as part of a transaction — captured fighters and infantry can’t" : "") + "). It needn’t be even; agree the terms first — once exchanged it can’t be undone.</li>" +
       (TI.isTF(c) ? "" : "<li>While each <b>agenda</b> is resolved, anyone may make one transaction with each other player — neighbors or not.</li>") +
       (c.has("te") ? "<li><b>Thunder’s Edge:</b> players who control a <b>space station</b> may transact with each other even if they aren’t neighbors (TE p.10).</li>" : "") +
       (TI.geEvent(c, "ageOfCommerce") ? "<li><b>Age of Commerce</b> (galactic event): players don’t have to be neighbors to transact, and a transaction may share a non-faction technology — the receiver gains it from their own deck and the giver keeps it (Codex IV p.16).</li>" : "") +
@@ -741,7 +747,7 @@ TI.reference = [
       (c.mode === "firstgame" ? "<li><b>Promissory notes</b> are left out of the first game (an advanced rule).</li>" : TI.isTF(c) ? "<li><b>Promissory notes</b> aren’t used in Twilight’s Fall.</li>" :
       "<li><b>Promissory notes:</b> you start with " + (c.has("pok") ? "6 (5 in your color and 1 faction note)" : "5 (4 in your color and 1 faction note)") + ". You can’t play your own; give them away as part of transactions (max 1 per transaction, from your hand — not from your play area). Keep your hand hidden (you may show a note you’re offering). Notes you received may be passed on without the owner’s permission. Returned notes can be given away again. A note received during its timing window may be played at once.</li>") +
       (c.has("pok") && !TI.isTF(c) ? "<li>The <b>“Alliance”</b> promissory note lets its holder use your commander’s ability once it is unlocked — you keep using it too." + (TI.allyRules(c) ? " <b>" + TI.allyRules(c).label + ":</b> " + TI.allyRules(c).who + " purge their own “Alliance” note at setup and start with their commander unlocked (" + TI.allyRules(c).src + ")." : "") + "</li>" : "") + "</ul>",
-    src: (c) => TI.cite(c, ["neighbors", "transactions", "deals"].concat(c.mode === "firstgame" || TI.isTF(c) ? [] : ["promissory"]).concat(c.has("pok") && !TI.isTF(c) ? ["leaders"] : []), ["LtP p.17, p.21", "LRR FAQ p.41"].concat(TI.isTF(c) ? ["TF p.6"] : []).concat(c.has("te") ? ["TE p.10"] : []).concat(TI.geEvent(c, "ageOfCommerce") ? ["Codex IV p.16"] : []).concat(TI.allyRules(c) && c.has("pok") && !TI.isTF(c) ? [TI.allyRules(c).src] : []))
+    src: (c) => TI.cite(c, ["neighbors", "transactions", "deals"].concat(c.mode === "firstgame" || TI.isTF(c) ? [] : ["promissory"]).concat(c.has("pok") && !TI.isTF(c) ? ["leaders"] : []).concat(c.has("pok") || TI.isTF(c) ? ["capture"] : []), (c.mode === "firstgame" ? ["LtP p.21", "LRR FAQ p.41"] : ["LtP p.17, p.21", "LRR FAQ p.41"]).concat(TI.isTF(c) ? ["TF p.6, p.11"] : []).concat(c.has("te") ? ["TE p.10"] : []).concat(TI.geEvent(c, "ageOfCommerce") ? ["Codex IV p.16"] : []).concat(TI.allyRules(c) && c.has("pok") && !TI.isTF(c) ? [TI.allyRules(c).src] : []))
   },
   {
     id: "ref-objectives", title: "Objectives, victory points & winning", when: () => true,
@@ -749,17 +755,18 @@ TI.reference = [
       "<li><b>Secret objectives:</b> you start with " + (c.mode === "firstgame" ? "1" : "1 (drawn 2, kept 1)") + (TI.isTF(c) ? "; the Aeterna card draws more" : "; the Imperial card draws more") + ". You may have at most <b>3</b>, scored and unscored together; only you can score yours.</li>" +
       "<li>Each card shows its points, <b>when</b> it can be scored (" + (TI.isTF(c) ? "status or action phase — Twilight’s Fall has no agenda phase" : "status, action or agenda phase") + ") and its requirement. Status-phase objectives must be met <b>during</b> the Score Objectives step; costs printed on a card are paid then.</li>" +
       "<li><b>Status phase:</b> in initiative order, score up to <b>1 public and 1 secret</b>.</li>" +
-      "<li><b>Action phase:</b> any number during your turn — but only <b>one per combat</b> (one in a space combat and one in a ground combat of the same tactical action is fine)." + (TI.isTF(c) ? "" : " <b>Agenda phase:</b> any number.") + "</li>" +
+      "<li><b>Action phase:</b> any number, at any time during the phase (not only on your own turn) — but only <b>one during or after each combat</b> (one in a space combat and one in a ground combat of the same tactical action is fine)." + (TI.isTF(c) ? "" : " <b>Agenda phase:</b> any number.") + "</li>" +
       "<li>You can’t score <b>public</b> objectives unless you control <b>every planet in your home system</b>. Each objective scores once per player.</li>" +
       "<li>“Destroy” requirements count any destroy effect; units removed for exceeding your fleet pool aren’t destroyed. A requirement naming “units” is met by one unit (Wiki FAQ).</li>" +
       (TI.isTF(c) ? "<li><b>Other points:</b> removing the custodians token (+1); the <b>Aeterna</b> primary while you control Mecatol Rex (+1); card effects.</li>" :
-        c.mode === "ordinian" ? "<li><b>Other points:</b> in the Ordinian scenario the custodians token is the <b>Coatl</b> — controlling it once repaired is worth points (see “Ordinian scenario: the Coatl”); effects that refer to Mecatol Rex or its system refer to the Coatl’s system; some agendas. A point gained from a law isn’t lost if the law is later discarded.</li>" :
-        c.mode === "liberation" ? "<li><b>Other points:</b> no custodians token is placed; effects that refer to Mecatol Rex or its system refer to Ordinian (e.g. the Imperial primary); the scenario’s <b>Liberate Ordinian</b> objective; some agendas. A point gained from a law isn’t lost if the law is later discarded.</li>" :
-        "<li><b>Other points:</b> removing the custodians token (+1); the Imperial primary while you control Mecatol Rex (+1); some agendas. A point gained from a law isn’t lost if the law is later discarded." + (TI.geEvent(c, "totalWar") ? " <b>Total War</b> (galactic event): as an action, discard 10 commodities from planets in your home system to gain 1 victory point (Codex IV p.16)." : "") + "</li>") +
+        c.mode === "ordinian" ? "<li><b>Other points:</b> in the Ordinian scenario the custodians token is the <b>Coatl</b> — controlling it once repaired is worth points (see “Ordinian scenario: the Coatl”); effects that refer to Mecatol Rex or its system refer to the Coatl’s system; some agendas, promissory notes and other cards — e.g. a “Support for the Throne” note gives you 1 victory point when you receive it, but you lose that point and return the note if you activate a system containing its owner’s units or its owner is eliminated. A point gained from a law isn’t lost if the law is later discarded.</li>" :
+        c.mode === "liberation" ? "<li><b>Other points:</b> no custodians token is placed; effects that refer to Mecatol Rex or its system refer to Ordinian (e.g. the Imperial primary); the scenario’s <b>Liberate Ordinian</b> objective; some agendas, promissory notes and other cards — e.g. a “Support for the Throne” note gives you 1 victory point when you receive it, but you lose that point and return the note if you activate a system containing its owner’s units or its owner is eliminated. A point gained from a law isn’t lost if the law is later discarded.</li>" :
+        "<li><b>Other points:</b> removing the custodians token (+1); the Imperial primary while you control Mecatol Rex (+1); some agendas" + (c.mode === "firstgame" ? "." : ", promissory notes and other cards — e.g. a “Support for the Throne” note gives you 1 victory point when you receive it, but you lose that point and return the note if you activate a system containing its owner’s units or its owner is eliminated.") + " A point gained from a law isn’t lost if the law is later discarded." + (TI.geEvent(c, "totalWar") ? " <b>Total War</b> (galactic event): as an action, discard 10 commodities from planets in your home system to gain 1 victory point (Codex IV p.16)." : "") + "</li>") +
       (c.mode === "liberation" ? "<li><b>Winning (Liberation of Ordinian):</b> the game ends when one of the allied Sol/Xxcha players has <b>12</b> victory points and the other <b>10</b>, or when any other player has <b>10</b> (Codex IV p.18 — it doesn’t say which side of the track to use). If the speaker must reveal a public objective and none are left, the game ends: most points wins, ties to initiative order.</li>" :
       TI.isAlliance(c) ? "<li><b>Winning (Alliance variant):</b> played on the 14-point side; an alliance wins when one ally has <b>14</b> victory points and the other at least <b>10</b> (" + TI.allianceSrc(c) + "). The game also ends if the speaker must reveal a public objective and none are left.</li>" :
-      "<li><b>Winning:</b> the first to <b>" + (c.mod("vp14") ? "14" : "10") + "</b> wins immediately. If several players would reach it at once, the earliest in initiative order wins (with no strategy cards in play: nearest the speaker, clockwise, speaker included). If the speaker must reveal a public objective and none are left, the game ends: most points wins, ties to initiative order.</li>") + "</ul>",
-    src: (c) => TI.cite(c, ["objectives", "vp", "status", "imperial", "custodians"], ["Wiki FAQ (Objectives)"].concat(TI.isTF(c) ? ["TF p.10–11"] : []).concat(TI.geEvent(c, "totalWar") ? ["Codex IV p.16"] : [])) + TI.scenarioSrc(c)
+      "<li><b>Winning:</b> the first to <b>" + (c.mod("vp14") ? "14" : "10") + "</b> wins immediately. If several players would reach it at once, the earliest in initiative order wins (with no strategy cards in play: nearest the speaker, clockwise, speaker included). If the speaker must reveal a public objective and none are left, the game ends: most points wins, ties to initiative order.</li>") +
+      "<li>An effect that refers to the player with the <b>most</b> or <b>fewest</b> victory points applies to <b>every</b> tied player.</li></ul>",
+    src: (c) => TI.cite(c, ["objectives", "vp", "status", "imperial", "custodians"], ["Wiki FAQ (Objectives)"].concat(c.mode !== "firstgame" && !TI.isTF(c) ? ["LtP p.21"] : []).concat(TI.isTF(c) ? ["TF p.10–11"] : []).concat(TI.geEvent(c, "totalWar") ? ["Codex IV p.16"] : [])) + TI.scenarioSrc(c)
   },
   {
     id: "ref-status", title: "Status phase — the 8 steps", when: () => true,
@@ -814,12 +821,13 @@ TI.reference = [
         : "<li>Their units, tokens, technologies, sheets and the promissory notes of their color/faction go back to the box (even ones other players hold); notes they held from others are returned to those players; laws they own are discarded; action cards discarded; strategy cards returned to the common area; secret objectives (scored or not) shuffled back.</li>") +
       "<li>If the speaker is eliminated, the token passes to the player on their left.</li>" +
       "<li>A game that started with 5+ players and drops to 4 or fewer still takes one strategy card each.</li>" +
-      (c.has("pok") ? "<li><b>PoK:</b> units they had captured return to their owners; relics are purged and relic fragments discarded (Wiki FAQ); units others had captured from them stay captured, and go to the box if they would ever be returned (Wiki FAQ)." + (TI.isTF(c) ? "" : " Faction specifics (Nekro assimilator tokens, Creuss wormhole tokens, the Naalu “0” token, Titans attachments, Mahact command tokens) are covered in LRR 33.10.") + "</li>" : (TI.isTF(c) ? "" : "<li>Faction specifics (Nekro assimilator tokens, Creuss wormhole tokens, the Naalu “0” token) are covered in LRR 33.10.</li>")) + "</ul>",
-    src: (c) => TI.cite(c, ["elimination"].concat(TI.isTF(c) ? [] : ["promissory"]), (c.has("pok") ? ["Wiki FAQ (General; Exploration)"] : []).concat(TI.isTF(c) ? ["TF p.6"] : []).concat(TI.isAlliance(c) ? [TI.allianceSrc(c)] : c.mode === "liberation" ? ["Codex IV p.18", "Codex II p.13"] : []))
+      (c.has("pok") ? "<li><b>PoK:</b> units they had captured return to their owners; relics are purged and relic fragments discarded (Wiki FAQ)." + (TI.isTF(c) ? "" : " Faction specifics (Nekro assimilator tokens, Creuss wormhole tokens, the Naalu “0” token, Titans attachments, Mahact command tokens) are covered in LRR 33.10.") + "</li>" +
+        "<li class=\"note flag\"><b>Sources disagree — units others had captured from them.</b> LRR §33.2 (followed here) returns every unit of their faction or colour to the game box, which reads as including their non-fighter ships and mechs on other players’ sheets. The Wiki FAQ reports an official answer that captured units stay on the capturer’s sheet and go to the box only if they would ever be returned. Captured fighter and infantry tokens belong to no player (§17.4), so they stay either way.</li>" : (TI.isTF(c) ? "" : "<li>Faction specifics (Nekro assimilator tokens, Creuss wormhole tokens, the Naalu “0” token) are covered in LRR 33.10.</li>")) + "</ul>",
+    src: (c) => TI.cite(c, ["elimination"].concat(TI.isTF(c) ? [] : ["promissory"]).concat(c.has("pok") ? ["capture"] : []), (c.has("pok") ? ["Wiki FAQ (General; Exploration) — conflict flagged"] : []).concat(TI.isTF(c) ? ["TF p.6"] : []).concat(TI.isAlliance(c) ? [TI.allianceSrc(c)] : c.mode === "liberation" ? ["Codex IV p.18", "Codex II p.13"] : []))
   },
   {
     id: "ref-leaders", title: "Leaders — agents, commanders & heroes (PoK)", when: (c) => c.has("pok") && !TI.isTF(c),
-    html: (c) => "<ul><li>Each faction has <b>three leaders</b>: an agent, a commander and a hero (the Nomad’s “The Company” adds two more agents — five in all). They sit on the leader sheet, hash-mark side up (1 agent, 2 commander, 3 hero).</li></ul>" +
+    html: (c) => "<ul><li>Each faction has <b>three leaders</b>: an agent, a commander and a hero. They sit on the leader sheet, hash-mark side up (1 agent, 2 commander, 3 hero). The Nomad’s “The Company” adds two more agents (five leaders in all); those two go in the Nomad’s play area, readied side up.</li></ul>" +
       "<dl><dt>Agent</dt><dd>No unlock needed; starts readied. Using its ability exhausts it; it readies in the status phase. Agents can interact with other players.</dd>" +
       "<dt>Commander</dt><dd>Locked until you meet its “Unlock” condition (conditions aren’t checked in the middle of resolving an ability) — then flip it; it never flips back. It can’t be exhausted. Your “Alliance” promissory note lets its holder use your commander too; you still can.</dd>" +
       "<dt>Hero</dt><dd>Unlocks when you have <b>3 scored objectives</b> (public and secret in any mix — victory points from other sources don’t count). A powerful once-per-game ability: it can’t be exhausted and is <b>purged</b> after its ability resolves (the Titans of Ul hero attaches to Elysium instead).</dd></dl>" +
@@ -838,8 +846,8 @@ TI.reference = [
   {
     id: "ref-explore", title: "Exploration, frontier tokens, attachments & relics (PoK)", when: (c) => c.has("pok"),
     html: (c) => "<h4>Exploring planets</h4><ul>" +
-      "<li>When you gain control of a planet <b>no one controlled before</b>, explore it: draw the top card of the exploration deck matching its <b>trait</b> — cultural, hazardous or industrial — and resolve it. A planet with several traits: choose the deck. Planets without a trait (Mecatol Rex, home planets) can’t be explored.</li>" +
-      "<li>Gaining several planets at once: choose an order and fully resolve each — gain A, explore A, gain B, explore B (Wiki FAQ). Transactions may happen after a card is revealed and before it resolves (Wiki FAQ).</li>" +
+      "<li>When you gain control of a planet that <b>isn’t already controlled by another player</b>, explore it: draw the top card of the exploration deck matching its <b>trait</b> — cultural, hazardous or industrial — and resolve it. A planet with several traits: choose the deck. Planets without a trait (Mecatol Rex, home planets) can’t be explored.</li>" +
+      "<li>Gaining several planets at once: choose an order and fully resolve each — gain A, explore A, gain B, explore B (Wiki FAQ). Transactions may happen after a card is revealed and before it resolves, but no other abilities can be used until it has resolved (Wiki FAQ).</li>" +
       "<li>After resolving, discard the card — unless it is a <b>relic fragment</b> or has an <b>Attach</b> header. An empty exploration deck is reshuffled from its discards.</li></ul>" +
       "<h4>Attachments</h4><ul><li>An “Attach” card goes partly under the explored planet’s card and its matching token goes on the planet; it changes the planet’s values/abilities and stays with the planet (and its ready state) when control changes. If the planet card is purged, its attachments are purged too.</li></ul>" +
       "<h4>Frontier tokens</h4><ul><li>Placed at setup in every non-home system without planets, anomalies included (never on hyperlanes; 1 per system). You can explore a frontier token only " + (TI.isTF(c) ? "when a card lets you (Twilight’s Fall uses no technology deck)" : "with the <b>Dark Energy Tap</b> technology or an ability that says so") + ": draw from the <b>frontier deck</b>, then discard the token.</li></ul>" +
@@ -892,10 +900,11 @@ TI.reference = [
         (pok ? "<li><b>Premade maps</b> for 3–8 players: PoK p.13 (3, 4), p.14 (5, 6), p.15 (7, 8) — no dealing.</li>" : "") +
         "<li><b>First-game preset maps</b> for 3–6 players: LtP p.22 (3, 4) and p.23 (5, 6).</li>" +
         "<li>Diagrams of every standard layout: LRR p.6" + (pok ? " (also PoK p.9 and p.12)" : " (base layouts also RR p.3)") + (te ? "; Thunder’s Edge layouts TE p.7" : "") + ".</li>" +
+        (TI.geEvent(c, "minorFactions") && c.galaxyFrom !== "option" ? "<li><b>Minor Factions</b> (galactic event" + (c.mod("ge-minorFactions") === true ? "" : ", if it is in play") + "): each player is dealt <b>1 fewer blue tile</b> than the table shows. Before the galaxy is created, each player places one unplayed faction’s home system in <b>ring 2</b>, equidistant from the players’ home systems (Codex IV p.15).</li>" : "") +
         (c.galaxyFrom === "option" ? "<li>This game’s galaxy comes from the selected mode or option — see its setup step.</li>" : "") + "</ul>";
       return h;
     },
-    src: (c) => (c.has("pok") ? "LRR p.4–6 · PoK p.9, p.11–15 · LtP p.22–23" : "LRR p.4–6 · RR p.2–3 · LtP p.22–23") + (c.has("te") ? " · TE p.7, p.12" : "")
+    src: (c) => (c.has("pok") ? "LRR p.4–6 · PoK p.9, p.11–15 · LtP p.22–23" : "LRR p.4–6 · RR p.2–3 · LtP p.22–23") + (c.has("te") ? " · TE p.7, p.12" : "") + (TI.geEvent(c, "minorFactions") && c.galaxyFrom !== "option" ? " · Codex IV p.15" : "")
   },
   {
     id: "ref-errata", title: "Errata — card text corrections", when: () => true,
@@ -913,7 +922,7 @@ TI.reference = [
         ["Unstable Planet", "action card", "Action: Choose 1 hazardous planet. Exhaust that planet and destroy up to 3 infantry on it."],
         ["Veto", "action card", "When an agenda is revealed: Discard that agenda and reveal 1 agenda from the top of the deck. Players vote on this agenda instead."]
       ];
-      return (TI.isTF(c) ? "<p class=\"note\">Twilight’s Fall returns the standard strategy cards, action cards, agendas, technologies, promissory notes, faction sheets, leaders and standard mechs to the box (TF p.6) — these apply only where a card with the same name is in play.</p>" : "") + "<p class=\"sub\">Read these cards as corrected below. The TI4 Wiki’s Errata page lists the same eleven corrections (its Diplomacy entry quotes only the secondary ability).</p>" +
+      return (TI.isTF(c) ? "<p class=\"note\">Twilight’s Fall returns the standard strategy cards, action cards, agendas, technologies, promissory notes, faction sheets, leaders and standard mechs to the box (TF p.6) — these apply only where a card with the same name is in play.</p>" : "") + "<p class=\"sub\">Read these cards as corrected below. The community TI4 Wiki’s Errata page lists the same eleven corrections (its Diplomacy entry quotes only the secondary ability).</p>" +
         E.map(e => "<div class=\"errata-card\"><b>" + e[0] + "</b> <span class=\"sub\">(" + e[1] + ")</span><br><q>" + e[2] + "</q></div>").join("");
     },
     src: (c) => "LRR errata p.40 · Wiki Errata" + (TI.isTF(c) ? " · TF p.6" : "")
@@ -922,13 +931,13 @@ TI.reference = [
     id: "ref-rulings", title: "Key rulings — LRR FAQ & TI4 Wiki FAQ", when: () => true,
     html: (c) => {
       /* Twilight's Fall has no agenda phase and no agenda cards (TF p.6, p.10): its agenda rulings can never apply */
-      const R = TI.rulings.filter(r => TI.setOk(c, r.set) && !(TI.isTF(c) && r.g === "Agendas"));
+      const R = TI.rulings.filter(r => TI.setOk(c, r.set) && !(TI.isTF(c) && (r.g === "Agendas" || r.tfOut)));
       const groups = [];
       for (const r of R) { let g = groups.find(x => x.g === r.g); if (!g) { g = { g: r.g, items: [] }; groups.push(g); } g.items.push(r); }
-      return (TI.isTF(c) ? "<p class=\"note\">Twilight’s Fall returns the standard strategy cards, action cards, agendas, technologies, promissory notes, faction sheets, leaders and standard mechs to the box (TF p.6) — these apply only where a card with the same name is in play. It has no agenda phase (TF p.10), so the agenda rulings are left out.</p>" : "") + "<p class=\"sub\">Official answers from the Living Rules Reference FAQ, and answers the TI4 Wiki marks as confirmed by Fantasy Flight Games or designer Dane Beltrami (“Wiki FAQ”). Card- and faction-specific rulings are under Faction rulings.</p>" +
-        groups.map(g => "<h4>" + g.g + "</h4><ul>" + g.items.map(r => "<li>" + r.t + " <span class=\"sub\">(" + r.s + ")</span></li>").join("") + "</ul>").join("");
+      return (TI.isTF(c) ? "<p class=\"note\">Twilight’s Fall returns the standard strategy cards, action cards, agendas, technologies, promissory notes, faction sheets, leaders and standard mechs, and the “Betray a Friend”, “Dictate Policy”, “Drive the Debate” and “Strengthen Bonds” secret objectives, to the box (TF p.6) — the rulings below apply only where a card with the same name is in play. It has no agenda phase (TF p.10), so the agenda rulings are left out, and the research/gain ruling is replaced by Twilight’s Fall’s own rule (TF p.10).</p>" : "") + "<p class=\"sub\">Official answers from the Living Rules Reference FAQ, and answers the TI4 Wiki (a community fan wiki, not an official source) marks as confirmed by Fantasy Flight Games or designer Dane Beltrami (“Wiki FAQ”). " + (TI.isTF(c) ? "Faction-specific rulings are under Faction rulings." : "Action-card rulings are under Action cards, voting and rider rulings under Agenda phase &amp; voting, and faction-specific rulings under Faction rulings.") + "</p>" +
+        groups.map(g => "<h4>" + g.g + "</h4><ul>" + g.items.map(r => "<li" + (r.flag ? " class=\"note flag\"" : "") + ">" + (typeof r.t === "function" ? r.t(c) : r.t) + " <span class=\"sub\">(" + (typeof r.s === "function" ? r.s(c) : r.s) + ")</span></li>").join("") + "</ul>").join("");
     },
-    src: (c) => "LRR FAQ p.40–42 · LRR §36 p.18, §39 p.19, §44 p.20, §46 p.20, §65 p.25, §95 p.36 · PoK p.16 · Wiki FAQ (General; Units & Unit Abilities; Objectives; Agendas; Technology; Exploration — topic on each ruling)" + (TI.isTF(c) ? " · TF p.6, p.10" : "")
+    src: (c) => "LRR FAQ p.40–42 · LRR §17 p.12, §33 p.17, §36 p.18, §39 p.19, §44 p.20, §46 p.20, §65 p.25, §95 p.36 · PoK p.16 · Wiki FAQ (General; Units & Unit Abilities; Objectives; Agendas; Technology; Exploration — topic on each ruling)" + (TI.isTF(c) ? " · TF p.6, p.10" : "")
   },
   {
     id: "ref-faction-rulings", title: "Faction rulings — LRR FAQ & TI4 Wiki FAQ", when: () => true,
@@ -937,26 +946,27 @@ TI.reference = [
       const groups = [];
       for (const r of R) { let g = groups.find(x => x.f === r.f); if (!g) { g = { f: r.f, items: [] }; groups.push(g); } g.items.push(r); }
       return (TI.isTF(c) ? "<p class=\"note\">Twilight’s Fall returns the standard strategy cards, action cards, agendas, technologies, promissory notes, faction sheets, leaders and standard mechs to the box (TF p.6) — these apply only where a card with the same name is in play.</p>" : "") + "<p class=\"sub\">Faction sheets, leaders and technologies are in the <a href=\"../../ti.html\">Faction Reference</a>. Rulings on Codex “Ω” cards appear only when that Codex (or Thunder’s Edge, which reprints them) is selected; rulings on the cards they replace are then hidden.</p>" +
-        "<dl>" + groups.map(g => "<dt>" + g.f + "</dt>" + g.items.map(r => "<dd>" + r.t + " <span class=\"sub\">(" + r.s + ")</span></dd>").join("")).join("") + "</dl>";
+        "<dl>" + groups.map(g => "<dt>" + g.f + "</dt>" + g.items.map(r => "<dd" + (r.flag ? " class=\"note flag\"" : "") + ">" + r.t + " <span class=\"sub\">(" + r.s + ")</span></dd>").join("")).join("") + "</dl>";
     },
-    src: (c) => "LRR errata p.40 · LRR FAQ p.41, p.43–44 · LRR §15, §33, §51, §60, §65, §68, §79, §85, §87, §90, §94 · PoK p.7, p.16 · Wiki FAQ (Factions)" + (c.has("te") ? " · TE p.5" : "") + (TI.isTF(c) ? " · TF p.6" : "")
+    src: (c) => "LRR errata p.40 · LRR FAQ p.41, p.43–44 · LRR §15, §33, " + (c.has("pok") ? "§51, " : "") + "§60, §65, §68, §79, §85, §87, §90, §94" + (c.has("pok") ? " · PoK p.7, p.16" : "") + (c.has("pok") && (c.has("codex3") || c.has("te")) ? " · Codex III p.13" : "") + " · Wiki FAQ (Factions)" + (c.has("te") ? " · TE p.5" : "") + (TI.isTF(c) ? " · TF p.6" : "")
   },
   {
     id: "ref-sources", title: "Sources & which rule wins", when: () => true,
     html: (c) => "<ul><li><b>Living Rules Reference v2.0</b> (22 Sept 2020) is “the definitive source” for base game + Prophecy of Kings rules; it beats the Learn to Play and the original base Rules Reference, and its errata and FAQ are applied throughout this page.</li>" +
-      "<li>Precedence, newest official ruling first: Thunder’s Edge &amp; Twilight’s Fall (2025) › Codex IV (2025) › Codex III (2022) › Codex II (2021) › LRR v2.0 (Sept 2020) › Prophecy of Kings rulebook (2020) › Codex I (2020 — its foreword says it came out before Prophecy of Kings was released) › base Rules Reference (2017) › Learn to Play. Thunder’s Edge ranks above every Codex because it reprints their content in revised form (TE p.4). A card beats the rules where they conflict.</li>" +
-      "<li><b>TI4 Wiki FAQ</b> answers marked official (confirmed by FFG or the designer) are used only to clarify what the PDFs leave open, labelled “Wiki FAQ”; where one conflicts with a PDF the PDF rule is shown and the conflict is flagged. Unofficial community answers are not used.</li>" +
+      "<li>Precedence, newest official ruling first: Thunder’s Edge &amp; Twilight’s Fall (2025) › Codex IV (2025) › Codex III (2022) › Codex II (2021) › LRR v2.0 (Sept 2020) › Prophecy of Kings rulebook (2020) › Codex I (2020 — its foreword says it came out before Prophecy of Kings was released) › base Rules Reference (2017) › Learn to Play › TI4 Wiki (community, clarification only). Thunder’s Edge ranks above every Codex because it reprints their content in revised form (TE p.4). A card beats the rules where they conflict.</li>" +
+      "<li><b>TI4 Wiki</b> (a community-run fan wiki, the lowest tier, below every official document): only answers on its FAQ page that it marks as confirmed by FFG or the designer are used, and only to clarify what the PDFs leave open, labelled “Wiki FAQ”. Its Errata page is used only as a cross-check of LRR p.40. Where one conflicts with a PDF, the PDF rule is shown and the conflict is flagged. Unofficial community answers are not used.</li>" +
       (c.has("te") ? "<li><b>Thunder’s Edge</b> (TE p.16) points to the Living Rules Reference online for the full rules. The LRR used here is v2.0 (2020), which predates Thunder’s Edge: where the Thunder’s Edge rulebook changes a rule, this page follows it; any later LRR revision is not covered.</li>" : "") +
       "<li>Page numbers are the printed page numbers of each booklet (they match the PDF pages). Base-game-only setups also cite the base Rules Reference (RR); the first game also cites the Learn to Play (LtP).</li></ul>",
     src: (c) => "LRR changelog (unnumbered PDF p.2), p.4, §1 p.7 · LtP p.5 · Codex I p.4 · TE p.4" + (c.has("te") ? ", p.16" : "")
   }
 ];
 
-/* set gate for rulings: "base" always · "pok" · "base-only" (cards PoK removes) · codex/te ids ·
+/* set gate for rulings: "base" always · "pok" · "base-only" (cards PoK removes) · "tf" (Twilight's Fall mode) · codex/te ids ·
    "!id" = that set is NOT selected · arrays = any of · {all: [...]} = every one of */
 TI.setOk = function (c, set) {
   if (!set || set === "base") return true;
   if (set === "base-only") return !c.has("pok");
+  if (set === "tf") return TI.isTF(c);
   if (typeof set === "string" && set.charAt(0) === "!") return !c.has(set.slice(1));
   if (Array.isArray(set)) return set.some(s => TI.setOk(c, s));
   if (typeof set === "object" && Array.isArray(set.all)) return set.all.every(s => TI.setOk(c, s));
@@ -990,17 +1000,17 @@ TI.rulings = [
   { g: "General", t: "Players don’t begin the game with commodities.", s: "Wiki FAQ (Commodities)" },
   { g: "General", t: "“End of turn” abilities can be resolved on the turn you pass.", s: "Wiki FAQ (Passing)" },
   { g: "General", t: "“After X” happens before “before Y” — they are distinct windows.", s: "Wiki FAQ (Timing)" },
-  { g: "General", t: "<b>Sources disagree:</b> a fighter or infantry token left without a plastic piece of its type, which can’t be replaced with one, is <b>destroyed</b> under LRR §36.3a and §46.3a (followed here); the Wiki FAQ reports an official answer that such tokens are <b>removed</b>, not destroyed.", s: "LRR §36 p.18, §46 p.20 · Wiki FAQ (Excess Fighters/Infantry) — conflict flagged" },
+  { g: "General", t: "<b>Sources disagree:</b> a fighter or infantry token left without a plastic piece of its type, which can’t be replaced with one, is <b>destroyed</b> under LRR §36.3a and §46.3a (followed here); the Wiki FAQ reports an official answer that such tokens are <b>removed</b>, not destroyed.", s: "LRR §36 p.18, §46 p.20 · Wiki FAQ (Excess Fighters/Infantry) — conflict flagged", flag: true },
   { g: "General", t: "“Replace” may be treated as “remove and place” when you have no units of that type left in reinforcements (component limitations apply). This overturns an earlier ruling about the Minister of Industry.", s: "Wiki FAQ (Replace v. Remove and Place)" },
   { g: "General", t: "A damaged unit that an ability removes and places (e.g. Transit Diodes) stays damaged; a damaged unit taken off the board so that it can be produced, placed or replaced (component limits) comes back undamaged.", s: "Wiki FAQ (Replace v. Remove and Place)" },
   { g: "General", t: "“At the start of a combat” abilities can only be used in a combat you are taking part in.", s: "Wiki FAQ (General)" },
-  { g: "General", t: "Captured units stay on the capturer’s sheet when their owner is eliminated; if they would be returned, they go to the box.", s: "Wiki FAQ (General)", set: "pok" },
+  { g: "General", t: "<b>Sources disagree:</b> when a player is eliminated, LRR §33.2 (followed here) returns every unit of their faction or colour to the game box, which reads as including their non-fighter ships and mechs captured on other players’ sheets. The Wiki FAQ reports an official answer that captured units stay on the capturer’s sheet and go to the box only if they would ever be returned. Captured fighter and infantry tokens belong to no player (§17.4), so they stay either way.", s: "LRR §33 p.17, §17 p.12 · Wiki FAQ (General) — conflict flagged", set: ["pok", "tf"], flag: true },
   { g: "Movement & combat", t: "Fighters block ship movement (a correction since LRR v1.1).", s: "LRR FAQ p.40" },
   { g: "Movement & combat", t: "Any effect that moves a ship (e.g. “Skilled Retreat”, the “Foresight” faction ability) lets it transport units from its system if it has capacity — including units on planets.", s: "LRR FAQ p.41" },
   { g: "Movement & combat", t: "If neither side can possibly win a space combat, the attacker must retreat; if they can’t, their units in the combat are destroyed.", s: "LRR FAQ p.40" },
   { g: "Movement & combat", t: "Only the destination system is moved “into”; the others are moved “through”. The mover chooses the path when wormholes and ordinary adjacency both work.", s: "Wiki FAQ (Moving Into Systems; Path of Movement)" },
-  { g: "Movement & combat", t: "<b>Sources disagree:</b> LRR §95.3 (followed here) bars picking up fighters and ground forces from a system that contains your command token (other than the active system), without limiting this to tactical actions. The Wiki FAQ reports an official ruling that the restriction applies only during tactical actions — ships moved by abilities may transport units out of such systems — and that the LRR “will be updated”; LRR v2.0 hasn’t been.", s: "LRR §95 p.36 · Wiki FAQ (Movement Abilities) — conflict flagged" },
-  { g: "Movement & combat", t: "<b>Sources disagree:</b> LRR §39.2 (followed here) puts a system on the board’s edge if any of its sides doesn’t touch another system tile, and hyperlane tiles aren’t systems (§44.2). The Wiki FAQ gives the designer’s intent that, on hyperlane maps, a side touching a hyperlane tile isn’t an edge.", s: "LRR §39 p.19, §44 p.20 · Wiki FAQ (Hyperlanes) — conflict flagged", set: ["pok", "te"] },
+  { g: "Movement & combat", t: "<b>Sources disagree:</b> LRR §95.3 (followed here) bars picking up fighters and ground forces from a system that contains your command token (other than the active system), without limiting this to tactical actions. The Wiki FAQ reports an official ruling that the restriction applies only during tactical actions — ships moved by abilities may transport units out of such systems — and that the LRR “will be updated”; LRR v2.0 hasn’t been.", s: "LRR §95 p.36 · Wiki FAQ (Movement Abilities) — conflict flagged", flag: true },
+  { g: "Movement & combat", t: "<b>Sources disagree:</b> LRR §39.2 (followed here) puts a system on the board’s edge if any of its sides doesn’t touch another system tile, and hyperlane tiles aren’t systems (§44.2). The Wiki FAQ gives the designer’s intent that, on hyperlane maps, a side touching a hyperlane tile isn’t an edge.", s: "LRR §39 p.19, §44 p.20 · Wiki FAQ (Hyperlanes) — conflict flagged", set: ["pok", "te"], flag: true },
   { g: "Unit abilities", t: "Bombardment, Anti-Fighter Barrage and Space Cannon are optional — you choose whether to roll.", s: "Wiki FAQ (Units & Unit Abilities)" },
   { g: "Unit abilities", t: "The anti-fighter barrage step still happens when the opponent has no fighters.", s: "Wiki FAQ (Units & Unit Abilities) · PoK p.16" },
   { g: "Unit abilities", t: "“Plasma Scoring” adds one die to each Bombardment or Space Cannon roll — not one per unit — and you choose the unit before rolling. With PDS on several invaded planets, each planet’s space cannon roll gets its die.", s: "LRR FAQ p.40–41" },
@@ -1017,7 +1027,7 @@ TI.rulings = [
   { g: "Objectives", t: "An objective requiring “units” is met by a single unit.", s: "Wiki FAQ (Objectives)" },
   { g: "Objectives", t: "Secret objectives are scored “after” events — e.g. Become a Martyr after elimination or losing Shard of the Throne; “Legal Text” action cards are played before Drive the Debate can be scored.", s: "Wiki FAQ (Objectives)" },
   { g: "Objectives", t: "“Turn Their Fleets to Dust” isn’t fulfilled by “Direct Hit”, or by destroying a ship with capacity so its fighters are removed — Space Cannon didn’t destroy the last ship.", s: "LRR FAQ p.41", set: { all: ["!codex3", "!te"] } },
-  { g: "Objectives", t: "Another player holding your “Trade Agreement” doesn’t count for “Strengthen Bonds” or “Betray a Friend” — only notes their instructions put in a play area count.", s: "Wiki FAQ (Objectives)" },
+  { g: "Objectives", t: "Another player holding your “Trade Agreement” doesn’t count for “Strengthen Bonds” or “Betray a Friend” — only notes their instructions put in a play area count.", s: "Wiki FAQ (Objectives)", tfOut: true },
   { g: "Objectives", t: "“Rule Distant Lands”: control 2 planets, each in or adjacent to a <i>different</i> opponent’s home system.", s: "Wiki FAQ (Objectives)" },
   { g: "Objectives", t: "A planet under a destroyed planet token is no longer a planet for any purpose.", s: "Wiki FAQ (Objectives)", set: "pok" },
   { g: "Objectives", t: "“Impersonation” can be played at your secret-objective limit: draw, then return one and shuffle.", s: "Wiki FAQ (Objectives)", set: ["codex1", "te"] },
@@ -1031,12 +1041,14 @@ TI.rulings = [
   { g: "Agendas", t: "“Minister of War”: performing any action is the trigger.", s: "LRR FAQ p.42" },
   { g: "Agendas", t: "“Shared Research” (Against): place the token in your home system even if you don’t control it. “New Constitution” exhausts only home planets you control.", s: "Wiki FAQ (Agendas)" },
   { g: "Agendas", t: "“Covert Legislation”: follow the text (draw a new agenda if the drawn one replaces itself); the speaker still votes. “Legal Text” cards and “Deadly Plot” must be played before the hidden agenda is revealed; “resolved with no effect” can’t be predicted.", s: "Wiki FAQ (Agendas)" },
-  { g: "Technology", t: "An ability that says “research” needs the prerequisites; “gain” or “replace” does not. You can’t resolve an ability to gain a technology you already own.", s: "Wiki FAQ (Technology)" },
+  { g: "Technology", t: "An ability that says “research” needs the prerequisites; “gain” or “replace” does not. You can’t resolve an ability to gain a technology you already own.", s: "Wiki FAQ (Technology)", tfOut: true },
+  { g: "Technology", t: "Twilight’s Fall has no technology deck. If an effect lets you gain or research a technology, you can take one of your faction technologies instead (they have no prerequisites); if you already have both, you may gain 2 command tokens instead.", s: "TF p.10", set: "tf" },
   { g: "Technology", t: "“Sling Relay” must produce a ship; an exhausted “Predictive Intelligence” gives no bonus votes; “Psychoarchaeology” trade goods are gained one at a time.", s: "Wiki FAQ (Technology)" },
   { g: "Technology", t: "When Infantry II’s resurrection and a capture effect both apply to the same infantry, both happen.", s: "Wiki FAQ (Technology)", set: "pok" },
   { g: "Exploration & relics", t: "Gaining several planets: gain and explore each in turn (gain A, explore A, gain B, explore B).", s: "Wiki FAQ (Exploration)", set: "pok" },
-  { g: "Exploration & relics", t: "Eliminated players’ relics are purged and relic fragments discarded. You may purge fragments even if the relic deck is empty.", s: "Wiki FAQ (Exploration)", set: "pok" },
-  { g: "Exploration & relics", t: "Over your commodity limit after purging the “Dynamis Core” relic? Discard down.", s: "Wiki FAQ (Exploration)", set: { all: [["codex2", "te"], ["pok", "te"]] } },
+  { g: "Exploration & relics", t: "Eliminated players’ relics are purged.", s: "Wiki FAQ (Exploration)", set: ["pok", "te"] },
+  { g: "Exploration & relics", t: "An eliminated player’s relic fragments are discarded. You may purge fragments even if the relic deck is empty.", s: "Wiki FAQ (Exploration)", set: "pok" },
+  { g: "Exploration & relics", t: (c) => "Over your commodity limit after purging the “Dynamis Core” relic? Discard down." + (TI.geEvent(c, "ageOfCommerce") ? " During the <b>Age of Commerce</b> galactic event there is no commodity maximum, so you keep them (Codex IV p.16)." : ""), s: (c) => "Wiki FAQ (Exploration)" + (TI.geEvent(c, "ageOfCommerce") ? " · Codex IV p.16" : ""), set: { all: [["codex2", "te"], ["pok", "te"]] } },
   { g: "Exploration & relics", t: "Cards taken from a discard pile with “The Codex” relic are public knowledge. “The Crown of Thalnos” affects only combat rolls (not Infantry II, “Courageous to the End” or anti-fighter barrage).", s: "Wiki FAQ (Exploration)", set: "pok" }
 ];
 
@@ -1046,7 +1058,7 @@ TI.factionRulings = [
   { f: "The Arborec", t: "The Warfare secondary triggers only space docks, so it can’t trigger Letani Warriors’ Production.", s: "LRR FAQ p.43", set: "!te" },
   { f: "The Arborec", t: "The LRR FAQ answer that the Warfare secondary can’t trigger Letani Warriors’ Production was written for the old “1 space dock” wording; Thunder’s Edge’s revised Warfare secondary uses the PRODUCTION abilities of the units in your home system.", s: "TE p.5 · LRR FAQ p.43", set: "te" },
   { f: "The Arborec", t: "Several Letani Warriors in a system total their Production (2 infantry for 1 resource).", s: "LRR FAQ p.43" },
-  { f: "The Arborec", t: "“Duha Menaimon” must be in the system when it is activated. “Sarween Tools” doesn’t reduce its production. “Mitosis” places only 1 infantry on a single planet.", s: "LRR FAQ p.43 · Wiki FAQ (The Arborec)" },
+  { f: "The Arborec", t: "“Duha Menaimon” must be in the system when it is activated. “Sarween Tools” doesn’t reduce the cost of units it produces (its ability isn’t PRODUCTION). “Mitosis” places only 1 infantry on a single planet.", s: "LRR FAQ p.41, p.43 · Wiki FAQ (The Arborec)" },
   { f: "The Arborec", t: "Hero “Ultrasonic Emitter”: the produced units must be paid for.", s: "Wiki FAQ (The Arborec)", set: "pok" },
   { f: "The Barony of Letnev", t: "“Non-Euclidean Shielding”: their Sustain Damage cancels up to 2 hits instead of 1.", s: "LRR §87 p.33" },
   { f: "The Barony of Letnev", t: "“War Funding” and “Munitions Reserves” affect only combat rolls — not anti-fighter barrage.", s: "Wiki FAQ (The Barony of Letnev)" },
@@ -1057,7 +1069,7 @@ TI.factionRulings = [
   { f: "The Embers of Muaat", t: "Prototype War Sun I is a printed unit, not a technology: the Nekro can’t copy it; with “Publicize Weapon Schematics” For, it loses Sustain Damage but others can’t ignore war sun prerequisites through it, and Against doesn’t affect it (normal once Prototype War Sun II is researched).", s: "LRR FAQ p.43 · Wiki FAQ (The Embers of Muaat)" },
   { f: "The Embers of Muaat", t: "Hero “Nova Seed” purges all tokens in the system except command and frontier tokens; faction tokens return to their faction.", s: "Wiki FAQ (The Embers of Muaat)", set: "pok" },
   { f: "The Emirates of Hacan", t: "They may trade action cards in transactions. For transactions with non-neighbors, either player may open negotiations as long as the active player is involved. “Arbiters” is passive and still works under “Political Secret”.", s: "LRR §94 p.36 · LRR FAQ p.43 · Wiki FAQ (The Emirates of Hacan)" },
-  { f: "The Emirates of Hacan", t: "A planet holding the Hacan mech can’t be traded during combat (future errata).", s: "Wiki FAQ (The Emirates of Hacan)", set: "pok" },
+  { f: "The Emirates of Hacan", t: "A planet holding the Hacan mech can’t be traded during combat, and you can’t produce ground forces on a planet that holds another player’s ground forces (future errata).", s: "Wiki FAQ (The Emirates of Hacan)", set: "pok" },
   { f: "The Ghosts of Creuss", t: "Their promissory note works even without “Wormhole Generator”. “Light/Wave Deflector” lets other players move through a “Hil Colish” wormhole into the Creuss home or Gate system. If the Hil Colish is removed by a gravity rift, its wormhole is gone for later ships.", s: "LRR FAQ p.44" },
   { f: "The Ghosts of Creuss", t: "Players are neighbors with the Creuss when Quantum Entanglement creates adjacency from the Creuss player’s view. Creuss wormhole tokens stay on the board if they are eliminated.", s: "LRR §60 p.24, §33 p.17" },
   { f: "The Ghosts of Creuss", t: "Commander Sai Seravus: fighters are placed one at a time, up to the number of capacity ships that moved through wormholes or the capacity limit. Hero “Singularity Reactor”: all tokens stay with their tile.", s: "Wiki FAQ (The Ghosts of Creuss)", set: "pok" },
@@ -1071,7 +1083,7 @@ TI.factionRulings = [
   { f: "The Nekro Virus", t: "“The Alastor”: infantry in the space combat count as ships for card effects (not fleet supply), keep fighting if it dies, can invade afterwards, count for “Assault Cannon”, and give the Winnu flagship extra dice.", s: "LRR FAQ p.43 · Wiki FAQ (The Nekro Virus)" },
   { f: "The Nekro Virus", t: "The Nekro player can’t vote, so they can’t play “Bribery” or “Distinguished Councilor” — but they can still play rider action cards.", s: "LRR FAQ p.43 · Wiki FAQ (The Nekro Virus)" },
   { f: "The Nekro Virus", t: "“Prophet’s Tears” works with Propagation, not with Technological Singularity. Agent Nekro Malleon (like other “during the action phase” abilities) can’t interrupt another ability. Alastor ground forces don’t move from where they are; if on a planet they are immune to Strike Wing Alpha II.", s: "Wiki FAQ (The Nekro Virus)", set: "pok" },
-  { f: "The Sardakk N’orr", t: "Commander G’hom Sek’kus: “Ceasefire” stops it (the LRR will say “move”); not usable when defending, nor with “Dominus Orb”; usable without moving ships in. “Valkyrie Particle Weave” still produces its hit if their hits were canceled.", s: "Wiki FAQ (Sardakk N’orr)", set: "pok" },
+  { f: "The Sardakk N’orr", t: "Commander G’hom Sek’kus: the LRR will say “move” instead of “commit”, so “Ceasefire” stops it, and ground forces can’t be committed to planets in anomalies without the appropriate technology, or through wormholes while “Enforced Travel Ban” is a law; not usable when defending, nor with “Dominus Orb”; usable without moving ships in. “Valkyrie Particle Weave” still produces its hit if their hits were canceled.", s: "Wiki FAQ (Sardakk N’orr)", set: "pok" },
   { f: "The Universities of Jol-Nar", t: "Hero Rin swaps technologies simultaneously; a Nekro assimilator token on a swapped faction technology stays with it.", s: "Wiki FAQ (The Universities of Jol-Nar)", set: "pok" },
   { f: "The Winnu", t: "Commander Rickar Rickani gives at most +2. “Reclamation” happens after the tactical action, too late to produce on Mecatol Rex that action.", s: "Wiki FAQ (The Winnu)", set: "pok" },
   { f: "The Xxcha Kingdom", t: "“Peace Accords” works from a planet to another in the same system, and on a planet whose system has other players’ ships as long as the planet has no opposing ground forces or structures. “Instinct Training” can cancel “Sabotage”. “Political Favor” can’t be used if the Xxcha strategy pool is empty.", s: "LRR FAQ p.43 · Wiki FAQ (The Xxcha Kingdom)" },
@@ -1081,10 +1093,11 @@ TI.factionRulings = [
   { f: "The Yssaril Tribes", t: "“Scheming” triggers every time they draw action cards.", s: "LRR FAQ p.41" },
   { f: "The Yin Brotherhood", t: "“Devotion” — see Errata.", s: "LRR errata p.40" },
   { f: "The Yin Brotherhood", t: "Agent Brother Milor keeps a combat going after the last ship is destroyed. Commander Brother Omar lets them build a single infantry for 1 resource and gain another.", s: "Wiki FAQ (The Yin Brotherhood)", set: { all: ["pok", "!codex3", "!te"] } },
-  { f: "The Yin Brotherhood", t: "Quantum Dissemination Ω resolves ground combats (not full invasions); “Parley” can be played on one planet. Brother Milor Ω works only in the action phase; with the Nekro or Naalu flagship abilities, the owner chooses fighters or infantry.", s: "Wiki FAQ (The Yin Brotherhood)", set: { all: ["pok", ["codex3", "te"]] } },
+  { f: "The Yin Brotherhood", t: "<b>Sources disagree:</b> Quantum Dissemination Ω as printed (Codex III p.13) says to <b>resolve invasions</b> on those planets (followed here); the Wiki FAQ reports an official answer that it should resolve only ground combats, not full invasion steps, with “Parley” playable on one of those planets. <b>Sources disagree:</b> Brother Milor Ω’s printed trigger (“After a player’s unit is destroyed”) has no phase limit (followed here); the Wiki FAQ reports an official answer that it can be used only in the action phase. With the Nekro or Naalu flagship abilities, the owner chooses fighters or infantry.", s: "Codex III p.13 · Wiki FAQ (The Yin Brotherhood) — conflicts flagged", set: { all: ["pok", ["codex3", "te"]] }, flag: true },
   { f: "The Argent Flight", t: "“Raid Formation” damages ships without using Sustain Damage (no “Direct Hit” window) and applies after rolling, before canceling or assigning hits. Hero Mirik Aun Sissiri must obey anomaly movement rules. “Strike Wing Alpha II”: rerolls happen first, and its infantry are destroyed before hits are canceled.", s: "Wiki FAQ (The Argent Flight)", set: "pok" },
   { f: "The Empyrean", t: "“Dark Pact”: the commodities and the trade good are gained together (one gain for “Pillage”). Flagship “Dynamo” may repair several times in a round, paying 2 influence each time, but one unit can’t sustain twice in one window.", s: "Wiki FAQ (The Empyrean)", set: "pok" },
-  { f: "The Mahact Gene-Sorcerers", t: "“Hubris”: they purge their own “Alliance” during setup and can’t receive others’. Agent Jae Mir Kan needs an eligible planet for the structure; the other player’s token is still placed. Commander Il Na Viroset: “when/after you activate” abilities can’t be used on the second token; end-of-turn ones can; “Dark Energy Tap” doesn’t trigger.", s: "PoK p.7 · Wiki FAQ (The Mahact Gene-Sorcerers)", set: "pok" },
+  { f: "The Mahact Gene-Sorcerers", t: "“Hubris”: they purge their own “Alliance” during setup and can’t receive others’. Agent Jae Mir Kan needs an eligible planet for the structure; the other player’s token is still placed. Commander Il Na Viroset: when they place a second token in a system, “when/after you activate” abilities and other abilities within that turn can’t be used, but end-of-turn abilities can; an ability that ends the turn ends it at once, with no further abilities in that timing window; “Dark Energy Tap” doesn’t trigger.", s: "PoK p.7 · Wiki FAQ (The Mahact Gene-Sorcerers)", set: "pok" },
+  { f: "The Mahact Gene-Sorcerers", t: "“Genetic Recombination” resolves before votes are cast, so it can’t target a player who can’t vote or has no votes. A Mahact mech produced after a system is activated wasn’t there at activation, so its ability doesn’t trigger.", s: "Wiki FAQ (The Mahact Gene-Sorcerers)", set: "pok" },
   { f: "The Mahact Gene-Sorcerers", t: "Commander Il Na Viroset: when it is used, the “Counterstroke” action card can’t be played.", s: "Wiki FAQ (The Mahact Gene-Sorcerers)", set: { all: ["pok", ["codex1", "te"]] } },
   { f: "The Mahact Gene-Sorcerers", t: "Hero “Benediction”: ships leaving gravity rifts roll; the moved ships’ owner is the attacker and the combat system counts as the active system; capacity is checked before combat; moving their own ships, the Mahact may pick up their own ground forces from planets, but ground forces on planets can’t be picked up with another player’s moved ships (by the Mahact or by that player). They may use their mech on themselves. An agenda removing a fleet-pool token takes another player’s token if that is all they have; with “Fleet Regulations” they may add a 5th token then return one.", s: "Wiki FAQ (The Mahact Gene-Sorcerers)", set: "pok" },
   { f: "The Naaz-Rokha Alliance", t: "Hero Hesh and Prit can take tokens from the command sheet when reinforcements are empty (LRR to be updated). A fragment can be purged for a command token with none in reinforcements — you just gain none. “Distant Suns”: decide on the extra card before drawing.", s: "Wiki FAQ (The Naaz-Rokha Alliance)", set: "pok" },
@@ -1115,7 +1128,7 @@ TI.teach = {
           : TI.isAlliance(c) ? "We’re playing in alliances of two, so winning works differently — more in a moment — but points still come almost entirely from <b>objectives</b>: public ones we all race for, and secret ones only you know."
           : "The first to <b>" + (c.mod("vp14") ? "14" : "10") + " victory points</b> wins" + (c.mod("vp14") ? " — we’re playing the long war, 14 points instead of 10" : "") + ", and points come almost entirely from <b>objectives</b>: public ones we all race for, and secret ones only you know.") +
         " The game also ends if a new public objective must be revealed and none are left — most points wins.</p>" +
-        (c.mode === "firstgame" ? "<p>This is a <b>first game</b>, kept simple: a <b>preset map</b>, six starter factions dealt at random, one secret objective each, and no promissory notes yet.</p>" : "") },
+        (c.mode === "firstgame" ? "<p>This is a <b>first game</b>, kept simple: a <b>preset map</b>, six starter factions dealt at random, one secret objective each, and no promissory notes yet." + (c.p === 5 ? " With five of us, the seat closest to two others starts with four extra trade goods, and the two seats beside it get two each." : "") + "</p>" : "") },
     { id: "round", h: "The shape of a round",
       body: (c) => "<p><b>Strategy phase:</b> from the speaker, clockwise, each of us takes one of the eight strategy cards" + (c.p <= 4 ? ", then a second one" : "") + "; its number is your turn order this round, and cards nobody takes gain a trade good. <b>Action phase:</b> in turn order we take one action each, round and round, until everyone has passed. <b>Status phase:</b> score objectives, reveal a new one, draw an action card, take our command tokens back off the board, gain two more, and ready everything. " +
         (TI.isTF(c) ? "Then, instead of an agenda phase, comes the <b>benediction phase</b> — more on that below.</p>"
@@ -1131,7 +1144,7 @@ TI.teach = {
     { id: "economy", h: "Planets and money",
       body: (c) => "<p>Each planet has a <b>resource</b> value (left) for ships" + (TI.isTF(c) ? "" : " and technology") + " and an <b>influence</b> value (right) for command tokens" + (TI.isTF(c) ? "" : " and votes") + ". Spend it by exhausting the card; it readies in the status phase. <b>Trade goods</b> count as either. <b>Commodities</b> are worthless to you but become trade goods when given to another player — that’s why neighbors trade.</p>" },
     { id: "combat", h: "Fighting",
-      body: () => "<p><b>Space combat</b>: each side rolls a ten-sided die per ship (some ships roll several), and each die equal to or above the ship’s combat value is a hit. Each side picks its own losses — fighters make good fodder. Repeat until one side is gone or retreats. Then <b>invade</b>: land ground forces, fight a ground combat the same way, and the survivor takes the planet. Enemy <b>PDS</b> fire their space cannon when you arrive and again when you land.</p>" },
+      body: () => "<p><b>Space combat</b>: each side rolls a ten-sided die per ship (some ships roll several), and each die equal to or above the ship’s combat value is a hit. Each side picks its own losses — fighters make good fodder. Repeat until one side is gone or retreats. Then <b>invade</b>: land ground forces, fight a ground combat the same way, and the survivor takes the planet. Enemy <b>PDS</b> fire their space cannon at your ships when you arrive, and PDS on a planet you invade fire again at the ground forces you land there.</p>" },
     { id: "objectives", h: "Scoring",
       body: () => "<p>In each status phase you may score <b>one public and one secret objective</b>. You can only score public objectives while you control <b>every planet in your home system</b>, so don’t leave it bare. Five stage I and five stage II objectives wait face down; one more is revealed each round.</p>" },
     { id: "council", h: (c) => c.mode === "ordinian" || c.mode === "liberation" ? "The Galactic Council" : "Mecatol Rex and the Galactic Council",
@@ -1152,7 +1165,7 @@ TI.teach = {
         const hl = " Hyperlanes — tiles with lines across them — link the systems at each end as if they were adjacent; nothing can stop on them.";
         if (c.has("te") && (c.galaxy === "hyper5" || c.galaxy === "hyper4")) return "<p>We <b>built the galaxy ourselves</b>, placing tiles in turn around the Thunder’s Edge <b>hyperlanes</b>.</p>";
         if (c.galaxy === "hyper5") return "<p>Our five-player galaxy uses <b>hyperlanes</b>." + hl + " They balance the seats, so no one got bonus trade goods.</p>";
-        if (c.galaxy === "large") return "<p>This is the <b>large galaxy</b>: four rings and every tile in the box — room to grow, which is why 14 points is recommended.</p>";
+        if (c.galaxy === "large") return c.has("te") ? "<p>This is the <b>large galaxy</b>: four rings and plenty of tiles — room to grow, which is why 14 points is recommended.</p>" : "<p>This is the <b>large galaxy</b>: four rings and every tile in the box — room to grow, which is why 14 points is recommended.</p>";
         if (c.galaxy === "alt") return "<p>This galaxy uses the <b>alternate hyperlanes</b>, set inside the map." + hl + "</p>";
         if (c.galaxy === "premade") return "<p>Tonight’s galaxy is a <b>premade map</b> from the Prophecy of Kings rulebook." + (TI.PREMADE_HL[c.p] ? hl : "") + "</p>";
         return "<p>We <b>built the galaxy ourselves</b>, placing tiles in turn — remember who put that asteroid field next to you." +
@@ -1168,14 +1181,14 @@ TI.teach = {
             (c.mode === "liberation" ? " Sol and the Xxcha are the exception: as allies they purged those notes and start with their commanders unlocked." : "")) +
         " Your <b>hero</b> unlocks at three scored objectives: a once-per-game blowout, then it’s purged. You also have <b>mechs</b>, heavy ground forces unique to your faction; some have a Deploy ability that puts them on the board without producing them.</p>" },
     { id: "pok-explore", when: (c) => c.has("pok"), h: "Exploration, relics and legendary planets",
-      body: (c) => "<p>When you take control of a planet no other player controls, you <b>explore</b> it: draw from the deck matching its trait for commodities, units, attachments or <b>relic fragments</b> — three of a type buy a <b>relic</b>. Empty systems have frontier tokens, explored " + (TI.isTF(c) ? "only when a card lets you" : "with the Dark Energy Tap technology") + ". <b>Legendary</b> planets come with an ability card. The <b>wormhole nexus</b> sits off the map with a gamma wormhole, opening to alpha and beta once someone enters it or takes Mallice.</p>" },
+      body: (c) => "<p>When you take control of a planet no other player controls, you <b>explore</b> it: draw from the deck matching its trait for commodities, units, attachments or <b>relic fragments</b> — three of a type buy a <b>relic</b>. Empty systems have frontier tokens, explored " + (TI.isTF(c) ? "only when a card lets you" : "with the Dark Energy Tap technology") + ". <b>Legendary</b> planets come with an ability card. The <b>wormhole nexus</b> sits beside the map but counts as part of the board, on its edge: it starts with only a gamma wormhole and opens to alpha and beta once someone moves or places a unit into it or gains control of Mallice.</p>" },
     /* ---- module-file teach inserts are placed here ---- */
     { id: "later", h: "Don’t worry about these until they come up",
       body: (c) => "<ul>" +
         "<li><b>Anomalies</b> — asteroid fields, supernovas, nebulas, gravity rifts: I’ll explain when one is in your way.</li>" +
         "<li><b>Unit abilities</b> — Sustain Damage, Anti-Fighter Barrage, Bombardment, Planetary Shield, Space Cannon — printed on your faction sheet.</li>" +
         "<li><b>Retreats, capacity, production limits and blockades</b> — in the reference.</li>" +
-        (TI.isTF(c) ? "" : "<li><b>Technology prerequisites</b> — the colored symbols; a planet’s technology specialty can stand in for one.</li>") +
+        (TI.isTF(c) ? "" : "<li><b>Technology prerequisites</b> — the colored symbols; you can exhaust a planet with a matching technology specialty to ignore one.</li>") +
         "<li><b>Card wording</b> — each action card" + (TI.isTF(c) ? "" : " and agenda") + " says when it’s played.</li>" +
         "<li><b>Elimination</b> — rare.</li>" +
         (c.has("pok") ? "<li><b>Capture, purge and deploy</b> — the cards that use them explain them.</li>" : "") +

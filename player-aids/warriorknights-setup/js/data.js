@@ -34,8 +34,8 @@ WK.modules = [
     description: "The variant that expands the game most: a new resource (Knowledge) buys Advancement cards; new troop types; new Baron and Neutral Action cards; the original Fate deck is replaced by a new 48-card deck.", src: "C&G p.1–4" },
   { id: "mis", requires: "cg", name: "Missions", summary: "A secret Mission card, worth 2 Influence if fulfilled at the end",
     description: "Each Baron is dealt one secret Mission card before strongholds are placed; fulfilled Missions score 2 Influence at the end of the game.", src: "C&G p.4" },
-  { id: "king", requires: "cg", name: "The King", summary: "The pool running out crowns a King; play on until someone reaches 16 Influence",
-    description: "A slightly longer game: 8 Influence per Baron in the pool; when it runs out the Baron with the most Influence becomes King (with the King's Army and +1 Influence per Upkeep) and play continues until a Baron has 16 Influence.", src: "C&G p.4" }
+  { id: "king", requires: "cg", name: "The King", summary: "The pool running out crowns a King; play on until someone reaches 16 Influence (12 / 20 in the shorter / longer game)",
+    description: "A slightly longer game: 8 Influence per Baron in the pool (standard length); when it runs out the Baron with the most Influence becomes King (with the King's Army and +1 Influence per Upkeep) and play continues until a Baron has at least 16 Influence at the end of a game round (12 or 20 with The King's shorter or longer length).", src: "C&G p.4" }
 ];
 
 /* Base-game and FAQ optional rules ("All players must agree at the start of the game which optional rules and
@@ -48,7 +48,7 @@ WK.variants = [
   { id: "elim", name: "Player Elimination", summary: "Lose your stronghold and you are out of the game",
     description: "A Baron whose stronghold is captured is eliminated: his Nobles leave the board and his cities become neutral.", src: "Rules p.20" },
   { id: "might", name: "Might Is Right", summary: "The city win is the only victory; Influence decides nothing",
-    description: "Only one victory condition: more than half the unrazed Kingdom cities at the beginning of an Upkeep phase. The game does not end when the Influence pool runs out.", src: "Rules p.20" },
+    description: "Only one victory condition: more than half the unrazed Kingdom cities at the beginning of an Upkeep phase (with two Barons, 5 cities, per the FAQ rule change). The game does not end when the Influence pool runs out.", src: "Rules p.20 · FAQ p.1" },
   { id: "aband", name: "Abandoned Nobles", summary: "A Noble killed by desertion is abandoned, not dead (FAQ)",
     description: "Makes mercenary desertion less harsh: a Noble who dies because of desertion is treated like a dead Noble except that he does not count as dead for cards such as No Heir.", src: "FAQ p.3" },
   { id: "mirac", name: "Miracles Can Happen", summary: "Cancel an Event later for 1 Faith more than its printed cost (FAQ)",
@@ -298,6 +298,7 @@ WK.reference = [
       else if (WK.king(c)) h += "<li><b>The King:</b> when the Influence pool runs out, the Baron with the most Influence (ties broken as below) becomes <b>King</b> and takes the King token — but the game goes on. When a Baron has at least <b>" + WK.target(c) + " Influence</b> at the end of a game round, the game ends and the Baron with the most Influence wins. You don't need to be King to win.</li>";
       else h += "<li><b>Influence:</b> when the last Influence token is taken from the pool during an Upkeep phase, this is the <b>last game round</b>. Finish that Upkeep — Barons still owed Influence take it from the extra tokens outside the pool, and revolts are resolved as normal — then the Baron with the <b>most Influence</b> is crowned and wins.</li>";
       if (WK.mis(c)) h += "<li><b>Missions:</b> at the end of the game, while tallying final Influence, everyone reveals his Mission; starting with the Chairman, each Baron who is fulfilling his Mission's criteria gains <b>2 Influence</b>." + (WK.king(c) ? " With The King, Missions are not scored when the pool runs out — only when the game ends." : "") + "</li>";
+      if (c.mod("might") && (WK.king(c) || WK.mis(c))) h += "<li class='caution'>The rules don't say how Might Is Right combines with " + [WK.king(c) ? "The King" : "", WK.mis(c) ? "Missions" : ""].filter(Boolean).join(" or ") + ": Might Is Right makes Influence irrelevant to winning, while " + (WK.king(c) ? "The King crowns a King when the Influence pool runs out and ends the game when a Baron has at least " + WK.target(c) + " Influence at the end of a round" : "") + (WK.king(c) && WK.mis(c) ? ", and " : "") + (WK.mis(c) ? "Missions pay out 2 Influence" : "") + ". Settle at the table how you will play it before you start.</li>";
       h += "</ul>";
       if (!c.mod("might") || WK.king(c)) h += "<h4>Ties for the most Influence</h4><ol><li>Most cities controlled (Kingdom and overseas).</li><li>Highest total of crowns + Faith + Votes.</li><li>Most troops on the board.</li><li>Still tied: there is no King and no winner.</li></ol>";
       h += "<h4>Influence each Upkeep</h4><ul><li>Each Baron takes <b>1 Influence per city he controls</b> (Kingdom and overseas) from the pool; if the pool runs short, the rest comes from outside the pool.</li>" +
@@ -305,7 +306,7 @@ WK.reference = [
         (WK.king(c) ? "<li><b>The King</b> gains <b>1 extra Influence</b> in every Upkeep after he is crowned.</li>" : "") + "</ul>";
       return h;
     },
-    src: (c) => WK.cite("Rules p.2, p.8, p.18", c.p === 2 ? "FAQ p.1" : "", c.mod("might") ? "Rules p.20" : "", (WK.king(c) || WK.mis(c)) ? "C&G p.4" : "", WK.fg(c) ? "C&G p.3" : "")
+    src: (c) => WK.cite("Rules p.2, p.8, p.18", (c.p > 2 && c.p < 6) ? "Rules p.19" : "", c.p === 2 ? "FAQ p.1" : "", c.mod("might") ? "Rules p.20" : "", (WK.king(c) || WK.mis(c)) ? "C&G p.4" : "", WK.fg(c) ? "C&G p.3" : "")
   },
   {
     title: "The Game Round",
@@ -358,12 +359,12 @@ WK.reference = [
       "<li><b>Rally Support</b> — gain <b>2 Votes</b>. If you now have more Votes than every other Baron, you become <b>Chairman of the Assembly</b> and take the Chairman token.</li>" +
       "<li><b>Serve the Church</b> — gain <b>1 Faith</b>. If you now have more Faith than every other Baron, you become <b>Head of the Church</b>. Then choose which area the card goes to.</li>" +
       "<li><b>Mobilize Forces</b> — choose one area; move one or more unexhausted Nobles into it, start a battle there, or both. It can move a Noble into an area with another of your unexhausted Nobles and send both into the battle. Every Noble that moves or attacks is then exhausted.</li>" +
-      "<li><b>Versatile Strategy</b> (the name printed on the card, pictured on Rules p.15; Rules p.9 and the FAQ also call it “Versatile Action”) — choose one: gain <b>2 crowns</b>; gain <b>1 Vote</b>; <b>move</b> one unexhausted Noble, then exhaust him; <b>start a battle</b> (to move <i>and</i> attack you need Mobilize Forces), then exhaust the Nobles involved; or place a Baron marker on an available spot of the Mercenary Track and <b>pay its fee</b>. The card returns to your hand.</li>" +
+      "<li><b>Versatile Strategy</b> (the name printed on the card, pictured on Rules p.15; Rules p.9 and the FAQ also call it “Versatile Action”) — choose one: gain <b>2 crowns</b>; gain <b>1 Vote</b>; <b>move</b> one unexhausted Noble, then exhaust him; <b>start a battle</b> (to move <i>and</i> attack you need Mobilize Forces), then exhaust the Nobles involved; or place a Baron marker on an available spot of the Mercenary Track (never one numbered higher than the number of Barons) and <b>pay the fee listed there</b> (e.g. 5 crowns for the “3” spot). The card returns to your hand.</li>" +
       (WK.fg(c) ? "<li><b>Forced March</b> (For Glory) — refresh one of your exhausted Nobles free, then any others for <b>2 crowns each</b>.</li>" +
-        "<li><b>Enrich Mind</b> (For Glory, two per Baron) — gain <b>1 Knowledge</b>; if you now have more Knowledge than every other Baron, take the <b>Scholar</b> token; then you may buy Advancement cards.</li>" : "") +
+        "<li><b>Enrich Mind</b> (For Glory, two per Baron) — gain <b>1 Knowledge</b>; if you now have more Knowledge than every other Baron, take the <b>Scholar</b> token; then you may buy <b>one</b> of the available Advancement cards (as many as you can afford if you are the Scholar).</li>" : "") +
       "</ul><h4>Chairman and Head of the Church</h4><ul><li>These tokens change hands only through <b>Rally Support</b> and <b>Serve the Church</b> — “except for a few Agent and Event cards”, in the FAQ's words. If the Head of the Church loses Faith so that you now have the most, you do <b>not</b> take the token until you play Serve the Church.</li>" +
       "<li>The rulebook adds one more case: a Chairman who is <b>banned</b> from the Assembly loses the token to the Baron with the most Votes (see “The Assembly”)" + (c.mod("elim") ? "; with <b>Player Elimination</b>, an eliminated Baron's tokens pass on too" : "") + ".</li></ul>",
-    src: (c) => WK.cite("Rules p.7–9, p.12, p.15", c.mod("elim") ? "Rules p.20" : "", "FAQ p.2", WK.fg(c) ? "C&G p.3" : "")
+    src: (c) => WK.cite("Rules p.7–9, p.12, p.15", c.mod("elim") ? "Rules p.20" : "", "FAQ p.2", WK.fg(c) ? "C&G p.2–3" : "")
   },
   {
     title: "Neutral Action Cards",
@@ -417,7 +418,7 @@ WK.reference = [
       "<li><b>Advance:</b> expeditions already on “1” or “2” — not one just started — move up one spot.</li>" +
       "<li><b>Resolve:</b> draw 1 Fate card (2 if blessed) for each expedition now on “3”.</li></ol>" +
       "<h4>Expedition results</h4><ul>" +
-      "<li><b>" + (WK.fg(c) ? "1x–5x" : "1x, 2x, 3x, 4x") + ":</b> success. Each funder receives the crowns he invested <b>times</b> the number (1x just breaks even); the crowns on the track go to the treasury and the markers go back. Example: 5 crowns on China and a 4x result pays 20 crowns.</li>" +
+      "<li><b>" + (WK.fg(c) ? "1x–5x" : "1x, 2x, 3x, 4x") + ":</b> success. Each funder receives the crowns he invested <b>times</b> the number (1x just breaks even); the crowns on the track go to the treasury, each funder takes back his Baron marker, and the expedition marker is removed (that expedition may be started again). Example: 5 crowns on China and a 4x result pays 20 crowns.</li>" +
       "<li><b>No News:</b> the expedition stays on “3” and draws again the next time Fund Expeditions is resolved; a blessing stays until it is resolved.</li>" +
       (WK.fg(c) ? "<li><b>Funds Needed</b> (For Glory): each funder either pays <b>2 crowns</b> to the treasury or loses his investment (his crowns on the expedition go to the treasury). The card is then treated as a “No Result” card (the sheet's wording; No News is the base game's no-result outcome).</li>" : "") +
       "<li><b>Fleet Lost:</b> all crowns invested go to the treasury; the marker is removed and the expedition may be started again later.</li></ul>" +
@@ -453,7 +454,7 @@ WK.reference = [
       "<li><b>Vote on Private Motions:</b> any Private Motion among the Current Agendas is voted on before the other Agendas.</li>" +
       "<li><b>Declare Agenda Order:</b> the Chairman decides the order of the remaining Agendas and reads them all aloud in that order.</li>" +
       (c.p === 2
-        ? "<li><b>Vote on Agendas — two Barons:</b> voting works differently. After the Chairman declares the order, each Baron secretly writes down how many Votes he casts on <b>each</b> of the three Agendas (in total, no more than the Votes he has). Reveal all votes at once, then resolve each Agenda in order.</li>"
+        ? "<li><b>Vote on Agendas — two Barons:</b> voting works differently. After the Chairman declares the order, each Baron secretly writes down how many Votes he casts on <b>each</b> of the three Agendas (in total, no more than the Votes he has). Reveal all votes at once, then resolve each Agenda in order. The Chairman still breaks any ties, however he voted (Rules p.5, p.11).</li>"
         : "<li><b>Vote on Agendas</b>, one at a time:<ol type='a'><li>each Baron secretly holds some Votes in a closed fist (the rest hidden in his other hand);</li><li>all reveal at once;</li><li>starting with the Chairman and going clockwise, each declares how his Votes are cast — yes/no, or for a Baron. All revealed Votes count and are discarded. The Chairman breaks ties any way he likes, however he voted;</li><li>the winning result takes effect immediately.</li></ol></li>") +
       "<li><b>Reveal next Assembly's Agendas:</b> place three new Agendas in the Current Agendas space.</li></ol>" +
       "<p>Finally, return all the cards in the Assembly stack to their owners; Barons keep any Votes they didn't use." + (WK.fg(c) ? " (For Glory's <b>A Pressing Agenda</b> adds an extra Agenda to the next Assembly.)" : "") + "</p>" +
@@ -475,7 +476,7 @@ WK.reference = [
       "<li>You can't refuse a decision that <i>withdraws</i> an office or charge from you.</li>" +
       "<li>A ban lasts the whole game unless an Assembly rescinds it; a reinstated Baron attends future Assemblies, not the current one.</li>" +
       "<li>If the Chairman is banned, the Baron with the most Votes becomes Chairman (ties broken randomly). Banned Barons can never become Chairman.</li></ul>",
-    src: (c) => WK.cite("Rules p.11–12", (c.p === 2 || c.mod("openpm")) ? "Rules p.19" : "", WK.fg(c) ? "C&G p.3" : "")
+    src: (c) => WK.cite(c.p === 2 ? "Rules p.5, p.11–12" : "Rules p.11–12", (c.p === 2 || c.mod("openpm")) ? "Rules p.19" : "", WK.fg(c) ? "C&G p.3" : "")
   },
   {
     title: "The Mercenary Draft",
@@ -496,7 +497,7 @@ WK.reference = [
         (WK.fg(c) ? "<li><b>For Glory — Leaders and Heralds:</b> one of each for every nationality. Each grants the Noble it's assigned to a special ability, treated as printed on his Noble card and usable in addition to his others, <b>even when exhausted</b>. A Noble may have only one Leader and one Herald at a time.</li>" +
           "<li><b>For Glory — Assemble Troops:</b> its casualty tokens fill track spots; at the start of the Draft remove them and skip those spaces, so Drafts come more often with more Mercenaries on offer.</li>" : "") + "</ul>";
     },
-    src: (c) => WK.cite("Rules p.4, p.8–9, p.12–13, p.17", WK.fg(c) ? "C&G p.2–3" : "")
+    src: (c) => WK.cite("Rules p.4, p.8–9, p.11–13, p.17–18", WK.fg(c) ? "C&G p.2–3" : "")
   },
   {
     title: "Movement",
@@ -515,8 +516,8 @@ WK.reference = [
       "<h4>Receiving troops while moving</h4><ul>" +
       "<li>At any point in his move, a Noble may take any number of troops from your stronghold (if he's in its area) or from an <b>unexhausted</b> Noble of yours in the same area. A Noble on a road may continue after.</li>" +
       "<li>An army with casualty tokens may receive troops. To take troops <i>out</i> of such an army you must take all its troops and casualty tokens — its Noble, left without troops, leaves the board — or none.</li></ul>" +
-      (WK.fg(c) ? "<p><b>For Glory:</b> <b>Forced March</b> refreshes exhausted Nobles, and some Advancement cards let a Noble move an extra space or make sea travel faster.</p>" : ""),
-    src: (c) => WK.cite("Rules p.8, p.13–14, p.18", "FAQ p.2–3", WK.fg(c) ? "C&G p.2–3" : "")
+      (WK.fg(c) ? "<p><b>For Glory:</b> <b>Forced March</b> refreshes one of your exhausted Nobles for free, then any others for 2 crowns each. Some Advancement cards let a Noble move an extra space or make sea travel faster.</p>" : ""),
+    src: (c) => WK.cite("Rules p.8–9, p.13–14, p.18", "FAQ p.2–3", WK.fg(c) ? "C&G p.2–3" : "")
   },
   {
     title: "Nobles & Their Abilities",
@@ -531,7 +532,7 @@ WK.reference = [
       "<li>The <b>+200</b> is leadership, not troops: it matters only when drawing Fate cards and in the siege strength comparison, and never counts as troops (so a Noble with 100 + 200 troops dies when his third casualty token arrives) (FAQ).</li>" +
       "<li>An <b>army</b> is a Noble with the Troop cards under his card; troops at a stronghold with no Noble are also an army.</li>" +
       (WK.fg(c) ? "<li><b>For Glory:</b> a Leader or Herald Mercenary grants its Noble an extra ability, usable even when he is exhausted (max one Leader and one Herald per Noble).</li>" : "") + "</ul>",
-    src: (c) => WK.cite("Rules p.2–3, p.11, p.14–15, p.19", "FAQ p.1", WK.fg(c) ? "C&G p.2" : "")
+    src: (c) => WK.cite("Rules p.2–3, p.11–12, p.14–15, p.19", "FAQ p.1", WK.fg(c) ? "C&G p.2" : "")
   },
   {
     title: "Battles — Starting a Battle",
@@ -605,15 +606,15 @@ WK.reference = [
     title: "Strongholds",
     when: () => true,
     html: (c) => "<ul>" +
-      "<li>A stronghold is attacked exactly like a city — assault or siege. Its strength is on its Stronghold card.</li>" +
+      "<li>A stronghold is attacked exactly like a city — assault or siege. Its strength is shown in the lower right of its Stronghold card.</li>" +
       "<li>Troops in a stronghold with no Noble: no commander, so no discard of two Fate cards. The battle ends at once if the stronghold is reduced to 0 and those troops take casualties equal to or greater than their number; they are removed with the stronghold.</li>" +
-      "<li><b>Eliminating a stronghold:</b> the winner takes <b>half the loser's crowns</b> (rounded down) and <b>one of the loser's cities</b>, of the loser's choice. The stronghold is removed; its Baron gains <b>no Influence</b> in this round's Upkeep, and may put it back during the Upkeep (just before placing Nobles) in any Kingdom area without an unrazed city or an opponent's Noble or stronghold.</li>" +
+      "<li><b>Eliminating a stronghold:</b> the winner takes <b>half the loser's crowns</b> (rounded down) and <b>one of the loser's cities</b>, of the loser's choice. The stronghold is removed; its Baron gains <b>no Influence</b> in this round's Upkeep, and may put it back during the Upkeep (just before placing Nobles) in any Kingdom area without an unrazed city or an opponent's Noble or stronghold." + (c.p <= 3 ? " With two or three Barons it may not go on the outer row or column of the main Kingdom map." : "") + "</li>" +
       "<li>FAQ: troops assigned to a captured stronghold are removed with it; draw for deserters and lose casualties as for a Noble death; the rest (including all Regular Troops) stay with the stronghold and return with it.</li>" +
       "<li>FAQ: if the attacking Noble dies while reducing a stronghold to 0, the attacker gets no rewards — but the stronghold is still removed and its Baron gets no Influence in the next Upkeep.</li>" +
       "<li>You may always place off-board Nobles, and assign Mercenaries from the Draft, at your stronghold — even while it is besieged (FAQ).</li>" +
       (c.mod("elim") ? "<li><b>Player Elimination:</b> a Baron whose stronghold is captured is eliminated. His Nobles leave the board and his cities become neutral; if he was Chairman or Head of the Church, the token passes to the Baron with the next-most Votes or Faith (ties broken randomly).</li>" : "") +
       (WK.king(c) ? "<li><b>The King — usurping:</b> a Baron who wins an attack against the King's stronghold takes the King token and all the King's Army cards (on top of the normal spoils) and becomes King.</li>" : "") + "</ul>",
-    src: (c) => WK.cite("Rules p.17", "FAQ p.3", c.mod("elim") ? "Rules p.20" : "", WK.king(c) ? "C&G p.4" : "")
+    src: (c) => WK.cite("Rules p.3, p.17", c.p <= 3 ? "Rules p.19" : "", "FAQ p.3", c.mod("elim") ? "Rules p.20" : "", WK.king(c) ? "C&G p.4" : "")
   },
   {
     title: "Retreats, Noble Death & Returning Nobles",
@@ -625,7 +626,7 @@ WK.reference = [
       "<li><b>Draw for deserters</b> (as above).</li>" +
       "<li><b>Lose casualties:</b> for each casualty token, discard 100 strength of <b>Mercenaries</b> — as many as possible without going over — then remove the tokens. Regular Troops are never discarded as casualties." + (WK.fg(c) ? " (For Glory: all his <b>Town Levies</b> are discarded after this, so use Levies for casualties before Mercenaries.)" : "") + "</li>" +
       "<li><b>Remove</b> the Noble from the board and discard any office he held.</li>" +
-      "<li><b>Heir:</b> the same piece keeps the remaining troops and may return in the Upkeep. With no heir, his Mercenaries are shuffled back and his Regular Troops leave the game — the only way to lose Regular Troops.</li></ol><ul>" +
+      "<li><b>Heir:</b> the same piece keeps the remaining troops and may return in the Upkeep. With no heir, his Mercenaries are shuffled back and his Regular Troops leave the game — the only way to lose Regular Troops." + (WK.king(c) ? " <b>The King:</b> King's Army cards are an exception: they are never discarded or lost unless another Baron becomes King." : "") + "</li></ol><ul>" +
       "<li>Casualties equal to or greater than troops at any moment — even outside battle, such as from the <i>Assassin</i> Event — kill the Noble at once (FAQ).</li>" +
       "<li>A Noble who loses all his troops <i>without</i> casualties is removed from the board but not dead, so <i>No Heir</i> and <i>Broken Line</i> don't apply (FAQ).</li>" +
       (c.mod("aband") ? "<li><b>Abandoned Nobles:</b> a Noble who dies because of desertion is <b>abandoned</b>, not dead, even with casualty tokens: remove him and his casualties/troops as for a death, but he doesn't count as dead for cards such as <i>No Heir</i>.</li>" : "") +
@@ -634,7 +635,7 @@ WK.reference = [
       "<li>Chairman first, then the Baron to his left, and so on. Nobles are off the board because they never had troops, gave all their troops away, or died (the returning Noble is then his heir).</li>" +
       "<li>First, re-divide the troops among your off-board Nobles as you like. Second, troops at your stronghold may go to off-board Nobles (troops with casualty tokens: all of them and the tokens to one Noble, or nothing).</li>" +
       "<li>Finally, every off-board Noble <b>with troops</b> must be placed at your stronghold or at any city you control that isn't under siege (your besieged stronghold is allowed — FAQ). A Noble without troops never enters the board.</li></ul>",
-    src: (c) => WK.cite("Rules p.8, p.17–19", "FAQ p.2–3", c.mod("heirs") ? "Rules p.19–20" : "", WK.fg(c) ? "C&G p.2" : "")
+    src: (c) => WK.cite("Rules p.8, p.17–19", "FAQ p.2–3", c.mod("heirs") ? "Rules p.19–20" : "", WK.fg(c) ? "C&G p.2" : "", WK.king(c) ? "C&G p.4" : "")
   },
   {
     title: "Cities: Control, Revolts & Fortifications",
@@ -747,7 +748,7 @@ WK.reference = [
       "<li><b>King's Army:</b> the new King immediately gains <b>" + c.p + " King's Army cards</b> (one per Baron), assigned at once to his stronghold and/or any of his Nobles at his stronghold or at cities he controls. They are Regular Troops: they never desert, but must be paid at Wages before any Mercenary. They are never discarded or lost unless another Baron becomes King.</li>" +
       "<li><b>The King's Influence:</b> the King gains <b>+1 Influence</b> in the Gain Influence step of every later Upkeep.</li>" +
       "<li><b>Usurping:</b> a Baron who wins an attack against the King's stronghold usurps him: on top of the normal spoils for defeating a stronghold, he takes the King token and all King's Army cards, assigns them as above, and is now King.</li>" +
-      "<li><b>Winning:</b> with the pool empty, all Influence now comes from the treasury. When a Baron has at least <b>" + WK.target(c) + " Influence</b> at the end of a game round the game ends" + (WK.mis(c) ? " (Missions are scored now)" : "") + " and the Baron with the most Influence wins. You needn't hold the King token to win — the King is everyone's target.</li>" +
+      "<li><b>Winning:</b> with the pool empty, all Influence now comes from the treasury. When a Baron has at least <b>" + WK.target(c) + " Influence</b> at the end of a game round the game ends" + (WK.mis(c) ? " (Missions are scored now)" : "") + " and the Baron with the most Influence wins (ties broken as normal). You needn't hold the King token to win — the King is everyone's target.</li>" +
       "<li><b>Game length:</b> standard 8 per Baron to 16; longer 10 per Baron to 20; shorter 6 per Baron to 12.</li>" +
       (c.mod("might") ? "<li class='caution'>The rules don't say how The King combines with Might Is Right; agree at the table which victory applies.</li>" : "") + "</ul>",
     src: (c) => WK.cite("C&G p.4", c.mod("might") ? "Rules p.20" : "")
@@ -757,17 +758,17 @@ WK.reference = [
     when: () => true,
     html: (c) => {
       const on = (id) => (c.mod(id) ? " <span class='inplay'>in play</span>" : "");
-      const lenOn = !WK.king(c) && c.len !== "std";
+      const lenOn = c.len !== "std";
       return "<p>Agree before the game which of these you'll use. Those selected above are marked <span class='inplay'>in play</span>.</p><ul>" +
         "<li><b>Game Length</b>" + (lenOn ? " <span class='inplay'>in play</span>" : "") + " — change the Influence pool: 8 per Baron for a shorter game, 12 or 15 for a longer one." + (WK.king(c) ? " (With The King, use its own lengths: 6 → 12, 8 → 16, 10 → 20.)" : "") + "</li>" +
         "<li><b>Open Private Motions</b>" + on("openpm") + " — Private Motions are limited only by the players' ingenuity (e.g., prohibit sieges, or prohibit all Nobles from using roads); they're still voted on like any other Agenda.</li>" +
         "<li><b>Exchanging Heirs</b>" + on("heirs") + " — every Noble starts with one heir (a token). A Baron may trade his Nobles' heirs to other players; the holder may use one for bargaining, threatening to kill it and make the Noble's death permanent. A dead Noble returns only if the holder of his living heir gives it back. <i>No Heir</i> or <i>Broken Line</i> kills the heir for good.</li>" +
         "<li><b>Player Elimination</b>" + on("elim") + " — a Baron whose stronghold is captured is eliminated: his Nobles leave the board and his cities become neutral; his Chairman or Head of the Church token passes to the Baron with the next-most Votes or Faith (ties broken randomly).</li>" +
-        "<li><b>Might Is Right</b>" + on("might") + " — one victory condition: more than half the unrazed Kingdom cities at the beginning of an Upkeep. Influence has no effect on who wins and the game doesn't end when the pool runs out; it may take much longer.</li>" +
+        "<li><b>Might Is Right</b>" + on("might") + " — one victory condition: more than half the unrazed Kingdom cities at the beginning of an Upkeep" + (c.p === 2 ? " (with two Barons, the FAQ rule change makes it 5 cities at the start of an Upkeep instead)" : "") + ". Influence has no effect on who wins and the game doesn't end when the pool runs out; it may take much longer.</li>" +
         "<li><b>Abandoned Nobles</b> (FAQ)" + on("aband") + " — a Noble who dies because of desertion is abandoned, not dead, even with casualty tokens: treated exactly like a dead Noble except for cards such as <i>No Heir</i>. It makes desertion less harsh.</li>" +
         "<li><b>Miracles Can Happen</b> (FAQ)" + on("mirac") + " — Events with continuous effects (such as <i>No Heir</i> or <i>Heretic</i>) may be canceled after they happen for 1 Faith more than the printed cost — though not after the fact they describe has happened (e.g., <i>No Heir</i> after the Noble's death).</li></ul>";
     },
-    src: (c) => WK.cite("Rules p.19–20", "FAQ p.3", WK.king(c) ? "C&G p.4" : "")
+    src: (c) => WK.cite("Rules p.19–20", c.p === 2 ? "FAQ p.1" : "", "FAQ p.3", WK.king(c) ? "C&G p.4" : "")
   },
   {
     title: "Key FAQ Rulings",
@@ -779,14 +780,14 @@ WK.reference = [
       "<li>Defending Nobles in an area with their own city are in the city: attack them only by assault or siege.</li>" +
       "<li>Casualties may be split among your armies in a battle; you can win even if your commander dies.</li>" +
       "<li>Every Noble that moves or attacks is exhausted, commander or not; Nobles you leave out of an attack stay fresh.</li>" +
-      "<li>Wages are paid for every troop regardless of casualty tokens; a desertion that leaves casualties ≥ troops kills the Noble.</li>" +
+      "<li>Wages are paid for every troop regardless of casualty tokens; a desertion that leaves casualties ≥ troops kills the Noble" + (c.mod("aband") ? " (with Abandoned Nobles he is abandoned instead: removed and treated as dead, but not dead for cards such as <i>No Heir</i>)" : "") + ".</li>" +
       "<li>A Noble left without troops but with no casualties is removed, not killed.</li>" +
       "<li>Retreat into an area with a neutral city is allowed if it holds no other Baron's Noble or stronghold.</li>" +
       "<li>Ports in razed-city areas work; you needn't own a city to use its port.</li>" +
       "<li>Sieges: casualties and breaches count in the strength test; another Noble may join or finish a siege; finish it in any later round; ask permission again when other Barons are present; a besieged Baron may move Nobles in but not out.</li>" +
       "<li>Strongholds may go in an area with a razed city; moving through an area with only another Baron's stronghold needs no permission; off-board Nobles may always be placed at your own stronghold, even besieged.</li>" +
       "<li>A Mobilize Forces card used for neither moving nor attacking goes to the Assembly or Wages area, your choice.</li>" +
-      "<li>Lasting Events must be canceled when played.</li></ul>",
+      "<li>Lasting Events must be canceled when played" + (c.mod("mirac") ? " — except that, with Miracles Can Happen, a continuous Event may be canceled later for 1 Faith more than its printed cost" : " (see the optional rule Miracles Can Happen)") + ".</li></ul>",
     src: (c) => WK.cite("FAQ p.1–3", WK.fg(c) ? "C&G p.3" : "")
   },
   {
@@ -836,15 +837,15 @@ WK.teach = {
         "<li><b>Versatile Strategy</b> — the Swiss army knife: 2 crowns, or 1 Vote, or move one Noble, or start a battle, or buy a spot in the Mercenary Draft. It comes straight back to your hand.</li>" +
         "<li><b>Levy Taxes</b> — a crown for every area where you have a Noble.</li>" +
         "<li><b>Draft Soldiers</b> — a free marker on the Mercenary Track; markers further left hire first when the Draft fires.</li>" +
-        "<li><b>Rally Support</b> — 2 Votes, and if you now have the most, you take the Chairman's token: he orders the Agendas and breaks ties.</li>" +
-        "<li><b>Serve the Church</b> — 1 Faith, and if you now have the most, you become Head of the Church, who aims Events at other people. Faith also cancels bad Events and buys off revolting cities.</li>" +
+        "<li><b>Rally Support</b> — 2 Votes, and if you now have more than anyone else, you take the Chairman's token: he orders the Agendas and breaks ties.</li>" +
+        "<li><b>Serve the Church</b> — 1 Faith, and if you now have more than anyone else, you become Head of the Church, who aims Events at other people. Faith also cancels bad Events and buys off revolting cities.</li>" +
         (WK.fg(c) ? "<li><b>Forced March</b> (For Glory) — refresh an exhausted Noble for free, others for 2 crowns each: a second attack in one round.</li>" +
-          "<li><b>Enrich Mind</b> (For Glory) — gain Knowledge, take the Scholar token if you have the most, and buy Advancements.</li>" : "") +
+          "<li><b>Enrich Mind</b> (For Glory) — gain Knowledge, take the Scholar token if you now have more than anyone else, and buy Advancements.</li>" : "") +
         "</ul><p>The Neutral cards shuffled in bring Events, expeditions you can invest in, city repairs and fortifications, healing for battered armies" + (WK.fg(c) ? ", troop recruiting, research" : "") + ", and a reshuffle of the Fate deck.</p>"
     },
     {
       h: "The central mechanic — the three stacks",
-      body: (c) => "<p>Here's the heart of the game. After a card resolves, it goes onto one of three areas: Levy Taxes feeds <b>Taxation</b>, Draft Soldiers feeds <b>Wages</b>, Rally Support feeds the <b>Assembly</b>; Serve the Church goes wherever you like, and Mobilize Forces goes to Wages if you only moved and the Assembly if you fought. When an area holds <b>" + (2 * c.p) + " cards</b> — twice our number — that phase fires at once. <b>Taxation</b> pays everyone their city income. <b>Wages</b> makes everyone pay their troops, and unpaid Mercenaries desert. The <b>Assembly</b> votes on three Agendas — laws, offices, charges — " + (c.p === 2 ? "with Votes written down secretly" : "with Votes held in a closed fist") + ". Only then do those cards go back to their owners. So every card you play — except Versatile Strategy, which comes straight back — is locked away until its phase fires, and you can trigger Wages when a rival is broke. The <b>Mercenary Draft</b> fires the same way when " + (c.p + 1) + " Baron markers are on the Mercenary Track.</p>"
+      body: (c) => "<p>Here's the heart of the game. After a card resolves, it goes onto one of three areas: Levy Taxes feeds <b>Taxation</b>, Draft Soldiers feeds <b>Wages</b>, Rally Support feeds the <b>Assembly</b>; Serve the Church goes wherever you like, and Mobilize Forces goes to Wages if you only moved, the Assembly if you only fought, and either one if you did both." + (WK.fg(c) ? " For Glory's <b>Forced March</b> goes to Wages, and <b>Enrich Mind</b> to Taxation or the Assembly, your choice." : "") + " When an area holds <b>" + (2 * c.p) + " cards</b> — twice our number — that phase fires at once. <b>Taxation</b> pays everyone their city income. <b>Wages</b> makes everyone pay their troops, and unpaid Mercenaries desert. The <b>Assembly</b> votes on three Agendas — laws, offices, charges — " + (c.p === 2 ? "with Votes written down secretly" : "with Votes held in a closed fist") + ". Only then do those cards go back to their owners. So every card you play — except Versatile Strategy, which comes straight back — is locked away until its phase fires, and you can trigger Wages when a rival is broke. The <b>Mercenary Draft</b> fires the same way when " + (c.p + 1) + " Baron markers are on the Mercenary Track.</p>"
     },
     {
       h: "Battles and the Fate deck",
@@ -874,7 +875,7 @@ WK.teach = {
     {
       h: "For Glory",
       when: (c) => WK.fg(c),
-      body: (c) => "<p>We're adding <b>For Glory</b>. A new resource, <b>Knowledge</b>, comes from the new <b>Enrich Mind</b> card and buys <b>Advancement cards</b> — powerful free abilities; you may own three. If Enrich Mind leaves you with more Knowledge than anyone else, you take the <b>Scholar</b> token, which lets you buy several at once" + (c.p === 2 ? "" : " — one of us starts as Scholar") + ". <b>Forced March</b> refreshes tired Nobles. New troops: <b>Garrisons</b> add 100 to a city's defense; <b>Town Levies</b> are raised at your own cities and never paid, but are lost if a Mercenary in their army deserts at Wages; and <b>Leader and Herald</b> Mercenaries give their Noble an extra ability. Three Neutral cards go on each stack now, adding <b>Research</b>, <b>A Pressing Agenda</b> and <b>Assemble Troops</b>. The new Fate deck lets you draw up to 20 cards and adds <b>Riot</b> (a city stops paying), <b>Retreat/Draw 1 Fate</b> (a defender may slip away) and <b>Funds Needed</b> (expedition investors pay 2 more crowns or lose their stake).</p>"
+      body: (c) => "<p>We're adding <b>For Glory</b>. A new resource, <b>Knowledge</b>, comes from the new <b>Enrich Mind</b> card and buys <b>Advancement cards</b> — powerful free abilities; you may own three. If Enrich Mind leaves you with more Knowledge than anyone else, you take the <b>Scholar</b> token, which lets you buy several at once" + (c.p === 2 ? "" : " — one of us starts as Scholar") + ". <b>Forced March</b> refreshes tired Nobles. New troops: <b>Garrisons</b> (1 crown from the new Upgrade Defenses) add 100 to a city's defense but must be paid every Wages; <b>Town Levies</b> (2 crowns each from the new Muster Forces) are raised at your own cities and never draw wages, but are lost if a Mercenary in their army deserts at Wages; and <b>Leader and Herald</b> Mercenaries give their Noble an extra ability. Three Neutral cards go on each stack now, adding <b>Research</b>, <b>A Pressing Agenda</b> and <b>Assemble Troops</b>. The new Fate deck lets you draw up to 20 cards and adds <b>Riot</b> (a city stops paying), <b>Retreat/Draw 1 Fate</b> (a defender may slip away) and <b>Funds Needed</b> (expedition investors pay 2 more crowns or lose their stake).</p>"
     },
     {
       h: "Missions",
@@ -884,7 +885,7 @@ WK.teach = {
     {
       h: "The King",
       when: (c) => WK.king(c),
-      body: (c) => "<p>With <b>The King</b>, the first to be crowned gets " + WK.word(c.p) + " King's Army cards — loyal troops that never desert — and 1 extra Influence every Upkeep. Take the King's stronghold and you <b>usurp</b> him: his crown and his army become yours. " +
+      body: (c) => "<p>With <b>The King</b>, the first to be crowned gets " + WK.word(c.p) + " King's Army cards — Regular troops that never desert, though the King must pay them at Wages before any of his Mercenaries — and 1 extra Influence every Upkeep. Take the King's stronghold and you <b>usurp</b> him: his crown and his army become yours. " +
         (c.mod("might") ? "How the crown and The King's finish at " + WK.target(c) + " Influence fit with Might Is Right is whatever we agreed before we started."
           : "Remember, you don't need the crown to win — only the most Influence when someone reaches " + WK.target(c) + ".") + "</p>"
     },

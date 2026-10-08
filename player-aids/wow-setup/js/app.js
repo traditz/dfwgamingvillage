@@ -229,8 +229,8 @@
     tools.appendChild(clr);
     box.appendChild(tools);
     $("#partyhint").textContent = outland()
-      ? "Optional. With The Burning Crusade’s sheets either faction may field the Paladin and the Shaman; each class once per game."
-      : "Optional. Paladin: Alliance only; Shaman: Horde only; each class once per game (Base p.7). Picking classes adds class notes to the reference.";
+      ? "Optional. With The Burning Crusade’s sheets either faction may field the Paladin and the Shaman; each class once per game (The Burning Crusade p.4, p.7). Picking classes adds class notes to the reference."
+      : "Optional. Paladin: Alliance only; Shaman: Horde only; each class once per game (Base p.6–7). Picking classes adds class notes to the reference.";
   }
 
   /* ---- setup, reference, teach ---------------------------------------- */

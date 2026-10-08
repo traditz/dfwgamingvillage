@@ -123,7 +123,7 @@ var T3 = {};
       src: "SE p.10 · FAQ p.8, p.10" },
     { id: "mines", grp: "se", set: "se", name: "Space Mines",
       summary: "Cruisers can lay mines that roll against ships entering the system",
-      description: "Spend 2 resources in a Production step with a Cruiser present to place a mine; enemy ships entering roll one die each — 9 or 10 is a hit.",
+      description: "Spend 2 resources in a Production step with a Cruiser present to place a mine; each enemy non-Fighter ship entering is rolled for — 9 or 10 is a hit.",
       src: "SE p.10 · FAQ p.9–10" },
     { id: "nexus", grp: "se", set: "se", name: "The Wormhole Nexus",
       summary: "An off-board system adjacent to every Alpha and Beta wormhole",
@@ -143,14 +143,14 @@ var T3 = {};
       src: "SE p.6, p.11, p.20" },
     { id: "terrds", grp: "se", set: "se", name: "Territorial Distant Suns", needs: ["ds", "newds"],
       summary: "Low-risk Domain Counters near the Home Systems and on the outer ring",
-      description: "A “low-risk” pile goes on outer-ring planets and planets adjacent to Home Systems; everything else is mixed on the rest. Its pile names Shattered Empire counters, so the new counters are switched on too.",
+      description: "A “low-risk” pile goes on outer-ring planets and planets adjacent to Home Systems; all remaining counters (leftover low-risk ones included) are mixed onto the rest. Its pile names Shattered Empire counters, so the new counters are switched on too.",
       src: "SE p.11" },
     { id: "custodians", grp: "se", set: "se", name: "Custodians of Mecatol Rex",
       summary: "Mecatol Rex defends itself: 3 Fighters and 2 Ground Forces",
       description: "Both Custodian tokens start on Mecatol Rex; an invader must beat the Fighter Ambush and then the Hostile Locals.",
       src: "SE p.6, p.11 · FAQ p.11" },
     { id: "voice", grp: "se", set: "se", name: "Voice of the Council",
-      summary: "A floating 1-VP Special Objective, won by a vote before each Council",
+      summary: "A floating 1-VP Special Objective — the Political (or Assembly) player may call a vote for it before resolving the primary",
       description: "Before resolving the Political (or Assembly) primary ability, the active player may call a vote; the winner takes the Voice of the Council Objective and its 1 VP.",
       src: "SE p.11 · FAQ p.10" },
     { id: "early", grp: "se", set: "se", name: "Simulated Early Turns",
@@ -175,7 +175,7 @@ var T3 = {};
       description: "Mechanized Units land and hold planets like Ground Forces, take one hit before dying and are repaired in the Status Phase.",
       src: "SoT p.11 · FAQ p.13" },
     { id: "mercs", grp: "sot", set: "sot", name: "Mercenaries",
-      summary: "Hire Mercenaries with the Trade III Strategy Card (it replaces Trade)",
+      summary: "Hire Mercenaries with the Trade III Strategy Card (it replaces Trade or Trade II)",
       description: "Trade III’s primary pays upkeep and recruits 1 of the top 2 Mercenaries; Mercenaries have Evasion and their own abilities.",
       src: "SoT p.12, p.20 · FAQ p.13–14" },
     { id: "intrigue", grp: "sot", set: "sot", name: "Political Intrigue",
@@ -262,7 +262,7 @@ var T3 = {};
       primary: ["Summon the Councilors", "Choose 1 of the face-up Political Cards and resolve it: 1) choose Representatives; 2) resolve Spies; 3) resolve bargaining and Promissory Notes; 4) resolve voting & outcome; 5) draw a new Political Card to replace it."],
       secondary: ["Subterfuge", "Spend 1 Command Counter from your Strategy Allocation area and 2 influence to draw 2 Action Cards."] },
     assembly2: { n: 3, name: "Assembly II", set: "sot", src: "SoT p.13, p.20 · FAQ p.12, p.15",
-      primary: ["Assembly of Councilors", "Draw 2 Political Cards. Then: 1) choose a player to resolve 1 Political Card from his hand; 2) give the Speaker token to any player except the chosen one; 3) choose Representatives; 4) resolve Spies; 5) bargaining and Promissory Notes; 6) resolve voting & outcome."],
+      primary: ["Assembly of Councilors", "Draw 2 Political Cards. Then: 1) choose any player — yourself included — to resolve 1 Political Card from his hand; 2) give the Speaker token to any player except the chosen one; 3) choose Representatives; 4) resolve Spies; 5) bargaining and Promissory Notes; 6) resolve voting & outcome."],
       secondary: ["Rally Support", "Spend 1 Command Counter from your Strategy Allocation area to draw 1 Action Card and refresh 1 planet outside your Home System."],
       notes: ["Errata: the primary draws <b>two</b> Political Cards (FAQ p.12 corrects SoT p.20). If you are already the Speaker you may keep the token and choose another player to pick the agenda (FAQ p.15)."] },
     civilization: { n: 3, name: "Civilization", set: "sot", src: "SoT p.21",
@@ -427,7 +427,7 @@ var T3 = {};
     const src = [];
     const dealText = (pool) => (faceDown ? "The first player places <b>" + faceDown + " random system" + (faceDown > 1 ? "s" : "") + " face down</b> next to Mecatol Rex, in " + (faceDown > 1 ? "positions" : "a position") + " of his choice, then deals the other " + (pool - faceDown) + ": " : "Deal them out: ") + "<b>" + deal + " systems to each player</b>, face down. Look at yours but keep them hidden.";
     // SE p.5: "systems" never include the Wormhole Nexus; with its option it is placed off the board (SE p.10), never dealt
-    const nexusNote = "Keep the Wormhole Nexus out of these systems — it is never dealt" + (c.mod("nexus") ? "; with its option it goes off the board (a later step)" : "") + " (SE p.5" + (c.mod("nexus") ? ", p.10" : "") + ").";
+    const nexusNote = "Keep the Wormhole Nexus out of these systems — it is never dealt" + (c.mod("nexus") ? "; with its option it goes off the board (a later step)" : "") + " (SE p.5, p.7" + (c.mod("nexus") ? ", p.10" : "") + ").";
     if (sot) {
       const t = { 3: [3, 5, 16, 0], 4: [4, 8, 20, 0], 5: [4, 8, 20, 1], 6: [4, 8, 20, 2], 7: [9, 12, 34, 2], 8: [9, 12, 34, 3] };
       const v = big ? (p === 5 ? [9, 12, 34, 0] : [9, 12, 34, 1]) : t[p];
@@ -441,7 +441,7 @@ var T3 = {};
       if (p >= 7) src.push("FAQ p.12");
       if (faceDown && p === 5) src.push("Base p.32");
       if (p >= 7) src.push("SE p.8");
-      if (se) src.push(c.mod("nexus") ? "SE p.5, p.10" : "SE p.5");
+      if (se) src.push(c.mod("nexus") ? "SE p.5, p.7, p.10" : "SE p.5, p.7");
       if (big) src.push("SE p.7");
     } else if (se && p >= 7) {
       const rm = p === 7 ? 2 : 3;
@@ -513,9 +513,9 @@ var T3 = {};
             "Play exactly these races — players choose among them: <b>" + list(T3.foteRaces[c.p]) + "</b>.",
             "The <b>Lazax</b> player always sits to the <b>left of the Federation of Sol</b> player. Treaty Cards that refer to the player on someone’s left or right always ignore the Lazax.",
             "Take your Race Sheet, Control Markers, Trade Contracts and Command Counters as normal; the Lazax sheet and pieces come in Shards of the Throne. The Lazax begin the game controlling Mecatol Rex.",
-            c.p === 7 ? "<i>Seven players — this page’s reading:</i> SoT p.14 allows a seventh player only with Shattered Empire, yet p.15 bars every Shattered Empire component, so take just the seventh colour (its plastic and its grey or orange Technology deck) from Shattered Empire and use no other Shattered Empire rule or component." : ""
+            c.p === 7 ? "<i>Seven players — this page’s reading:</i> SoT p.14 allows a seventh player only with Shattered Empire, yet p.15 bars every Shattered Empire component, so take just the seventh colour (its plastic and its grey or orange Technology deck) from Shattered Empire and use no other Shattered Empire rule or component. That deck comes complete as a Shattered Empire deck (SE p.4, p.8): take out its 4 brand-new Shattered Empire technologies. Its Advanced Fighters, Micro Technology and Assault Cannon are the Shattered Empire versions, and no other version exists in that colour, so they stay (the books don’t cover this; this page’s reading)." : ""
           ]),
-          src: (c) => cite(["SoT p.6, p.14–15", c.p === 7 ? "SE p.5, p.8" : ""]) },
+          src: (c) => cite(["SoT p.6, p.14–15", c.p === 7 ? "SE p.4–5, p.8" : ""]) },
         { when: () => true, exp: (c) => (c.mod("mechs") || c.mod("flagships") || (c.mod("rst") && c.has("sot"))) ? "sot" : ((c.has("se") || c.mod("rst")) ? "se" : "base"),
           t: "Colours, plastic units and Technology decks",
           d: (c) => {
@@ -584,7 +584,7 @@ var T3 = {};
             c.uses("warfare2") ? "Put the <b>High Alert token</b> beside Warfare II." : "",
             T3.bonusCount(c.p) ? "Keep the <b>Bonus Counters</b> nearby: each round the Speaker puts one on every card nobody chose (" + T3.bonusCount(c.p) + " a round with " + c.p + " players)." : "With " + c.p + " players every Strategy Card is chosen each round, so the Bonus Counters are not used."
           ]),
-          src: (c) => cite(["Base p.6, p.9", c.p === 4 ? "Base p.31" : "", c.p === 5 ? "Base p.32" : "", c.p >= 7 ? "SE p.8" : "", c.fote ? "SoT p.14" : "",
+          src: (c) => cite(["Base p.6, p.9", c.p <= 4 ? "Base p.31" : "", c.p === 5 ? "Base p.32" : "", c.p >= 7 ? "SE p.8" : "", c.fote ? "SoT p.14" : "",
             (c.varSC || c.swapped) ? "SE p.9" : "", c.uses("imperial2") ? "SE p.9, p.17" : "", c.uses("trade3") ? "SoT p.12" : "", c.mod("intrigue") ? "SoT p.12" : "", c.uses("warfare2") ? "SE p.5, p.16" : ""]) }
       ]
     },
@@ -601,12 +601,12 @@ var T3 = {};
               "Separate the Objective Cards into three piles: <b>Secret</b> Objectives, Public <b>Stage I</b> and Public <b>Stage II</b>." +
                 (c.mod("varobj") ? " <b>Variant Objectives:</b> use Shattered Empire’s new Stage I and Stage II decks instead of the originals (they favour military conflict)." : ""),
               c.mod("prelim")
-                ? "<b>Preliminary Objectives:</b> instead of a Secret Objective, deal each player <b>1 Preliminary Objective</b> face down; box the rest unseen (they never join the Secret deck). Completing yours lets you draw a Secret Objective."
+                ? "<b>Preliminary Objectives:</b> instead of a Secret Objective, deal each player <b>1 Preliminary Objective</b> face down; box the rest unseen (they never join the Secret deck). Completing yours lets you draw a Secret Objective. Shuffle the " + secrets + " face down: they form the <b>Secret Objective deck</b>."
                 : "Shuffle the " + secrets + " and deal <b>1 face down to each player</b>. Read yours, then keep it face down — never show it to an opponent.",
               c.has("sot") ? "Unused Secret Objectives are not boxed: they stay face down in the play area as the <b>Secret Objective deck</b>. A fulfilled Secret Objective leaves the game." : "Put the unused Secret Objectives back in the box unseen.",
               "Stage II: remove the <b>“Game Over”</b> card, shuffle the rest and draw <b>" + s2 + "</b> at random, unseen" + (c.varSC ? " (one more than usual for the variant Strategy Cards)" : "") + (lw ? " (Long War)" : "") + ". Shuffle the Game Over card in with them and stack these <b>" + (s2 + 1) + "</b> face down.",
               "Stage I: shuffle, draw <b>" + s1 + "</b> at random and place them on top. The result is the <b>Public Objective deck of " + deck + " cards</b> — " + s1 + " Stage I over " + (s2 + 1) + " Stage II, one of them Game Over.",
-              "Box every unused Objective Card without anyone seeing it — otherwise experienced players can work out what is coming.",
+              c.has("sot") ? "Box every unused <b>Public</b> Objective Card without anyone seeing it — otherwise experienced players can work out what is coming." : "Box every unused Objective Card without anyone seeing it — otherwise experienced players can work out what is coming.",
               (lw && !c.mod("aoe")) ? "<i>Long War alternative:</i> leave the Game Over card out; the game then ends after the Status Phase in which the last Public Objective was drawn." : "",
               c.mod("aoe") ? "<b>Age of Empire:</b> now deal the deck face up, left to right, in a single row; after the Game Over card is placed, box whatever is left. The row (" + (s1 + 1) + "–" + deck + " cards, Game Over at the right) holds every Public Objective of the game, all scorable from round 1 — except that <b>no one may qualify for Stage II objectives in the first three rounds</b> (errata)." : "",
               (c.varSC && !c.mod("aoe")) ? "<b>Variant Strategy Cards:</b> reveal the top card of the deck and place it face up in the common play area." : "",
@@ -923,7 +923,7 @@ var T3 = {};
       html: (c) => ol([
           "<b>Strategy Phase</b> — starting with the Speaker, everyone takes " + (c.p <= 4 ? "<b>two</b> Strategy Cards" : "a Strategy Card") + (T3.bonusCount(c.p) ? "; unchosen cards collect Bonus Counters." : " — all eight are taken, so there are no Bonus Counters."),
           "<b>Action Phase</b> — in order of play, one action per turn (Strategic, Tactical, Transfer or Pass), round and round until everyone has passed.",
-          "<b>Status Phase</b> — claim objectives, repair, clear your Command Counters from the board, refresh planets, draw 1 Action Card and 2 Command Counters, reorganise, return the Strategy Cards."
+          "<b>Status Phase</b> — " + (c.fote ? "" : "claim objectives, ") + "repair, clear your Command Counters from the board, refresh planets, draw 1 Action Card and 2 Command Counters, reorganise, return the Strategy Cards" + (c.fote ? ", then advance the round marker" : "") + "."
         ]) + ul([
           c.fote ? "Fall of the Empire lasts eight rounds." : "Rounds repeat until someone wins or another game-ending condition applies.",
           "“Friendly” means <b>your own</b> units and planets only; everyone else’s — allies included — are “enemy”.",
@@ -948,7 +948,7 @@ var T3 = {};
           "<b>Order of play</b> follows the card numbers: " + c.deck.map((id, i) => (i + 1) + " " + T3.cardName(id)).join(", ") + ". A number nobody took is skipped."
         ]);
       },
-      src: (c) => cite(["Base p.7, p.9, p.11, p.36", c.p <= 5 ? "Base p.31–32" : "", c.p >= 7 ? "SE p.8" : "", c.p <= 4 ? "FAQ p.2" : "", c.uses("bureaucracy") ? "SE p.16" : "", c.uses("bureaucracy") && c.mod("aoe") ? "Base p.33" : ""]) },
+      src: (c) => cite(["Base p.7, p.9, p.11", c.uses("initiative") ? "Base p.36" : "", c.p <= 5 ? "Base p.31–32" : "", c.p >= 7 ? "SE p.8" : "", c.p <= 4 ? "FAQ p.2" : "", c.uses("bureaucracy") ? "SE p.16" : "", c.uses("bureaucracy") && c.mod("aoe") ? "Base p.33" : ""]) },
     {
       title: "The Strategy Cards in this game",
       when: () => true,
@@ -972,7 +972,7 @@ var T3 = {};
       when: () => true,
       html: (c) => ul([
           "In order of play each player takes <b>one action</b>, then the next player; after the last player it comes back round. Keep going until <b>everyone has passed</b> — a player left alone may take several actions in a row.",
-          "<b>Strategic Action:</b> resolve your Strategy Card’s primary ability; the others may then follow with its secondary; flip your card to Inactive. You choose when — the card’s number only sets the order of play." + (c.uses("initiative") ? " The Initiative holder has no Strategic Action." : "") + (c.p <= 4 ? " With two cards you take two Strategic Actions, in the order you like." : ""),
+          "<b>Strategic Action:</b> resolve your Strategy Card’s primary ability; the others may then follow with its secondary; flip your card to Inactive. You choose when — the card’s number only sets the order of play." + (c.p <= 4 ? " With two cards you take a Strategic Action for each, in the order you like" + (c.uses("initiative") ? " — except Initiative, which gives none, so its holder takes just one, for his other card." : ".") : (c.uses("initiative") ? " The Initiative holder has no Strategic Action." : "")),
           "<b>Tactical Action:</b> activate one system with a Command Counter from your Command Pool, then move, fight, land, invade and produce there (the Activation Sequence).",
           "<b>Transfer Action:</b> activate two adjacent systems that hold only your units, shuffle ships between them and produce in one of them.",
           "<b>Pass:</b> allowed only once you have taken your Strategic Action" + (c.p <= 4 ? "s" : "") + ". After passing you take no more actions this round, but you may still use the secondary ability of cards played later.",
@@ -1003,23 +1003,23 @@ var T3 = {};
       title: "Movement",
       when: () => true,
       html: (c) => ul([
-          "Each ship moves up to its <b>movement value</b> (on your Race Sheet) and must <b>end in the activated system</b> — the only movement allowed. Fighters" + (c.mod("mechs") ? ", Mechanized Units" : "") + ", Ground Forces and PDS travel aboard Carriers or War Suns.",
+          "Each ship moves up to its <b>movement value</b> (on your Race Sheet) and must <b>end in the activated system</b> — the only movement allowed. Fighters" + (c.mod("mechs") ? ", Mechanized Units" : "") + ", Ground Forces and PDS travel aboard Carriers or War Suns" + (c.mod("flagships") ? " — or a Flagship whose card gives it capacity" : "") + ".",
           "A ship may <b>never move through a system containing enemy ships</b>; the only way in is to activate that system. Only ships block — enemy Fighters don’t (unless their owner has <i>Advanced Fighters</i>), and neither do Space Docks or Ground Forces.",
           "Ships in a system <b>you already activated</b> this round can’t move. Ships may pass through systems holding your Command Counters.",
           "Any legal route is fine, and a ship may even leave the activated system and come back (to collect units) if it has the movement.",
-          "<b>Carriers and War Suns</b> pick up Ground Forces and PDS in the system they start in, pass through or end in — but never in a system you activated earlier, nor in one containing enemy ships. They unload only in Planetary Landings. A Carrier may take Fighters from another Carrier, but not its Ground Forces or PDS.",
+          "<b>Carriers and War Suns</b>" + (c.mod("flagships") ? " (and Flagships with capacity)" : "") + " pick up Ground Forces and PDS in the system they start in, pass through or end in — but never in a system you activated earlier, nor in one containing enemy ships. They unload only in Planetary Landings. A Carrier may take Fighters from another Carrier, but not its Ground Forces or PDS.",
           "When the last Ground Force leaves a planet, leave a Control Marker to show you still control it.",
           "Passing through a crowded system doesn’t break your Fleet Supply; ending there does (excess ships are removed at once).",
           "Each fleet carrying Ground Forces needs at least one plastic Ground Force with it; Supplement Counters travel only with a real unit of their type.",
           "<b>Wormholes:</b> systems holding the same wormhole type (Alpha or Beta) are adjacent — for movement only (Transfer Actions included), not for PDS fire or other effects. A wormhole type with only one end in play does nothing." +
             (c.mod("nexus") ? " The Wormhole Nexus is adjacent to every Alpha and Beta system." : "") + (c.has("sot") && !c.fote ? " The Ghosts of Creuss’ “D” wormhole counts as a wormhole for card and game effects." : "")
         ]),
-      src: (c) => cite(["Base p.11, p.19–20, p.27–29, p.38", c.mod("nexus") ? "SE p.10" : "", c.has("sot") && !c.fote ? "SoT p.9" : "", "FAQ p.4–6, p.8"]) },
+      src: (c) => cite(["Base p.11, p.19–20, p.27–29, p.38", c.mod("nexus") ? "SE p.10" : "", c.has("sot") && !c.fote ? "SoT p.9" : "", c.mod("flagships") ? "SoT p.10" : "", c.mod("mechs") ? "SoT p.11" : "", "FAQ p.4–8"]) },
     {
       title: "Transfer Action",
       when: () => true,
       html: (c) => ol([
-          "<b>Activate two systems:</b> one Command Counter from your Command Pool on one system, then one from your <b>reinforcements</b> on an adjacent system. Both must contain at least one of your units and <b>no enemy units at all</b> (Ground Forces and PDS included).",
+          "<b>Activate two systems:</b> one Command Counter from your Command Pool on one system, then one from your <b>reinforcements</b> on an adjacent system. Both must contain at least one of your units and <b>no enemy units at all</b> (Ground Forces and PDS included). Neither system may already hold one of your Command Counters.",
           "<b>Movement</b> between the two systems — within each ship’s movement allowance. Fighters and Ground Forces must always be supported, so they move only with a ship that has room for them.",
           "<b>PDS fire:</b> enemy PDS in range may fire at your ships; a PDS in range of both systems fires at only one.",
           "<b>Planetary Landings</b> — only onto planets you already control.",
@@ -1034,7 +1034,7 @@ var T3 = {};
           "Possible pre-combat effects: Action Cards played “immediately before a space battle”, <b>Anti-Fighter Barrage</b>, Assault Cannons, the Mentak ability, Minister of War" + (c.mod("sabotage") ? ", <b>Sabotage Runs</b>" : "") + ". The <b>defender</b> chooses their order" + (c.mod("sabotage") ? " — but Anti-Fighter Barrage always comes before Sabotage Runs" : "") + ".",
           "<b>Anti-Fighter Barrage:</b> every Destroyer (attacking and defending) rolls <b>2 dice</b>; each result equal to or above its combat value destroys one enemy Fighter. No return fire; once per battle, not every round."
         ]) + h("Each combat round") + ol([
-          "<b>Announce</b> withdrawal (attacker first) or retreat (defender — only if the attacker didn’t). An announced retreat must be carried out.",
+          "<b>Announce</b> withdrawal (attacker first) or retreat (defender — only if the attacker didn’t). An announced withdrawal or retreat can’t be taken back.",
           "<b>Roll</b> one die per ship (a War Sun rolls 3). Each result equal to or above the ship’s combat value is a hit. A “0” is a 10.",
           "<b>Remove casualties</b> — the attacker first, then the defender, each choosing his own: destroy a ship or damage a Dreadnought or War Sun (a second hit destroys it). Fighters make cheap casualties.",
           "<b>Execute</b> the withdrawal or retreat: the whole fleet moves to an <b>adjacent system you activated earlier this round</b> that contains <b>no enemy ships</b> (enemy planets are fine). Cancelled if the enemy has no units left. Check Fleet Supply and Fighter capacity afterwards. No adjacent activated system — no retreat."
@@ -1062,14 +1062,14 @@ var T3 = {};
           "Both remove that many casualties" + (c.mod("shock") ? " (Shock Troops must be taken first)" : "") + (c.mod("mechs") ? "; a Mechanized Unit may absorb one hit by being damaged" : "") + "."
         ]) + ul([
           "Repeat until only one side (or neither) is left. <b>No retreats.</b>",
-          "<b>Success</b> — all defenders destroyed and at least one invader survives: the defender’s PDS and Space Dock there are destroyed" + (c.mod("facilities") ? " (and his Facility)" : "") + ", and you take the Planet Card, exhausted." + ((c.mod("leaders") || c.mod("shock")) ? " " + [c.mod("leaders") ? "An invading Agent" : "", c.mod("shock") ? (c.mod("leaders") ? "a" : "A") + " surviving Shock Troop" : ""].filter(Boolean).join(" or ") + " can capture the PDS and Space Dock instead." : ""),
+          "<b>Success</b> — all defenders destroyed and at least one invader survives: the defender’s PDS and Space Dock there are destroyed" + (c.mod("facilities") ? " (and his Facility)" : "") + ", and you take the Planet Card, exhausted." + ((c.mod("leaders") || c.mod("shock")) ? " " + [c.mod("leaders") ? "An invading Agent" : "", c.mod("shock") ? (c.mod("leaders") ? "a" : "A") + " surviving Shock Troop (with at least one surviving Ground Force)" : ""].filter(Boolean).join(" or ") + " can capture the PDS and Space Dock" + (c.mod("facilities") ? " (and Facility)" : "") + " instead, replacing them with your own — if you have no PDS or Space Dock left in your reinforcements, those pieces are destroyed instead." : ""),
           "Both sides wiped out: the defender keeps the planet (he places a Control Marker); its PDS and Space Dock are unaffected.",
           "PDS landed with an invasion don’t fight and can’t be casualties; if the last invading Ground Force dies, they are destroyed.",
           "A planet whose last Ground Force is bombarded away doesn’t revert to neutral, and its PDS survive.",
           "Invading a planet that holds only a Control Marker still counts as Invasion Combat (it breaks a trade agreement).",
           c.has("sot") ? "<b>Stalemate:</b> the FAQ’s stalemate rule (see Space Battles) covers Invasion Combat too." : ""
         ]),
-      src: (c) => cite(["Base p.12, p.17–18, p.25, p.29–31", c.mod("shock") ? "SE p.10" : "", c.mod("facilities") ? "SE p.11" : "", c.mod("mechs") ? "SoT p.11" : "", "FAQ p.3–4" + (c.has("sot") ? ", p.12" : "")]) },
+      src: (c) => cite(["Base p.12, p.17–18, p.25, p.29–31" + (c.mod("leaders") ? ", p.35" : ""), c.mod("shock") ? "SE p.10" : "", c.mod("facilities") ? "SE p.11" : "", c.mod("mechs") ? "SoT p.11" : "", "FAQ p.3–4" + (c.mod("shock") ? ", p.10" : "") + (c.has("sot") ? ", p.12" : "")]) },
     {
       title: "Status Phase",
       when: () => true,
@@ -1097,12 +1097,12 @@ var T3 = {};
       when: () => true,
       html: () => ul([
           "Each race has <b>16 Command Counters</b>. A counter you receive goes into one of the three areas of your Race Sheet and stays there until the next Status Phase; a counter you spend returns to your reinforcements.",
-          "<b>Command Pool</b> — one counter per activation (Tactical or Transfer Action). Empty pool: no more activations.",
+          "<b>Command Pool</b> — one counter per Tactical or Transfer Action (a Transfer Action’s second system is activated from your reinforcements). Empty pool: no Tactical or Transfer Actions.",
           "<b>Strategy Allocation</b> — pays for other players’ secondary abilities (and some race abilities and Action Cards).",
           "<b>Fleet Supply</b> (Fleet side up) — the most ships, <b>not counting Fighters</b>, you may have in any one system. You may never move, build or otherwise end up with more; any excess is removed immediately — even at the start of a battle. You may have any number of fleets.",
           "A <b>fleet</b> is all of one player’s ships in one system — Fighters included (they just don’t count toward the Fleet Supply).",
           "Advanced Fighters errata: Fighters beyond a system’s Fighter capacity count toward your Fleet Supply.",
-          "You are limited to the Command Counters provided — no substitutes. With all 16 in use, effects that would give you more don’t happen. (Control Markers and Bonus Counters that run out <i>may</i> be replaced by agreed substitutes.)"
+          "You are limited to the Command Counters provided — no substitutes. With all 16 on the board or your Race Sheet, nothing that needs another counter can happen — no Transfer Action (its second counter comes from reinforcements) and no effect that would give you more. (Control Markers and Bonus Counters that run out <i>may</i> be replaced by agreed substitutes.)"
         ]),
       src: "Base p.12, p.20–21 · FAQ p.1, p.4, p.8" },
     {
@@ -1112,7 +1112,7 @@ var T3 = {};
           [["Space Dock", "3", "4", "Builds units (planet’s resources + 2 per activation); supports 3 Fighters; sits on its planet, never in space"],
            ["Ground Force", "12 + supplements", "1 for 2", "Takes and holds planets; battle value 8 (SE p.10)"],
            ["PDS", "6", "2", "Space cannon (normally hits on 6), planetary shield, invasion defence; max 2 per planet"],
-           ["Fighter", "10 + supplements", "1 for 2", "Moves only with a Carrier/War Sun; needs capacity (Space Dock 3, Carrier 6, War Sun 6)"],
+           ["Fighter", "10 + supplements", "1 for 2", "Moves only with a Carrier/War Sun" + (c.mod("flagships") ? " (or a Flagship with capacity)" : "") + "; needs capacity (Space Dock 3, Carrier 6, War Sun 6)"],
            ["Carrier", "4", "3", "Capacity 6 — any mix of Fighters, Ground Forces and PDS"],
            ["Destroyer", "8", "1", "Anti-Fighter Barrage: 2 dice before a Space Battle (normally hits on 9)"],
            ["Cruiser", "8", "2", "Movement 2, combat value 7 in the rulebook’s examples"],
@@ -1126,24 +1126,25 @@ var T3 = {};
           "</tbody></table></div>" + ul([
           "Every unit’s cost, combat value and movement is on your Race Sheet’s unit table" + (c.has("se") || c.has("sot") ? " and the expansions’ unit reference cards" : "") + "; this table gives only what the rulebooks print.",
           "Only Fighters and Ground Forces are unlimited (Supplement Counters; any substitute once those run out). Every other unit is limited to its plastic: rebuild one only after it is destroyed.",
-          "A Supplement Counter is one more unit of its type and must always share its system/planet (and its Carrier) with at least one real unit of that type — keep it under one.",
+          "A Supplement Counter is one more unit of its type" + (((c.has("se") && !c.fote) || c.has("sot")) ? " (base-game counters; the " + [c.has("se") && !c.fote ? "Shattered Empire tokens" : "", c.has("sot") ? "Shards of the Throne counters" : ""].filter(Boolean).join(" and ") + " are worth 3 each — make change as needed)" : "") + " and must always share its system/planet (and its Carrier) with at least one real unit of that type — keep it under one.",
           "Ground Forces and PDS aboard a Carrier take no part in battles. If the Carrier is destroyed they are destroyed with it; its Fighters survive only if other capacity in the system (Carrier, War Sun, Space Dock) supports them. Excess units on a Carrier are destroyed at once.",
           "A <b>unit</b> is any plastic piece on the board, plus Fighter and Ground Force Supplement Counters."
         ]),
-      src: (c) => cite(["Base p.4, p.13, p.15, p.19–20, p.26–31", c.mod("shock") ? "SE p.10" : "SE p.10 (Ground Force value)", c.mod("mechs") ? "SoT p.11" : "", c.mod("flagships") ? "SoT p.10" : "", c.mod("mercs") ? "SoT p.12" : "", "FAQ p.7", c.mod("shock") ? "FAQ p.10" : "", c.mod("flagships") ? "FAQ p.13" : ""]) },
+      src: (c) => cite(["Base p.4, p.13, p.15, p.19–20, p.26–31", c.mod("shock") ? "SE p.10" : "SE p.10 (Ground Force value)", (c.has("se") && !c.fote) ? "SE p.6" : "", c.has("sot") ? "SoT p.8" : "", c.mod("mechs") ? "SoT p.11" : "", c.mod("flagships") ? "SoT p.10" : "", c.mod("mercs") ? "SoT p.12" : "", "FAQ p.7", c.mod("shock") ? "FAQ p.10" : "", c.mod("flagships") ? "FAQ p.13" : ""]) },
     {
       title: "Space Docks and production",
       when: () => true,
       html: (c) => ul([
           "To produce, activate (Tactical or Transfer Action) a system with your Space Dock; in the last step, build up to the dock planet’s <b>resource value + 2 units</b> — any mix, whatever their cost. Each Fighter and Ground Force counts as one unit.",
           "Pay the total in one lump sum from any of your planets (and Trade Goods). 1 resource buys <b>2 Fighters or 2 Ground Forces</b> — 1 even for a single one, and no mixing one of each.",
-          "New ships appear in the system’s space; Ground Forces and PDS appear on the dock’s planet.",
+          "New ships appear in the system’s space; Ground Forces" + (c.mod("mechs") ? ", Mechanized Units" : "") + " and PDS appear on the dock’s planet.",
           "<b>Blockade:</b> while an enemy ship is in the system your Space Dock can’t build ships — Ground Forces and PDS are still allowed.",
-          "<b>New Space Dock</b> (cost 4): only in the Production step of an activation of its system, on a planet you have controlled <b>all round</b>, one per planet, with no enemy ships in the system. It can’t build until next round — a Space Dock placed on the board by any means counts as built this round.",
+          "<b>New Space Dock</b> (cost 4): only in the Production step of an activation of its system, on a planet you have controlled <b>all round</b>, one per planet, with no enemy ships in the system. It can’t build until next round — a Space Dock placed on the board by any means counts as built this round." + (c.uses("industry") ? " (Industry is the exception — see below.)" : ""),
           c.uses("imperial") || c.uses("imperial2") ? "The Imperial secondary can build at a Space Dock in a system you already activated, or without activating it." : "",
-          c.uses("production") ? "Production builds without activating the system (primary: +2 resources; secondary: up to 3 units)." : ""
+          c.uses("production") ? "Production builds without activating the system (primary: +2 resources; secondary: up to 3 units)." : "",
+          c.uses("industry") ? "<b>Industry</b> (replaces Imperial in Fall of the Empire) — primary, choose one: <b>a)</b> 1 free Space Dock on a planet you control, even one whose Planet Card you gained this round; <b>b)</b> up to 4 resources’ worth of free units in an activated system you control that contains a Space Dock. Secondary: spend 1 Command Counter from your Strategy Allocation area for up to 2 resources’ worth of free units the same way. Option b) and the secondary may use a Space Dock built this round." : ""
         ]),
-      src: (c) => cite(["Base p.12, p.22, p.26–27", c.uses("imperial") ? "Base p.38" : "", c.uses("production") ? "SE p.15" : "", c.uses("imperial2") ? "SE p.17" : "", "FAQ p.4–7"]) },
+      src: (c) => cite(["Base p.12, p.22, p.26–27", c.uses("imperial") ? "Base p.38" : "", c.uses("production") ? "SE p.15" : "", c.uses("imperial2") ? "SE p.17" : "", c.mod("mechs") ? "SoT p.11" : "", c.uses("industry") ? "SoT p.14, p.21" : "", "FAQ p.4–7"]) },
     {
       title: "Planets, resources and influence",
       when: () => true,
@@ -1157,7 +1158,7 @@ var T3 = {};
           "“I control Mecatol Rex” means the planet, not the system.",
           (c.has("se") || c.has("sot")) ? "The <b>yellow</b> (general) technology specialty works like the others but doesn’t count toward objectives." : ""
         ]),
-      src: (c) => cite(["Base p.12, p.17, p.19, p.21–22, p.25, p.27", c.has("se") && !c.fote ? "SE p.6" : "", c.has("sot") ? "SoT p.9" : "", c.mod("mechs") ? "SoT p.11" : "", "FAQ p.8", c.mod("mechs") ? "FAQ p.13" : ""]) },
+      src: (c) => cite(["Base p.12, p.17, p.19, p.21–23, p.25, p.27", c.has("se") && !c.fote ? "SE p.6" : "", c.has("sot") ? "SoT p.9" : "", c.mod("mechs") ? "SoT p.11" : "", "FAQ p.8", c.mod("mechs") ? "FAQ p.13" : ""]) },
     {
       title: "Systems, special systems and wormholes",
       when: () => true,
@@ -1173,7 +1174,7 @@ var T3 = {};
           c.has("se") && !c.fote ? "<b>Refresh abilities</b> (icon beside a planet’s name): in the Status Phase, straight after refreshing, exhaust the planet for its ability instead of its resources — 2 Trade Goods, 2 Shock Troops (Ground Forces without that option), 2 Ground Forces or 2 Fighters, placed on that planet. No Fighters (ships) can be gained this way while enemy ships are in the system, and the planet Mirage has no Fighter capacity of its own." : "",
           "<b>Wormholes:</b> matching wormholes make systems adjacent for movement only; an unmatched wormhole does nothing."
         ]),
-      src: (c) => cite(["Base p.18–19, p.25", c.has("se") && !c.fote ? "SE p.6–7" : "", c.has("sot") && !c.fote ? "SoT p.9" : "", "FAQ p.8" + (c.has("se") && !c.fote ? ", p.11" : "")]) },
+      src: (c) => cite(["Base p.18–19, p.25", c.has("se") && !c.fote ? "SE p.6–7" + (c.mod("facilities") ? ", p.11" : "") : "", c.has("sot") && !c.fote ? "SoT p.9" : "", "FAQ p.8" + (c.has("se") && !c.fote ? ", p.11" : "")]) },
     {
       title: "Trade agreements and Trade Goods",
       when: () => true,
@@ -1186,24 +1187,25 @@ var T3 = {};
                 : "during the Trade III primary, which opens new agreements first and then pays everyone, even on those (see below).")) +
             " The supply is limited, so collect in clockwise order.",
           "Trade Goods may be given to other players at any time.",
-          "<b>Breaking:</b> either partner may break an agreement in the Status Phase (except with the Hacan); a Space Battle or Invasion Combat between the partners breaks it automatically (PDS fire and Action Cards don’t)." + (c.uses("trade") ? " Trade option <b>b</b> cancels every agreement in play, Hacan’s included." : ""),
+          "<b>Breaking:</b> either partner may break an agreement in the Status Phase (except with the Hacan); a Space Battle or Invasion Combat between the partners breaks it automatically (PDS fire and Action Cards don’t); taking a partner’s planet that holds only his Control Marker still counts as Invasion Combat." + (c.uses("trade") ? " Trade option <b>b</b> cancels every agreement in play, Hacan’s included." : ""),
           "Micro Technology (errata): +1 Trade Good per active agreement whenever you collect from agreements.",
           c.uses("trade2") ? "Trade II: everyone collects during the primary, the others 1 fewer in total; it can cancel up to 2 agreements (not Hacan)." : "",
-          c.uses("trade3") ? "Trade III: everyone collects during the primary, even on new agreements; its secondary breaks another pair’s agreement." : ""
+          c.uses("trade3") ? "Trade III: everyone collects during the primary, even on new agreements; its secondary breaks an agreement between any 2 other players and gains you 1 Trade Good — never one with the Hacan." : ""
         ]),
       src: (c) => cite(["Base p.24–25, p.37", c.uses("trade2") ? "SE p.15" : "", c.uses("trade3") ? "SoT p.20" : "", "FAQ p.1, p.6"]) },
     {
       title: "Action Cards",
       when: () => true,
-      html: () => ul([
+      html: (c) => ul([
           "Keep them hidden. Hand limit <b>7</b>: discard down immediately; at 7, draw and discard one card at a time.",
           "Play a card only in the circumstances printed on it. Announce that you are playing one; others may then announce theirs; reveal them all and resolve in order of play (clockwise from the Speaker when no one holds Strategy Cards).",
           "<b>Sabotage</b> needs no announcement: play it just after an Action Card is revealed (and its choices declared) to cancel it; discard both. A sabotaged card doesn’t count as played.",
           "Never play two identical cards on the same situation or entity in one round.",
           "“Play: As an action” replaces your action for the turn, and its text must be resolved.",
-          "When the deck runs out, shuffle the discards into a new deck. You may play an Action Card between two hits."
+          "When the deck runs out, shuffle the discards into a new deck. You may play an Action Card between two hits.",
+          c.has("sot") ? "A Shards of the Throne Action Card with a Trade Good icon, when you aren’t playing the optional rule it names, may be discarded instead of spending 1 Trade Good." : ""
         ]),
-      src: "Base p.22–23 · FAQ p.2–3" },
+      src: (c) => cite(["Base p.22–23", c.has("sot") ? "SoT p.9" : "", "FAQ p.2–3"]) },
     {
       title: "Political Cards and the Galactic Council",
       when: () => true,
@@ -1212,30 +1214,30 @@ var T3 = {};
           "<b>Elect</b> agendas: each player votes for one subject; the most votes (not necessarily a majority) wins. For “elect two planets”, each vote names a group of two.",
           "<b>For / Against</b> agendas: the majority of votes cast decides.",
           "<b>Laws:</b> voted “for”, enact the effect and keep the card face up — permanent unless a later agenda repeals it. Voted “against”, resolve any against-effect and discard.",
-          "<b>Voting:</b> first debate, threaten and bribe — no promise is binding. Then vote clockwise from the player left of the Speaker (the Speaker votes last). Your votes = total influence of your <b>unexhausted</b> planets (minimum 1); cast all or none, never split. Voting doesn’t exhaust planets; Trade Goods can’t buy votes.",
+          "<b>Voting:</b> first debate, threaten and bribe — no promise is binding. Then vote clockwise from the player left of the Speaker (the Speaker votes last). Your votes = total influence of your <b>unexhausted</b> planets (minimum 1); cast all or none, never split. Voting doesn’t exhaust planets; Trade Goods can’t buy votes." + (c.mod("intrigue") ? " With Political Intrigue: accepted Promissory Notes <b>are</b> binding; add your Representative’s bonus votes, and with no living Representative you can’t vote (see Political Intrigue)." : ""),
           "You may abstain. A tie — even 0–0 — is broken by the Speaker.",
           c.varSC ? "<b>Political Card hand</b> (variant set): hand limit 5; the Assembly card makes a player play one from hand (drawing the top card if he has none); discard one instead of a Trade Good at any time." : "",
           c.fote ? "<b>Agenda Cards</b> (Fall of the Empire) replace Political Cards: icons show Elect Player, Elect Planet (never a Home System) or Event (resolve, discard, draw another)." : ""
         ]),
-      src: (c) => cite(["Base p.23, p.37", c.varSC ? "SE p.15" : "", c.fote ? "SoT p.14" : "", "FAQ p.5"]) },
+      src: (c) => cite(["Base p.23, p.37", c.varSC ? "SE p.15" : "", c.fote ? "SoT p.14" : "", c.mod("intrigue") ? "SoT p.13" : "", "FAQ p.5"]) },
     {
       title: "Technology",
       when: () => true,
       html: (c) => ul([
-          "Four fields: <b>red</b> Warfare, <b>green</b> Biotechnology, <b>blue</b> Propulsion, <b>yellow</b> General. Each player’s deck is identical (24 advances in the base game" + (c.has("se") && !c.fote ? "; Shattered Empire adds 4 brand-new ones per colour" : "") + (c.has("sot") ? "; Shards of the Throne adds 4 more" : "") + ").",
+          "Four fields: <b>red</b> Warfare, <b>green</b> Biotechnology, <b>blue</b> Propulsion, <b>yellow</b> General. Each player’s deck is identical (24 advances in the base game" + (c.has("se") && !c.fote ? "; Shattered Empire adds 4 brand-new advances to every deck, one per field, and replaces Advanced Fighters, Micro Technology and Assault Cannon with revised cards" : "") + (c.has("sot") ? "; Shards of the Throne adds 4 more to every deck" : "") + ").",
           "You get advances mainly from the Technology card (primary: 1 free" + (c.uses("technology2") ? ", then you may buy a second for 8 resources" : "") + "; secondary: 1 for " + (c.uses("technology2") ? "6" : "8") + " resources), and from some Action and Political Cards. Acquired cards go face up in your play area.",
-          "You need every <b>prerequisite</b> printed on a card already face up in front of you. Technologies can’t be given to other players.",
-          "<b>Technology specialties:</b> each planet you control with a red, green or blue specialty cuts 1 off the cost of an advance of that colour when you buy with the Technology secondary — per planet, and only while that Planet Card is unexhausted (you needn’t exhaust it)." + ((c.has("se") || c.has("sot")) ? " The yellow specialty works the same way but doesn’t count toward objectives." : ""),
+          "You need the <b>prerequisites</b> printed on a card already face up in front of you — where the card offers alternatives (e.g. Micro Technology: Stasis Capsules <i>or</i> Sarween Tools), one is enough. Technologies can’t be given to other players.",
+          "<b>Technology specialties:</b> each planet you control with a red, green or blue specialty cuts 1 off the cost of an advance of that colour when you buy with the Technology secondary — " + (c.has("sot") ? "per specialty symbol (a planet showing two counts twice)," : "per planet,") + " and only while that Planet Card is unexhausted (you needn’t exhaust it)." + ((c.has("se") || c.has("sot")) ? " The yellow specialty works the same way but doesn’t count toward objectives." : ""),
           "Technology tree: Base p.42–43" + (c.has("se") && !c.fote ? "; with the new advances, SE p.18–19" : "") + ".",
           c.mod("rst") ? "<b>Race-Specific Technologies:</b> whenever you may buy a technology, you may buy your race’s instead for the normal cost <b>plus</b> the cost on its card (e.g. Technology primary: just the card’s cost). No prerequisites, no colour — so no specialty or Research Grant discount" + (c.has("se") ? ", and Subsidized Studies doesn’t apply either" : "") + "; otherwise a normal technology. Never another race’s" + (c.has("se") ? " (not even through Sharing of Technology or Technological Society)" : "") + "." : ""
         ]),
-      src: (c) => cite(["Base p.4, p.24, p.38", c.has("se") && !c.fote ? "SE p.5, p.8" : "", c.uses("technology2") ? "SE p.16" : "", c.has("sot") ? "SoT p.9" : "", c.mod("rst") ? (c.has("se") ? "SE p.9" : "") : "", c.mod("rst") && c.has("sot") ? "SoT p.10" : "", c.mod("rst") ? "FAQ p.10" : "", "FAQ p.6"]) },
+      src: (c) => cite(["Base p.4, p.24, p.38", c.has("se") && !c.fote ? "SE p.4–5, p.8" : "", c.uses("technology2") ? "SE p.16" : "", c.has("sot") ? "SoT p.9" : "", c.mod("rst") ? (c.has("se") ? "SE p.9" : "") : "", c.mod("rst") && c.has("sot") ? "SoT p.10" : "", c.mod("rst") ? "FAQ p.10" : "", "FAQ p.6", c.has("sot") ? "FAQ p.15" : ""]) },
     {
       title: "Objectives",
       when: (c) => !c.fote,
       html: (c) => ul([
           "<b>Public Objectives</b> " + (c.mod("aoe") ? "are all laid out face up at the start (Age of Empire) and no others enter the game" : "are revealed a few at a time" + (c.uses("imperial") ? " by the Imperial primary" : "") + (c.uses("bureaucracy") ? " by Bureaucracy" : "")) + "; anyone can score each one, once. Your <b>Secret Objective</b> is yours alone.",
-          "In Status Phase step 1 you may claim <b>one</b> Public Objective and/or your Secret Objective; place a Control Marker on each claimed card." + (c.has("sot") ? " With two Secret Objectives you may still claim only one per Status Phase." : ""),
+          "In Status Phase step 1 you may claim <b>one</b> Public Objective and/or your Secret Objective; place a Control Marker on each claimed card." + (c.has("sot") ? " With two Secret Objectives you may still claim only one per Status Phase." : "") + ((c.mod("throne") || c.uses("imperial2")) ? " Exception: after resolving option a) of the Imperial primary you may claim any number of Public Objectives in that Status Phase." : "") + (c.uses("bureaucracy") ? " Bureaucracy’s primary also lets you fulfil one face-up Public Objective at once (not a Secret), and you may still claim another in the Status Phase." : ""),
           "Objectives saying <b>“I now…”</b> must be fulfilled right then — e.g. “I now spend 20 resources” means paying them in step 1.",
           "Keep your Secret Objective hidden until you can meet it. Reveal it without meeting it and you lose it for the rest of the game.",
           c.mod("varobj") ? "<b>Variant Objectives:</b> Shattered Empire’s Stage I and II decks lean toward conflict. You have <b>won a space battle</b> if you are the only player with ships left in the system; the Custodians of Mecatol Rex and Domain Counters aren’t “opposing” forces for objectives." : "",
@@ -1243,7 +1245,7 @@ var T3 = {};
           c.has("se") ? "Rulings on Shattered Empire’s objectives: “destroyed x ships in a Space Battle” counts ships destroyed by pre-combat abilities but not by PDS fire; “destroyed X Ground Forces” counts bombardment and Action Cards such as Chemical Warfare." : "",
           c.has("sot") ? "An effect that targets a Secret Objective never touches one already fulfilled and scored." : ""
         ]),
-      src: (c) => cite(["Base p.14, p.26", c.mod("aoe") ? "Base p.33" : "", c.mod("varobj") ? "SE p.9" : "", c.mod("prelim") ? "SoT p.10" : "", "FAQ p.8" + (c.mod("varobj") ? ", p.10" : "") + (c.has("se") ? ", p.11" : "") + (c.has("sot") ? ", p.14" : "")]) }
+      src: (c) => cite(["Base p.14, p.26", c.mod("aoe") ? "Base p.33" : "", c.mod("varobj") ? "SE p.9" : "", c.uses("bureaucracy") ? "SE p.16" : "", c.uses("imperial2") ? "SE p.17" : "", c.mod("throne") ? "Variants p.2" : "", c.mod("prelim") ? "SoT p.10" : "", "FAQ p.8" + (c.mod("varobj") ? ", p.10" : "") + (c.has("se") ? ", p.11" : "") + (c.has("sot") ? ", p.14" : "")]) }
   ];
 })();
 
@@ -1287,6 +1289,7 @@ var T3 = {};
         "<b>Razing:</b> at the start of the Planetary Landings step (errata), each Dreadnought or War Sun in the system may raze one <b>face-down</b> counter — box it unresolved. A ship that razes can’t bombard in the same activation. Then roll a die: <b>1–7</b> no effect · <b>8–9</b> lose 3 random Action Cards · <b>0</b> lose 3 random Action Cards and exhaust all your ready planets.",
         "<b>Lazax Survivors:</b> probed — remove it; the prober gains <b>1 VP</b> and draws 3 Action Cards. Razed — the razer discards all his Action Cards, exhausts all his planets, loses all his Trade Goods and may not vote on the next agenda.",
         "Voluntary Annexation" + (c.uses("diplomacy2") ? " (or Diplomacy II’s annexation)" : "") + " of a planet removes its counter without effect.",
+        "Local forces from Domain Counters (such as Hostile Locals" + (c.mod("newds") ? " or Fighter Ambush" : "") + ") are not “opposing” forces — opposing forces belong to another player — so overcoming them doesn’t fulfil objectives that need opposing forces.",
         c.mod("leaders") ? "A Leader whose invasion of a neutral planet fails is killed" + ((c.mod("newds") || c.mod("custodians")) ? "; a Leader on a ship lost to a Fighter Ambush rolls as in a Space Battle, but “captured” means killed" : "") + "." : ""
       ]) + h("Domain effects") + dl([
         ["Radiation", "Kill all the Ground Forces of the initial landing — the planet stays uncontrolled — then remove the counter."],
@@ -1297,16 +1300,16 @@ var T3 = {};
         ["Peaceful Annexation", "The landing proceeds without incident. Discard."],
         ["Industrial Society", "You may place a free Space Dock here (it can’t build this round), and the Planet Card arrives unexhausted. Discard."],
         ["Technological Society", "The player on your left picks a free advance from your Technology deck that you have the prerequisites for" + (c.mod("rst") ? " (never another race’s Race-Specific Technology)" : "") + ". Discard."],
-        ["Wormhole Discovery", "Place the counter in the system: a new wormhole that connects to others of its letter (Alpha or Beta). It doesn’t count for the Master of Gates objective."],
+        ["Wormhole Discovery", "Place the counter in the system: a new wormhole that connects to others of its letter (Alpha or Beta). It doesn’t count for the Master of Gates objective" + ((c.has("se") || c.has("sot")) ? " or for Keeper of Gates" : "") + "."],
         ["Natural Wealth (number)", "Receive that many Trade Goods, if able. Discard."],
         c.mod("newds") ? ["Fighter Ambush (number)", "After landing, fight a Space Battle against that many local Fighters (another player rolls; no Anti-Fighter Barrage). If you lose, the planet stays uncontrolled, your landed Ground Forces are discarded and the Fighters return to full strength. Discard after winning."] : null,
         c.mod("newds") ? ["Automated Defense System", "Roll 2 dice: for each 6+ lose 1 ship in the system and one landing Ground Force; with no Ground Forces left the planet stays uncontrolled. The first successful invader removes it and may place a free PDS."] : null,
         c.mod("newds") ? ["Hidden Factory", "Receive free ships worth up to 2 resources, placed in this system. Discard."] : null,
         c.mod("newds") ? ["Native Intelligence", "Secretly look at any one face-down Domain Counter on any planet. Discard."] : null,
         c.mod("newds") ? ["Hostage Situation", "Pay Trade Goods equal to the number of Ground Forces landing, or lose all of the initial landing (the planet stays uncontrolled). Discard."] : null
-      ]) + (c.mod("terrds") ? h("Territorial Distant Suns") + ul(["Low-risk counters (Peaceful Annexation, Natural Wealth 2, Native Intelligence, Hostile Locals 1, Biohazard, Hostage Situation, Fighter Ambush 1, Settlers) sit on the outer ring and on planets adjacent to Home Systems; everything else is mixed on the remaining planets."]) : ""),
+      ]) + (c.mod("terrds") ? h("Territorial Distant Suns") + ul(["Low-risk counters (Peaceful Annexation, Natural Wealth 2, Native Intelligence, Hostile Locals 1, Biohazard, Hostage Situation, Fighter Ambush 1, Settlers) go randomly on the outer ring and on planets adjacent to Home Systems; then every remaining counter — leftover low-risk ones included — is mixed and placed randomly on the remaining planets."]) : ""),
       src: (c) => cite(["Base p.33–34, p.44", "SE p.13", c.has("se") ? "SE p.20" : "", c.mod("terrds") ? "SE p.11" : "", "FAQ p.4", c.uses("diplomacy2") ? "FAQ p.9" : "", c.mod("rst") ? "FAQ p.10" : "",
-        c.mod("leaders") && (c.mod("newds") || c.mod("custodians")) ? "FAQ p.11" : ""]) },
+        "FAQ p.11", (c.has("se") || c.has("sot")) ? "FAQ p.15" : ""]) },
     { title: "Option: Leaders", when: (c) => c.mod("leaders"),
       html: (c) => h("Moving Leaders") + ul([
         "Three per race; all start in the Home System. A Leader is always on a planet or aboard a ship — never alone in space, never on a neutral or enemy planet.",
@@ -1316,7 +1319,7 @@ var T3 = {};
         ["Carrying ship destroyed in a Space Battle", "Roll: <b>1–5</b> killed · <b>6–8</b> escapes to any friendly planet not under blockade · <b>9–10</b> captured by the opponent. Destroyed any other way: killed."],
         ["Planet successfully invaded", "Roll: <b>1–5</b> captured · <b>6–9</b> escapes · <b>10</b> killed. Ownership changing any other way: the Leader escapes."],
         ["Captives", "In the Status Phase the captor may hand a captive to any player (to its owner = freed, placed on a friendly planet not under blockade), keep it another round, or execute it."],
-        ["Rescue", "After successfully invading a planet of a player holding captives, roll: 9 or 10 finds one (your choice). Someone else’s Leader becomes your captive; your own is placed on a friendly planet. Invading a player’s last planet takes all his captives."]
+        ["Rescue", "After successfully invading a planet of a player holding captives, roll: 9 or 10 finds one (your choice). Someone else’s Leader becomes your captive; your own is placed on a friendly planet not under blockade. Invading a player’s last planet takes all his captives."]
       ]) + h("Abilities") + dl([
         ["Scientist", "Technology specialty planet: discount 2 instead of 1" + (c.has("sot") ? " (on a two-specialty planet, one more than the planet’s 2)" : "") + " · new Space Dock there costs 2 · its PDS get +1 on all rolls · with a PDS there, War Suns (and Graviton-Negator Dreadnoughts) can’t bombard it."],
         ["Diplomat", "Delays an invasion of its planet: the invading Ground Forces return to their Carriers (they may not attack another planet instead). It cancels only that one invasion — another player may still invade the planet this round (even the same player, if his Command Counter leaves that system), and a War Sun may still bombard it. A planet protected by a Diplomat can’t be protected again this round or next. A fleet with a Diplomat may move through a system with an opponent’s ships if he permits."],
@@ -1327,7 +1330,7 @@ var T3 = {};
       src: (c) => cite(["Base p.34–35", c.has("se") || c.mod("mercs") ? (c.mod("mercs") ? "SoT p.12" : "") : "", "FAQ p.3–4" + (c.has("se") ? ", p.11" : "") + (c.mod("mechs") ? ", p.13" : "") + (c.has("sot") ? ", p.15" : "")]) },
     { title: "Option: Sabotage Runs", when: (c) => c.mod("sabotage"),
       html: () => ul([
-        "Before a Space Battle, right after any Anti-Fighter Barrage, each player (attacker first) may announce a Sabotage Run against an enemy War Sun and commit Fighters to it.",
+        "Before a Space Battle, as one of the pre-combat effects, each player (attacker first) may announce a Sabotage Run against an enemy War Sun and commit Fighters to it. The defender chooses the order of the pre-combat effects, but any Anti-Fighter Barrage always comes before Sabotage Runs.",
         "<b>Outer defences:</b> roll a die per committed Fighter — an <b>unmodified 9 or 10</b> gets through; any other result destroys the Fighter (no return fire).",
         "<b>Inner defences:</b> roll one at a time for each Fighter that got through — an <b>unmodified 10</b> destroys the War Sun outright (no return fire); anything else destroys that Fighter.",
         "Surviving Fighters and an unharmed War Sun then fight normally. Against two War Suns, split your Fighters into two separate runs.",
@@ -1391,7 +1394,8 @@ var T3 = {};
       src: "SE p.11 · FAQ p.9, p.11" },
     { title: "Shattered Empire: Custodians of Mecatol Rex", when: (c) => c.mod("custodians"),
       html: () => ul([
-        "The Custodians defend Mecatol Rex with <b>3 Fighters</b> (a Fighter Ambush) and <b>2 Ground Forces</b> (Hostile Locals), resolved exactly like those Domain Counters: first win the Space Battle against the Fighters (no Anti-Fighter Barrage), then beat the locals with your Ground Forces. Defeated tokens leave the game.",
+        "The Custodians defend Mecatol Rex with <b>3 Fighters</b> (a Fighter Ambush token) and <b>2 Ground Forces</b> (a Hostile Locals token); another player rolls their dice. Defeated tokens leave the game.",
+        "<b>Fighter Ambush:</b> after your Ground Forces land, a Space Battle against the 3 Fighters starts at once (no Anti-Fighter Barrage). If you fail, the planet stays uncontrolled, all landing Ground Forces are discarded and the Fighters return to full strength. <b>Hostile Locals:</b> then your Ground Forces fight the 2 locals; they may <b>not be bombarded</b>, and if the invasion fails they return to full strength.",
         "Voluntary Annexation of Mecatol Rex, or an exploding Ancient Artifact, removes them. They are not “opposing” forces for objectives."
       ]),
       src: "SE p.11, p.20 · FAQ p.11" },
@@ -1418,9 +1422,9 @@ var T3 = {};
       html: () => ul([
         "Build your Flagship when producing units in your <b>Home System</b> (never elsewhere); its cost is on your race’s Flagship card. Only one of yours on the board at a time — you may rebuild it after it is destroyed.",
         "Cost, combat value, movement, capacity and special ability are on the card. It follows all normal unit rules — Fleet Supply included — and all cards and abilities that affect ships; Nano Technology and Type IV Drive don’t affect it.",
-        "Rulings: the Arborec Duha Menaimon may produce Ground Forces (with Production only alongside a friendly Space Dock). The Creuss Hil Colish gives its <b>destination</b> system a “D” wormhole it can’t use itself, and no other race may use it. The Xxcha Loncara Ssodu always has Deep Space Cannon (even unresearched) and no other PDS technology, and can’t be used in Invasion Combat. Ground Forces fighting as Fighters with the Yin Van Hauge follow all Fighter rules."
+        "Rulings: the Arborec Duha Menaimon may produce Ground Forces (with Production only alongside a friendly Space Dock). The Creuss Hil Colish’s system counts as having a “D” wormhole; while it moves, only its <b>destination</b> (the activated system, if Hil Colish will end its move there) has it, not the system it leaves. Hil Colish can’t use that wormhole itself, and no other race may use it, not even with Light/Wave Deflector. The Xxcha Loncara Ssodu always has Deep Space Cannon (even unresearched) and no other PDS technology, and can’t be used in Invasion Combat. Ground Forces fighting as Fighters with the Yin Van Hauge follow all Fighter rules."
       ]),
-      src: "SoT p.10 · FAQ p.11–13" },
+      src: "SoT p.10 · FAQ p.12–13, p.15" },
     { title: "Shards of the Throne: The Final Frontier", when: (c) => c.mod("frontier"),
       html: () => ul([
         "A system’s Space Domain Counter is revealed as soon as all moving units have ended their movement there; resolve it immediately. It can be used with or without Distant Suns."
@@ -1486,16 +1490,16 @@ var T3 = {};
         "Strategy Cards: the base game’s set, with <b>Civilization</b> instead of Political and <b>Industry</b> instead of Imperial.",
         "<b>Agenda Cards</b> replace the Political deck and count as Political Cards; an Agenda electing a planet can’t target a Home System. Icons: Elect Player, Elect Planet, Event (resolve, discard, draw a new Agenda).",
         "Use all of Shards of the Throne’s new Action and Technology Cards and the <b>Mechanized Units</b> rules. No other optional rule and no Shattered Empire component may be used." +
-          (c.p === 7 ? " <i>Seven players (this page’s reading): only the seventh colour — its plastic and Technology deck — comes from Shattered Empire, which SoT p.14 requires for a seventh player.</i>" : "")
+          (c.p === 7 ? " <i>Seven players (this page’s reading): only the seventh colour — its plastic and Technology deck — comes from Shattered Empire, which SoT p.14 requires for a seventh player. Remove that deck’s 4 brand-new Shattered Empire technologies; its Shattered Empire Advanced Fighters, Micro Technology and Assault Cannon stay, as no other version exists in that colour.</i>" : "")
       ]),
-      src: "SoT p.14–15" },
+      src: (c) => cite([c.p === 7 ? "SoT p.14–15 · SE p.4, p.8" : "SoT p.14–15"]) },
     {
       title: "Race rulings from the rulebooks and FAQ",
       when: () => true,
       html: (c) => {
         const inGame = (list) => c.fote ? list.some((r) => T3.foteRaces[c.p].join("|").indexOf(r) !== -1) : true;
         const rows = [
-          inGame(["Hacan"]) ? ["Emirates of Hacan", "Trade agreements with the Hacan can’t be broken in the Status Phase — but other effects (Action and Political Cards, Trade option b) can break them" + (c.uses("trade2") ? "; Trade II can’t cancel them" : "") + (c.uses("trade3") ? "; Trade III’s secondary can’t touch them" : "") + ". Collects 1 extra Trade Good per trade agreement. Never more than 7 Action Cards, even while trading them."] : null,
+          inGame(["Hacan"]) ? ["Emirates of Hacan", "Trade agreements with the Hacan can’t be broken in the Status Phase — but other effects (Action and Political Cards" + (c.uses("trade") ? ", Trade option b" : "") + ") can break them" + (c.uses("trade2") ? "; Trade II can’t cancel them" : "") + (c.uses("trade3") ? "; Trade III’s secondary can’t touch them" : "") + ". Collects 1 extra Trade Good per trade agreement. Never more than 7 Action Cards, even while trading them."] : null,
           inGame(["Jol Nar"]) ? ["Universities of Jol Nar", "Errata: “You receive −1 on your combat rolls…”. Re-rolls one die per Command Counter spent. When following the Technology card he may also execute the primary (a free advance, plus the option to buy one); he still pays the Command Counter unless he holds Initiative, one advance may be the prerequisite of the other, and nobody else gets a second round of secondaries." + (c.uses("technology2") ? " With Technology II: a free advance, a second for 6 and a third for 8." : "")] : null,
           inGame(["Letnev"]) ? ["Barony of Letnev", "Trade Goods spent before combat give their bonus for one combat round; spending more doesn’t raise it, but he may pay again each round." + (c.mod("rst") && c.has("sot") ? " Noneuclidean Shielding: a Dreadnought dealt just 1 hit is still damaged, and Direct Hit still destroys it." : "")] : null,
           c.fote ? null : ["Mentak Coalition", "Cruisers and Destroyers that fire before combat with the Mentak ability also fire in the regular battle; an Admiral doesn’t boost those shots." + (c.mod("rst") && c.has("se") ? " Salvage Operations can’t rebuild a War Sun without the War Sun technology." : "")],
@@ -1509,7 +1513,7 @@ var T3 = {};
           (c.has("se") && !c.fote) ? ["Winnu", "The home world’s yellow specialty works like the others but doesn’t count for objectives." + (c.mod("rst") ? " Its Shattered Empire racial technology may be used once per game round." : "") + (c.mod("rst") && c.has("sot") ? " Lazax Gate Folding onto an uncontrolled Mecatol Rex takes control" + (c.mod("custodians") ? " and discards the Custodians" : "") + "." : "")] : null,
           (c.has("sot") && !c.fote) ? ["Arborec", "The home world’s green specialty counts for objectives. Errata: “Your Ground Forces have a production capacity of 1. You may not produce units with Ground Forces that have moved during the same activation.” Capacity can’t be pooled; they can build ships; aboard ships they may produce (units go on ships with capacity or your planets there); with Production only in a system with a friendly Space Dock."] : null,
           (c.has("sot") && !c.fote) ? ["Ghosts of Creuss", "Two Home Systems joined by a “D” wormhole; starting units go in the Creuss planet’s system. Alpha/Beta systems are adjacent for movement only. The “D” wormholes needn’t be controlled for Keeper of Gates." + (c.mod("rst") ? " Slave Wormhole Generator: a “friendly” system has any of your units or Control Markers. Dimensional Splicer deals only one hit however many wormholes." : "")] : null,
-          (c.has("sot") && !c.fote) ? ["Nekro Virus", (c.mod("mechs") ? "" : "Without Mechanized Units it starts with 2 extra Ground Forces. ") + "Taking 3 Command Counters instead of an advance, only generic technology discounts apply (Neural Computing −2). It may gain technologies from Domain Counters; Lazax Survivors is removed without effect; it can’t vote for Voice of the Council; it copies technology at the end of a battle." + (c.mod("rst") ? " Valefar Assimilator may copy any racial technology, but not one that modifies another race’s ability; copying Creuss’ Slave Wormhole Generator uses Creuss’ tokens (each moved once per round)." : "")] : null,
+          (c.has("sot") && !c.fote) ? ["Nekro Virus", (c.mod("mechs") ? "" : "Without Mechanized Units it starts with 2 extra Ground Forces. ") + "Taking 3 Command Counters instead of an advance, only generic technology discounts apply (Neural Computing −2). " + ((c.mod("ds") || c.mod("frontier")) ? "It may gain technologies from Domain Counters" + (c.mod("ds") ? "; Lazax Survivors is removed without effect" : "") + ". " : "") + (c.mod("voice") ? "It can’t vote for Voice of the Council. " : "") + "It copies technology at the end of a battle." + (c.mod("rst") ? " Valefar Assimilator may copy any racial technology, but not one that modifies another race’s ability; copying Creuss’ Slave Wormhole Generator uses Creuss’ tokens (each moved once per round)." : "")] : null,
           c.fote ? ["Lazax", "Begin controlling Mecatol Rex; sit to the left of Sol; can give but never accept Treaty Cards; with Civilization they pick the agenda’s result without a vote."] : null
         ];
         return "<p>Race abilities themselves are printed on the Race Sheets; these are the rulebooks’ and FAQ’s errata and rulings about them.</p>" + dl(rows);
@@ -1542,6 +1546,7 @@ var T3 = {};
         ["Code of Honor", "Doesn’t stop the Naalu retreat ability."],
         ["Free Trade", "One extra Trade Good in total when you collect trade income — nothing if you collect none."],
         ["Fleet Regulations", "Fleet Supply counters above its new limit of 5 go straight back to reinforcements."],
+        ["Humane Labor", "When several cards change the same value, Political Cards apply first (in the order they entered the game), then Technology Cards (in their owner’s chosen order), then Action Cards (in the order they were resolved). So under Humane Labor (Space Dock production 2), Enviro Compensator still adds 1 for its owner (limit 3)."],
         ["Checks and Balances", "Voted against: cards already resolved stay inactive with their new owner, who may then pass without a Strategic Action" + (c.p <= 4 ? "; both of each player’s cards pass left" : "") + ". The order of play shifts, but the Speaker token stays where it is."]
       ])) + h("Technology Cards") + dl([
         ["Sarween Tools", "+1 resource at every one of your Space Docks — enough to build with on its own — but each dock’s extra resource is spent only there: a ship’s production can’t be split between docks."],
@@ -1579,33 +1584,33 @@ var T3 = {};
       when: () => true,
       html: (c) => h("Cards") + dl([
           ["Direct Hit", "Add: “Play: Immediately after the ship has been damaged in a Space Battle in which you participate.” (Pre-combat damage counts; PDS" + (c.mod("mines") ? " and Space Mine" : "") + " damage doesn’t.)"],
-          ["Ancient Artifact", "“Planetary unit” means <b>planetary force</b> — the planet’s Ground Forces" + (c.has("se") && !c.fote ? " and Shock Troops" : "") + " together take one combined roll of three dice (PDS and Space Docks unaffected" + (c.mod("mechs") ? "; Mechanized Units are immune to effects on Ground Forces — SoT p.21’s errata counts them in the planetary force, but the newer FAQ is used" : "") + "). On 6–10 the two technologies are taken one after the other (the first can be a prerequisite of the second). With Leaders, they die on 1–5 and count as planetary force."],
-          ["Open the Trade Routes", "“Against”: “This round, each player must give all of the Trade Goods he receives to the player on his left.”"],
+          c.fote ? null : ["Ancient Artifact", "“Planetary unit” means <b>planetary force</b> — the planet’s Ground Forces" + (c.mod("shock") ? " and Shock Troops" : "") + " together take one combined roll of three dice (PDS and Space Docks unaffected" + (c.mod("mechs") ? "; Mechanized Units are immune to effects on Ground Forces — SoT p.21’s errata counts them in the planetary force, but the newer FAQ is used" : "") + "). On 6–10 the two technologies are taken one after the other (the first can be a prerequisite of the second). With Leaders, they die on 1–5 and count as planetary force."],
+          c.fote ? null : ["Open the Trade Routes", "“Against”: “This round, each player must give all of the Trade Goods he receives to the player on his left.”"],
           ["Advanced Fighters", "Add: “Any Fighters in excess of a system’s Fighter capacity will count towards your Fleet Supply limit.”"],
           ["Micro Technology", "“When you receive Trade Goods from your trade agreements, you now receive 1 additional Trade Good for each of your active trade agreements.”"],
           ["Integrated Economy", "Read as: “You may only place PDS and Ground Force units on any friendly planet within this range.”"],
           c.has("se") && !c.fote ? ["Sharing of Technology", "Not a Law — discard it after resolving."] : null,
-          c.has("se") && !c.fote ? ["“Once per turn”", "Production Centers, Diplomats, Spatial Conduit Network, the Yin reversal and the Winnu racial technology: once per <b>game round</b>. Objectives about “this turn” mean this game round."] : null,
+          c.has("se") && !c.fote ? ["“Once per turn”", (c.mod("rst") ? "Production Centers, Diplomats, Spatial Conduit Network, the Yin reversal and the Winnu racial technology" : "The Yin reversal") + ": once per <b>game round</b>. Objectives about “this turn” mean this game round."] : null,
           c.has("sot") ? ["A Beacon of Hope", "“Play: Immediately before any Space Battle involving your Flagship begins.”"] : null,
-          c.has("sot") ? ["Quantum Datahub Node · Inheritance Systems · Instinct Training", "Read “Strategy Phase” for “Status Phase” · “Technology Strategy Card” for “Trade Strategy Card” · “game round” for “game turn”."] : null,
+          (c.has("sot") && c.mod("rst")) ? ["Quantum Datahub Node · Inheritance Systems · Instinct Training", "Read “Strategy Phase” for “Status Phase” · “Technology Strategy Card” for “Trade Strategy Card” · “game round” for “game turn”."] : null,
           c.has("sot") ? ["Transfabrication", "Read “Produce Units” for “Build Units”; units scuttled by it can’t be rebuilt the same round."] : null,
-          c.has("sot") ? ["Berserker Genome (replacement)", "Renamed <b>Valkyrie Armor</b>."] : null
+          (c.has("se") && c.has("sot") && c.mod("rst") && !c.fote) ? ["Berserker Genome (replacement)", "Renamed <b>Valkyrie Armor</b>."] : null
         ]) + h("Race sheets") + ul([
           "PDS cost is <b>2</b> (the original sheets misprint it).",
-          "Xxcha, Sardakk N’orr and Jol Nar ability wording — see Race rulings." + (c.has("sot") && !c.fote ? " Arborec ability wording — see Race rulings." : "")
+          ((rs) => rs.length ? (rs.length > 1 ? rs.slice(0, -1).join(", ") + " and " + rs[rs.length - 1] : rs[0]) + " ability wording — see Race rulings." : "")(["Xxcha", "Sardakk N’orr", "Jol Nar"].filter((r) => !c.fote || T3.foteRaces[c.p].join("|").indexOf(r) !== -1)) + (c.has("sot") && !c.fote ? " Arborec ability wording — see Race rulings." : "")
         ]) + h("Rulebooks") + ul([
           "4 players" + (c.has("se") && !c.fote ? " (and 8)" : "") + ": remove Strategic Flexibility and Strategic Shift.",
-          "Age of Empire: no Stage II objectives in the first three rounds.",
+          c.fote ? "" : "Age of Empire: no Stage II objectives in the first three rounds.",
           "Retreats go to a previously activated system with no enemy ships (enemy planets allowed).",
           "Scuttling waits until Status Phase step 1 is complete.",
           "3–4 players: order of play uses your lower initiative number.",
           "Elimination: Action Cards discarded, trade agreements removed; Strategy Card counts unchanged.",
-          "Distant Suns: razing happens at the start of Planetary Landings.",
+          c.fote ? "" : "Distant Suns: razing happens at the start of Planetary Landings.",
           "“Space Combat” means Space Battles; bonuses apply only to the combat-dice step." + (c.has("sot") ? " <i>(SoT p.22 reprints this as “Space Battles or Invasion Combat”; the newer FAQ p.2 wording is used.)</i>" : ""),
           c.has("se") && !c.fote ? "<b>Shattered Empire:</b> the 7–8 player setup ignores any “first remove 2 random systems” instruction · Artifacts can’t go in or next to Home Systems · Tactical Retreats go to an adjacent, unactivated system without enemy units · Shock Troops aboard ships are “with” any Ground Force in their fleet · Space Mines trigger whenever an enemy ship enters or is built in their system · Simulated Early Turns allow refresh abilities in the abbreviated Status Phase, and Political Card discards instead of spending Trade Goods." : "",
           c.has("sot") ? "<b>Shards of the Throne:</b> " + (c.fote ? "" : "its galaxy piles remove 2 systems for 7 players and 3 for 8 (not the 4 and 5 printed on SoT p.9) · Assembly II draws two Political Cards · ") + "a stalemate forces the attacker into a tactical retreat (or destroys his ships)." : ""
         ]),
-      src: (c) => cite(["SE p.13", c.has("sot") ? "SoT p.21–22" : "", "FAQ p.1–3, p.7" + (c.has("se") && !c.fote ? ", p.8–9" : "") + (c.has("sot") ? ", p.11–12" : "") + (c.mod("mechs") ? ", p.13" : "")]) }
+      src: (c) => cite([c.has("se") && !c.fote ? "SE p.8, p.13" : "SE p.13", c.has("sot") ? "SoT p.21–22" : "", "FAQ p.1–3, p.7" + (c.has("se") && !c.fote ? ", p.8–9" : "") + (c.has("sot") ? ", p.11–12" : "") + (c.mod("mechs") ? ", p.13" : "")]) }
   ];
   T3.reference = T3.reference.concat(more);
 })();
@@ -1623,7 +1628,7 @@ var T3 = {};
   // one short spoken line per Strategy Card
   const cardLine = {
     initiative: "<b>Initiative</b>: act first, become Speaker, and follow everyone’s cards for free — but no primary ability, and never two rounds running.",
-    diplomacy: "<b>Diplomacy</b>: name an opponent — neither of you may activate systems holding the other’s units this round. Followers refresh two planets.",
+    diplomacy: "<b>Diplomacy</b>: name an opponent — neither of you may activate systems holding the other’s units this round. Followers refresh up to two exhausted planets outside their Home System.",
     political: "<b>Political</b>: three Action Cards, a Command Counter, and an agenda for the Galactic Council. Followers draw an Action Card.",
     logistics: "<b>Logistics</b>: four Command Counters. Followers buy them at three influence each.",
     trade: "<b>Trade</b>: three Trade Goods, collect on your trade deals and approve new ones — or cancel every deal. Followers collect on theirs.",
@@ -1637,15 +1642,15 @@ var T3 = {};
     diplomacy2: "<b>Diplomacy Two</b>: make everyone drop a Command Counter into one of your systems, or annex for free. Followers pay a counter and three influence to annex an empty planet next to a system they control.",
     assembly: "<b>Assembly</b>: a Political and two Action Cards, then either take the Speaker token and name who plays an agenda, or give the token away and play an agenda from your own hand. Followers refresh planets worth up to six.",
     production: "<b>Production</b>: build at a Space Dock without activating, with two extra resources. Followers build up to three units.",
-    trade2: "<b>Trade Two</b>: three Trade Goods or cancel up to two deals; everyone collects, the others one short. No secondary.",
-    warfare2: "<b>Warfare Two</b>: the High Alert token gives your ships there plus one movement and plus one in battle. Followers shift two ships into adjacent systems they control.",
+    trade2: "<b>Trade Two</b>: three Trade Goods or cancel up to two deals; everyone collects, the others one short; then new deals may open, with your approval. No secondary.",
+    warfare2: "<b>Warfare Two</b>: the High Alert token gives your ships there plus one movement and plus one in battle. Followers move up to two ships out of unactivated systems into adjacent systems they control, without activating the destination.",
     technology2: "<b>Technology Two</b>: a free advance and another for eight. Followers pay six.",
     bureaucracy: "<b>Bureaucracy</b>: a Command Counter, pick which of two objectives appears, then claim one on the spot. Followers draw a Political and an Action Card.",
     bureaucracyAoE: "<b>Bureaucracy</b>: a Command Counter, then claim one objective on the spot — with Age of Empire every objective is already out, so nothing new appears. Followers draw a Political and an Action Card.",
     imperial2: "<b>Imperial Two</b>: no automatic points — score any number of objectives this Status Phase and take a point if you hold Mecatol Rex, or keep its build secondary to yourself. Otherwise followers build without activating.",
-    trade3: "<b>Trade Three</b>: everyone collects, even on brand-new deals; mercenaries are paid; you may hire one. Followers can break someone else’s deal for a Trade Good.",
+    trade3: "<b>Trade Three</b>: everyone collects, even on brand-new deals; mercenaries are paid; you may hire one. Followers can break a deal between two other players and gain a Trade Good — never a deal with the Hacan.",
     political2: "<b>Political Two</b>: pick one of two face-up agendas and run the council with Representatives and Promissory Notes. Followers pay two influence for two Action Cards.",
-    assembly2: "<b>Assembly Two</b>: choose who proposes an agenda from hand, pass the Speaker token, and run the council with Representatives. Followers draw a card and refresh a planet.",
+    assembly2: "<b>Assembly Two</b>: draw two Political Cards, choose any player — you too — to put an agenda from his hand before the council, and you may hand the Speaker token to anyone but that player; then run the council with Representatives. Followers draw an Action Card and refresh one planet outside their Home System.",
     civilization: "<b>Civilization</b>: draw two agendas, keep one — the Lazax simply decide it; anyone else puts it to a vote. Followers pay two influence for two Action Cards.",
     industry: "<b>Industry</b>: a free Space Dock, or four resources’ worth of free units. Followers get two resources’ worth."
   };
@@ -1661,7 +1666,7 @@ var T3 = {};
             (c.mod("longwar")
               ? " — this is the <b>Long War</b>" + (c.uses("bureaucracy") ? " (fourteen, less one because Bureaucracy is in play)" : "") + ", with a " + numWord(c.varSC ? 15 : 14) + "-card objective deck"
               : (c.uses("bureaucracy") ? " — one fewer than usual, because Bureaucracy is in play" : "")) + ".</p>" +
-            "<p>Points come mostly from <b>Objective cards</b>: Public Objectives anyone can score, " + (c.mod("aoe") ? "all face up from the start" : "revealed a few at a time") + ", and one hidden <b>" + (c.mod("prelim") ? "Preliminary Objective" : "Secret Objective") + "</b> each. We score in the Status Phase, in turn order, so the first to reach the target wins." +
+            "<p>Points come mostly from <b>Objective cards</b>: Public Objectives anyone can score, " + (c.mod("aoe") ? "all face up from the start" : "revealed a few at a time") + ", and one hidden <b>" + (c.mod("prelim") ? "Preliminary Objective" : "Secret Objective") + "</b> each. We score in the Status Phase, in turn order — at most one Public Objective plus your " + (c.mod("prelim") ? "Preliminary (later Secret)" : "Secret") + " Objective each time" + ((c.mod("throne") || c.uses("imperial2")) ? ", unless the Imperial card lifts that limit" : "") + " — so the first to reach the target wins." +
             (c.uses("imperial") ? (c.mod("throne") ? " The <b>Imperial</b> card follows The Ancient Throne — more on that below." : " The <b>Imperial</b> card gives " + (c.mod("star") ? "one point — The Star in the Crown halves it —" : "two points") + " each time it’s played.") : "") + "</p>" +
             "<p>" + (c.mod("aoe") ? "A marker walks along the objective row each round; when it reaches <b>Game Over</b>, most points wins." : "The <b>Game Over</b> card lurks deep in the objective deck: when it appears, most points wins.") +
             " And no one scores objectives while he’s lost a planet in his own Home System" + (c.mod("homeworlds") ? " — with <b>Homeworlds</b>, no victory points from anything at all" : "") + ".</p>";
@@ -1669,7 +1674,7 @@ var T3 = {};
       { when: (c) => c.fote,
         h: "The hook — Fall of the Empire",
         body: (c) => "<p>Tonight we play the fall of the Lazax Empire. The <b>Lazax</b> still rule from Mecatol Rex; " + list(T3.foteRaces[c.p].slice(1).map((r) => /^The /.test(r) ? r.replace(/^The /, "the ") : "the " + r)) + " circle the throne. There are <b>no victory points</b>: each of us has a hidden <b>Scenario Objective</b> — the Lazax one lies face up — and the game lasts at most <b>eight rounds</b>. Some objectives win on the spot; otherwise, after round eight, everyone meeting his objective wins.</p>" +
-          "<p>You can win together. On your turn, activate another player’s Home System to slip him one of your <b>Treaty Cards</b>; he shuffles it into his treaty hand and secretly discards any one card. When someone wins, whoever holds that winner’s <b>lowest-numbered</b> treaty wins too — but anyone holding treaties from two different players loses. The Lazax give treaties but never accept them.</p>" },
+          "<p>You can win together. On your turn, activate another player’s Home System to slip him one of your <b>Treaty Cards</b>; he shuffles it into his treaty hand and secretly discards any one card. When someone wins, whoever holds that winner’s <b>lowest-numbered</b> treaty wins too — but anyone holding treaties from two or more opponents loses. The Lazax give treaties but never accept them.</p>" },
       {
         h: "The shape of a round",
         body: (c) => "<p>Three phases. <b>Strategy</b>: starting with the Speaker, each of us takes " + (c.p <= 4 ? "<b>two</b> Strategy Cards — the lower number sets your turn order; each card’s primary ability is yours, its secondary is for everyone else" : "a Strategy Card — its number sets turn order; its primary ability is yours, its secondary is for everyone else") + (T3.bonusCount(c.p) ? "; cards nobody takes gather bonus counters" : "") + ". <b>Action</b>: one action each, round and round, until everyone passes. <b>Status</b>: " + (c.fote ? "" : "score objectives, ") + "repair, pick our Command Counters up off the board, refresh planets, draw an Action Card and two Command Counters, and return the Strategy Cards" + (c.fote ? " — then the round marker moves on" : "") + ".</p>" },
@@ -1697,7 +1702,7 @@ var T3 = {};
       {
         h: "Fighting",
         body: (c) => "<p>Each ship rolls a die — a War Sun three — and hits on its combat value or better; a zero is a ten. The attacker removes casualties first; Dreadnoughts and War Suns soak a hit by being damaged. Destroyers shoot at Fighters before the first round, and PDS shoot at fleets in range. The attacker may withdraw or the defender retreat, but only into an adjacent system he has already activated this round, with no enemy ships in it" +
-          (c.mod("tretreat") ? " — or, with <b>Tactical Retreats</b>, the defender pays a Strategy Allocation counter to activate a fresh neighbouring system" : "") + ".</p>" +
+          (c.mod("tretreat") ? " — or, with <b>Tactical Retreats</b>, the defender pays a Strategy Allocation counter to activate an unactivated neighbouring system with no enemy units in it, and retreats there" : "") + ".</p>" +
           "<p>Invading a planet: Dreadnoughts and War Suns bombard, the defender’s PDS fire once, then Ground Forces roll until one side is gone. A battle between trading partners cancels their deal.</p>" },
       {
         h: "The Galactic Council",
@@ -1712,7 +1717,7 @@ var T3 = {};
       { when: (c) => c.fote,
         h: "The scenario’s own rules",
         body: (c) => "<p><b>Civilization</b> replaces Political — the Lazax set an agenda’s result with no vote — and <b>Industry</b> replaces Imperial with free Space Docks and units. Everyone has <b>Mechanized Units</b>, heavy ground troops that survive one hit. No other optional rules" +
-          (c.has("se") ? (c.p === 7 ? ", and <b>Shattered Empire</b> only lends the seventh player his colour" : ", and <b>Shattered Empire</b> stays in the box") : "") + ".</p>" },
+          (c.has("se") ? (c.p === 7 ? ", and — on this page’s reading of the scenario — <b>Shattered Empire</b> only lends the seventh player his colour" : ", and <b>Shattered Empire</b> stays in the box") : "") + ".</p>" },
       { when: (c) => !c.fote && (c.p <= 5 || c.p >= 7 || c.mod("larger")),
         h: (c) => (c.p === 6 ? "The galaxy" : c.p + " players"),
         body: (c) => "<p>" + [
@@ -1739,7 +1744,7 @@ var T3 = {};
         body: () => "<p><b>Preliminary Objectives</b>: your starting objective is easier and worth one point; complete it to draw a real Secret Objective.</p>" },
       { when: (c) => c.mod("ds"),
         h: "Distant Suns",
-        body: (c) => "<p><b>Distant Suns</b>: every neutral planet hides a Domain Counter, flipped when you land — Trade Goods, a free Space Dock, a technology, a wormhole, or radiation, a biohazard, hostile locals" +
+        body: (c) => "<p><b>Distant Suns</b>: every neutral planet except Mecatol Rex" + (c.has("se") ? " and the Trade Stations" : "") + " hides a Domain Counter, flipped when you land — Trade Goods, a free Space Dock, a technology, a wormhole, or radiation, a biohazard, hostile locals" +
           (c.mod("newds") ? ", and Shattered Empire’s <b>new counters</b>: ambushes, hidden factories, hostages" : "") + ". A Fighter can <b>probe</b> first; a Dreadnought or War Sun can <b>raze</b> one unseen, at a political price." +
           (c.mod("terrds") ? " <b>Territorial Distant Suns</b> keeps the gentler counters near our Home Systems and on the outer ring." : "") + "</p>" },
       { when: (c) => c.mod("leaders"),
@@ -1786,7 +1791,7 @@ var T3 = {};
         body: () => "<p><b>Mercenaries</b>: hired through Trade Three, each costs a Trade Good of upkeep whenever Trade Three is played, can’t hold planets alone, and dodges hits with <b>Evasion</b>.</p>" },
       { when: (c) => c.mod("intrigue"),
         h: "Political Intrigue",
-        body: () => "<p><b>Political Intrigue</b>: before each vote everyone sends a <b>Representative</b> — Councilors bring votes, Spies can assassinate, Bodyguards can’t be assassinated; no Representative, no vote. A <b>Promissory Note</b> you accept binds your vote.</p>" },
+        body: () => "<p><b>Political Intrigue</b>: before each vote everyone sends a <b>Representative</b> — each adds the bonus votes printed on its card, Councilors generally the most; Spies can assassinate, Bodyguards can’t be assassinated; no Representative, no vote. A <b>Promissory Note</b> you accept binds your vote.</p>" },
       {
         h: "Don’t worry about these until they come up",
         body: (c) => {

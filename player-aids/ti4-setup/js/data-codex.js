@@ -51,6 +51,7 @@ var TI_CODEX = (function () {
   function geId(k) { return "ge-" + k; }
   function tf(c) { return !!c && c.mode === "twilightsfall"; }          /* Thunder's Edge: Twilight's Fall mode */
   function relicsOk(c) { return pok(c) || te(c); }                        /* relic deck: PoK, or TE (TE p.6 step 8) */
+  function geCommerce(c) { return typeof TI !== "undefined" && typeof TI.geEvent === "function" && !!TI.geEvent(c, "ageOfCommerce"); } /* Age of Commerce galactic event (Codex IV p.16; core helper) */
   var TE_MAPS = ["te-map-thunderdreaming", "te-map-subjugation", "te-map-redvsblue", "te-map-legendary"];
   function teMapOn(c) { for (var i = 0; i < TE_MAPS.length; i++) { if (on(c, TE_MAPS[i])) return TE_MAPS[i]; } return null; }
   /* The module is offered with Codex III or Thunder's Edge (TE p.4 includes the Keleres, revised). The TE
@@ -207,7 +208,7 @@ var TI_CODEX = (function () {
       var names = ringCells(k).map(function (qr) { var c = idx.at[qr[0] + "," + qr[1]]; return c ? cellText(key, c) : "—"; });
       rows.push("<b>Ring " + k + "</b> (" + (6 * k) + " spaces): " + names.join(", "));
     }
-    var legend = "Heavy outline = home position · shaded centre = " + (key === "ordinian" || key === "liberation" ? "the scenario's centre system" : "Mecatol Rex") +
+    var legend = "Heavy outline = home position · " + (meta.centreText.indexOf("{MR}") >= 0 ? "shaded centre = Mecatol Rex" : (key === "ordinian" || key === "liberation" ? "shaded centre = the scenario's centre system" : "shaded hex = Mecatol Rex (not the centre on this map)")) +
       (hasHyp ? " · dashed = hyperlane tile — turn it exactly as drawn on " + meta.book + " " + meta.page + " (rotation can't be shown here)" : "") + ".";
     var sizes = [];
     for (var j = 1; j <= idx.maxR; j++) sizes.push(j === 1 ? "Ring 1 is the 6 spaces touching it" : "ring " + j + " the next " + (6 * j));
@@ -409,13 +410,14 @@ var TI_CODEX = (function () {
       t: "Codex II cards: reference cards and relics",
       d: function (c) {
         return ul([
-          "<b>Relics:</b> shuffle <b>JR-XS455-O</b>, <b>Dynamis Core</b> and <b>Nano-Forge</b> into the relic deck" + (relicsOk(c) ? "." : " (the relic deck comes with Prophecy of Kings or Thunder's Edge)."),
+          relicsOk(c) ? "<b>Relics:</b> shuffle <b>JR-XS455-O</b>, <b>Dynamis Core</b> and <b>Nano-Forge</b> into the relic deck."
+            : "<b>Relics:</b> <b>JR-XS455-O</b>, <b>Dynamis Core</b> and <b>Nano-Forge</b> go in the relic deck, which comes with Prophecy of Kings or Thunder's Edge. Without either, there is no relic deck, so leave them out.",
           "<b>Faction reference cards</b> — a new card type summarising each faction; useful for drafting factions and for new players.",
           "<b>Alliance reference cards</b> — a new mini-card type, kept apart from other decks: whoever receives a faction's “Alliance” promissory note takes its card to see that faction's commander ability.",
           te(c) ? "<b>With Thunder's Edge:</b> use TE's own complete sets of Faction and Alliance reference cards — the Codex print-and-play versions are not used. TE's Codex cards include 3 relics and TE adds a Nano-Forge attachment token; use TE's printings where you have them." : ""
         ]);
       },
-      src: function (c) { return join("Codex II pp.11–12", te(c) ? "TE pp.4–5" : ""); } },
+      src: function (c) { return join("Codex II pp.11–12", relicsOk(c) ? "" : "LRR p.5", te(c) ? "TE pp.4–5" : ""); } },
 
     { id: "codex3-cards", after: "start", exp: "codex3",
       when: function (c) { return has(c, "codex3") && !tf(c); },
@@ -442,13 +444,14 @@ var TI_CODEX = (function () {
       t: "Codex IV cards: relics and galactic events",
       d: function (c) {
         return ul([
-          "<b>Relics:</b> shuffle <b>Circlet of the Void</b>, <b>Book of Latvinia</b> and <b>Neuraloop</b> into the relic deck — they replace nothing" + (relicsOk(c) ? "" : " (the relic deck comes with Prophecy of Kings or Thunder's Edge)") + "." +
+          (relicsOk(c) ? "<b>Relics:</b> shuffle <b>Circlet of the Void</b>, <b>Book of Latvinia</b> and <b>Neuraloop</b> into the relic deck — they replace nothing."
+            : "<b>Relics:</b> <b>Circlet of the Void</b>, <b>Book of Latvinia</b> and <b>Neuraloop</b> go in the relic deck (they replace nothing), which comes with Prophecy of Kings or Thunder's Edge. Without either, leave them out.") +
             (lib(c) ? " In Liberation of Ordinian, Circlet of the Void and Neuraloop instead start with the Naaz-Rokha and Nomad players (step 11)." : ""),
           "<b>Galactic event cards</b> (a new card type): Minor Factions, Total War, Age of Commerce and Age of Exploration — used only if you play with galactic events" + (geOn(c) ? " (you are — see the galactic events step)" : "") + ".",
           te(c) ? "<b>With Thunder's Edge:</b> TE says it includes all Codex gameplay content in revised form; its 20-card galactic event deck includes Minor Factions and Age of Exploration. Use TE's printings where you have them." : ""
         ]);
       },
-      src: function (c) { return join("Codex IV pp.14–16", lib(c) ? "Codex IV p.18" : "", te(c) ? "TE pp.4–5, 16" : ""); } },
+      src: function (c) { return join("Codex IV pp.14–16", relicsOk(c) ? "" : "LRR p.5", lib(c) ? "Codex IV p.18" : "", te(c) ? "TE pp.4–5, 16" : ""); } },
 
     /* ---------- Twilight's Fall (Thunder's Edge mode): which Codex components still apply ---------- */
     { id: "codex-tf", after: "start",
@@ -581,7 +584,7 @@ var TI_CODEX = (function () {
         if (!pok(c)) {
           return ul([
             "<b>Without Prophecy of Kings, skip this step.</b> It purges “Alliance” promissory notes and unlocks commanders — both Prophecy of Kings components (PoK p.10) — and an Alliance reference card only shows an ally's commander ability (Codex II p.11).",
-            "Thunder's Edge's later version of the variant also limits this step to games with Prophecy of Kings (TE p.13).",
+            "Thunder's Edge's later version of the variant likewise limits purging “Alliance” notes and unlocking commanders to games with Prophecy of Kings, but it moves taking your ally's Alliance reference card to step 2 for every game (TE p.13).",
             "Codex II numbers this as step 3, “Choose Color”; in the Living Rules Reference, Choose Color is step 4."
           ]);
         }
@@ -824,13 +827,13 @@ var TI_CODEX = (function () {
         return ul([
           "<b>JR-XS455-O</b> (Lost Titan Prototype) — an extra <b>agent</b>: Action: exhaust and choose a player; they may spend 3 resources to place a structure on a planet they control, or else gain 1 trade good. Like other agents it can be lent to others, and it interacts with the Yssaril agent and the Nomad's Temporal Command Suite.",
           "<b>Nano-Forge</b> — Action: attach it to a non-legendary, non-home planet you control: +2 resources, +2 influence, and the planet becomes <b>legendary</b>. Once attached, the action can't be used again.",
-          "<b>Dynamis Core</b> — while in your play area your commodity value is <b>+2</b>; Action: purge it to gain trade goods equal to your printed commodity value +2. If that leaves you above your maximum commodities, discard down (Wiki FAQ).",
+          "<b>Dynamis Core</b> — while in your play area your commodity value is <b>+2</b>; Action: purge it to gain trade goods equal to your printed commodity value +2. If that leaves you above your maximum commodities, discard down (Wiki FAQ)." + (geCommerce(c) ? " During the <b>Age of Commerce</b> galactic event there is no commodity maximum, so you keep them (Codex IV p.16)." : ""),
           tf(c) ? "" : "<b>Faction reference cards</b> — each shows a complexity rating (green simple, yellow medium, red for experienced players), the faction's commodity value, starting units and technology, and a summary of its abilities and faction components.",
           tf(c) ? "" : "<b>Alliance reference cards</b> — show a faction's commander ability for whoever holds its “Alliance” promissory note; also used by the Alliance game variant" + (te(c) ? " and, with Thunder's Edge, by some galactic events: when you gain one for any reason other than an “Alliance” promissory note, place it in your play area and use its ability (TE p.12)" : "") + "."
-        ]) + (tf(c) ? p("<i>Twilight's Fall: only these relics apply — reference cards come from Thunder's Edge (TF p.6, TE p.4).</i>") : (te(c) ? p("With Thunder's Edge, use TE's reference card sets instead of the print-and-play cards.") : "")) +
+        ]) + (tf(c) ? p("<i>Twilight's Fall: only these relics apply — reference cards come from Thunder's Edge (TF p.6, TE p.4).</i>") : (te(c) ? p("With Thunder's Edge, use TE's reference card sets instead of the print-and-play cards. TE's Codex cards also include 3 revised relics (TE p.4), and TE adds a Nano-Forge attachment token (TE p.5); use TE's printings of these relics where you have them.") : "")) +
           (relicsOk(c) ? "" : p("<i>The relics need a relic deck, which comes with Prophecy of Kings or Thunder's Edge — without either they stay in the box.</i>"));
       },
-      src: function (c) { return join("Codex II pp.11–12", "Wiki FAQ (Exploration)", te(c) ? "TE pp.4, 12" : "", tf(c) ? "TF p.6" : ""); } },
+      src: function (c) { return join("Codex II pp.11–12", "Wiki FAQ (Exploration)", te(c) ? "TE pp.4–5, 12" : "", tf(c) ? "TF p.6" : "", geCommerce(c) ? "Codex IV p.16" : ""); } },
 
     { id: "codex3-card-texts", title: "Codex III: Omega leaders, secret objectives and exploration cards",
       when: function (c) { return has(c, "codex3"); },
@@ -841,10 +844,10 @@ var TI_CODEX = (function () {
           h("Xxcha") + ul([
             "<b>Political Data Nexus Ω</b> (hero, “Voice of the Council”) — reworked to help in and out of the agenda phase, reducing the old card's wild swings: when you exhaust planets, add each planet's resources and influence together and treat the total as both. Wiki FAQ: spend the combined value as resources <i>or</i> influence, not both; hero unlocks are checked only after the whole score-objectives step; abilities that use a planet's “resource value” (e.g. Uprising) use the printed value."
           ]) + h("Yin Brotherhood — the first faction with all three leaders reworked") + ul([
-            "<b>Brother Milor Ω</b> (agent) — now covers ground combat too: after a player's unit is destroyed, exhaust to let that player place 2 fighters in that system (a ship) or 2 infantry on that planet (a ground force). Action phase only; with the Nekro or Naalu flagship abilities the owner chooses fighters or infantry (Wiki FAQ).",
+            "<b>Brother Milor Ω</b> (agent) — now covers ground combat too: after a player's unit is destroyed, exhaust to let that player place 2 fighters in that system (a ship) or 2 infantry on that planet (a ground force). With the Nekro or Naalu flagship abilities the owner chooses fighters or infantry (Wiki FAQ).",
             "<b>Brother Omar Ω</b> (commander) — counts as a green prerequisite; when you research a technology another player owns, you may return 1 of your infantry to reinforcements to ignore its prerequisites.",
-            "<b>Quantum Dissemination Ω</b> (hero, Dannel of the Tenth) — the Greyfire mutagen turned to nastier ends: Action: commit up to 3 infantry from reinforcements to any non-home planets and resolve invasions there; no one can use space cannon against them; then purge. Wiki FAQ: that means <b>ground combats</b> on those planets, not full invasion steps; Parley can be played on one of them."
-          ]) + h("Naalu Collective") + ul([
+            "<b>Quantum Dissemination Ω</b> (hero, Dannel of the Tenth) — the Greyfire mutagen turned to nastier ends: Action: commit up to 3 infantry from reinforcements to any non-home planets and resolve invasions there; no one can use space cannon against them; then purge."
+          ]) + "<ul><li class=\"note flag\"><b>Sources disagree:</b> Brother Milor Ω's printed trigger has no phase limit (followed here); the Wiki FAQ reports an official answer that it can be used only in the action phase.</li><li class=\"note flag\"><b>Sources disagree:</b> Quantum Dissemination Ω as printed resolves invasions (followed here); the Wiki FAQ reports an official answer that it should resolve only ground combats, not full invasion steps, with Parley playable on one of those planets.</li></ul>" + h("Naalu Collective") + ul([
             "<b>Z'eu Ω</b> (agent) — a full operative now: Action: exhaust to let a player take a tactical action in a non-home system without placing a command token; the system still counts as activated. Wiki FAQ: that player is the active player for it, but it isn't their turn (no Fleet Logistics); Master Plan and Minister of War still work.",
             "<b>M'aban Ω</b> (commander) — at any time, look at your neighbours' promissory note hands and the top and bottom agenda cards. Not when Covert Legislation is revealed before the speaker draws, and not to interrupt the Politics primary (Wiki FAQ).",
             "<b>Iconoclast Ω</b> (mech) — other players can't use anti-fighter barrage against your units in its system; Sustain Damage; cost 2, combat 6."
@@ -868,7 +871,7 @@ var TI_CODEX = (function () {
         return ul([
           "<b>Circlet of the Void</b> — your units don't roll for gravity rifts, and you ignore the movement effects of other anomalies; Action: exhaust to explore a frontier token in a system without other players' ships (no Dark Energy Tap needed).",
           "<b>Book of Latvinia</b> — when you gain it, research up to 2 technologies that have no prerequisites; Action: purge it — if you control planets with <b>all 4</b> technology specialties, gain 1 victory point; otherwise gain the speaker token.",
-          "<b>Neuraloop</b> — when a public objective is revealed, you may purge one of your relics to discard it and replace it with a random objective from <b>any</b> objective deck; that objective is public, even a secret objective."
+          "<b>Neuraloop</b> — when a public objective is revealed, you may purge one of your relics to discard that objective and replace it with a random objective from <b>any</b> objective deck; the new objective is public, even if it is a secret objective."
         ]) + (lib(c) ? p("Liberation of Ordinian hands Circlet of the Void to the Naaz-Rokha and Neuraloop to the Nomad at setup.") : "") +
           (te(c) ? p("Thunder's Edge's Codex cards include 3 relics without naming them; if yours match these, use the TE printings.") : "") +
           (relicsOk(c) ? "" : p("<i>The relics need a relic deck, which comes with Prophecy of Kings or Thunder's Edge — without either they stay in the box.</i>"));
@@ -923,7 +926,7 @@ var TI_CODEX = (function () {
           (te(c) ? " Thunder's Edge adds more events to the deck; they're covered with Thunder's Edge." : ""))];
         if (geHas(c, "minorFactions")) {
           parts.push(h("Minor Factions (complexity 2)") + ul([
-            "Setup: 1 fewer blue tile each; unplayed factions' home systems go in the second ring, equidistant from players' home systems, each with 3 neutral infantry (combat 8). These minor faction systems are not home systems.",
+            "Setup: 1 fewer blue tile each. Before creating the galaxy, shuffle the reference cards of the factions nobody is playing and deal 1 to each player. In speaker order, each player places that faction's home system in the second ring, equidistant from players' home systems, then places 3 neutral infantry (combat 8) on its planets, split as evenly as possible. These minor faction systems are not home systems.",
             "When a player controls <b>every planet</b> in a minor faction system, they take that faction's <b>alliance card</b> — from the deck or from whoever had it." + (te(c) ? " Place it in your play area; you can use its ability (TE p.12)." : " The Codex calls this gaining the faction's abilities."),
             "Planets in minor faction systems have <b>all three traits</b> — cultural, industrial and hazardous.",
             "Needs Prophecy of Kings; without it, ignore the alliance-card paragraph."
@@ -970,7 +973,7 @@ var TI_CODEX = (function () {
       html: function () {
         return p("Players fight for control of the disabled Argent Flight flagship <b>Coatl</b> (the custodians token) in the Ordinian nebula at the centre of the galaxy. As in a standard game, the game ends when a player gains their <b>10th victory point</b>. The standard custodians token rules are not used.") +
           ul([
-            "<b>Control:</b> you control the Coatl while you are the <b>only</b> player with ships in its system; you lose control when you no longer have ships there.",
+            "<b>Control:</b> you <b>gain</b> control of the Coatl if you are the <b>only</b> player with ships in its system, and you keep it until you no longer have ships in its system.",
             "No player can use <b>space cannon</b> against ships in the Coatl's system.",
             "<b>Repair:</b> it starts damaged. At the start of your turn, if you control it, you may spend <b>6 resources</b> to repair it — flip it to its “1 Victory Point” side. Once repaired, the <b>agenda phase</b> is added to the game, and controlling the Coatl is worth <b>1 victory point</b>.",
             "<b>Moving:</b> the repaired Coatl counts as a ship with move 1 for the movement step only; its controller can move it like one of their ships. It never takes part in combat, can't retreat and can't be destroyed.",
@@ -1031,7 +1034,7 @@ var TI_CODEX = (function () {
       when: function (c) { return lib(c); },
       body: function () {
         return p("There's an extra stage I objective, <b>Liberate Ordinian</b>: win a combat against the Nekro Virus. When the first stage II objective comes out it flips to <b>Control Ordinian</b> — points already scored stay, but the first side is gone. Sol and Xxcha play by the alliance rules: they share space without fighting, can join each other's tactical actions, can roll together in combat and can't be eliminated while the partner holds a planet. They also share a hero, the <b>F.S.S. Orlando</b>, which unlocks when the Nekro reach 5 points — and both must agree to use it.") +
-          p("The Creuss play with three mysterious <b>Unknown</b> leaders and must be red; the Nekro hold Ordinian with a big fleet, and their Valefar Assimilators are swapped for two strange assimilated technologies; the Naaz-Rokha hold the <b>Circlet of the Void</b>, which skips gravity-rift rolls, ignores other anomalies' movement effects and explores frontier tokens from afar; and the Nomad hold the <b>Neuraloop</b>, which can swap out a public objective as it's revealed.");
+          p("The Creuss play with three mysterious <b>Unknown</b> leaders and must be red; the Nekro hold Ordinian with a big fleet, and their Valefar Assimilators are swapped for two strange assimilated technologies; the Naaz-Rokha hold the <b>Circlet of the Void</b>, which skips gravity-rift rolls, ignores other anomalies' movement effects and explores frontier tokens from afar; and the Nomad hold the <b>Neuraloop</b>, which lets them purge a relic to swap out a public objective as it's revealed.");
       } },
     { id: "codex-ordinian", slot: "insert", h: "Ordinian: the Coatl and the Nekro",
       when: function (c) { return ord(c); },
@@ -1049,14 +1052,14 @@ var TI_CODEX = (function () {
     { id: "codex2-cards", slot: "insert", h: "Twilight Codex II cards",
       when: function (c) { return has(c, "codex2"); },
       body: function (c) {
-        if (tf(c)) return p("From Codex II, only its three relics join us in Twilight's Fall: <b>JR-XS455-O</b>, an extra agent you can lend out to help someone build a structure; <b>Dynamis Core</b>, which raises your commodity value by 2; and <b>Nano-Forge</b>, which makes one of your planets legendary and adds 2 resources and 2 influence.");
+        if (tf(c)) return p("From Codex II, only its three relics join us in Twilight's Fall: <b>JR-XS455-O</b>, an extra agent you can lend out to help someone build a structure; <b>Dynamis Core</b>, which raises your commodity value by 2; and <b>Nano-Forge</b>, which makes one of your non-home, non-legendary planets legendary and adds 2 resources and 2 influence.");
         /* TE p.4: Thunder's Edge's own reference-card sets replace the print-and-play ones; "Alliance" notes are PoK */
         var refs = te(c)
           ? "Thunder's Edge's faction reference cards stand in for Codex II's print-and-play ones — glance at them any time to see what everyone does" +
             (pok(c) ? " — and its alliance reference cards show what a borrowed commander does." : ".")
           : "Codex II " + (relicsOk(c) ? "also " : "") + "gives us faction reference cards — glance at them any time to see what everyone does" +
             (pok(c) ? " — and alliance reference cards, so whoever holds an “Alliance” note knows what the borrowed commander does." : ".");
-        return p((relicsOk(c) ? "Codex II adds three relics: <b>JR-XS455-O</b>, an extra agent you can lend out to help someone build a structure; <b>Dynamis Core</b>, which raises your commodity value by 2; and <b>Nano-Forge</b>, which makes one of your planets legendary and adds 2 resources and 2 influence. " : "") + refs);
+        return p((relicsOk(c) ? "Codex II adds three relics: <b>JR-XS455-O</b>, an extra agent you can lend out to help someone build a structure; <b>Dynamis Core</b>, which raises your commodity value by 2; and <b>Nano-Forge</b>, which makes one of your non-home, non-legendary planets legendary and adds 2 resources and 2 influence. " : "") + refs);
       } },
     { id: "codex3-cards", slot: "insert", h: "Twilight Codex III cards",
       when: function (c) { return has(c, "codex3"); },
@@ -1070,11 +1073,11 @@ var TI_CODEX = (function () {
     { id: "codex4-cards", slot: "insert", h: "Twilight Codex IV cards",
       when: function (c) { return has(c, "codex4"); },
       body: function (c) {
-        if (tf(c)) return p("Codex IV's galactic events aren't used in Twilight's Fall, but its three relics can turn up: <b>Circlet of the Void</b> skips gravity-rift rolls, ignores other anomalies' movement effects and explores frontier tokens from afar; the <b>Book of Latvinia</b> is a victory point if you control planets with all four technology specialties; and <b>Neuraloop</b> lets you swap out a public objective as it's revealed.");
+        if (tf(c)) return p("Codex IV's galactic events aren't used in Twilight's Fall, but its three relics can turn up: <b>Circlet of the Void</b> skips gravity-rift rolls, ignores other anomalies' movement effects and explores frontier tokens from afar; the <b>Book of Latvinia</b> can be purged for a victory point if you control planets with all four technology specialties — otherwise you take the speaker token; and <b>Neuraloop</b> lets you purge one of your relics to swap out a public objective as it's revealed.");
         if (!relicsOk(c)) return p(geOn(c) ? "Codex IV's relics need a relic deck, which comes with Prophecy of Kings or Thunder's Edge, so tonight Codex IV brings only its galactic event — more on that in a moment."
           : "Codex IV's relics need a relic deck, which comes with Prophecy of Kings or Thunder's Edge, so they stay in the box tonight.");
-        return p(lib(c) ? "The third Codex IV relic, the <b>Book of Latvinia</b>, can turn up in the relic deck: control planets with all four technology specialties and it's a victory point; otherwise it's the speaker token."
-          : "Three new relics are in the relic deck: <b>Circlet of the Void</b> skips gravity-rift rolls, ignores other anomalies' movement effects and explores frontier tokens from afar; the <b>Book of Latvinia</b> is a victory point if you control planets with all four technology specialties; and <b>Neuraloop</b> lets you swap out a public objective as it's revealed — even for a secret one.");
+        return p(lib(c) ? "The third Codex IV relic, the <b>Book of Latvinia</b>, can turn up in the relic deck: when you gain it, research up to two technologies with no prerequisites; later, purge it for a victory point if you control planets with all four technology specialties — otherwise you take the speaker token."
+          : "Three new relics are in the relic deck: <b>Circlet of the Void</b> skips gravity-rift rolls, ignores other anomalies' movement effects and explores frontier tokens from afar; the <b>Book of Latvinia</b> lets you research up to two technologies with no prerequisites when you gain it, and later you can purge it for a victory point if you control planets with all four technology specialties — otherwise you take the speaker token; and <b>Neuraloop</b> lets you purge one of your relics to swap out a public objective as it's revealed — even for a secret one.");
       } },
     { id: "codex-keleres", slot: "insert", h: "The Council Keleres",
       when: function (c) { return keleresOn(c); },
@@ -1129,7 +1132,7 @@ var TI_CODEX = (function () {
   ];
   function laterItems(c) {
     return [
-      (has(c, "codex1") || has(c, "codex3")) && !tf(c) ? "Exact wording of the Omega (Ω) cards — read them when they're played; the Rules Reference has the clarifications." : "",
+      (has(c, "codex1") || has(c, "codex3")) && !tf(c) ? (te(c) ? "Exact wording of the revised Codex cards (marked with the Codex icon) — read them when they're played; the Codex notes in this page's rules reference cover them." : "Exact wording of the Omega (Ω) cards — read them when they're played; the Codex notes in this page's rules reference have the clarifications.") : "",
       keleresOn(c) ? "The Keleres' <b>Custodia Vigilia</b> — a planet off the board that their I.I.H.Q. Modernization technology grants." : "",
       allianceOn(c) || lib(c) ? "Swapping planet cards with your ally when an effect lets you redistribute command tokens." : "",
       geHas(c, "ageOfExploration") ? "Exactly where a new Age of Exploration tile may go — it must touch at least two non-home systems." : "",
@@ -1143,7 +1146,7 @@ var TI_CODEX = (function () {
   var notes = [
     "PRECEDENCE & DATES: TE (2025; newer than Codex IV — TE p.4 says it includes all Codex gameplay content in revised form and TE p.16 names Codex IV's Minor Factions/Age of Exploration events; the TE rulebook's text layer prints no date, but TF prints © 2025) > Codex IV (© 2025) > Codex III (© 2022; the source file is FFG's v2.1, but the book prints no version, so the set name omits it — audit 2) > Codex II (© 2021) > LRR v2.0 (09/22/20) > Codex I (© 2020, published before PoK). LRR changelog dates used: v1.1 02/03/18, v1.2 06/12/19, v1.3 05/04/20, v2.0 09/22/20 (LRR pp.2–3).",
     "CODEX I RULES UPDATES (Codex I p.14): all five (Diplomacy primary, Hyper Metabolism, gravity rifts, retreating with ground forces, rerolls) are already in LRR v2.0 — 32.2 (p.16), errata v1.1 + Wiki Errata, 41.2/31.2 (pp.16, 19), 78.4/78.7/95.1 (pp.29–30, 36), 74.3/78.5e (pp.28, 30). No conflict with the core LRR text. One LATER change: TE p.16 limits a gravity rift's +1 move bonus to once per ship ('a change from previous rulings'), which conflicts with LRR 41.3 — the core gravity-rift reference should show the TE ruling; my codex-rules-updates section states it.",
-    "OMEGA CARDS are not in the LRR or the Wiki Errata. Wiki FAQ [OFFICIAL] clarifications used: X-89 Ω vs Planetary Shield; War Funding Ω combat rolls only; Political Data Nexus Ω (one or the other, unlock timing, printed value); Brother Milor Ω; Quantum Dissemination Ω (ground combats, Parley); Z'eu Ω; M'aban Ω; Turn Their Fleets to Dust scoring; Impersonation; Reflective Shielding; Counterstroke; Ghost Squad; Master Plan; Dynamis Core; Council Keleres (starting-tech order, Custodia Vigilia, Omniopiares, Agency Supply Network, Law's Order, Xander). No [UNOFFICIAL] answers used. (Core data.js repeats some of these as codex/te-gated rulings — fine, just don't add more copies.)",
+    "OMEGA CARDS are not in the LRR or the Wiki Errata. Wiki FAQ [OFFICIAL] clarifications used: X-89 Ω vs Planetary Shield; War Funding Ω combat rolls only; Political Data Nexus Ω (one or the other, unlock timing, printed value); Brother Milor Ω (flagship choice; action-phase-only flagged as Sources disagree); Quantum Dissemination Ω (ground combats/Parley flagged as Sources disagree); Z'eu Ω; M'aban Ω; Turn Their Fleets to Dust scoring; Impersonation; Reflective Shielding; Counterstroke; Ghost Squad; Master Plan; Dynamis Core; Council Keleres (starting-tech order, Custodia Vigilia, Omniopiares, Agency Supply Network, Law's Order, Xander). No [UNOFFICIAL] answers used. (Core data.js repeats some of these as codex/te-gated rulings — fine, just don't add more copies.)",
     "THUNDER'S EDGE and the Codex: TE p.4 ships 74 revised 'Codex Cards' (20 action cards, 3 relics, 6 exploration cards, Keleres sheet/mech/5 leaders/PN/2 techs/Custodia Vigilia; replacing 3 faction techs, 8 Magen Defense Grid, 8 X-89, 3 secret objectives, 5 PNs, 1 mech, 6 leaders) and its own Faction/Alliance reference card sets (Codex print-and-play ones not used). My set steps just say 'use TE's printings' when c.has('te'); C's te-start step covers the physical swap. Visible TE wording change: Acquiescence drops 'or place' (TE p.5). TE's Keleres has a faction tech 'Executive Order' (TE p.16) absent from Codex III — my Keleres content warns that TE's sheet wins. The relic deck exists with PoK or TE (TE p.6 step 8), so relic lines check either.",
     "ALLIANCE VARIANT — SPLIT WITH C: the 'alliance' module (id kept; requires any-of [['codex2','te']]) is shared. My alliance-* steps, alliance-ref and 'Alliances' teach render Codex II's version and are gated !c.has('te'); with Thunder's Edge in play, C's te-alliance-* steps/reference/teach render TE p.13 (newest) — C gates them on c.has('te') && c.mod('alliance'). Liberation of Ordinian (mode, not the module) keeps its own inline alliance rules in my liberation-ref (TE p.13 wording when te).",
     "GALACTIC EVENTS — SPLIT WITH C: my 'galacticEvents' module (requires codex4) owns the Codex IV event texts. With te on, C's te-galactic-event step and te-events teach are the pick step/teach (TE p.6), so my ge-pick step and 'Galactic event' teach are gated !c.has('te'). My ge-minor-factions setup step (TE-aware: TE pp.7, 10, 16) and galactic-events-ref stay in both cases; ge-minor-factions is also gated off when C's 'te-map-subjugation' map is on (that map builds Minor Factions in). Choice ids (read by C too): 'ge-any' (default = all four shown), 'ge-minorFactions', 'ge-totalWar', 'ge-ageOfCommerce', 'ge-ageOfExploration'.",

@@ -112,13 +112,14 @@
     if (!state.exps.has("wg")) { state.opts.delete("air"); state.opts.delete("airadv"); state.opts.delete("res"); }
     if (!state.opts.has("air")) state.opts.delete("airadv");
     // Rise of Fenris module compatibility (RoF p.46, p.50-51)
-    if (state.mods.has("desolation")) {
+    const desoLive = state.mods.has("desolation") && state.mode === "standard" && state.modOpen && state.exps.has("rof");
+    if (desoLive) {
       state.triumph = "tiles";                 // Desolation uses the Triumph Tiles
       state.mods.delete("rivals");             // no Rivals, Mad Tesla, resolution tiles
       state.mods.delete("madtesla");
       state.mods.delete("mpautoma");           // the Automa doesn't support Desolation
       state.opts.delete("res");
-    } else state.mods.delete("deshard");
+    } else if (!state.mods.has("desolation")) state.mods.delete("deshard");
     if (state.triumph === "peace") state.mods.delete("rivals");   // Rivals incompatible with Peace
     if (state.players < 3) state.mods.delete("mpautoma");
     // Campaign bookkeeping
@@ -238,12 +239,13 @@
     const tr = el("div", "mods");
     for (const t of SY.triumphs) {
       const locked = state.mods.has("desolation") && t.id !== "tiles";
-      const b = btn("mod radio" + (locked ? " off" : ""), "<span class='mod-name'>" + t.name + "</span><span class='mod-sum'>" + (locked ? "Desolation uses the Triumph Tiles" : t.summary) + "</span>",
+      const desoTiles = state.mods.has("desolation") && t.id === "tiles";
+      const b = btn("mod radio" + (locked ? " off" : ""), "<span class='mod-name'>" + t.name + "</span><span class='mod-sum'>" + (locked ? "Desolation uses the Triumph Tiles" : desoTiles ? "Desolation: shuffle all 21 tiles, reveal " + SY.desolationTiles(state.players) : t.summary) + "</span>",
         state.triumph === t.id, locked ? null : () => {
           state.triumph = t.id;
           if (t.id === "peace") state.mods.delete("rivals");
           update();
-        }, t.src);
+        }, desoTiles ? "Rise of Fenris p.46" : t.src);
       if (locked) b.disabled = true;
       tr.appendChild(b);
     }
@@ -387,6 +389,7 @@
     const e = SY.episodeById(id);
     if (!e || !c.ep) return false;
     if (e.id === c.epId) return c.rewards;
+    if (e.idx === 1 && e.id !== c.prev2) return false;   // the unplayed Episode 2 branch never opens its rewards/outcome page
     return reached(id, c);
   }
   function docVisible(x, c) {

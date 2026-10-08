@@ -567,6 +567,7 @@ main { max-width: 980px; margin: 0 auto; padding: 18px 22px 40px; position: rela
 .note.faq { border-image-source: var(--f-note-faq); }
 .note.flag { border-image-source: var(--f-note-flag); }
 li.note { list-style: none; margin: 10px 0 10px -26px; }
+.ref-body dd.note { border-width: 12px; border-style: solid; border-color: transparent; padding: 2px 6px; margin: 10px 0; } /* longhands: the border shorthand would reset the .note border-image frame */
 
 .table-wrap {
   overflow-x: auto; max-width: 100%; margin: 10px 0 14px; -webkit-overflow-scrolling: touch;

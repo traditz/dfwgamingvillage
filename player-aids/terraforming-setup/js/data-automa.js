@@ -527,7 +527,7 @@ var TM_AUTOMA = (function () {
   function actionOnlyRows(c) {
     return [
       venus(c) ? ["B16", "Government Intervention", "Only the first that applies: on an <b>even-numbered</b> generation, or once Venus is complete → advance the Martian global parameter furthest from completion (ties: oxygen, then an ocean, then temperature); otherwise raise Venus 1 step. MarsBot gets <b>no TR and no M€</b> bonuses from this card, even when it sets off another raise."] : null,
-      colonies(c) ? ["B18", "Shipping Lines", "Pick the colony tile with the most advanced track (ties: one where MarsBot has a colony, then random as for colony placement). MarsBot loses 1 M€ and trades there."] : null,
+      colonies(c) ? ["B18", "Shipping Lines", "From generation 2 (never in the first action deck), shuffle it into each new action deck after the Research phase. Pick the colony tile with the most advanced track (ties: one where MarsBot has a colony, then random as for colony placement). MarsBot loses 1 M€ and trades there."] : null,
       colonies(c) ? ["B19", "Extended Shipping Lines", "As Shipping Lines: a second trade each generation once MarsBot has unlocked its second trade fleet."] : null,
       turmoil(c) ? ["B20", "Party Politics", "If MarsBot has a delegate in its reserve, it places one in the party the priority list picks (see Turmoil) and you check Party Leader and Dominance. Then, if it still has a reserve delegate and 5+ M€, flip a project card (and discard it): if its cost divides evenly by 3, MarsBot pays 5 M€ and places a second delegate the same way."] : null
     ].filter(Boolean);
@@ -567,7 +567,7 @@ var TM_AUTOMA = (function () {
       choices: [
         { id: "mb-normal", name: "Normal", summary: "The default rules." },
         { id: "mb-easy", name: "Easy", summary: "No advance-tracker icons; Failed Actions pay 3 M€; award values − 5." },
-        { id: "mb-hard", name: "Hard", summary: "1 VP per played card with a non-negative VP icon; on its first turn each generation it can buy a milestone for 8 M€." },
+        { id: "mb-hard", name: "Hard", summary: "1 VP per played card with a non-negative VP icon; on its first turn each generation, if it has 8 M€ and meets enough milestones, it claims one for 8 M€." },
         { id: "mb-brutal", name: "Brutal", summary: "Hard, plus 4 starting project cards and it keeps all 4 each research phase." }
       ],
       default: "mb-normal",
@@ -724,11 +724,11 @@ var TM_AUTOMA = (function () {
           "Only you are dealt corporations. MarsBot doesn't get a corporation card" + (corps(c)
             ? " from this deck: it draws a MarsBot corporation after you've played yours (see below)."
             : ". Once you know the game, you can give it a MarsBot corporation (Automa B)."),
-          corps(c) && pcards(c) ? "<b>Prelude:</b> with a MarsBot corporation, you choose your 2 Prelude cards (of the 4 dealt) only after MarsBot's corporation has been drawn (see <i>MarsBot's corporation</i>), not together with your corporation and project cards." : "",
+          corps(c) && pcards(c) ? "<b>Prelude:</b> with a MarsBot corporation, you choose your 2 Prelude cards (of the " + (on(c, "p2-extended") ? 6 : 4) + " dealt) only after MarsBot's corporation has been drawn (see <i>MarsBot's corporation</i>), not together with your corporation and project cards." : "",
           "Promo: the corporation <b>Mons Insurance</b> can't be used against MarsBot."
         ]);
       },
-      src: function (c) { return join("Automa A pp.3, 11", corps(c) ? "Automa B p.1" : ""); } },
+      src: function (c) { return join("Automa A pp.3, 11", corps(c) ? "Automa B p.1" : "", corps(c) && pcards(c) && on(c, "p2-extended") ? "Prelude 2 p.3" : ""); } },
 
     /* ---- MarsBot's first action deck ---- */
     { id: "mb-action-deck", after: "base-setup-6", exp: "automa",
@@ -784,7 +784,7 @@ var TM_AUTOMA = (function () {
           prelude2(c) ? "Prelude 2: <b>Recession</b> stays out of the Prelude deck." : ""
         ]);
       },
-      src: function (c) { return pnc(c) ? "Automa C p.1 · Prelude p.2" : "Automa C p.1"; } },
+      src: function (c) { return pnc(c) ? "Automa C p.1 · Automa A pp.3, 10 · Prelude p.2" : "Automa C p.1"; } },
 
     /* ---- Venus Next ---- */
     { id: "mb-venus", after: "venus-setup", exp: "automa",
@@ -906,7 +906,7 @@ var TM_AUTOMA = (function () {
           (corps(c) ? p("<b>Corporation cubes:</b> when a tracker reaches a space with a cube or M€ from its corporation, resolve the corporation's effect first, then the printed icon, unless the card says otherwise. Moving back up a regressed track doesn't retrigger it.") : "");
       },
       src: function (c) {
-        return join("Automa A p.5", prelude(c) ? "Automa C p.1" : "", venus(c) ? "Automa C p.2" : "", colonies(c) ? "Automa C p.4" : "", hard(c) ? "Automa A p.11" : "", corps(c) ? "Automa B p.3" : "");
+        return join("Automa A pp.5–6", prelude(c) ? "Automa C p.1" : "", venus(c) ? "Automa C p.2" : "", colonies(c) ? "Automa C p.4" : "", (hard(c) || easy(c)) ? "Automa A p.11" : "", corps(c) ? "Automa B p.3" : "");
       } },
 
     /* ---- Your turn against MarsBot ---- */
@@ -938,7 +938,7 @@ var TM_AUTOMA = (function () {
         var research = draft(c)
           ? "<b>Drafting</b> (this game):" + ol([
               "Draw two piles of 4 project cards. Take one; give MarsBot the other.",
-              "Pick 1 card from your pile to keep. From MarsBot's pile give it 1 card " + (corps(c) ? "by its corporation's Draft Priority, or at random if it has none" : "at random") + ".",
+              "Pick 1 card from your pile to keep. From MarsBot's pile give it 1 card " + (corps(c) ? "by its corporation's Draft Priority: the best-matching card, at random among equal matches, and at random if none match (see <i>MarsBot corporations</i>); at random if its corporation has no Draft Priority" : "at random") + ".",
               "Swap piles and repeat until you've each kept 4.",
               brutal(c) ? "Brutal: MarsBot keeps all 4." : (corps(c)
                 ? "Shuffle MarsBot's 4 and discard 1 to the project discard pile. With a Draft Priority, reveal them one by one instead: set aside matches and discard the first card that doesn't match (if all match, discard none)."
@@ -1087,7 +1087,7 @@ var TM_AUTOMA = (function () {
         var deck = bonusDeckRows(c).map(function (r) { return [r[0], "<b>" + r[1] + "</b>", r[2]]; });
         var only = actionOnlyRows(c).map(function (r) { return [r[0], "<b>" + r[1] + "</b>", r[2]]; });
         return h("In the bonus deck") + tbl(["No.", "Card", "Effect"], deck) +
-          (only.length ? h("Shuffled into the action deck every generation") + tbl(["No.", "Card", "Effect"], only) : "") +
+          (only.length ? h("Shuffled into the action deck, not the bonus deck") + tbl(["No.", "Card", "Effect"], only) : "") +
           ul([
             "<b>Destroy</b> = remove it from play: back in the box for the rest of the game.",
             "An empty bonus deck is rebuilt from the bonus discard pile, never including destroyed cards.",
@@ -1116,7 +1116,7 @@ var TM_AUTOMA = (function () {
       },
       src: function (c) {
         var m = mapId(c);
-        return join("Automa A p.7", ma(c) ? "Automa C p.16" : ((m !== "tharsis" && !amz(c)) ? "Automa C p.12" : ""), noBoard(c) ? "Automa C pp.8, 13" : "", venus(c) ? "Automa C p.3" : "");
+        return join("Automa A p.7", ma(c) ? "Automa C pp.13, 16" : ((m !== "tharsis" && !amz(c)) ? "Automa C pp.8, 12" : ""), noBoard(c) ? "Automa C pp.8, 13" : "", venus(c) ? "Automa C p.3" : "");
       } },
 
     /* ---- milestones & awards ---- */
@@ -1131,7 +1131,7 @@ var TM_AUTOMA = (function () {
           "<b>Award:</b> the one it's most ahead of you on (ties: the leftmost" + (venus(c) ? ", with Venuphile last" : "") + "). For awards that count leftover resources, your value is your resources plus your production.",
           "<b>Final scoring:</b> 5 VP to the award winner and, in a two-player game, <b>no second place</b>. Ties are friendly: both get the 5 VP.",
           easy(c) ? "<b>Easy:</b> MarsBot's award values are 5 lower." : "",
-          "“Leftmost” means as printed on the game board."
+          "“Leftmost” means as laid out on the game board (with the M&amp;A tiles, the tiles' left-to-right positions). The Automa books don't define it further."
         ]) +
           (noBoard(c) ? h("Milestones and awards: Amazonis Planitia") +
             p("<b>Not covered:</b> there's no board reference card for Amazonis Planitia, and the Automa books never mention this map, so they don't rate the milestones (" + listAnd(AMZ_MS) + ") or awards (" + listAnd(AMZ_AW) + ") printed on it for MarsBot." +
@@ -1235,7 +1235,7 @@ var TM_AUTOMA = (function () {
             "<b>Pharmacy Union, Splice</b> (promos): if you play one and MarsBot's starting corporation, or any track or bonus effect, gives it a microbe advance (not plant or animal), resolve your effect as for a card with a microbe tag. If MarsBot plays one, your Prelude's microbe tag triggers it, but your corporation's tag doesn't.",
             "<b>Aphrodite, Lakefront Resorts:</b> they override Government Intervention's “no M€”. Aphrodite gains 2 M€ when that card raises Venus; Lakefront Resorts places a white cube or advances the building track when it places an ocean. MarsBot still gets no TR from it.",
             "<b>Pristar:</b> Government Intervention doesn't trigger its ability.",
-            "<b>Utopia Investments:</b> regressed tracks don't retrigger their icons on later advances, and neither do tracks you push back with production-reduction effects. Mark the space with a MarsBot player marker."
+            "<b>Utopia Investments:</b> regressed tracks don't retrigger their icons on later advances, and neither do tracks you push back with production-reduction effects. To remember, put one of MarsBot's player markers on each space a track regresses from."
           ]);
       },
       src: function () { return "Automa B pp.1–4"; } },
@@ -1331,7 +1331,7 @@ var TM_AUTOMA = (function () {
           corps(c) ? (pcards(c) ? "MarsBot's corporation is drawn after you play your corporation and before you choose and play your Preludes. " : "") + "A wild tag never matches a Draft Priority." : ""
         ]);
       },
-      src: function (c) { return join("Automa C p.1", pnc(c) ? "Prelude p.2" : "", corps(c) ? "Automa B pp.1–2" : ""); } },
+      src: function (c) { return join("Automa C p.1", "Automa A p.3", pnc(c) ? "Prelude p.2" : "", corps(c) ? "Automa B pp.1–2" : ""); } },
 
     /* ---- FAQ ---- */
     { id: "mb-ref-faq", title: "MarsBot FAQ: specific cards",
@@ -1400,7 +1400,7 @@ var TM_AUTOMA = (function () {
     { id: "mb-turn", slot: "insert", after: "shape", h: "How MarsBot takes a turn",
       when: function (c) { return am(c); },
       body: function (c) {
-        var tags = [venus(c) ? "Venus tags move its Venus track" : "", prelude(c) ? "a wild tag moves its lowest track" : ""].filter(Boolean);
+        var tags = [venus(c) ? "Venus tags move its Venus track" : "", prelude(c) ? "a wild tag moves its least-advanced track, the top one if tied" : ""].filter(Boolean);
         return p("On MarsBot's turn, flip the top card of its action deck. Ignore a project card's text: each tag moves one of its tracks forward a space" + (tags.length ? " (" + listAnd(tags) + ")" : "") +
           ", and when a tracker lands on an icon, MarsBot does it: raises the temperature, places a greenery, ocean or city, gains TR, or takes a milestone or award for free. A card with no tags, or an action it can't take, is a <b>Failed Action</b>, worth " + failMC(c) + " M€ to it. Bonus cards do what they say.");
       } },
@@ -1419,7 +1419,7 @@ var TM_AUTOMA = (function () {
     { id: "mb-score", slot: "insert", h: "How MarsBot scores",
       when: function (c) { return am(c); },
       body: function (c) {
-        var rates = ma(c) ? "Its award values come from its tracks, tile by tile, as this page lists."
+        var rates = ma(c) ? "Most of its award values come from its tracks, the rest as usual, from its M€, TR or played cards, or a fixed value, tile by tile, as this page lists."
           : (noBoard(c) ? "On Amazonis Planitia the MarsBot books don't rate the awards at all; more on that in a moment."
             : "Its reference card rates its awards: " + SCORE_EX[mapId(c)] + ".");
         return p("MarsBot scores TR, tiles, milestones and awards, but " + (hard(c) ? "from its cards only a point for each one whose VP icon isn't negative" : "nothing for its cards") +
@@ -1444,13 +1444,13 @@ var TM_AUTOMA = (function () {
       when: function (c) { return am(c) && draft(c); },
       body: function (c) {
         return p("We <b>draft</b> from two piles of four: you keep one card, MarsBot keeps " + (corps(c) ? "its draft-priority match or a random one" : "a random one") +
-          ", then you swap, until each of you has four. " + (brutal(c) ? "On Brutal it keeps all four" : (corps(c) ? "Then it discards one, saving any that match its priority" : "Then it discards one at random")) + ", and a bonus card joins them.");
+          ", then you swap, until each of you has four. " + (brutal(c) ? "On Brutal it keeps all four" : (corps(c) ? "Then it flips its drafted cards one by one and discards the first that misses its priority, keeping all four if they all match" : "Then it discards one at random")) + ", and a bonus card joins them.");
       } },
     { id: "mb-prelude", slot: "insert", h: "Prelude against MarsBot",
       when: function (c) { return am(c) && prelude(c); },
       body: function (c) {
-        if (pnc(c)) return p("We're using <b>Prelude</b> without its Prelude cards, and the MarsBot books don't cover that. So before we start, we agree whether to use MarsBot's Prelude changes: three extra project cards for it, and a shorter clock, where reaching generation 18 loses and its M€ is worth more sooner. Either way, a wild tag on a card it resolves moves its lowest track.");
-        return p("With <b>Prelude</b>, MarsBot takes three extra project cards instead of Preludes, and wild tags move its lowest track. The clock is shorter: generation 18 loses, and its M€ is worth more sooner." +
+        if (pnc(c)) return p("We're using <b>Prelude</b> without its Prelude cards, and the MarsBot books don't cover that. So before we start, we agree whether to use MarsBot's Prelude changes: three extra project cards for it, and a shorter clock, where reaching generation 18 loses and its M€ is worth more sooner. Either way, a wild tag on a card it resolves moves its least-advanced track, the top one if tied.");
+        return p("With <b>Prelude</b>, MarsBot takes three extra project cards instead of Preludes, and wild tags move its least-advanced track (the top one if tied). The clock is shorter: generation 18 loses, and its M€ is worth more sooner." +
           (prelude2(c) ? " Prelude 2's <b>Recession</b> stays in the box." : ""));
       } },
     { id: "mb-venus", slot: "insert", h: "Venus Next against MarsBot",
@@ -1461,7 +1461,7 @@ var TM_AUTOMA = (function () {
     { id: "mb-colonies", slot: "insert", h: "Colonies against MarsBot",
       when: function (c) { return am(c) && colonies(c); },
       body: function (c) {
-        return p("With <b>Colonies</b>, bonus cards found MarsBot's colonies, and from generation 2 <b>Shipping Lines</b> trades once a generation. Instead of the usual rewards it stores resources on its shipping board, and every five in one area move a track. At space 9 of its " + trk(c, "energy") + " it gets a second fleet.");
+        return p("With <b>Colonies</b>, bonus cards found MarsBot's colonies, and from generation 2 <b>Shipping Lines</b> trades once a generation. Instead of the usual rewards it stores resources on its shipping board, and every five in one area move a track" + (venus(c) ? "" : ", except floaters: they collect on Titan, and if it has five at the end of a Research phase it spends them on an extra card") + ". At space 9 of its " + trk(c, "energy") + " it gets a second fleet, and from the next generation Extended Shipping Lines joins its deck too, so it trades twice a generation.");
       } },
     { id: "mb-turmoil", slot: "insert", h: "Turmoil against MarsBot",
       when: function (c) { return am(c) && turmoil(c); },
@@ -1480,7 +1480,7 @@ var TM_AUTOMA = (function () {
       when: function (c) { return am(c) && ma(c); },
       body: function (c) {
         return p("Against MarsBot, the tiles work a little differently. MarsBot plays on its Tharsis board" + (mapId(c) !== "tharsis" ? ", even on " + mapName(c) : "") +
-          ", and it qualifies for each tile by its tracks; this page lists how. <b>Terraformer</b> isn't supported against it, so it stays out of the game.");
+          ", and it qualifies for most tiles by its tracks, for the rest as usual or by its M€, TR, played cards or delegates; this page lists how. <b>Terraformer</b> isn't supported against it, so it stays out of the game.");
       } },
     { id: "mb-amazonis", slot: "insert", h: "Amazonis Planitia",
       when: function (c) { return am(c) && amz(c); },

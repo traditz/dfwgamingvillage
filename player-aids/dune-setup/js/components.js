@@ -8,7 +8,7 @@
    Gating: each game's own box shows only for that game (c.game). Parts "used only in a solo / two-player game"
    follow the player count (c.p); module parts follow the module (c.mod), except that the CHOAM Module must be used
    in a six-player game (Six-Player supplement p.2), so its parts also show at 6 players; the Control the Spice card
-   follows Epic Game Mode. With the Tech Module and all of Rise of Ix the Ixian Embassy board isn't used (Bloodlines p.7), so
+   follows Epic Game Mode, with notes for Immortality (Immortality p.12) and six-player Commanders (Six-Player supplement p.7). With the Tech Module and all of Rise of Ix the Ixian Embassy board isn't used (Bloodlines p.7), so
    it is hidden. Uprising-specific notes on Rise of Ix parts come from Uprising p.18.
    ============================================================================= */
 window.AID_COMPONENTS = {
@@ -113,7 +113,10 @@ window.AID_COMPONENTS = {
     { set: "ix", qty: "2", name: "Rival reference cards", note: "Used only in a solo or two-player game", img: "ix-rival-refs.webp", w: 227, h: 245, when: (c) => c.p <= 2 },
     { set: "ix", qty: "1", name: "Disc", note: "Freighter token. Per player color", img: "ix-freighter.webp", w: 166, h: 148 },
     { set: "ix", qty: "2", name: "Dreadnoughts", note: "Per player color", img: "ix-dreadnoughts.webp", w: 249, h: 145 },
-    { set: "ix", qty: "1", name: "Starting card", note: "Control the Spice, used only in Epic Game mode: each player swaps one Dune, the Desert Planet in their starting deck for it (Rise of Ix p.10)", img: "ix-control-spice.webp", w: 169, h: 228, when: (c) => c.mod("epic") },
+    { set: "ix", qty: "1", name: "Starting card", note: "Control the Spice, used only in Epic Game mode: each player swaps one Dune, the Desert Planet in their starting deck for it (Rise of Ix p.10)", img: "ix-control-spice.webp", w: 169, h: 228, when: (c) => c.mod("epic") && !c.has("imm") && c.p !== 6 },
+    { set: "ix", qty: "1", name: "Starting card", note: "Control the Spice, used only in Epic Game mode: each Ally swaps one Dune, the Desert Planet in their starting deck for it (Rise of Ix p.10); Commanders don’t add it or remove any card (Six-Player supplement p.7)", img: "ix-control-spice.webp", w: 169, h: 228, when: (c) => c.mod("epic") && !c.has("imm") && c.p === 6 },
+    { set: "ix", qty: "1", name: "Starting card", note: "Control the Spice, used only in Epic Game mode. With Immortality, don’t swap it into the starting deck: each player places it in their discard pile at the start of the game (Immortality p.12)", img: "ix-control-spice.webp", w: 169, h: 228, when: (c) => c.mod("epic") && c.has("imm") && c.p !== 6 },
+    { set: "ix", qty: "1", name: "Starting card", note: "Control the Spice, used only in Epic Game mode. With Immortality, don’t swap it into the starting deck: each Ally places it in their discard pile at the start of the game (Immortality p.12); Commanders don’t add it (Six-Player supplement p.7)", img: "ix-control-spice.webp", w: 169, h: 228, when: (c) => c.mod("epic") && c.has("imm") && c.p === 6 },
 
     /* ---- Immortality (Immortality p.3) ---- */
     { set: "imm", name: "Bene Tleilax board", img: "imm-board.webp", w: 320, h: 230 },
@@ -123,7 +126,8 @@ window.AID_COMPONENTS = {
     { set: "imm", name: "Research Station overlay", img: "imm-research-overlay.webp", w: 320, h: 202 },
     { set: "imm", qty: "15", name: "Intrigue cards", img: "imm-intrigue.webp", w: 160, h: 208 },
     { set: "imm", name: "Family Atomics token", note: "Each player takes one (Immortality p.5)", img: "imm-atomics.webp", w: 166, h: 166 },
-    { set: "imm", qty: "2", name: "Starting cards", note: "Experimentation. Each player swaps the two Dune, the Desert Planet cards in their starting deck for these (Immortality p.5)", img: "imm-experimentation.webp", w: 208, h: 227 },
+    { set: "imm", qty: "2", name: "Starting cards", note: "Experimentation. Each player swaps the two Dune, the Desert Planet cards in their starting deck for these (Immortality p.5)", img: "imm-experimentation.webp", w: 208, h: 227, when: (c) => c.p !== 6 },
+    { set: "imm", qty: "2", name: "Starting cards", note: "Experimentation. Each Ally swaps the two Dune, the Desert Planet cards in their starting deck for these (Immortality p.5); Commanders don’t add them or remove any cards (Six-Player supplement p.6)", img: "imm-experimentation.webp", w: 208, h: 227, when: (c) => c.p === 6 },
     { set: "imm", qty: "2", name: "Discs", note: "1 Research token, 1 Tleilaxu token. Per player color", img: "imm-discs.webp", w: 138, h: 139 },
     { set: "imm", qty: "4", name: "House Hagal cards", note: "Used only in a solo game", img: "imm-hagal.webp", w: 221, h: 184, when: (c) => c.p === 1 },
 
@@ -141,14 +145,15 @@ window.AID_COMPONENTS = {
     { set: "blchoam", qty: "5", name: "Imperium cards", note: "Shuffle into the Imperium deck. These are the 5 of the 32 Imperium Deck cards used only with the CHOAM Module", img: "bl-choam-imperium.webp", w: 279, h: 285 },
     { set: "blchoam", qty: "8", name: "Contract tokens", note: "Shuffle into the existing contracts", img: "bl-contracts.webp", w: 318, h: 175 },
     { set: "blchoam", name: "Coercive Negotiation", note: "Shuffle into the Intrigue deck. This is the 1 of the 18 Intrigue cards used only with the CHOAM Module", img: "bl-coercive.webp", w: 153, h: 197 },
-    { set: "blchoam", name: "CHOAM Transports", note: "If also using the Tech Module: shuffle into the other Tech tiles", img: "bl-choam-transports.webp", w: 224, h: 136, when: (c) => c.mod("tech") },
+    { set: "blchoam", name: "CHOAM Transports", note: "If also using the Tech Module: shuffle into the other Tech tiles. This is the 1 of the 18 Tech tiles used only with the CHOAM Module", img: "bl-choam-transports.webp", w: 224, h: 136, when: (c) => c.mod("tech") },
     { set: "blsolo", qty: "6", name: "House Hagal cards", note: "4 used only with the Tech Module (the Acquire Tech cards, solo only); the 2 Tuek’s Sietch cards only if a player uses Esmar Tuek", img: "bl-hagal.webp", w: 260, h: 199 },
     { set: "blsolo", qty: "6", name: "Rival cards", note: "1 used only with the Tech Module, in a solo game (Bloodlines p.6, p.8)", img: "bl-rival-cards.webp", w: 205, h: 242 },
 
     /* ---- Tech Module (Bloodlines p.6) ---- */
     { set: "tech", name: "Ixian Embassy board", img: "tech-embassy.webp", w: 153, h: 320, when: (c) => !c.has("ix") },
     { set: "tech", name: "2 Imperium cards, 2 Intrigue cards, and Kota Odax of Ix", note: "Marked with the Tech Module symbol; already counted in the Bloodlines box’s card and Leader totals (Bloodlines p.2, p.6)", img: "tech-cards.webp", w: 320, h: 256 },
-    { set: "tech", qty: "18", name: "Tech tiles", img: "tech-tiles.webp", w: 320, h: 163 },
+    { set: "tech", qty: "18", name: "Tech tiles", img: "tech-tiles.webp", w: 320, h: 163, when: (c) => c.mod("choam") || c.p === 6 },
+    { set: "tech", qty: "18", name: "Tech tiles", note: "One of these, CHOAM Transports, is used only with the CHOAM Module: leave it out (Bloodlines p.6)", img: "tech-tiles.webp", w: 320, h: 163, when: (c) => !c.mod("choam") && c.p !== 6 },
     { set: "tech", name: "4 House Hagal cards and 1 Rival card", note: "Used in a solo game only; already counted in the Bloodlines solo and two-player totals (Bloodlines p.6, p.8). Don’t use the 4 Acquire Tech House Hagal cards with <i>Rise of Ix</i> (Bloodlines p.8)", img: "tech-solo.webp", w: 320, h: 232, when: (c) => c.p === 1 }
   ]
 };

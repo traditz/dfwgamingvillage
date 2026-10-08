@@ -534,7 +534,8 @@
     switch (x) {
       case "base": return true;
       case "he": case "av": case "uc": case "ma":
-      case "venus": case "prelude": case "prelude2": case "colonies": case "turmoil": return c.has(x);
+      case "venus": case "prelude2": case "colonies": case "turmoil": return c.has(x);
+      case "prelude": return c.has("prelude") || (c.mode === "solo" && c.mod("tr-solo"));
       case "automaA": case "automaB": case "automaC": return c.has("automa");
       default: return true;
     }

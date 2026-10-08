@@ -146,13 +146,13 @@ WW.teams = {
             "<li><b>Overlord:</b> a base-game Overlord or <b>Ragnaros</b> — never an Outland Overlord.</li>" +
             "<li><b>Creatures:</b> the Yeti, Ooze and Abomination and the <b>purple</b> figures of the base creature types are used; the Outland-only Arakkoa, Ravager, Mo’arg, Wrath Guard, Fungal Giant and Shivan may be left out.</li>" +
             "<li><b>Level 6:</b> not available — use Lordaeron’s Experience Track; the level 6 extensions, level 6 Power and Talent cards and Flying Mount cards stay in the box.</li>" +
-            "<li><b>Quests:</b> the new Quest cards are used, except the <b>Outland quests</b> (green background on the card face).</li>" +
+            "<li><b>Quests:</b> the new green, yellow, red and purple Quest cards are used, except the <b>Outland quests</b> (green background on the card face); The Burning Crusade’s blue Quest cards stay in the box (they need the Outland board).</li>" +
             "<li><b>Ending:</b> the normal game — the final PvP battle when the turn marker reaches “End”." +
             (c.mod("dto") ? " Here the <b>Defeat the Overlord!</b> variant replaces that ending (see the variants step)." : "") + "</li></ul></li>" +
             "<li>Still in force without Outland: the <b>new Creature Reference Sheets</b> (they replace the base ones) and the <b>10-dice-per-colour</b> limit.</li>" +
             "<li><b>Not covered by the variant:</b> the Lordaeron dungeons (Dungeon tokens and Stage decks), the replacement Paladin and Shaman sheets and the new Item cards (with the hexagon deck) are set up in TBC p.7’s steps, which this variant replaces, and p.19 doesn’t bring them back — so this page leaves them out.<ul>" +
             "<li>That is this page’s literal reading, not a printed rule: TBC p.4 also calls the new sheets replacements for the base ones without mentioning Outland, and the books don’t say whether any of these may be added.</li></ul></li></ul>",
-          src: (c) => J(["The Burning Crusade p.4, p.7, p.8, p.19", c.mod("dto") && "Base p.37"]) },
+          src: (c) => J(["The Burning Crusade p.4, p.5, p.7, p.8, p.19", c.mod("dto") && "Base p.37"]) },
 
         { when: () => true, exp: (c) => (c.outland ? "tbc" : "base"),
           t: (c) => (c.outland ? "Lay out Lordaeron and Outland" : "Lay out the board"),
@@ -227,10 +227,10 @@ WW.teams = {
             "<li>Take the starting <b>Health</b> and <b>Energy</b> tokens shown in your sheet’s Level 1 frame and put them in the Health and Energy areas.</li>" +
             "<li>Place your <b>figure</b>: Alliance in <b>Southshore</b>, Horde in <b>Brill</b>.</li>" +
             "<li>Each player takes two <b>Action tokens</b> to track actions — flip one to its grey side after each action.</li>" +
-            ([2, 3, 5].includes(c.p) ? "<li>Running two characters? Do all of this for each of them.</li>" : "") +
+            ([2, 3, 5].includes(c.p) ? "<li>Running two characters? Do all of this for each of them — except the Action tokens, which are two per player.</li>" : "") +
             (c.outland ? "<li>The Alliance Shaman and the Horde Paladin use The Burning Crusade’s own figures and counters (7 counters each).</li>" : "") +
             "</ul>",
-          src: (c) => J(["Base p.5, p.7–8", c.outland && "The Burning Crusade p.3–4, p.14"]) }
+          src: (c) => J(["Base p.5, p.7–8" + ([2, 3].includes(c.p) ? ", p.3, p.35" : c.p === 5 ? ", p.3, p.36" : ""), c.outland && "The Burning Crusade p.3–4, p.14"]) }
       ]
     },
     {
@@ -376,10 +376,10 @@ WW.teams = {
         { when: () => true, exp: "base",
           t: "Begin — the Horde goes first",
           d: (c) => "<ul><li>The <b>Horde</b> always takes the first faction turn.</li>" +
-            "<li>The game runs " + (c.outland ? "until a faction defeats the Overlord — after turn 30 the turn marker loops back to “Start”" :
+            "<li>The game runs " + (c.outland ? "until a faction defeats the Overlord — after turn 30 the turn marker loops back to “Start”, and from then on an item icon on the turn track adds the top <b>hexagon (orange)</b> Item card to the Merchant instead of the item shown" :
               c.mod("dto") ? "until a faction defeats the Overlord — the turn track loops after turn 30" :
               "<b>30 faction turns</b> (15 per faction) and ends with the final PvP battle — unless a faction defeats the Overlord first") + ".</li></ul>",
-          src: (c) => J(["Base p.8", c.mod("dto") && !c.outland && "Base p.37", c.outland && "The Burning Crusade p.18"]) },
+          src: (c) => J(["Base p.8", c.mod("dto") && !c.outland && "Base p.37", c.outland && "The Burning Crusade p.18", c.nool && !c.mod("dto") && "The Burning Crusade p.19"]) },
 
         { when: (c) => c.mod("first"), exp: "guide",
           t: "First game: recommended heroes and first moves",
@@ -436,7 +436,7 @@ WW.teams = {
         "<li><b>Character actions.</b> Every character of the active faction takes <b>two actions</b>" + (c.outland ? " (only one for a character who stays in a dungeon — see “Dungeons”)" : "") + ". The faction picks the order freely and may interleave characters (C2, C1, C1, C2, C3, C3 is fine). Flip an Action token after each action.</li>" +
         "<li><b>Character Management.</b> Equip and unequip Power and Item cards between your sheet and your Spellbook/Bag. Normally the only time you may do so" +
         ((c.mod("sow-class") || c.outland) ? " (fast-equip cards are the exception)" : "") + ".</li>" +
-        (c.outland ? "<li><b>Dungeon phase (The Burning Crusade).</b> Every active-faction character in a dungeon must fight the boss of the stage they’re next to — one dungeon at a time, in the order the faction chooses; skipped if nobody is in a dungeon. The book places it after all of the faction’s actions and says that when it ends “the turn marker is moved”, so this page runs it after Character Management.</li>" : "") +
+        (c.outland ? "<li><b>Dungeon phase (The Burning Crusade).</b> Every active-faction character in a dungeon must fight the boss of the stage they’re next to (characters on the Outland Overlord’s sheet fight the Overlord) — one dungeon at a time, in the order the faction chooses; skipped if nobody is in a dungeon. The book places it after all of the faction’s actions and says that when it ends “the turn marker is moved”, so this page runs it after Character Management.</li>" : "") +
         "<li><b>Advance the turn marker</b> one space." + (c.outland ? " After turn 30 it returns to “Start” (The Burning Crusade)." :
           c.mod("dto") ? " After turn 30 it returns to space “1” (Defeat the Overlord!)." : " Into “End”: the game ends at once and the final PvP battle begins.") + "</li>" +
         (c.mod("sow-destiny") ? "<li><b>Destiny check (Shadow of War).</b> If the marker reaches the Destiny hit token, the Destiny card expires: resolve its expiry text <b>before</b> anything else on that space, discard it (unless it says otherwise) and reveal a new one.</li>" : "") +
@@ -446,7 +446,7 @@ WW.teams = {
         "<li>The other faction becomes the active faction.</li></ol>" +
         "<ul><li><b>Faction decisions</b> (action order, who gets which items): if the faction can’t agree, the player whose character has the most XP decides; ties are broken randomly.</li>" +
         "<li><b>Open information:</b> gold, Health, Energy, Bag and Spellbook contents are open to everyone, and anyone may look through the Merchant deck.</li></ul>",
-      src: (c) => J(["Base p.7–9, p.12, p.37", c.mod("sow-destiny") && "Shadow of War p.6–7", c.outland && "The Burning Crusade p.9, p.13, p.17–18"])
+      src: (c) => J(["Base p.7–9, p.12, p.37", c.mod("sow-class") && "Shadow of War p.4", c.mod("sow-destiny") && "Shadow of War p.6–7", c.outland && "The Burning Crusade p.8, p.9, p.13, p.17–18"])
     },
     {
       title: "The five character actions",
@@ -461,20 +461,21 @@ WW.teams = {
         "</ul></li>" +
         "<li><b>Rest:</b> regain Health and Energy totalling <b>2 × your level</b> (any mix) and remove 1 Curse token. In a region with a friendly town: <b>3 × your level</b> and remove all Curse tokens.</li>" +
         "<li><b>Challenge:</b> fight one group in your region — independent creatures, a group of quest creatures spawned by a <b>friendly</b> quest (never an enemy quest’s), " +
-        (c.outland ? "a <b>boss</b> from an Event (an Outland Overlord is fought in its lair instead — see “Dungeons”)" : "a <b>boss</b> (the Overlord or a boss from an Event)") + ", or <b>all</b> the enemy characters there (PvP). Invite friendly characters in your region to join; each joiner spends an action (no actions left, no joining).</li>" +
+        (c.outland ? "a <b>boss</b> from an Event" + (c.mod("sow-destiny") ? " or the boss of a “Boss” Destiny card" : "") + " (an Outland Overlord is fought in its lair instead — see “Dungeons”)" : "a <b>boss</b> (the Overlord" + (c.mod("sow-destiny") ? ", a boss from an Event, or the boss of a “Boss” Destiny card" : " or a boss from an Event") + ")") + ", or <b>all</b> the enemy characters there (PvP). Invite friendly characters in your region to join; each joiner spends an action (no actions left, no joining).</li>" +
         "<li><b>Training:</b> buy Power cards from your Class deck with a level requirement no higher than your level; pay their gold cost and put them under your Spellbook.</li>" +
         "<li><b>Town</b> (region with a friendly town icon) — any or all, in any order: regain Health and Energy totalling <b>your level</b>; buy and sell Item cards with the Merchant; buy Power cards as in Training." +
         (c.outland ? " Not possible inside a dungeon." : "") + "</li>" +
         "<li><b>Group</b> = all independent creatures of one type in a region, or all quest creatures of one type in a region. A single creature is a group; independent and quest creatures are never grouped together.</li>" +
         "<li><b>Trading:</b> after resolving an action, if you share a region with a friendly character you may give or exchange gold and Bag items. Power cards and soulbound items never change hands.</li></ul>",
-      src: (c) => J(["Base p.8–12, p.35–36 · FAQ p.2–3", c.tbc && "The Burning Crusade p.8" + (c.outland ? ", p.9, p.14, p.16, p.18" : "")])
+      src: (c) => J(["Base p.8–12, p.17, p.35–36 · FAQ p.2–3", c.mod("sow-destiny") && "Shadow of War p.6", c.tbc && "The Burning Crusade p.8" + (c.outland ? ", p.9, p.14, p.16, p.18" : "")])
     },
     {
       title: "Combat against creatures and bosses",
       when: () => true,
       html: (c) => "<p>Only creatures of one type fight in a combat, and quest and independent creatures never fight together. Look up the creature’s Threat, Attack and Health" +
         (c.tbc ? " on The Burning Crusade’s Creature Reference Sheets (they replace the base sheets and make some base creatures tougher)" : " on the Creature Reference Sheet") +
-        "; green figures are the weakest of a type, " + (c.tbc ? "purple" : "red") + " the deadliest. A boss’s values and abilities are on its Event card or Overlord sheet.</p>" +
+        "; green figures are the weakest of a type, " + (c.tbc ? "purple" : "red") + " the deadliest. A boss’s values and abilities are on its Event card or Overlord sheet" +
+        (c.outland ? "; a dungeon boss’s are on its Boss card, enhanced by the Minion cards drawn for that stage and not discarded (see “Dungeons”)" : "") + ".</p>" +
         "<h4>1 · Attack Phase — each participating character in turn</h4><ol>" +
         "<li><b>Dice Pool:</b> collect the dice from every equipped card that says “Add X to your dice pool” (pay any Energy cost now), then roll them all.</li>" +
         "<li><b>Reroll:</b> reroll up to your <b>Reroll value</b> in dice; each die can be rerolled only once.</li>" +
@@ -490,7 +491,7 @@ WW.teams = {
         "<li>In a <b>group</b>, each character resolves an Attack Phase in an order agreed at the start of each round; the Defense Phase is resolved once.</li>" +
         "<li>Creature abilities work during <b>each</b> character’s Attack Phase and don’t multiply with the number of creatures unless they say so (FAQ). If a creature’s ability defeats a character at the end of the Reroll step, that character’s other dice are ignored.</li>" +
         "<li><b>Wounds</b> are taken one Health token at a time, so healing can happen in between; you can’t soak up more wounds than it takes to defeat you.</li></ul>",
-      src: (c) => J(["Base p.26–31, p.33 · FAQ p.3", c.tbc && "The Burning Crusade p.7–8"])
+      src: (c) => J(["Base p.26–31, p.33 · FAQ p.3", c.tbc && "The Burning Crusade p.7–8" + (c.outland ? ", p.10, p.12" : "")])
     },
     {
       title: "Dice, rerolls and card timing",
@@ -504,7 +505,7 @@ WW.teams = {
         "<li><b>Card effect limitation (FAQ errata):</b> “A character may only use the abilities of <b>each</b> of his Power, Talent, and Item cards once per combat round.” A card with non-combat effects can be used once per character action. Combat effects (REROLL +1, ATTRITION +1…) last one round. Example: Cleave can’t spot two red 8s for +2 attrition.</li>" +
         "<li><b>“Add X to your dice pool”</b> cards are used at the start of your Dice Pool step.</li>" +
         "<li><b>Instant powers</b> cost their Energy every use, paid before the effect; a card’s secondary abilities are free once the first ability’s cost is paid.</li>" +
-        "<li><b>Simultaneous effects:</b> the active character chooses the order; with no active player (e.g. the Defense Phase), the active faction decides; in the final PvP battle, randomly pick which faction decides each conflict.</li>" +
+        "<li><b>Simultaneous effects:</b> the active character chooses the order; with no active player (e.g. the Defense Phase), the active faction decides" + (c.outland || c.mod("dto") ? "" : "; in the final PvP battle, randomly pick which faction decides each conflict") + ".</li>" +
         "<li><b>Dice symbols:</b> blue, red or green die = that colour; <b>black</b> = any colour; <b>two-coloured</b> = either colour; a <b>number inside</b> = that result on that colour; a <b>“+”</b> = that result or higher.</li>" +
         "<li><b>FAQ:</b> “the previous combat round” means the round just before this one, in this combat. A “rolled result” is a die’s current result, rerolls included.</li>" +
         "<li><b>Friendly participating character</b> includes you — and you must be in the combat to use such an ability.</li></ul>",
@@ -514,7 +515,7 @@ WW.teams = {
       title: "PvP combat",
       when: () => true,
       html: (c) => "<ul>" +
-        "<li><b>When:</b> a Challenge against <b>all</b> enemy characters in your region (you can’t single one out and they can’t refuse)" + (c.outland ? "" : ", or the final battle at “End”") + "." +
+        "<li><b>When:</b> a Challenge against <b>all</b> enemy characters in your region (you can’t single one out and they can’t refuse)" + (c.outland || c.mod("dto") ? "" : ", or the final battle at “End”") + "." +
         (c.outland ? " There is <b>no PvP inside dungeons</b>." : "") + "</li>" +
         "<li>The challengers are the <b>attackers</b>. Attack Phases <b>alternate</b> between factions, attackers first; each faction chooses its own order.</li>" +
         "<li><b>Threat</b> = the highest level among the opposing characters <b>+ 2</b>" + (c.outland ? " (a faction’s Threat is never more than <b>7</b>, however many level 6 characters it has)" : "") + ". Each faction uses its own Combat Area.</li>" +
@@ -527,10 +528,10 @@ WW.teams = {
         "<li>Keep going round by round until all the characters of one or both factions are defeated. A faction whose last character falls ends the combat at once.</li>" +
         "<li><b>Loot:</b> the winners may take one item from the <b>Bag</b> (not the sheet) of each defeated enemy, shared as they agree; defeated winners take no loot; refused loot goes back. With a full Bag, drop something or drop the loot — dropped items go to the Merchant deck (FAQ).</li>" +
         "<li><b>Mutual defeat:</b> no winner and no loot; randomise the order in which characters go to graveyards or starting regions." +
-        (c.mod("deadly") ? " Under <b>Deadly PvP!</b>, when every character falls in the same step, the team with fewer unabsorbed wounds counts as the winner for the final PvP battle and for Event cards that ask (equal = tie)." : "") + "</li>" +
+        (c.mod("deadly") ? " Under <b>Deadly PvP!</b>, when every character falls in the same step, the team with fewer unabsorbed wounds counts as the winner " + (c.outland || c.mod("dto") ? "for Event cards that ask" : "for the final PvP battle and for Event cards that ask") + " (equal = tie)." : "") + "</li>" +
         "<li>Defeating enemy characters gives <b>no XP</b>.</li>" +
         (c.mod("deadly") ? "" : "<li>PvP too slow? The FAQ suggests the <b>Deadly PvP!</b> variant.</li>") + "</ul>",
-      src: (c) => J(["Base p.33–34, p.37, p.40 · FAQ p.1, p.3", c.outland && "The Burning Crusade p.14, p.16"])
+      src: (c) => J(["Base p.33–34, p.37, p.40 · FAQ p.1, p.3", c.outland && "The Burning Crusade p.14, p.16, p.18"])
     },
     {
       title: "Quests, experience and levels",
@@ -548,7 +549,7 @@ WW.teams = {
         "<li>No XP for defeating enemy characters or independent creatures" + (c.mod("sow-blue") ? " — except through blue quests" : "") + ".</li>" +
         "<li><b>Quest errata (FAQ):</b> the red Horde quest “Brutes in the Barrows” should say “The Infectis Scar”, not “Hearthglen” (the mini-maps are right)." +
         (c.tbc ? " The Burning Crusade’s red Horde quest “A Sample of Slime” should show 1 green Ooze and 1 purple Ooze, both in The Sepulcher (not Agmand Mills)." : "") + "</li></ul>",
-      src: (c) => J(["Base p.7, p.17–18, p.20–23, p.40 · FAQ p.1" + (c.tbc ? ", p.4" : ""), c.mod("sow-blue") && "Shadow of War p.5", c.tbc && "The Burning Crusade p.5" + (c.outland ? ", p.15–16" : "")])
+      src: (c) => J(["Base p.7, p.17–18, p.20–23, p.40 · FAQ p.1" + (c.tbc ? ", p.4" : ""), c.chars === 4 && (c.p === 2 ? "Base p.35" : "Base p.36"), c.mod("sow-blue") && "Shadow of War p.5", c.tbc && "The Burning Crusade p.5" + (c.outland ? ", p.15–16" : "")])
     },
     {
       title: "Character sheet, powers and items",
@@ -561,7 +562,7 @@ WW.teams = {
         "<li><b>Unique categories</b> (e.g. Paladin Aura, Blessing and Seal; Warlock Demon): only one equipped Power card per category. Talents have no category (FAQ).</li>" +
         "<li><b>Pets and Demons:</b> place Health tokens on the card equal to its Health capacity; you may take a wound on it instead of yourself; at 0 it goes back to your Spellbook (re-equip later, paying its Energy). Defeat unequips it. Pets heal only through Mend Pet or by unequipping and re-equipping in Character Management (FAQ).</li>" +
         "<li><b>Bag:</b> up to <b>3</b> items" + (c.mod("sow-items") ? " — plus up to <b>7 Bonus Items</b> (Shadow of War)" : "") + ". Over the limit, put one (new or old) into the Merchant deck for nothing — the only way to discard an item. Equipping from a full Bag, you may swap the Bag item straight with the one on your sheet (FAQ). The Spellbook has no limit.</li>" +
-        ((c.mod("sow-class") || c.outland) ? "<li><b>Fast-equip</b> (Spellbook icon in the card’s upper right): at the start of any of your actions — including a Challenge or joining one — you may equip the card from your Spellbook" + (c.outland ? " or Bag" : "") + ", paying an active power’s Energy and matching the area; you may unequip a card to make room.</li>" : "") +
+        ((c.mod("sow-class") || c.outland) ? "<li><b>Fast-equip</b> (Spellbook icon in the card’s upper right): at the start of any of your actions — including a Challenge or joining one — you may equip the card from your Spellbook" + (c.outland ? " or Bag" : "") + ", paying an active power’s Energy and matching the area; " + (c.outland && c.mod("sow-class") ? "to make room, a Shadow of War power may replace one equipped <b>power</b>, while a Burning Crusade fast-equip card may replace any card (even one without the icon)" : c.outland ? "to make room you may unequip any card (even one without the icon)" : "to make room you may unequip one equipped <b>power</b>") + ".</li>" : "") +
         "<li><b>Gain vs regain:</b> “regain” stops at your capacity; “gain” may exceed it for the ability’s duration. If a capacity boost ends, remove the excess at once.</li>" +
         "<li><b>Merchant:</b> on a Town action, look through the Merchant deck and buy any number of items (pay the gold cost; higher-level items allowed); sell any number from your sheet or Bag for <b>half their value, rounded up</b>. Power cards and soulbound items can never be sold; soulbound items can’t be given away either.</li>" +
         "<li><b>Item errata (FAQ):</b> Pyric Caduceus has the ranged icon, not melee; Crackling Staff works at the “End of your Dice Pool step”, not the end of the Reroll step; of the two “Scroll of Lesser Strength” cards, the one adding two blue dice is “Scroll of Lesser Spirit”.</li></ul>",
@@ -594,7 +595,7 @@ WW.teams = {
         "<li>reset to exactly <b>1 Health and 1 Energy</b>;</li>" +
         "<li>lose any remaining actions. You may also remove all your Curse tokens; your pet or demon is unequipped; your Auction Items are discarded.</li></ol></li>" +
         (c.outland ? "<li><b>Defeated in a dungeon:</b> move to the nearest graveyard or friendly town on the same board as the dungeon.</li>" : "") +
-        "<li>Brought back by the Priest’s Resurrection or the Shaman’s Reincarnation? Treat it as a defeat: you lose your remaining actions, get no gold or items from that quest (XP yes) and can be looted (FAQ).</li>" +
+        "<li>Brought back by the Priest’s Resurrection or the Shaman’s Reincarnation? Treat it as a defeat: you lose your remaining actions, get no gold or items from that quest (XP yes) and may be looted if your faction loses the PvP combat you were fighting in (FAQ).</li>" +
         "<li><b>Stun</b> (mainly Spiders): for each Stun token, remove <b>2 dice</b> of your choice before rolling each round; if you can’t, you’re defeated before the Reroll step. Remove Stun tokens when the combat ends or you’re defeated.</li>" +
         "<li><b>Curse</b> (mainly Wraiths): for each Curse token, remove <b>1 die</b> before rolling and suffer REROLL −1 and ATTRITION −1. Curses stay after combat: a Rest removes one (all in a friendly town) and defeat removes them all. Unable to remove a die? You are <b>not</b> instantly defeated (FAQ).</li>" +
         (c.tbc ? "<li><b>Poison</b> (The Burning Crusade): at the start of each Damage step lose 1 Health per Poison token (a pet or demon may take some). Poison tokens go when the combat ends or you’re defeated.</li>" : "") +
@@ -636,7 +637,7 @@ WW.teams = {
       title: "Shadow of War — new rules",
       when: (c) => c.sow,
       html: (c) => "<ul>" +
-        "<li>The expansion is designed to be used whole, but you may use only some of its cards (e.g. just the powers and talents, or just the items). Its cards carry a broken-shield symbol. All of it works with The Burning Crusade too.</li>" +
+        "<li>The expansion is designed to be used whole, but you may use only some of its cards (e.g. just the powers and talents, or just the items). Its cards carry a broken-shield symbol." + (c.tbc ? " All of it works with The Burning Crusade too." : "") + "</li>" +
         (c.mod("sow-class") ? "<li><b>New powers and talents:</b> 10 + 10 per class, same rules as the base cards. Cards with the <b>Spellbook icon</b> can be fast-equipped at the start of any of your actions (including a Challenge or joining one): the card must be in your Spellbook, you pay an active power’s Energy, the type must match the area, and you may unequip one power to make room. Some talents let you equip at other times (e.g. the Warrior’s Tactical Mastery: “Start of the combat round: You may equip one power”).</li>" : "") +
         (c.mod("sow-items") ? "<li><b>Bonus Item cards</b> (green star backs, a fifth deck): they don’t count toward the 3-item Bag limit — you may hold up to <b>7 Bonus Items</b> as well; an eighth sends one Bonus Item (new or old) to the Merchant deck for nothing.</li>" +
           "<li><b>Experience Reward cards</b> (in the Bonus Item deck) aren’t Item cards: take the XP at once (a group splits it normally), then discard the card. Defeated characters can still receive this XP; a full Bag doesn’t matter.</li>" : "") +
@@ -688,7 +689,7 @@ WW.teams = {
         "<li>Fight the boss with the normal combat rules; every minion adds its effects (“Attack +2”, “Health +2”…) — all cumulative, and the whole thing counts as <b>one opponent</b>. Friendly characters in the same dungeon all take part automatically.</li>" +
         "<li><b>Win:</b> distribute the boss’s reward (plus minion gold and XP) by the normal quest rules; share out the Item cards; Reward cards help everyone and are resolved at once, then go back into their Stage deck (unless “keep this card”). The revealed Boss and Minion cards also return to the Stage deck (as in the book’s example). Then move everyone to the next Stage deck — or, after the last stage, out to any region with a friendly flight path on the same board.</li></ol>" +
         "<ul><li><b>One stage per Dungeon phase</b> (unless an ability says otherwise): the next stage waits for your next Dungeon phase.</li>" +
-        "<li><b>XP penalty:</b> characters of a <b>higher level than the stage level</b> get <b>no XP</b> from it; there’s no bonus for lower-level characters.</li>" +
+        "<li><b>XP penalty:</b> split the XP as evenly as possible among all participants, as usual; then each character of a <b>higher level than the stage level</b> loses their share (<b>no XP</b>, and it isn’t passed to the others). There’s no bonus for lower-level characters.</li>" +
         "<li><b>Defeated</b> characters go to the nearest graveyard or friendly town on the same board. If everyone is defeated, the Boss and all faceup Minion, Item and Reward cards are shuffled back into the Stage deck. If some survive and win, the defeated still get their XP share — but no gold, Reward or Item cards.</li>" +
         "<li><b>Lair:</b> beating Stage 2 of the Overlord’s lair sends the group onto the Overlord sheet instead of Stage 3.</li></ul>" +
         "<h4>Actions while in a dungeon</h4><ul>" +
@@ -766,7 +767,7 @@ WW.teams = {
         "<li>A creature ability triggers once, not once per creature, unless it says otherwise (e.g. fighting 2 Murlocs and rolling one red 1 costs 1 Health, not 2).</li>" +
         "<li>Each ability can be used once per combat round unless it says otherwise (Cleave can’t spot two red 8s for +2 attrition).</li>" +
         "<li>Dice limits are physical; changing a die’s colour needs an unrolled die of the new colour.</li>" +
-        "<li>Equipping from a full Bag: swap the Bag item straight with the one on your sheet. Looting with a full Bag means dropping something (to the Merchant deck).</li>" +
+        "<li>Equipping from a full Bag: swap the Bag item straight with the one on your sheet. Looting with a full Bag: drop an item from your Bag to make room, or drop the looted item itself (dropped items go to the Merchant deck).</li>" +
         "<li>Add-on items must still match the area’s trait. Powers only match the type.</li>" +
         "<li>Cursed and unable to remove a die: not an automatic defeat (unlike Stun).</li>" +
         "<li>The Dwarf’s <b>Stoneform</b> racial ability may change a red 2 into a green 3 — a black die in an icon means any colour.</li>" +
@@ -812,7 +813,7 @@ WW.teams = {
     ],
     priest: (c) => [
       "<b>Shadowguard errata:</b> “During the Defense Phase” instead of “During the Resolution step”. (FAQ)",
-      "<b>Resurrection</b> keeps a defeated character in his region with Health and Energy back, but it counts as a defeat: he loses his remaining actions, takes no gold or items from that quest (XP yes) and can be looted (FAQ).",
+      "<b>Resurrection</b> keeps a defeated character in his region with Health and Energy back, but it counts as a defeat: he loses his remaining actions, takes no gold or items from that quest (XP yes) and may be looted if his faction loses the PvP combat he was fighting in (FAQ).",
       "<b>Shadow Word: Pain</b> adds 2 blue dice only if it was used in the round immediately before, in the same combat (FAQ).",
       c.mod("sow-class") ? "<b>Unbreakable Will</b> (Shadow of War) errata: “Place 1 armor token in the defense box for each blue 8 you spot.” (FAQ)" : "",
       "First-game pick: Wennu Bloodsinger (Horde) — Lesser Heal and Shadow Word: Pain; first talent Improved Pain."
@@ -825,7 +826,7 @@ WW.teams = {
       c.outland ? "The Burning Crusade’s Shaman sheet lets either faction field the Shaman (Alliance Shaman: Draenei); still only one Shaman per game." : "Base sheet: the Shaman is always <b>Horde</b> (single-sided sheet).",
       c.outland ? "<b>Sheet errata (FAQ):</b> the new Horde Shaman’s racial should read “Bloodfury: ATTRITION +1” and Lightning Bolt costs 1 Energy — easiest: use the old Orc Shaman sheet. The Draenei Shaman’s Lightning Bolt costs 1 too." : "",
       "<b>Earth Shock</b> removes a die for this round only — you may roll it again next round (FAQ).",
-      "<b>Reincarnation</b> counts as a defeat, like the Priest’s Resurrection: remaining actions lost, no quest gold or items (XP yes), can be looted (FAQ)."
+      "<b>Reincarnation</b> counts as a defeat, like the Priest’s Resurrection: remaining actions lost, no quest gold or items (XP yes), may be looted if his faction loses that PvP combat (FAQ)."
     ].filter(Boolean),
     warlock: (c) => [
       "<b>Demons</b> (Imp, Succubus, Voidwalker) share the unique Demon category — one equipped at a time — and have a Health capacity like pets (Base).",
@@ -845,7 +846,7 @@ WW.teams = {
     druid: ["FAQ p.2", "Base p.40", (c) => (c.tbc ? "The Burning Crusade p.8" : "")],
     hunter: ["FAQ p.2–3", "Base p.40"],
     mage: ["FAQ p.1", "Base p.40"],
-    paladin: ["Base p.3, p.7, p.16–17", "FAQ p.2", (c) => (c.outland ? "The Burning Crusade p.4, p.7" : "")],
+    paladin: ["Base p.3, p.7, p.16–17", "FAQ p.2", (c) => (c.outland ? "The Burning Crusade p.3–4, p.7" : "")],
     priest: ["FAQ p.1–2", (c) => (c.mod("sow-class") ? "FAQ p.3" : ""), "Base p.40"],
     rogue: ["FAQ p.1"],
     shaman: ["Base p.3, p.7", "FAQ p.2", (c) => (c.outland ? "The Burning Crusade p.4, p.7 · FAQ p.4" : "")],
@@ -882,9 +883,9 @@ WW.teams = {
       {
         h: "Your actions — and why you take them",
         body: (c) => "<ul>" +
-          "<li><b>Travel</b> up to two regions, or hop between our flight paths" + (c.outland ? " — the Dark Portal leads to Outland" : "") + ". Blue monsters stop you.</li>" +
+          "<li><b>Travel</b> up to two regions; one of those steps can be a hop between our flight paths" + (c.outland ? " — the Dark Portal leads to Outland" : "") + ". Blue monsters stop you.</li>" +
           "<li><b>Challenge</b> a monster from one of our quests, a boss, or every enemy hero in your region; teammates there can join by spending an action. A <b>blue</b> monster in your region must be fought first.</li>" +
-          "<li><b>Rest</b> to heal twice your level — three times in our towns — and shed a Curse.</li>" +
+          "<li><b>Rest</b> to heal twice your level and shed a Curse — in our towns, three times your level and every Curse.</li>" +
           "<li><b>Training</b> buys Power cards up to your level; a <b>Town</b> action heals, trains and trades with the Merchant.</li></ul>"
       },
       {
@@ -896,7 +897,8 @@ WW.teams = {
       {
         h: "Growing your hero",
         body: (c) => "<p>Each faction keeps <b>" + quests(c) + "</b> quests face up. Kill a quest’s last monster and you take its gold, XP and items; quests below your level pay less XP. Each new level refills you and adds a <b>Talent</b>; the top level is <b>" + maxLvl(c) +
-          "</b>. Fall in battle and you return at a graveyard or our starting region with 1 Health and 1 Energy.</p>"
+          "</b>. Fall in battle and you return at the nearest graveyard or our starting region with 1 Health and 1 Energy" +
+          (c.outland ? " — always on the board where you fell, so in Outland it’s a graveyard there; a dungeon boss sends you to the nearest graveyard or our town on that board" : "") + ".</p>"
       },
       {
         h: (c) => "Our Overlord — " + ovOf(c).name,
@@ -909,7 +911,7 @@ WW.teams = {
             nef: "<p>Nefarian moves after every Event card, by the Fate number in its corner — we’ll have to catch him.</p>",
             kaz: "<p>Lord Kazzak is the elusive one, with five Overlord counters; his sheet explains them.</p>",
             rag: "<p>Ragnaros has an Overlord counter on Lordaeron marking where he is, and a token on his sheet tracks the progress of the fight against him; his sheet has the rest.</p>"
-          }[o.id] + "<p>Challenge " + (o.he === "she" ? "her" : "him") + " like any boss when you’re ready — losing just sends you to the graveyard.</p>";
+          }[o.id] + "<p>Challenge " + (o.he === "she" ? "her" : "him") + " like any boss when you’re ready — losing is just a normal defeat: back to the nearest graveyard or our starting region.</p>";
         }
       },
       { when: (c) => [2, 3, 5].includes(c.p),
@@ -918,7 +920,7 @@ WW.teams = {
           " — four actions to plan." + ((c.p === 3 || c.p === 5) ? " That player can’t take both the Paladin and the Shaman." : "") + "</p>" },
       { when: (c) => c.mod("sow-class"),
         h: "Shadow of War — new powers and talents",
-        body: () => "<p>Each class gets ten more powers and talents. Powers with a <b>spellbook icon</b> can be equipped at the start of any action, even just before a fight.</p>" },
+        body: () => "<p>Each class gets ten more Power cards and ten more Talent cards. Powers with a <b>spellbook icon</b> can be equipped at the start of any action, even just before a fight.</p>" },
       { when: (c) => c.mod("sow-items"),
         h: "Shadow of War — Bonus Items",
         body: () => "<p>A fifth Item deck, <b>Bonus Items</b>: you may carry seven on top of your three normal items. <b>Experience Reward</b> cards in it are straight XP.</p>" },

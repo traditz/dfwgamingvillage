@@ -34,7 +34,7 @@ window.AID_COMPONENTS = {   // standard v1.1 (per-set picture panel colour: the 
     { set: "base", qty: "12 per Baron", name: "Baron Action cards", note: "The list counts 80 Action cards: 12 per Baron and 8 Neutral", img: "base-baron-actions.webp", w: 320, h: 177 },
     { set: "base", qty: "8", name: "Neutral Action cards", img: "base-neutral-actions.webp", w: 320, h: 181,
       when: (c) => !(c.has("cg") && c.mod("fg")) },
-    { set: "base", qty: "8", name: "Neutral Action cards", note: "For Glory: Uncertain Times, Muster Troops and Upgrade Defenses are taken out and replaced by the expansion's versions (C&G p.1)", img: "base-neutral-actions.webp", w: 320, h: 181,
+    { set: "base", qty: "8", name: "Neutral Action cards", note: "For Glory: the original Uncertain Times, Muster Troops (the expansion calls it \"Muster Forces\") and Upgrade Defenses are taken out and replaced by the expansion's versions (C&G p.1 · Rules p.11)", img: "base-neutral-actions.webp", w: 320, h: 181,
       when: (c) => c.has("cg") && c.mod("fg") },
     { set: "base", qty: "93", name: "Crown tokens", note: "In 1s and 5s. FAQ errata: 93, not 78 (FAQ p.1)", img: "base-crowns.webp", w: 320, h: 216 },
     { set: "base", qty: "40", name: "Vote tokens", note: "In 1s and 3s", img: "base-votes.webp", w: 320, h: 158 },

@@ -93,6 +93,7 @@
       const b = el("button", "pbtn" + (state.players === i ? " on" : "") + (ok ? "" : " off"), String(i));
       b.type = "button";
       if (ok) b.addEventListener("click", () => { state.players = i; update(); });
+      else if (state.mode === "solo") b.title = "Solo mode is 1 player";
       else if (i === 5) b.title = "5 players requires the Stretch Goals box";
       else if (i === 1) b.title = "1 player is the Solo mode";
       box.appendChild(b);

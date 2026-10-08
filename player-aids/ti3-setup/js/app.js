@@ -77,7 +77,7 @@
       else {
         b.disabled = true;
         b.title = state.mode === "fote"
-          ? (i === 3 ? "Fall of the Empire is for 4–6 players (SoT p.14)" : "Fall of the Empire goes up to 7 players only with Shattered Empire (SoT p.14)")
+          ? (i < r[0] ? "Fall of the Empire is for 4–6 players, or 7 with Shattered Empire (SoT p.14)" : (state.exps.has("se") ? "Fall of the Empire is for at most 7 players (SoT p.14)" : "Fall of the Empire goes up to 7 players only with Shattered Empire (SoT p.14)"))
           : "7 and 8 players need Shattered Empire (SE p.8)";
       }
       box.appendChild(b);
