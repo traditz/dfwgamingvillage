@@ -29,7 +29,8 @@ DW.expMeta = {
   base:         { name: "Base Game",  cls: "e-base" },
   longnight:    { name: "Long Night", cls: "e-ln"   },
   wc:           { name: "Warring Colonies", cls: "e-wc" },
-  variant:      { name: "Variant",    cls: "e-var"  },
+  wcv:          { name: "Warring Colonies variant", cls: "e-wc" },
+  variant:     { name: "Variant",    cls: "e-var"  },
   improvements: { name: "Improvements Module", cls: "e-mod" },
   bandits:      { name: "Bandits Module",      cls: "e-mod" },
   raxxon:       { name: "Raxxon Module",       cls: "e-mod" },
@@ -38,7 +39,7 @@ DW.expMeta = {
   lonewolf:     { name: "Lone Wolf",           cls: "e-mod" },
   quickplay:    { name: "Quick Play",          cls: "e-mod" }
 };
-DW.precedence = { base: 0, longnight: 1, wc: 2 };
+DW.precedence = { base: 0, longnight: 1, wc: 2, wcv: 3 };
 
 /* ---- Optional modules & variants -------------------------------------------
    `type`     groups the chip in the configurator.
@@ -67,13 +68,13 @@ DW.modules = [
 
   /* --- The Long Night introductory scenarios --- */
   { id: "chimpcode", name: "Scenario: The Chimp and the Code", type: "scenario", requires: "longnight",
-    implies: ["raxxon"], excludes: ["banditblitz", "wcvariant", "coop"],
+    implies: ["raxxon"], excludes: ["banditblitz", "wcvariant", "coop", "hardcore"],
     summary: "Story-driven intro to the Raxxon module (Special Objectives R1-R3). Learn the rules as you play.",
     description: "The recommended first taste of Raxxon. Uses Special Objective cards R1-R3 instead of a normal main objective, with read-aloud story sections. Raxxon starts fully barricaded; Blue and Emma Han are set aside during setup (Long Night rules p.20-21)." },
   { id: "banditblitz", name: "Scenario: Bandit Blitz", type: "scenario", requires: "longnight",
-    implies: ["bandits"], excludes: ["chimpcode", "wcvariant", "coop"], minPlayers: 3,
+    implies: ["bandits"], excludes: ["chimpcode", "wcvariant", "coop", "hardcore"], minPlayers: 3,
     summary: "Story-driven intro to the Bandits module (Special Objectives B1-B3) with the unique Bandit Betrayal.",
-    description: "The recommended first taste of Bandits. Uses Special Main Objective cards B1-B3 with read-aloud story sections and a special exile phase. The betrayal card shuffled into the secret objective deal is the unique BANDIT BETRAYAL card (Long Night rules p.22-23). Needs 3+ players here: the 2 Player Variant follows the co-op rules, which deal no secret objectives (Rulebook p.15)." },
+    description: "The recommended first taste of Bandits. Uses Special Main Objective cards B1-B3 with read-aloud story sections and a special exile phase. The betrayal card shuffled into the secret objective deal is the unique BANDIT BETRAYAL card (Long Night rules p.22-23). Needs 3+ players here: the 2 Player Variant follows the co-op rules, which deal no secret objectives (Rulebook p.15 · Long Night rules p.15)." },
 
   /* --- Warring Colonies modules --- */
   { id: "randomitems", name: "Random Items module", type: "wcmodule", requires: "wc", excludes: ["wcvariant"],
@@ -87,16 +88,16 @@ DW.modules = [
   { id: "coop", name: "Co-op variant", type: "variant", requires: ["base", "longnight"],
     excludes: ["betrayer", "hardcore", "wcvariant", "chimpcode", "banditblitz"],
     summary: "Fully cooperative: hardcore objective side, no secret objectives, no exile votes.",
-    description: "Play cooperatively: use the hardcore side of the main objective and do not assign secret objectives — everyone's only goal is the main objective. No votes to exile. During setup remove every card showing the non-co-op symbol (bottom right corner). The rulebook's 2 Player Variant also follows these rules (Rulebook p.15)." },
-  { id: "betrayer", name: "Betrayer variant", type: "variant", requires: ["base", "longnight"], excludes: ["coop", "wcvariant"],
+    description: "Play cooperatively: use the hardcore side of the main objective and do not assign secret objectives — everyone's only goal is the main objective. No votes to exile. During setup remove every card showing the non-co-op symbol (bottom right corner). The rulebook's 2 Player Variant also follows these rules (Rulebook p.15 · Long Night rules p.15)." },
+  { id: "betrayer", name: "Betrayer variant", type: "variant", requires: ["base", "longnight"], excludes: ["coop", "wcvariant"], minPlayers: 3,
     summary: "Deal only 1 non-betrayal secret objective per player, greatly raising the odds of a betrayer.",
-    description: "During setup, set aside only 1 non-betrayal secret objective per player (instead of 2) before adding the 1 betrayal card — a much higher chance someone at the table is working against the colony (Rulebook p.15)." },
-  { id: "hardcore", name: "Hardcore variant", type: "variant", requires: ["base", "longnight"], excludes: ["coop", "wcvariant"],
+    description: "During setup, set aside only 1 non-betrayal secret objective per player (instead of 2) before adding the 1 betrayal card — a much higher chance someone at the table is working against the colony (Rulebook p.15 · Long Night rules p.15). Needs 3+ players here: the 2 Player Variant follows the co-op rules (Rulebook p.15 · Long Night rules p.15)." },
+  { id: "hardcore", name: "Hardcore variant", type: "variant", requires: ["base", "longnight"], excludes: ["coop", "wcvariant", "chimpcode", "banditblitz"], minPlayers: 3,
     summary: "Play the normal game, but use the hardcore side of the main objective.",
-    description: "For a greater challenge, play the standard (secret objectives) game but use the hardcore side of the main objective card (Rulebook p.15)." },
+    description: "For a greater challenge, play the standard (secret objectives) game but use the hardcore side of the main objective card (Rulebook p.15 · Long Night rules p.15). Needs 3+ players here: the 2 Player Variant follows the co-op rules (Rulebook p.15 · Long Night rules p.15)." },
   { id: "elimination", name: "Player Elimination variant", type: "variant", requires: ["base", "longnight"], excludes: ["wcvariant"],
     summary: "Lose your last survivor and you're out of the game — no replacement survivor.",
-    description: "If a player's last remaining survivor would be killed or otherwise lost, remove all cards in their hand from the game; that player is out. (Normally they would draw a fresh survivor and continue.) (Rulebook p.15)." },
+    description: "If a player's last remaining survivor would be killed or otherwise lost, remove all cards in their hand from the game; that player is out. (Normally they would draw a fresh survivor and continue.) (Rulebook p.15 · Long Night rules p.15)." },
   { id: "mature", name: "Remove mature crossroads", type: "variant", requires: ["base", "longnight", "wc"],
     summary: "Set aside the crossroads cards with mature themes (marked with the mature symbol).",
     description: "Some crossroads cards have mature themes — sex, language, suicide, alcohol use, etc. — and are marked with the mature symbol. Remove them from the crossroads deck before play if your group prefers (Rulebook p.6). The Long Night lists its 9 Adult Only crossroads cards as a separate component (Long Night rules p.2)." }
@@ -128,6 +129,10 @@ DW.phases = [
 
 /* Tag helper: prefer the Long Night wording tag when it's on the table. */
 const _core = c => (c.has("longnight") ? "longnight" : "base");
+/* Citation helpers: The Long Night rulebook restates the base rules on the same
+   page numbers, and its wording governs when it is on the table. */
+const _cite = (b, l) => c => (c.has("longnight") ? l : b);
+const _rb = pages => c => (c.has("longnight") ? "Long Night rules " : "Rulebook ") + pages;
 
 DW.setup = [
   /* ======================= STANDARD GAME ================================== */
@@ -141,25 +146,26 @@ DW.setup = [
   { ph: 0, exp: "longnight", when: c => !c.wc && c.combined, src: "Long Night rules p.16 (Preparing for the Long Night)",
     t: "Combining Base + Long Night: pick your components",
     d: "Any cards and components from both sets may be mixed as desired. Start by gathering all cards marked with the Long Night moon icon (plus the icon of each module you're using), then add what you like from the base box. <b>Whenever location search decks are combined from more than one set, shuffle each location's cards together and deal 20 facedown to form that location's deck; remove the undealt cards from the game.</b> Note this can swing difficulty — curate to taste." },
-  { ph: 0, exp: _core, when: c => !c.wc, src: "Rulebook p.3, p.6 (step 2)",
+  { ph: 0, exp: _core, when: c => !c.wc, src: _cite("Rulebook p.3, p.6 (step 2)", "Long Night rules p.3, p.6 (step 2)"),
     t: "Hand out player reference sheets",
     d: "Each player takes a player reference sheet. It holds your group leader (face up), your secret objective (face down), your following, and your unused/used action dice pools." },
 
-  { ph: 0, exp: "wc", when: c => c.wc, src: "Warring Colonies rulebook p.4 (steps 1-2)",
+  { ph: 0, exp: "wc", when: c => c.wc, src: "Warring Colonies rulebook p.4 (steps 1-2), p.6",
     t: "Collect components & lay out TWO colonies",
-    d: "Gather the items on the <b>Collection List</b> (WC rulebook p.6) from your Dead of Winter and Long Night sets and combine them with the Warring Colonies contents. Place <b>2 colony boards</b>, the 6 location boards and the Graveyard around the table, then place the <b>Combat Tracker</b> so the yellow and blue sides each face a colony. Do not use Raxxon, the Bandits' Hideout, or Improvements-module tokens." },
-  { ph: 0, exp: "wc", when: c => c.wc, src: "Warring Colonies rulebook p.4 (step 3), p.7, p.9",
+    d: "Gather the items on the <b>Collection List</b> (WC rulebook p.6) from your Dead of Winter and Long Night sets and combine them with the Warring Colonies contents. Place <b>2 colony boards</b>, the 6 location boards and the Graveyard around the table, then place the <b>Combat Tracker</b> so the yellow and blue sides each face a colony. Do not use Raxxon, the Bandits' Hideout or Improvements-module tokens, and take only the <b>starter item cards</b> from The Long Night: its location item cards stay in the box (all base-game item cards are used)." },
+  { ph: 0, exp: "wc", when: c => c.wc, src: c => "Warring Colonies rulebook p.4 (step 3), p.7, p.9" + (c.p === 11 ? ", p.15" : ""),
     t: "Hand out the Warring Colonies reference sheets",
-    d: "Each player takes one of the NEW reference sheets from the Warring Colonies set — the round order and available actions have changed (no Attack-a-Survivor, Attract, Move-a-Survivor or Vote-to-Exile actions; new Colony Combat, bullets and Elect Colony Leader steps)." },
+    d: c => "Each player takes one of the NEW reference sheets from the Warring Colonies set — the round order and available actions have changed (no Attack-a-Survivor, Attract, Move-a-Survivor or Vote-to-Exile actions; new Colony Combat, bullets and Elect Colony Leader steps)." +
+       (c.p === 11 ? " <b>11 players:</b> the Lone Wolf does not use a reference sheet (WC rulebook p.15)." : "") },
   { ph: 0, exp: "wc", when: c => c.wc, src: "Warring Colonies rulebook p.4 (step 5)",
     t: "Split into two colonies" + "",
     d: "Divide evenly into teams, each team sitting around its own colony board. With an odd number of players, one player is the <b>Lone Wolf</b> (see phase 6)." },
 
   /* -- Phase 1: Main Objective -- */
-  { ph: 1, exp: _core, when: c => !c.wc && !c.mod("chimpcode") && !c.mod("banditblitz"), src: "Rulebook p.6 (step 3)",
+  { ph: 1, exp: _core, when: c => !c.wc && !c.mod("chimpcode") && !c.mod("banditblitz"), src: _cite("Rulebook p.6 (step 3)", "Long Night rules p.6 (step 3)"),
     t: "Choose the main objective",
     d: c => `Pick a standard main objective together or draw 1 at random, place it on its space on the colony board, and follow its printed SET UP box (starting morale, starting round, zombies to add). ${c.has("longnight") ? "First game of The Long Night? The Long Night rulebook suggests <b>Tribute</b> (Long Night rules p.6)." : "First game? The rulebook suggests <b>We Need More Samples</b>."}` },
-  { ph: 1, exp: "variant", when: c => !c.wc && (c.mod("hardcore") || c.coopRules) && !c.mod("chimpcode") && !c.mod("banditblitz"), src: "Rulebook p.15 (Variants)",
+  { ph: 1, exp: "variant", when: c => !c.wc && (c.mod("hardcore") || c.coopRules) && !c.mod("chimpcode") && !c.mod("banditblitz"), src: _cite("Rulebook p.15 (Variants)", "Long Night rules p.15 (Variants)"),
     t: c => c.twoPlayer && !c.mod("coop") ? "2-player rules: use the HARDCORE side of the main objective"
           : "Use the HARDCORE side of the main objective",
     d: c => c.twoPlayer && !c.mod("coop")
@@ -169,7 +175,7 @@ DW.setup = [
       : "Hardcore variant: flip the main objective to its hardcore side for a greater challenge." },
   { ph: 1, exp: "scenario", when: c => c.mod("chimpcode"), src: "Long Night rules p.20-21",
     t: "Scenario setup — The Chimp and the Code",
-    d: "Instead of a normal main objective, use <b>Special Objective card R1</b>. Set up as a Raxxon-module game with these changes: place barricades on EVERY entrance and survivor space at Raxxon (survivors may not move there yet); do NOT use the pill or containment-code rules yet; remove <b>Blue</b> and <b>Emma Han</b> from the survivor deck and set them aside. One player reads the opening story aloud — the scenario tells you when each Raxxon rule comes online (R1 → R2 → R3)." },
+    d: "Instead of a normal main objective, use <b>Special Objective card R1</b>. Set up as a Raxxon-module game with these changes: place barricades on EVERY entrance and survivor space at Raxxon (survivors may not move there yet); do NOT use the pill or containment-code rules yet; remove <b>Blue</b> and <b>Emma Han</b> from the survivor deck and set them aside. One player reads the opening story aloud. It immediately brings in Emma Han: her standee goes to the colony and her survivor card into the first player's following, and she is equipped with the Raxxon Blueprints (found in the Raxxon search deck). Blue stays aside until R1 is completed. The story tells you when each Raxxon rule comes online (R1 → R2 → R3)." },
   { ph: 1, exp: "scenario", when: c => c.mod("banditblitz"), src: "Long Night rules p.22-23",
     t: "Scenario setup — Bandit Blitz",
     d: "Instead of a normal main objective, use <b>Special Main Objective card B1</b>. Set up as a Bandits-module game, but when building the secret objective stack use the unique <b>BANDIT BETRAYAL</b> card as the 1 betrayal objective (you may read it aloud before shuffling it in). One player reads the opening story aloud; apply only the Reveal Crisis, Bandits Scavenge and Adding Zombies bandit rules until the story unlocks the rest (B1 → B2 → B3)." },
@@ -178,34 +184,36 @@ DW.setup = [
     d: "Pick one of the 4 Warring Colonies main objectives (or draw randomly) and place it near the play area — <b>both colonies share the same main objective</b>. Follow its SET UP box (e.g. Divide and Conquer: morale 4, round track 4, a barricade at each non-colony location, 12 zombies at each colony, 3 bullets in each supply)." },
 
   /* -- Phase 2: Secret Objectives -- */
-  { ph: 2, exp: _core, when: c => !c.wc && !c.coopRules && !c.mod("betrayer") && !c.mod("banditblitz"), src: "Rulebook p.6 (step 4)",
+  { ph: 2, exp: _core, when: c => !c.wc && !c.coopRules && !c.mod("betrayer") && !c.mod("banditblitz"), src: _cite("Rulebook p.6 (step 4)", "Long Night rules p.6 (step 4)"),
     t: "Build & deal the secret objectives",
     d: c => `Shuffle the non-betrayal secret objectives and set aside <b>2 per player</b> face down (${2 * c.p} cards). Shuffle the betrayal secret objectives and add <b>1</b> of them face down. Shuffle the ${2 * c.p + 1} set-aside cards together and deal 1 to each player; return the rest to the box unseen. You may NOT reveal your secret objective. There may or may not be a betrayer at your table.` },
-  { ph: 2, exp: "variant", when: c => !c.wc && c.mod("betrayer") && !c.coopRules && !c.mod("banditblitz"), src: "Rulebook p.15 (Betrayer variant)",
+  { ph: 2, exp: "variant", when: c => !c.wc && c.mod("betrayer") && !c.coopRules && !c.mod("banditblitz"), src: _cite("Rulebook p.15 (Betrayer variant)", "Long Night rules p.15 (Betrayer variant)"),
     t: "Betrayer variant: deal riskier objectives",
-    d: c => `Set aside only <b>1</b> non-betrayal secret objective per player (${c.p} cards) plus 1 betrayal card, shuffle, and deal 1 to each player — the odds of a betrayer are now much higher.` },
+    d: c => `Set aside only <b>1</b> non-betrayal secret objective per player (${c.p} cards) and add 1 betrayal card (${c.p + 1} cards). Shuffle them together, deal 1 to each player, and return the leftover card to the box without looking at it. You may NOT reveal your secret objective. The odds of a betrayer are now much higher.` },
   { ph: 2, exp: "scenario", when: c => c.mod("banditblitz"), src: "Long Night rules p.22",
     t: "Deal secret objectives with the BANDIT BETRAYAL",
-    d: c => `${c.mod("betrayer") ? `Betrayer variant: set aside only 1 non-betrayal secret objective per player (${c.p} cards; Rulebook p.15)` : `As normal, set aside 2 non-betrayal secret objectives per player (${2 * c.p} cards)`} — but the 1 betrayal card added is the unique <b>BANDIT BETRAYAL</b>. Shuffle and deal 1 to each player. The bandit betrayer needs Special Objective B2 completed to win, so they'll help the colony get at least that far.` },
-  { ph: 2, exp: "variant", when: c => !c.wc && c.coopRules, src: "Rulebook p.15 (Co-op / 2-player variants)",
+    d: c => `${c.mod("betrayer") ? `Betrayer variant: set aside only 1 non-betrayal secret objective per player (${c.p} cards; Long Night rules p.15)` : `As normal, set aside 2 non-betrayal secret objectives per player (${2 * c.p} cards)`} — but the 1 betrayal card added is the unique <b>BANDIT BETRAYAL</b>. Shuffle and deal 1 to each player. The bandit betrayer needs Special Objective B2 completed to win, so they'll help the colony get at least that far.` },
+  { ph: 2, exp: "variant", when: c => !c.wc && c.coopRules, src: _cite("Rulebook p.15 (Co-op / 2-player variants)", "Long Night rules p.15 (Co-op / 2-player variants)"),
     t: c => c.twoPlayer && !c.mod("coop") ? "2-player rules: co-op — no secret objectives" : "Co-op: no secret objectives",
     d: c => (c.twoPlayer && !c.mod("coop") ? "<b>The rulebook's 2 Player Variant follows the co-op rules.</b> " : "") +
        "Do not assign secret objectives — every player's only objective is the main objective. There is no betrayer and no voting to exile. During setup, remove from the game every card showing the non-co-op symbol in its bottom right corner." },
-  { ph: 2, exp: "wc", when: c => c.wc, src: "Warring Colonies rulebook p.4 (step 6), p.6",
+  { ph: 2, exp: "wc", when: c => c.wc, src: c => "Warring Colonies rulebook p.4 (step 6), p.6" + (c.loneWolf ? ", p.14" : ""),
     t: "Deal Warring Colonies secret objectives",
-    d: "Shuffle the secret objective cards (the non-betrayal objectives gathered from the Collection List) and deal 1 to each player; return the rest to the box unseen. You cannot reveal yours. <b>There are no betrayal secret objectives in the Warring Colonies variant</b> — the enemy is across the table. (Per the Collection List, the 'Justice' and 'Us or Them' objectives are removed.)" },
+    d: c => "Shuffle the secret objective cards (the non-betrayal objectives gathered from the Collection List) and deal 1 to each player; return the rest to the box unseen. You cannot reveal yours. <b>There are no betrayal secret objectives in the Warring Colonies variant</b> — the enemy is across the table. (Per the Collection List, the 'Justice' and 'Us or Them' objectives are removed.)" +
+       (c.loneWolf ? " <b>Lone Wolf:</b> don't deal them one; they take a Lone Wolf secret objective instead (WC rulebook p.14; see phase 6)." : "") },
 
   /* -- Phase 3: Decks & Item Cards -- */
-  { ph: 3, exp: _core, when: c => !c.wc, src: "Rulebook p.6 (steps 5-6)",
+  { ph: 3, exp: _core, when: c => !c.wc, src: c => (c.has("longnight") ? "Long Night rules" : "Rulebook") + " p.6 (steps 5-6)" + (c.has("wc") ? " · WC rulebook p.2" : ""),
     t: "Build the crisis, survivor, exile & crossroads decks",
     d: c => "Shuffle the crisis cards onto their space on the colony board. Shuffle the survivor deck, the exiled-objective deck and the crossroads deck and place them beside the board." +
-       (c.mod("mature") ? " You chose to <b>remove the mature-themed crossroads</b> (marked with the mature symbol) — set them aside now." : " (Crossroads cards with mature themes are marked with a symbol; remove them first if your group prefers.)") },
-  { ph: 3, exp: _core, when: c => !c.wc, src: "Rulebook p.6 (step 7)",
+       (c.mod("mature") ? " You chose to <b>remove the mature-themed crossroads</b> (marked with the mature symbol) — set them aside now." : " (Crossroads cards with mature themes are marked with a symbol; remove them first if your group prefers.)") +
+       (c.has("wc") ? " <b>Warring Colonies cards:</b> its crossroads, crisis and survivor cards (all marked with the bullets icon) can be shuffled into these decks, but leave out every card marked with the <b>crosshairs</b> symbol in its lower right corner. Those are only for the Warring Colonies variant (WC rulebook p.2)." : "") },
+  { ph: 3, exp: _core, when: c => !c.wc, src: _cite("Rulebook p.6 (step 7)", "Long Night rules p.6 (step 7)"),
     t: "Deal starting items",
     d: c => c.twoPlayer
-      ? "2-player variant (Rulebook p.15): shuffle the starter item cards and deal <b>7</b> to each player (instead of 5). Return the rest to the box."
+      ? `2-player variant (${c.has("longnight") ? "Long Night rules" : "Rulebook"} p.15): shuffle the starter item cards and deal <b>7</b> to each player (instead of 5). Return the rest to the box.`
       : "Shuffle all the starter item cards and deal <b>5</b> to each player. Return the rest to the box." },
-  { ph: 3, exp: _core, when: c => !c.wc, src: "Rulebook p.6 (step 8)",
+  { ph: 3, exp: _core, when: c => !c.wc, src: _cite("Rulebook p.6 (step 8)", "Long Night rules p.6 (step 8)"),
     t: "Build each location's item deck",
     d: c => "Separate the remaining item cards by the location printed at their bottom, shuffle each deck, and place it on its location card." +
        (c.combined ? " <b>Combined sets:</b> where a location has cards from both boxes, shuffle them together and deal 20 facedown as that location's deck; remove the undealt cards (Long Night rules p.16)." : "") },
@@ -217,21 +225,22 @@ DW.setup = [
     d: c => `Shuffle the <b>Warring Colonies crisis deck</b> (a joint crisis both colonies contribute to) and place it centrally. Shuffle the survivor deck and the crossroads deck${c.mod("mature") ? " (mature-marked crossroads removed)" : ""}. Deal <b>${c.p === 11 ? "4" : "5"} starter items</b> to each player${c.p === 11 ? " (11-player game: 4 each — WC rulebook p.15)" : ""}. Build each location's item deck, add <b>5 Random Item cards to each</b>, and shuffle. Place a set of <b>5 tactics cards at each colony</b>. The optional crossroads list on p.6 adds variety at the cost of setup time.` },
 
   /* -- Phase 4: Survivors & First Player -- */
-  { ph: 4, exp: _core, when: c => !c.wc, src: "Rulebook p.6 (steps 9-12)",
+  { ph: 4, exp: _core, when: c => !c.wc, src: _cite("Rulebook p.6 (steps 9-12)", "Long Night rules p.6 (steps 9-12)"),
     t: "Draft survivors & pick group leaders",
     d: c => (c.twoPlayer
-      ? "2-player variant (Rulebook p.15): deal <b>4 survivor cards</b> to each player; each keeps <b>3</b> and returns the rest. Re-shuffle the survivor deck."
+      ? `2-player variant (${c.has("longnight") ? "Long Night rules" : "Rulebook"} p.15): deal <b>4 survivor cards</b> to each player; each keeps <b>3</b> and returns the rest. Re-shuffle the survivor deck.`
       : "Deal <b>4 survivor cards</b> to each player; each keeps <b>2</b> and returns the rest. Re-shuffle the survivor deck.") +
       " Each player makes one kept survivor her <b>group leader</b> (face up on the reference sheet); the other(s) go to her following below the sheet. Add every drafted survivor's standee to the dashed circles in the colony's Colony Occupants section." },
-  { ph: 4, exp: _core, when: c => !c.wc, src: "Rulebook p.6-7 (steps 13-14)",
+  { ph: 4, exp: _core, when: c => !c.wc, src: _cite("Rulebook p.6-7 (steps 13-14)", "Long Night rules p.6-7 (steps 13-14)"),
     t: "Tokens within reach; highest influence goes first",
     d: "Separate the remaining standees and tokens within easy reach of all players. The player whose <b>group leader has the highest influence value</b> takes the first player token and the first turn. Use the blue marker for morale and the red marker for rounds, set from the main objective." },
-  { ph: 4, exp: "wc", when: c => c.wc, src: "Warring Colonies rulebook p.4 (steps 12-13), p.6",
+  { ph: 4, exp: "wc", when: c => c.wc, src: c => "Warring Colonies rulebook p.4 (steps 12-13), p.6" + (c.loneWolf ? ", p.14" : ""),
     t: "Draft survivors & pick group leaders",
     d: c => (c.p <= 5
       ? "4-5 player game: deal <b>5 survivor cards</b> to each player; each keeps <b>3</b>."
       : "Deal <b>4 survivor cards</b> to each player; each keeps <b>2</b>.") +
-      " Re-shuffle the survivor deck. Each player makes one kept survivor her group leader and places the rest in her following, then places her survivor standees in <b>her own colony</b>. (Per the Collection List you may remove Anneleigh Chan, Blue, Melissa Gupta and Jamie Gilmour.)" },
+      " Re-shuffle the survivor deck. Each player makes one kept survivor her group leader and places the rest in her following, then places her survivor standees in <b>her own colony</b>. (Per the Collection List you may remove Anneleigh Chan, Blue, Melissa Gupta and Jamie Gilmour.)" +
+      (c.loneWolf ? " <b>Lone Wolf:</b> always dealt 5 survivors and keeps 3, and places them at the Lone Wolf Den, not a colony (WC rulebook p.14)." : "") },
   { ph: 4, exp: "wc", when: c => c.wc, src: "Warring Colonies rulebook p.4 (steps 14-15), p.10, p.13",
     t: "Tokens within reach; elect the first colony leaders",
     d: "Separate the remaining standees and tokens within reach. In each colony, the player whose group leader has the <b>highest influence among that colony's leaders</b> takes their colony's <b>colony leader token</b> (the first player tokens) and takes the first turn. Colony leaders play tactics cards and bid bullets in combat, and are re-elected every round." },
@@ -246,7 +255,7 @@ DW.setup = [
   { ph: 5, exp: "raxxon", when: c => !c.wc && c.mod("raxxon"), src: "Long Night rules p.18 (Raxxon module)",
     t: "Raxxon module setup",
     d: "Add the cards marked with the <b>skull-and-crossbones icon</b> to their decks. Add the <b>Raxxon location</b> and set up its search deck normally. Shuffle the <b>Raxxon experiments deck</b> and place it on Raxxon with the Audio Logs side face up (anyone may read the top card's Audio Log at any time). Place the <b>side effect deck</b> nearby — it is not shuffled and may be examined freely. Keep the special zombie standees handy." },
-  { ph: 5, exp: "variant", when: c => !c.wc && c.mod("elimination"), src: "Rulebook p.15 (Player Elimination variant)",
+  { ph: 5, exp: "variant", when: c => !c.wc && c.mod("elimination"), src: _cite("Rulebook p.15 (Player Elimination variant)", "Long Night rules p.15 (Player Elimination variant)"),
     t: "Player Elimination in effect",
     d: "Agree before starting: if a player's last remaining survivor would be killed or otherwise lost, they remove their hand from the game and are OUT — they do not draw a replacement survivor." },
   { ph: 5, exp: "lonewolf", when: c => c.wc && c.loneWolf, src: "Warring Colonies rulebook p.14-15 (Lone Wolf)",
@@ -255,7 +264,7 @@ DW.setup = [
   { ph: 5, exp: "quickplay", when: c => c.wc && c.mod("quickplay"), src: "Warring Colonies rulebook p.15 (Quick Play)",
     t: "Quick Play in effect",
     d: "After both active players have moved their survivors each turn, flip the sand timer immediately — both players share <b>2 minutes TOTAL</b> for the whole simultaneous actions step. Unfinished actions are lost." },
-  { ph: 5, exp: _core, when: c => !c.wc, src: "Rulebook p.8",
+  { ph: 5, exp: _core, when: c => !c.wc, src: _cite("Rulebook p.8", "Long Night rules p.8"),
     t: "Begin round 1",
     d: c => "Start the Player Turns Phase: reveal the top card of the crisis deck, everyone rolls action dice (1 + 1 per survivor you control — " + (c.twoPlayer ? "4 dice to start with the 2-player variant's 3 survivors" : "3 dice to start") + "), then the first player takes the first turn. Remember: the player to your right draws a crossroads card at the start of your turn." },
   { ph: 5, exp: "wc", when: c => c.wc, src: "Rulebook p.8 · Warring Colonies rulebook p.7-8, p.14",
@@ -272,20 +281,20 @@ DW.howToPlay = {
         <ol class="sub"><li>Reveal Crisis</li><li>Roll Action Dice</li><li>Player Turns</li></ol>
         <div class="sub-title">Colony Phase</div>
         <ol class="sub"><li>Pay Food</li><li>Check Waste</li><li>Resolve Crisis</li><li>Add Zombies</li><li>Check Main Objective</li><li>Move Round Tracker</li><li>Pass First Player Token</li></ol>`,
-        tag: _core, src: "Rulebook p.8, p.12-13", when: c => !c.wc },
-      { t: c => `Roll Action Dice: discard leftover dice, then each player rolls <b>1 die + 1 per survivor they control</b> (${c.twoPlayer ? "4 to start with the 2-player variant's 3 survivors — Rulebook p.15" : "3 to start"}). Dice belong to your group, not to a specific survivor — several dice can drive one survivor.`, tag: _core, src: "Rulebook p.8", when: c => !c.wc },
-      { t: "On your turn, the player to your right draws a crossroads card for you and watches for its trigger. Take as many actions as you can/wish, then play passes left.", tag: _core, src: "Rulebook p.8", when: c => !c.wc },
+        tag: _core, src: _rb("p.8, p.12-13"), when: c => !c.wc },
+      { t: c => `Roll Action Dice: discard leftover dice, then each player rolls <b>1 die + 1 per survivor they control</b> (${c.twoPlayer ? "4 to start with the 2-player variant's 3 survivors — " + _rb("p.15")(c) : "3 to start"}). Dice belong to your group, not to a specific survivor — several dice can drive one survivor.`, tag: _core, src: _rb("p.8"), when: c => !c.wc },
+      { t: "On your turn, the player to your right draws a crossroads card for you and watches for its trigger. Take as many actions as you can/wish, then play passes left.", tag: _core, src: _rb("p.8"), when: c => !c.wc },
       { t: `The Warring Colonies round order (new steps in bold):
         <div class="sub-title">Player Turns Phase</div>
         <ol class="sub"><li>Reveal Crisis (a joint crisis for both colonies)</li><li>Roll Action Dice</li><li>Player Turns</li></ol>
         <div class="sub-title">Colony Phase</div>
         <ol class="sub"><li>Pay Food</li><li><b>Colony Combat</b></li><li>Check Waste</li><li>Resolve Crisis</li><li><b>Add 2 Bullets</b></li><li>Add Zombies</li><li>Check Main Objective</li><li>Move Round Trackers</li><li><b>Elect Colony Leaders</b></li></ol>`,
         tag: "wc", src: "WC rulebook p.7", when: c => c.wc },
-      { t: c => `Turns are <b>simultaneous</b>: one player from each colony (starting with the leaders) takes a turn at the same time, in 4 parts completed in order:
+      { t: c => `Turns are <b>simultaneous</b>: one player from each colony takes a turn at the same time — the colony leaders first, then continuing clockwise around each colony — in 4 parts completed in order:
         <ol class="sub">
           <li><b>Draw Crossroads Cards</b> — the teammate to each active player's right draws one for them (triggered cards do NOT stop play).</li>
-          <li><b>Move Survivors</b> — the lower-morale colony's player moves 1 survivor or passes, then the other; alternate until both pass. Each survivor moves at most once. Requests are allowed during this step.</li>
-          <li><b>Simultaneous Actions</b> — ${c.mod("quickplay") ? "Quick Play (WC rulebook p.15): flip the 2-minute sand timer as soon as both players have moved; both have 2 minutes TOTAL and unfinished actions are lost" : "the first player to finish flips the 2-minute sand timer; the other must finish within it or lose the remaining actions"}. A bitten survivor is laid on its side and the bite is resolved at the end of the step.</li>
+          <li><b>Move Survivors</b> — the lower-morale colony's player (roll a die to break a tie) moves 1 survivor or passes, then the other; alternate until both pass. Once you pass you can't move again this step, and each survivor moves at most once. Requests are allowed during this step; all other actions wait for Simultaneous Actions.</li>
+          <li><b>Simultaneous Actions</b> — ${c.mod("quickplay") ? "Quick Play (WC rulebook p.15): flip the 2-minute sand timer as soon as both players have moved; both have 2 minutes TOTAL and unfinished actions are lost" : "the first player to finish flips the 2-minute sand timer; the other must finish within it or lose the remaining actions"}. If both active players search the same location, each simply takes whatever card is on top of the deck when they search or make noise. A bitten survivor is laid on its side and can no longer take actions or use abilities; resolve all bites and bite spreads at the end of the step.</li>
           <li><b>Resolve Crossroads Cards</b> — resolve triggered cards starting with the higher-morale colony (roll a die to break ties). If several survivors met a trigger, the active player picks which one it applies to.</li>
         </ol>`,
         tag: "wc", src: "WC rulebook p.8-9", when: c => c.wc }
@@ -296,29 +305,30 @@ DW.howToPlay = {
           <li><b>Zombie:</b> it is killed and removed — then roll for exposure on the attacker.</li>
           ${c.wc ? "" : "<li><b>Survivor:</b> roll the spent die — if the result is ≤ the TARGET's attack value, the target takes 1 wound and you take a random card from that player's hand. No exposure roll.</li>"}
           <li>You may attack repeatedly (a new die each time), but never your own survivors or helpless survivors.</li>
-        </ul>`, tag: _core, src: "Rulebook p.8-9" },
+        </ul>`, tag: _core, src: _rb("p.8-9") },
       { t: c => `<b>Search</b> — anywhere except the colony: spend a die ≥ the survivor's search value, then:
         <ol class="sub">
           <li>Draw 1 card from the location's item deck and look at it.</li>
-          <li>Either add it to your hand (ending the search), or <b>make noise</b> — place a noise token on an empty noise space (max 4 per location) to draw and look at another card.${c.wc ? " <b>Warring Colonies: only 1 noise may be made per search action</b> (WC rulebook p.10)." : ""}</li>
+          <li>Either add it to your hand (ending the search), or <b>make noise</b> — place a noise token on an empty noise space (max 4 per location each round) to draw and look at another card.${c.wc ? " <b>Warring Colonies: only 1 noise may be made per search action</b> (WC rulebook p.10)." : ""}</li>
           <li>When you stop (or run out of noise spaces), keep exactly 1 drawn card; the rest go to the bottom of that deck.</li>
-        </ol>`, tag: _core, src: "Rulebook p.9-10" },
-      { t: "<b>Barricade</b> — spend any die to place a barricade token on an empty entrance space at the survivor's location.", tag: _core, src: "Rulebook p.10" },
-      { t: "<b>Clean Waste</b> — with a survivor at the colony, spend any die to remove the top 3 cards of the waste pile from the game.", tag: _core, src: "Rulebook p.10" },
-      { t: "<b>Attract</b> — spend any die to move 2 zombies from any location to empty entrance spaces at the survivor's location.", tag: _core, src: "Rulebook p.10", when: c => !c.wc },
-      { t: "<b>Survivor abilities</b> with a number (e.g. 4+) need a die of that value or higher each time they're used; abilities may repeat in a turn unless the card says otherwise.", tag: _core, src: "Rulebook p.10" },
-      { t: "Warring Colonies removes the <b>Attack-a-Survivor</b> and <b>Attract</b> actions entirely; movement happens in its own turn step instead of as an action. A survivor sharing an enemy colony entrance with a zombie may attack that zombie.", tag: "wc", src: "WC rulebook p.9-10", when: c => c.wc }
+          <li>You may search repeatedly with the same survivor in a turn (a new qualifying die each time).</li>
+        </ol>`, tag: _core, src: _rb("p.5, p.9-10") },
+      { t: "<b>Barricade</b> — spend any die to place a barricade token on an empty entrance space at the survivor's location.", tag: _core, src: _rb("p.10") },
+      { t: "<b>Clean Waste</b> — with a survivor at the colony, spend any die to remove the top 3 cards of the waste pile from the game.", tag: _core, src: _rb("p.10") },
+      { t: "<b>Attract</b> — spend any die to move 2 zombies from any location to empty entrance spaces at the survivor's location.", tag: _core, src: _rb("p.10"), when: c => !c.wc },
+      { t: "<b>Survivor abilities</b> with a number (e.g. 4+) need a die of that value or higher each time they're used; abilities may repeat in a turn unless the card says otherwise.", tag: _core, src: _rb("p.10") },
+      { t: "Warring Colonies removes the <b>Attack a Survivor</b>, <b>Attract</b>, <b>Move a Survivor</b> and <b>Vote to Exile</b> actions; movement happens in its own turn step instead. A survivor sharing an enemy colony entrance with a zombie may attack that zombie.", tag: "wc", src: "WC rulebook p.9-10", when: c => c.wc }
     ]},
     { h: "Actions that do not require a die", items: [
-      { t: "<b>Play a card</b> (your turn only) — to the waste pile; every 10 waste cards costs 1 morale at Check Waste. <b>Equip</b> cards attach to a survivor instead and can only leave by hand-off or being added to a crisis.", tag: _core, src: "Rulebook p.10" },
-      { t: "<b>Add a card to the crisis</b> — face down from hand (or unequip into it). Matching symbols help prevent the crisis (+1 point); every non-matching card is −1. Multi-food cards still count as 1 card here.", tag: _core, src: "Rulebook p.11-12", when: c => !c.wc },
+      { t: "<b>Play a card</b> (your turn only) — to the waste pile; every 10 waste cards costs 1 morale at Check Waste. <b>Equip</b> cards attach to a survivor you control instead and can only leave by hand-off or being added to a crisis.", tag: _core, src: _rb("p.10") },
+      { t: "<b>Add a card to the crisis</b> — face down from hand (or unequip into it). Matching symbols help prevent the crisis (+1 point); every non-matching card is −1. Multi-food cards still count as 1 card here.", tag: _core, src: _rb("p.11-12"), when: c => !c.wc },
       { t: "In Warring Colonies the crisis is <b>joint</b> and contributions are played <b>face up</b> — only matching cards may be added; the crisis cannot be sabotaged.", tag: "wc", src: "WC rulebook p.10", when: c => c.wc },
-      { t: "<b>Move a survivor</b> — each of your survivors may move once per turn, to any location with an empty survivor space; roll for exposure after each move.", tag: _core, src: "Rulebook p.11", when: c => !c.wc },
-      { t: "<b>Spend food tokens</b> — remove tokens from the supply; each one gives +1 to any single unused die you control.", tag: _core, src: "Rulebook p.11" },
-      { t: "<b>Request</b> — ask other players for item cards; anything given must be revealed and immediately played (never into the crisis).", tag: _core, src: "Rulebook p.11" },
-      { t: "<b>Hand off</b> — pass an equipped item to another survivor at the same location. A once-per-round ability already used this round stays used.", tag: _core, src: "Rulebook p.11" },
-      { t: "<b>Vote to exile</b> — once per turn, name another player (never yourself); everyone votes thumbs up/down simultaneously (count down from 3). The first player breaks ties.", tag: _core, src: "Rulebook p.11, p.15", when: c => !c.wc && !c.coopRules },
-      { t: "Co-op rules: there is no voting to exile.", tag: "variant", src: "Rulebook p.15", when: c => !c.wc && c.coopRules }
+      { t: "<b>Move a survivor</b> — each of your survivors may move once per turn, to any location with an empty survivor space; roll for exposure after each move.", tag: _core, src: _rb("p.11"), when: c => !c.wc },
+      { t: "<b>Spend food tokens</b> — remove tokens from the supply; each one gives +1 to any single unused die you control.", tag: _core, src: _rb("p.11") },
+      { t: "<b>Request</b> — ask other players for item cards; anything given must be revealed and immediately played (never into the crisis).", tag: _core, src: _rb("p.11") },
+      { t: "<b>Hand off</b> — pass an equipped item to another survivor at the same location. A once-per-round ability already used this round stays used.", tag: _core, src: _rb("p.11") },
+      { t: "<b>Vote to exile</b> — once per turn, name another player (never yourself); everyone votes thumbs up/down simultaneously (count down from 3). The first player breaks ties.", tag: _core, src: _rb("p.11, p.15"), when: c => !c.wc && !c.coopRules },
+      { t: "Co-op rules: there is no voting to exile.", tag: "variant", src: _rb("p.15"), when: c => !c.wc && c.coopRules }
     ]},
     { h: "Exposure & the bite", items: [
       { t: `Roll the exposure die immediately after a survivor <b>moves</b> or <b>kills a zombie</b>. The faces:
@@ -327,18 +337,19 @@ DW.howToPlay = {
           <li><b>Wound</b> — the survivor takes 1 wound token.</li>
           <li><b>Frostbite</b> — 1 frostbite wound; at the start of each of your turns, every frostbitten survivor you control takes another wound.</li>
           <li><b>Bitten</b> — the survivor is killed and the bite spreads.</li>
-        </ul>`, tag: _core, src: "Rulebook p.11" },
+        </ul>`, tag: _core, src: _rb("p.11") },
       { t: `Bite spread: it jumps to the <b>lowest-influence survivor at the same location</b> (after a move, at the destination). That survivor's controller chooses:
         <ul class="sub">
           <li><b>Option 1:</b> kill the survivor — the spread stops.</li>
           <li><b>Option 2:</b> roll the exposure die — blank means they live and the spread stops; anything else kills them and it spreads again.</li>
         </ul>
-        It continues until someone picks Option 1, a blank is rolled, or no survivors remain at the location.`, tag: _core, src: "Rulebook p.11" },
-      { t: c => "A survivor with <b>3+ wounds is killed</b> — frostbite" + (c.has("longnight") ? " and despair (Long Night rules p.14)" : "") + " tokens count toward the 3. Any survivor death costs the colony 1 morale.", tag: _core, src: "Rulebook p.11, p.14" }
+        It continues until someone picks Option 1, a blank is rolled, or no survivors remain at the location.`, tag: _core, src: _rb("p.11") },
+      { t: c => "A survivor with <b>3+ wounds is killed</b> — frostbite" + (c.has("longnight") ? " and despair (Long Night rules p.14)" : "") + " tokens count toward the 3. Any survivor death costs the colony 1 morale.", tag: _core, src: _rb("p.11, p.14") }
     ]},
     { h: "Crossroads cards", items: [
-      { t: "The drawer keeps the card secret and reads it all aloud only if its italicized trigger happens during your turn; you then pick one option (if you can't meet one, you must take the other). Untriggered cards go to the bottom of the deck.", tag: _core, src: "Rulebook p.12" },
-      { t: "Action-based triggers fire <b>after</b> the action resolves (unless the card says otherwise). If a crossroads makes you search a deck for a card, shuffle that deck afterwards.", tag: _core, src: "Rulebook p.12" }
+      { t: c => "The drawer keeps the card secret and reads it all aloud only if its italicized trigger happens during your turn; you then pick one option (if you can't meet one, you must take the other). The chosen option takes effect immediately and the card is removed from the game; untriggered cards go to the bottom of the deck." +
+          (c.wc ? " <b>Warring Colonies:</b> a triggered card does not stop play — it is read and resolved in the Resolve Crossroads Cards step at the end of the turn, higher-morale colony first; if several survivors met the trigger, the active player picks which one it applies to (WC rulebook p.8-9)." : ""), tag: _core, src: _rb("p.4, p.12") },
+      { t: "Action-based triggers fire <b>after</b> the action resolves (unless the card says otherwise). If a crossroads makes you search a deck for a card, shuffle that deck afterwards.", tag: _core, src: c => c.has("longnight") ? (c.has("base") ? "Rulebook p.12, p.15 · Long Night rules p.12" : "Long Night rules p.12") : "Rulebook p.12, p.15" }
     ]},
     { h: "Colony phase details", items: [
       { t: `<b>Pay Food</b>: remove 1 food per 2 survivors in the colony (round up) — helpless survivors count; survivors out at locations feed themselves. If there isn't enough food, do this in order:
@@ -346,28 +357,31 @@ DW.howToPlay = {
           <li>Remove NO food tokens.</li>
           <li>Add a starvation token to the food supply.</li>
           <li>Lose 1 morale for EVERY starvation token in the supply (they accumulate).</li>
-        </ol>`, tag: _core, src: "Rulebook p.12" },
-      { t: "<b>Check Waste</b>: lose 1 morale per 10 cards in the waste pile (round down).", tag: _core, src: "Rulebook p.12" },
-      { t: "<b>Resolve Crisis</b>: shuffle & reveal the contributed cards; matching symbol +1, non-matching −1. Total < number of non-exiled players → the crisis hits. Total ≥ players → prevented; beating it by 2+ gains 1 morale.", tag: _core, src: "Rulebook p.12" },
-      { t: "<b>Add Zombies</b>: 1 per 2 survivors at the colony (round up, helpless count), and 1 per survivor at each other location. Then resolve noise tokens one at a time.", tag: _core, src: "Rulebook p.12" },
-      { t: "Noise (base rules): roll an action die per noise token — a 3 or lower adds a zombie there.", tag: "base", src: "Rulebook p.12", when: c => !c.has("longnight") },
+        </ol>`, tag: _core, src: _rb("p.12") },
+      { t: "<b>Check Waste</b>: lose 1 morale per 10 cards in the waste pile (round down).", tag: _core, src: _rb("p.12") },
+      { t: c => c.wc
+          ? "<b>Resolve Crisis</b> (Warring Colonies): contributions are already face up and every one matches, so each counts +1 — there is no sabotage and no exile; otherwise resolve the joint crisis as in a standard game."
+          : "<b>Resolve Crisis</b>: shuffle & reveal the contributed cards; matching symbol +1, non-matching −1. Total < number of non-exiled players → the crisis hits. Total ≥ players → prevented; beating it by 2+ gains 1 morale. Afterwards, remove all cards added to the crisis from the game.",
+        tag: _core, src: c => _rb("p.12")(c) + (c.wc ? " · WC rulebook p.7, p.9-10" : "") },
+      { t: "<b>Add Zombies</b>: 1 per 2 survivors at the colony (round up, helpless count), and 1 per survivor at each other location. Then resolve noise tokens one at a time.", tag: _core, src: _rb("p.12") },
+      { t: "Noise (base rules): one at a time, remove each noise token and roll an action die for it — on a 3 or lower, add a zombie to that location.", tag: "base", src: "Rulebook p.12", when: c => !c.has("longnight") },
       { t: "Noise (Long Night): flip each noise token like a coin — the “!!!” side adds a zombie there.", tag: "longnight", src: "Long Night rules p.12", when: c => c.has("longnight") },
-      { t: "Zombies fill colony entrances in numbered order, one at a time (1, 2, 3 … then back to 1). No empty space but a barricade? The barricade is destroyed and that zombie is removed. No space and no barricade? <b>Overrun</b>: the zombie is removed and the lowest-influence survivor at the colony dies (helpless if only helpless remain). Non-colony locations work the same with a single entrance.", tag: _core, src: "Rulebook p.13" },
+      { t: "Zombies fill colony entrances in numbered order, one at a time (1, 2, 3 … then back to 1). No empty space but a barricade? The barricade is destroyed and that zombie is removed. No space and no barricade? <b>Overrun</b>: the zombie is removed and the lowest-influence survivor at the colony dies (a helpless survivor if only helpless remain; −1 morale either way). No survivors at the colony? The zombie is simply removed. Non-colony locations work the same with a single entrance.", tag: _core, src: _rb("p.13") },
       { t: "First player token passes to the RIGHT at the end of the round.", tag: "base", src: "Rulebook p.13", when: c => !c.has("longnight") && !c.wc },
       { t: "First player vote (Long Night): before the token passes, any player may call a vote to keep it where it is; if the vote passes, the current first player keeps it — otherwise it passes to the player on the right.", tag: "longnight", src: "Long Night rules p.13, p.16", when: c => c.has("longnight") && !c.wc },
       { t: "Elect Colony Leaders (WC): each colony votes by pointing on a count of 3 — no voting for yourself, no abstaining; current leader breaks ties. The winner takes the colony leader token for next round.", tag: "wc", src: "WC rulebook p.13", when: c => c.wc }
     ]},
     { h: "Zombies & killing", items: [
-      { t: "Any attacked zombie dies. Whoever kills a zombie (attack or card effect) rolls exposure for the killing survivor. At the colony you choose which entrance's zombie dies.", tag: _core, src: "Rulebook p.13" },
-      { t: "Out of zombie standees? Use the zombie tokens.", tag: _core, src: "Rulebook p.13" }
+      { t: "Any attacked zombie dies. Whoever kills a zombie (attack or card effect) rolls exposure for the killing survivor. At the colony you choose which entrance's zombie dies.", tag: _core, src: _rb("p.13") },
+      { t: "Out of zombie standees? Use the zombie tokens.", tag: _core, src: _rb("p.13") }
     ]},
     { h: "Survivors: adding, dying, leaders", items: [
-      { t: "New survivors join at the colony; they can act on your turn but give no extra die until the next Roll Action Dice step. If the colony's survivor spaces are full, crossroads cards that would add survivors (including helpless ones) can't be triggered and item cards that would add survivors can't be played.", tag: _core, src: "Rulebook p.14" },
-      { t: c => "Deaths: overrun, 3+ wounds, bitten, or card effects. Equipped cards return to their owner's hand if the survivor dies at the colony; elsewhere they're shuffled into that location's item deck. Lose your group leader and you promote one from your following; lose your LAST survivor and you discard your hand from the game" + (c.mod("elimination") ? " — and with Player Elimination in play (Rulebook p.15), you are OUT of the game" : ", draw a new survivor and continue") + ".", tag: _core, src: "Rulebook p.14" },
-      { t: "“Remove from the game” is NOT killing — no morale is lost unless the card says so.", tag: _core, src: "Rulebook p.14" }
+      { t: "New survivors join at the colony; they can act on your turn but give no extra die until the next Roll Action Dice step. If the colony's survivor spaces are full, crossroads cards that would add survivors (including helpless ones) can't be triggered and item cards that would add survivors can't be played.", tag: _core, src: _rb("p.14") },
+      { t: c => "Deaths: overrun, 3+ wounds, bitten, or card effects. Equipped cards return to their owner's hand if the survivor dies at the colony" + (c.wc ? " (your own colony — if a survivor dies at the ENEMY colony, its equipped cards go to the enemy colony leader, who immediately equips them to friendly survivors at that colony; if there are none, the cards are removed from the game — WC rulebook p.11)" : "") + "; elsewhere they're shuffled into that location's item deck. Lose your group leader and you promote one from your following; lose your LAST survivor (killed or otherwise lost) and you remove every card in your hand from the game" + (c.mod("elimination") ? ` — and with Player Elimination in play (${_rb("p.15")(c)}), you are OUT of the game` : ", then draw a new survivor, add it to the game and make it your group leader") + ".", tag: _core, src: _rb("p.14") },
+      { t: "“Remove from the game” is NOT killing — no morale is lost unless the card says so.", tag: _core, src: _rb("p.14") }
     ]},
     { h: "Exile", items: [
-      { t: "An exiled player immediately draws an exiled secret objective (replacing their goal), and moves all their colony survivors out to non-colony locations (free move, roll exposure as normal).", tag: _core, src: "Rulebook p.14", when: c => !c.wc && !c.coopRules },
+      { t: "An exiled player immediately draws 1 exiled secret objective card, which adjusts their secret objective (follow the card), and moves all their colony survivors to non-colony locations of their choice (normal movement rules, including exposure, but it doesn't use their 1 move per turn).", tag: _core, src: _rb("p.14"), when: c => !c.wc && !c.coopRules },
       { t: `New rules for the exiled player:
         <ul class="sub">
           <li>Cannot add cards to a crisis.</li>
@@ -377,17 +391,17 @@ DW.howToPlay = {
           <li>Cannot vote.</li>
           <li>The colony loses no morale when their survivors die.</li>
           <li>Cards they play are removed from the game instead of going to the waste pile.</li>
-        </ul>`, tag: _core, src: "Rulebook p.14", when: c => !c.wc && !c.coopRules },
-      { t: "If there are ever 2 exiled players and neither had a betrayal objective, <b>morale immediately drops to 0</b>.", tag: _core, src: "Rulebook p.14", when: c => !c.wc && !c.coopRules }
+        </ul>`, tag: _core, src: _rb("p.14"), when: c => !c.wc && !c.coopRules },
+      { t: "If there are ever 2 exiled players and neither had a betrayal objective, <b>morale immediately drops to 0</b>.", tag: _core, src: _rb("p.14"), when: c => !c.wc && !c.coopRules }
     ]},
     { h: "Winning & losing", items: [
-      { t: "The game ends immediately when morale hits 0 or the round tracker hits 0 (do NOT check the main objective), or when the main objective is completed.", tag: _core, src: "Rulebook p.14", when: c => !c.wc },
-      { t: "You win only if YOUR secret objective is complete when the game ends (it usually includes the main objective). Multiple winners are possible; so is everyone losing.", tag: _core, src: "Rulebook p.14", when: c => !c.wc && !c.coopRules },
-      { t: "Co-op rules: everyone wins together by completing the (hardcore) main objective.", tag: "variant", src: "Rulebook p.15", when: c => !c.wc && c.coopRules },
+      { t: "The game ends immediately when morale hits 0 or the round tracker hits 0 (do NOT check the main objective), or when the main objective is completed.", tag: _core, src: _rb("p.14"), when: c => !c.wc },
+      { t: "You win only if YOUR secret objective is complete when the game ends (it usually includes the main objective). Multiple winners are possible; so is everyone losing.", tag: _core, src: _rb("p.14"), when: c => !c.wc && !c.coopRules },
+      { t: c => "Co-op rules: everyone wins together by completing the " + (c.mod("chimpcode") || c.mod("banditblitz") ? "scenario's special objectives." : "(hardcore) main objective."), tag: "variant", src: _rb("p.15"), when: c => !c.wc && c.coopRules },
       { t: "Warring Colonies: both colonies check the main objective at the same time — if one or both have completed it, the game is over (the round tracker reaching 0 still ends the game, as in the standard rules). You still must complete your own secret objective, which usually includes your colony completing the main objective. If a colony's morale hits 0, its players have lost but keep playing until the next Check Main Objective step; a 0-morale colony's morale can never rise again. Both at 0 then → both lose.", tag: "wc", src: "WC rulebook p.7, p.13 · Rulebook p.13", when: c => c.wc }
     ]},
     { h: "Card text & timing", items: [
-      { t: "A card effect that contradicts the rulebook wins. If two effects seem simultaneous, the first player picks the order. An item card can't be played to interrupt an effect in progress — e.g. medicine can't save a survivor taking their 3rd wound.", tag: _core, src: "Rulebook p.15" },
+      { t: "A card effect that contradicts the rulebook wins. If two effects seem simultaneous, the first player picks the order. An item card can't be played to interrupt an effect in progress — e.g. medicine can't save a survivor taking their 3rd wound.", tag: _core, src: _rb("p.15") },
       { t: "“Roll a die” = roll a spare action die. Any effect that searches a whole item deck ends with shuffling that deck.", tag: "longnight", src: "Long Night rules p.15", when: c => c.has("longnight") }
     ]}
   ],
@@ -408,16 +422,18 @@ DW.howToPlay = {
       { t: "When an improvement's tokens ≥ its printed number, its ongoing effect switches ON — place the card (or its token) in the center of the colony blueprint.", src: "Long Night rules p.17" }
     ]},
     { h: "Bandits module", tag: "bandits", when: c => c.mod("bandits") && !c.wc, items: [
+      { t: "<b>Bandit Blitz</b>: at the start only Placing, Zombies and Scavenge apply. Fighting bandits and the Bandits' Hideout switch on once B1 is completed (story section). Leader of the bandits switches on at B2's special exile phase, if a non-betrayer is exiled.", src: "Long Night rules p.22-23", when: c => c.mod("banditblitz") },
       { t: "<b>Placing</b>: when a crisis is revealed, place bandits at the locations shown on its bandit strip (no space → that bandit isn't placed). Bandits occupy survivor spaces.", src: "Long Night rules p.17" },
-      { t: "<b>Fighting</b>: attack a bandit like a survivor with attack value 4 — succeed and the bandit is removed. (No exposure roll; it's a survivor-style attack.)", src: "Long Night rules p.17" },
+      { t: "<b>Fighting</b>: attack a bandit like a survivor with attack value 4 — succeed and the bandit is removed. (No exposure roll; it's a survivor-style attack.)", src: "Long Night rules p.17, p.8" },
       { t: "<b>Zombies</b>: each bandit counts as a survivor for Add Zombies. If a location is overrun and holds no survivors, remove all bandits there.", src: "Long Night rules p.17" },
       { t: "<b>Scavenge</b>: after Add Zombies, each bandit draws 1 card from its location's search deck onto the Bandits' Hideout, face up.", src: "Long Night rules p.17" },
       { t: "<b>Hideout</b>: interact with the Bandits' Hideout per its location card (it has no search deck of its own).", src: "Long Night rules p.17" },
       { t: "<b>Leader of the bandits</b>: an exiled player who was NOT the betrayer becomes the bandits' leader and chooses where crisis-placed bandits go.", src: "Long Night rules p.17" }
     ]},
     { h: "Raxxon module", tag: "raxxon", when: c => c.mod("raxxon") && !c.wc, items: [
+      { t: "<b>The Chimp and the Code</b>: Raxxon starts fully barricaded and survivors can't go there. Once R1 is completed, the barricades come off and Searching at Raxxon and Pills switch on. Once R2 is completed, the containment code (and code failure) rules apply from the next round on. Immediately draw 2 experiment cards (3 with 4+ non-exiled players) and place their special zombies.", src: "Long Night rules p.20-21", when: c => c.mod("chimpcode") },
       { t: "<b>Searching at Raxxon</b>: after any search there, roll for exposure on the searching survivor.", src: "Long Night rules p.18" },
-      { t: "<b>Pills</b>: choose a survivor to take the pill, roll a die and follow the card; if instructed, search the side effect deck and equip the side effect — it can never be unequipped.", src: "Long Night rules p.18" },
+      { t: "<b>Pills</b>: choose a survivor <b>you control</b> to take the pill, roll a die and follow the card; if instructed, search the side effect deck and equip the side effect to that survivor — it can never be unequipped.", src: "Long Night rules p.18" },
       { t: `<b>Containment code</b>: during your turn, while you control a survivor at Raxxon, you may place unused action dice on the location. At the start of the colony phase, if 2 dice there match the code on the top experiment card's Audio Log, all players vote — the most popular option takes effect:
         <ul class="sub">
           <li><b>Thumbs up</b> — discard the top experiment card without triggering its placement.</li>
@@ -456,22 +472,22 @@ DW.howToPlay = {
       { t: "Moving to the enemy colony: place your survivor on any empty ZOMBIE ENTRANCE space there. Entrance-to-entrance moves are allowed (roll exposure as normal).", src: "WC rulebook p.8" },
       { t: "Moving to a full location: return one of your own survivors home free, or spend 1 bullet (2 if the target has a weapon equipped) to bounce an ENEMY survivor back to their colony — never the other active player's survivor. No exposure rolls for the bounced survivor.", src: "WC rulebook p.8" },
       { t: "Enemy survivors at your entrances DON'T count for Pay Food but DO count for Add Zombies. If a zombie would be placed at a full entrance holding a survivor, that lowest-influence survivor takes 1 wound and is returned to its colony instead (no exposure roll).", src: "WC rulebook p.10, p.13" },
-      { t: "Crossroads and secret objective text refers only to YOUR colony's players and survivors unless stated otherwise (“in play”, “any player”, “a survivor” = yours). Anita Wallace, Eric Parker, Nadia Rivers and Derek Yoshida's abilities work only on/for friendly players.", src: "WC rulebook p.13" },
+      { t: "Crossroads and secret objective text refers only to YOUR colony's players and survivors unless stated otherwise (“in play”, “any player”, “a survivor” = yours). Anita Wallace, Eric Parker, Nadia Rivers and Derek Yoshida's abilities can only be used on or by friendly players or survivors.", src: "WC rulebook p.13" },
       { t: "Bite spreads and zombie overruns ignore colony allegiance — they work exactly as in the standard game.", src: "WC rulebook p.13" }
     ]},
     { h: "Lone Wolf", tag: "lonewolf", when: c => c.wc && c.loneWolf, items: [
       { t: "The Lone Wolf takes their whole turn FIRST each round, before the simultaneous turns, with no time limit.", src: "WC rulebook p.14" },
       { t: "The Lone Wolf Den is a mini-colony: only Lone Wolf survivors may enter, zombies never spawn there, Pay Food is normal, and Check Waste costs 1 morale per <b>5</b> waste cards (not 10). Lone Wolf morale starts at 4, caps at 5, and 0 morale removes the Lone Wolf from the game.", src: "WC rulebook p.14-15" },
-      { t: "Lone Wolf survivors can move to entrances at BOTH colonies. Bounced from a full location, they return to the Den (owner's choice of location if the Den is full). The Lone Wolf CAN move a survivor to a full location, but must spend an action die to return a survivor there to its colony (returning a Lone Wolf survivor costs no die). The Lone Wolf can't collect bullets, ignores helpless survivors, and may feed cards to the joint crisis while ignoring its morale effects.", src: "WC rulebook p.14" },
+      { t: "Lone Wolf survivors can move to entrances at BOTH colonies. Bounced from a full location, they return to the Den (owner's choice of location if the Den is full). The Lone Wolf CAN move a survivor to a full location, but must spend an action die to return a survivor there to its colony (returning a Lone Wolf survivor costs no die). The Lone Wolf can't collect bullets. New Lone Wolf survivors are placed at the Den unless stated otherwise (a location of the Lone Wolf's choice if the Den is full), and helpless survivors are ignored. The Lone Wolf may feed cards to the joint crisis but is unaffected by any morale loss or gain from the crisis.", src: "WC rulebook p.14" },
       { t: "Combat at a Lone Wolf location: before it starts, run away — all Lone Wolf survivors return one by one to the Den (or a location of choice if the Den is full), rolling exposure as normal — or pick a colony to fight for; those survivors count for that side and can be assigned wounds (retreating survivors also return to the Den).", src: "WC rulebook p.15" },
       { t: "<b>Missions</b>: start with 3 mission cards; completing one raises morale per the card and immediately draws a replacement. Once per round at turn start, the Lone Wolf may discard a mission to draw a new one. When the mission pile runs out, no more can be drawn. The Lone Wolf wins if their secret objective is complete at game end.", src: "WC rulebook p.15" }
     ]},
     { h: "Standard-game variants in play", when: c => !c.wc && (c.coopRules || c.mod("betrayer") || c.mod("hardcore") || c.mod("elimination")), items: [
-      { t: "Co-op: hardcore objective side, no secret objectives, no exile votes, non-co-op-marked cards removed.", tag: "variant", src: "Rulebook p.15", when: c => c.coopRules },
-      { t: "2-player: co-op rules + 7 starting items each and 4-keep-3 survivor draft.", tag: "variant", src: "Rulebook p.15", when: c => c.twoPlayer },
-      { t: "Betrayer variant: only 1 non-betrayal objective per player is in the deal — trust no one.", tag: "variant", src: "Rulebook p.15", when: c => c.mod("betrayer") && !c.coopRules },
-      { t: "Hardcore variant: the hardcore objective side, with normal secret objectives.", tag: "variant", src: "Rulebook p.15", when: c => c.mod("hardcore") && !c.coopRules },
-      { t: "Player Elimination: your last survivor dying knocks you out of the game.", tag: "variant", src: "Rulebook p.15", when: c => c.mod("elimination") }
+      { t: c => "Co-op: " + (c.mod("chimpcode") || c.mod("banditblitz") ? "the scenario's Special Objective cards stand in for the main objective" : "hardcore objective side") + ", no secret objectives, no exile votes, non-co-op-marked cards removed.", tag: "variant", src: _rb("p.15"), when: c => c.coopRules },
+      { t: "2-player: co-op rules + 7 starting items each and 4-keep-3 survivor draft.", tag: "variant", src: _rb("p.15"), when: c => c.twoPlayer },
+      { t: "Betrayer variant: only 1 non-betrayal objective per player is in the deal — trust no one.", tag: "variant", src: _rb("p.15"), when: c => c.mod("betrayer") && !c.coopRules },
+      { t: "Hardcore variant: the hardcore objective side, with normal secret objectives.", tag: "variant", src: _rb("p.15"), when: c => c.mod("hardcore") && !c.coopRules },
+      { t: "Player Elimination: your last survivor dying knocks you out of the game.", tag: "variant", src: _rb("p.15"), when: c => c.mod("elimination") }
     ]}
   ]
 };
@@ -479,10 +495,10 @@ DW.howToPlay = {
 /* ---- Locations reference --------------------------------------------------- */
 DW.boards = [
   { name: "The Colony", when: c => true, items: [
-    "Home base. Holds the morale track, round track, food supply, main objective, waste pile, crisis deck & contributions, and the Colony Occupants survivor spaces.",
-    "6 numbered entrances — zombies fill them in numbered order; barricades and (Long Night) explosive traps go on entrance spaces.",
+    c => c.wc ? "Each colony's home base. Holds its own morale track, round track, food supply, waste pile, bullet supply (the crisis card space) and Colony Occupants survivor spaces. The shared main objective and the joint crisis (with its face-up contributions) sit near the play area, not on either colony board (WC rulebook p.3-4, p.10)." : "Home base. Holds the morale track, round track, food supply, main objective, waste pile, crisis deck & contributions, and the Colony Occupants survivor spaces.",
+    c => "6 numbered entrances — zombies fill them in numbered order; barricades" + (c.has("longnight") ? " and explosive traps" : "") + " go on entrance spaces.",
     "You cannot SEARCH at the colony; Clean Waste requires a survivor here.",
-    "Zombies arrive here every round: 1 per 2 survivors present (helpless count)."
+    "Zombies arrive here every round: 1 per 2 survivors present, rounded up (helpless survivors count)."
   ]},
   { name: "The 6 town locations", when: c => true, items: [
     c => "Police Station, Grocery Store, School, Library, Hospital, Gas Station — each has survivor spaces, ONE zombie entrance, a 20-card item deck" + (c.wc || c.mod("randomitems") ? " (25 with the 5 Random Item cards mixed in)" : "") + " and 4 noise spaces.",
@@ -495,15 +511,15 @@ DW.boards = [
     "No gameplay effect other than possible crossroads cards."
   ]},
   { name: "Raxxon Pharmaceutical", when: c => c.mod("raxxon") && !c.wc, items: [
-    "A full location with its own search deck — but every search here ends with an exposure roll.",
+    c => "A full location with its own search deck — but every search here ends with an exposure roll." + (c.mod("chimpcode") ? " (The Chimp and the Code: Raxxon is barricaded and can't be entered or searched until R1 is completed — Long Night rules p.20.)" : ""),
     "Hosts the Raxxon experiments deck (Audio Logs face up — read the top card any time); the browsable side effect deck sits beside it.",
-    "Park 2 unused action dice here matching the containment code to give the colony a vote on containing this round's experiment.",
-    "Pill items make a chosen survivor roll a die — side effect cards equip permanently."
+    c => "Park 2 unused action dice here matching the containment code to give the colony a vote on containing this round's experiment." + (c.mod("chimpcode") ? " (The Chimp and the Code: only from the round after R2 is completed — Long Night rules p.21.)" : ""),
+    c => "Pill items make a chosen survivor roll a die — side effect cards equip permanently." + (c.mod("chimpcode") ? " (The Chimp and the Code: only once R1 is completed — Long Night rules p.21.)" : "")
   ]},
   { name: "Bandits' Hideout", when: c => c.mod("bandits") && !c.wc, items: [
     "A special location with NO search deck — everything the bandits scavenge piles up here face up.",
-    "Interact with it by following the instructions printed on the location card.",
-    "An exiled non-betrayer becomes leader of the bandits and directs where crisis-placed bandits go."
+    c => "Interact with it by following the instructions printed on the location card." + (c.mod("banditblitz") ? " (Bandit Blitz: only once B1 is completed — Long Night rules p.22.)" : ""),
+    c => "An exiled non-betrayer becomes leader of the bandits and directs where crisis-placed bandits go." + (c.mod("banditblitz") ? " (Bandit Blitz: only from B2's special exile phase — Long Night rules p.23.)" : "")
   ]},
   { name: "Two colonies & the Combat Tracker", when: c => c.wc, items: [
     "Each team has its own full colony board; the crisis card space is now that colony's bullet supply.",
@@ -521,41 +537,43 @@ DW.boards = [
 /* ---- Common rulings (curated from the rulebooks) --------------------------- */
 DW.faq = [
   { q: "Do helpless survivors eat food and attract zombies?",
-    a: "Yes to both. Helpless survivor tokens count as survivors when paying food (1 food per 2 survivors at the colony, rounded up) and when adding zombies to the colony. <i>(Rulebook p.12)</i>" },
+    a: c => `Yes to both. Helpless survivor tokens count as survivors when paying food (1 food per 2 survivors at the colony, rounded up) and when adding zombies to the colony. <i>(${_rb("p.12")(c)})</i>` },
   { q: "Do survivors out at locations need food?",
-    a: "No — only survivors in the colony count for Pay Food. Survivors elsewhere are considered to be foraging for themselves. <i>(Rulebook p.12)</i>" },
+    a: c => `No — only survivors in the colony count for Pay Food. Survivors elsewhere are considered to be foraging for themselves. <i>(${_rb("p.12")(c)})</i>` },
   { q: "What exactly kills a survivor?",
-    a: "Reaching 3+ wound tokens (frostbite — and in The Long Night, despair — count), a bitten exposure result, an entrance overrun choosing them, or a card effect. Every survivor death (helpless included) costs 1 morale. <i>(Rulebook p.11, 14 · Long Night rules p.14)</i>" },
+    a: c => "Reaching 3+ wound tokens (frostbite — and in The Long Night, despair — count), a bitten exposure result, an entrance overrun choosing them, or a card effect. Every survivor death (helpless included) costs 1 morale" + (c.coopRules || c.wc ? "" : " — except survivors controlled by an exiled player") + ". <i>(" + (c.has("longnight") ? "Long Night rules p.11, 13-14" : "Rulebook p.11, 13-14 · Long Night rules p.14") + ")</i>" },
   { q: "Does attacking another survivor trigger an exposure roll?",
-    a: "No. The exposure die is rolled after moving or after killing a zombie — never when attacking a survivor. <i>(Rulebook p.8, 11)</i>" },
+    a: c => `No. The exposure die is rolled after moving or after killing a zombie — never when attacking a survivor. <i>(${_rb("p.8, 11")(c)})</i>`, when: c => !c.wc },
   { q: "Can I heal a survivor about to take their third wound?",
-    a: "No. An item card cannot be played to interrupt an effect in progress — medicine can only be played after a wound lands, so the third wound kills before it could be removed. <i>(Rulebook p.15)</i>" },
+    a: c => `No. An item card cannot be played to interrupt an effect in progress — medicine can only be played after a wound lands, so the third wound kills before it could be removed. <i>(${_rb("p.15")(c)})</i>` },
   { q: "How do starvation tokens work?",
-    a: "If you can't pay the full food cost, you remove NO food, add 1 starvation token to the supply, and then lose 1 morale for EVERY starvation token there — they accumulate. <i>(Rulebook p.12)</i>" },
+    a: c => `If you can't pay the full food cost, you remove NO food, add 1 starvation token to the supply, and then lose 1 morale for EVERY starvation token there — they accumulate. <i>(${_rb("p.12")(c)})</i>` },
   { q: "The crisis needs how many points?",
-    a: "The point total (matching cards +1, non-matching −1) must equal or exceed the number of NON-EXILED players. Beat it by 2 or more and the colony gains 1 morale. <i>(Rulebook p.12)</i>" },
+    a: c => `The point total (matching cards +1, non-matching −1) must equal or exceed the number of NON-EXILED players. Beat it by 2 or more and the colony gains 1 morale. <i>(${_rb("p.12")(c)})</i>`, when: c => !c.wc },
   { q: "A food card that adds 3 food — how much is it worth in the crisis?",
-    a: "It counts as 1 card with 1 food symbol. Multi-token food cards still only count once when contributed to a crisis. <i>(Rulebook p.11)</i>" },
+    a: c => `It counts as 1 card with 1 food symbol. Multi-token food cards still only count once when contributed to a crisis. <i>(${_rb("p.11")(c)})</i>` },
   { q: "What can't an exiled player do?",
-    a: "Add cards to a crisis, add helpless survivors, spend food tokens (they may play food cards as +1 die each instead), or vote. Their played cards leave the game instead of hitting the waste pile, their dead survivors cost no morale, and survivors they add arrive at non-colony locations. <i>(Rulebook p.14)</i>", when: c => !c.wc },
+    a: c => `Add cards to a crisis, add helpless survivors, spend food tokens (they may play food cards as +1 die each instead), or vote. Their played cards leave the game instead of hitting the waste pile, their dead survivors cost no morale, and survivors they add arrive at non-colony locations. <i>(${_rb("p.14")(c)})</i>`, when: c => !c.wc && !c.coopRules },
   { q: "What if two players get exiled?",
-    a: "If ever 2 exiled players are both non-betrayers, morale immediately drops to 0 and the game ends. <i>(Rulebook p.14)</i>", when: c => !c.wc },
+    a: c => `If ever 2 exiled players are both non-betrayers, morale immediately drops to 0 and the game ends. <i>(${_rb("p.14")(c)})</i>`, when: c => !c.wc && !c.coopRules },
   { q: "Morale or the round track hit 0 — do we still check the objective?",
-    a: c => "No. The game ends immediately and you do NOT check whether the main objective was completed. " + (c.coopRules ? "Under the co-op rules your only objective is the main objective, so the colony has lost. <i>(Rulebook p.14, 15)</i>" : "Each player only wins if their secret objective is done. <i>(Rulebook p.14)</i>"), when: c => !c.wc },
+    a: c => "No. The game ends immediately and you do NOT check whether the main objective was completed. " + (c.coopRules ? `Under the co-op rules your only objective is the main objective, so the colony has lost. <i>(${_rb("p.14, 15")(c)})</i>` : `Each player only wins if their secret objective is done. <i>(${_rb("p.14")(c)})</i>`), when: c => !c.wc },
   { q: "Can I unequip an item?",
-    a: "Only by handing it off to a survivor at the same location or by adding it to the crisis. If the carrier dies at the colony the cards return to your hand; anywhere else they're shuffled into that location's item deck. <i>(Rulebook p.10, 14)</i>" },
+    a: c => "Only by handing it off to a survivor at the same location or by adding it to the crisis. If the carrier dies at the colony the cards return to your hand; anywhere else they're shuffled into that location's item deck." +
+       (c.wc ? " In Warring Colonies, if the carrier dies at the ENEMY colony the cards go to the enemy colony leader, who immediately equips them to friendly survivors there, or they are removed from the game if there are none." : "") +
+       ` <i>(${_rb("p.10, 14")(c)}${c.wc ? " · WC rulebook p.11" : ""})</i>` },
   { q: "Can a requested card go into the crisis?",
-    a: "No. A card given via Request must be revealed and immediately played — it can never be added to the crisis. <i>(Rulebook p.11)</i>" },
+    a: c => `No. A card given via Request must be revealed and immediately played — it can never be added to the crisis. <i>(${_rb("p.11")(c)})</i>` },
   { q: "How does noise turn into zombies?",
     a: c => c.has("longnight")
       ? "The Long Night way: during Add Zombies, flip each noise token like a coin — every “!!!” face adds a zombie at that location. (The base game instead rolled a die per token, spawning on 3 or lower.) <i>(Long Night rules p.12)</i>"
       : "During Add Zombies, remove each noise token one at a time and roll an action die for it — on 3 or lower, add a zombie to that location. <i>(Rulebook p.12)</i>" },
   { q: "When do new survivors give me an extra die?",
-    a: "Not until the next Roll Action Dice step. The survivor can act this turn (using your existing dice), but the extra die arrives next round. <i>(Rulebook p.14)</i>" },
+    a: c => `Not until the next Roll Action Dice step. The survivor can act this turn (using your existing dice), but the extra die arrives next round. <i>(${_rb("p.14")(c)})</i>` },
   { q: "Frostbite vs despair vs wounds?",
-    a: "Frostbite is a wound that also deals 1 extra wound to that survivor at the start of each of your turns. Despair (Long Night) is a wound that healing can't touch — only effects that explicitly remove despair work. All of them count toward the 3-wound death threshold.", when: c => c.has("longnight") },
+    a: "Frostbite is a wound that also deals 1 extra wound to that survivor at the start of each of your turns. Despair (Long Night) is a wound that healing can't touch — only effects that explicitly remove despair work. All of them count toward the 3-wound death threshold. <i>(Long Night rules p.11, p.14, p.16)</i>", when: c => c.has("longnight") },
   { q: "How tough is a bandit?",
-    a: "Attack it exactly like a survivor whose attack value is 4: spend a die equal to or higher than YOUR survivor's attack value, then roll that spent die — a result of 4 or less removes the bandit. No exposure roll (it's a survivor-style attack). Bandits count as survivors for zombie spawns, and each one steals a search-deck card to the Hideout every round. <i>(Long Night rules p.17, p.8)</i>", when: c => c.mod("bandits") && !c.wc },
+    a: c => "Attack it exactly like a survivor whose attack value is 4: spend a die equal to or higher than YOUR survivor's attack value, then roll that spent die — a result of 4 or less removes the bandit. No exposure roll (it's a survivor-style attack). Bandits count as survivors for zombie spawns, and each one steals a search-deck card to the Hideout every round." + (c.mod("banditblitz") ? " <b>Bandit Blitz:</b> attacking bandits only switches on once B1 is completed (Long Night rules p.22)." : "") + " <i>(Long Night rules p.17, p.8)</i>", when: c => c.mod("bandits") && !c.wc },
   { q: "Can an item or ability kill a Raxxon special zombie?",
     a: "Special zombies can only be killed with a regular attack. Items and character abilities that don't involve an attack, and explosive traps, don't affect them, and they must be targeted before anything else at their location. <i>(Long Night rules p.18)</i>", when: c => c.mod("raxxon") && !c.wc },
   { q: "Who takes wounds when a combat is lost?",
@@ -570,7 +588,8 @@ DW.faq = [
 
 /* ---- Reference numbers ------------------------------------------------------ */
 DW.playerRef = {
-  src: "Rulebook p.5-8, 12, 15 · Long Night rules p.6-8 · WC rulebook p.4, 9-10, 13-15",
+  src: c => c.wc ? "Rulebook p.5-8, 12, 15 · Long Night rules p.6-8 · WC rulebook p.4, 9-10, 13-15"
+    : [c.has("base") ? "Rulebook p.5-8, 12, 15" : "", c.has("longnight") ? "Long Night rules p.5-8, 12, 15" : ""].filter(Boolean).join(" · "),
   stdRows: p => ({
     dice: p === 2 ? "4 each * (1 + 1 per survivor)" : "3 each (1 + 1 per survivor)",
     items: p === 2 ? "7 each *" : "5 each",
@@ -578,7 +597,7 @@ DW.playerRef = {
     pool: p === 2 ? "None *" : `${2 * p} non-betrayal + 1 betrayal`,
     crisis: `${p} points (non-exiled players)`
   }),
-  twoPlayerNote: "* 2-player games use the rulebook's 2 Player Variant, which follows the co-op rules: 7 starting items, keep 3 survivors (so 4 starting dice), and no secret objectives (Rulebook p.15).",
+  twoPlayerNote: c => `* 2-player games use the rulebook's 2 Player Variant, which follows the co-op rules: 7 starting items, keep 3 survivors (so 4 starting dice), and no secret objectives (${c.has("longnight") ? "Long Night rules" : "Rulebook"} p.15).`,
   notes: [
     "Action dice: every player rolls 1 + 1 per survivor controlled, re-rolled fresh each round.",
     "Crisis target = the number of NON-EXILED players; beat it by 2+ for a bonus morale.",
@@ -613,11 +632,11 @@ DW.teach = {
 <p>Each round: reveal the <b>crisis</b> — this round's shared tax, paid in item cards. Everyone rolls their <b>action dice</b> — one per survivor you control, plus one. Then turns: on yours, spend dice on actions with your survivors wherever they stand${c.wc ? " — and in Warring Colonies, one player from each colony takes a turn at the same time" : ""}. After everyone's gone, the <b>colony phase</b> collects the bills: feed the colony, count the waste, resolve the crisis, and add zombies to every location with survivors in it${c.wc ? " — plus colony combat, fresh bullets and a vote for each colony's leader" : ""}.</p>` },
 
     { h: "Your dice — and what they buy", body: (c) => `
-<p>Dice are your action currency, and the roll matters: <b>attack</b> and <b>search</b> need a die equal to or above that survivor's printed value. Attack kills a zombie where a survivor stands; <b>search</b> digs item cards out of a location's deck — the location decides what you find: medicine at the hospital, food at the grocery store, guns at the police station. Any die at all barricades an entrance${c.wc ? " or" : ","} cleans three cards off the waste pile (with a survivor at the colony)${c.wc ? "" : ", or attracts two zombies to a survivor's location"}.</p>
+<p>Dice are your action currency, and the roll matters: <b>attack</b> and <b>search</b> need a die equal to or above that survivor's printed value. Attack kills a zombie where a survivor stands${c.wc ? "" : " — or targets another player's survivor there: roll the spent die, and if it's equal to or under that survivor's attack value, they take a wound and you take a random card from that player's hand (no exposure roll)"}; <b>search</b> digs item cards out of a location's deck — the location decides what you find: medicine at the hospital, food at the grocery store, guns at the police station. Draw one card; for each extra card you want to look at, make <b>noise</b> — put a noise token on an empty noise space at that location and draw again${c.wc ? " (in Warring Colonies, only one noise per search)" : " (a location holds at most four noise tokens a round)"} — then keep one card and put the rest on the bottom of that deck. Noise can bring zombies to that location in the colony phase. Any die at all barricades an entrance${c.wc ? " or" : ","} cleans three cards off the waste pile (with a survivor at the colony)${c.wc ? "" : ", or attracts two zombies to a survivor's location"}.</p>
 <p>Free actions that cost no dice: ${c.wc ? "" : "move each survivor once, "}play cards, add cards to the crisis, hand items off, <b>spend food tokens to pump a die up</b>, request help${c.wc || c.coopRules ? "" : " — and <b>vote to exile</b> someone the table stops trusting"}.${c.wc ? " In Warring Colonies, movement gets its own step at the start of your turn." : ""}</p>` },
 
     { h: "Exposure — the coldest rule in the game", body: (c) => `
-<p>Every time a survivor <b>moves between locations</b> or <b>kills a zombie</b>, roll the <b>exposure die</b>. A blank is safe. A wound face wounds. <b>Frostbite</b> is a wound that adds another wound at the start of each of your turns while it stays on. And the <b>bitten</b> face kills that survivor <i>immediately</i> — then the bite spreads to the lowest-influence survivor at that location, whose owner must kill them or gamble the die again. Three wounds of any kind kill a survivor, and every death costs the colony a morale. Every move is this bet. Travel with fuel cards when you can; they skip the roll.</p>` },
+<p>Every time a survivor <b>moves between locations</b> or <b>kills a zombie</b>, roll the <b>exposure die</b>. A blank is safe. A wound face wounds. <b>Frostbite</b> is a wound that adds another wound at the start of each of your turns while it stays on. And the <b>bitten</b> face kills that survivor <i>immediately</i>${c.wc ? " (in Warring Colonies, a bite rolled during the simultaneous actions step waits: lay that survivor on its side, where it can't act or use abilities, and resolve all bites and bite spreads at the end of that step)" : ""} — then the bite spreads to the lowest-influence survivor at that location, whose owner must kill them or gamble the die again. Three wounds of any kind kill a survivor, and every death costs the colony a morale. Every move is this bet. Travel with fuel cards when you can; they skip the roll.</p>` },
 
     { h: "Crossroads — don't read ahead", body: (c) => `
 <p>At the start of your turn, the ${c.wc ? "teammate" : "player"} on your right draws a <b>Crossroads card</b> and silently watches you. If you trip its trigger — usually something you do, sometimes just a situation you're in — ${c.wc ? "they read it to you at the end of your turn" : "they interrupt and read it to you"}: a story with a choice. Don't ask, don't peek. It's the best part of the game.${c.mod("mature") ? " (We've removed the mature-themed Crossroads this game.)" : ""}</p>` },
@@ -627,7 +646,7 @@ DW.teach = {
 
     { h: "The Long Night", when: (c) => c.has("longnight"), body: (c) => {
       const bits = [];
-      if (c.mod("raxxon")) bits.push("<b>Raxxon</b> is a new location: every search there ends with an exposure roll, and its pill items can leave a survivor with a permanent side effect. At the start of each colony phase, unless two dice parked at Raxxon match the containment code on the top experiment card — and we vote to contain it — special zombies break out. They can only be killed by a regular attack, and you must attack them before anything else where they stand" + (c.mod("chimpcode") ? " (the scenario switches these Raxxon rules on as the story unfolds)" : ""));
+      if (c.mod("raxxon")) bits.push("<b>Raxxon</b> is a new location: every search there ends with an exposure roll, and its pill items can leave a survivor with a permanent side effect. At the start of each colony phase, unless two action dice — placed there by players who have a survivor at Raxxon — match the containment code on the top experiment card and we vote thumbs up to contain it, special zombies break out (a thumbs-down vote lets them out, but the first player picks one location that gets 3 fewer zombies this round). They can only be killed by a regular attack, and you must attack them before anything else where they stand" + (c.mod("chimpcode") ? " (the scenario switches these Raxxon rules on as the story unfolds)" : ""));
       if (c.mod("bandits")) bits.push("<b>bandits</b> arrive with each crisis card and take up survivor spaces; they draw zombies like survivors, and every round each one scavenges a card from its location's search deck to the Bandits' Hideout. Attack them like a survivor with attack value 4" + (c.mod("banditblitz") ? " (in Bandit Blitz, attacking bandits unlocks when the story says so)" : ""));
       if (c.mod("improvements")) bits.push("four colony <b>improvements</b> sit face up by the colony; items and other effects add advancement tokens, and once one has enough, its ongoing effect switches on");
       const always = "<b>despair</b> tokens are wounds that normal healing can't remove; <b>unruly</b> helpless survivors eat and draw zombies like two; <b>explosive traps</b> work like barricades but also wipe out the zombies already at that entrance when they're destroyed; and noise tokens are flipped like coins instead of rolled" + (c.wc ? "" : ". At the end of each round, anyone can call a vote to keep the first player token where it is");
@@ -639,10 +658,11 @@ DW.teach = {
 <p>The new heart of the game is <b>colony combat</b>: in the colony phase, every location with survivors from both colonies has a fight. Each colony leader plays one of their five tactics cards, adds one strength per survivor there and one more per survivor with a weapon equipped, secretly bids bullets, and rolls a combat die. The lower total loses, and the loser spreads wounds equal to the difference among their survivors there. Each colony gains two bullets a round and elects its leader at the end of every round. And don't leave home unguarded: every enemy survivor sitting in your colony with no defender costs you a morale.</p>${c.loneWolf ? `
 <p>With our odd player count, one of us is the <b>Lone Wolf</b>, who belongs to neither colony: they take their whole turn first each round with no timer, keep their survivors in their own Den, complete mission cards to raise their morale, and win only by completing their own secret objective.</p>` : ""}` },
 
-    { h: "Table variants in play", when: (c) => c.mod("randomitems") || c.mod("quickplay") || c.mod("hardcore") || c.mod("elimination") || c.mod("betrayer") || c.mod("chimpcode") || c.mod("banditblitz"), body: (c) => {
+    { h: "Table variants in play", when: (c) => c.mod("randomitems") || c.mod("quickplay") || c.mod("hardcore") || c.mod("elimination") || c.mod("betrayer") || c.mod("chimpcode") || c.mod("banditblitz") || (c.has("wc") && !c.wc), body: (c) => {
       const bits = [];
+      if (c.has("wc") && !c.wc) bits.push("the <b>Warring Colonies</b> crossroads, crisis and survivor cards are mixed into our decks — minus any card marked with the crosshairs symbol, which is only for the Warring Colonies variant");
       if (c.mod("betrayer") && !c.coopRules) bits.push("the <b>Betrayer variant</b> put only one non-betrayal objective per player into the deal, so a traitor among us is much more likely");
-      if (c.mod("hardcore")) bits.push("<b>Hardcore</b>: we're playing the hardcore side of the main objective, for a greater challenge");
+      if (c.mod("hardcore") && !c.mod("chimpcode") && !c.mod("banditblitz")) bits.push("<b>Hardcore</b>: we're playing the hardcore side of the main objective, for a greater challenge");
       if (c.mod("elimination")) bits.push("<b>Player Elimination</b>: lose your last survivor and you're out for good");
       if (c.mod("randomitems")) bits.push("the <b>Random Items module</b> shuffled five random item cards into every location's item deck, so searches can turn up surprises");
       if (c.mod("quickplay")) bits.push("<b>Quick Play</b>: each simultaneous actions step gets just two minutes on the sand timer, total");

@@ -41,7 +41,7 @@
     const r = RT.races.find(x => x.id === state.race);
     if (r && !raceAvailable(r)) state.race = "primebloods";
     // The Insider only works with the base game + Character expansions
-    if (state.exps.has("insider") && (state.race !== "primebloods" || state.exps.has("xyrians"))) {
+    if (state.exps.has("insider") && (state.race !== "primebloods" || state.exps.has("xyrians") || state.exps.has("sangre") || state.exps.has("neoflesh"))) {
       state.exps.delete("insider");
     }
     const [lo, hi] = playerRange();
@@ -66,8 +66,8 @@
         } else {
           state.exps.add(e.id);
           // Insider is incompatible with Xyrians and the alternative races
-          if (e.id === "insider") { state.exps.delete("xyrians"); state.race = "primebloods"; }
-          if (e.id === "xyrians") state.exps.delete("insider");
+          if (e.id === "insider") { state.exps.delete("xyrians"); state.exps.delete("sangre"); state.exps.delete("neoflesh"); state.race = "primebloods"; }
+          if (e.id === "xyrians" || e.id === "sangre" || e.id === "neoflesh") state.exps.delete("insider");
         }
         update();
       });

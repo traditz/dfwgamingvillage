@@ -93,7 +93,13 @@ function renderConfigurator() {
 
   const op = $("#options"); op.innerHTML = "";
   const opts = availableOptions();
-  if (!opts.length) { op.appendChild(el("p", "muted", "Enable an expansion to unlock optional modules.")); }
+  if (!opts.length) {
+    const anyExp = ["pegasus", "exodus", "daybreak"].some(expEnabled);
+    const msg = !anyExp ? "Enable an expansion to unlock optional modules."
+      : "No optional modules at 3 players: Cylon Leaders are not used in a three-player game (Pegasus p.10; Daybreak p.5)" +
+        (expEnabled("pegasus") && !expEnabled("daybreak") ? ", and the Sympathetic Cylon variant replaces the Sympathizer, which is only used in 4- or 6-player games (Pegasus p.18; Base p.19)." : ".");
+    op.appendChild(el("p", "muted", msg));
+  }
   opts.forEach(o => {
     // A 7-player game forces a Cylon Leader — show it locked-on.
     const forced = o.id === "cylonLeaders" && sevenForced();
@@ -138,7 +144,7 @@ function renderGallery() {
     card.innerHTML = `
       <div class="card-mode">${name}</div>
       <div class="card-sum">${obj.summary}</div>
-      <div class="card-tags">${tags.length ? tags.map(t => `<span class="tag">${t}</span>`).join("") : `<span class="tag base">Core only</span>`}</div>`;
+      <div class="card-tags">${tags.length ? tags.map(t => `<span class="tag">${t}</span>`).join("") : `<span class="tag base">No optional modules</span>`}</div>`;
     card.onclick = () => { state.selected = configKey(c); renderAll(); $("#detail").scrollIntoView({behavior:"smooth", block:"start"}); };
     grid.appendChild(card);
   });
@@ -220,7 +226,7 @@ function renderDetail() {
         }).join("")}</ol>
       </section>`;
   });
-  html += `<div class="legend" id="sec-setup">Each step is tagged with the expansion it comes from and cites its rulebook source (official page · v4.4 reference page). Where a newer expansion supersedes an older rule, only the newest version is shown.</div>`;
+  html += `<div class="legend" id="sec-setup">Each step is tagged with the expansion it comes from and cites its source: the official rulebook page, then (where given) the matching page of the unofficial Esoteric Order of Gamers v4.4 rules summary. Where a newer expansion supersedes an older rule, only the newest version is shown.</div>`;
   html += `<div class="steps">${blocks}</div>`;
 
   // Loyalty deck panel — exact composition for THIS setup.
@@ -232,9 +238,10 @@ function renderDetail() {
   cards.push(`<span class="loy-card not">${L.not}× You Are Not a Cylon${notBreakdown}</span>`);
   if (L.mutineer)    cards.push(`<span class="loy-card mut">1× You Are a Mutineer</span>`);
   const sympVariant = config.options.has("sympatheticCylon");
+  const art = n => [8, 11, 18].includes(n) ? "an" : "a";
   if (L.sympathizer) cards.push(`<span class="loy-card sym">1× You Are a ${sympVariant ? "Sympathetic Cylon" : "Sympathizer"}</span>`);
   const sympNote = L.sympathizer
-    ? `<b>Timing:</b> the ${sympVariant ? "Sympathetic Cylon" : "Sympathizer"} card is <b>not</b> shuffled in before the starting deal — deal each player their first Loyalty card, <i>then</i> add it to the remaining deck and shuffle. It stays in the deck from then on — usually it arrives with the Sleeper-phase deal, but any earlier Loyalty draw can deliver it (FAQ p.6).`
+    ? `<b>Timing:</b> the ${sympVariant ? "Sympathetic Cylon" : "Sympathizer"} card is <b>not</b> shuffled in before the starting deal — deal each player their first Loyalty card, <i>then</i> add it to the remaining deck and shuffle. It stays in the deck from then on — usually it arrives with the Sleeper-phase deal, but any earlier Loyalty draw can deliver it (Base p.6, p.19 · FAQ p.6).`
     : "";
   const cylNote =
     L.gov === "daybreak"
@@ -249,7 +256,7 @@ function renderDetail() {
   html += `<div class="panel loyalty" id="sec-loyalty">
       <h3>Loyalty Deck — ${state.players} players${L.cl ? " + Cylon Leader" : ""}
           <span class="etag ${gm.cls}">${gm.name} chart</span></h3>
-      ${L.valid ? `<div class="loy-total">Deal a <b>${L.total}-card</b> Loyalty deck:</div>
+      ${L.valid ? `<div class="loy-total">${L.sympathizer ? `Build ${art(L.total - 1)} <b>${L.total - 1}-card</b> Loyalty deck and deal from it, then add the ${sympVariant ? "Sympathetic Cylon" : "Sympathizer"} and shuffle (${L.total} cards in all):` : `Deal from ${art(L.total)} <b>${L.total}-card</b> Loyalty deck:`}</div>
       <div class="loy-cards">${cards.join("")}</div>` : `<div class="loy-total">No standard composition for this player count.</div>`}
       ${L.extras.length ? `<p class="note2"><b>${L.not}× You Are Not a Cylon</b> = ${L.notBase} from the chart (${state.players} players${L.cl ? " + Cylon Leader" : ""}) + ${L.not - L.notBase} for ${L.extras.join(" & ")}. This is the Exodus +1 from the chart's asterisk (*) footnote.</p>` : ""}
       ${cylNote ? `<p class="note2 ${L.mutineer ? "req" : ""}">${cylNote}</p>` : ""}
@@ -312,7 +319,7 @@ function buildSearchPanel(c) {
   const books = ["base", "pegasus", "exodus", "daybreak"].filter(expEnabled).map(e => BSG.expMeta[e].name);
   return `<section class="rules-search" id="sec-search">
       <h3>Search the Rulebooks</h3>
-      <p class="rs-sub">Searches this page first, then the ${books.join(", ")} rulebook${books.length > 1 ? "s" : ""}, the official FFG <b>FAQ &amp; Errata</b>, and a community <b>Unofficial FAQ</b> — scoped to this setup. Each result cites its source; newer expansions supersede older rules, official sources rank above unofficial, and “Read the whole page” opens any result’s full text. (The v4.4 combined reference is intentionally excluded.)</p>
+      <p class="rs-sub">Searches this page first, then the ${books.join(", ")} rulebook${books.length > 1 ? "s" : ""}, the official FFG <b>FAQ &amp; Errata</b>, and a community <b>Unofficial FAQ</b> — scoped to this setup. Each result cites its source; newer expansions supersede older rules, official sources rank above unofficial, and “Read the whole page” opens any result’s full text. (The unofficial Esoteric Order of Gamers v4.4 rules summary cited beside some setup steps is intentionally excluded.)</p>
       <input type="search" id="rules-q" class="rs-input" placeholder="Ask a question or search a rule — e.g. “how do I win as a Cylon?”" autocomplete="off" spellcheck="false">
       <div id="rules-results" class="rs-results"></div>
     </section>`;
@@ -341,14 +348,14 @@ const _SYN = {
    older book's rulebook passages on a topic a newer book in play governs, and BSG.precedence breaks ties. */
 window.AID_SEARCH = {
   index: BSG.rulesIndex,
-  visible: (x, c) => c.has(x),
+  visible: (x, c) => String(x).split("+").every(e => c.has(e)),
   skin: "rs", input: "#rules-q", results: "#rules-results", headingLevel: 4, sticky: ".jump-nav", partial: "always",
   synonyms: _SYN, suppress: BSG.rulesSuppress, precedence: BSG.precedence,
   tiers: [{ label: "From the rulebooks", test: (pg) => !pg.s, cls: "rs-group" },
           { label: "Official FAQ & Errata", test: (pg) => pg.s === "f", cls: "rs-group" },
           { label: "Community Unofficial FAQ", test: (pg) => pg.s === "u", cls: "rs-group" }],
   label: (pg) => {
-    const m = BSG.expMeta[pg.x] || { name: pg.b, cls: "e-base" };
+    const m = BSG.expMeta[String(pg.x).split("+").pop()] || { name: pg.b, cls: "e-base" };
     return { tag: { text: m.name, cls: "etag " + m.cls },
              badge: pg.s === "u" ? { text: "Unofficial", cls: "rs-badge rs-unofficial" }
                   : pg.s === "f" ? { text: "FAQ · Errata", cls: "rs-badge rs-faq" } : null };
@@ -412,7 +419,7 @@ function buildLocations(c) {
     }</ul></section>`;
   });
   return `<div class="locations"><h3>Location Reference</h3>
-      <div class="legend">What each location does — only the boards in your setup. Where the Daybreak overlays change a location, the revised version is shown.</div>
+      <div class="legend">What each location does — only the boards in your setup. Where the Pegasus or Daybreak overlays (Cylon locations; Daybreak's Colonial One) change a location, the revised version is shown. Summaries are transcribed from an unofficial fan location sheet (‘BSG Locations (Updated)’); the exact wording printed on each board governs. Entries marked unofficial come only from that sheet, not FFG.</div>
       <div class="loc-grid">${blocks}</div></div>`;
 }
 
@@ -438,20 +445,25 @@ function buildCombatChart(c) {
         : i.icon
           ? `<li class="ic"><img class="li-icon" loading="lazy" src="images/charts/icn/${i.icon}.png" alt=""><span>${i.t}</span></li>`
           : `<li>${i.t}</li>`;
-      const items = s.items.filter(i => typeof i === "string" || !i.fleet || fleet);  // per-item fleet gating
+      const items = s.items.filter(i => typeof i === "string" || ((!i.fleet || fleet) && (!i.when || i.when(c))));  // per-item fleet / config gating
       const body = `<ul>${items.map(li).join("")}</ul>`;
       return `<section class="cc-sec${s.fleet ? " fleet" : ""}">
         <h5>${s.h}${s.fleet ? ` <span class="cc-flag">Cylon Fleet</span>` : ""}</h5>
         ${body}
       </section>`;
     }).join("");
+  // Attack Table caption: which rows of the (merged, unofficial) image apply to this setup.
+  const tableNote = BSG.combat.attackTableNote +
+    (fleet ? " Cylon Fleet option: the Admiral targets a space area — use ‘Attack a space area with a nuke’, not ‘Targeted with a nuke’ (Exodus p.15, p.24)."
+           : " Without the Cylon Fleet option, ignore the Viper Mk VII row and ‘Attack a space area with a nuke’: nukes target a basestar (‘Targeted with a nuke’).") +
+    (c.has("daybreak") ? "" : " Assault raptor rows are Daybreak only.");
   return `<div class="combat-chart">
-      <div class="cc-head">Combat Reference <span class="cc-src">combined from v4.4 p.6 &amp; p.14</span></div>
+      <div class="cc-head">Combat Reference <span class="cc-src">Base p.22–27, p.32 · Pegasus p.9 · Exodus p.12–15, p.18 · Daybreak p.11, p.20 — layout adapted from the unofficial EOG v4.4 fan summary p.6 &amp; p.14</span></div>
       <div class="cc-grid">
         <div class="cc-text">${secHtml}</div>
         <figure class="cc-table">
           <img loading="lazy" src="${BSG.combat.attackTableImg}" alt="Attack Table (D8)">
-          <figcaption>${BSG.combat.attackTableNote}</figcaption>
+          <figcaption>${tableNote}</figcaption>
         </figure>
       </div>
     </div>`;

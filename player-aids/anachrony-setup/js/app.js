@@ -93,8 +93,9 @@
     if (mod.id === "chronossus" && !solo) return false;
     // Fractures of Time is not supported with Doomsday or Guardians (Fractures p.15)
     if (state.exps.has("fot") && (mod.id === "doomsday" || mod.id === "guardians")) return false;
-    // Solo: Intrigues is unsupported (Solo p.3); Endgame Condition cards stay in the box (Solo p.4, p.8)
-    if (solo && (mod.id === "ic" || mod.id === "egdraft")) return false;
+    // Solo: Intrigues is unsupported (Solo p.3); Endgame Condition cards stay in the box (Solo p.4, p.8);
+    // the Starting Asset Draft is defined only for 2-4 players (Essential p.20) and the solo opponent is First Player (Solo p.4, p.9)
+    if (solo && (mod.id === "ic" || mod.id === "egdraft" || mod.id === "draft")) return false;
     return true;
   }
 

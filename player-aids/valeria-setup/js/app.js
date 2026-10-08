@@ -164,7 +164,7 @@
       const set = (x === "combo") ? "base" : x;
       return set === "base" || c.has(set);
     },
-    hint: () => "Search this page, every selected rulebook and the combined expansions guide. Type a word, a phrase or a question.",
+    hint: () => "Search this page, every selected rulebook and the unofficial combined expansions guide. Type a word, a phrase or a question.",
     noMatch: () => "No matches on this page or in the selected sets' documents."
   };
 

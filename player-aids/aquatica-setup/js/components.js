@@ -31,7 +31,7 @@ window.AID_COMPONENTS = {
     { set: "base", qty: "18", name: "Ocean Character cards", note: "2 identical sets of cards (Base p.6)", img: "base-ocean-characters.webp", w: 320, h: 159 },
     { set: "base", qty: "16", name: "Trained Mantas miniatures", note: "A set of 4 per player, marked with the symbol of their Starting Character cards", img: "base-trained-mantas.webp", w: 320, h: 105 },
     { set: "base", qty: "23", name: "Wild Mantas miniatures", img: "base-wild-mantas.webp", w: 320, h: 156 },
-    { set: "base", qty: "5", name: "Double-sided Goal tokens", note: "Variable Goals: 4 are placed over the Goals printed on the board (Base p.26, p.28)", img: "base-goal-tokens.webp", w: 320, h: 205,
+    { set: "base", qty: "5", name: "Double-sided Goal tokens", note: "Variable Goals: 4 drawn at random are placed over the Goals printed on the board (Base p.26, p.28). With Coral Reefs: shuffled with the expansions' Goal tokens, and 4 random ones (or 4 the players agree on) go on the Goal spaces of the board's night side (Coral Reefs p.6)", img: "base-goal-tokens.webp", w: 320, h: 205,
       when: (c) => c.mode !== "tribes" && (c.mod("advgoals") || c.has("cr")) },
 
     { set: "cw", qty: "6", name: "Starting Character cards for the 5th player", img: "cw-starting-characters.webp", w: 320, h: 167 },

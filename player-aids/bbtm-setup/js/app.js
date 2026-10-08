@@ -216,7 +216,7 @@ function diffPips(diff) {
   const d = BBTM.difficulty[diff];
   let pips = "";
   for (let i = 1; i <= 4; i++) pips += `<span class="pip${i <= d.pips ? " on" : ""}"></span>`;
-  return `<span class="diff ${d.cls}" title="Difficulty: ${d.label} (as printed in the Legendary rulebook)">
+  return `<span class="diff ${d.cls}" title="Difficulty: ${d.label} (fan rating from the unofficial Legendary rulebook)">
       <span class="pips">${pips}</span><span class="diff-label">${d.label}</span></span>`;
 }
 

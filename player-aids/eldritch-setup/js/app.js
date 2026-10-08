@@ -38,6 +38,8 @@
     // campaign implies personal stories; choose-prelude and no-prelude are exclusive
     if (state.mods.has("campaign")) state.mods.add("stories");
     if (state.mods.has("noPrelude")) state.mods.delete("choosePrelude");
+    // staged and insane difficulty build the Mythos deck in incompatible ways
+    if (state.mods.has("staged") && state.mods.has("insane")) state.mods.delete("staged");
   }
 
   function renderExpansions() {
@@ -61,7 +63,7 @@
     box.innerHTML = "";
     const any = el("button", "ao-btn" + (state.ao === null ? " on" : ""));
     any.type = "button";
-    any.innerHTML = "<b>Decide at the table</b><span>Generic steps — resolve whichever sheet you pick.</span>";
+    any.innerHTML = "<b>Decide at the table</b><span>" + (state.mods.has("campaign") ? "Generic steps — use the sheet your campaign determined." : "Generic steps — resolve whichever sheet you pick.") + "</span>";
     any.addEventListener("click", () => { state.ao = null; update(); });
     box.appendChild(any);
     for (const a of EH.ancientOnes) {
@@ -99,7 +101,7 @@
       b.innerHTML = "<span class='mod-name'>" + mod.name + "</span><span class='mod-sum'>" + mod.summary + "</span>";
       b.title = mod.description + " (" + mod.src + ")";
       b.addEventListener("click", () => {
-        on ? state.mods.delete(mod.id) : state.mods.add(mod.id);
+        if (on) { state.mods.delete(mod.id); } else { state.mods.add(mod.id); if (mod.id === "staged") state.mods.delete("insane"); if (mod.id === "insane") state.mods.delete("staged"); }
         update();
       });
       box.appendChild(b);

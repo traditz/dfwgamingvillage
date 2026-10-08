@@ -35,12 +35,13 @@ function ctx() {
   const heraldCount = AH.modules.filter(m => m.type === "herald" && state.modules.has(m.id)).length;
   const guardian    = AH.modules.some(m => m.type === "guardian" && state.modules.has(m.id));
   const institution = AH.modules.some(m => m.type === "institution" && state.modules.has(m.id));
+  const institutionCount = AH.modules.filter(m => m.type === "institution" && state.modules.has(m.id)).length;
   return {
     has: e => expEnabled(e),
     p: state.players,
     mod: id => state.modules.has(id),
     boardCount: boardCount(),
-    heraldCount, guardian, institution
+    heraldCount, guardian, institution, institutionCount
   };
 }
 
@@ -49,10 +50,12 @@ function pruneState() {
   if (state.players < 1) state.players = 1;
   if (state.players > 8) state.players = 8;
   [...state.modules].forEach(id => {
+    if (!state.modules.has(id)) return;   // already dropped as an excluded partner
     const m = AH.modules.find(x => x.id === id);
     if (!m || !moduleAvailable(m)) { state.modules.delete(id); return; }
     if (m.excludes && m.excludes.some(x => state.modules.has(x))) {
-      // keep this one, drop the conflicting partner(s) it was just toggled against
+      // keep this one (first listed), drop the conflicting partner(s) — e.g. from a shared link
+      m.excludes.forEach(x => state.modules.delete(x));
     }
   });
 }
@@ -224,7 +227,7 @@ function buildBoards(c) {
     }</ul></section>`;
   });
   return `<div class="locations"><h3>Boards & Location Reference</h3>
-      <div class="legend">The special tracks and rules each board in your setup adds. (Arkham locations have no fixed actions — you draw an encounter card — so this covers the mechanics that matter at the table.)</div>
+      <div class="legend">The special tracks and rules each board in your setup adds. (At an Arkham location you either draw that neighbourhood’s encounter card or use the location’s printed special ability instead, unless a gate is open there. So this section covers each board’s tracks and special rules.) Core p.22 · FAQ p.8</div>
       <div class="loc-grid">${blocks}</div></div>`;
 }
 
@@ -232,9 +235,9 @@ function buildBoards(c) {
 function buildFaq(c) {
   const items = AH.faq.filter(f => !f.when || f.when(c));
   if (!items.length) return "";
-  return `<div class="faq"><h3>FAQ — Rulings for This Setup</h3>
+  return `<div class="faq"><h3>FAQ & Rules Clarifications for This Setup</h3>
       <div class="faq-list">${
-        items.map(f => `<details class="faq-item"><summary>${f.q}</summary><div class="faq-a">${f.a}</div></details>`).join("")
+        items.map(f => `<details class="faq-item"><summary>${f.q}</summary><div class="faq-a">${f.a}${f.src ? ` <span class="htp-src">${f.src}</span>` : ""}</div></details>`).join("")
       }</div></div>`;
 }
 
@@ -262,7 +265,7 @@ function buildReference(c) {
           <thead><tr><th>Investigators</th><th>Monster limit</th><th>Outskirts limit</th><th>Gates to awaken</th></tr></thead>
           <tbody>${rows.join("")}</tbody>
         </table>
-        <ul class="ref-notes">${AH.playerRef.notes.map(n => `<li>${n}</li>`).join("")}</ul>
+        <ul class="ref-notes">${AH.playerRef.notes.filter(n => typeof n === "string" || n.when(c)).map(n => `<li>${typeof n === "string" ? n : n.t}</li>`).join("")}</ul>
       </div></div>`;
 }
 

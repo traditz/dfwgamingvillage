@@ -161,8 +161,9 @@
       const s = bookOfSet[x] || "base";
       return s === "base" || c.has(s);
     },
-    hint: () => "Search this page, every rulebook and the FAQ. Type a word, a phrase or a question.",
-    noMatch: () => "No matches on this page or in the selected sets' rulebooks."
+    label: (pg) => (pg.x === "gc" ? { loc: "card " + pg.p + "/5" } : {}),
+    hint: () => "Search this page, the Rules of Play, the FAQ and the selected expansions' rulebooks. Type a word, a phrase or a question.",
+    noMatch: () => "No matches on this page, in the Rules of Play, the FAQ or the selected expansions' rulebooks."
   };
 
   /* ---- master update ---- */

@@ -1,8 +1,9 @@
 /* =============================================================================
    Clank! A Deck-Building Adventure — Components glossary data (standard v1.1; rendered by js/comp-widget.js)
    Sources (component lists): Base p.1 · Sunken p.1 · Mummy p.1 · Gold & Silk p.1 · Ape Lords p.1 · Adventuring
-   Party p.1 (the FAQ has no component list). Pictures cropped from those pages; these books print no page numbers,
-   so pages are counted as the page's other citations count them.
+   Party p.1 (the FAQ has no component list). Pictures cropped from those pages. Base, Sunken, Mummy, Gold & Silk and
+   Ape Lords print no page numbers and are cited by PDF page (cover/components page = p.1). Adventuring Party's printed
+   page numbers (2–8) equal its PDF pages, and its unnumbered components page is p.1.
    Board gating (c.board): each game board shows only when chosen. Components the rulebooks tie to a board show only
    with it: Sunken — Goldfish card, SCUBA (Sunken p.1); Mummy — marker, card, pyramid die, Supreme Monkey Idol and its
    secrets (Mummy p.2); Dwarven Mine — Mining Bonus tokens (Gold & Silk p.1); Spider Queen's Lair — Web tokens and the

@@ -17,6 +17,9 @@
    cards are hidden, and so are Crimson Seas' pieces, which only its add-on to the base game setup brings in
    (Crimson Seas p.2); its Citizens and Monsters stay, since Darksworn may use Monster Areas from the
    expansions (Darksworn p.2). The No Duke variant deals no Dukes (Base Rulebook p.13).
+   The base Starters entry has four gated copies: the Herald (default), the Coxswain in its place with
+   Crimson Seas (Crimson Seas p.3, p.5), the Margrave in its place with that mini-pack (Combined Guide p.2,
+   unofficial), and Peasant + Knight only in the Darksworn saga (Darksworn p.3).
    ============================================================================= */
 window.AID_COMPONENTS = {
   sets: [
@@ -32,7 +35,13 @@ window.AID_COMPONENTS = {
     { set: "base", qty: "10", name: "Dukes", img: "base-dukes.webp", w: 237, h: 223,
       when: (c) => c.mode !== "darksworn" && !c.mod("noduke") },
     { set: "base", qty: "15", name: "Starters", note: "1 Starter Peasant, 1 Starter Knight and 1 Starter Herald per player (Base Rulebook p.3)",
-      img: "base-starters.webp", w: 239, h: 226 },
+      img: "base-starters.webp", w: 239, h: 226, when: (c) => c.mode !== "darksworn" && !c.has("cs") && !c.mod("margrave") },
+    { set: "base", qty: "15", name: "Starters", note: "1 Starter Peasant and 1 Starter Knight per player; the Crimson Seas Coxswain takes the Herald’s place (Base Rulebook p.3 · Crimson Seas p.2–3, p.5 · Combined Guide p.1, unofficial)",
+      img: "base-starters.webp", w: 239, h: 226, when: (c) => c.mode !== "darksworn" && c.has("cs") },
+    { set: "base", qty: "15", name: "Starters", note: "1 Starter Peasant and 1 Starter Knight per player; the Margrave Park starter replaces the Herald (Base Rulebook p.3 · Combined Guide p.2, unofficial)",
+      img: "base-starters.webp", w: 239, h: 226, when: (c) => c.mode !== "darksworn" && !c.has("cs") && c.mod("margrave") },
+    { set: "base", qty: "15", name: "Starters", note: "Darksworn saga: 1 Peasant and 1 Knight per player, with the Darksworn Explorer; no Herald or other card with the =/x trigger (Darksworn Rulebook p.3)",
+      img: "base-starters.webp", w: 239, h: 226, when: (c) => c.mode === "darksworn" },
     { set: "base", qty: "5", name: "Reference", img: "base-reference.webp", w: 239, h: 226 },
     { set: "base", qty: "10", name: "Exhausted", img: "base-exhausted.webp", w: 239, h: 224, when: (c) => c.mode !== "darksworn" },
     { set: "base", qty: "6", name: "Monster Events", note: "Used in the Monster Event variant (Base Rulebook p.12)",
@@ -52,7 +61,7 @@ window.AID_COMPONENTS = {
     { set: "cs", qty: "24", name: "Tome tokens", when: (c) => c.mode !== "darksworn" },
     { set: "cs", qty: "20", name: "Map tokens", when: (c) => c.mode !== "darksworn" },
     { set: "cs", qty: "5", name: "Coxwain starter cards",
-      note: "The Coxswain: 1 per player, and in the 2nd Edition each player’s 3rd starter instead of the Herald (Crimson Seas p.2 · Combined Guide p.1)",
+      note: "The Coxswain: 1 per player (Crimson Seas p.2). It fills the Herald’s slot as each player’s 3rd starter, since Crimson Seas cancels the consolation rule the Herald provides and its setup picture shows Peasant, Knight and Coxswain (Crimson Seas p.3, p.5 · Combined Guide p.1, unofficial)",
       when: (c) => c.mode !== "darksworn" },
     { set: "cs", qty: "16", name: "Noble cards", when: (c) => c.mode !== "darksworn" },
     { set: "cs", qty: "60", name: "Citizen cards" },

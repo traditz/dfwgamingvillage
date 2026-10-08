@@ -29,13 +29,13 @@ function boardMode() { return hasSrc("cataclysm") ? "cataclysm" : "main"; }
 
 /* Faster-play variants (id, name, desc, optional req predicate). */
 const OPTIONS = [
-  { id:"easyCmd",   name:"Easier Command Spell",  desc:"Command Spell triggers on more results (5p: 3–6, 6p: 2–6, 7p+: automatic)." },
+  { id:"easyCmd",   name:"Easier Command Spell",  desc:"With 5+ characters the Command Spell succeeds on more results (5: 3–6, 6: 2–6, 7+: casts automatically); no change with 4 or fewer. No effect when an Alternative Ending (incl. The Eternal Crown) or the full Dragon replaces the Command Spell." },
   { id:"fastSC",    name:"Faster Strength/Craft", desc:"Lower the trophy threshold for a counter from 7 to 6 (or 5)." },
   { id:"startBonus",name:"Starting Bonus",        desc:"Each character takes one extra Strength or Craft at the start." },
   { id:"bloodbath", name:"Talisman Bloodbath",    desc:"Use only one Talisman card; a killed character is out of the game." },
   { id:"sudden",    name:"Sudden Death",          desc:"First character to reach the Crown of Command wins outright." },
-  { id:"inherit",   name:"Inherited Items",       desc:"A new character inherits the killed character's Objects, gold & Followers." },
-  { id:"evadeUnf",  name:"Evade Unfriendlies",    desc:"Allow evading unfriendly cards/spaces at the table's discretion." }
+  { id:"inherit",   name:"Inherited Items",       desc:"A new character inherits the killed character's Objects, gold & Followers — the killer can't take them." },
+  { id:"evadeUnf",  name:"Evade Unfriendlies",    desc:"Allow evading unfriendly individuals on cards/spaces at the table's discretion (never Inner Region spaces)." }
 ];
 
 /* Build the context object every `when` predicate consumes. */
@@ -151,12 +151,12 @@ function renderSetup() {
 
   // Variant reminders chosen by the player
   const chosenOpts = OPTIONS.filter(o => state.options.has(o.id));
-  const callouts = TAL.setupCallouts.filter(co => co.when(c));
+  const callouts = TAL.setupCallouts.filter(co => !co.when || co.when(c));
   let notes = "";
   if (chosenOpts.length || callouts.length) {
     notes += `<div class="callouts"><h3>Notes for this configuration</h3>`;
     chosenOpts.forEach(o => { notes += `<div class="callout"><span class="etag s-var">Variant</span> <b>${esc(o.name)}</b><p>${esc(o.desc)}</p></div>`; });
-    callouts.forEach(co => { notes += `<div class="callout">${srcTag(co.src)} <b>${esc(co.t)}</b><p>${esc(co.d)}</p></div>`; });
+    callouts.forEach(co => { notes += `<div class="callout">${srcTag(typeof co.src === "function" ? co.src(c) : co.src)} <b>${esc(co.t)}</b><p>${esc(typeof co.d === "function" ? co.d(c) : co.d)}</p></div>`; });
     notes += `</div>`;
   }
   $("#setupNotes").innerHTML = notes;

@@ -65,7 +65,8 @@ window.AID_COMPONENTS = {
     { set: "dungeon", qty: "128", name: "Dungeon cards", img: "dungeon-cards.webp", w: 300, h: 189 },
     { set: "dungeon", qty: "20", name: "Spell cards", img: "dungeon-spells.webp", w: 300, h: 188 },
     { set: "dungeon", qty: "10", name: "Adventure cards", img: "dungeon-adventure.webp", w: 300, h: 188 },
-    { set: "dungeon", qty: "10", name: "Treasure cards", note: "Left in the game box until they are needed (Dungeon, p.4)", img: "dungeon-treasure.webp", w: 300, h: 186 },
+    { set: "dungeon", qty: "10", name: "Treasure cards", note: "Left in the game box until they are needed (Dungeon, p.4)", img: "dungeon-treasure.webp", w: 300, h: 186, when: (c) => !c.has("deeprealms") && !c.has("lostrealms") },
+    { set: "dungeon", qty: "10", name: "Treasure cards", note: "3 random Treasure cards start faceup on the Throne Room; the rest stay in the box until needed (Dungeon, p.4 · Deep Realms, p.2 · Lost Realms, p.2)", img: "dungeon-treasure.webp", w: 300, h: 186, when: (c) => c.has("deeprealms") || c.has("lostrealms") },
     { set: "dungeon", qty: "5", name: "Character cards", img: "dungeon-characters.webp", w: 300, h: 156 },
     { set: "dungeon", qty: "5", name: "Plastic character figures", img: "dungeon-figures.webp", w: 300, h: 179 },
 

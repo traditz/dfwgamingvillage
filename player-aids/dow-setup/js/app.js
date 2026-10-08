@@ -195,7 +195,7 @@ function renderDetail() {
           const m = DW.expMeta[F(s.exp, c)];
           return `<li><span class="snum">${n}</span>
             <div class="sbody"><span class="st">${F(s.t, c)}</span> <span class="etag ${m.cls}">${m.name}</span>
-            <div class="sd">${F(s.d, c)}</div>${s.src ? `<div class="ssrc">${s.src}</div>` : ""}</div></li>`;
+            <div class="sd">${F(s.d, c)}</div>${s.src ? `<div class="ssrc">${F(s.src, c)}</div>` : ""}</div></li>`;
         }).join("")}</ol>
       </section>`;
   });
@@ -231,7 +231,7 @@ function buildHowToPlay(c) {
       if (typeof i === "string") return `<li>${i}</li>`;
       const tag = resolved[idx];
       const show = tag && tag !== headTag;
-      return `<li>${show ? tagHtml(tag) : ""}${F(i.t, c)}${i.src ? ` <span class="htp-src">${i.src}</span>` : ""}</li>`;
+      return `<li>${show ? tagHtml(tag) : ""}${F(i.t, c)}${i.src ? ` <span class="htp-src">${F(i.src, c)}</span>` : ""}</li>`;
     }).join("");
     return `<section class="htp-sec ${cls}"><h5>${title}${headTag ? tagHtml(headTag) : ""}</h5><ul>${lis}</ul></section>`;
   };
@@ -290,7 +290,9 @@ function buildReference(c) {
         <li>Colony leaders: highest-influence group leader per colony at start, re-elected every round.</li>
         <li>Each colony gains <b>2 bullets</b> per round (Add 2 Bullets step); bid bullets are discarded after every combat.</li>
         <li>Lone Wolf: dealt 5 survivors, keeps 3; morale starts at 4 (max 5); starts with 3 mission cards.</li>
-        <li>The simultaneous actions step is limited by the 2-minute sand timer (flipped by whoever finishes first${c.mod("quickplay") ? " — Quick Play: one shared 2-minute timer for everyone" : ""}).</li>
+        <li>${c.mod("quickplay")
+          ? "Quick Play: flip the 2-minute sand timer as soon as both active players have finished moving; they have 2 minutes TOTAL for all their actions, and unfinished actions are lost (WC rulebook p.15)."
+          : "The simultaneous actions step: the first active player to finish flips the 2-minute sand timer, and the other has 2 minutes to finish (WC rulebook p.9)."}${c.loneWolf ? " The Lone Wolf has no time limit (WC rulebook p.14)." : ""}</li>
       </ul>`;
   } else {
     const rows = [];
@@ -308,16 +310,16 @@ function buildReference(c) {
     table = `<table class="ref-table">
         <thead><tr><th>Players</th><th>Starting dice</th><th>Starting items</th><th>Survivor draft</th><th>Secret objective pool</th><th>Crisis target</th></tr></thead>
         <tbody>${rows.join("")}</tbody></table>
-      <ul class="ref-notes"><li>${DW.playerRef.twoPlayerNote}</li>${DW.playerRef.notes.map(n => `<li>${n}</li>`).join("")}</ul>`;
+      <ul class="ref-notes"><li>${F(DW.playerRef.twoPlayerNote, c)}</li>${DW.playerRef.notes.map(n => `<li>${n}</li>`).join("")}</ul>`;
   }
   return `<div class="reference"><h3>Reference Table</h3>
-      <div class="legend">Core numbers for your game. ${DW.playerRef.src}.</div>
+      <div class="legend">Core numbers for your game. ${F(DW.playerRef.src, c)}.</div>
       <div class="ref-grid">${table}</div></div>`;
 }
 
 /* ---- Rulebook search panel ----------------------------------------------- */
 function buildSearchPanel(c) {
-  const books = DW.expansions.filter(e => expEnabled(e.id)).map(e => e.short + " rulebook");
+  const books = DW.expansions.filter(e => expEnabled(e.id)).map(e => e.short.replace(/^The /, "") + " rulebook");
   return `<section class="rules-search" id="sec-search">
       <h3>Search the Rulebooks</h3>
       <p class="rs-sub">Searches this page first, then the ${books.join(", ")} for this setup — type keywords <i>or ask a plain question</i> (“what happens when an entrance is overrun?”). Rulebook results are ranked by relevance and cite their book and page; “Read the whole page” opens the full text.</p>
@@ -380,7 +382,7 @@ const _SYN = {
    DW.precedence breaks ties toward the newer book. */
 window.AID_SEARCH = {
   index: DW.rulesIndex,
-  visible: (x, c) => c.has(x),
+  visible: (x, c) => x === "wcv" ? !!c.wc : c.has(x),
   skin: "rs", input: "#rules-q", results: "#rules-results", headingLevel: 4, sticky: ".jump-nav", partial: "always",
   synonyms: _SYN, suppress: DW.rulesSuppress, precedence: DW.precedence, onPage: "detail",
   label: (pg) => { const m = DW.expMeta[pg.x] || { name: pg.b, cls: "e-base" }; return { tag: { text: m.name, cls: "etag " + m.cls } }; },

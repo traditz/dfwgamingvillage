@@ -3,7 +3,7 @@
    Sources (printed page numbers): Base Rulebook p.3 (Components) · Forsaken Lore p.1 · Mountains of
    Madness p.3 (with "Using This Expansion" p.2) · Strange Remnants p.1 · Under the Pyramids p.3 (p.2) ·
    Signs of Carcosa p.1 · The Dreamlands p.3 (p.2) · Cities in Ruin p.1 · Masks of Nyarlathotep p.3
-   (p.2, Preludes p.4, Personal Stories p.6).
+   (p.2, Preludes p.4, Personal Stories p.6) · Ultimate FAQ 2.0 p.19 (SR + Masks Mystic Ruins combine).
    - Pictures are cropped from the picture pages (base, MoM, UtP, The Dreamlands, Masks). Forsaken Lore,
      Strange Remnants, Signs of Carcosa and Cities in Ruin list their components as text only, so those items
      have no picture (except Strange Remnants' Round Overview card, pictured on its components page).
@@ -93,7 +93,7 @@ window.AID_COMPONENTS = {
     /* ---- Strange Remnants (SR p.1: a text list; its Round Overview card is pictured on the same page) ---- */
     { set: "sr", qty: "4", name: "Investigator sheets" },
     { set: "sr", qty: "1", name: "Ancient One sheet" },
-    { set: "sr", qty: "86", name: "Encounter cards", note: "4 General, 4 America, 4 Europe, 4 Asia/Australia, 6 Other World, 20 Mystic Ruins (4 unique backs), 20 Special (2 unique backs), 24 Research. The Mystic Ruins cards are used by the Syzygy Ancient One and the <i>In Cosmic Alignment</i> Prelude; otherwise returned to the box (SR p.1)" },
+    { set: "sr", qty: "86", name: "Encounter cards", note: "4 General, 4 America, 4 Europe, 4 Asia/Australia, 6 Other World, 20 Mystic Ruins (4 unique backs), 20 Special (2 unique backs), 24 Research. The Mystic Ruins cards are used by the Syzygy Ancient One and the <i>In Cosmic Alignment</i> Prelude; otherwise returned to the box (SR p.1). If you also play with Masks of Nyarlathotep, whenever the Mystic Ruins deck is used (including for Antediluvium or <i>The Stars Align</i>), shuffle both expansions' Mystic Ruins cards into one deck (FAQ p.19)" },
     { set: "sr", qty: "6", name: "Mystery cards" },
     { set: "sr", qty: "6", name: "Adventure cards", note: "Used by the <i>In Cosmic Alignment</i> Prelude; otherwise returned to the box (SR p.1)" },
     { set: "sr", qty: "20", name: "Mythos cards" },
@@ -199,7 +199,7 @@ window.AID_COMPONENTS = {
     { set: "mon", qty: "2", name: "Ancient One sheets", img: "mon-ancient-ones.webp", w: 263, h: 308 },
     { set: "mon", qty: "10", name: "Mystery cards", note: "2 unique backs", img: "mon-mysteries.webp", w: 318, h: 210 },
     { set: "mon", qty: "12", name: "Adventure cards", note: "4 unique backs. Used by the Nyarlathotep Ancient One; otherwise returned to the box (Masks p.2)", img: "mon-adventures.webp", w: 318, h: 210 },
-    { set: "mon", name: "Encounter cards", note: "8 General, 8 Americas, 8 Europe, 8 Asia/Australia, 6 Other World, 20 Mystic Ruin (4 unique backs), 48 Research (2 unique backs), 16 Special (2 unique backs). The Mystic Ruins cards are used by the Antediluvium Ancient One and <i>The Stars Align</i> Prelude; otherwise returned to the box (Masks p.2)", img: "mon-encounters.webp", w: 320, h: 116 },
+    { set: "mon", name: "Encounter cards", note: "8 General, 8 Americas, 8 Europe, 8 Asia/Australia, 6 Other World, 20 Mystic Ruin (4 unique backs), 48 Research (2 unique backs), 16 Special (2 unique backs). The Mystic Ruins cards are used by the Antediluvium Ancient One and <i>The Stars Align</i> Prelude; otherwise returned to the box (Masks p.2). If you also play with Strange Remnants, whenever the Mystic Ruins deck is used (including for Syzygy or <i>In Cosmic Alignment</i>), shuffle both expansions' Mystic Ruins cards into one deck (FAQ p.19)", img: "mon-encounters.webp", w: 320, h: 116 },
     { set: "mon", qty: "20", name: "Mythos cards", img: "mon-mythos.webp", w: 223, h: 308 },
     { set: "mon", qty: "14", name: "Prelude cards", note: "Four first appeared in earlier expansions: <i>Beginning of the End</i> (MoM), <i>The Dunwich Horror</i> (SR), <i>Twin Blasphemies of the Black Goat</i> (The Dreamlands) and <i>Call of Cthulhu</i> (UtP). If you play with that expansion too, leave the duplicate out of the Prelude deck (Masks p.4)", img: "mon-preludes.webp", w: 226, h: 313, when: (c) => !c.mod("noPrelude") || c.mod("campaign") },
     { set: "mon", qty: "8", name: "Round Overview cards", img: "mon-round-overview.webp", w: 226, h: 312 },

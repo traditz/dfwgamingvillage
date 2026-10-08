@@ -14,7 +14,10 @@
      (OoI p.5, OotD p.6, OotP p.2). Only the named pieces are gated to their mode (Adventure and Mythos
      decks, entrance card, Track card / Scenario card, the Expedition side of the scenario sheet); their
      special adventures, supply, day, amulet, omen and expedition tokens are "other content" and show in
-     every mode. The mode entrance cards replace all other entrance cards (OoI p.3, OotD p.3, OotP p.3).
+     every mode — except Omens of the Pharaoh's special adventures: its Hidden Chambers belong to the Dashur
+     deck and its Dark Pharaoh adventures need its Ancient Ones or The Exhibit (OotP p.2, p.4). The mode
+     entrance cards replace all other entrance cards (OoI p.3, OotD p.3, OotP p.3). The Alaska Expedition
+     uses only the three Omens of Ice Ancient Ones (OoI p.2, step 7), so the other sets' Ancient One cards hide.
    - Gates of Arkham has no such statement. Its p.2 list of pieces to combine with the base game leaves out
      the Streets of Arkham setup pieces (Arkham Adventures, Mythos, Events, entrance, gates; seals go only
      on Arkham Adventures, p.3), so those show only in that mode. GoA Skills and Memberships stay in every
@@ -44,7 +47,7 @@ window.AID_COMPONENTS = {
     { set: "base", qty: "1", name: "Entrance reference sheet", img: "base-entrance-sheet.webp", w: 273, h: 190,
       when: (c) => c.mode === "museum" && !c.has("uf") },
     { set: "base", qty: "16", name: "Investigator cards", img: "base-investigators.webp", w: 320, h: 178 },
-    { set: "base", qty: "8", name: "Ancient One cards", img: "base-ancient-ones.webp", w: 320, h: 174 },
+    { set: "base", qty: "8", name: "Ancient One cards", img: "base-ancient-ones.webp", w: 320, h: 174, when: (c) => c.mode !== "alaska" },
     { set: "base", qty: "48", name: "Adventure cards", img: "base-adventures.webp", w: 251, h: 242,
       when: (c) => c.mode === "museum" },
     { set: "base", qty: "8", name: "Other World Adventure cards", img: "base-other-worlds.webp", w: 279, h: 243 },
@@ -59,14 +62,15 @@ window.AID_COMPONENTS = {
     { set: "base", qty: "30", name: "Stamina tokens", img: "base-stamina.webp", w: 114, h: 147 },
     { set: "base", qty: "15", name: "Clue tokens", img: "base-clues.webp", w: 89, h: 148 },
     { set: "base", qty: "22", name: "Monster markers", img: "base-monsters.webp", w: 316, h: 181 },
-    { set: "base", qty: "5", name: "Mask monster markers", img: "base-mask-monsters.webp", w: 316, h: 182 },
+    { set: "base", qty: "5", name: "Mask monster markers", note: "Used only when Nyarlathotep is the Ancient One; otherwise set aside (Base p.3, p.5)", img: "base-mask-monsters.webp", w: 316, h: 182, when: (c) => !c.has("ootp") },
+    { set: "base", qty: "5", name: "Mask monster markers", note: "Used against the original Nyarlathotep, in the Lightless Pyramid, or with The Exhibit; against the Omens of the Pharaoh Nyarlathotep, follow his card instead (Base p.3, p.5 · Omens of the Pharaoh p.2–4)", img: "base-mask-monsters.webp", w: 316, h: 182, when: (c) => c.has("ootp") },
     { set: "base", qty: "12", name: "Doom tokens", img: "base-doom.webp", w: 123, h: 129 },
     { set: "base", qty: "17", name: "Elder Sign tokens", img: "base-elder-signs.webp", w: 163, h: 166 },
 
     /* ---- Unseen Forces (p.1; only the new kinds of component are pictured) ---- */
     { set: "uf", qty: "1", name: "White die", img: "uf-white-die.webp", w: 142, h: 133 },
     { set: "uf", qty: "1", name: "Black die", img: "uf-black-die.webp", w: 139, h: 132 },
-    { set: "uf", qty: "4", name: "Ancient One cards" },
+    { set: "uf", qty: "4", name: "Ancient One cards", when: (c) => c.mode !== "alaska" },
     { set: "uf", qty: "8", name: "Investigator cards" },
     { set: "uf", qty: "40", name: "Adventure cards", when: (c) => c.mode === "museum" },
     { set: "uf", qty: "2", name: "Other World cards" },
@@ -87,7 +91,8 @@ window.AID_COMPONENTS = {
     { set: "uf", qty: "7", name: "Stamina tokens" },
     { set: "uf", qty: "6", name: "Doom tokens" },
     { set: "uf", qty: "12", name: "Monster markers" },
-    { set: "uf", qty: "1", name: "Mask monster marker" },
+    { set: "uf", qty: "1", name: "Mask monster marker", note: "Used only when the Ancient One card calls for it (Unseen Forces p.2)", when: (c) => !c.has("ootp") },
+    { set: "uf", qty: "1", name: "Mask monster marker", note: "Used when the Ancient One card calls for it, in the Lightless Pyramid, or with The Exhibit (Unseen Forces p.2 · Omens of the Pharaoh p.3–4)", when: (c) => c.has("ootp") },
     { set: "uf", qty: "3", name: "Children of Abhoth monster markers", note: "Used only when Abhoth is the Ancient One (Unseen Forces p.1)",
       img: "uf-children-of-abhoth.webp", w: 320, h: 207 },
 
@@ -96,7 +101,7 @@ window.AID_COMPONENTS = {
       img: "goa-arkham-adventures.webp", w: 258, h: 285, when: (c) => c.mode === "streets" },
     { set: "goa", qty: "8", name: "Other World cards", note: "Ancient Egypt, Far Side of the Moon and The Vaults of Zin are used only in the Streets of Arkham game mode (FAQ p.4)",
       img: "goa-other-worlds.webp", w: 258, h: 288 },
-    { set: "goa", qty: "4", name: "Ancient One cards", img: "goa-ancient-ones.webp", w: 288, h: 233 },
+    { set: "goa", qty: "4", name: "Ancient One cards", img: "goa-ancient-ones.webp", w: 288, h: 233, when: (c) => c.mode !== "alaska" },
     { set: "goa", qty: "8", name: "Investigator cards", img: "goa-investigators.webp", w: 304, h: 245 },
     { set: "goa", qty: "8", name: "Investigator markers", img: "goa-investigator-markers.webp", w: 221, h: 171 },
     { set: "goa", qty: "8", name: "Membership cards (double-sided)", img: "goa-memberships.webp", w: 185, h: 172 },
@@ -153,7 +158,7 @@ window.AID_COMPONENTS = {
     { set: "ootd", qty: "60", name: "Pacific Adventure cards", note: "R'lyeh Rising game mode: they replace the Adventure deck (Omens of the Deep p.2)",
       img: "ootd-pacific-adventures.webp", w: 245, h: 293, when: (c) => c.mode === "rlyeh" },
     { set: "ootd", qty: "4", name: "Special Adventure cards", img: "ootd-special-adventures.webp", w: 258, h: 293 },
-    { set: "ootd", qty: "3", name: "Ancient One cards", img: "ootd-ancient-ones.webp", w: 320, h: 245 },
+    { set: "ootd", qty: "3", name: "Ancient One cards", img: "ootd-ancient-ones.webp", w: 320, h: 245, when: (c) => c.mode !== "alaska" },
     { set: "ootd", qty: "8", name: "Investigator cards", img: "ootd-investigators.webp", w: 291, h: 229 },
     { set: "ootd", qty: "40", name: "Staged Mythos cards", note: "R'lyeh Rising game mode: a Stage I Ocean deck replaces the Mythos deck, with the Stage II R'lyeh deck set aside (Omens of the Deep p.2)",
       img: "ootd-staged-mythos.webp", w: 194, h: 213, when: (c) => c.mode === "rlyeh" },
@@ -176,9 +181,11 @@ window.AID_COMPONENTS = {
     /* ---- Omens of the Pharaoh (p.1) ---- */
     { set: "ootp", qty: "50", name: "Egyptian Adventure cards", note: "Lightless Pyramid game mode: a Stage I “Cairo” and a Stage II “Dashur” deck replace the Adventure deck (Omens of the Pharaoh p.2)",
       img: "ootp-egyptian-adventures.webp", w: 242, h: 293, when: (c) => c.mode === "pyramid" },
-    { set: "ootp", qty: "8", name: "Special Adventure cards", note: "Dark Pharaoh and Hidden Chamber special adventures (Omens of the Pharaoh p.4)",
-      img: "ootp-special-adventures.webp", w: 263, h: 293 },
-    { set: "ootp", qty: "3", name: "Ancient One cards", img: "ootp-ancient-ones.webp", w: 301, h: 227 },
+    { set: "ootp", qty: "8", name: "Special Adventure cards", note: "4 Dark Pharaoh special adventures, shuffled and placed near the Adventure decks, plus 4 Hidden Chamber special adventures, shuffled into the Stage II “Dashur” deck (Omens of the Pharaoh p.2, p.4)",
+      img: "ootp-special-adventures.webp", w: 263, h: 293, when: (c) => c.mode === "pyramid" },
+    { set: "ootp", qty: "8", name: "Special Adventure cards", note: "Outside the Lightless Pyramid only the 4 Dark Pharaoh special adventures are used: the Omens of the Pharaoh Ancient Ones’ doom icon or The Exhibit draws them into play. The 4 Hidden Chambers belong to the Stage II “Dashur” deck (Omens of the Pharaoh p.2, p.4)",
+      img: "ootp-special-adventures.webp", w: 263, h: 293, when: (c) => c.mode !== "pyramid" && (c.mode !== "alaska" || c.mod("exhibit")) },
+    { set: "ootp", qty: "3", name: "Ancient One cards", img: "ootp-ancient-ones.webp", w: 301, h: 227, when: (c) => c.mode !== "alaska" },
     { set: "ootp", qty: "6", name: "Investigator cards", img: "ootp-investigators.webp", w: 298, h: 230, when: (c) => !c.has("goa") },
     { set: "ootp", qty: "6", name: "Investigator cards", note: "Calvin Wright replaces the Gates of Arkham Calvin Wright Ally card, which is no longer used (Omens of the Pharaoh p.5)",
       img: "ootp-investigators.webp", w: 298, h: 230, when: (c) => c.has("goa") },
@@ -190,7 +197,7 @@ window.AID_COMPONENTS = {
     { set: "ootp", qty: "1", name: "Cairo/Dashur entrance card", note: "Replaces the entrance sheet and all other entrance cards in the Lightless Pyramid game mode (Omens of the Pharaoh p.2–3)",
       img: "ootp-entrance.webp", w: 307, h: 177, when: (c) => c.mode === "pyramid" },
     { set: "ootp", qty: "8", name: "Expedition tokens", img: "ootp-expedition-tokens.webp", w: 160, h: 133 },
-    { set: "ootp", qty: "8", name: "Monster markers", note: "Including 7 mask monsters", img: "ootp-monsters.webp", w: 251, h: 135 },
+    { set: "ootp", qty: "8", name: "Monster markers", note: "Including 7 mask monsters: used in the Lightless Pyramid, with The Exhibit, or against the original Nyarlathotep; against the Omens of the Pharaoh Nyarlathotep, follow his card instead (Omens of the Pharaoh p.2–4)", img: "ootp-monsters.webp", w: 251, h: 135 },
     { set: "ootp", qty: "6", name: "Investigator markers", img: "ootp-investigator-markers.webp", w: 157, h: 160 },
     { set: "ootp", qty: "1", name: "Double-sided scenario sheet", note: "“The Expedition” side is used only in the Lightless Pyramid; “The Exhibit” brings Relics into other game modes (Omens of the Pharaoh p.2, p.4)",
       img: "ootp-scenario-sheet.webp", w: 320, h: 186, when: (c) => c.mode === "pyramid" || c.mod("exhibit") }
