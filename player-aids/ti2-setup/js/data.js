@@ -46,10 +46,10 @@ T2.modules = [
   { id: "ds", requires: "core", name: "Distant Suns", summary: "A hidden domain counter on every neutral planet; probing and razing",
     description: "Optional rule: face-down Domain Counters on neutral planets trigger on the first invasion — wealth, settlers, new technology, wormholes, radiation, hostile locals, Lazax survivors and more. Adds probing and razing.", src: "Rules p.18–20 §10.2" },
   { id: "shock", requires: "he", name: "Shock Troops", summary: "Veteran Ground Forces (combat 5) that capture enemy docks and PDS",
-    description: "Optional rule: a Ground Force that rolls an unmodified 10 in invasion combat may become a Shock Troop. Eight counters.", src: "Hope's End p.2 §2.2" },
+    description: "Optional rule: when a normal Ground Force rolls an unmodified 10 in Invasion Combat, roll again; on a 9 or 10 that unit immediately becomes a Shock Troop (combat 5). Eight counters; never more than 8 Shock Troops on the board at once.", src: "Hope's End p.2 §2.2" },
   { id: "leaders", requires: "he", name: "Leaders", summary: "Three leaders per race: Generals, Admirals, Diplomats, Agents, Scientists",
     description: "Optional rule: 24 Leader counters, three for each of the eight races, with special abilities; they can be killed, captured and rescued.", src: "Hope's End p.2–3 §2.3" },
-  { id: "facedown", requires: "he", needs: "leaders", name: "Face-down Leaders", summary: "Leader counters stay hidden until a Leader uses its skill",
+  { id: "facedown", requires: "he", needs: "leaders", name: "Face-down Leaders", summary: "Leader counters stay face down; reveal one only while it uses its skill",
     description: "Optional rule within Leaders: play with the Leader counters face down; reveal one only (temporarily) when it uses its special skills.", src: "Hope's End p.3 §2.3" }
 ];
 
@@ -147,7 +147,7 @@ T2.leaders = [
 
 /* FAQ precedence note: the one FAQ-vs-FAQ contradiction, resolved newest-first */
 T2.faqConflicts = [
-  "Two fleets that both have Assault Cannon and at least one Dreadnought: the 2/27/02 batch (FAQ p.2) says the player with more Assault-Cannon Dreadnoughts fires first with the difference; an older, undated answer (FAQ p.5) says the two cancel out. The newer ruling (p.2) is applied here."
+  "Two fleets that both have Assault Cannon and at least one Dreadnought: the 2/27/02 batch (FAQ p.2) says the player with more Assault-Cannon Dreadnoughts may fire first with as many Dreadnoughts as the difference (3 vs 2: one fires first), and all the others fire normally; an older, undated answer (FAQ p.5) says the two cancel out. The newer ruling (p.2) is applied here."
 ];
 
 /* =============================================================================
@@ -169,7 +169,7 @@ T2.phases = [
   {
     title: "Races & Supplies",
     steps: [
-      { when: () => true, exp: (c) => c.has("he") ? "he" : "core",
+      { when: () => true, exp: (c) => c.mod("bid") ? "opt" : (c.has("he") ? "he" : "core"),
         t: "Players and home systems",
         d: (c) => {
           const homes = c.has("he") ? 8 : 6;
@@ -182,7 +182,7 @@ T2.phases = [
           return d;
         },
         src: (c) => "Rules p.3 §4.0, p.4 §5.0, p.5 §6.0" + (c.p === 2 ? ", p.11 §8.1" : "") + (c.has("he") ? " · Hope's End p.1 §1.1" : "") },
-      { when: () => true, exp: "core",
+      { when: () => true, exp: (c) => c.has("he") ? "he" : "core",
         t: "Race stands",
         d: (c) => "<ul><li>Each player takes the <b>Race Stand</b> for their race and presses the race card into a plastic stand.</li>" +
           "<li>The back of the stand lists your <b>starting income</b>, <b>special abilities</b>, <b>starting technology</b> and <b>Extra Starting Units</b>. (Example: the Sardakk N'orr begin with 35 credits, two Technology chits and 5 extra combat units.)</li>" +
@@ -196,7 +196,7 @@ T2.phases = [
         t: "Technology chits",
         d: (c) => "<ul><li>Sort the technology chits by type and colour within reach of everyone: <b>Green</b> Biological · <b>Red</b> Weapons · <b>Blue</b> Propulsion · <b>Yellow</b> General.</li>" +
           "<li>The base game has <b>20</b> technologies with <b>six chits each</b>, so all six players can own every one. A chit's front shows its name and requirements; the back, its effect.</li>" +
-          (c.has("he") ? "<li><b>Hope's End:</b> add its <b>4 new technologies</b> (24 in all — see the Technology Tree in the reference).</li>" : "") + "</ul>",
+          (c.has("he") ? "<li><b>Hope's End:</b> you may add its <b>4 new technologies</b> (24 in all — see the Technology Tree in the reference).</li>" : "") + "</ul>",
         src: (c) => "Rules p.3 §4.0, p.6–7 §7.5" + (c.has("he") ? " · Hope's End p.1 §1.1, p.4" : "") },
       { when: () => true, exp: "core",
         t: "Colours and control markers",
@@ -209,7 +209,7 @@ T2.phases = [
         d: (c) => {
           let d = "<ul>";
           if (c.has("he")) {
-            d += "<li><b>Hope's End:</b> mix its <b>28 Political</b> and <b>28 Action</b> cards into the base decks.</li>";
+            d += "<li><b>Hope's End:</b> you may mix its <b>28 Political</b> and <b>28 Action</b> cards into the base decks (the sheet says “feel free to”).</li>";
             const out = [];
             if (!c.mod("ds")) out.push("<b>Distant Suns</b>");
             if (!c.mod("leaders")) out.push("<b>Leaders</b>");
@@ -277,7 +277,7 @@ T2.phases = [
             : "Asteroid Fields and Supernovas" + (c.has("he") ? " — and Hope's End's Nebulas and Gravity Rifts, if you add its tiles" : "");
           let d = "<ul>" + (c.big ? "<li>Hope's End shows only the finished map, so this page applies the base game's placement rules below, building out from Mecatol Rex until the galaxy matches the picture.</li>" : "") +
             "<li>Starting with the lowest roll and going clockwise, players take turns placing <b>one tile</b> from their hand face up around Mecatol Rex.</li>" +
-            "<li><b>Ring by ring:</b> no tile in ring 2 until ring 1 is complete, none in ring 3 until ring 2 is complete.</li>" +
+            (c.big ? "<li><b>Ring by ring:</b> a player may not begin a new ring until the ring inside it is complete (Diagram Two): ring 1 first, then ring 2, then ring 3, and so on outward to the edge of the picture. <i>On these maps a ring counts as complete when every spot the picture shows in it is filled; this is the page's reading, because Hope's End doesn't say.</i></li>" : "<li><b>Ring by ring:</b> no tile in ring 2 until ring 1 is complete, none in ring 3 until ring 2 is complete.</li>") +
             "<li>Place your <b>home system</b> in its spot as soon as that spot is available" + (c.big ? " (its spot on the picture)" : " (in the six-player diagram, after ring 2 is complete)") + ".</li>" +
             "<li><b>Red-bordered tiles</b> (" + red + ") may not go next to another red-bordered tile unless there is absolutely no other option.</li>" +
             "<li><b>Snake order:</b> after every full round the direction reverses (P1 P2 P3 P4, P4 P3 P2 P1, P1 P2…), so the last player places twice in a row.</li>" +
@@ -368,7 +368,7 @@ T2.reference = [
       "<li><b>Progression Phase</b> — check the chart. If nobody has won, start again with the " + (c.p === 2 ? "Economy" : "Political") + " Phase.</li></ol>" +
       "<ul><li><b>Turn-order ties</b> (equal influence): most resources goes first; then most technologies; then most credits in hand; then a coin toss (FAQ p.4).</li>" +
       "<li>Bonus influence from Fantastic Rhetoric counts for voting order only, not turn order (FAQ p.3).</li></ul>",
-    src: (c) => "Rules p.9 §8.0, p.11 §8.2, p.13 §8.3, p.18 §9.0, p.20 · FAQ p.3–4"
+    src: (c) => "Rules p.9 §8.0, p.11 §8.2, p.13 §8.3, p.16 §8.4–8.5, p.17 §8.6, p.18 §9.0, p.20 · FAQ p.3–4"
   },
   {
     title: "Political Phase — the Galactic Council",
@@ -392,7 +392,7 @@ T2.reference = [
       "<li><b>Dispute Resolution</b>: each player votes once for a pair of planets; the pair with the most votes is elected (FAQ p.4).</li>" +
       "<li><b>Mass Mobilization</b>: the Ground Forces go only on planets you control (FAQ p.3–4).</li>" +
       "<li>The two <b>“Long Term Truce”</b> cards (as the FAQ names them; time limits of two and one turns) are <b>not Laws</b> — errata. “Attack” = invading a system with an enemy fleet, invading a planet with enemy troops, rolling dice to hit enemy forces, or destroying them with a technology such as the X-89 bacterial weapon; other hostile acts (e.g. Public Execution) are not attacks (FAQ p.6).</li></ul>",
-    src: (c) => "Rules p.9–11 §8.1 · FAQ p.1–4, p.6" + (c.has("he") ? " · Hope's End p.3 " + (c.mod("leaders") ? "§2.3–2.4" : "§2.4") : "")
+    src: (c) => "Rules p.9–11 §8.1, p.11 §8.2 · FAQ p.1–4, p.6" + (c.has("he") ? " · Hope's End p.3 " + (c.mod("leaders") ? "§2.3–2.4" : "§2.4") : "")
   },
   {
     title: "Economy Phase — cards, credits, trade and purchases",
@@ -413,7 +413,7 @@ T2.reference = [
       "<li><b>Check your Spacedock limits and blockades first:</b> units you can't place are destroyed, and the credits lost.</li>" +
       (c.mod("leaders") ? "<li><b>Scientist:</b> once a round, one PDS or Spacedock for 5 credits on the Scientist's planet — placed there even if the Scientist then moves (FAQ p.2).</li>" : "") +
       (c.has("he") ? "<li>Graviton Laser System: every PDS costs you 5. Integrated Economy: place purchased units directly on the board during this segment.</li>" : "") + "</ul>",
-    src: (c) => "Rules p.11–12 §8.2 · FAQ " + (c.mod("leaders") ? "p.2–3" : "p.3") + (c.has("he") ? " · Hope's End " + (c.mod("leaders") ? "p.3–4" : "p.4") : "")
+    src: (c) => "Rules p.7 §7.6, p.11–12 §8.2 · FAQ " + (c.mod("leaders") ? "p.2–3" : "p.3") + (c.has("he") ? " · Hope's End " + (c.mod("leaders") ? "p.3–4" : "p.4") : "")
   },
   {
     title: "Units — costs, combat values and capacity",
@@ -434,14 +434,14 @@ T2.reference = [
     title: "Movement — fleets, carriers and interdiction",
     when: () => true,
     html: (c) => "<ul>" +
-      "<li>A movement of 1 = from one system to an adjacent one. Dreadnoughts and Carriers move 1, Cruisers 2" + (c.has("he") ? " (XRD Transporter: Carriers +1; Type IV Drive: Cruisers and Dreadnoughts +1" + (c.mod("leaders") ? "; an Admiral: up to three Dreadnoughts +1" : "") + ")" : "") + ".</li>" +
+      "<li>A movement of 1 = from one system to an adjacent one. Dreadnoughts and Carriers move 1, Cruisers 2" + (c.has("he") ? " (XRD Transporter: Carriers +1; Type IV Drive: Cruisers and Dreadnoughts +1" + (c.mod("leaders") ? "; an Admiral: up to three Dreadnoughts that start and end their move with him +1" : "") + ")" : "") + ".</li>" +
       "<li>A <b>fleet</b> is one or more of your spaceships in the same system at the start of your Movement Segment.</li>" +
       "<li><b>Transport:</b> a Carrier may pick up Ground Forces or PDS at any time during its move (before, during or after). They can't leave the Carrier — not even onto another Carrier — until the Invasion Combat Segment (FAQ p.3).</li>" +
       "<li>A Carrier with more than one move may drop Fighters along the way, if the systems it drops them in can maintain them (FAQ p.3).</li>" +
       "<li><b>Interdiction:</b> a ship entering a system with another race's spaceships must <b>stop</b>; a space battle follows.</li>" +
       "<li>You can never move <b>through</b> a system holding another race's fleet — not even an ally's" + (c.has("he") ? " (Light/Wave Deflector lets you" + (c.mod("leaders") ? "; so does a Diplomat, with the opponent's permission" : "") + ")" : "") + ". You may move through systems with enemy planets and with enemy Spacedocks and their Fighters.</li>" +
       "<li><b>Out-of-turn PDS fire:</b> right after an enemy finishes his Movement Segment, each of your PDS in a system containing his ships may fire once at them (no defense). It's optional, and Light/Wave Deflector doesn't stop it (FAQ p.5).</li>" +
-      (c.has("he") ? "<li>Before your Movement Segment: Spatial Jump (one fleet anywhere; each ship — Fighters too — is lost on 8–10) and Transit Diodes (move up to three Ground Forces between your planets).</li>" : "") +
+      (c.has("he") ? "<li>Before your Movement Segment: Spatial Jump (one fleet anywhere; each ship — Fighters too — is lost on 8–10) and Transit Diodes (move up to three Ground Forces from one of your planets to another).</li>" : "") +
       (c.mod("leaders") ? "<li><b>Leaders</b> change ship or board a ship only immediately before your Movement Segment, within one system; they land only in the Invasion Combat Segment.</li>" : "") + "</ul>",
     src: (c) => "Rules p.7–8 §7.7–7.10, p.13–14 §8.3, p.20 · FAQ " + (c.has("he") ? "p.1, " : "") + "p.3, p.5" + (c.has("he") ? " · Hope's End " + (c.mod("leaders") ? "p.2–4" : "p.4") : "")
   },
@@ -466,7 +466,7 @@ T2.reference = [
       "<h4>Before the first round</h4><ul>" +
       "<li><b>PDS offensive fire:</b> in your Space Combat Segment each of your PDS may fire once at enemy ships in its system — or, with Deep Space Cannon, in an adjacent system (one or the other). No defense.</li>" +
       (c.has("he") ? "<li><b>Mentak Coalition:</b> fires two Cruisers before space combat — in every system where it fights, attacking or defending, and <b>before</b> Assault Cannons (FAQ p.1)." + (c.mod("leaders") ? " An Admiral aboard doesn't add a third shot, nor a second Assault Cannon shot from one Dreadnought (FAQ p.1–2)." : "") + "</li>" : "") +
-      "<li><b>Assault Cannon</b> (technology) gives your Dreadnoughts a free shot before combat" + (c.has("he") ? ": each fires once and the casualties are removed at once, with no defense" : "") + ". A defending PDS fires <b>before</b> these Dreadnoughts (FAQ p.5). If both sides have Assault Cannon and Dreadnoughts, the side with more Assault-Cannon Dreadnoughts fires first with the difference (e.g. 3 vs 2: one shot first); all the others fire normally (FAQ p.2 — see the FAQ note below).</li></ul>" +
+      "<li><b>Assault Cannon</b> (technology) gives your Dreadnoughts a free shot before combat" + (c.has("he") ? ": each fires once and the casualties are removed at once, with no defense" : "") + ". A defending PDS fires <b>before</b> these Dreadnoughts (FAQ p.5). If both sides have Assault Cannon and Dreadnoughts, the side with more Assault-Cannon Dreadnoughts may fire first with as many Dreadnoughts as the difference (e.g. 3 vs 2: one shot first); all the others fire normally (FAQ p.2 — see the FAQ note below).</li></ul>" +
       "<h4>Each round</h4><ol>" +
       "<li>The <b>attacker</b> fires once with <b>all</b> his ships; each roll equal to or higher than the ship's combat value is a hit.</li>" +
       "<li>The <b>defender</b> fires with all his units.</li>" +
@@ -476,7 +476,7 @@ T2.reference = [
       "<li><b>Cargo:</b> Ground Forces and PDS aboard a Carrier can't attack or defend and are destroyed with it; its Fighters may survive until the end of the Space Combat Segment.</li>" +
       "<li>A roll that can't miss or can't hit after modifiers isn't rolled — it simply succeeds or fails (FAQ p.5). PDS may shoot Fighters (FAQ p.5).</li>" +
       "<li>Battling breaks any Trade Agreement between the two players (the Hacan's excepted).</li>" +
-      (c.has("he") ? "<li>Modifiers: Hylar V Assault Laser (your Cruisers +1), Cybernetics (your Fighters +1), Magen Defense Grid (your PDS +1)" + (c.mod("leaders") ? ", an <b>Admiral</b> (one extra die for his ship; no Skilled Retreat against his fleet)" : "") + ". Fighters are useless in a <b>Nebula</b>. After winning: Strategic Mathematics.</li>" : "") +
+      (c.has("he") ? "<li>Modifiers: Hylar V Assault Laser (your Cruisers +1), Cybernetics (your Fighters +1), Magen Defense Grid (your PDS +1)" + (c.mod("leaders") ? ", an <b>Admiral</b> (one extra die for his ship; no Skilled Retreat against his fleet unless the retreating fleet also has an Admiral)" : "") + ". Fighters can't hit in a <b>Nebula</b> (they can still be taken as casualties). After winning: Strategic Mathematics.</li>" : "") +
       (c.mod("leaders") ? "<li><b>Leaders</b> on a destroyed ship: roll — 1–5 killed, 6–9 captured by the destroyer, 0 escapes to any friendly planet.</li>" : "") + "</ul>" +
       "<p class='tbl-note'><b>Example (Diagram Four):</b> Sol's Dreadnought and Carrier (2 Ground Forces, 3 Fighters) attack a Xxcha Dreadnought and two Cruisers. Sol scores 2 hits, Xxcha 3: Xxcha loses both Cruisers, Sol its three Fighters. Next round Sol's Dreadnought hits and the Xxcha Dreadnought misses — the system is Sol's, and its Ground Forces can invade.</p>",
     src: (c) => "Rules p.7 §7.7, p.8 §7.9, p.11–12 §8.2, p.14–15 §8.3 · FAQ " + (c.has("he") ? "p.1–2" : "p.2") + ", p.5" + (c.has("he") ? " · Hope's End " + (c.mod("leaders") ? "p.1–4" : "p.1, p.4") : "")
@@ -494,10 +494,10 @@ T2.reference = [
       "<li>A PDS landed with the invaders can't fight and is destroyed if the invasion fails.</li>" +
       "<li><b>Neutral planet taken:</b> add its resources and influence at once. <b>Enemy planet taken:</b> all enemy PDS and Spacedocks there are destroyed" + (c.mod("shock") ? " (if any of your Shock Troops survive, you may capture them instead)" : "") + "; you add its values, the loser deducts them. <b>Friendly planet:</b> the landing Ground Forces simply join the garrison.</li>" +
       "<li><b>Control:</b> you control a planet only if you have landed at least one Ground Force there. Moving your last Ground Force off leaves your control marker. Losing all your troops to a card doesn't lose the planet unless the card says so (FAQ p.4–5).</li>" +
-      (c.has("he") ? "<li>Technologies: Stasis Capsules — a Dreadnought may bombard and land Ground Forces in the same turn (FAQ p.5); X-89 Bacterial Weapon; Dacxive Animators; Graviton Negator (bombard PDS planets; Fighters invade like Ground Forces but can't take control); Magen Defense Grid (defending Ground Forces in a system with a PDS +1).</li>" : "") +
-      (c.mod("leaders") ? "<li><b>Leaders</b> may land on a friendly planet, or join an invasion (a <b>General</b> re-rolls one die per round; an invading Leader is captured if the invasion fails). A <b>Diplomat</b> on the defending planet may delay the invasion a turn. Dreadnoughts bombarding a planet with an enemy <b>General</b> get −4. A planet holding a Leader that is successfully invaded: roll — 1–5 captured, 6–9 escapes to any friendly planet, 0 killed.</li>" : "") +
+      (c.has("he") ? "<li>Technologies: Stasis Capsules — a Dreadnought may bombard and land Ground Forces in the same turn (FAQ p.5); X-89 Bacterial Weapon; Dacxive Animators; Graviton Negator (bombard PDS planets; Fighters invade like Ground Forces, return to space afterwards and can't take control); Magen Defense Grid (defending Ground Forces in a system with a PDS +1).</li>" : "") +
+      (c.mod("leaders") ? "<li><b>Leaders</b> may land on a friendly planet, or join an invasion (a <b>General</b> re-rolls one die per round; an invading Leader is captured if the invasion fails). A <b>Diplomat</b> on the planet about to be invaded may delay the invasion one turn: the invading Ground Forces return to their fleet (Dreadnoughts may still bombard — FAQ p.2). Not on Mecatol Rex, and not again the turn after. Dreadnoughts bombarding a planet with an enemy <b>General</b> get −4. A planet holding a Leader that is successfully invaded: roll — 1–5 captured, 6–9 escapes to any friendly planet, 0 killed.</li>" : "") +
       (c.mod("ds") ? "<li><b>Distant Suns:</b> the first invasion of a neutral planet triggers its Domain Counter; probing and razing also happen in this segment (see Distant Suns).</li>" : "") + "</ul>",
-    src: (c) => "Rules p.7–9 §7.7–7.12, p.15–16 §8.3" + (c.mod("ds") ? ", p.19 §10.2" : "") + " · FAQ p.4–5" + (c.has("he") ? " · Hope's End " + (c.mod("leaders") ? "p.2–4" : (c.mod("shock") ? "p.2, p.4" : "p.4")) : "")
+    src: (c) => "Rules p.7–9 §7.7–7.12, p.15–16 §8.3" + (c.mod("ds") ? ", p.19 §10.2" : "") + " · FAQ " + (c.mod("leaders") ? "p.2, p.4–5" : "p.4–5") + (c.has("he") ? " · Hope's End " + (c.mod("leaders") ? "p.2–4" : (c.mod("shock") ? "p.2, p.4" : "p.4")) : "")
   },
   {
     title: "Technology Phase",
@@ -508,7 +508,7 @@ T2.reference = [
       "<li><b>Planet specialties:</b> a planet with a technology symbol by its name lets you subtract its <b>resources</b> from the cost of technology of that colour. Example: two red planets worth 6 resources together → red technology costs 24. No planet has a yellow (General) specialty. Resource modifiers such as Sarween Tools count (FAQ p.5–6).</li>" +
       "<li>Colours: <span class='t-chip t-grn'>Green · Biological</span> <span class='t-chip t-red'>Red · Weapons</span> <span class='t-chip t-blu'>Blue · Propulsion</span> <span class='t-chip t-yel'>Yellow · General</span></li>" +
       "<li>Losing a technology (e.g. to Scientist Assassination) doesn't remove the ones that required it, and you may keep buying as if you still had it (FAQ p.6).</li>" +
-      (c.mod("leaders") ? "<li><b>Scientist</b> on a planet outside your home system: that planet counts double resources toward your technology purchase.</li>" : "") +
+      (c.mod("leaders") ? "<li><b>Scientist</b> on any planet outside your home system: you may use <b>double that planet's resource value</b> in credit toward the purchase of technology (of any colour) this Technology Phase.</li>" : "") +
       (c.mod("ds") ? "<li><b>New Technology</b> domain counter: 5 × the planet's influence in credit toward your next technology.</li>" : "") +
       (c.has("he") ? "" : "<li>The base rulebook prints no technology list: each chit carries its own requirements and effect. (Add Hope's End above to see its comprehensive flow-chart of all 24.)</li>") + "</ul>",
     src: (c) => "Rules p.6–7 §7.5, p.16 §8.4 · FAQ p.5–6" + (c.mod("leaders") ? " · Hope's End p.3" : "") + (c.mod("ds") ? " · Rules p.20" : "")
@@ -562,7 +562,7 @@ T2.reference = [
       "<li><b>The Xxcha Kingdom</b> — their racial ability gets rid of a political agenda before the vote; it works on an agenda chosen with Determine Policy, and they may discard a current Law being revoted by paying 5 credits (FAQ p.2, p.4).</li>" +
       "<li><b>The Emirates of Hacan</b> — their Trade Agreements are not broken when they fight a trading partner.</li>" +
       "<li><b>The Federation of Sol</b> and <b>The Barony of Letnev</b> — no rules beyond their race stands.</li>" +
-      (c.has("he") ? "<li><b>The Mentak Coalition</b> (Hope's End) — two Cruisers fire before space combat: in every battle, attacking or defending, and before Assault Cannons" + (c.mod("leaders") ? "; no extra shot from an Admiral" : "") + " (FAQ p.1–2).</li>" +
+      (c.has("he") ? "<li><b>The Mentak Coalition</b> (Hope's End) — two Cruisers fire before space combat: in every battle, attacking or defending, and before Assault Cannons" + (c.mod("leaders") ? "; no extra shot from an Admiral (FAQ p.1–2)" : " (FAQ p.1)") + ".</li>" +
         "<li><b>The Yssaril Tribes</b> (Hope's End) — no rules beyond their race stand.</li>" : "") + "</ul>",
     src: (c) => "Rules p.5 §6.1, p.12 §8.2, p.16 §8.4 · FAQ " + (c.has("he") ? "p.1–2" : "p.2") + ", p.4" + (c.has("he") ? " · Hope's End p.1" : "")
   },
@@ -590,16 +590,16 @@ T2.reference = [
     html: (c) => "<ul><li>When: after the galaxy is set up, before the game begins.</li>" +
       "<li>Buy control of <b>neutral planets adjacent to your home system</b> with your starting credits: <b>(Resources + Influence) × 2</b> each, then place one free Ground Force there.</li>" +
       "<li>Example: next to the N'orr are Mellon (1 resource, 4 influence — 10 credits) and Sakulag (4 and 2 — 12 credits); the N'orr buy Sakulag for 12.</li>" +
-      (c.mod("ds") ? "<li>Distant Suns: planets bought this way were never invaded, so their Domain Counters are removed unseen.</li>" : "") + "</ul>",
+      (c.mod("ds") ? "<li>Distant Suns: planets bought this way were never invaded, so their Domain Counters are ignored and removed from the game.</li>" : "") + "</ul>",
     src: (c) => "Rules p.18 §10.1" + (c.mod("ds") ? " · Rules p.19 §10.2" : "")
   },
   {
     title: "Hope's End — cards, deeds and new tiles",
     when: (c) => c.has("he"),
     html: (c) => "<ul>" +
-      "<li><b>Cards:</b> 28 Political and 28 Action cards join the decks. Cards needing an optional rule (e.g. Distant Suns, Leaders) carry its keyword in the lower left-hand corner so you can remove them when that rule isn't in use.</li>" +
+      "<li><b>Cards:</b> 28 Political and 28 Action cards you may mix into the decks. Cards needing an optional rule (e.g. Distant Suns, Leaders) carry its keyword in the lower left-hand corner so you can remove them when that rule isn't in use.</li>" +
       "<li><b>Event cards</b> (among the new Political cards): read aloud and resolve at once, then draw another Political card; they can't be Vetoed or affected like agendas.</li>" +
-      "<li><b>Deed cards:</b> take a planet's Deed when you invade it — from the neutral pile or from its previous owner.</li>" +
+      "<li><b>Deed cards</b> (58, one per planet): when you <b>successfully</b> invade a planet, take its Deed — from the neutral pile or from the player who just lost it. They show your resources, influence and planet count, and are used to pick planets at random when a new Action card says so.</li>" +
       "<li><b>New races:</b> the Mentak Coalition and the Yssaril Tribes play like any other race.</li>" +
       "<li><b>New hexes:</b> 13, including the two new home systems; with them you have 8 home systems, Mecatol Rex and 43 regular tiles. New system types: the Nebula and the Gravity Rift (see Special systems).</li>" +
       "<li><b>Larger galaxies:</b> the sheet's examples — “Vortex”, “Snowflake” and “Gauntlet” — use 42 tiles (discard one at random), recommended only for 6 players; experimenting with other constellations is encouraged." + (c.big ? " Tonight: “" + T2.galaxyName(c) + "”." : "") + "</li>" +
@@ -626,7 +626,7 @@ T2.reference = [
       "<li><b>Moving:</b> immediately before your Movement Segment, a Leader may board a ship from a planet or change ships within one system. In the Invasion Combat Segment it may land on a friendly planet in the system or join an invasion (captured if the invasion fails).</li>" +
       "<li><b>Ship destroyed in space combat:</b> roll — 1–5 killed · 6–9 captured by the destroyer · 0 escapes to any friendly planet. Destroyed any other way: killed.</li>" +
       "<li><b>Planet successfully invaded:</b> roll — 1–5 captured · 6–9 escapes to any friendly planet · 0 killed. Planet lost by bombardment or any other way: the Leader escapes to another friendly planet.</li>" +
-      "<li><b>Captives:</b> kept by the captor, who may execute them at any time or hand them to any player in the Political Phase (to their owner: freed). Each time you successfully invade a planet of a player holding captives, roll: on <b>0</b> you find one (at random) — yours is freed, anyone else's becomes your captive.</li></ul>" +
+      "<li><b>Captives:</b> kept by the captor, who may execute them at any time or hand them to any player in the Political Phase (handed to their owner, they are freed). Each time you successfully invade a planet of a player holding captives, roll: on <b>0</b> you find one (at random) — yours is freed, anyone else's becomes your captive. A freed Leader is placed at once on any friendly planet.</li></ul>" +
       "<div class='tbl-wrap'><table class='tbl'><thead><tr><th scope='col'>Leader</th><th scope='col'>Abilities</th></tr></thead><tbody>" +
       T2.leaders.map(l => "<tr><th scope='row'>" + l.n + "</th><td><ul>" + l.fx.map(f => "<li>" + f + "</li>").join("") + "</ul></td></tr>").join("") + "</tbody></table></div>" +
       "<ul><li>With the Mentak, an Admiral doesn't give their Cruisers or an Assault-Cannon Dreadnought an extra pre-combat shot (FAQ p.1–2).</li></ul>",
@@ -648,8 +648,9 @@ T2.reference = [
       "<li>Sarween Tools raises Spacedock production, progression totals and specialty discounts; a Spacedock itself doesn't count toward production (FAQ p.3, p.5–6).</li>" +
       "<li>Stasis Capsules: a Dreadnought may bombard and land Ground Forces in the same turn (FAQ p.5). Light/Wave Deflector doesn't stop PDS fire (FAQ p.5). Spatial Jump: Fighters roll too (FAQ p.1).</li>" +
       "<li>A lost prerequisite doesn't remove dependent technologies (FAQ p.6).</li></ul>" +
-      (c.has("he") ? "<h4>Hope's End</h4><ul><li>Mentak pre-combat shots: every battle, also when defending, before Assault Cannons" + (c.mod("leaders") ? "; no extra shots with an Admiral" : "") + " (FAQ p.1–2).</li>" +
-        (c.mod("leaders") ? "<li>A Diplomat stops invading Ground Forces, not bombardment (FAQ p.2).</li><li>A Scientist's cheap Spacedock or PDS is placed on the planet where it was bought (FAQ p.2).</li><li>A Leader whose troops die to radiation or a biohazard escapes back to the ship (FAQ p.2).</li>" : "") +
+      (c.has("he") ? "<h4>Hope's End</h4><ul><li>Mentak pre-combat shots: every battle, also when defending, before Assault Cannons" + (c.mod("leaders") ? "; no extra shots with an Admiral (FAQ p.1–2)" : " (FAQ p.1)") + ".</li>" +
+        (c.mod("leaders") ? "<li>A Diplomat stops invading Ground Forces, not bombardment (FAQ p.2).</li><li>A Scientist's cheap Spacedock or PDS is placed on the planet where it was bought (FAQ p.2).</li>" : "") +
+        (c.mod("leaders") && c.mod("ds") ? "<li>Distant Suns: a Leader whose Ground Forces die to a Radioactive or Biohazard counter escapes back to the ship he was dropped from (FAQ p.2).</li>" : "") +
         (c.mod("shock") ? "<li>A Spacedock captured by Shock Troops can place new units that turn (FAQ p.2).</li>" : "") + "</ul>" : ""),
     src: (c) => "FAQ p.1–6"
   }
@@ -688,12 +689,12 @@ T2.teach = {
       body: (c) => {
         const k = T2.deal[c.p];
         return "<p>We build the galaxy ourselves: " + (k.remove ? T2.word(k.remove) + " system tile" + (k.remove > 1 ? "s go" : " goes") + " back in the box unseen and we're dealt the rest — " + k.each : "all thirty-two system tiles are dealt out — " + k.each) +
-          ". Lowest roll places first, ring by ring out from Mecatol Rex, in snake order; red-bordered hazards can't touch each other, and after a tile with no planet you must play one with a planet. Put rich systems near your home and hazards between you and your neighbours." +
+          ". Lowest roll places first, ring by ring out from Mecatol Rex, in snake order; red-bordered hazards can't touch each other unless there's no other choice, and after a tile with no planet you must play one with a planet if you can. Put rich systems near your home and hazards between you and your neighbours." +
           (c.p === 5 ? " With five the board is lopsided, so the two A seats start with 15 extra credits and the B seat with 20 — and whoever is dealt the seventh tile must pay 5 credits or pass it on before looking." : "") + "</p>";
       } },
     { when: (c) => c.big,
       h: (c) => "Tonight's galaxy — the “" + T2.galaxyName(c) + "”",
-      body: (c) => "<p>We're building Hope's End's “" + T2.galaxyName(c) + "” constellation: forty-two system tiles — one of the forty-three discarded at random — dealt seven each, then placed in snake order out from Mecatol Rex until the galaxy matches the picture. The sheet only shows the finished map, so the dealing and placing are the base game's rules, borrowed: red-bordered hazards can't touch each other, and after a tile with no planet you must play one with a planet.</p>" },
+      body: (c) => "<p>We're building Hope's End's “" + T2.galaxyName(c) + "” constellation: forty-two system tiles — one of the forty-three discarded at random — dealt seven each, then placed in snake order out from Mecatol Rex until the galaxy matches the picture. The sheet only shows the finished map, so the dealing and placing are the base game's rules, borrowed: red-bordered hazards can't touch each other unless there's no other choice, and after a tile with no planet you must play one with a planet if you can.</p>" },
     { when: (c) => c.mod("bid"),
       h: "Race bidding",
       body: () => "<p>Races tonight are auctioned: instead of drawing home systems at random, we bid our starting income for the race we want. The rulebook doesn't say how the auction runs, so let's agree that before we start.</p>" },
@@ -702,21 +703,21 @@ T2.teach = {
       body: (c) => "<p>Before the first round you may spend starting credits buying <b>neutral planets next to your home system</b>: resources plus influence, times two, and each comes with a free Ground Force." + (c.mod("ds") ? " Bought planets skip their hidden domain counter." : "") + "</p>" },
     { when: (c) => c.mod("ds"),
       h: "Distant Suns",
-      body: () => "<p>Every neutral planet hides a face-down <b>domain counter</b> that goes off when someone first invades it: wealth, settlers, new technology, an industrial society, a new wormhole — or radiation, a biohazard, hostile locals, even Lazax survivors that nobody believes in. A Carrier with a Fighter can <b>probe</b> to peek first; a Dreadnought can <b>raze</b> a planet to wipe its counter, but then the dice decide how badly the galaxy takes it.</p>" },
+      body: () => "<p>Every neutral planet except Mecatol Rex hides a face-down <b>domain counter</b> that goes off when someone first invades it: wealth, settlers, new technology, an industrial society, a new wormhole — or radiation, a biohazard, hostile locals, even Lazax survivors that nobody believes in. A Carrier with a Fighter can <b>probe</b> to peek at it, but you can't invade a planet in the same turn you probe it. A Dreadnought can <b>raze</b> a planet to wipe its counter, but then nobody may invade it that round, and the dice decide how badly the galaxy takes it.</p>" },
     { when: (c) => c.has("he"),
       h: "Hope's End",
       body: (c) => "<p>Hope's End adds two races — the Mentak Coalition and the Yssaril Tribes — and new hazard tiles" +
         (c.big ? ", which are in tonight's galaxy" : ", which come into play on its larger galaxies (tonight's standard map uses the base game's tiles)") +
-        ": a <b>Nebula</b> stops any ship that enters and leaves Fighters unable to hit in battle, and a <b>Gravity Rift</b> makes each departing ship roll — 7 or better and it leaves by any side, otherwise it must leave by the side matching the roll or stay put. " +
+        ": a <b>Nebula</b> stops any ship that enters and leaves Fighters unable to hit in battle, and a <b>Gravity Rift</b> makes each departing ship (Fighters excepted) roll — 7 or better and it leaves by any side, otherwise it must leave by the side matching the roll or stay put. " +
         (c.p === 2 ? "Some new Political cards are <b>Events</b>, but with no council between the two of us they never come up. "
           : "Some new Political cards are <b>Events</b> that resolve at once before the real agenda. ") +
-        "Take a planet's <b>Deed card</b> when you invade it — it keeps your totals honest. And there are four new technologies; the full tree is in the reference.</p>" },
+        "Take a planet's <b>Deed card</b> when you successfully invade it — it keeps your totals honest. And there are four new technologies; the full tree is in the reference.</p>" },
     { when: (c) => c.mod("shock"),
       h: "Shock Troops",
       body: () => "<p>When one of your Ground Forces rolls a natural 10 in invasion combat, roll again: on 9 or 10 it becomes a <b>Shock Troop</b>. They hit on 5 and must be taken as your first casualties — except against the defending PDS shots before the ground battle. If any survive a successful invasion, you can <b>capture</b> the enemy's Spacedocks and PDS there instead of destroying them. Only eight can exist at a time.</p>" },
     { when: (c) => c.mod("leaders"),
       h: (c) => c.mod("facedown") ? "Leaders — face down" : "Leaders",
-      body: (c) => "<p>Each race has three <b>Leaders</b>, drawn from five types: Generals re-roll a die in ground battles, Admirals add a die in space and speed up Dreadnoughts, Diplomats delay invasions, Agents silence PDS, and Scientists make technology and defences cheaper. They ride any ship; when their ship dies or their planet falls they may be killed, captured or escape — and captives can be traded or rescued." +
+      body: (c) => "<p>Each race has three <b>Leaders</b>, drawn from five types: Generals re-roll a die in ground battles, Admirals add a die in space and speed up Dreadnoughts, Diplomats delay invasions, Agents stop enemy PDS firing at an invasion they join, and Scientists make technology, PDS and Spacedocks cheaper. They ride any ship; when their ship dies or their planet falls they may be killed, captured or escape — and captives can be traded or rescued." +
         (c.mod("facedown") ? " We play them <b>face down</b>: you reveal a Leader only when it uses its skill." : "") + "</p>" },
     {
       h: "Don't worry about these until they come up",
@@ -724,7 +725,7 @@ T2.teach = {
         const items = [];
         items.push("<li><b>" + (c.p === 2 ? "Individual Action cards" : "Individual agendas and Action cards") + "</b> — each says when and how it works; I'll referee the first few.</li>");
         items.push("<li><b>Trade Agreements</b> — played from Action cards; they pay you per planet your partner owns and break if you fight each other.</li>");
-        items.push("<li><b>Insurgence checks</b> — only when a card" + (c.mod("ds") ? " or a razing roll" : "") + " calls for one: a die plus your warships against the planet's influence.</li>");
+        items.push("<li><b>Insurgence checks</b> — only when a card" + (c.mod("ds") ? " or a razing roll" : "") + " calls for one: a die plus one for each of your Cruisers and Dreadnoughts in the system, against the planet's influence.</li>");
         items.push("<li><b>Running out of money</b> — you sell units at fixed prices, only enough to cover the debt.</li>");
         items.push("<li><b>Wormholes, asteroid fields and supernovas</b> — the exact movement rules are in the reference.</li>");
         items.push("<li><b>Ties</b> — turn order goes to most resources, then technologies, then credits.</li>");

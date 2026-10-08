@@ -35,7 +35,7 @@ window.AID_COMPONENTS = {
     { set: "core", qty: "4", name: "Battle dice" },
     { set: "core", qty: "1", name: "Resource die" },
 
-    { set: "exp", qty: "16", name: "Board pieces", note: "Adds the water space: flying units may pass through it but not end their move there. Pictured: a water space", img: "exp-water.webp", w: 209, h: 239 },
+    { set: "exp", qty: "16", name: "Board pieces", note: "Adds the water space: only flying units may enter it, and they may only pass through, never end their move there. Pictured: a water space", img: "exp-water.webp", w: 209, h: 239 },
     { set: "exp", qty: "4", name: "Hero building tiles", note: "1 per race", img: "exp-hero-building.webp", w: 193, h: 169,
       when: (c) => c.mod("heroes") },
     { set: "exp", qty: "8", name: "Outpost markers", note: "2 per race, coloured by race; they replace the base game’s Outposts (Expansion p.2)", img: "exp-outposts.webp", w: 166, h: 185 },

@@ -77,9 +77,9 @@ HH.modules = [
     description: "The rulebook’s memory aid for the rule that orders placed since the last change of initiative can’t be executed yet.",
     src: "Rules p.19" },
   { id: "pending", name: "Mark pending phase icons",
-    summary: "Drop a spare token on each special-phase icon a marker crosses until that phase is resolved",
+    summary: "Drop a spare token on each not-yet-triggered special-phase icon the current player’s initiative marker moves past or onto, until that phase is resolved",
     description: "The rulebook’s suggestion for not losing track of which special phases are still to resolve.",
-    src: "Rules p.15" },
+    src: "Rules p.15 · FAQ p.2" },
   { id: "tuck", name: "Tuck your reserve under the board",
     summary: "Slide recycled orders halfway under the board so they aren’t mixed up with cards in play",
     description: "The rulebook’s tip for keeping each player’s reserve separate from cards being executed.",
@@ -111,7 +111,8 @@ HH.trackHtml = function () {
 // Citation for the selected table aids, e.g. "Rules p.15, p.19"
 HH.aidSrc = function (c) {
   var pg = [c.mod("pending") ? "p.15" : "", c.mod("rotate") ? "p.19" : "", c.mod("tuck") ? "p.20" : ""].filter(Boolean);
-  return pg.length ? "Rules " + pg.join(", ") : "";
+  var s = pg.length ? "Rules " + pg.join(", ") : "";
+  return s + (c.mod("pending") ? " · FAQ p.2" : "");
 };
 
 HH.heroTrackHtml = function () {
@@ -265,7 +266,7 @@ HH.phases = [
         d: "<ul><li>Lay the plastic <b>fortifications</b> (<b>3 factories, 6 fortresses and the palace</b>) on the table in the rough arrangement shown in the rulebook’s diagram, matching the holes in the board.</li>" +
           "<li>Lower the unfolded board onto them, lining each one up with its hole. The board should lie flat with the fortifications protruding through it. Factories and fortresses are interchangeable with others of their type.</li>" +
           "<li>The board has the <b>main map board</b> (Terra, plus Horus’s flagship the <b>Vengeful Spirit</b>), the <b>strategic map</b>, and record-keeping tracks.</li></ul>",
-        src: "Rules p.12 · p.3" },
+        src: "Rules p.12 · p.3, p.37" },
       { when: () => true, who: "both",
         t: "General component setup",
         d: (c) => "<ul>" +
@@ -368,7 +369,7 @@ HH.phases = [
       { when: (c) => c.scen !== "bab", who: "imp",
         t: "Unit setup 2: the Imperial deployment",
         d: (c) => "<ul>" +
-          HH.li(c, "imp", "places the rest of his starting forces. None may break an area’s <b>stacking limit</b> (6 units; 3 in a fortified area), go in either spaceport holding a Traitor Warband, or go on the <b>Vengeful Spirit</b>.") +
+          HH.li(c, "imp", "places the rest of his starting forces. None may break an area’s <b>stacking limit</b> (6 units; 3 in a fortified area. Heroes and defense lasers don’t count toward it), go in either spaceport holding a Traitor Warband, or go on the <b>Vengeful Spirit</b>.") +
           "<li><b>1 Imperial Army</b> in each fortress area: the Tower of Shadows, Librarium Technologicus, Bastion Eternal, Fortress of Truth, Citadel of Justice and Black Ministry." +
             (HH.scIs(c, "hta", "cha") ? " If a fortress is impassible, its Army is destroyed instead of placed." : "") + "</li>" +
           "<li><b>6 defense lasers</b>, in six different areas.</li>" +
@@ -393,14 +394,14 @@ HH.phases = [
       { when: () => true, who: "table",
         t: "Build the event deck",
         d: (c) => HH.evHtml(c),
-        src: (c) => "Scenarios " + HH.scPage(c) + (c.scen === "cha" ? " · Rules p.5, p.39" : " · Rules p.5, p.13, p.39") },
+        src: (c) => "Scenarios " + HH.scPage(c) + (c.scen === "cha" ? " · Rules p.3, p.5, p.13, p.39" :" · Rules p.5, p.13, p.39") },
       { when: () => true, who: "trt",
         t: (c) => "Corruption: " + HH.sc(c).corr + " draws",
         d: (c) => "<ul>" + HH.li(c, "trt", "makes <b>" + HH.sc(c).corr + " corruption draws</b>. For each:<ol>" +
           "<li>Choose an <b>Imperial Army</b> or <b>Imperial Tank Division</b> on the main map board. They are the only unit types that can be corrupted, and each Imperial unit can be put in jeopardy only <b>once</b> during setup.</li>" +
           "<li>Draw the top <b>bombardment card</b>. <b>Imperial Eagle</b>: no effect. <b>Chaos Star</b>: the unit is corrupted.</li>" +
           "<li>Move a corrupted unit’s figure from its gray base onto a <b>black Traitor base</b> (rank I for an Army, rank II for a Tank Division). It stays in the same area and is now a Traitor unit. The gray base goes to the Imperial stockpile. Discard the drawn card.</li></ol>") +
-          "<li>Only the 12 spare black bases can be used. With none of the right rank left, that unit type can’t be corrupted.</li>" +
+          "<li>Only the <b>12 spare black bases</b> (8 rank I for Armies, 4 rank II for Tank Divisions) can be used; bases can’t be borrowed from other Traitor units. With none of the right rank left, that unit type can’t be corrupted.</li>" +
           HH.li(c, "imp", "watches which of his Armies and Tank Divisions change sides.") + "</ul>",
         src: (c) => "Scenarios " + HH.scPage(c) + " · Rules p.13, p.37" },
       { when: () => true, who: "trt",
@@ -436,7 +437,7 @@ HH.phases = [
         t: "Agree on your table aids",
         d: (c) => "<ul>" +
           (c.mod("rotate") ? "<li><b>Rotate new orders.</b> Place every order on the strategic map turned 90° from the rest of its stack. At each change of initiative, turn them all to match. A turned card can’t be executed yet.</li>" : "") +
-          (c.mod("pending") ? "<li><b>Mark pending phases.</b> Keep a spare marker or token handy. Put it on each special-phase icon a marker moves past or onto, and take it off when that phase is resolved.</li>" : "") +
+          (c.mod("pending") ? "<li><b>Mark pending phases.</b> Keep a spare marker or token handy. Put it on each special-phase icon the <b>current player’s</b> marker moves past or onto (unless that space has already triggered this game), and take it off when that phase is resolved.</li>" : "") +
           (c.mod("tuck") ? "<li><b>Tuck your reserve.</b> Slide your faceup reserve cards halfway under the game board while they aren’t in use, so they aren’t confused with cards being executed.</li>" : "") +
           "</ul>",
         src: (c) => HH.aidSrc(c) },
@@ -479,7 +480,7 @@ HH.reference = [
         "<li>A unit the unit setup would place in an impassible area is destroyed instead of placed.</li>" +
         "<li>Units and Heroes can’t enter an impassible area, it can’t be the target of a bombardment, and it can’t be the subject of <b>any</b> game effect at all: functionally, it doesn’t exist.</li></ul>";
       if (s.tok) h += "<h4>Special tokens</h4><ul>" +
-        "<li>Each player has 3. When you place one of your orders on the strategic map, or execute one of your orders from the strategic map or from your hand, you may spend <b>one</b> to cut that cost by 1 (minimum 0).</li>" +
+        "<li>Each player has 3. When you place one of your orders on the strategic map, or execute one of your orders from the strategic map or from your hand, you may spend <b>one</b> to cut the <b>initiative cost</b> of that placement or execution by 1 (minimum 0).</li>" +
         "<li>Only one token per placement or execution. A spent token is out for the rest of the game.</li>" +
         (s.id === "cha" ? "<li>Cry Havoc also uses special tokens to mark impassible areas; the two uses aren’t interchangeable.</li>" : "") + "</ul>";
       if (s.id === "ffb") h += "<h4>Before you start</h4><ul>" +
@@ -556,7 +557,7 @@ HH.reference = [
     html: (c) => "<p>The track as pictured in the rulebook (34 spaces). The board’s <b>Order Phase</b> icon is the draw orders phase (the index equates them).</p>" + HH.trackHtml() +
       "<ul><li>That is <b>10 Event</b>, <b>5 Draw Orders</b> and <b>5 Refresh</b> icons, <b>Spaceport Victory</b> on space 17 and <b>Imperial Victory</b> on space 34.</li>" +
       "<li>Each space’s special phase happens <b>once per game</b>: the first round in which a marker moves past or onto it. A marker reaching an icon that has already been triggered has no effect.</li>" +
-      "<li>Only the <b>current player’s</b> marker triggers icons. If a card moves your opponent’s marker onto an icon, it isn’t resolved.</li>" +
+      "<li>Only the <b>current player’s</b> marker triggers <b>special phase</b> icons (Event, Draw orders, Refresh). If a card moves your opponent’s marker onto one, it isn’t resolved. The Spaceport Victory and Imperial Victory spaces are different: they count for <b>any</b> marker that reaches them.</li>" +
       (c.mod("pending") ? "<li><b>Table aid:</b> drop a token on each pending icon until it is resolved.</li>" : "<li>Pending icons can be marked with a spare token until resolved.</li>") + "</ul>" +
       "<h4>Event phase</h4><ul><li>The current player draws the top event card and carries out its instructions.</li>" +
       "<li>“Do immediately” cards are resolved at once. Otherwise the instructions say what to do with the card, and its effect says how and when it applies.</li></ul>" +
@@ -575,7 +576,7 @@ HH.reference = [
       "<li><b>Strategic effect:</b> a bonus carried out only when the order is executed <b>from the strategic map</b>.</li>" +
       "<li><b>Starting order icon</b> (green skull, lower left) and <b>recycle symbol</b> (bottom centre).</li></ul>" +
       "<h4>Regions and the seven order stacks</h4><ul>" +
-      "<li>The strategic map is a high-level version of the main map. Each <b>region</b> is a group of areas and has an <b>order stack</b>. The six regions are Palace, Imperial Plateau, Crucible, Lions Gate, Volcanus and Black Ministry. The <b>Vengeful Spirit</b>’s stack sits beside its areas, top right of the board.</li>" +
+      "<li>The strategic map is a high-level version of the main map. Each <b>region</b> is a group of areas and has an <b>order stack</b>. The strategic map shows six regions: Palace, Imperial Plateau, Crucible, Lions Gate, Volcanus and Black Ministry. The <b>Vengeful Spirit</b> is a seventh region (its two areas); its stack sits beside those areas, top right of the board, not on the strategic map itself.</li>" +
       "<li>A new order goes <b>on top</b> of its stack. Offset it slightly so both players can see the orders underneath." + (c.mod("rotate") ? " <b>Table aid:</b> turn it 90° until the next change of initiative." : "") + "</li>" +
       "<li>You may look at a facedown order only if it is yours <b>and</b> on top of its stack.</li>" +
       "<li>An order underneath others can’t be executed until those above it are executed or buried.</li>" +
@@ -625,7 +626,7 @@ HH.reference = [
       "<li>Where it starts and in each area it enters, a flying transport unit may <b>pick up</b> friendly units, up to its combat rating at any one time. A Chaos Thunderhawk Flight carries 2. It may <b>not</b> pick up from an activated area.</li>" +
       "<li>It may <b>drop off</b> units in friendly or empty areas it passes through, or where it stops, and may drop off and pick up in the same area. It must drop off everything at the end of its move.</li>" +
       "<li>FAQ: transport works <b>only during a movement order</b>, not when an event moves the Thunderhawk and not when it retreats. Thunderhawks <b>can’t transport Heroes</b>.</li></ul>" +
-      "<h4>Heroes moving</h4><ul><li>Heroes move by movement orders, as units with 3 movement points. They also count as units for routing, retreating and event card effects.</li>" +
+      "<h4>Heroes moving</h4><ul><li>Heroes move by movement orders, as units with 3 movement points. They also count as units for the movement part of routing and retreating, and for event card effects.</li>" +
       "<li>FAQ: an unsupported Hero can execute move and attack orders, but can’t move through enemy areas.</li></ul>",
     src: () => "Rules p.21–23, p.32 · FAQ p.3"
   },
@@ -667,7 +668,7 @@ HH.reference = [
       "<ul><li>Fortified defenders cut the attacker’s regular damage by 2 (or 1) in each of the attacker’s active iterations; see Fortifications.</li>" +
       "<li>FAQ: the 2 extra cards drawn with <b>Hunker Down</b> can’t be played in that iteration.</li></ul>" +
       "<h4>Combat card anatomy</h4><ul><li><b>Attack value</b> (top left), <b>shields</b> (icons down the left edge), and a <b>special effect</b>: name, unit requirement, free effect icon, effect text and counter cost. A blank part means the card doesn’t have it.</li></ul>",
-    src: () => "Rules p.26–29, p.44 · FAQ p.1, p.3"
+    src: () => "Rules p.26–29, p.32–34, p.44 · FAQ p.1, p.3"
   },
   {
     title: "Battle 3 · Retreats, routing & end of battle",
@@ -708,7 +709,7 @@ HH.reference = [
       "<tr><td>Jaghatai Khan (White Scars)</td><td>Fulgrim (Emperor’s Children)</td></tr>" +
       "<tr><td>Sanguinius (Blood Angels)</td><td>Mortarion (Death Guard)</td></tr>" +
       "<tr><td>The Fabricator General (of Mars)</td><td>Magnus the Red (Thousand Sons)</td></tr></tbody></table></div><ul>" +
-      "<li><b>Heroes are not units.</b> They don’t make an area friendly, don’t count toward stacking limits or spaceports, and can’t be hit by defense lasers or orbital bombardment. They do count as units for movement orders, routing, retreating and event card effects.</li>" +
+      "<li><b>Heroes are not units.</b> They don’t make an area friendly, don’t count toward stacking limits or spaceports, and can’t be hit by defense lasers or orbital bombardment. They do count as units for movement orders, for the movement part of routing and retreating, and for event card effects.</li>" +
       "<li><b>Entering play:</b> a Hero not placed at setup can be put in whenever his owner may place units from his stockpile, for example with Drop Pods, Port Landing or the event “The Righteous Heed the Call”. This is free and doesn’t use up any unit placement.</li>" +
       "<li><b>Common ability:</b> Hero combat cards (2 per battle; 1 if every engaged Hero on your side is wounded).</li>" +
       "<li><b>Individual abilities</b> are printed only on the reference sheets and are always optional. The rulebook mentions: Sanguinius deals extra damage based on the Blood Angels with him; Magnus the Red may draw bombardment cards when attacking with Thousand Sons; Rogal Dorn’s ability works in a coexistence battle inside an unbreached fortified area; some abilities corrupt units.</li>" +
@@ -728,7 +729,7 @@ HH.reference = [
       "<li>Jaghatai Khan can’t use his ability if his area is already activated.</li>" +
       "<li>Orbital bombardments from abilities or events (Magnus the Red, “The Sky Fortress Rises”) follow all the normal bombardment rules.</li>" +
       "<li>Rogal Dorn and an Imperial Fists Space Marine defend. The Marine takes 3 damage, then the battle ends with attackers surviving. The attackers can’t move into the target area, because the Marine wasn’t eliminated during the battle; it is eliminated after the battle is resolved.</li></ul>",
-    src: () => "Rules p.7, p.12, p.29, p.31–33, p.35–38, p.40 · FAQ p.1–3"
+    src: () => "Rules p.7, p.12, p.28–29, p.31–33, p.35–38, p.40 · FAQ p.1–3"
   },
   {
     title: "Fortifications, crevasses & breaches",
@@ -780,7 +781,7 @@ HH.reference = [
       "<li><b>FAQ erratum:</b> if the passive player has no engaged units left, the active player may assign this damage to enemy Heroes.</li>" +
       "<li><b>FAQ:</b> it is special-effect damage, not regular damage. It <b>ignores fortification</b> and <b>can’t be reduced with shields</b>; the effect itself can be countered (e.g. 3 shields) only <b>before</b> the card is drawn.</li></ul>" +
       "<ul><li>Spent bombardment cards go to the bombardment discard pile.</li></ul>",
-    src: () => "Rules p.3, p.5–6, p.13, p.34–36 · FAQ p.1–2"
+    src: () => "Rules p.3, p.5–6, p.13, p.29, p.34–36 · FAQ p.1–2"
   },
   {
     title: "Defense lasers & landings",
@@ -811,7 +812,7 @@ HH.reference = [
       "<li>The <b>Command Center</b> (the circular area) is fortified. Otherwise its areas follow all the normal rules.</li>" +
       "<li>FAQ: Boarding Action and Port Landing may move units into the Catacombs even if enemy units are there.</li>" +
       "<li>FAQ: the event “Thrown to Terra by his Mighty Hand” moves <b>every</b> unit and Hero on the Vengeful Spirit, of both sides, into a single area on Terra.</li></ul>",
-    src: () => "Rules p.37–38, p.41 · FAQ p.1–2"
+    src: () => "Rules p.15, p.37–38, p.41 · FAQ p.1–2"
   },
   {
     title: "Traitor Armies & corruption",
@@ -1001,7 +1002,7 @@ HH.reference = [
     when: (c) => c.mod("rotate") || c.mod("pending") || c.mod("tuck"),
     html: (c) => "<ul>" +
       (c.mod("rotate") ? "<li><b>Rotated orders:</b> every order placed on the strategic map goes on turned 90°. At each change of initiative, turn them all to match the stack. Turned cards can’t be executed.</li>" : "") +
-      (c.mod("pending") ? "<li><b>Pending phases:</b> put a spare marker or token on each special-phase icon crossed this round, and remove it as that phase is resolved.</li>" : "") +
+      (c.mod("pending") ? "<li><b>Pending phases:</b> put a spare marker or token on each not-yet-triggered special-phase icon the current player’s initiative marker moved past or onto this round, and remove it as that phase is resolved.</li>" : "") +
       (c.mod("tuck") ? "<li><b>Reserves:</b> keep your reserve cards tucked halfway under the game board when they aren’t in use.</li>" : "") + "</ul>",
     src: (c) => HH.aidSrc(c)
   },
@@ -1033,7 +1034,7 @@ HH.teachScen = {
   hta: "<p>In Holy Terra Asunder the battlefield itself changes over the course of the game. First we take turns, Traitor first, marking four impassible areas with special tokens: never two side by side, and never the Inner Palace, a spaceport or the Vengeful Spirit. Nothing can enter, bombard or affect an impassible area. Then we deploy by choice, as in Heresy Unheralded: Warbands and Imperial Armies claim the four spaceports, each side places the rest within the book’s limits, and a unit that would have to go into an impassible area is destroyed instead.</p>",
   ffb: "<p>In Fortune Favors the Bold each of us gets three special tokens. When you place one of your orders, or execute one from the map or your hand, you may spend one token to make it cost one less, down to zero: only one token at a time, and a spent token is gone. Before we start, we both read the event card The Warp Claims a Mighty Armada: it threatens the Imperial hold-out victory, though it may never come out. We deploy by choice, as in Heresy Unheralded: Warbands and Imperial Armies claim the four spaceports, then each side places the rest within the book’s limits.</p>",
   lug: "<p>Like Unto Gods gives us the most choice. We deploy by choice, as in Heresy Unheralded: Warbands and Imperial Armies claim the four spaceports, then each side places the rest within the book’s limits. Then we build the event deck together: the Imperial player has nine event cards and the Traitor eight, and each of us puts two facedown in Act I, two in Act II and one in Act III. Random neutral cards are added and others trimmed, leaving acts of four, four and two. Each of us also adds any four order cards he likes to his starting hand.</p>",
-  cha: "<p>Cry Havoc throws in everything. Four impassible areas, chosen in turn as in Holy Terra Asunder, simply don’t exist for the game. Each of us has three special tokens, as in Fortune Favors the Bold: spend one to make placing or executing an order cost one less. We deploy by choice, as in Heresy Unheralded: Warbands and Imperial Armies claim the four spaceports, then each side places the rest within the book’s limits. The event deck is ten event cards dealt at random from all thirty, and each of us adds one random order from his deck to his starting hand.</p>"
+  cha: "<p>Cry Havoc throws in everything. Four impassible areas, chosen in turn as in Holy Terra Asunder, simply don’t exist for the game. Each of us also has three special tokens, as in Fortune Favors the Bold: spend one (only one at a time) to make placing or executing an order cost one less, down to zero, and it is gone for the game. These are separate from the four tokens marking impassible areas, which can’t be spent. We deploy by choice, as in Heresy Unheralded: Warbands and Imperial Armies claim the four spaceports, then each side places the rest within the book’s limits. The event deck is ten event cards dealt at random from all thirty, and each of us adds one random order from his deck to his starting hand.</p>"
 };
 
 HH.teach = {
@@ -1068,19 +1069,19 @@ HH.teach = {
       h: "Your five actions — and why you’d take each",
       body: () => "<ul>" +
         "<li><b>Place an order</b>, 1 point: facedown on one of the seven stacks of the strategic map. Cheap and hidden, and executing it later from there adds the card’s strategic bonus.</li>" +
-        "<li><b>Execute from the map</b>, 1 point whatever the card costs, but not an order placed since the last change of initiative. That’s the reward for planning ahead.</li>" +
+        "<li><b>Execute from the map</b>, 1 point whatever the card costs: one of your own orders that is on top of its stack, but not one placed since the last change of initiative. That’s the reward for planning ahead.</li>" +
         "<li><b>Execute from hand</b>, 0 to 3 points, one per skull: immediate, in any region, but no bonus.</li>" +
-        "<li><b>Bury an order</b>, 1 point: send a stack’s top card to the bottom.</li>" +
-        "<li><b>Draw an order</b>, 1 point: from your reserve or your deck.</li></ul>"
+        "<li><b>Bury an order</b>, 1 point: send a stack’s top card, yours or your opponent’s, to the bottom without looking at it. That uncovers the card beneath it.</li>" +
+        "<li><b>Draw an order</b>, 1 point: one card of your choice from your reserve, or the top of your deck. You can’t take this action while you hold six orders.</li></ul>"
     },
     {
       h: "The central idea — regions and activation",
-      body: () => "<p>Every order works in <b>one region</b> and <b>activates</b> the areas it names: put your marker there. You can’t order units out of your activated areas until a Refresh, so each order commits troops. Most units move 2, fast ones more, and a crevasse costs 2. You can only move through friendly or empty areas; enemies need an attack order.</p>"
+      body: () => "<p>Every order works in <b>one region</b> and <b>activates</b> the areas it names: put your marker there. You can’t order units out of your activated areas until a Refresh, so each order commits troops. Most units move 2, fast ones more, and a crevasse costs 2. You can only move into and through friendly or neutral areas (neutral means no units, even if a Hero stands there); entering an enemy or contested area needs an attack order.</p>"
     },
     {
       h: "Battles and Heroes",
-      body: () => "<p>Attack orders start battles, and so does sharing an area with the enemy when initiative changes. Each side draws combat cards equal to <b>half its engaged units’ total rank</b>, rounded up (rank is the points on the base), plus <b>two Hero cards</b> if a Hero fights. The order sets the iterations: Firefight 4, Assault 6, Onslaught 8.</p>" +
-        "<p>Each iteration, the active player plays up to as many cards as the iteration number, deals their attack values as damage, and may use one card’s special effect plus any free ones. The passive player discards up to as many cards to block one damage per shield, or pays shields to cancel an effect. Damage equal to a unit’s rank kills it. Roles swap every iteration, and from the second on the active player may retreat. Fortified defenders take 2 off the attacker’s damage in each of his active iterations.</p>" +
+      body: () => "<p>Attack orders start battles, and so does sharing an area with the enemy when initiative changes. Each side draws combat cards equal to <b>half its engaged units’ total rank</b>, rounded up (rank is the points on the base), plus <b>two Hero cards</b> if a Hero fights. The order sets the iterations: Firefight 4, Assault 6, Onslaught 8, and a coexistence battle lasts up to 8.</p>" +
+        "<p>Each iteration, the active player plays up to as many cards as the iteration number, deals their attack values as damage, and may use one card’s special effect plus any free ones. The passive player can cancel a special effect that has a counter cost by discarding that many shields, from any number of cards. He can then still discard up to as many cards as the iteration number to block one damage per shield. Damage equal to a unit’s rank kills it. The defender picks who is active first. Roles then swap every iteration, and from the second on the active player may retreat. Fortified defenders take 2 off the attacker’s damage in each of his active iterations.</p>" +
         "<p>Heroes aren’t units. They bring Hero cards and the abilities on your reference sheet, and battle damage reaches them only once their units are gone, though some cards hit them directly. Wounded, a Hero brings one card; Defeated, he’s gone, and his units there may rout.</p>"
     },
     {
@@ -1096,8 +1097,8 @@ HH.teach = {
     {
       h: (c) => c.seat === "imp" ? "Tips for the Imperial player" : c.seat === "trt" ? "Tips for the Traitor player" : "Tips for each side",
       body: (c) => {
-        var imp = "<p><b>Imperial:</b> take the fight to Horus with <b>Boarding Action</b> orders, and bring several Heroes. Stacking limits are only checked at a change of initiative, so you may board with more than three units, as long as the Boarding Action is carried out before a change of initiative forces you to cut back. Don’t abandon Palace areas: Drop Pods can’t land in an enemy Palace area, but an empty one is fair game.</p>";
-        var trt = "<p><b>Traitor:</b> Drop Pods can’t land in an enemy Palace area, but empty ones are fair game, and a beachhead inside makes reinforcing easier. Heroes, Horus included, can land from your stockpile or the Vengeful Spirit: Horus dropped into the Palace to attack the Emperor can turn the tables.</p>";
+        var imp = "<p><b>Imperial:</b> take the fight to Horus with <b>Boarding Action</b> orders, and bring several Heroes. Stacking limits are only checked at a change of initiative, so you may board with more than three units, as long as the Boarding Action is carried out before a change of initiative forces you to cut back. Don’t abandon Palace areas: Drop Pods can’t land in an enemy Palace area, but one with no Imperial units in it is fair game, even with a Hero standing there alone, because Heroes aren’t units.</p>";
+        var trt = "<p><b>Traitor:</b> Drop Pods can’t land in an enemy Palace area, but one with no Imperial units (a lone Hero doesn’t count) is fair game, and a beachhead inside makes reinforcing easier. Heroes, Horus included, can land from your stockpile or the Vengeful Spirit: Horus dropped into the Palace to attack the Emperor can turn the tables.</p>";
         return c.seat === "imp" ? imp : c.seat === "trt" ? trt : imp + trt;
       }
     },
@@ -1106,7 +1107,7 @@ HH.teach = {
       h: "Table aids we’re using",
       body: (c) => "<ul>" +
         (c.mod("rotate") ? "<li>New orders on the map go on <b>turned 90 degrees</b> until the next change of initiative; turned cards can’t be executed.</li>" : "") +
-        (c.mod("pending") ? "<li>A <b>token</b> marks each phase icon crossed until that phase is done.</li>" : "") +
+        (c.mod("pending") ? "<li>A <b>token</b> marks each new phase icon the current player’s marker passes or lands on, until that phase is done.</li>" : "") +
         (c.mod("tuck") ? "<li>Reserves stay <b>tucked half under the board</b>.</li>" : "") + "</ul>"
     },
     {

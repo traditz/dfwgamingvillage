@@ -37,8 +37,8 @@ window.AID_COMPONENTS = {
     { set: "core", name: "P.D.S.", img: "core-pds.webp", w: 87, h: 99 },
     { set: "core", name: "Spacedock", img: "core-spacedock.webp", w: 148, h: 111 },
 
-    { set: "he", qty: "28", name: "Political cards", note: "Mix into your deck; some are Event cards (Hope's End p.3 §2.4). Cards needing an optional rule carry its keyword in the lower left-hand corner." },
-    { set: "he", qty: "28", name: "Action cards", note: "Mix into your deck; cards needing an optional rule carry its keyword in the lower left-hand corner." },
+    { set: "he", qty: "28", name: "Political cards", note: "You may mix these into your decks (the sheet says “feel free to”); some are Event cards (Hope's End p.3 §2.4). Cards needing an optional rule carry its keyword in the lower left-hand corner." },
+    { set: "he", qty: "28", name: "Action cards", note: "You may mix these into your decks; cards needing an optional rule carry its keyword in the lower left-hand corner." },
     { set: "he", qty: "2", name: "Race stands", note: "The Mentak Coalition and the Yssaril Tribes" },
     { set: "he", qty: "22", name: "Control markers", note: "For the two new races" },
     { set: "he", qty: "58", name: "Deed cards", note: "Perforated; one for each planet in TI2 and Hope's End" },

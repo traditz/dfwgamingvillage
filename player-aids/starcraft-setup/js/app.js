@@ -15,7 +15,7 @@
   // The context every data.js function receives. maybe(f) is true unless the full table is known and f isn't at it.
   const ctx = () => {
     const facs = SC.FAC_ORDER.filter((f) => state.facs.includes(f));
-    const complete = facs.length === state.players;
+    const complete = state.mode !== "scenario" && facs.length === state.players;
     return {
       has: (id) => state.exps.has(id),
       p: state.players,
@@ -50,8 +50,9 @@
     }
     // More Starting Planet Tokens and Larger Galaxy contradict each other on the third planet (BW p.11)
     if (state.mods.has("mspt") && state.mods.has("lg")) state.mods.delete("mspt");
-    // no more factions than players
-    while (state.facs.length > state.players) state.facs.pop();
+    // no more factions than players, except in scenarios, where a player may control several factions (FAQ p.3)
+    const cap = state.mode === "scenario" ? 6 : state.players;
+    while (state.facs.length > cap) state.facs.pop();
   }
 
   function renderExpansions() {
@@ -91,7 +92,8 @@
   function renderFactions() {
     const box = $("#factions");
     box.innerHTML = "";
-    const full = state.facs.length >= state.players;
+    const cap = state.mode === "scenario" ? 6 : state.players;
+    const full = state.facs.length >= cap;
     for (const f of SC.FAC_ORDER) {
       const F = SC.F[f];
       const on = state.facs.includes(f);
@@ -100,7 +102,7 @@
       b.type = "button";
       b.setAttribute("aria-pressed", on ? "true" : "false");
       b.innerHTML = "<b>" + F.name + "</b><span>" + F.race + " · " + F.color.toLowerCase() + "</span>";
-      if (blocked) { b.disabled = true; b.title = "Already " + state.players + " factions for " + state.players + " players"; }
+      if (blocked) { b.disabled = true; b.title = state.mode === "scenario" ? "All six factions marked" : "Already " + state.players + " factions for " + state.players + " players"; }
       else b.addEventListener("click", () => {
         if (on) state.facs = state.facs.filter((x) => x !== f);
         else state.facs.push(f);
@@ -109,7 +111,7 @@
       box.appendChild(b);
     }
     const n = state.facs.length;
-    $("#fac-count").textContent = n ? "(" + n + " of " + state.players + " marked)" : "(optional)";
+    $("#fac-count").textContent = n ? (state.mode === "scenario" ? "(" + n + " marked)" : "(" + n + " of " + state.players + " marked)") : "(optional)";
   }
 
   function renderModes() {

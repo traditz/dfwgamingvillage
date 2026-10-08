@@ -255,7 +255,7 @@ SC.phases = [
         },
         src: function (c) {
           var s = ["Base p.3, p.8"];
-          if (c.has("bw")) s.push("BW p.2, p.4, p.7");
+          if (c.has("bw")) s.push("BW p.2, p.4–8" + (c.mod("nlc") ? ", p.11" : ""));
           if (c.mod("fast")) s.push("FAQ p.3");
           return s.join(" · ");
         } },
@@ -316,8 +316,7 @@ SC.phases = [
             "<li>You may look at any player's Leadership deck at any time, except during a Choose Leadership Cards step.</li></ul>";
         },
         src: function (c) {
-          var s = c.mod("nlc") ? ["BW p.11"] : ["BW p.9–10, p.20"];
-          if (c.mod("lg") && !c.mod("nlc")) s.push("BW p.11");
+          var s = c.mod("nlc") ? ["BW p.11"] : [(c.mod("lg") || c.mode === "survival") ? "BW p.9–11, p.20" : "BW p.9–10, p.20"];
           if (c.mod("gc") && (c.mod("nlc") || !c.mod("lg"))) s.push("Base p.42");   // only when the Galactic Conquest sentence shows
           return s.join(" · ");
         } }
@@ -426,7 +425,7 @@ SC.phases = [
               ? "<li>You may place special (gold) orders from the start, but to <b>execute</b> one it must fit in your Special Order Pool (one slot per Research &amp; Development module) or be on a planet where you control a strategic area. Otherwise you take the Event card instead" + (c.mod("dso") ? ", or, with <b>Disposable Special Orders</b>, execute it and remove the token from the game" : "") + ".</li>"
               : "<li>No faction starts with a Research &amp; Development module, so no one can place special orders in round 1.</li>") + "</ul>";
         },
-        src: function (c) { return c.has("bw") ? "Base p.10 · BW p.5–6" + (c.mod("dso") ? ", p.11" : "") + " · FAQ p.3" : "Base p.10, p.36"; } }
+        src: function (c) { return c.has("bw") ? "Base p.10, p.12 · BW p.5–6" + (c.mod("dso") ? ", p.11" : "") + " · FAQ p.3" : "Base p.10, p.12, p.36"; } }
     ]
   }
 ];
@@ -478,7 +477,7 @@ SC.reference = [
       if (c.has("bw")) h += "<p>With Brood War, special victory objectives are printed on each faction's <b>Special Victory Leadership card</b>, not the Faction Sheet; the descriptions above come from the core components, so follow your card's wording.</p>";
       return h;
     },
-    src: function (c) { return "Base p.2, p.6, p.8, p.16–17, p.19, p.22, p.37, p.40, p.42 · FAQ p.1–2" + (c.has("bw") ? " · BW p.6–7, p.10" : ""); }
+    src: function (c) { return "Base p.2, p.6, p.8, p.16–17, p.19, p.22, p.37, p.40, p.42 · FAQ p.1–2" + (c.has("bw") ? " · BW p.2, p.6–7, p.10" : ""); }
   },
   {
     title: "The game round at a glance",
@@ -514,7 +513,7 @@ SC.reference = [
       }
       return h + "</ul>";
     },
-    src: function (c) { return "Base p.6, p.12–14, p.36" + (c.has("bw") ? " · BW p.5, p.9 · FAQ p.3" : ""); }
+    src: function (c) { return "Base p.4, p.6, p.9, p.12–14, p.36" +(c.has("bw") ? " · BW p.5, p.9 · FAQ p.3" : ""); }
   },
   {
     title: "Execution Phase — carrying out orders",
@@ -526,7 +525,7 @@ SC.reference = [
         "<li>An eliminated player's orders are discarded without effect when they reach the top of a stack.</li>";
       if (c.has("bw")) {
         h += "<li><b>Special Order Pool (Brood War):</b> when you reveal a special (gold) order, either <b>execute</b> it and put it in the Special Order Pool on your Faction Sheet, which you may do only while the pool holds fewer orders than your Research &amp; Development modules allow, or take the <b>Event card option</b> and return the token to your unused orders. The pool empties back into your unused orders in Regrouping step 4. (FAQ: ignore the mention of strategic areas in this rule on BW p.5.)</li>" +
-          "<li><b>Strategic areas (Brood War):</b> if you control a strategic area (gold hexagon) on a planet, every order you execute on that planet is treated as a special order, and those special orders go back to your unused orders instead of into your pool.</li>";
+          "<li><b>Strategic areas (Brood War):</b> if you control a strategic area (gold hexagon) on a planet, you may treat every order you execute on that planet as a special order, and those special orders go back to your unused orders instead of into your pool.</li>";
         if (c.mod("dso")) h += "<li><b>Disposable Special Orders:</b> you may always execute a special order, whatever your R&amp;D modules. If you execute one and cannot (or do not wish to) put it in your Special Order Pool, remove the token from the game.</li>";
       }
       return h + "</ul>";
@@ -543,7 +542,7 @@ SC.reference = [
         "<p>Do any or all of these, but in this order (you can't build a base and then build units there). With neither a base nor a unit on the planet, the order has no effect.</p><ul>" +
         "<li><b>Workers</b>: pay the cost and put them in the Unavailable Workers area of your Faction Sheet (usable after the next Regrouping).</li>" +
         "<li><b>Transports</b>: place each on any navigation route connected to the active planet (on a z-axis route, on its major end, and flip the minor end to its warning side). At most one of your transports per route; other players' transports don't stop you.</li>" +
-        "<li><b>Units</b>: only types your buildings allow; place them on any <b>friendly or empty</b> area of the active planet within unit limits, even when enemy units sit in your base's area (you just can't place them there).</li>" +
+        "<li><b>Units</b>: only types your buildings allow; place them on any <b>friendly or empty</b> area of the active planet within unit limits, even when enemy units sit in your base's area (you just can't place them there)." + (c.has("bw") ? " With Brood War, never in an area whose ground-only or flying-only icons don't match the unit." : "") + "</li>" +
         "<li><b>Unit build limit</b>: Terran and Protoss start at 2, +1 per Supply module; Zerg have 2 per different building type (max 6). Tech-required units count toward it too.</li>" +
         "<li><b>Bases</b>: one per Build order, in an area with one of your units; only one base of yours per planet, and never in an area with an enemy base" + (c.has("bw") ? "; never in a flying-only area, and an area holds at most one base or installation" : "") + ".</li>" +
         "<li><b>Upgrades</b> improve all your bases at once, including bases built later. Building levels can't be skipped (I, then II, then III); you may only build as many modules as your Faction Sheet has module spaces.</li>" +
@@ -587,7 +586,7 @@ SC.reference = [
         "<li><b>Draw three Combat cards</b> into your hand (optional).</li>" +
         "<li><b>Purchase one technology</b> (optional): look through your Technology deck, pay the cost once and take <b>every copy</b> of that technology (the dots at the bottom of a card show how many there are). Announce it and explain its effect. Unless it says otherwise, it goes into your Combat deck, and it now counts as a Combat card.</li>" +
         "<li><b>Shuffle your Combat deck</b>, with your discards, if you added a technology to it.</li></ol><ul>" +
-        "<li><b>Special Research order</b>: after the standard steps, choose one: draw an <b>additional Event card</b>, or put <b>one copy</b> of the technology you just bought into your hand instead of your deck.</li>" +
+        "<li><b>Special Research order</b>: after drawing and buying, but before any new technology goes into your Combat deck, choose one: draw an <b>additional Event card</b>, or, if you bought a technology for your Combat deck, put <b>one copy</b> of it into your hand (shuffle the other copies in as normal).</li>" +
         "<li>If you ever draw the last card of your Combat deck, immediately shuffle your discards into a new deck (then finish drawing).</li>" +
         "<li>To speed play, if everyone agrees, the next player may start their order while you choose your technology.</li></ul>";
     },
@@ -603,7 +602,7 @@ SC.reference = [
         "<li><b>Force mining</b>: assign one worker beyond a card's capacity for one extra resource, then flip the card to its partially depleted (yellow) side and put a depletion token, partially depleted side up, on its area.</li>" +
         "<li>Force mining a partially depleted card again removes it from the game: its workers go to your Unavailable Workers area and the area's depletion token flips to its depleted side. You may do both in one action (two extra workers).</li>" +
         "<li>When you gain the card of a partially depleted area, take it yellow side up.</li>";
-      if (c.has("bw")) h += "<li><b>Resource tokens (Brood War)</b>: some Leadership and Event cards give mineral or gas resource tokens. Discard one whenever you pay a cost to reduce it by one resource of that type.</li>";
+      if (c.has("bw")) h += "<li><b>Resource tokens (Brood War)</b>: some Leadership and Event cards give mineral or gas resource tokens. Whenever you pay a resource cost you may discard them: each one reduces that cost by one resource of its type.</li>";
       if (c.mode === "survival") h += "<li><b>Survival</b>: each conquest point you would receive becomes a resource token of your choice.</li>";
       return h + "</ul>";
     },
@@ -615,10 +614,10 @@ SC.reference = [
     html: function (c) {
       return "<p>A battle starts when the active player's Mobilize order moves units into an area containing enemy units: the active player is the <b>attacker</b>.</p><ol>" +
         "<li><b>Place the order token</b> face up in the contested area (the units come off the board while you fight).</li>" +
-        "<li><b>Start-of-battle abilities</b>: the attacker, then the defender, may each use <b>one</b> ability that says <i>at the start of a battle</i>." + (c.has("bw") ? " A defender with a guard token in the area may discard it now for +2 health in each skirmish." : "") + "</li>" +
-        "<li><b>Draw Combat cards</b>: the attacker draws <b>3</b> (5 with a special Mobilize order), the defender <b>1</b>.</li>" +
+        "<li><b>Start-of-battle abilities</b>: the attacker, then the defender, may each use <b>one</b> ability that says <i>at the start of a battle</i>." + (c.has("bw") ? " A defender with a guard token in the area may discard it now for +2 health in each skirmish (not combined with any other health bonus)." : "") + "</li>" +
+        "<li><b>Draw Combat cards</b>: the attacker draws <b>3</b> (5 with a special Mobilize order, which also gives the attacker +1 final attack in every skirmish), the defender <b>1</b>.</li>" +
         "<li><b>Attacker establishes skirmishes</b>: pairs one attacking unit with one defending unit, making as many pairs as possible (assist units are left out). These are the front-line units.</li>" +
-        "<li><b>Assign supporting units</b>: every unpaired unit must join a skirmish of its owner's choice, all in one or spread out; if both sides have supporters, the attacker assigns first." + (c.has("bw") ? " Once the match-ups are made, a defender with a <b>Defensive module</b> may switch any two of their units between skirmishes (not assist units)." : "") + "</li>" +
+        "<li><b>Assign supporting units</b>: every unpaired unit must join a skirmish of its owner's choice, all in one or spread out; if both sides have supporters, the attacker assigns first." + (c.has("bw") ? " Once the match-ups are made, a defender with a <b>Defensive module</b> may switch any two of their units between skirmishes (not assist units; a unit may be switched into the front line only if the opposing front-line unit can attack it)." : "") + "</li>" +
         "<li><b>Place Combat cards</b>: the attacker, then the defender, plays one standard Combat card face down to <b>each</b> skirmish, optionally with one reinforcement card. Instead of a card from hand you may play the top card of your deck unseen (but then no reinforcement card from hand on that skirmish).</li>" +
         "<li><b>Resolve skirmishes</b> one at a time, in the order the attacker chooses: reveal, compare attack and health, destroy units and discard cards.</li>" +
         "<li><b>Resolve splash damage</b>.</li>" +
@@ -658,7 +657,7 @@ SC.reference = [
     title: "Splash damage",
     when: function () { return true; },
     html: function (c) {
-      return "<ul><li><b>Trigger</b>: a splash damage card triggers if its side destroys at least one enemy unit in the skirmish where it was played, even if its own units die. Every splash card in that skirmish triggers (standard and reinforcement). Set triggered cards aside face up; discard the rest normally.</li>" +
+      return "<ul><li><b>Trigger</b>: a splash damage card triggers if its side destroys at least one enemy unit in the skirmish where it was played, even if its own units die. All of that side's splash cards in the skirmish trigger (standard and reinforcement). Set triggered cards aside face up; discard the rest normally.</li>" +
         "<li>Destroying a cloaked unit still triggers splash damage, even though the unit withdraws; cloaking does not let a unit withdraw from splash damage itself.</li>" +
         "<li><b>Resolve</b> after all skirmishes: for each triggered card the opponent must choose and destroy one of their surviving units of the type named (<i>ground</i>, <i>flying</i> or <i>ground/flying</i>). The attacker destroys first, then the defender.</li>" +
         "<li>Destroy as many units as possible: apply ground and flying splash before ground/flying splash. Then discard the splash cards.</li>" +
@@ -716,14 +715,14 @@ SC.reference = [
       h += "<li>Your first building of a type is level I; higher levels go on top of the lower one in the same space and can't be skipped. Each building shows the units it lets you build.</li>" +
         "<li>Every faction starts with one level I building printed on its Faction Sheet; a level II token goes on top of it.</li>" +
         "<li><b>Supply module</b> (Terran and Protoss only): +1 unit build limit each.</li>" +
-        "<li><b>Research &amp; Development module</b>: " + (c.has("bw") ? "sets the size of your Special Order Pool: one special order executed per module, per round." : "lets you place one special order per module in the Planning Phase (still four orders in total).") + "</li>" +
+        "<li><b>Research &amp; Development module</b>: " + (c.has("bw") ? "sets the size of your Special Order Pool, one slot per module. Each special order you execute fills a slot until Regrouping step 4; special orders executed on a planet where you control a strategic area don't use the pool" + (c.mod("dso") ? ", and with <b>Disposable Special Orders</b> a special order you execute but can't (or won't) put in the pool is removed from the game instead" : "") + "." :"lets you place one special order per module in the Planning Phase (still four orders in total).") + "</li>" +
         "<li><b>Air Support module</b>, three benefits for every base: <i>Cloaking Detector</i> (your units in an area with your base gain detector); <i>Anti-aircraft Defenses</i> (+1 attack in each skirmish of a battle in an area with your base where the enemy front-line unit is flying); <i>Limited Orbital Defense</i> (enemies can't transport units from another planet straight into an area with your base).</li>";
       if (c.has("bw")) h += "<li><b>Defensive module</b> (gas: Zerg 2, Terran 2, Protoss 1): when defending, after match-ups are made, switch any two of your units between skirmishes (front-line or supporting, not assist units); a unit may be switched into the front line only if the opposing front-line unit can attack it.</li>" +
         "<li><b>Assist module</b> (gas: Zerg 2, Terran 1, Protoss 2): one of your assist units in an area doesn't count toward its unit limit, and a single assist unit doesn't count toward the limit when you attack.</li>" +
         "<li><b>Offensive module</b> (gas: Zerg 1, Terran 2, Protoss 2): destroy your own transports to evade an enemy's Limited Orbital Defense (see Mobilize order).</li>";
       return h + "<li>You may build only as many modules as your Faction Sheet has module spaces.</li></ul>";
     },
-    src: function (c) { return "Base p.22–23, p.36–38, p.40–41, p.44" + (c.has("bw") ? " · BW p.5–8, p.20" : ""); }
+    src: function (c) { return "Base p.22–23, p.36–38, p.40–41, p.44" + (c.has("bw") ? " · BW p.5–8" + (c.mod("dso") ? ", p.11" : "") + ", p.20 · FAQ p.3" : ""); }
   },
   {
     title: "Regrouping Phase",
@@ -771,11 +770,11 @@ SC.reference = [
       var target = c.mod("team") ? 30 : (c.mod("lg") ? 25 : 15);
       var h = "<ul>";
       if (c.mod("team")) {
-        h += "<li><b>Normal victory (teams)</b>: at step " + n.normal + " of the Regrouping Phase, the game ends if a team has <b>30</b> or more conquest points combined" + (SC.aldarisOn(c) ? " (<b>40</b> for every other team if Aldaris's objective is in play; Aldaris's team still needs 30)" : "") + ", and the team with the most combined points wins. For tiebreakers, combine both teammates' resources, areas, bases or workers.</li>" +
+        h += "<li><b>Normal victory (teams)</b>: at step " + n.normal + " of the Regrouping Phase, the game ends if a team has <b>30</b> or more conquest points combined" + (SC.aldarisOn(c) ? " (<b>40</b> for every other team if Aldaris's objective is in play; Aldaris's team still needs 30)" : "") + ", and the team with the most combined points wins. Ties: use the normal tiebreakers in order (most total resources, most areas controlled, most bases in play, most workers in the Worker Pool area), combining both teammates' totals for each; if still tied, the tied teams share the victory.</li>" +
           (c.mod("lg") ? "<li><b>Larger Galaxy</b>: the Special Victory Leadership cards aren't used, so there are no special victories.</li>"
-            : "<li><b>Special victory</b>: at step " + n.special + ", if either teammate has achieved their special victory objective, their team wins. Two or more teams at once: the most combined conquest points wins, then the usual tiebreakers.</li>") +
+            : "<li><b>Special victory</b>: at step " + n.special + ", if either teammate has achieved their special victory objective, their team wins. Two or more teams at once: the most combined conquest points wins, then the usual tiebreakers. Most objectives count only in <b>Stage III</b>: the top card of the Event deck must be a Stage III card (three planets on its back)." + (c.has("bw") ? " With Brood War each objective is on that player's Special Victory Leadership card, which lets them complete it once Stage III has been reached, so it must have been chosen in Stage I" + (c.mod("nlc") ? " (No Leadership Cards: everyone has it)" : "") + "." : "") + "</li>") +
           "<li><b>End-game victory</b>: if two or more <i>The End Draws Near</i> cards are in the common play area at the end of step " + n.events + ", the team with the most combined conquest points wins" + (SC.aldarisOn(c) ? ", unless Aldaris's objective is in play: then Aldaris's team wins" : "") + ".</li>" +
-          "<li><b>Elimination victory</b>: the last team with anything on the board wins.</li>" +
+          "<li><b>Elimination</b>: a player with no bases and no units on the board is eliminated immediately and can't place orders or play Event cards; their orders are discarded as they reach the top of a stack and their Event cards (even <i>The End Draws Near</i>) are removed without effect. <b>Elimination victory</b>: the last team with anything on the board wins.</li>" +
           "<li>Base p.43 numbers the team special victory and end-game checks as steps 6 and 7, following the back-cover list that the FAQ corrects; the step numbers here follow the corrected order.</li>";
         if (c.mod("lg")) h += "<li><b>Not covered by the rulebooks:</b> Larger Galaxy raises the target to 25 for a normal game, but neither book says how it combines with Team Play's 30-point team target. Agree on a target before you start.</li>";
       } else {
@@ -805,7 +804,7 @@ SC.reference = [
       var h = "<ul>";
       var hero = "<li>A hero is a normal unit of its type (it matches that unit's Combat cards and has its Faction Sheet abilities) plus the card's abilities, marked by a <b>hero token</b> under the figure that moves with it. Heroes are immune to splash damage, to mind control and to Technology card abilities that destroy units.</li>";
       if (c.mode === "scenario") return h + "<li><b>Scenarios</b>: Leadership cards are never used unless the scenario says so. A scenario that starts you with a hero also gives you that hero's Leadership card.</li>" + hero + "</ul>";
-      if (c.mod("nlc")) h += "<li><b>No Leadership Cards</b>: each player has only their Special Victory Leadership card; the Choose Leadership Cards steps are skipped, so there are no Stage II or III cards and no heroes from them. (The Event cards <i>Subtle Planning</i>, <i>Heroic Strategy</i> and <i>Inspiring Leadership</i> were removed at setup.)</li>";
+      if (c.mod("nlc")) h += "<li><b>No Leadership Cards</b>: each player has only their Special Victory Leadership card; the Choose Leadership Cards steps are skipped, so there are no Stage II or III cards and no heroes from them." + (c.mod("lg") ? " With Larger Galaxy the card only gives your starting units: its special victory isn't used." : (c.mod("gc") ? " In " + (c.mode === "survival" ? "Survival" : "Galactic Conquest") + " its objective can't win the game: elimination is the only victory." : "")) + " (The Event cards <i>Subtle Planning</i>, <i>Heroic Strategy</i> and <i>Inspiring Leadership</i> were removed at setup.)</li>";
       else h += "<li>Each faction has <b>7 Leadership cards</b> in three stages. You use one per stage, up to three in a game: Stage I at setup, the others in step 5 of the first Regrouping Phase of each new stage. They are never randomized: you choose.</li>" +
         "<li>Choose face down, reveal together, and resolve starting with the first player, clockwise. One-time cards are then removed from the game; <i>Place in your play area</i>, Special Victory and Hero cards stay in play.</li>" +
         "<li>Stage I cards list your starting units. Each faction has one Stage I <b>Special Victory</b> card: " +
@@ -817,7 +816,7 @@ SC.reference = [
     },
     src: function (c) {
       if (c.mode === "scenario") return "BW p.10, p.12";
-      return (c.mod("nlc") ? "BW p.11 · " : "BW p.3, p.9–10" + (c.mod("lg") ? ", p.11" : "") + (c.mod("gc") && !c.mod("lg") ? " · Base p.42" : "") + " · ") + "FAQ p.3";
+      return (c.mod("nlc") ? "BW p.11" + (c.mod("gc") && !c.mod("lg") ? " · Base p.42" : "") + " · " : "BW p.2–3, p.9–" + (c.mod("lg") || c.mode === "survival" ? "11" : "10") + ", p.20" + (c.mod("gc") && !c.mod("lg") ? " · Base p.42" : "") + " · ") + "FAQ p.3";
     }
   },
   {
@@ -825,13 +824,13 @@ SC.reference = [
     when: function (c) { return c.has("bw"); },
     html: function () {
       return "<ul><li><b>Ground-only and flying-only areas</b>: units may never enter, be built in or occupy an area whose special unit limit icons don't match their type. Bases and installations (Terran bases included) can never be built in, move into or be in a flying-only area. Otherwise these are normal areas.</li>" +
-        "<li><b>Strategic areas</b> (gold hexagon): control one and every order you execute on that planet counts as special without using your Special Order Pool.</li>" +
+        "<li><b>Strategic areas</b> (gold hexagon): while you control one, you may treat every order you execute on that planet as a special order. Special orders you execute there go back to your unused orders instead of your Special Order Pool, so they don't count against your Research &amp; Development limit.</li>" +
         "<li><b>Moria</b>, the large planet: its five areas don't look adjacent, but there are no special movement rules.</li>" +
         "<li><b>Installations</b> (Infested Command Centers, Cerebrate, Overmind, Warp Gate): placed in areas, they don't count toward unit limits; an area holds at most one base or one installation. They are destroyed the same way as bases, but they are not bases and give no resources. An area holding only an installation is controlled by its owner. The Cerebrate, Overmind and Warp Gate follow their Leadership card or scenario; Infested Command Centers come from the Zerg <i>Infest Command Center</i> technology.</li>" +
         "<li><b>Guard token</b>: at the start of a battle in its area, the defender may discard it for <b>+2 health in each skirmish</b>. It is discarded if you no longer control the area. Defending only, and it can't be combined with other health bonuses (another defend or guard token, a <i>Bunker</i> Technology card, a <i>Flawless Defense Plan</i> Event card).</li>" +
         "<li><b>Mind control tokens</b> (2 per Protoss faction), <b>hero tokens</b>, <b>resource tokens</b>; the <b>Star order token</b> and <b>special conquest point tokens</b> belong to Arcturus Mengsk's matching Leadership cards; <b>scenario item tokens</b> are used only by scenarios.</li></ul>";
     },
-    src: function () { return "BW p.3–4, p.6, p.9 · FAQ p.3"; }
+    src: function () { return "BW p.2–4, p.6, p.9 · FAQ p.3"; }
   },
   {
     title: "Variant — Galactic Conquest",
@@ -987,7 +986,7 @@ SC.reference = [
         "<li>The active player may draw an Event card instead of executing the order just revealed.</li>" +
         "<li>Any player may use any z-axis navigation route, whatever its colour.</li></ul>";
     },
-    src: function () { return "Base p.48 · FAQ p.1"; }
+    src: function (c) { return "Base p.48 · FAQ p.1" + (c.has("bw") ? " · BW p.20" : ""); }
   }
 ];
 
@@ -1059,7 +1058,7 @@ SC.teach = {
       body: function (c) {
         var h = "<p>Brood War adds new units and changes a few rules. <b>Special orders</b> (the gold tokens) can be placed freely, but executing one needs room in your <b>Special Order Pool</b>, one slot per Research &amp; Development module; otherwise you take the Event card. Control a planet's <b>strategic area</b> and your orders there count as special for free. Your <b>Defend order</b> moves units into one of your areas during Planning and leaves a guard token there, worth +2 health per skirmish when it's attacked.";
         if (SC.lead(c)) h += " At each new stage we each pick one of our seven <b>Leadership cards</b>: Stage I sets your starting forces" + (c.mod("gc") ? "" : ", only the Special Victory card lets you win by objective" + (c.mod("lg") ? " (unused in Larger Galaxy)" : "")) + ", and Stage II brings heroes.";
-        else if (c.mod("nlc")) h += " With <b>No Leadership Cards</b>, everyone simply starts with their Special Victory Leadership card.";
+        else if (c.mod("nlc")) h += c.mod("lg") ? " With <b>No Leadership Cards</b> and Larger Galaxy, you simply start with the units listed on your Special Victory Leadership card. There are no special victories and no Leadership picks." : " With <b>No Leadership Cards</b>, everyone simply starts with their Special Victory Leadership card, which sets your starting forces" + (c.mod("gc") ? "" : " and your special victory") + ", and nobody picks Leadership cards at later stages.";
         else h += " Leadership cards stay in the box unless the scenario says otherwise.";
         return h + "</p>";
       }
@@ -1070,7 +1069,7 @@ SC.teach = {
         return "<p>We're in teams of two, sitting apart. You can't attack your teammate or move into their areas, yet their areas still count as enemy areas. " +
           (c.mod("gc") ? "The last team standing wins."
             : (c.mod("lg") ? "With Larger Galaxy there are no special victories: a team wins on our agreed points target, or with the most combined points when the end draws near, or by being the last team standing."
-              : "Either partner's special victory wins for both; otherwise it's 30 points combined, or the most combined points when the end draws near" + (SC.aldarisOn(c) ? " (Aldaris's team wins that one if his objective is in play)" : "") + ".")) +
+              : "Either partner's special victory wins for both, though your teammate's units, bases and areas don't count toward yours; otherwise it's 30 points combined" + (SC.aldarisOn(c) ? " (40 for every other team if Aldaris's objective is in play)" : "") + ", or the most combined points when the end draws near" + (SC.aldarisOn(c) ? " (Aldaris's team wins that one if his objective is in play)" : "") + ".")) +
           (c.has("bw") ? "" : " And you can't build a base that would give your team every area of a planet.") + "</p>";
       }
     },
@@ -1083,7 +1082,7 @@ SC.teach = {
     { when: function (c) { return c.mode === "survival"; },
       h: "Survival",
       body: function (c) {
-        return "<p>Survival plays like Galactic Conquest, only harsher: no bases means you're out, destroyed bases leave the game, and each conquest point you would score becomes a resource token instead. A Build order may build transports on a planet where you control an area, even without a base there." +
+        return "<p>Survival plays like Galactic Conquest: <i>The End Draws Near</i> cards are out of the deck, so there's no clock, and the Event deck recycles its Stage III cards. It's harsher, though: no bases means you're out, destroyed bases leave the game, and each conquest point you would score becomes a resource token instead. A Build order may build transports on a planet where you control an area, even without a base there." +
           (c.mod("fast") ? " And with <b>Faster Survival</b>, each faction has only 3 bases for the whole game." : "") + "</p>";
       }
     },
@@ -1097,7 +1096,7 @@ SC.teach = {
         if (c.mod("lg")) L.push("<li><b>Larger Galaxy</b>: three planets each, still one starting base and no special victories. " +
           (c.mod("gc") ? "It normally takes 25 conquest points to win, but in Galactic Conquest nobody scores points, so that doesn't matter tonight."
             : (c.mod("team") ? "It raises the normal target to 25 conquest points; for teams we use the target we agreed." : "It takes 25 conquest points to win.")) + "</li>");
-        if (c.mod("nlc")) L.push("<li><b>No Leadership Cards</b>: just your Special Victory card, no new picks at each stage.</li>");
+        if (c.mod("nlc")) L.push("<li><b>No Leadership Cards</b>: " + (c.mod("lg") ? "you only take the starting units from your Special Victory card (Larger Galaxy has no special victories)" : "just your Special Victory card") + ", no new picks at each stage.</li>");
         return "<ul>" + L.join("") + "</ul>";
       }
     },
@@ -1116,8 +1115,8 @@ SC.teach = {
           if (F.race === "Protoss") s += "Supply modules raise the build limit" + (c.has("bw") ? "; can mind control enemy units." : ".");
           if (F.race === "Zerg") s += "no Supply modules: the build limit is twice the number of different building types.";
           if (f === "aldaris" && SC.aldarisOn(c)) s += c.mod("team")
-            ? " His objective raises every other team's target to 40 and wins the game for his team when two <i>The End Draws Near</i> cards are played."
-            : " His objective raises everyone else's target to 20 and wins him the game when two <i>The End Draws Near</i> cards are played.";
+            ? (SC.lead(c) ? " If he takes his Special Victory Leadership card, his objective" : " His objective") + " raises every other team's target to 40 and wins the game for his team when two <i>The End Draws Near</i> cards are played."
+            : (SC.lead(c) ? " If he takes his Special Victory Leadership card, his objective" : " His objective") + " raises everyone else's target to 20 and wins him the game when two <i>The End Draws Near</i> cards are played.";
           return s + "</li>";
         }).join("") + "</ul>";
       }
@@ -1126,11 +1125,12 @@ SC.teach = {
       h: "Don't worry about these until they come up",
       body: function (c) {
         var L = ["<li><b>Keywords</b> (cloaking, detector, assist, cancel, <i>vs.</i>) and <b>splash damage</b>: we'll read them when they appear.</li>",
-          "<li><b>Tech-required units</b>: Guardians and Archons are built by sacrificing other units.</li>",
+          "<li><b>Tech-required units</b>: Guardians and Archons are built by sacrificing other units" + (c.has("bw") ? "; with Brood War, the Lurker's cost also includes destroying friendly units" : "") + ".</li>",
           "<li><b>Air Support modules</b> stop enemies transporting units from other planets straight into the areas with that player's bases.</li>",
           "<li><b>Z-axis routes</b> work like normal routes, for anyone.</li>"];
         if (SC.scoring(c)) L.push("<li><b>Tiebreakers</b>: total resources, then areas, bases and idle workers.</li>");
-        if (c.has("bw")) L.push("<li>Brood War's <b>mind control, recharge, collateral damage, sacrifice</b> and <b>installations</b>: see the reference.</li>");
+        if (!c.has("bw")) L.push("<li><b>Special (gold) orders</b>: each Research &amp; Development module lets you place one per round; they're stronger versions of Build, Mobilize and Research.</li>");
+        if (c.has("bw")) L.push("<li>Brood War's new <b>Defensive, Assist and Offensive modules</b>, <b>ground-only and flying-only areas</b>, <b>mind control, recharge, collateral damage, sacrifice</b> and <b>installations</b>: see the reference.</li>");
         if (SC.lead(c)) L.push("<li><b>Heroes</b> arrive with Stage II Leadership cards.</li>");
         return "<ul>" + L.join("") + "</ul>";
       }

@@ -55,7 +55,7 @@ RW.factions = [
 ];
 
 RW.modules = [
-  { id: "explore", requires: "core", name: "Exploration Tokens", summary: "Facedown tokens in every area for heroes to uncover",
+  { id: "explore", requires: "core", name: "Exploration Tokens", summary: "Facedown tokens in every area outside the home realms for heroes to uncover",
     description: "The base game's optional variant: heroes flip exploration tokens during the Quest Phase — events, locations and destructible locations. With Banners of War, its 8 exploration tokens join them.", src: "Rules p.37 · BoW p.11" },
   { id: "dev", requires: "bow", name: "Development Cards", summary: "Buy permanent faction upgrades with Harvest's Supremacy Bonus",
     description: "Eight Development cards per faction, bought with resources when you resolve Harvest's Supremacy Bonus. Brings capital strongholds, Waiqar's Reanimate tokens and the Daqan peasant tokens.", src: "BoW p.9" },
@@ -151,7 +151,7 @@ RW.phases = [
             : "<li><b>Original-edition copy:</b> there are no Victory cards. To claim victory you will place <b>an unused unit of your faction</b> on a Season deck instead (see Rules Reference › How You Win).</li>";
           return d + "</ul>";
         },
-        src: (c) => RW.cite("Rules p.4, p.7", c.has("bow") && "BoW p.2, p.4–6", c.mod("dev") && "BoW p.9", c.mod("cmd") && "BoW p.10", c.orig && "Revised Gameplay p.1–2") }
+        src: (c) => RW.cite("Rules p.4, p.7", c.has("bow") && "BoW p.2–6", c.mod("dev") && "BoW p.9", c.mod("cmd") && "BoW p.10", c.orig && "Revised Gameplay p.1–2") }
     ]
   },
   {
@@ -256,7 +256,7 @@ RW.phases = [
           "<li>Each player places the matching hero figure" + (c.mod("cmd") ? "s" : "") + " in any area of his home realm.</li>" +
           (c.mod("cmd") ? "<li><b>Commanders of the Battlefield:</b> shuffle the Commander cards and deal each player <b>one</b>. He chooses one of his heroes to be his <b>commander</b>, places the Commander card faceup next to that Hero card, and slides one of his commander tokens under the matching figure.</li>" : "") +
           "<li>Then shuffle all undealt Hero cards into a <b>single Hero deck</b>.</li></ul>",
-        src: (c) => RW.cite("Rules p.7, p.20, p.25", c.has("bow") && "BoW p.4–5", c.mod("cmd") && "BoW p.10") },
+        src: (c) => RW.cite("Rules p.7, p.20, p.25", c.has("bow") && "BoW p.3–5", c.mod("cmd") && "BoW p.10") },
       { when: () => true, exp: (c) => c.has("bow") ? "bow" : "core",
         t: "Shuffle and place the card decks (setup step 8)",
         d: (c) => {
@@ -273,7 +273,7 @@ RW.phases = [
           if (c.mod("dev")) d += "<li><b>Development Cards:</b> each faction's 8 Development cards stay with their player, ready to buy.</li>";
           return d + "</ul>";
         },
-        src: (c) => RW.cite("Rules p.7, p.11, p.36", c.has("bow") && "BoW p.4–5, p.7–8", c.mod("cmd") && "BoW p.10", c.mod("dev") && "BoW p.9") },
+        src: (c) => RW.cite("Rules p.7, p.11, p.36", c.has("bow") && "BoW p.3–5, p.7–8, p.10", c.mod("dev") && "BoW p.9") },
       { when: (c) => c.orig, exp: "orig",
         t: "Original-edition copy — apply the card changes",
         d: "<ul><li>Play these original-edition components with the revised wording:<ul>" +
@@ -314,7 +314,7 @@ RW.phases = [
         t: "Year 1 begins with spring",
         d: (c) => "<ul><li>The game lasts <b>seven years</b> of four seasons each: spring, summer, fall, winter.</li>" +
           "<li>The first player draws and resolves the top card of the <b>spring</b> Season deck. Then everyone chooses an Order card.</li>" +
-          "<li>Nobody has a revealed Order card yet, so anything done “in play order” this season goes to the player with the most influence, then the highest starting influence.</li>" +
+          "<li>Until Order cards are revealed (the first spring Season card and its secondary ability), nobody has a revealed Order card, so play order goes to the player with the most influence, then the highest starting influence. Once Order cards are flipped, they resolve lowest number first as usual.</li>" +
           "<li>Every Order card's <b>Supremacy Bonus</b> is available each spring, because no other Order cards are in play.</li>" +
           "<li>A player who controls <b>" + RW.num(RW.runesToWin(c)) + " dragon runes</b> may stake a claim during his turn with " + RW.vMark(c) + ". Otherwise the most dragon runes after the seventh winter wins.</li></ul>",
         src: (c) => RW.cite("Rules p.11–12, p.30, p.37", c.mod("rotfc") && "BoW p.11", c.orig && !c.has("bow") && "Revised Gameplay p.2") }
@@ -455,7 +455,7 @@ RW.reference = [
       "<li><b>Influence</b>, as much as printed;</li>" +
       "<li><b>Quest cards</b>, as many as printed — then discard down to three.</li></ul></li>" +
       "<li><b>Supremacy:</b> spend up to 3 influence to draw that many Hero cards. Keep one, shuffle the rest back, and place its figure at one of your strongholds. A fourth hero means one of yours deserts.</li>" +
-      (c.mod("cmd") ? "<li><b>Commanders:</b> instead of Hero cards, you may pay up to 3 influence to draw that many Commander cards (see Commanders).</li>" : "") +
+      (c.mod("cmd") ? "<li><b>Commanders:</b> instead of Hero cards, you may pay up to 3 influence to draw that many Commander cards (see Commanders). Commanders don't count toward the three-hero limit, so you may have four heroes as long as one is a commander (five with Lieutenant General) before anyone deserts.</li>" : "") +
       (c.mod("rotfc") ? "<li><b>Rise of the Free Cities:</b> the alternate cities give more Tactics cards and influence; three also give a dragon rune.</li>" : "") +
       (c.has("bow") ? "<li><b>Desolation or cryomancy</b> in a city's area: the city provides none of its printed icons for Rally Support.</li>" : "") + "</ul>" +
       "<h4>Acquire Power (7) and Title cards</h4><ul>" +
@@ -465,7 +465,7 @@ RW.reference = [
       "<li>Title cards are never shuffled and have one owner at a time; whoever takes one moves it to his play area. There are three" + (c.has("bow") ? ", plus Guildmaster of Merchants" : "") + ".</li>" +
       "<li>The holder of <b>Primarch of the Wizards' Council</b> decides all influence-bid ties.</li>" +
       (c.has("bow") ? "<li><b>Guildmaster of Merchants:</b> +2 resources of any one type each time you resolve Harvest, and you may ignore resource loss caused by a Season card's primary ability.</li>" : "") + "</ul>",
-    src: (c) => RW.cite("Rules p.25, p.31, p.36", c.has("bow") && "BoW p.8", c.mod("cmd") && "BoW p.10", c.mod("rotfc") && "BoW p.11")
+    src: (c) => RW.cite("Rules p.7, p.25, p.31, p.36", c.has("bow") && "BoW p.8", c.mod("cmd") && "BoW p.10", c.mod("rotfc") && "BoW p.11")
   },
   {
     title: "Key Terms — Areas, Control & Figures",
@@ -526,7 +526,7 @@ RW.reference = [
       "<h4>Allied units</h4><ul>" +
       "<li>Neutral units sharing an area with your units are <b>allied</b>: they move and fight as yours, and count toward the 8-unit limit and the winter food limit.</li>" +
       "<li>Allied units in an area you don't control (except during a battle) become ordinary neutral units again.</li>" +
-      "<li>If your last faction unit dies in a battle, your allies stay allied until it ends and may retreat with you.</li>" +
+      "<li>If your last faction unit dies in a battle, your allied neutrals stay allied until the battle ends. If you lose, they may retreat into a friendly area and stay allied to you.</li>" +
       "<li>Allies may move without your units if they end in a friendly area.</li>" +
       "<li>Neutral units placed or moved into a player's area by a Tactics card ally with him; moved into an empty or neutral area, they are no longer allied.</li>" +
       "<li>Decisions for allied units are made by their ally. For unallied ones, the player to the current player's left decides.</li></ul>" +
@@ -626,7 +626,7 @@ RW.reference = [
       "<li>Heroes quest, duel and resolve exploration tokens only in the Quest Phase, never through Order cards.</li>" +
       "<li>The Quest Phase is not part of anyone's turn.</li>" +
       (c.mod("cmd") ? "<li><b>Commanders</b> can't attempt Quests but may move, duel, train or heal, and can receive and use Reward cards.</li>" : "") +
-      (c.mod("explore") ? "<li><b>Exploration tokens:</b> after a moving hero stops, flip any exploration token in his area and resolve it before he duels or quests.</li>" : "") + "</ul>",
+      (c.mod("explore") ? "<li><b>Exploration tokens:</b> when a hero takes the Move action, after his movement (even none) flip any exploration token in his area and resolve it before he duels or quests.</li>" : "") + "</ul>",
     src: (c) => RW.cite("Rules p.16, p.25–26, p.30, p.40", c.mod("cmd") && "BoW p.10", c.mod("explore") && "Rules p.37")
   },
   {
@@ -709,7 +709,8 @@ RW.reference = [
       "<li>On a tie, or with no revealed Order cards: the most influence tokens.</li>" +
       "<li>Still tied: the highest starting influence.</li></ol>" +
       "<h4>Limits</h4><ul>" +
-      "<li>At any time: <b>1</b> Objective card, <b>3</b> Hero cards" + (c.mod("cmd") ? " (commanders don't count)" : "") + ", <b>3</b> Quest cards, <b>10</b> Tactics cards; <b>8</b> units per area.</li>" +
+      "<li>At any time: <b>1</b> Objective card, <b>3</b> Hero cards" + (c.mod("cmd") ? " (commanders don't count)" : "") + ", <b>3</b> Quest cards, <b>10</b> Tactics cards.</li>" +
+      "<li><b>8</b> units per area (allied neutral units count; heroes are not units). The only exception: you may bring any number into an enemy or neutral area to start a battle; if you win, the excess must retreat to a single area. When a winter Season card's secondary ability resolves, the cap is your food dial's current space (excess units destroyed, your choice), then it returns to 8.</li>" +
       "<li>Run out of activation tokens, damage tokens, defeated hero markers, influence or training tokens? Use coins or beads. Everything else is limited to what's in the box.</li>" +
       "<li>A deck that runs out is reshuffled from its discard pile.</li>" +
       "<li>You may destroy your own pieces only to recruit a unit type that is all in play, or to build a stronghold or development when none are left — plus when unit limits force it.</li></ul>" +
@@ -721,13 +722,13 @@ RW.reference = [
       "<li>After a Quest reward, discard the Quest and draw a new one.</li>" +
       "<li>Heroes quest, duel and explore only in the summer Quest Phase.</li>" +
       "<li>Lower Order cards resolve first.</li></ul>",
-    src: (c) => RW.cite("Rules p.31, p.37, p.40", c.mod("cmd") && "BoW p.10")
+    src: (c) => RW.cite("Rules p.11, p.18, p.31, p.37, p.40", c.mod("cmd") && "BoW p.10")
   },
   {
     title: "Exploration Tokens (variant)",
     when: (c) => c.mod("explore"),
     html: (c) => "<ul>" +
-      "<li>After a hero ends his move in a Quest Phase Move action, flip any exploration token in his area and resolve it <b>before</b> he duels or quests. Not when a hero retreats into the area.</li>" +
+      "<li>After a hero takes the Quest Phase Move action and ends his movement (if any), flip any exploration token in his area and resolve it <b>before</b> he duels or quests. Not when a hero retreats into the area.</li>" +
       "<li><b>Events</b> (yellow arrow) are discarded after use. <b>Locations</b> stay, with ongoing effects. <b>Destructible locations</b> stay too, but a player controlling the area with <b>at least six units</b> during his turn may discard them.</li></ul>" +
       "<div class='tbl-wrap'><table class='rtable'><thead><tr><th>Token</th><th>Type</th><th>Effect</th></tr></thead><tbody>" +
       "<tr><td><b>Dragon Throne</b></td><td>Destructible location</td><td>Stays faceup. The area's controller has one additional dragon rune; a rune token may also be placed here.</td></tr>" +
@@ -771,7 +772,7 @@ RW.reference = [
       "<li><b>Supplemental influence:</b> a “3” token is worth three influence; swap them in if normal tokens run short.</li>" +
       "<li><b>Revealing rune tokens</b> to trigger a card (such as “Game of Power”) requires tokens not already revealed.</li>" +
       "<li>Every Banners of War card carries the expansion's icon on its front, so it can be sorted out afterwards.</li></ul>",
-    src: "BoW p.4–8, p.11 · Rules p.30"
+    src: "BoW p.2, p.4–8, p.11 · Rules p.30"
   },
   {
     title: "Development Cards (variant)",
@@ -875,7 +876,7 @@ RW.reference = [
         "<li>Battles follow the Revised rulebook's steps — supporting heroes, routed hexagons — with the expansion's additions slotted in.</li>" +
         "<li>The expansion's note about the base game's Epic Game variant doesn't apply: the revised rules have no Epic variant.</li>" +
         (c.mod("dev") ? "<li><b>Conquered capitals:</b> BoW p.12 says the winner “may not replace an enemy capital stronghold with one of his own”; p.9 spells it out — he may replace it with one of his strongholds, never with his capital. This page follows p.9.</li>" : "") + "</ul>" : ""),
-    src: (c) => RW.cite("FAQ 1.2 p.1", "Revised Gameplay p.1–2", "Rules p.4, p.7–9, p.14–15, p.17, p.19, p.26, p.30–31, p.33", "BoW p.10", c.has("bow") && "BoW p.8, p.11–12", c.mod("dev") && "BoW p.9")
+    src: (c) => RW.cite("FAQ 1.2 p.1", "Revised Gameplay p.1–2", "Rules p.4, p.7–9, p.14–15, p.17, p.19, p.21–22, p.25–26, p.30–31, p.33", "BoW p.10", c.has("bow") && "BoW p.8, p.11–12", c.mod("dev") && "BoW p.9")
   }
 ];
 
@@ -933,12 +934,12 @@ RW.teach = {
     },
     {
       h: "Heroes and quests",
-      body: (c) => "<p>Heroes aren't units; " + (c.mod("cmd") ? "you start with two and can hold three, plus your commander" : "you start with one and can hold three") + ". In each summer's <b>Quest Phase</b>, every hero heals, trains, or moves up to two areas — straight through enemy land — and then may duel an enemy hero or attempt one of your Quest cards. Quests test strength, agility or wisdom: draw that many Fate cards and pick one. Rewards come facedown — weapons, armor, even dragon runes.</p>"
+      body: (c) => "<p>Heroes aren't units; " + (c.mod("cmd") ? "you start with two and can hold three, plus your commander" : "you start with one and can hold three") + ". In each summer's <b>Quest Phase</b>, each hero does one thing: heals (in a friendly area), trains, or moves up to two areas — straight through enemy land. A hero who moves may then duel an enemy hero or attempt one of your Quest cards. Quests test strength, agility or wisdom: draw that many Fate cards and pick one. Rewards come facedown — weapons, armor, even dragon runes.</p>"
     },
     { when: (c) => c.has("bow"),
       h: "Banners of War",
       body: (c) => "<p>Each faction gets two new unit types on a <b>reinforcement sheet</b>, recruited in place of a base unit. Some new Tactics cards are <b>Tactical Fate</b> cards: play them for their text, or in a fight instead of drawing a Fate card. Everyone also gets a ninth Order, <b>Garrison</b>, number zero: +2 strength when you defend this season.</p>" +
-        "<p>Watch for <b>desolation</b> and <b>cryomancy</b> tokens, which strip an area's resources, and the <b>Lost City</b>, a Quest's prize worth a dragon rune. <b>Guildmaster of Merchants</b> is a fourth Title to fight over.</p>"
+        "<p>Watch for <b>desolation</b> and <b>cryomancy</b> tokens, which strip an area's resources, and the <b>Lost City</b>: certain Quests place it on map tile 12, and whoever controls its area holds an extra dragon rune. <b>Guildmaster of Merchants</b> is a fourth Title to fight over.</p>"
     },
     { when: (c) => c.mod("dev"),
       h: "Development cards",

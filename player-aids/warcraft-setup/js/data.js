@@ -119,7 +119,7 @@ WC.S = {
   main: {
     name: "The Main Game", group: "Rulebook", tag: "core",
     blurb: "Build an economy, raise an army and race for victory points — 15 alone, or 30 as teams of two.",
-    origin: "the scenario the rulebook teaches",
+    origin: (c) => c.p === 3 ? "the rulebook’s main game, in the Expansion Set’s three-player version" : "the scenario the rulebook teaches",
     races: (c) => c.p === 2 ? c.races : (c.p === 3 ? ["hu", "orc", "ne"] : ["hu", "orc", "ud", "ne"]),
     src: (c) => c.p === 3 ? "Rules p.2–9 · Expansion p.3" : "Rules p.2–9",
     img: (c) => c.p === 2 ? "main-2p.webp" : (c.p === 3 ? "main-3p.webp" : "main-4p-faq.webp"),
@@ -159,7 +159,7 @@ WC.S = {
       w.push("Or be the last " + (c.p === 4 ? "team" : "player") + " standing. A player is eliminated when his Town is captured: the second time enemy units still hold it after all Move Steps" + (c.p === 4 ? ", and his teammate goes with him" : "") + ".");
       return w;
     },
-    winSrc: (c) => c.p === 3 ? "Expansion p.3 · Rules p.5, p.9" : (c.p === 4 && c.mod("vp20") ? "Rules p.2, p.5, p.9 · FAQ p.2" + (c.has("exp") ? " · Expansion p.3" : "") : "Rules p.2, p.5, p.9")
+    winSrc: (c) => c.p === 3 ? "Expansion p.3 · Rules p.5, p.9" : (c.p === 4 && c.mod("vp20") ? "Rules p.2, p.5, p.9 · FAQ p.2 · Expansion p.3" : "Rules p.2, p.5, p.9")
   },
 
   elfgate: {
@@ -184,7 +184,7 @@ WC.S = {
     removeSrc: "FAQ p.1",
     rules: [
       "Goldmines and Forests <b>next to Towns never deplete</b>: ignore a rolled 3 when harvesting there.",
-      "The Night Elf units are <b>neutral and never move</b>. When you fight them, the <b>player to your left</b> rolls for them, but may not play cards for them.",
+      "The Night Elf units are <b>neutral and never move</b>. They begin play <b>upgraded to level 2</b>. When you fight them, the <b>player to your left</b> rolls for them, but may not play cards for them.",
       "Night Elf units that are killed <b>leave play for good</b> — they defend the gate."
     ],
     rulesSrc: "Rules p.10",
@@ -243,7 +243,7 @@ WC.S = {
     ],
     tokens: [
       "Place the <b>4 wall tokens</b> as the diagram shows.",
-      "Place the <b>2 captive tokens</b>, Orc and Night Elf sides up, on spaces <b>A and B</b> as shown."
+      "Place the <b>2 captive tokens</b> on spaces <b>A and B</b> as the diagram shows: the <b>Night Elf</b> captive (Tyrande, held by the Orcs) on <b>A</b> beside the Orc Town, and the <b>Orc</b> captive (Thrall, held by the Night Elves) on <b>B</b> beside the Night Elf Town."
     ],
     tokensSrc: "Rules p.11",
     res: null, resSrc: "Rules p.11",
@@ -579,12 +579,12 @@ WC.phases = [
   {
     title: "Scenario & Races",
     steps: [
-      { when: () => true, exp: (c) => WC.S[c.scen].tag,
+      { when: () => true, exp: (c) => (c.scen === "main" && c.p === 3) ? "exp" : WC.S[c.scen].tag,
         t: "Scenario, players & races",
         d: (c) => {
           const S = WC.S[c.scen];
           const items = [];
-          items.push("<b>" + S.name + "</b>: " + S.origin + ", for <b>" + c.p + " players</b>.");
+          items.push("<b>" + S.name + "</b>: " + WC.val(S.origin, c) + ", for <b>" + c.p + " players</b>.");
           if (c.scen === "main" && c.p === 2)
             items.push("Randomly choose <b>two races</b>, or let each player choose if everyone agrees; the other two races aren’t used. This game: <b>" + WC.rn(c.races) + "</b>.");
           else items.push("Races: <b>" + WC.rn(c.races) + "</b>" + (S.neutral ? ", with the <b>Night Elves as a neutral force</b> that no one plays" : "") + ". Decide who plays which randomly, or by choice if everyone agrees.");
@@ -594,14 +594,14 @@ WC.phases = [
         },
         src: (c) => c.scen === "main"
           ? WC.src("Rules p.2–3, p.5, p.9", c.p === 3 ? "Expansion p.3" : null, c.p === 4 && c.mod("vp20") ? "FAQ p.2" : null,
-              c.p === 4 && c.mod("vp20") && c.has("exp") ? "Expansion p.3" : null)
+              c.p === 4 && c.mod("vp20") ? "Expansion p.3" : null)
           : WC.src(WC.val(WC.S[c.scen].src, c), "Rules p.3") }
     ]
   },
   {
     title: "1 · Create the Game Board",
     steps: [
-      { when: () => true, exp: (c) => (c.scen === "main" && c.p === 4) ? "faq" : WC.S[c.scen].tag,
+      { when: () => true, exp: (c) => (c.scen === "main" && c.p === 4) ? "faq" : ((c.scen === "main" && c.p === 3) ? "exp" : WC.S[c.scen].tag),
         t: "Build the board",
         d: (c) => {
           const S = WC.S[c.scen];
@@ -716,9 +716,10 @@ WC.phases = [
       { when: () => true, exp: (c) => WC.S[c.scen].tiles ? "scen" : "core",
         t: "Arrange the unit tiles",
         d: (c) => WC.ul([
-          "Stack your unit tiles in <b>three stacks by type</b> (ranged, flying and melee), in Level order with <b>Level 1 on top</b>.",
-          "The top tile of each stack gives the Strength and special ability of <b>all</b> your units of that type.",
-          WC.S[c.scen].tiles ? "<b>This scenario:</b> " + WC.S[c.scen].tiles : null
+          WC.S[c.scen].tiles
+            ? "Stack your unit tiles in <b>three stacks by type</b> (ranged, flying and melee), in Level order. <b>This scenario:</b> all unit types for all players begin play <b>upgraded to their most powerful form</b>, so the <b>highest-Level tile is on top</b> of each stack."
+            : "Stack your unit tiles in <b>three stacks by type</b> (ranged, flying and melee), in Level order with <b>Level 1 on top</b>.",
+          "The top tile of each stack gives the Strength and special ability of <b>all</b> your units of that type."
         ]),
         src: (c) => WC.src("Rules p.3", WC.S[c.scen].tiles ? "Rules p.11" : null) },
       { when: () => true, exp: (c) => WC.S[c.scen].remove ? "faq" : (c.has("exp") ? "exp" : "core"),
@@ -726,7 +727,7 @@ WC.phases = [
         d: (c) => {
           const S = WC.S[c.scen];
           return WC.ul([
-            S.remove ? "<b>FAQ errata:</b> " + S.remove : null,
+            S.remove ? "<b>FAQ errata:</b> " + S.remove + (c.has("exp") ? " These are the base game’s card names; for the Expansion Set’s new decks, see <b>What the books leave open</b>." : "") : null,
             c.scen === "plague" ? "Your Victory Point cards are already out of your deck, in the shops." : null,
             c.has("exp") ? "<b>Expansion Set:</b> each race uses its new experience deck, which replaces the base game’s. Each card also shows its <b>mana</b>." : null,
             "Each player shuffles his experience deck and draws <b>3 cards</b>. You may look at your own hand.",
@@ -784,7 +785,7 @@ WC.costTable = function (c) {
 
 WC.racialText = {
   hu: "<b>Human Alliance — Cooperative Building.</b> In your Spend Step you have a fourth option: build <b>complete</b> buildings and Outposts by assigning <b>2 workers</b> and paying <b>3 gold + 3 wood</b> each, instead of 1 worker and 2 + 2. They come into play at once and are never under construction. Afterwards you may still take a second, normal Spend option (train, construct or upgrade), but not with those 2 workers.",
-  ne: "<b>Night Elf Sentinels — Ancients.</b> Your Town is the <b>Tree of Eternity</b>, which can move up to <b>one space per turn</b> in your Move Step. It can’t move into a mountain, water, Town or Outpost space or a space with an enemy worker or unit, and can’t leave a space with enemy units. It doesn’t count against stacking, and wherever it stands is the Night Elf Town space. Each of your <b>Outposts may also move one space</b> in your Move Step, under the same limits, and doesn’t count against stacking. Cards and abilities that move units (Cripple, Fast, Town Portal, Mass Teleport) don’t affect the Tree or your Outposts.",
+  ne: "<b>Night Elf Sentinels — Ancients.</b> Your Town is the <b>Tree of Eternity</b>, which can move up to <b>one space per turn</b> in your Move Step. It can’t move into a mountain, water, Town or Outpost space or a space with an enemy worker or unit, and can’t leave a space with enemy units. It doesn’t count against stacking, and wherever it stands is the Night Elf Town space. Each of your <b>Outposts may also move one space</b> in your Move Step, under the same limits, and doesn’t count against stacking. Cards and abilities that affect a unit’s movement, such as Cripple, Fast, Town Portal or Mass Teleport, don’t affect the Tree or your Outposts.",
   orc: "<b>Orcish Horde — Protective Burrows.</b> During the Move Step, your <b>Town and Outposts can attack as ranged units with Strength 2</b> when they’re in the battlefield or a flank of a battle that has at least one actual participating Orc unit. Each rolls <b>one extra attack per Orc worker</b> in its space; an Outpost with 2 workers rolls 3 attacks. Towns, Outposts and workers still can’t be taken as casualties.",
   ud: "<b>Undead Scourge — Undead Resource Gathering.</b> In your Harvest Step you may harvest wood from any Forest where you have <b>3 melee units</b>; together they count as one worker and may break the worker stacking limit. In your Spend Step you <b>don’t assign workers</b> to construction: you still need one worker in your Town per building, and one in the space of each Outpost, but they stay free. The building or Outpost completes at your next Deploy Step even if those workers move, harvest or are killed."
 };
@@ -812,23 +813,24 @@ WC.reference = [
       "<b>Workers</b> can’t move into a space with enemy units, workers or Outposts unless one of your units is already there, even one that just moved in this turn.",
       "<b>Mountains:</b> only flying units may enter." + (c.has("exp") ? " <i>Expansion Set clarification:</i> an ability such as Raise Dead may place or summon other units there, but once such a unit leaves the mountain it can’t re-enter." : ""),
       c.has("exp") ? "<b>Water</b> (Expansion Set): only flying units may enter, and only to pass through. They can’t end their movement there." : null,
+      "<b>Occupied Town:</b> if units or workers were deployed into a Town space holding enemy units, no units or workers, whoever owns them, may leave that space; the battle there is fought in the Move Step as normal.",
       c.mod("heroes") ? "<b>Heroes</b> move 2 spaces but can’t enter mountain or water spaces. Like other units they stop on entering a space with an enemy unit, worker or Outpost, and they don’t count against stacking limits." : null,
-      WC.creepRules(c) ? "<b>Creeps</b> are always enemy units. A unit that enters a creep’s space must stop; a face-down creep is turned face up. Workers can’t enter a creep’s space unless you already have a unit there." : null,
+      WC.creepRules(c) ? "<b>Creeps</b> are always enemy units. A unit that enters a creep’s space must stop; a face-down creep is turned face up. Workers can’t enter a creep’s space unless you already have a unit there." + (c.scen === "dragon" ? " <i>Dragon Rise:</i> Orc and Undead units don’t have to stop for, or battle, the hatchling or the dragon." : "") : null,
       c.mod("racial") && c.race("ne") ? "<b>Night Elves (Ancients):</b> the Tree of Eternity and each Night Elf Outpost may move one space in the Night Elf Move Step (see Racial Abilities)." : null
     ]) + "<h4>After moving</h4>" + WC.ul([
       "Every space with at least one of your units and at least one enemy unit becomes a <b>battle</b>. You resolve all your battles, in any order you choose, before your Move Step ends. Moving onto an enemy worker alone doesn’t start a battle.",
       "Once your battles are resolved, <b>workers and Outposts</b> in spaces with enemy units are destroyed.",
       "<b>Captured Towns:</b> when all players have finished their Move Steps and all battles are resolved, a player whose Town space holds enemy units puts a <b>partial depletion marker</b> on it, which can never be removed. If one is already there, that player" + (c.teams ? " and his teammates are" : " is") + " <b>eliminated</b>: remove their workers, units and Outposts. If only one player or team is left, it wins."
     ]),
-    src: (c) => WC.src("Rules p.4–5, p.9", c.has("exp") ? "Expansion p.2, p.3" : null, c.mod("heroes") ? "Expansion p.5" : null, WC.creepRules(c) ? "Expansion p.4" : null,
-      c.mod("racial") && c.race("ne") ? "Expansion p.3–4" : null)
+    src: (c) => WC.src("Rules p.4–6, p.9", "FAQ p.2", c.has("exp") ? "Expansion p.2, p.3" : null, c.mod("heroes") ? "Expansion p.5" : null, WC.creepRules(c) ? "Expansion p.4" : null,
+      c.mod("racial") && c.race("ne") ? "Expansion p.3–4" : null, c.scen === "dragon" ? "Expansion p.7–8" : null)
   },
   {
     title: "Battle — Who Fights & How",
     when: () => true,
     html: (c) => WC.ul([
       "A battle happens when units of two different players" + (c.teams ? " (or teams)" : "") + " share a space at the end of a player’s Move Step. That space is the <b>battlefield</b>; <b>every</b> adjacent space is a <b>flank</b>" + (c.has("exp") ? ", whether or not it holds any units" : "") + ".",
-      "<b>All</b> units of the two players" + (c.teams ? " and their teammates" : "") + " in the battlefield and the flanks take part. Other players’ units in the flanks don’t.",
+      "<b>All</b> units of the two players in the battlefield and the flanks take part" + (c.teams ? "; a teammate’s units join only if that teammate wants them to, and he rolls for his own" : "") + ". Other players’ units in the flanks don’t.",
       c.mod("research") ? "<b>Spell research:</b> nobody draws cards when a battle begins or for winning it." : "When a battle begins, every player with a participating unit <b>draws 1 experience card</b>. When your deck runs out, shuffle your discard pile into a new deck.",
       "The <b>attacker</b> is the player whose Move Step triggered the battle; the <b>defender</b> is the player being attacked." + (c.teams ? " Teammates with participating units share those roles." : "")
     ]) + "<h4>Each round</h4><ol>" +
@@ -902,13 +904,13 @@ WC.reference = [
       }
       h += "<h4>Also</h4>" + WC.ul([
         "Keep your resources in plain sight, and answer honestly if asked how many you have.",
-        "You can still harvest from a space with an Outpost, but the worker building that Outpost can’t harvest until it’s complete.",
-        c.scen === "elfgate" ? "<b>The Elf Gate:</b> Goldmines and Forests next to Towns never deplete; ignore a rolled 3 there." : null,
-        c.scen === "necro" ? "<b>March of the Necromancers:</b> the Goldmines and Forests next to the Human Town never deplete. When the Undead player harvests, each Necromancer on A, B or C lets him place a free unit there." : null,
+        "You can still harvest from a space with an Outpost, but the worker building that Outpost can’t harvest until it’s complete." + (c.mod("racial") && c.race("ud") ? " (Undead with Racial Abilities: your Outpost workers aren’t assigned, so they may harvest.)" : ""),
+        c.scen === "elfgate" ? "<b>The Elf Gate:</b> Goldmines and Forests next to Towns never deplete; ignore a rolled 3 there." + ((c.mod("drain") || c.mod("hidden")) ? " This is written for the resource die; how it works with Draining/Hidden resources is left open (see What the books leave open)." : "") : null,
+        c.scen === "necro" ? "<b>March of the Necromancers:</b> the Goldmines and Forests next to the Human Town never deplete." + ((c.mod("drain") || c.mod("hidden")) ? " This is written for the resource die; how it works with Draining/Hidden resources is left open (see What the books leave open)." : "") + " When the Undead player harvests, each Necromancer on A, B or C lets him place a free unit there: melee on A, ranged on B, flying on C, within the normal stacking limits." : null,
         c.scen === "skull" ? "<b>Skull of Storms:</b> with a unit in the shrine space, you may call down lightning during your Harvest Step." : null,
         c.scen === "nordrassil" ? "<b>Nordrassil:</b> nobody plays the Harvest Step." : null,
-        c.mod("racial") && c.race("ud") ? "<b>Undead:</b> 3 Undead melee units in a Forest may harvest wood as one worker (see Racial Abilities)." : null,
-        (c.mod("drain") || c.mod("hidden")) ? "The Night Elf <b>Renew</b> card adds <b>10 wood</b> to a Forest space instead of its normal effect." : null
+        c.mod("racial") && c.race("ud") ? "<b>Undead:</b> 3 Undead melee units in a Forest may harvest wood as one worker, even as a fourth worker beyond the limit of 3 (see Racial Abilities)." : null,
+        (c.mod("drain") || c.mod("hidden")) && c.race("ne") ? "The Night Elf <b>Renew</b> card adds <b>10 wood</b> to a Forest space instead of its normal effect." : null
       ]);
       return h;
     },
@@ -927,7 +929,7 @@ WC.reference = [
       "<b>Stacking limits apply.</b> A unit or worker with nowhere legal to go stays in training. If returning a building’s worker would break the worker limit in your Town, the building stays under construction; those workers can’t go to an Outpost instead.",
       "You may always choose <b>not</b> to complete a unit, worker, building or Outpost yet.",
       c.mod("research") ? "<b>Spell research:</b> remove your research tokens from your worker building and draw that many experience cards." : null,
-      c.mod("heroes") ? "<b>Heroes:</b> a re-trained hero deploys like any unit, at the level it had when it was killed unless you trained it lower." : null,
+      c.mod("heroes") ? "<b>Heroes:</b> a re-trained hero deploys like any unit, in your Town or Outpost space, but doesn’t count against stacking limits. It returns at the level it had when it was killed unless you trained it lower." : null,
       c.scen === "nordrassil" ? "<b>Nordrassil:</b> nobody plays the Deploy Step." : null
     ]),
     src: (c) => WC.src("Rules p.6", "FAQ p.2", c.mod("research") ? "Expansion p.6" : null, c.mod("heroes") ? "Expansion p.6" : null, c.scen === "nordrassil" ? "Rules p.11" : null,
@@ -948,8 +950,8 @@ WC.reference = [
       ]) +
       "<h4>Option 2 · Construct buildings and Outposts</h4>" + WC.ul([
         "<b>Building:</b> take a worker off your Town space, pay 2 gold + 2 wood, and put the building tile face down next to your Town interface with the worker on it. It completes in your next Deploy Step.",
-        c.mod("racial") && c.race("ud") ? "<b>Undead:</b> you don’t assign the worker; it must be in your Town, but stays free (see Racial Abilities)." : null,
         "<b>Outpost:</b> you need a worker in the chosen space. Pay 2 gold + 2 wood and put the Outpost face down there with that worker on it. If the worker does anything before the Outpost is complete (moves, harvests, fights, is killed), the Outpost is destroyed.",
+        c.mod("racial") && c.race("ud") ? "<b>Undead:</b> you don’t assign workers to buildings or Outposts. You still need one worker in your Town for each building, and one in the space of each Outpost, but they stay free. The building or Outpost still completes at your next Deploy Step even if those workers move, harvest or are killed (see Racial Abilities)." : null,
         "Outposts can be built anywhere a worker can reach: every space except mountains" + (c.has("exp") ? " and water" : "") + ".",
         c.has("exp") ? "<b>Rebuilding an Outpost</b> (Expansion Set): with both your Outposts on the board, you may destroy one to reconstruct it in another space. Move the marker there face down, under construction." : null,
         "Limits: <b>2 melee, 3 ranged and 3 flying buildings, and 2 Outposts</b>, the tiles and markers you have.",
@@ -961,14 +963,16 @@ WC.reference = [
         "A <b>victory point symbol</b> instead of a requirement means the type is fully upgraded and worth <b>1 VP</b>, up to 3 VP for melee, ranged and flying.",
         "Choose carefully: it’s hard to build enough to upgrade everything to the top."
       ]) +
-      ((c.scen === "orcsale" || c.scen === "plague" || c.scen === "necro") ? "<h4>This scenario</h4>" + WC.ul([
+      ((c.scen === "orcsale" || c.scen === "plague" || c.scen === "necro" || c.scen === "nordrassil") ? "<h4>This scenario</h4>" + WC.ul([
         c.scen === "orcsale" ? "Recruit Orc mercenaries (4 gold each) at a mercenary camp <b>instead of</b> training, constructing or upgrading." : null,
         c.scen === "plague" ? "With a unit on a shop token, buy your Victory Point card there for 4 gold <b>in addition to</b> your normal Spend option." : null,
-        c.scen === "necro" ? "The Undead player can’t train or construct; Necromancers on D and E give him free upgrades." : null
+        c.scen === "necro" ? "The Undead player can’t train or construct. When he upgrades, a Necromancer on D or E lets him upgrade one unit type for free, or two types with Necromancers on both." : null,
+        c.scen === "nordrassil" ? "<b>Nordrassil:</b> the Undead player doesn’t play the Spend Step. No player has a resource stockpile, and the Allies don’t play the Harvest Step." : null
       ]) : ""),
     src: (c) => WC.src("Rules p.2–3, p.6–7, p.12", "FAQ p.2", c.has("exp") ? "Expansion p.2, p.3" : null,
       c.mod("racial") ? "Expansion p.3–4" : null, (c.mod("heroes") || c.mod("research")) ? "Expansion p.6" : null,
-      c.scen === "orcsale" ? "Orcs for Sale sheet" : null, c.scen === "plague" ? "Plague of the Scourge sheet (fan-submitted)" : null, c.scen === "necro" ? "Rules p.10" : null)
+      c.scen === "orcsale" ? "Orcs for Sale sheet" : null, c.scen === "plague" ? "Plague of the Scourge sheet (fan-submitted)" : null, c.scen === "necro" ? "Rules p.10" : null,
+      c.scen === "nordrassil" ? "Rules p.11" : null)
   },
   {
     title: "Victory Points & Winning",
@@ -978,18 +982,19 @@ WC.reference = [
         (c.has("exp")
           ? "<b>Experience:</b> Victory Point cards. Each base-game deck has <b>3</b>; the Expansion rulebook doesn’t list the cards in its new decks, which replace them, so check yours."
           : "<b>Experience:</b> each experience deck has <b>3 Victory Point cards</b>.") +
-          " Hold one as long as you like; once played face up in front of you, it is worth 1 VP.",
+          " Hold one as long as you like; once played face up in front of you, it is worth 1 VP." +
+          (c.scen === "plague" ? " <b>This scenario:</b> your 3 Victory Point cards aren’t in your deck. One waits at each goblin shop, and with a unit on that shop token during your Spend Step you may buy it for 4 gold, on top of your normal Spend option. To win you need all three cards and a total of 9 victory points, at the end of any Step." : ""),
         "<b>Upgrades:</b> each of your three unit types is worth 1 VP when fully upgraded.",
         "<b>Board control:</b> spaces showing a VP value score for any player with units in them at the end of the turn. <b>Town spaces are worth 3</b>, objective spaces 1 or 2. Holding your own Town, at least one unit in it, keeps you at 3 VP or more.",
         c.teams ? "<b>Teams:</b> a space scores only once, even when both teammates have units in it." : null,
         (c.scen === "elfgate" || c.scen === "necro" || c.scen === "captives" || c.scen === "nordrassil" || c.scen === "dragon" || c.scen === "elements" || c.scen === "altar")
-          ? "<b>This scenario</b> isn’t won on victory points." + (WC.S[c.scen].remove ? " The Victory Point cards are removed from the decks." : "") : null
+          ? "<b>This scenario</b> isn’t won on victory points." + (WC.S[c.scen].remove ? (c.has("exp") ? " The FAQ removes the base game’s Victory Point cards here; for the Expansion Set’s new decks, see What the books leave open." : " The Victory Point cards are removed from the decks.") : "") : null
       ]) + "<h4>Elimination</h4>" + WC.ul([
         "A Town space still occupied by enemy units after everyone’s Move Step gets a permanent partial depletion marker. The second time, that player" + (c.teams ? " and his teammates are" : " is") + " eliminated, and his workers, units and Outposts are removed.",
         "If only one player or team is left, the game ends and that player or team wins."
       ]),
     src: (c) => WC.src("Rules p.2, p.5, p.9", c.teams ? "FAQ p.2" : null, WC.winSrc(c).indexOf("Rules p.2") === 0 ? null : WC.winSrc(c),
-      c.mod("vp20") ? "FAQ p.2" : null, c.mod("vp20") && c.has("exp") ? "Expansion p.3" : null, WC.S[c.scen].removeSrc || null,
+      c.mod("vp20") ? "FAQ p.2" : null, c.mod("vp20") ? "Expansion p.3" : null, WC.S[c.scen].removeSrc || null,
       c.has("exp") ? "Expansion p.2" : null)
   },
   {
@@ -1010,7 +1015,7 @@ WC.reference = [
     when: (c) => c.scen !== "main",
     html: (c) => {
       const S = WC.S[c.scen];
-      return "<p><b>" + S.name + "</b>: " + S.origin + ".</p><h4>Special rules</h4>" + WC.ul(WC.val(S.rules, c)) +
+      return "<p><b>" + S.name + "</b>: " + WC.val(S.origin, c) + ".</p><h4>Special rules</h4>" + WC.ul(WC.val(S.rules, c)) +
         "<h4>Victory</h4>" + WC.ul(WC.win(c));
     },
     src: (c) => WC.src(WC.val(WC.S[c.scen].rulesSrc, c), WC.winSrc(c) !== WC.val(WC.S[c.scen].rulesSrc, c) ? WC.winSrc(c) : null)
@@ -1103,7 +1108,7 @@ WC.reference = [
       "Creeps are always <b>enemy units</b>. A unit entering a creep’s space must stop, and a face-down creep is revealed; it stays face up until killed. Workers can’t enter a creep’s space unless you already have a unit there.",
       "<b>Battling creeps:</b> the <b>player to your left</b> rolls the creep’s dice, but draws no card and uses no cards or hero abilities for it. You still draw a card before the battle, and another if you win" + (c.mod("research") ? ", except with Spell research" : "") + ".",
       "Each casualty costs the creep <b>one die</b>. Lost dice return after the battle if it survives; with no dice left it is killed.",
-      "<b>Experience:</b> if your hero is in the <b>battlefield</b> when a creep dies, take its marker face down. In a team game, every allied hero in the battlefield gets the full experience. If only non-hero units killed it, or your hero was only in a flank, the marker goes back to the box.",
+      "<b>Experience:</b> if your hero is in the <b>battlefield</b> when a creep dies, take its marker face down. In a team game, every allied hero in the battlefield gets the full experience: one takes the marker, and the others take equivalent unused creep markers from the box. If only non-hero units killed it, or your hero was only in a flank, the marker goes back to the box.",
       c.scen === "elements" ? "<b>Battle of the Elements:</b> several creeps in one space are all revealed and fight as allies; their controller splits the casualties." : null,
       c.scen === "dragon" ? "<b>Dragon Rise:</b> the hatchling and dragon are creeps. Night Elf and Human units follow the normal creep rules; Orc and Undead units don’t have to stop for them or battle them." : null
     ]),
@@ -1176,13 +1181,13 @@ WC.reference = [
       "<b>Scenario setup:</b> remove the 3 Victory Point cards from every deck in The Elf Gate, March of the Necromancers, The Captives and Nordrassil. Also remove the 2 Summon Building cards (Undead) in March of the Necromancers; and in Nordrassil the 2 Summon Building, 2 Renew, 2 Call to Arms and 2 Pillage cards.",
       "<b>Retreat?</b> No. The only way out besides Town Portal is taking your casualties from the battlefield so the battle ends sooner.",
       "<b>Both sides wiped out in the same phase?</b> No winner: nobody draws the extra card, and units taken by Devour are killed.",
-      "<b>Deploying into your own occupied Town</b> is allowed; nobody may leave the space, and the battle is fought in the Move Step.",
+      "<b>Deploying into your Town while enemy units occupy it</b> is allowed; then no units or workers, whoever’s they are, may leave the space, and the battle is fought in the Move Step as normal.",
       "<b>Outposts</b> can be built anywhere a worker can reach, every space except mountains" + (c.has("exp") ? " (and the Expansion’s water, which workers can’t enter)" : "") + ". A space with an Outpost can still be harvested, but not by the worker building it.",
       c.teams ? "<b>Team scoring:</b> a space occupied by both teammates scores once." : null,
       "<b>Multiple copies</b> of one card may be played together: Fast doesn’t normally stack, Cripple stacks to 0, Envenomed Spears doesn’t stack.",
       c.has("exp") ? null : "<b>Simultaneous cards:</b> the player whose turn it is plays one first, then clockwise, until everyone is done. In a battle that player is the attacker, so this newer ruling replaces the rulebook’s defender-first order.",
       "<b>Polymorphed units</b> can do anything but attack that round. <b>Raise Dead</b> still triggers if the casualty is prevented.",
-      c.p === 4 && c.scen === "main" ? "<b>Four-player target:</b> the main game was designed to end in an elimination. For a likelier VP win, play to 20; the Strategic Four-Player Game option." : null
+      c.p === 4 && c.scen === "main" ? "<b>Four-player target:</b> the main game was designed to end in an elimination. For a likelier VP win, play to 20 (the FAQ’s option, which the Expansion Set calls the Strategic Four-Player Game)." : null
     ]) + (c.has("exp") ? "<h4>Rule changes &amp; clarifications (Expansion Set rulebook, October 2004)</h4><p>Part of the Expansion Set’s rules, so they apply while it is selected.</p>" + WC.ul([
       "<b>“Natural” rolls:</b> abilities that trigger on a roll of 1, or any other number, need the die itself to show it; modified rolls don’t count.",
       "<b>Rebuilding Outposts:</b> with both your Outposts on the board, you may destroy one to reconstruct it elsewhere, face down and under construction.",
@@ -1192,7 +1197,7 @@ WC.reference = [
     ]) + "<h4>Timing (Expansion Set, Appendix 1)</h4>" + WC.ul([
       "<b>Timing conflicts:</b> simultaneous card or hero-ability uses go in play order from the first player, clockwise; each may decline after seeing earlier ones. This replaces the FAQ’s “player whose turn it is goes first” and the rulebook’s “defender first”."
     ]) : ""),
-    src: (c) => WC.src("FAQ p.1–2", c.has("exp") ? "Expansion p.3, p.6" : "Rules p.9")
+    src: (c) => WC.src("FAQ p.1–2", c.has("exp") ? "Expansion p.3, p.6" : "Rules p.9", "Rules p.6", !c.has("exp") && c.p === 4 && c.scen === "main" ? "Expansion p.3" : null)
   },
   {
     title: "Board Pieces at a Glance",
@@ -1249,13 +1254,13 @@ WC.teach = {
               (c.p === 4
                 ? "<p>We play as two teams, <b>Humans and Night Elves against Orcs and Undead</b>. The first team to hold <b>" + (c.mod("vp20") ? "20" : "30") + " victory points</b> at the end of either teammate’s turn wins." + (c.mod("vp20") ? " We’re playing the Strategic Four-Player Game: <b>20 victory points</b> instead of 30, so a team can win without wiping anyone out." : "") + "</p>"
                 : "<p>The first of us to hold <b>15 victory points</b> at the end of his own turn wins." + (c.p === 3 ? " This three-player version comes with the Expansion Set’s board pieces." : "") + "</p>") +
-              "<p>Points come from three places: the " + (c.has("exp") ? "" : "three ") + "victory point cards in your experience deck, fully upgrading a unit type, and holding scoring spaces. Your own Town is worth 3. There’s a faster way to win too: capture Towns. If enemy units are still in your Town after everyone has moved, it gets a permanent scar. A second time, and you’re out" + (c.teams ? ", along with your teammate" : "") + ".</p>";
+              "<p>Points come from three places: the " + (c.has("exp") ? "" : "three ") + "victory point cards in your experience deck, fully upgrading a unit type, and holding scoring spaces. Your own Town is worth 3. There’s a faster way to win too: capture Towns. If enemy units are still in your Town after everyone has moved, it gets a permanent scar. A second time, and you’re out" + (c.teams ? ", along with your teammate" : "") + "." + (c.p === 3 ? " With three of us, knocking out one rival isn’t enough: the game ends that way only when one player is left." : "") + "</p>";
             break;
           case "elfgate":
-            hook = "<p>Tonight is <b>The Elf Gate</b>. Humans, Orcs and Undead race for a magic gate that moves armies across the world. A small, neutral <b>Night Elf</b> garrison guards it: it never moves, and the player on your left rolls for it when you attack. To win, end your turn with a unit on the gate, <b>space D</b>, while fewer than <b>three enemy units</b>, Night Elves included, stand in all the spaces around it. Or be the last of us standing. Victory points don’t count tonight, so the victory point cards are out of the decks.</p>";
+            hook = "<p>Tonight is <b>The Elf Gate</b>. Humans, Orcs and Undead race for a magic gate that moves armies across the world. A small, neutral <b>Night Elf</b> garrison guards it: it never moves, and the player on your left rolls for it when you attack. To win, end your turn with a unit on the gate, <b>space D</b>, while fewer than <b>three enemy units</b>, Night Elves included, stand in all the spaces around it. Or be the last of us standing. Victory points don’t count tonight" + (c.has("exp") ? "." : ", so the victory point cards are out of the decks.") + "</p>";
             break;
           case "necro":
-            hook = "<p>Tonight is <b>March of the Necromancers</b>. The Undead player has no town, no buildings and no stockpile, just <b>two Necromancers</b> roaming the countryside, raising free Undead units from the unit tokens at A, B and C and free upgrades at D and E. The Humans must <b>kill both Necromancers</b> or <b>destroy the tokens at A, B and C</b>. The Undead win by taking the Human Town.</p>";
+            hook = "<p>Tonight is <b>March of the Necromancers</b>. The Undead player has no town, no buildings and no stockpile, just <b>two Necromancers</b> roaming the countryside, raising free Undead units from the unit tokens at A, B and C and free upgrades at D and E. The Humans must <b>kill both Necromancers</b> or <b>destroy the tokens at A, B and C</b>. The Undead win by eliminating the Human player through his Town, as in the main game: if Undead units are still in the Human Town after everyone has moved, it is scarred for good, and the second time the Humans are out.</p>";
             break;
           case "captives":
             hook = "<p>Tonight is <b>The Captives</b>. The Orcs hold the Night Elf leader Tyrande, and the Night Elves hold Thrall. Walls block melee and ranged units along certain edges. March a unit to your captive, escort it home to <b>your own Town</b>, and you win. Eliminating the other side works too.</p>";
@@ -1294,19 +1299,19 @@ WC.teach = {
     },
     {
       h: "Your four steps — and why you take them",
-      body: (c) => "<p><b>Move.</b> Each unit and worker may move once: melee and ranged units one space, flyers and workers up to two. Only flyers go into mountains" + (c.has("exp") ? ", and they can only fly over water" : "") + ". End your move with at most three of your own units and three of your own workers in a space. Move into enemy units and a battle starts once you’ve finished moving. Workers can’t walk in on enemies unless your units are already there, and any worker or Outpost left alone with enemy units is destroyed.</p>" +
+      body: (c) => "<p><b>Move.</b> Each unit and worker may move once: melee and ranged units one space, flyers and workers up to two. A unit moving more than one space must stop as soon as it enters a space with an enemy unit, worker or Outpost. Only flyers go into mountains" + (c.has("exp") ? ", and they can only fly over water" : "") + ". End your move with at most three of your own units and three of your own workers in a space. Move into enemy units and a battle starts once you’ve finished moving. Workers can’t walk in on enemies unless your units are already there, and any worker or Outpost left alone with enemy units is destroyed.</p>" +
         ((c.mod("drain") || c.mod("hidden"))
           ? "<p><b>Harvest.</b> Each worker on a goldmine or forest collects <b>2</b> gold or wood from it, until the space runs dry.</p>"
           : "<p><b>Harvest.</b> For each worker on a goldmine or forest, roll the resource die and take that much gold or wood. Roll a <b>3</b> and the space starts running dry; a second 3 exhausts it, so plan to move on.</p>") +
         "<p><b>Deploy.</b> Everything you paid for last turn arrives now: units and workers appear in your Town or at an Outpost, and new buildings and Outposts are finished.</p>" +
-        "<p><b>Spend.</b> This is the big decision. Each turn you pick <b>one</b>: train units and workers, construct buildings and Outposts, or upgrade unit types. A melee unit costs 1 gold and 1 wood; buildings, Outposts and each upgrade cost 2 gold and 2 wood. More buildings let you train more at once and unlock upgrades, and an upgrade improves every unit of that type on the board at once.</p>"
+        "<p><b>Spend.</b> This is the big decision. Each turn you pick <b>one</b>: train units and workers, construct buildings and Outposts, or upgrade unit types. A melee unit costs 1 gold and 1 wood; buildings, Outposts and each upgrade cost 2 gold and 2 wood. Each building takes a worker from your Town, and each Outpost a worker in its space, and that worker is tied up until it’s finished. More buildings let you train more at once and unlock upgrades, and an upgrade improves every unit of that type on the board at once.</p>"
     },
     {
       h: "Battle — the heart of the game",
       body: (c) => "<p>Battles decide Warcraft. The space you moved into is the <b>battlefield</b>. Every space around it is a <b>flank</b>, and all of both sides’ units there join in, so where you stand matters. " +
         (c.mod("research") ? "" : "Everyone fighting draws an experience card. ") +
-        "Then <b>ranged units shoot, flyers attack, and melee units attack</b>. In each phase you roll one die per unit of that type, and every roll <b>equal to or under your Strength</b>, shown on your top unit tile, is a hit. Whoever is hit picks his own casualties, defender first. Melee attacks can’t hit flyers. Rounds repeat until only one side has units left in the battlefield itself; taking your casualties from the battlefield is how you cut your losses. " +
-        (c.mod("research") ? "" : "The winner draws another card. ") +
+        "Then <b>ranged units shoot, flyers attack, and melee units attack</b>. In each phase you roll one die per unit of that type, and every roll <b>equal to or under your Strength</b>, shown on your top unit tile, is a hit. Whoever is hit picks his own casualties, defender first. Melee attacks can’t hit flyers. Rounds repeat until at most one side has units left in the battlefield itself; taking your casualties from the battlefield is how you cut your losses. " +
+        (c.mod("research") ? "The last side with units in the battlefield wins; if it ends up empty, nobody wins. " : "The last side with units in the battlefield wins and draws another card; if it ends up empty, nobody wins. ") +
         "Your experience cards are spells and tricks: play them when their text says.</p>"
     },
     { when: (c) => c.scen !== "main",
@@ -1322,11 +1327,11 @@ WC.teach = {
           skull: "Lightning can’t target a Town space, and the other player chooses which of his units take the casualties.",
           dragon: "Orc and Undead units walk past the hatchling and dragon and can carry the hatchling. Human and Night Elf units must stop and fight them, after any enemy units there.",
           elements: "Units that begin and end your move with an element token gain its power until the end of the turn: water gives Heal, earth Raise Dead, air Slow Poison and fire Bloodlust.",
-          orcsale: "Park a unit or worker on a 2-point camp and you may spend your Spend Step hiring orcs at 4 gold each. They must always stay with one of your own units or they walk off, and if the mercenary reserve has none of the type you want left, you can bribe one away from a rival.",
+          orcsale: "Park a unit or worker on a 2-point camp and you may spend your Spend Step hiring orcs at 4 gold each. Each one must always share a space with one of your regular, non-mercenary units, or it walks off back to the reserve. And if the mercenary reserve has none of the type you want left, you bribe one of that type away from whoever has it on the board.",
           goldrush: "No special rules: just the map. Mountains split the board, so watch the resource spaces and where your flyers can reach.",
           plague: "With a unit on a shop during the Spend Step you may buy your own victory point card there for 4 gold, on top of your normal Spend. Each shop has one card for each of us."
         };
-        return "<p>" + map[c.scen] + "</p>" + (S.remove ? "<p>Our decks have been trimmed per the FAQ, so some cards aren’t in them tonight.</p>" : "");
+        return "<p>" + map[c.scen] + "</p>" + (S.remove ? (c.has("exp") ? "<p>The FAQ trims this scenario’s decks; with the Expansion Set’s new decks we’ve agreed before play which cards come out.</p>" : "<p>Our decks have been trimmed per the FAQ, so some cards aren’t in them tonight.</p>") : "");
       }
     },
     { when: (c) => !!c.teams,
@@ -1355,7 +1360,7 @@ WC.teach = {
     },
     { when: (c) => c.mod("heroes"),
       h: "Heroes",
-      body: () => "<p>Each of us picked one of four <b>heroes</b>. A hero moves two spaces, doesn’t count toward stacking, and takes wounds instead of dying until its Life runs out. Heroes level up by being in the battlefield when creeps, or enemy heroes, die: two experience points buy a level, once per turn at the end of any Move Step, and every level adds abilities. Abilities cost <b>mana</b>: discard experience cards with enough mana to pay. Some heroes summon creatures. A killed hero can be re-trained on your hero building.</p>"
+      body: () => "<p>Each of us picked one of four <b>heroes</b>. A hero moves two spaces but can’t enter mountains or water, doesn’t count toward stacking, and takes wounds instead of dying until its Life runs out. Heroes level up by being in the battlefield when creeps, or enemy heroes, die: two experience points buy a level, once per turn at the end of any Move Step, and every level adds abilities. Abilities cost <b>mana</b>: discard experience cards with enough mana to pay. Some heroes summon creatures. A killed hero can be re-trained on your hero building.</p>"
     },
     { when: (c) => c.mod("research"),
       h: "Spell research",
@@ -1372,7 +1377,7 @@ WC.teach = {
     {
       h: "Don’t worry about these until they come up",
       body: (c) => WC.ul([
-        "<b>Unit special abilities</b> such as Area Attack, Heal, Slow Poison, Bloodlust and Raise Dead: read the tile when an upgrade reveals one.",
+        "<b>Unit special abilities</b> such as Area Attack, Heal, Slow Poison, Bloodlust and Raise Dead: the unit tile shows only an icon, so when an upgrade reveals one, look it up " + (c.has("exp") ? "on your Player Reference Sheet." : "under Unit Special Abilities on this page (the back of the rulebook, with Heal as revised by the FAQ)."),
         "<b>Each experience card’s exact text:</b> read it when you draw it.",
         "<b>Deploy details:</b> stacking limits can hold a unit back, and you may always delay finishing something.",
         c.has("exp") ? "<b>Rebuilding Outposts:</b> with both on the board, you may knock one down to rebuild it elsewhere." : null,

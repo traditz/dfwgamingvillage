@@ -29,7 +29,7 @@ SWR.modes = [
   { id: "first", name: "First game",
     blurb: "Learn to Play setup: fixed starting positions, and action cards are only used to recruit leaders. Base game only (Rise of the Empire's setup changes are written for the full game, RotE p.1)." },
   { id: "std", name: "Full game",
-    blurb: "Rules Reference setup (the Learn to Play's advanced rules): random starting loyalty, place your own units, two secret starting action cards each." }
+    blurb: "Rules Reference setup (the Learn to Play's advanced rules): random starting loyalty, place your own units, two secret starting action cards per faction." }
 ];
 
 SWR.players = [
@@ -45,7 +45,7 @@ SWR.modules = [
     src: "RotE p.1" },
   { id: "rotefirst", requires: "rote", name: "First game with the expansion",
     summary: "Both mission decks use only the cards with a Darth Vader icon or a leader icon",
-    description: "For your first game using Rise of the Empire. Off: each player chooses the base or the Rise of the Empire mission set (Choosing Mission Sets).",
+    description: "For your first game using Rise of the Empire. Off: each faction chooses the base or the Rise of the Empire mission set (in a team game the General chooses) (Choosing Mission Sets).",
     src: "RotE p.1–2" }
 ];
 
@@ -138,7 +138,7 @@ SWR.ul = function (items) { return "<ul>" + items.filter(Boolean).map(function (
           d: function (c) {
             var a = [];
             if (c.has("rote")) {
-              a.push("Sort the objective cards into three piles by the number on the card back: <b>I</b>, <b>II</b> and <b>III</b>.");
+              a.push("Sort all of the objective cards, the base game's and the expansion's 12 together, into three piles by the number on the card back: <b>I</b>, <b>II</b> and <b>III</b>.");
               a.push("<b>Stage III:</b> 1 <b>Death Star Plans</b> card + 4 random stage III cards. Shuffle.");
               a.push("<b>Stage II:</b> 1 <b>Death Star Plans</b> card + 4 random stage II cards. Shuffle and place on top of the stage III deck.");
               a.push("<b>Stage I:</b> shuffle the pile and deal 5 random cards onto the top of the stage II deck.");
@@ -448,7 +448,7 @@ SWR.ul = function (items) { return "<ul>" + items.filter(Boolean).map(function (
           "<li><b>Success:</b> perform the ability, making any choices now.</li>" +
           "<li><b>Starting missions</b> return to your hand; all other missions (projects too) are discarded. A discarded project goes to the project deck's discard pile.</li></ol>" +
           "<h4>Dice and odds</h4>" + ul([
-            "Hit and direct hit = <b>1 success</b>; special = <b>2 successes</b>; blank = none. Any colour of die may be rolled.",
+            "Hit and direct hit = <b>1 success</b>; special = <b>2 successes</b>; blank = none. " + (rote(c) ? "Roll red or black dice in any mix; green dice only for minor skill icons or where an ability says so (Rise of the Empire)." : "Any colour of die may be rolled."),
             "A <b>leader portrait</b> on the card: its owner gains <b>2 extra successes</b> if that leader is assigned to the mission. (On a <i>resolve</i> card, the portrait leader adds an extra effect instead.)",
             "An opposing leader with no matching icons still forces a roll: you need at least one success.",
             "“Count all skill icons”: one die per skill icon of any kind.",
@@ -466,7 +466,7 @@ SWR.ul = function (items) { return "<ul>" + items.filter(Boolean).map(function (
             "If an ability assigns a leader to a mission during the Assignment Phase you may add a second leader; during the Command Phase you may not."
           ]);
       },
-      src: function (c) { return J("RR p.8–10", "LtP p.8", "FAQ p.4", "FAQ p.8", rote(c) && "RotE p.1"); }
+      src: function (c) { return J("RR p.3", "RR p.7", "RR p.8–10", "LtP p.8", "FAQ p.4", "FAQ p.8", rote(c) && "RotE p.1"); }
     },
     {
       title: "Skills",
@@ -546,7 +546,7 @@ SWR.ul = function (items) { return "<ul>" + items.filter(Boolean).map(function (
             "<b>Preventing hits:</b> at the start of Assign Damage, the attacking player removes his dice that match the icons his opponent's ability prevents (e.g. “prevent 2 black hits” removes two black dice showing hits).",
             "<b>Removing damage:</b> as a combat action, spend a die showing a special to remove 1 damage from one of your units whose health matches the die's colour, in this theater. Specials can no longer draw or play tactic cards.",
             "<b>Destroying:</b> skip the Destroy Units step. A unit is destroyed at the <b>end of the round of battle</b> if its damage ≥ health; track damage with tokens. A unit destroyed by a tactic card doesn't roll this round and leaves after both cards are resolved (so it still meets unit requirements).",
-            "Card damage: place a damage token on a unit of your choice (matching health colour if a colour is given); split it unless the card names one unit.",
+            "Card damage: place a damage token on a unit of your choice (matching health colour if a colour is given). Damage of more than 1 may be split among several units unless the card names one unit.",
             "The general rules under the base Destroy Units step still apply: damage that hasn't destroyed a unit stays on it into later combat rounds and is removed at the end of the combat, and lone Rebel Transports must retreat or be destroyed (only if an Imperial ship is present)."
           ]) +
           "<h4>Canceling</h4>" + ul([
@@ -572,11 +572,11 @@ SWR.ul = function (items) { return "<ul>" + items.filter(Boolean).map(function (
         ]) + "<h4>Winning a battle</h4>" + ul([
           "You win a battle (space or ground) when the opponent has no units of that theater left in the system. Retreating all of a theater's units hands the opponent that battle.",
           "One side can win the space battle and the other the ground battle. If both sides are wiped out, or both retreat all their space units, nobody wins.",
-          "You don't win a battle if the opponent had no units in that theater at the start of the combat. Destroying the last enemy ship still wins the space battle even if you retreat after the ground battle.",
+          "You don't win a battle if the opponent had no units in that theater at the start of the combat. Destroying the last enemy ship still wins the space battle even if you retreat after the ground battle." + (rote(c) ? " A ground battle only occurs if both players have ground units in the system at the start of the ground battle step: if an effect such as <i>Baze's Loyalty</i> destroys all of the opponent's ground units at the start of combat, there is no ground battle, so nobody “wins a ground battle” and cards that need one (e.g. <i>Confrontation</i>) can't be used (FAQ p.6)." : ""),
           "“A combat that you initiated”: the player resolving his turn; outside a turn, the player whose card caused the combat."
         ]);
       },
-      src: function (c) { return J("RR p.3", "RR p.5", "LtP p.15", "FAQ p.2", rote(c) && "RotE p.1"); }
+      src: function (c) { return J("RR p.3", "RR p.5", "LtP p.15", "FAQ p.2", rote(c) && "FAQ p.6", rote(c) && "RotE p.1"); }
     },
     {
       title: "Dice",
@@ -607,8 +607,8 @@ SWR.ul = function (items) { return "<ul>" + items.filter(Boolean).map(function (
           "<li><b>Draw objective:</b> the Rebels draw 1 objective card." + t("the Rebel General") + (rote(c) ? " An <b>Immediate</b> objective is revealed and resolved at once." : "") + "</li>" +
           "<li><b>Advance the time marker</b> one space, then act on the icons beside its new space. On the time track pictured in the Learn to Play, the <b>recruit</b> icon is on spaces <b>2, 3, 4 and 5</b> and the <b>build</b> icon on spaces <b>2, 4, 6, 8, 10, 12 and 14</b>:" + ul([
             "<b>Recruit icon:</b> each draws 2 cards from his action deck and recruits one leader shown on either card. " +
-              (c.first ? "<b>First game:</b> ignore both cards' abilities and return both to the box." : "Keep the chosen card facedown (usable later); put the other on the bottom of your action deck unrevealed.") +
-              " Choices are simultaneous, but the Rebels declare their leader first." + t("the Admiral draws and decides; the leader goes to the pool of its colour and that pool's player gets the card"),
+              (c.first ? "<b>First game:</b> ignore both cards' abilities and return both to the box." : "Keep the chosen card facedown (usable later), but an <b>Immediate</b> card is revealed and resolved at once; put the other on the bottom of your action deck unrevealed.") +
+              " Choices are simultaneous, but the Rebels declare their leader first." + t(c.first ? "the Admiral draws and decides; the leader goes to the pool of its colour (both cards still go back to the box)" : "the Admiral draws and decides; the leader goes to the pool of its colour and that pool's player gets the card"),
             "<b>Build icon:</b> both build at once: one unit per resource icon in your loyal and subjugated systems (subjugated: <b>left-most icon only</b>), placed on your build queue in the space matching the number beside the icon." + t("Admiral only") + (rote(c) ? " If there's a timing conflict over which units to build, the Rebels choose first (Rise of the Empire)." : "")
           ]) + "</li>" +
           "<li><b>Deploy units:</b> starting with the Rebels, slide every unit one space down the build queue; units sliding off space 1 are deployed (see Building & deploying)." + t("Admiral only") + "</li></ol>" +
@@ -628,6 +628,7 @@ SWR.ul = function (items) { return "<ul>" + items.filter(Boolean).map(function (
           "Units come from the supply. You can't use a system's resource icons if the opponent has a unit there, nor if it holds a <b>sabotage marker</b>.",
           "The Rebels may also build from the resource icons on the <b>“Rebel Base” space</b>, unless the base is revealed and the Empire has a unit or loyalty in its system.",
           "The Rebel faction sheet offers several units for the blue ▲ and orange ■ icons: choose one when you build that icon.",
+          rote(c) ? "<b>Rise of the Empire:</b> the units on each player's <b>unit reference sheet</b> can also be built under the normal rules, so both players have more options for the units they can build. If there's a timing conflict when choosing which units to build in the Refresh Phase, the Rebels place theirs on the build queue first, then the Empire." : "",
           "You may build fewer units than you could.",
           "Units are limited to those in the box. When building in Refresh Phase step 5 you may destroy one of your units on the board to build it, but only if none with that name is left in your supply. The Empire can never destroy its own Death Star this way.",
           "Abilities that “place units on the build queue” take them from the supply, ignore the system's loyalty, and work despite sabotage. An ability that refers to a system's resource icons uses all of them, whoever has loyalty, subjugation or units there.",
@@ -706,10 +707,10 @@ SWR.ul = function (items) { return "<ul>" + items.filter(Boolean).map(function (
           "<b>Eliminated</b> leaders go back to the box for the rest of the game.",
           rote(c) ? "<b>Leader pool limit</b> (Rise of the Empire): more than <b>8 leaders</b> in a pool → choose 8 and eliminate the rest." + (c.team ? " Team game: 8 per team; the excess comes from the pool of whichever teammate has more." : "") : ""
         ]) + "<h4>Captured leaders</h4>" + ul([
-          "Capture puts the <b>captured ring</b> on a Rebel leader (only Rebel leaders can be captured). A captured leader doesn't oppose missions, doesn't add tactic values, can't use action cards, can't return to the pool, and the Rebels can't move it. It doesn't stop Rebel units leaving its system.",
+          "Capture puts the <b>captured ring</b> on a Rebel leader (only Rebel leaders can be captured). A captured leader doesn't oppose missions (except one attempted against it: then it opposes and rolls dice, and the Rebels may also send another leader from their pool), doesn't add tactic values, can't use action cards, can't return to the pool, and the Rebels can't move it. It doesn't stop Rebel units leaving its system.",
           "The Empire can move it like a ground unit (it takes no transport capacity), but not when retreating.",
           "There is one captured ring: capturing a second leader rescues the first. Another ring attached to a captured leader replaces the captured ring. A leader in the <b>carbonite</b> ring is still captured (it can be rescued, and missions and cards that affect captured leaders work on it); the Empire can hold one leader in each ring. Rescuing it doesn't give back the reputation lost to <i>Carbon Freezing</i>.",
-          "<b>Rescue:</b> when no Imperial units remain in its system, or by a card. Remove the ring and place the leader on the “Rebel Base” space (the base's system if revealed). After a rescue <i>mission</i>, any of the assigned leaders may go with it."
+          "<b>Rescue:</b> when no Imperial units remain in its system, or by a card. Remove the ring and place the leader on the “Rebel Base” space (the base's system if revealed). When a mission" + (c.first ? "" : " (or the Millennium Falcon ring resolved with it)") + " rescues the leader, any of the leaders assigned to that mission may go with it. If the rescue only happened because a mission destroyed the last Imperial unit there, the assigned leaders stay."
         ]) + "<h4>Attachment rings</h4>" + ul([
           "Press the leader's stand into the ring; its effect is on the card that attached it (you may keep that card as a reminder).",
           "One ring per leader: a new ring replaces the old one. A removed ring returns to the supply and its effect ends.",
@@ -735,7 +736,7 @@ SWR.ul = function (items) { return "<ul>" + items.filter(Boolean).map(function (
           "Captured leaders and leaders lured to the Dark Side can't use action cards.",
           "You may look at your own action cards at any time, never at the opponent's. A card that searches for a mission card doesn't reveal it.",
           "Recruiting: you keep the chosen card facedown; the other goes to the bottom of your action deck.",
-          c.team ? "<i>Team game:</i> each card goes to the player controlling the leader shown on it; a card without a leader can be used by either." : ""
+          c.team ? "<i>Team game:</i> each starting action card goes to the player who controls the leader shown on it (either player may use a card that shows no leader). When recruiting, the Admiral draws and chooses; the kept card goes to the player whose pool (blue or orange) receives the recruited leader." : ""
         ]);
       },
       src: function (c) { return c.first ? J("LtP p.4", "LtP p.10", "LtP p.18") : J("RR p.2", "RR p.11", "LtP p.18", "FAQ p.3", "FAQ p.7"); }
@@ -775,7 +776,7 @@ SWR.ul = function (items) { return "<ul>" + items.filter(Boolean).map(function (
         ]) + "<h4>Death Star Plans (objective)</h4>" + ul([
           "In the space battle step, after both sides have attacked and units are destroyed, the Rebels may reveal <i>Death Star Plans</i> if they have at least one <b>fighter</b> in the system and a Death Star (or one under construction) is there.",
           "Roll <b>3 dice</b>" + (rote(c) ? " (red or black)" : "") + ": any <b>direct hit</b> destroys it; discard the card and gain its reputation. No direct hit: keep the card for a later combat round. One use per combat round.",
-          "<i>One in a Million</i> can turn a die into an automatic direct hit; the Master Yoda ring can reroll one.",
+          c.first ? "The Master Yoda ring can reroll one die." : "<i>One in a Million</i> can turn a die into an automatic direct hit; the Master Yoda ring can reroll one.",
           rote(c) ? "<b>Shield Bunker</b> (Rise of the Empire): a Death Star or Death Star Under Construction in the same system as a Shield Bunker can't be destroyed, dealt damage or assigned damage, so Death Star Plans can't touch it until every Shield Bunker there is destroyed." : ""
         ]) + "<h4>Rulings</h4>" + ul([
           "If the only Imperial ship is a Death Star that can't roll because of two or more Ion Cannons, the Empire has no ground units there, and the Rebels haven't revealed Death Star Plans this round, the Rebel ships must retreat at the end of the combat round (destroyed if they can't).",
@@ -853,19 +854,20 @@ SWR.ul = function (items) { return "<ul>" + items.filter(Boolean).map(function (
           "In a mission, the player who reveals it rolls and decides for it, and one player per team rolls for all of that team's leaders in the system (the Rules Reference; the Learn to Play has each player roll for his own leaders).",
           "Any step done “starting with the current player” is done by the current player's whole team before the other team. Project cards the Empire draws go into the Imperial General's mission hand.",
           "Turns follow the <b>initiative numbers</b> beside the roles on the faction sheets. On your turn: activate a system with one of your leaders, reveal a mission one of your leaders is assigned to, or pass.",
-          "Rules about “a player's units” mean all of the team's units."
+          "Rules about “a player's units” mean all of the team's units.",
+          rote(c) ? "<b>Rise of the Empire:</b> each team may keep at most <b>8 leaders</b> across its two pools; if it has more, it chooses 8 and eliminates the excess, taken from the pool of the teammate who has more." : ""
         ]) + "<h4>Responsibilities</h4><div class='tbl-wrap'><table class='ref-table'><thead><tr><th>Admiral</th><th>General</th></tr></thead><tbody>" +
           "<tr><td>Space battles: rolls, " + (rote(c) ? "plays the space tactic cards" : "draws and plays space tactic cards") + ", makes all decisions</td><td>Ground battles: rolls, " + (rote(c) ? "plays the ground tactic cards" : "draws and plays ground tactic cards") + ", makes all decisions</td></tr>" +
-          "<tr><td>Recruiting: draws the action cards and chooses the leader (an orange leader and its card go to the General)</td><td>Mission hand: draws, discards, and may veto the Admiral's assignments</td></tr>" +
+          "<tr><td>Recruiting: draws the action cards and chooses the leader (" + (c.first ? "an orange leader goes to the General; in the first game both cards go back to the box" : "an orange leader and its card go to the General") + ")</td><td>Mission hand: draws, discards, and may veto the Admiral's assignments</td></tr>" +
           "<tr><td>Building and deploying units; places the starting units</td><td>Imperial General: draws and manages probe cards · Rebel General: draws, keeps and plays objectives</td></tr>" +
-          "<tr><td>—</td><td>Decides the base location if the Rebel team disagrees" + (rote(c) ? "; chooses the faction's mission set" : "") + "</td></tr>" +
+          "<tr><td>—</td><td>Decides the base location if the Rebel team disagrees" + (rote(c) && !c.mod("rotefirst") ? "; chooses the faction's mission set" : "") + "</td></tr>" +
           "</tbody></table></div>" + ul([
           "<b>Communication:</b> share anything, and show each other cards, but talk openly at the table. Code and whispers are fine; leaving the room is not.",
-          "Combat: each team adds at most one leader and uses its best tactic values; any player may retreat with his own leader, once per team per combat.",
+          "Combat: each team adds at most one leader, and a player can't add one if his teammate already has a leader with tactic values in the system. The team uses the highest space and highest ground tactic values among its leaders there, whoever controls them. Any player may retreat using his own leader, once per team per combat.",
           "Missions: at most two leaders per mission, whoever owns them; only one player of the opposing team sends a leader."
         ]);
       },
-      src: function (c) { return J("LtP p.19", "LtP p.20", "RR p.2–6", "RR p.8–12", "RR p.14–15", rote(c) && "RotE p.1–2"); }
+      src: function (c) { return J(c.first && "LtP p.10", "LtP p.19", "LtP p.20", "RR p.2–6", "RR p.8–12", "RR p.14–15", rote(c) && "RotE p.1–2"); }
     },
     {
       title: "Rise of the Empire — other rules",
@@ -892,7 +894,7 @@ SWR.ul = function (items) { return "<ul>" + items.filter(Boolean).map(function (
           "<i>Sweep the Area</i>: as with <i>Collect Bounty</i>, a leader captured in a system that contains an Imperial unit stays in that system.",
           "<i>Target the Star Destroyers</i> happens before hit prevention; its hits can't be prevented by black-hit prevention, only by red.",
           "<i>Ambitions of Power</i> works even without Admiral Motti or Jabba the Hutt. A leader returned by <i>Track Them</i> during the Assignment Phase can still be assigned.",
-          "Master Yoda and Millennium Falcon rings can't go on a leader with the Bounty ring.",
+          "Master Yoda and Millennium Falcon rings can't go on a leader with the Bounty ring; if no valid leader can take the Millennium Falcon ring, the action card is discarded without effect.",
           "Dice-manipulating abilities (Master Yoda ring, <i>One in a Million</i>) work for <i>Discredit Rebellion</i> if their leader is in the mission's system."
         ]);
       },
@@ -905,7 +907,7 @@ SWR.ul = function (items) { return "<ul>" + items.filter(Boolean).map(function (
         return "<p>Official answers about specific base-game cards, A to Z.</p>" + ul([
           "<b><i>Boba Fett? Where?</i></b> doesn't stop the Rebels using attached rings. <i>Undercover</i> can move a leader out of that system but not into it.",
           "<b><i>Build Alliance</i></b> (and any mission) may be revealed even if it gives no benefit.",
-          "<b><i>Build Super Star Destroyer</i>, <i>Support of Mon Calamari</i></b>: placing units on the build queue isn't stopped by sabotage.",
+          "<b><i>Construct Super Star Destroyer</i> (the FAQ calls it “Build Super Star Destroyer”), <i>Support of Mon Calamari</i></b>: placing units on the build queue isn't stopped by sabotage.",
           "<b><i>Capture Rebel Operative</i>, <i>Collect Bounty</i></b> can't be attempted against a leader who is already captured or lured to the Dark Side. A leader taken by <i>Collect Bounty</i> in a system with an Imperial unit stays in that system.",
           "<b><i>Contingency Plan</i></b> can't add a second leader to the mission (it's used in the Command Phase). With <i>Rapid Mobilization</i> it resolves that card twice at the end of the Command Phase; if they had different numbers of leaders assigned, the Rebels choose the order.",
           "<b><i>Crippling Blow</i></b> counts the health printed on the faction sheet (an AT-AT destroyed with 2 damage after <i>Point Blank Assault</i> is still 3 health), and ground units lost with a transport destroyed in a destroyed system count. With <i>Rebel Assault</i> also possible, you can't wait: play an objective as soon as it is fulfilled.",
@@ -930,7 +932,7 @@ SWR.ul = function (items) { return "<ul>" + items.filter(Boolean).map(function (
           "<b><i>Stolen Plans</i>, <i>Lord Vader's Orders</i></b>: when the objective deck is rearranged, card backs stay open information."
         ]);
       },
-      src: function () { return J("RR p.6", "RR p.11", "FAQ p.1–5"); }
+      src: function () { return J("RR p.6", "RR p.11", "FAQ p.1–5", "RotE p.1"); }
     },
     {
       title: "Golden rules, limits & errata",
@@ -960,14 +962,14 @@ SWR.ul = function (items) { return "<ul>" + items.filter(Boolean).map(function (
       html: function () {
         return ul([
           "Setup uses the fixed starting positions of LtP p.16, and the Rebel base must not be adjacent to any Imperial units.",
-          "No starting action cards; recruiting ignores the action cards' abilities.",
+          "No starting action cards; when recruiting, both drawn cards' abilities are ignored and both cards go back to the box.",
           "<b>First Game Strategy</b> (read it aloud): the Rebels have far fewer units, but conquering the galaxy isn't their path to victory. Even with most of their units destroyed they can win by keeping the base hidden and gaining reputation from objectives.",
           "The Empire's goal is to find the base: draw lots of probe cards (intel missions) or conquer many systems hoping to find it.",
           "Once the base is found, the Death Star is the ultimate weapon. Early on it is nearly invincible; later, defend it with plenty of TIE Fighters.",
           "With 2 players you now know every rule you need; with more, also read the Team Game rules. Look up anything else in the Rules Reference."
         ]);
       },
-      src: function () { return J("LtP p.5", "LtP p.16–17", "LtP p.20"); }
+      src: function () { return J("LtP p.4", "LtP p.5", "LtP p.10", "LtP p.16–17", "LtP p.20"); }
     }
   ];
 })();
@@ -992,14 +994,14 @@ SWR.teach = {
         return "<ul>" +
           "<li><b>Assignment:</b> Rebels first, we secretly put leaders on mission cards from our hands.</li>" +
           "<li><b>Command:</b> we take turns" + (c.team ? " in the initiative order on our faction sheets" : ", Rebels first") + ": reveal a mission, or send a leader to a system to move troops and fight. Pass when you're done.</li>" +
-          "<li><b>Refresh:</b> leaders come home, we draw two missions each, the Empire draws two <b>probe cards</b>, each a system where the base is <b>not</b>, the Rebels draw an objective, and time ticks forward. Some time spaces let us <b>recruit</b> a leader (spaces 2 to 5) or <b>build</b> units from our systems (every even space up to 14).</li></ul>";
+          "<li><b>Refresh:</b> leaders come home, we draw two missions each (hand limit 10), the Empire draws two <b>probe cards</b>, each a system where the base is <b>not</b>, the Rebels draw an objective, and time ticks forward. Some time spaces let us <b>recruit</b> a leader (spaces 2 to 5) and/or <b>build</b> units from our systems (every even space up to 14): built units go on the build queue, slide down one space every round, and <b>deploy</b> when they slide off, into your loyal or subjugated systems (Rebels: or the Rebel Base space), at most two per system.</li></ul>";
       }
     },
     {
       h: "Leaders are your actions",
       body: function () {
         return "<p>Each leader does <b>one thing a round</b>. On a mission, it's committed. Kept in your pool, it can <b>activate a system</b>, pulling your ships in from neighbouring systems with troops aboard, or it can <b>oppose</b> an enemy mission, or lead a battle.</p>" +
-          "<p>A mission says <b>resolve</b>, which just happens, or <b>attempt</b>, which can be opposed: if an enemy leader comes, both sides roll a die per matching skill icon, and the player attempting it needs <b>more</b> successes. So every round asks: how many leaders do I commit, and how many do I hold back?</p>" +
+          "<p>Each mission card shows a skill requirement in its corner: the one or two leaders you put on it need at least that many matching skill icons, or you can't reveal it. A mission says <b>resolve</b>, which just happens, or <b>attempt</b>, which can be opposed: if an enemy leader comes, both sides roll a die per matching skill icon, and the player attempting it needs <b>more</b> successes. So every round asks: how many leaders do I commit, and how many do I hold back?</p>" +
           "<p>Rebels use missions for loyalty, sabotage and objectives; the Empire uses them to capture leaders, research projects and hunt the base. One warning: your units can't leave a system that holds one of your leaders.</p>";
       }
     },
@@ -1014,7 +1016,7 @@ SWR.teach = {
     {
       h: "Fighting",
       body: function (c) {
-        var base = "<p>When you move into a system with enemy units, a side with no leader there may add one from its pool, then every combat round has a <b>space battle</b> if both sides have ships there and a <b>ground battle</b> if both have ground units. Roll the black and red dice on your units, five of each at most. A <b>hit</b> only damages a unit whose health matches the die's colour; a <b>direct hit</b> damages anything. ";
+        var base = "<p>When you move into a system with enemy units, a side with no leader <b>with tactic values</b> there may add one from its pool, then every combat round has a <b>space battle</b> if both sides have ships there and a <b>ground battle</b> if both have ground units. Roll the black and red dice on your units, five of each at most. A <b>hit</b> only damages a unit whose health matches the die's colour; a <b>direct hit</b> damages anything. ";
         if (c.has("rote")) {
           return base + "Either side may retreat after each round, if it has a leader there.</p>" +
             "<p>Rise of the Empire uses <b>Cinematic Combat</b>: we each have our own tactic decks, and before every round of battle we secretly pick a card, reveal together, and use its top or bottom half. Tactic values give <b>rerolls</b>, a <b>special</b> removes damage from your unit, and units die at the end of each round of battle.</p>";
@@ -1043,7 +1045,7 @@ SWR.teach = {
     { when: function (c) { return c.p === 3; },
       h: "Three players",
       body: function () {
-        return "<p>One player is the whole Rebellion and takes <b>two turns</b> a round, one with the blue leaders and one with the orange. The Empire splits: the <b>Admiral</b> has the blue leaders, space battles, recruiting and building; the <b>General</b> the orange leaders, ground battles, missions and probes. Talk openly at the table.</p>";
+        return "<p>One player is the whole Rebellion and plays both Rebel seats: in each round of Command Phase turns he takes <b>two turns</b>, one as the Admiral with the blue leaders and one as the General with the orange leaders, in initiative order, and he <b>passes for each separately</b>. The Empire splits: the <b>Admiral</b> has the blue leaders, space battles, recruiting and building; the <b>General</b> the orange leaders, ground battles, missions and probes. Talk openly at the table.</p>";
       }
     },
     { when: function (c) { return c.has("rote"); },
