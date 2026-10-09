@@ -446,6 +446,15 @@ section:first-child > h2 { margin-top: 40px; }
 .ref-body li { margin-bottom: 5px; }
 .ref-body li ul { margin: 4px 0 4px 1.2em; }
 .ref-body b { font-weight: 700; }
+/* rulebook icons beside their descriptions (Resources, Magic & Icons) */
+.ref-body ul.vc-icons { list-style: none; margin-left: 0; }
+.ref-body ul.vc-icons li { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 9px; }
+.vc-ic { height: 32px; width: auto; max-width: 44px; flex: none; object-fit: contain; }
+.ref-body ul.vc-icons .vc-ic { width: 36px; }
+.vc-ic + span { padding-top: 3px; }
+.ref-body p.vc-icon-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; }
+.vc-pair { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.vc-pair .vc-ic + span { padding-top: 0; }
 
 /* ---- search -------------------------------------------------------------------- */
 .rsearch-wrap { margin-bottom: 16px; }

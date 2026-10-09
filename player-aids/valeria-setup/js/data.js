@@ -308,17 +308,51 @@ ${c.mod("wardtowers") ? "<li><b>Build a Banner (Ward Towers)</b> <i>(unofficial 
 
   { id: "resources", title: "Resources, Magic & Icons",
     when: () => true,
-    html: (c) => `
+    html: (c) => {
+      const ds = c.mode === "darksworn";
+      const ic = (f, alt) => `<img class="vc-ic" src="images/icons/${f}.webp" alt="${alt}" title="${alt}">`;
+      const row = (f, alt, name, text) => `<li>${ic(f, alt)}<span><b>${name}</b> — ${text}</span></li>`;
+      const banishAny = c.has("ff") || c.has("cs") || c.has("sv") || ds;
+      return `
+<h4>Resources</h4>
+<ul class="vc-icons">
+${row("gold", "Gold icon", "Gold", "the currency of the kingdom, used to purchase cards.")}
+${row("strength", "Strength icon", "Strength", "the strength of the kingdom and the strength of Monsters.")}
+${row("magic", "Magic icon", "Magic", "the magical abilities of the kingdom and the magical defense of Monsters. <b>Magic augments</b> Strength or Gold as long as at least one of the real resource is spent.")}
+${row("vp", "Victory Points icon", "Victory Points", `<b>not</b> a Resource${ds ? " (but Praying to Aquila spends them)" : ""}.`)}
+${banishAny ? row("wild", "Wild icon", "Wild", "that many of ONE Resource of your choice — never mixed.") : ""}
+${c.has("cs") && !ds ? row("tome", "Tome icon", "Tome", "any 1 of the tokens in the 3 slots on Nae Aerie, unless otherwise specified (see Tomes below).") : ""}
+</ul>
 <ul>
-<li><b>Magic augments</b> Strength or Gold as long as at least one of the real resource is spent. Victory Points are <b>not</b> a Resource${c.mode === "darksworn" ? " (but Praying to Aquila spends them)" : ""}.</li>
+<li>A number on top of an icon means that many of that Resource; when you gain one, move its token on your player board.</li>
 <li>Track values past 10 with the <b>+10 markers</b>; they're not a component limit.</li>
-<li><b>Operator icons</b>: <i>plus</i> (both sides), <i>or</i> (choose one), <i>per</i> (multiply), <i>≤</i> (take up to the limit — Citizens taken this way ignore the “+” surcharge), <i>paid-to-gain</i> (left goes to the bank for the right), <i>taken-from</i> (left comes from the right), ${c.mode === "darksworn" ? "<i>player</i> (any player, including you; blue with “?” = another player, not you)" : "<i>opponent of your choice</i>"}, <i>any die</i>${c.has("ff") || c.has("cs") || c.has("sv") || c.mode === "darksworn" ? ", <i>banish</i> (remove from the game — never a Starter)" : ""}${c.has("ff") ? ", <i>cannot take</i> (the left item can't take from the right), <i>opponents</i> (all other players)" : ""}${c.has("ff") || c.has("cs") ? ", <i>you</i> (you and any of your cards or Resources)" : ""}${c.mode === "darksworn" ? ", <i>discard</i> (Citizens go to the oubliette; Monsters to the Monster discard), <i>return</i> (a captured Citizen back to its stack — this can un-exhaust it)" : ""}.</li>
-${c.has("ff") || c.has("cs") || c.has("sv") || c.mode === "darksworn" ? "<li><b>Wild</b>: that many of ONE Resource of your choice — never mixed.</li>" : ""}
+</ul>
+<h4>Operator icons</h4>
+<ul class="vc-icons">
+${row("op-plus", "Plus icon", "Plus", "both items on either side are included.")}
+${row("op-or", "Or icon", "Or", "choose only one of the items on either side.")}
+${row("op-per", "Per icon", "Per", "the left item is multiplied by the right.")}
+${row("op-limit", "Less-than-or-equal icon", "Less than or equal to", "take the left item up to the limit on the right — Citizens taken this way ignore the “+” surcharge.")}
+${row("op-paid", "Paid-to-gain icon", "Paid to gain", "the left item goes to the bank to gain the right item.")}
+${row("op-taken", "Taken-from icon", "Taken from", "the left item is taken from the right item.")}
+${ds ? row("ds-player", "Player icon", "Player", "any player, including you. The blue icon with “?” means another player, not you.") + "\n" + row("op-opponent", "Opponent-of-your-choice icon", "Another player", "the blue icon with “?” — a player other than you.")
+      : row("op-opponent", "Opponent-of-your-choice icon", "An opponent of your choice", "the Active player chooses an opponent for the effect to target.")}
+${row("op-die", "Any-die icon", "Any die", "the Active player chooses a die for the effect to target.")}
+${banishAny ? row(ds ? "ds-banish" : "banish", "Banish icon", "Banish", "remove a card of your choice from the game — never a Starter.") : ""}
+${c.has("ff") ? row("cannot-take", "Cannot-take icon", "Cannot take", "the left item can't take from the right.") + "\n" + row("opponents", "Opponents icon", "Opponents", "all other players.") : ""}
+${c.has("ff") || c.has("cs") ? row("you", "You icon", "You", "you, and any of your cards or Resources.") : ""}
+${ds ? row("ds-discard", "Discard icon", "Discard", "Citizens go to the oubliette; Monsters to the Monster discard.") + "\n" + row("ds-return", "Return icon", "Return", "a captured Citizen goes back to its stack — this can un-exhaust it.") : ""}
+${row("five-player", "5-player icon", "5-player", "Monsters with this icon are included in the stacks only in a 5-player game.")}
+</ul>
+<h4>Card types &amp; Role icons</h4>
+<p class="vc-icon-row">${(ds ? ["starter", "citizen", "monster"] : ["starter", "duke", "citizen", "monster", "domain"]).map(t => { const n = t[0].toUpperCase() + t.slice(1); return `<span class="vc-pair">${ic("type-" + t, n)}<span>${n}</span></span>`; }).join(" ")}</p>
+<p class="vc-icon-row">${["worker", "soldier", "shadow", "holy"].map(t => { const n = t[0].toUpperCase() + t.slice(1); return `<span class="vc-pair">${ic("role-" + t, n)}<span>${n}</span></span>`; }).join(" ")}</p>
+<ul>
 <li>Domain card text beats the rulebook when they conflict. A Role icon overlapping a Citizen-card icon restricts the effect to Citizen cards.</li>
 <li>Tableau limits: none — ${c.mode === "darksworn" ? "Darksworn deals no Dukes, and Banish can never remove Starter cards" : "except always exactly 1 Starter Peasant, 1 Starter Knight, 1 Starter " + VC.help.starter3(c) + (c.mod("noduke") ? "" : ", and 1 Duke")}.</li>
 ${c.has("cs") && c.mode !== "darksworn" ? "<li><b>Tomes</b>: flip facedown anytime to pay as the pictured Resource (works like the real token, may be augmented by Magic/Magic Tomes; never taken by opponents, never converts to a bank Resource). Flip used Tomes faceup at the very end of your turn.</li>" : ""}
 </ul>
-<p class="src-line">Base Rulebook p.4, p.7–8, p.13, p.16${c.has("ff") ? " · Flames & Frost rulesheet p.2" : ""}${c.has("cs") ? " · Crimson Seas p.4" + (c.mode !== "darksworn" ? ", p.9" : "") : ""}${c.has("sv") ? " · Shadowvale rules p.3" : ""}${c.mode === "darksworn" ? " · Darksworn p.3–5, p.9" : ""}</p>` },
+<p class="src-line">Base Rulebook p.4, p.7–8, p.13, p.16${c.has("ff") ? " · Flames & Frost rulesheet p.2" : ""}${c.has("cs") ? " · Crimson Seas p.4" + (c.mode !== "darksworn" ? ", p.9" : "") : ""}${c.has("sv") ? " · Shadowvale rules p.3" : ""}${c.mode === "darksworn" ? " · Darksworn p.3–5, p.9" : ""}</p>`; } },
 
   { id: "cards", title: "Citizens, Monsters, Domains & Dukes",
     when: (c) => c.mode !== "darksworn",
