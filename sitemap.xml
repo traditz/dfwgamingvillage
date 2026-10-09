@@ -87,4 +87,10 @@
   <url><loc>https://www.dfwgamingvillage.com/player-aids/horusheresy-setup/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://www.dfwgamingvillage.com/world-of-warcraft.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://www.dfwgamingvillage.com/player-aids/wow-setup/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://www.dfwgamingvillage.com/root.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://www.dfwgamingvillage.com/player-aids/root-setup/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://www.dfwgamingvillage.com/vast-crystal-caverns.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://www.dfwgamingvillage.com/player-aids/vastcaverns-setup/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://www.dfwgamingvillage.com/vast-mysterious-manor.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://www.dfwgamingvillage.com/player-aids/vastmanor-setup/</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
 </urlset>

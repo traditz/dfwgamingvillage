@@ -1,0 +1,432 @@
+/* =============================================================================
+   Vast: The Crystal Caverns — Setup & Reference Utility
+   Designed after the Vast rulebook (Leder Games, 2016) and the Fearsome Foes books:
+   - white interior pages with the book's pale grey ink splatter (images/splatter.webp, from the PDF);
+   - DwarvenAxe chapter headings in the book's purple #746097 → Germania One;
+   - Norwester tracked capitals ("CAVE TILES", "SEE PG 6–7 FOR SETUP") → Saira Semi Condensed;
+   - Noto Serif body, the rulebook's own text face;
+   - each role's chapter colour on its chip (Knight gold, Goblins green, Dragon red, Cave purple, Thief grey;
+     Ghost blue, Ghoul orange, Unicorn maroon; replacement roles take the colour of the role they replace, as the books do);
+   - variant-card highlights (Rules p.17) → the step source tags; "Beware!" grey box and Glossary lavender box → callouts;
+   - "1) Move and Use Powers" numbered headings → step numbers;
+   - p.2's purple story column with its drop cap → the hook band under the header;
+   - header: the rulebook cover illustration (Knight facing the red eyes in the dark) + the official logo (FAQ p.1).
+   ============================================================================= */
+
+:root {
+  --paper:     #ffffff;
+  --paper-2:   #f4f2f7;   /* faint lavender: hovers, teaching panel */
+  --ink:       #231f20;   /* the book's black */
+  --ink-2:     #4a4547;   /* muted text */
+  --purple:    #746097;   /* the book's headings and sidebars */
+  --purple-d:  #5e4b80;   /* small purple text, selected fills */
+  --purple-dd: #45375f;
+  --lav:       #cec8db;   /* the book's Glossary / Cave panel */
+  --lav-2:     #e9e5f0;
+  --grey-box:  #e9e9e9;   /* the book's "Beware!" box */
+  --line:      #d9d6dd;
+  --rule:      #a9a3ad;   /* table rules */
+  --ctl:       #857f8c;   /* control borders, 3.9:1 on white */
+  --cave:      #030404;   /* the cover's darkness */
+  --mist:      #cfc6e6;   /* lavender text on the dark */
+  --gold:      #ffe06a;   /* the book's highlight gold */
+  --bad:       #a8111d;
+  --measure:   68ch;
+  --f-head: "Germania One", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --f-caps: "Saira Semi Condensed", "Arial Narrow", "Roboto Condensed", "Segoe UI", sans-serif;
+  --f-text: "Noto Serif", Georgia, "Times New Roman", serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 106.25%; scroll-behavior: smooth; }   /* 17px */
+body {
+  background: var(--paper); color: var(--ink);
+  font-family: var(--f-text); font-size: 1rem; line-height: 1.6;
+  min-height: 100vh; overflow-x: hidden; -webkit-text-size-adjust: 100%;
+}
+a { color: var(--purple-d); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+a:hover { color: var(--purple-dd); text-decoration-thickness: 2px; }
+b, strong { font-weight: 700; }
+:focus-visible { outline: 3px solid var(--purple-d); outline-offset: 3px; }
+li::marker { color: var(--purple); }
+
+/* ---- header: the cover ------------------------------------------------------ */
+.topbar { background: var(--cave); color: #fff; }
+.hero { position: relative; overflow: hidden; }
+.hero-in {
+  position: relative; max-width: 1180px; margin: 0 auto; min-height: 344px;
+  display: grid; grid-template-columns: 55% 45%; align-items: center;
+}
+.hero-art { position: absolute; top: 0; bottom: 0; left: 0; width: 63%; }
+.hero-art img {
+  display: block; width: 100%; height: 100%; object-fit: cover; object-position: 0 50%;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 7%, #000 74%, transparent 100%);
+          mask-image: linear-gradient(90deg, transparent 0, #000 7%, #000 74%, transparent 100%);
+}
+.hero-title { grid-column: 2; position: relative; padding: 30px 28px 30px 8px; text-align: center; }
+.brand-title { margin: 0; line-height: 0; }
+.brand-logo { display: block; width: 100%; max-width: 410px; height: auto; margin: 0 auto; }
+.brand-sub {
+  margin-top: 16px; font-family: var(--f-caps); font-weight: 600; font-size: 1.02rem; line-height: 1.3;
+  letter-spacing: 0.24em; text-transform: uppercase; color: var(--mist);
+}
+.brand-sub::before, .brand-sub::after { content: "\2014"; margin: 0 0.6em; letter-spacing: 0; color: var(--purple); }
+
+/* the hook: p.2's purple story column with its drop cap */
+.hero-copy { background: var(--purple); color: #fff; }
+.hero-copy .tagline { max-width: 900px; margin: 0 auto; padding: 18px 30px 20px; }
+.tag-hook { display: block; font-family: var(--f-head); font-size: 1.62rem; line-height: 1.32; letter-spacing: 0.01em; }
+.tag-hook::first-letter { float: left; font-size: 2.85em; line-height: 0.86; margin: 0.04em 0.07em 0 0; }
+
+/* ---- layout ---------------------------------------------------------------- */
+main { padding: 0 24px 56px; overflow-x: clip; }   /* clip keeps the splatter from widening the page */
+main > .intro, main > .sec { max-width: 832px; margin-left: auto; margin-right: auto; }
+.intro { padding-top: 28px; }
+.intro .tag-lead { font-style: italic; color: var(--ink-2); max-width: var(--measure); }
+.sec { position: relative; isolation: isolate; margin-top: 60px; }
+main > .intro + .sec { margin-top: 34px; }
+/* the book's pale ink splatter behind each chapter title */
+.sec::before {
+  content: ""; position: absolute; z-index: -1; pointer-events: none;
+  top: -60px; right: -190px; width: 600px; height: 391px;
+  background: url("../images/splatter.webp") no-repeat center / contain;
+}
+.sec:nth-of-type(even)::before { right: auto; left: -260px; top: -40px; transform: scaleX(-1) rotate(-6deg); }
+/* the Knight of Rules p.5, standing in the page margin beside the Rules Reference (wide screens only) */
+.sec-ref::after {
+  content: none; position: absolute; z-index: -1; pointer-events: none;
+  top: -24px; right: calc((100% - 100vw) / 2);              /* flush with the window edge: she bleeds off the page, as on p.5 */
+  width: min(236px, calc((100vw - 100%) / 2 - 24px)); aspect-ratio: 300 / 622;
+  background: url("../images/knight-margin.webp") no-repeat right top / contain;
+}
+@media (min-width: 1240px) { .sec-ref::after { content: ""; } }
+section h2 {
+  font-family: var(--f-head); font-weight: 400; color: var(--purple);
+  font-size: clamp(2.3rem, 5.4vw, 3.1rem); line-height: 1.04; letter-spacing: 0.005em; margin-bottom: 8px;
+}
+.sec-note { font-style: italic; color: var(--ink-2); margin-bottom: 22px; max-width: var(--measure); }
+
+/* ---- configurator ---------------------------------------------------------- */
+.cfg, .role-groups { display: flex; flex-direction: column; gap: 24px; }
+.cfg-label, .choice-label {
+  display: block; margin-bottom: 10px; font-family: var(--f-caps); font-weight: 700; font-size: 1rem; line-height: 1.35;
+  letter-spacing: 0.13em; text-transform: uppercase; color: var(--ink);
+}
+.choice-label { letter-spacing: 0.04em; text-transform: none; font-size: 1.04rem; margin-bottom: 8px; }
+.cfg-label .hint, .choice-label .hint {
+  font-family: var(--f-text); font-weight: 400; font-style: italic; font-size: 0.94rem;
+  letter-spacing: 0; text-transform: none; color: var(--ink-2);
+}
+
+/* role chips: each in its rulebook chapter colour */
+.chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: 10px; }
+.chip {
+  --rc: var(--purple); --rt: var(--purple-d); --rbg: var(--lav);
+  position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 1px;
+  min-height: 66px; padding: 9px 44px 11px 16px; text-align: left; cursor: pointer;
+  font: inherit; color: var(--ink); background: var(--paper);
+  border: 1.5px solid var(--ctl); border-left: 8px solid var(--rc); border-radius: 3px;
+  transition: background-color .15s, border-color .15s;
+}
+.chip b { font-family: var(--f-head); font-weight: 400; font-size: 1.5rem; line-height: 1.1; color: var(--rt); }
+.chip span { font-size: 0.94rem; line-height: 1.4; color: var(--ink-2); }
+.chip::before {   /* tick box: empty circle, then a filled check when chosen */
+  content: ""; position: absolute; top: 10px; right: 10px; width: 24px; height: 24px; border-radius: 50%;
+  border: 1.5px solid var(--ctl); background: var(--paper);
+  display: grid; place-items: center; font: 700 0.9rem/1 var(--f-caps); color: #fff;
+}
+.chip:hover { border-color: var(--rt); border-left-color: var(--rc); background: var(--paper-2); }
+.chip.on { background: var(--rbg); border: 2.5px solid var(--rt); border-left: 8px solid var(--rc); padding: 8px 43px 10px 16px; }
+.chip.on::before { content: "\2713"; background: var(--rt); border-color: var(--rt); top: 9px; right: 9px; }
+.chip.on:hover { background: var(--rbg); box-shadow: inset 0 0 0 1px var(--rt); }
+
+#roles-base .chip:nth-child(1) { --rc: #b18534; --rt: #7a5813; --rbg: #fff0b5; }  /* Knight  */
+#roles-base .chip:nth-child(2) { --rc: #397b3c; --rt: #2c6130; --rbg: #d6e7cc; }  /* Goblins */
+#roles-base .chip:nth-child(3) { --rc: #d7182a; --rt: #a8111d; --rbg: #f5c8bd; }  /* Dragon  */
+#roles-base .chip:nth-child(4) { --rc: #746097; --rt: #5e4b80; --rbg: #cec8db; }  /* Cave    */
+#roles-base .chip:nth-child(5) { --rc: #48484a; --rt: #48484a; --rbg: #e9e9e9; }  /* Thief   */
+#roles-ff .chip:nth-child(1)   { --rc: #4f9a3e; --rt: #2c6130; --rbg: #d6e7cc; }  /* Vile Ghoul (Goblins' seat) */
+#roles-ff .chip:nth-child(2)   { --rc: #4c101b; --rt: #4c101b; --rbg: #e6dbda; }  /* Nightmare Unicorn */
+#roles-ff .chip:nth-child(3)   { --rc: #746097; --rt: #5e4b80; --rbg: #cec8db; }  /* Cave Ghost (Cave's seat) */
+#roles-ff .chip:nth-child(4)   { --rc: #f15a22; --rt: #a33b0f; --rbg: #fad9c4; }  /* Ghoul   */
+#roles-ff .chip:nth-child(5)   { --rc: #134e8c; --rt: #134e8c; --rbg: #d5d8ea; }  /* Ghost   */
+
+/* buttons: quick picks, segmented choices, speed presets */
+.presets, .seg, .speed { display: flex; flex-wrap: wrap; gap: 8px; }
+.preset, .seg-btn {
+  position: relative; min-height: 44px; padding: 8px 16px; cursor: pointer; text-align: left;
+  font-family: var(--f-caps); font-weight: 600; font-size: 1rem; line-height: 1.25; letter-spacing: 0.02em;
+  color: var(--ink); background: var(--paper); border: 1.5px solid var(--ctl); border-radius: 3px;
+  transition: background-color .15s, border-color .15s, color .15s;
+}
+.preset:hover, .seg-btn:hover { border-color: var(--purple-d); background: var(--lav-2); }
+.preset.on, .seg-btn.on { background: var(--purple-d); border-color: var(--purple-dd); color: #fff; box-shadow: inset 0 0 0 1px var(--purple-dd); }
+.preset.on:hover, .seg-btn.on:hover { background: var(--purple-dd); }
+.preset.on::before, .seg-btn.on::before { content: "\2713\00a0"; font-weight: 700; }
+
+/* the variant in play: the book's lavender Glossary box */
+.status {
+  padding: 14px 18px 15px; background: var(--lav); color: var(--ink);
+  border-left: 6px solid var(--purple-d); font-size: 1rem; line-height: 1.55;
+}
+.status > b { font-family: var(--f-caps); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.status-var { display: inline-block; margin-top: 3px; font-style: italic; color: var(--ink-2); }
+.status .star, .star { color: var(--purple-dd); font-weight: 700; }
+.status.bad { background: #f5c8bd; border-left-color: var(--bad); color: #7d0c15; font-weight: 700; }
+
+.choices { display: flex; flex-direction: column; gap: 16px; }
+
+.levels { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px 18px; }
+.lvl-row { display: flex; flex-direction: column; gap: 4px; }
+.lvl-name { font-family: var(--f-caps); font-weight: 700; font-size: 0.94rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink); }
+.lvl-sel {
+  font: inherit; font-size: 1rem; min-height: 44px; padding: 7px 38px 7px 12px; color: var(--ink);
+  background: var(--paper) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1l6 6 6-6' fill='none' stroke='%235e4b80' stroke-width='2.4'/%3E%3C/svg%3E") no-repeat right 13px center;
+  border: 1.5px solid var(--ctl); border-radius: 3px; -webkit-appearance: none; appearance: none; cursor: pointer;
+}
+.lvl-sel:hover { border-color: var(--purple-d); }
+.speed { grid-column: 1 / -1; margin-top: 4px; }
+
+/* optional variants: sidebar cards with a tick box */
+.mods { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+.mod {
+  position: relative; display: flex; flex-direction: column; justify-content: flex-start; align-items: flex-start;
+  padding: 12px 46px 13px 16px; text-align: left; cursor: pointer;
+  font: inherit; color: var(--ink-2); background: var(--paper);
+  border: 1.5px solid var(--ctl); border-radius: 3px; transition: background-color .15s, border-color .15s;
+}
+.mod-name {
+  display: block; margin-bottom: 3px; font-family: var(--f-caps); font-weight: 700; font-size: 1rem; line-height: 1.3;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink);
+}
+.mod-sum { display: block; font-size: 0.94rem; line-height: 1.45; }
+.mod::before {
+  content: ""; position: absolute; top: 12px; right: 12px; width: 22px; height: 22px; border-radius: 3px;
+  border: 1.5px solid var(--ctl); background: var(--paper);
+  display: grid; place-items: center; font: 700 0.85rem/1 var(--f-caps); color: #fff;
+}
+.mod:hover { border-color: var(--purple-d); background: var(--paper-2); }
+.mod.on { background: var(--lav-2); border: 2.5px solid var(--purple-d); padding: 11px 45px 12px 15px; color: var(--ink); }
+.mod.on::before { content: "\2713"; background: var(--purple-d); border-color: var(--purple-d); top: 11px; right: 11px; }
+
+/* ---- setup steps ----------------------------------------------------------- */
+.teach-bar { margin: 6px 0 24px; }
+.phase { margin-top: 38px; }
+.phase:first-child { margin-top: 8px; }
+.phase-title {
+  display: flex; align-items: center; gap: 12px; padding-bottom: 6px;
+  font-family: var(--f-head); font-weight: 400; font-size: 2.05rem; line-height: 1.1; color: var(--purple);
+  border-bottom: 2px solid var(--purple);
+}
+.phase-title::before {   /* a lit Crystal tile from the rulebook (p.2) */
+  content: ""; flex: none; width: 34px; height: 34px; border-radius: 3px;
+  background: url("../images/tile-crystal.webp") center / cover; box-shadow: 0 0 0 1.5px var(--purple-d);
+}
+.step { display: grid; grid-template-columns: 62px minmax(0, 1fr); column-gap: 10px; padding: 18px 0 20px; border-bottom: 1px solid var(--line); }
+.step:last-child { border-bottom: 0; }
+.step-num { font-family: var(--f-head); font-size: 1.72rem; line-height: 1.15; color: var(--purple); text-align: right; white-space: nowrap; }
+.step-num::after { content: ")"; }   /* the book's "1) Move and Use Powers" */
+.step-body { min-width: 0; }
+.step-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin-bottom: 6px; }
+.step-head h4 { font-family: var(--f-head); font-weight: 400; font-size: 1.72rem; line-height: 1.15; color: var(--purple); }
+.step-text { max-width: var(--measure); }
+.step-text p + p { margin-top: 8px; }
+.step-text ul, .step-text ol { margin: 6px 0 6px 1.35em; }
+.step-text li { margin-bottom: 5px; padding-left: 2px; }
+.step-text h5 {
+  margin: 16px 0 4px; font-family: var(--f-caps); font-weight: 700; font-size: 0.97rem;
+  letter-spacing: 0.13em; text-transform: uppercase; color: var(--purple-d);
+}
+.step-text .lead { font-weight: 700; margin-bottom: 4px; }
+.step-text .layers li { margin-bottom: 3px; }
+.mini-src { font-size: 0.88rem; color: var(--ink-2); font-style: italic; }
+.goals li { margin-bottom: 7px; }
+.lose { margin-top: 10px; padding: 10px 14px; background: var(--lav-2); border-left: 5px solid var(--purple-d); }
+.warn { margin: 12px 0; padding: 11px 16px 12px; background: var(--grey-box); border-left: 5px solid var(--ink); font-size: 0.97rem; }
+.warn p + p { margin-top: 6px; }
+.inline-note { margin-top: 7px; font-size: 0.97rem; color: var(--ink-2); font-style: italic; }
+
+/* source tags: the book's highlighted Variant card names (Rules p.17) */
+.tag {
+  display: inline-block; white-space: nowrap; padding: 1px 8px 2px;
+  font-family: var(--f-text); font-weight: 700; font-style: italic; font-size: 0.84rem; line-height: 1.35;
+  color: #fff; border-radius: 0;
+}
+.tag-core { background: #5e4b80; }                       /* purple: Past Plunder */
+.tag-var  { background: #2f6b28; }                       /* green: Goblin Infestation */
+.tag-ff   { background: #b34214; }                       /* Fearsome Foes orange */
+.tag-faq  { background: var(--gold); color: var(--ink); box-shadow: inset 0 0 0 1px #c9a400; }   /* gold: Flare */
+.tag-opt  { background: #134e8c; }                       /* Ghost blue */
+
+/* citations: "SEE PG 6–7 FOR SETUP" */
+.src-line {
+  margin-top: 10px; font-family: var(--f-caps); font-weight: 600; font-size: 0.86rem; line-height: 1.4;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--purple-d);
+}
+.src-line::before { content: "Source: "; font-weight: 700; color: var(--ink); }
+
+/* ---- teaching script ------------------------------------------------------- */
+#teachBtn {
+  display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 10px 22px 10px 18px; cursor: pointer;
+  font-family: var(--f-caps); font-weight: 700; font-size: 1.05rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: #fff; background: var(--purple); border: 2px solid var(--purple-dd); border-radius: 3px;
+  transition: background-color .15s;
+}
+#teachBtn:hover { background: var(--purple-d); }
+#teachBtn[aria-expanded="true"] { background: var(--purple-dd); }
+.teach-panel {
+  max-width: calc(var(--measure) + 64px); margin: 0 0 32px; padding: 0 26px 24px; overflow: hidden;
+  background: var(--paper-2); border: 2px solid var(--purple); border-radius: 3px;
+}
+.teach-panel[hidden] { display: none; }
+.teach-top {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px 16px; flex-wrap: wrap;
+  margin: 0 -26px 16px; padding: 14px 26px; background: var(--purple); color: #fff;
+}
+.teach-top h3 { font-family: var(--f-head); font-weight: 400; font-size: 1.62rem; line-height: 1.15; }
+.teach-copy {
+  min-height: 44px; padding: 8px 14px; cursor: pointer;
+  font-family: var(--f-caps); font-weight: 700; font-size: 0.94rem; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--purple-dd); background: #fff; border: 2px solid #fff; border-radius: 3px;
+}
+.teach-copy:hover { background: var(--lav-2); border-color: var(--lav-2); }
+.teach-top :focus-visible { outline-color: #fff; }
+.teach-note { font-style: italic; color: var(--ink-2); margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1.5px dashed var(--ctl); }
+.teach-panel h4 {
+  margin: 20px 0 6px; font-family: var(--f-caps); font-weight: 700; font-size: 1rem;
+  letter-spacing: 0.13em; text-transform: uppercase; color: var(--purple-d);
+}
+.teach-panel p { margin-bottom: 10px; }
+.teach-panel ul { margin: 4px 0 12px 1.3em; }
+.teach-panel li { margin-bottom: 5px; }
+
+/* ---- reference ------------------------------------------------------------- */
+#reference { border-top: 3px solid var(--purple); }
+.ref { border-bottom: 1px solid var(--line); }
+.ref summary {
+  display: flex; align-items: center; gap: 14px; min-height: 58px; padding: 10px 6px 10px 4px; cursor: pointer; list-style: none;
+  font-family: var(--f-head); font-weight: 400; font-size: 1.62rem; line-height: 1.15; color: var(--purple);
+}
+.ref summary::-webkit-details-marker { display: none; }
+.ref summary::after {   /* plus / minus drawn as bars */
+  content: ""; margin-left: auto; flex: none; width: 32px; height: 32px;
+  border: 2px solid var(--purple-d); border-radius: 3px;
+  background:
+    linear-gradient(var(--purple-d), var(--purple-d)) center / 14px 2.5px no-repeat,
+    linear-gradient(var(--purple-d), var(--purple-d)) center / 2.5px 14px no-repeat,
+    var(--paper);
+}
+.ref[open] > summary::after {
+  background: linear-gradient(#fff, #fff) center / 14px 2.5px no-repeat, var(--purple-d);
+}
+.ref summary:hover { background: var(--paper-2); }
+.ref-body { padding: 4px 6px 26px; max-width: calc(var(--measure) + 40px); }
+.ref-body h4 {
+  margin: 18px 0 6px; font-family: var(--f-caps); font-weight: 700; font-size: 1rem;
+  letter-spacing: 0.13em; text-transform: uppercase; color: var(--purple-d);
+}
+.ref-body h4:first-child { margin-top: 6px; }
+.ref-body p { margin-bottom: 10px; }
+.ref-body ul, .ref-body ol { margin: 4px 0 12px 1.35em; }
+.ref-body li { margin-bottom: 5px; padding-left: 2px; }
+
+/* tables: the book's "Gain Grit / Lose Grit" rules (Rules p.7) */
+.tbl-wrap { overflow-x: auto; margin: 10px 0 16px; -webkit-overflow-scrolling: touch; }
+.tbl-wrap table { border-collapse: collapse; width: 100%; font-size: 0.95rem; line-height: 1.45; }
+.tbl-wrap th {
+  padding: 6px 10px 5px; text-align: left; vertical-align: bottom;
+  font-family: var(--f-caps); font-weight: 700; font-size: 0.9rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--purple-d); border-bottom: 2.5px solid var(--ink);
+}
+.tbl-wrap td { padding: 6px 10px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--rule); }
+.tbl-wrap tbody tr:nth-child(even) td { background: #f7f6f9; }
+.tbl-wrap table:has(th:empty) td:nth-child(even) { white-space: nowrap; }
+.tbl-wrap td, .tbl-wrap th { font-variant-numeric: lining-nums tabular-nums; }
+.tbl-wrap table.diff td { min-width: 96px; }
+.tbl-wrap table.diff td:first-child, .tbl-wrap table.powers td:first-child { font-weight: 700; }
+
+/* ---- search ---------------------------------------------------------------- */
+.rsearch-wrap { margin-bottom: 16px; max-width: calc(var(--measure) + 50px); }
+#rresults { max-width: calc(var(--measure) + 50px); }
+#rsearch {
+  width: 100%; min-height: 52px; padding: 12px 16px 12px 46px; font: inherit; font-size: 1.05rem; color: var(--ink);
+  background: var(--paper) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='8.5' cy='8.5' r='6' fill='none' stroke='%235e4b80' stroke-width='2.4'/%3E%3Cpath d='M13 13l5.5 5.5' stroke='%235e4b80' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat 15px center;
+  border: 2px solid var(--ctl); border-radius: 3px; -webkit-appearance: none; appearance: none;
+}
+#rsearch:hover { border-color: var(--purple-d); }
+#rsearch:focus { outline: none; border-color: var(--purple-d); box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--purple-d); }
+#rsearch::placeholder { color: var(--ink-2); font-style: italic; opacity: 1; }
+.rhint { color: var(--ink-2); font-style: italic; }
+.rhit { padding: 12px 16px 13px; margin-bottom: 10px; background: var(--paper); border: 1px solid var(--line); border-left: 5px solid var(--purple); border-radius: 0 3px 3px 0; }
+.rhit-src {
+  margin-bottom: 4px; font-family: var(--f-caps); font-weight: 700; font-size: 0.86rem;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--purple-d);
+}
+.rhit-text { font-size: 1rem; line-height: 1.55; }
+.rhit-text mark, .aid-srch mark { background: var(--gold); color: var(--ink); padding: 0 2px; border-radius: 0; }
+
+/* ---- footer: back to the dark -------------------------------------------- */
+.footer { margin-top: 30px; padding: 30px 24px 44px; text-align: center; background: var(--cave); border-top: 6px solid var(--purple); color: var(--mist); font-style: italic; font-size: 0.97rem; }
+.footer p { max-width: 70ch; margin: 0 auto; }
+
+/* ---- responsive ------------------------------------------------------------ */
+@media (max-width: 900px) {
+  .hero-in { grid-template-columns: 50% 50%; min-height: 300px; }
+  .hero-art { width: 56%; }
+  .hero-art img { object-position: 8% 46%; }
+  .hero-title { padding-right: 18px; }
+  .brand-sub { font-size: 0.92rem; letter-spacing: 0.15em; }
+  .brand-sub::before, .brand-sub::after { margin: 0 0.4em; }
+}
+@media (max-width: 640px) {
+  .hero-in { display: block; min-height: 0; }
+  .hero-art { position: relative; width: 100%; height: 132px; }
+  .hero-art img {
+    object-position: 50% 30%;
+    -webkit-mask-image: linear-gradient(180deg, #000 0, #000 52%, transparent 100%);
+            mask-image: linear-gradient(180deg, #000 0, #000 52%, transparent 100%);
+  }
+  .hero-title { margin-top: -24px; padding: 0 16px 14px; }
+  .brand-logo { max-width: 214px; }
+  .brand-sub { margin-top: 8px; font-size: 0.86rem; letter-spacing: 0.18em; }
+  .brand-sub::before, .brand-sub::after { margin: 0 0.4em; }
+  .hero-copy .tagline { padding: 10px 16px 11px; }
+  .tag-hook { font-size: 1.16rem; line-height: 1.3; }
+  .tag-hook::first-letter { font-size: 2.7em; }
+  main { padding: 0 16px 40px; }
+  .intro { padding-top: 20px; }
+  .sec { margin-top: 48px; }
+  .sec::before { width: 380px; height: 248px; right: -150px; top: -40px; }
+  .sec:nth-of-type(even)::before { left: -170px; }
+  /* the Knight of Rules p.5, standing in the page margin beside the Rules Reference (wide screens only) */
+.sec-ref::after {
+  content: none; position: absolute; z-index: -1; pointer-events: none;
+  top: -24px; right: calc((100% - 100vw) / 2);              /* flush with the window edge: she bleeds off the page, as on p.5 */
+  width: min(236px, calc((100vw - 100%) / 2 - 24px)); aspect-ratio: 300 / 622;
+  background: url("../images/knight-margin.webp") no-repeat right top / contain;
+}
+@media (min-width: 1240px) { .sec-ref::after { content: ""; } }
+section h2 { font-size: 2.25rem; }
+  .chips, .mods { grid-template-columns: 1fr; }
+  .step { grid-template-columns: 40px minmax(0, 1fr); column-gap: 8px; }
+  .step-num, .step-head h4 { font-size: 1.5rem; }
+  .phase-title { font-size: 1.8rem; }
+  .teach-panel { padding: 0 16px 18px; }
+  .teach-top { margin: 0 -16px 12px; padding: 12px 16px; }
+  .ref summary { font-size: 1.45rem; }
+  .ref-body { padding: 4px 2px 20px; }
+  .tbl-wrap th, .tbl-wrap td { padding-left: 7px; padding-right: 7px; }
+  .levels { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+  html { scroll-behavior: auto; }
+}
+
+/* Components glossary and rulebook search (css/components.css, css/search.css) — tokens from this page's palette */
+#components, .aid-srch {
+  --comp-surface: #ffffff; --comp-fig: #fefefe; --comp-ink: #231f20; --comp-muted: #4a4547;
+  --comp-line: #857f8c; --comp-accent: #5e4b80; --comp-accent-ink: #ffffff;
+  --comp-head-font: "Saira Semi Condensed", "Arial Narrow", "Roboto Condensed", "Segoe UI", sans-serif; --comp-radius: 3px;
+}

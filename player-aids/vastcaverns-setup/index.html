@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vast: The Crystal Caverns — Setup &amp; Reference Utility</title>
+  <meta name="description" content="Setup steps, role variants, a full rules reference and a teaching script for Vast: The Crystal Caverns and the Fearsome Foes roles, with the official FAQ applied.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Germania+One&family=Noto+Serif:ital,wght@0,400;0,700;1,400;1,700&family=Saira+Semi+Condensed:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=2">
+  <link rel="stylesheet" href="css/components.css?v=1">
+  <link rel="stylesheet" href="css/search.css?v=1.1">
+</head>
+<body>
+  <header class="topbar">
+    <div class="hero">
+      <div class="hero-in">
+        <div class="hero-art" aria-hidden="true"><img src="images/hero-cover.webp" width="1280" height="760" alt=""></div>
+        <div class="hero-title">
+          <h1 class="brand-title"><img class="brand-logo" src="images/vast-logo.webp" width="800" height="428" alt="Vast: The Crystal Caverns"></h1>
+          <div class="brand-sub">Setup &amp; Reference Utility</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-copy">
+      <p class="tagline"><span class="tag-hook">The Dragon has slept for hundreds of years. Today, everything in the dark wakes up.</span></p>
+    </div>
+  </header>
+
+  <main>
+    <div class="intro">
+      <p class="tagline tag-lead">Pick the roles at the table — the five originals and the Fearsome Foes — for the exact role variant,
+      step-by-step setup, every role's rules with the official FAQ applied, a teaching script, and a searchable index of every rulebook.</p>
+    </div>
+
+    <section aria-label="Configuration" class="sec sec-cfg">
+      <h2>Choose the Roles</h2>
+      <p class="sec-note">Select the roles being played. The variant, setup, victory conditions, rules and teaching script below all follow your choices.</p>
+      <div class="cfg">
+        <div id="expansions" class="role-groups">
+        <div>
+          <div class="cfg-label" id="roles-base-l">Base game roles <span class="hint">(5 players: all of them; first game: all but the Thief)</span></div>
+          <div id="roles-base" class="chips" role="group" aria-labelledby="roles-base-l"></div>
+        </div>
+        <div>
+          <div class="cfg-label" id="roles-ff-l">Fearsome Foes roles <span class="hint">— the Vile Ghoul, Nightmare Unicorn and Cave Ghost replace the Goblins, Dragon and Cave (the Unicorn may also join the Dragon); the Ghoul and Ghost are added roles. The Ghost and Cave Ghost are advanced.</span></div>
+          <div id="roles-ff" class="chips" role="group" aria-labelledby="roles-ff-l"></div>
+        </div>
+        </div>
+        <div>
+          <div class="cfg-label" id="presets-l">Quick picks</div>
+          <div id="presets" class="presets" role="group" aria-labelledby="presets-l"></div>
+        </div>
+        <div id="status" class="status" aria-live="polite"></div>
+        <div id="choices-group" hidden>
+          <div class="cfg-label">Choices for this setup <span class="hint">— the rulebooks ask you to pick or agree on these</span></div>
+          <div id="choices" class="choices"></div>
+        </div>
+        <div id="levels-group">
+          <div class="cfg-label">Difficulty levels <span class="hint">— Standard is the default; set each role's level to balance experience</span></div>
+          <div id="levels" class="levels"></div>
+        </div>
+        <div id="modules-group">
+          <div class="cfg-label">Optional variants</div>
+          <div id="modules" class="mods"></div>
+        </div>
+      </div>
+    </section>
+
+    <section aria-label="Setup" class="sec sec-setup">
+      <h2>Setup</h2>
+      <p class="sec-note">Follow the steps in order. Each cites its official source; FAQ rulings are already applied.</p>
+      <div class="teach-bar"><button id="teachBtn" type="button" aria-expanded="false" aria-controls="teach" title="A ~5 minute script to teach this exact setup aloud">📖 Teaching script</button></div>
+      <div id="teach" class="teach-panel" hidden></div>
+      <div id="setup"></div>
+    </section>
+
+    <section class="sec sec-comp" id="components" aria-labelledby="comp-h" hidden>
+      <h2 id="comp-h">Components</h2>
+      <p class="sec-note">Every component pictured in the rulebooks for the roles and options you’ve selected, with its count. Tap a picture to enlarge it.</p>
+      <div id="aid-comp"></div>
+    </section>
+
+    <section aria-label="Reference" class="sec sec-ref">
+      <h2>Rules Reference</h2>
+      <p class="sec-note">Tap a heading to open it. Only the roles in play are shown.</p>
+      <div id="reference"></div>
+    </section>
+
+    <section aria-label="Rulebook search" class="sec sec-search">
+      <h2>Search the Rulebooks</h2>
+      <p class="sec-note">Answers from this page come first, then every matching page of the rulebook, the FAQ and the Fearsome Foes books for the roles and variants in play.</p>
+      <div class="rsearch-wrap">
+        <input id="rsearch" type="search" placeholder="e.g. collapse, grit, ambush, skitter… or ask a question" aria-label="Search this page and the rulebooks">
+      </div>
+      <div id="rresults"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Setup and reference content grounded in the official Vast: The Crystal Caverns rulebook, the Official FAQ (12 July 2019)
+    and the Vast: The Fearsome Foes rulebooks for the Ghost, Ghoul and Unicorn. A fan-made play aid — not affiliated with Leder Games.</p>
+  </footer>
+
+  <script src="js/data.js?v=1"></script>
+  <script src="js/data-ref.js?v=1"></script>
+  <script src="js/data-teach.js?v=1"></script>
+  <script src="js/rules.js?v=1"></script>
+  <script src="js/components.js?v=1"></script>
+  <script src="js/comp-widget.js?v=1"></script>
+  <script src="js/search-widget.js?v=1.1"></script>
+  <script src="js/app.js?v=1"></script>
+  <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
+  <script src="/site-analytics.js?v=20260607-analytics"></script>
+</body>
+</html>
