@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Western Legends — Setup &amp; Reference Utility</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:ital,wght@0,400;0,600;0,700;1,400&family=Oranienbaum&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=4">
+  <link rel="stylesheet" href="css/components.css?v=1">
+  <link rel="stylesheet" href="css/search.css?v=1.1">
+  <link rel="stylesheet" href="css/icons.css?v=1">
+</head>
+<body>
+  <header class="topbar">
+    <div class="hero">
+      <div class="hero-art" aria-hidden="true">
+        <img src="images/hero-cover.webp" width="1440" height="883" alt="">
+      </div>
+      <div class="hero-copy">
+        <h1 class="brand-title"><img class="brand-mark" src="images/wordmark.webp" width="900" height="175" alt=""><span class="vh">Western Legends</span></h1>
+        <div class="brand-sub"><span>Setup &amp; Reference Utility</span></div>
+        <p class="tagline">
+          <span class="tag-lead">Choose the boxes you own, your player count, game length, variants and game mode
+          for exact setup steps, a rules reference built from the Complete Rules, a teaching script and a
+          searchable rulebook.</span>
+          <span class="tag-hook">History only remembers the most legendary. Will it be the Marshal, the outlaw — or you?</span>
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section aria-label="Configuration" class="sec sec-cfg">
+      <h2>Saddle Up</h2>
+      <p class="sec-note">Select the sets you own, the number of players, the game length, and any variants or game mode. Every step, ruling and script below adapts to your choices.</p>
+      <div class="cfg">
+        <div>
+          <label class="cfg-label">Sets you own <span class="hint">(the Complete Rules sets up Core + Ante Up + Blood Money)</span></label>
+          <div id="expansions" class="chips"></div>
+        </div>
+        <div>
+          <label class="cfg-label">Players <span class="hint">(2 players adds the Man in Black, except in Who Runs Border Town?)</span></label>
+          <div id="players" class="pbtns"></div>
+        </div>
+        <div>
+          <label class="cfg-label">Game length <span class="hint">(Legendary Points that trigger the end)</span></label>
+          <div id="lengths" class="pbtns plen"></div>
+        </div>
+        <div>
+          <label class="cfg-label">Game mode <span class="hint">— modes need Core, Ante Up and Blood Money</span></label>
+          <div id="modes" class="mode-grid"></div>
+        </div>
+        <div id="modules-group">
+          <label class="cfg-label">Variants <span class="hint">— optional; a game mode sets its own</span></label>
+          <div id="modules" class="mods"></div>
+        </div>
+      </div>
+    </section>
+
+    <section aria-label="Setup" class="sec sec-setup">
+      <h2>Setup</h2>
+      <p class="sec-note">Follow the steps in order: Pre-Setup, Play Area Setup, then Final Setup. Each step cites the page of the Complete Rules it comes from.</p>
+      <div class="teach-bar"><button id="teachBtn" type="button" title="A ~5 minute script to teach this exact setup aloud">📖 Teaching script</button></div>
+      <div id="teach" class="teach-panel" hidden></div>
+      <div id="setup"></div>
+    </section>
+
+    <section class="sec sec-comp" id="components" aria-labelledby="comp-h" hidden>
+      <h2 id="comp-h">Components</h2>
+      <p class="sec-note">Every component the Complete Rules names and pictures (setup diagrams, Appendix I and the variant pages) for the sets, variants and mode you’ve selected. The book prints a count for only a few pieces. Tap a picture to enlarge it.</p>
+      <div id="aid-comp"></div>
+    </section>
+
+    <section aria-label="Reference" class="sec sec-ref">
+      <h2>Rules Reference</h2>
+      <p class="sec-note">Tap a heading to open it. Contents adapt to your sets, variants and mode.</p>
+      <div id="reference"></div>
+    </section>
+
+    <section aria-label="Rulebook search" class="sec sec-search">
+      <h2>Search the Rulebook</h2>
+      <p class="sec-note">Answers from this page come first, then every matching page of the Western Legends Complete Rules.</p>
+      <div class="rsearch-wrap">
+        <input id="rsearch" type="search" placeholder="e.g. arrest, rustle, faro, Traveling Trader… or ask a question" aria-label="Search this page and the rulebook">
+      </div>
+      <div id="rresults"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Setup and reference content grounded in the official Western Legends Complete Rules (v1.2), which combines
+    Western Legends with Ante Up, Blood Money, Fistful of Extras, The Good, The Bad, and The Handsome and Wild Bunch of
+    Extras. A fan-made play aid — not affiliated with Kolossal Games.</p>
+  </footer>
+
+  <script src="js/data.js?v=2"></script>
+  <script src="js/data-ref.js?v=3"></script>
+  <script src="js/data-modes.js?v=2"></script>
+  <script src="js/data-legends.js?v=2"></script>
+  <script src="js/data-teach.js?v=2"></script>
+  <script src="js/rules.js?v=2"></script>
+  <script src="js/components.js?v=2"></script>
+  <script src="js/comp-widget.js?v=1"></script>
+  <script src="js/search-widget.js?v=1.1"></script>
+  <script src="js/app.js?v=2"></script>
+  <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
+  <script src="/site-analytics.js?v=20260607-analytics"></script>
+</body>
+</html>
