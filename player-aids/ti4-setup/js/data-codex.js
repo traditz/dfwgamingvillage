@@ -817,7 +817,7 @@ var TI_CODEX = (function () {
             "<b>Counterstroke</b> can't be played against the Mahact commander Il Na Viroset.",
             "<b>Ghost Squad</b> can't move the Titans' Hel-Titans (structures can't move).",
             "<b>Master Plan</b> works after a tactical action granted by the Naalu agent Z'eu Ω."
-          ]) + (te(c) ? p("<b>With Thunder's Edge</b>, use its revised printings of all these cards (no Ω; marked with the Codex icon).") : "");
+          ]) + (te(c) ? p("<b>With Thunder's Edge</b>, use its revised printings of all these cards (no Ω; marked with the Codex <span class=\"ic-nb\">icon <img class=\"aid-ic aid-ic-inline\" src=\"images/icons/codex-icon.webp\" alt=\"Twilight Codex expansion icon\" title=\"Twilight Codex expansion icon\">).</span>") : "");
       },
       src: function (c) { return join("Codex I pp.3, 8–11", "Wiki FAQ (Units & Unit Abilities; Objectives; Action Cards; The Barony of Letnev; The Mahact Gene-Sorcerers; The Naalu Collective; The Titans of Ul)", te(c) ? "TE pp.4–5" : ""); } },
 

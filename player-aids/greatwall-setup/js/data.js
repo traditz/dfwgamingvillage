@@ -231,6 +231,18 @@ GW.phases = [
 ];
 
 /* =============================================================================
+   RULEBOOK ICONS (DFWGV icons standard v1 — css/icons.css, images/icons/)
+   Names exactly as printed in the core rulebook's Icon List (p.16) and, for
+   Black Powder, the FAQ errata's "New Icons" paragraph for BP p.4. Pictures are
+   crops of those printed icons (the sharpest print of each in the sources).
+   Always pass the full literal file name.
+   ============================================================================= */
+GW.ic = (file, name) => "<img class=\"aid-ic\" src=\"images/icons/" + file + ".webp\" alt=\"" + name + "\">";
+GW.icIn = (file, name) => "<img class=\"aid-ic aid-ic-inline\" src=\"images/icons/" + file + ".webp\" alt=\"" + name + "\">";
+GW.icPair = (file, name) => "<span class=\"aid-pair\">" + GW.ic(file, name) + "<span>" + name + "</span></span>";
+GW.icRow = (pairs) => "<p class=\"aid-icon-row\">" + pairs.join(" ") + "</p>";
+
+/* =============================================================================
    RULES REFERENCE
    ============================================================================= */
 GW.reference = [
@@ -250,28 +262,47 @@ GW.reference = [
     }
   },
   {
+    title: "Icon List",
+    when: () => true,
+    html: (c) => "<h4>Resources &amp; Overseers</h4>" +
+      GW.icRow([GW.icPair("wood", "Wood"), GW.icPair("stone", "Stone"), GW.icPair("gold", "Gold"), GW.icPair("chi", "Chi"), GW.icPair("any-resource", "Any Resource")]) +
+      GW.icRow([GW.icPair("gold-overseer", "Gold Overseer"), GW.icPair("chi-overseer", "Chi Overseer"), GW.icPair("any-overseer", "Any Overseer")]) +
+      "<p>Also in the Icon List (printed too small to reproduce here): <b>Wood, Stone or Gold</b> · <b>Wood Overseer</b> · <b>Stone Overseer</b>.</p>" +
+      "<h4>Clerks &amp; Soldiers</h4>" +
+      GW.icRow([GW.icPair("clerk", "Clerk"), GW.icPair("spearman", "Spearman"), GW.icPair("archer", "Archer"), GW.icPair("horseman", "Horseman"), GW.icPair("soldier", "Soldier")]) +
+      "<h4>Cards</h4>" +
+      GW.icRow([GW.icPair("horde-card", "Horde card"), GW.icPair("advisor-card", "Advisor card"), GW.icPair("supporting-advisor", "Supporting Advisor"), GW.icPair("tactic-card", "Tactic card"), GW.icPair("command-card", "Command Card")]) +
+      "<h4>The Wall</h4>" +
+      GW.icRow([GW.icPair("wall", "Wall"), GW.icPair("defense-value", "Defense value"), GW.icPair("offensive-power", "Offensive Power"), GW.icPair("barricade", "Barricade")]) +
+      "<h4>Honor, Shame &amp; more</h4>" +
+      GW.icRow([GW.icPair("honor", "Honor"), GW.icPair("shame-token", "Shame Token"), GW.icPair("wound", "Wound"), GW.icPair("tea", "Tea"), GW.icPair("player-number", "Player number")]) +
+      (c.has("bp") ? "<h4>Black Powder — new icons</h4>" +
+        GW.icRow([GW.icPair("war-machine", "War Machine"), GW.icPair("special-soldier", "Special soldier"), GW.icPair("snake-clan-token", "Snake Clan token")]) : ""),
+    src: (c) => "Core p.16" + (c.has("bp") ? " · FAQ errata (Black Powder p.4 — New Icons)" : "")
+  },
+  {
     title: "Clerks, Locations & Activation",
     when: () => true,
-    html: (c) => "<ul><li>You start with " + (c.p === 5 ? "4" : "5") + " Clerks in your pool (" + (c.p === 5 ? "4" : "3") + " more are on the board's Clerk space, hireable at the Embassy). Command cards <b>Move</b> Clerks into Locations — you may also relocate Clerks already on the board, but never out of a full Regular Location.</li>" +
+    html: (c) => "<ul><li>You start with " + (c.p === 5 ? "4" : "5") + " " + "<span class=\"ic-nb\">" + GW.icIn("clerk", "Clerk") + "&nbsp;Clerks</span> in your pool (" + (c.p === 5 ? "4" : "3") + " more are on the board's Clerk space, hireable at the Embassy). Command cards <b>Move</b> Clerks into Locations — you may also relocate Clerks already on the board, but never out of a full Regular Location.</li>" +
       "<li><b>Regular Locations</b> (red spots) Activate only when <b>every</b> Clerk slot is filled; <b>Special Locations</b> (green spots) Activate with 1+ Clerks, any number allowed.</li>" +
       "<li>On Activation each player resolves <b>all</b> their Clerks there (in Tea order" + (c.mode === "coop" ? " — in co-op you choose the order together; Tea order only breaks ties for claiming Hordes" : "") + "), then Clerks return to their pools — except at the <b>Emperor's Embassy</b>, where Clerks resolve one at a time. Receiving a Location's effect is optional.</li>" +
-      "<li><b>Shame icon Locations:</b> if only one player has Clerks there when it Activates, that player takes a Shame token; with two or more Clans present, nobody does.</li>" +
+      "<li><b>Locations with the " + "<span class=\"ic-nb\">" + GW.icIn("shame-token", "Shame Token") + "&nbsp;Shame</span> token icon:</b> if only one player has Clerks there when it Activates, that player takes a Shame token; with two or more Clans present, nobody does.</li>" +
       "<li><b>Advanced Activation</b> (from cards/Advisors): may fire a Regular Location that isn't full, and never hands out the Shame-icon token.</li></ul>",
-    src: (c) => ["Core p.7", c.p === 5 ? "Stretch Goals p.7" : null, c.mode === "coop" ? "Core p.14" : null].filter(Boolean).join(" · ")
+    src: (c) => ["Core p.7, p.16", c.p === 5 ? "Stretch Goals p.7" : null, c.mode === "coop" ? "Core p.14" : null].filter(Boolean).join(" · ")
   },
   {
     title: "The Locations",
     when: () => true,
-    html: (c) => "<ul><li><b>Production Locations</b> (Lumber Mill – Wood, Quarry – Stone, Gold Mine – Gold, Temple – Chi): each Clerk gathers 1 Resource; an <b>Overseer</b> adds its level if you gathered at least 1. Then each player with a Clerk there may <b>Upgrade one Overseer one level</b> (pay the next slot's cost; your first placement uses a Soldier from your pool — it never comes back). Then each gatherer may <b>Donate</b> exactly 1 of that Resource to the Warehouse for <b>2 Honor</b> (no Chi Donations). One Overseer per player per Location, one Upgrade per Activation (FAQ #8).</li>" +
+    html: (c) => "<ul><li><b>Production Locations</b> (Lumber Mill – " + "<span class=\"ic-nb\">" + GW.icIn("wood", "Wood") + "&nbsp;Wood</span>, Quarry – " + "<span class=\"ic-nb\">" + GW.icIn("stone", "Stone") + "&nbsp;Stone</span>, Gold Mine – " + "<span class=\"ic-nb\">" + GW.icIn("gold", "Gold") + "&nbsp;Gold</span>, Temple – " + "<span class=\"ic-nb\">" + GW.icIn("chi", "Chi") + "&nbsp;Chi</span>): each Clerk gathers 1 Resource; an <b>Overseer</b> adds its level if you gathered at least 1. Then each player with a Clerk there may <b>Upgrade one Overseer one level</b> (pay the next slot's cost; your first placement uses a Soldier from your pool — it never comes back). Then each gatherer may <b>Donate</b> exactly 1 of that Resource to the Warehouse for <b>2 Honor</b> (no Chi Donations). One Overseer per player per Location, one Upgrade per Activation (FAQ #8).</li>" +
       "<li><b>Barracks:</b> each Clerk Recruits 1 Soldier (Spearman 2 Stone + 1 Wood · Archer 2 Chi + 1 Wood · Horseman 3 Gold + 1 Wood" + (c.has("bp") ? " · your Clan's Special Soldier: Warrior Monk 2 Wood + 1 Chi · Bomber 1 Wood + 1 Gold + 1 Chi · Flamethrower 3 Wood + 1 Chi · Crossbowman 2 Gold + 2 Chi · Tank 2 Wood + 2 Stone + 2 Gold" : "") + (c.mod("gk") ? " · Bannerman 2 Gold + 1 Wood" : "") + "); fresh recruits may immediately <b>Attack</b> any Wall Section or go to a Rest Zone. Multiple recruits resolve simultaneously.</li>" +
-      "<li><b>Builders' Encampment:</b> per Clerk, build a <b>Barricade</b> in a Wall Section holding fewer than 3 (2 of Wood/Stone/Gold in any mix; +2 Honor) or a <b>Wall part</b> (cost printed on the current level; Honor = the cost: 5/10/15)" + (c.has("bp") ? " or a <b>War Machine</b> (+4 Honor, and you may Shoot with it at once)" : "") + ". <b>Warehouse Resources must be spent first</b> — they're free but grant no extra Honor.</li>" +
+      "<li><b>Builders' Encampment:</b> per Clerk, build a " + "<span class=\"ic-nb\">" + GW.icIn("barricade", "Barricade") + "&nbsp;<b>Barricade</b></span> in a Wall Section holding fewer than 3 (2 of Wood/Stone/Gold in any mix; +2 Honor) or a <b>Wall part</b> (cost printed on the current level; Honor = the cost: 5/10/15)" + (c.has("bp") ? " or a <b>War Machine</b> (+4 Honor, and you may Shoot with it at once)" : "") + ". <b>Warehouse Resources must be spent first</b> — they're free but grant no extra Honor.</li>" +
       "<li><b>Emperor's Embassy</b> (Clerks resolve individually): hire a <b>Clerk</b> for 2 Gold, or hire an <b>Advisor</b> for Gold equal to your total Advisor count after hiring; the track refills between hires.</li>" +
       "<li><b>Tea House:</b> everyone with Clerks there moves up 1 step in the Tea stack (in prior Tea order); fill <b>all</b> its slots alone and you jump straight to the top.</li>" +
       "<li><b>Logistics Center:</b> per Clerk, Move any number of Soldiers from one Wall Section to another (Rest Zone→Rest Zone, Firing spot→Firing spot, Firing spot→Rest Zone — never Rest Zone→Firing spot, and never as an Attack).</li>" +
       "<li><b>War Academy:</b> per Clerk, draw 1 Tactic card (hand limit 5).</li>" +
       "<li><b>Warehouse:</b> holds Donated Resources for anyone's Walls and Barricades; Clerks can't go there" + (c.mod("ac") ? " (except in the Emperor's Visit Scenario)" : "") + ".</li></ul>",
     src: (c) => {
-      const s = ["Core p.7–9"];
+      const s = ["Core p.7–9, p.16"];
       if (c.has("bp")) s.push("Black Powder p.3–4");
       if (c.mod("gk")) s.push("Stretch Goals p.3");
       if (c.mod("ac")) s.push("Stretch Goals p.5");
@@ -282,16 +313,17 @@ GW.reference = [
   {
     title: "Soldiers — Attack & Wounding",
     when: () => true,
-    html: (c) => "<ul><li>Soldiers Attack when freshly Recruited (any Wall Section), when placed from a Rest Zone (same Section only), or — for Archers — when Firing. Soldiers already on Horde cards can't Attack or Move (FAQ #5). A covered <b>Vital spot</b> = a Wound; covering a spot with a Soldier pays that spot's printed reward.</li>" +
-      "<li><b>Spearmen</b> go on the <b>first-row</b> Horde card only, one free Vital spot each.</li>" +
-      "<li><b>Horsemen</b> go on <b>any</b> Horde card in the Section, covering <b>2 adjacent</b> free Vital spots (never diagonal).</li>" +
-      "<li><b>Archers</b> occupy Wall <b>Firing spots</b>; when they Attack (or Fire in Winter) they place a <b>Wound marker</b> on any Vital spot of any Horde in the Section. Wound-marker Wounds pay no reward.</li>" +
-      (c.has("bp") ? "<li><b>Special Soldiers (Black Powder):</b> Warrior Monk (Monkey — any Horde card, 1 spot) · Bomber (Panda — Fires, then may drop onto the first row like a Spearman) · Flamethrower (Dragon — first row; Wounds each orthogonally adjacent <b>empty</b> spot, FAQ #12) · Crossbowman (Snake — Fires; its Wounds are <b>Snake Clan tokens</b>, which count as your Soldiers when a Horde is Defeated, can't die, and protect you from Breach Shame) · Tank (Turtle — first row, covers up to 4 spots, may cover Wound markers but not Soldiers/Snake tokens, immune to War Machines). Bombers and Crossbowmen in Firing spots earn no 2-Honor Defeat bonus but die like Archers in a Breach (errata).</li>" : "") +
-      (c.mod("gk") ? "<li><b>Bannermen (Genghis Khan):</b> follow Spearman rules; if yours is on a Wall Section at the start of Winter, you may Attack with <b>2 Soldiers</b> there right before the Shooting step. Bannermen count as Soldiers (FAQ #36) but not as Special Soldiers (FAQ #14), and they aren't Spearmen — so they can't Attack Genghis Khan (FAQ #37).</li>" : "") + "</ul>",
+    html: (c) => "<ul><li>Soldiers Attack when freshly Recruited (any Wall Section), when placed from a Rest Zone (same Section only), or — for Archers — when Firing. Soldiers already on Horde cards can't Attack or Move (FAQ #5). A covered <b>Vital spot</b> = a Wound; covering a spot with a Soldier pays that spot's printed reward.</li></ul>" +
+      "<ul class=\"aid-icons\"><li>" + GW.ic("spearman", "Spearman") + "<span><b>Spearmen</b> go on the <b>first-row</b> Horde card only, one free Vital spot each.</span></li>" +
+      "<li>" + GW.ic("horseman", "Horseman") + "<span><b>Horsemen</b> go on <b>any</b> Horde card in the Section, covering <b>2 adjacent</b> free Vital spots (never diagonal).</span></li>" +
+      "<li>" + GW.ic("archer", "Archer") + "<span><b>Archers</b> occupy Wall <b>Firing spots</b>; when they Attack (or Fire in Winter) they place a <b>Wound marker</b> on any Vital spot of any Horde in the Section. Wound-marker Wounds pay no reward.</span></li>" +
+      (c.has("bp") ? "<li>" + GW.ic("special-soldier", "Special soldier") + "<span><b>Special Soldiers (Black Powder):</b> Warrior Monk (Monkey — any Horde card, 1 spot) · Bomber (Panda — Fires, then may drop onto the first row like a Spearman) · Flamethrower (Dragon — first row; Wounds each orthogonally adjacent <b>empty</b> spot, FAQ #12) · Crossbowman (Snake — Fires; its Wounds are " + "<span class=\"ic-nb\">" + GW.icIn("snake-clan-token", "Snake Clan token") + "&nbsp;<b>Snake Clan tokens</b></span>, which count as your Soldiers when a Horde is Defeated, can't die, and protect you from Breach Shame) · Tank (Turtle — first row, covers up to 4 spots, may cover Wound markers but not Soldiers/Snake tokens, immune to War Machines). Bombers and Crossbowmen in Firing spots earn no 2-Honor Defeat bonus but die like Archers in a Breach (errata).</span></li>" : "") + "</ul>" +
+      (c.mod("gk") ? "<ul><li><b>Bannermen (Genghis Khan):</b> follow Spearman rules; if yours is on a Wall Section at the start of Winter, you may Attack with <b>2 Soldiers</b> there right before the Shooting step. Bannermen count as Soldiers (FAQ #36) but not as Special Soldiers (FAQ #14), and they aren't Spearmen — so they can't Attack Genghis Khan (FAQ #37).</li></ul>" : ""),
     src: (c) => {
-      const s = ["Core p.9–10"];
-      if (c.has("bp")) s.push("Black Powder p.4 · FAQ");
-      if (c.mod("gk")) s.push("Stretch Goals p.3 · FAQ");
+      const s = ["Core p.9–10, p.16"];
+      if (c.has("bp")) s.push("Black Powder p.4");
+      if (c.mod("gk")) s.push("Stretch Goals p.3");
+      if (c.has("bp") || c.mod("gk")) s.push("FAQ");
       return s.join(" · ");
     }
   },
@@ -302,30 +334,30 @@ GW.reference = [
       "<li><b>Lethality</b> (printed by the Time token) tells each player how many of their Soldiers on that card are <b>Killed</b> — pay <b>2 Chi per Soldier</b> to <b>Save</b> one instead (Saved and surviving Soldiers go to the Rest Zone; Killed ones to your pool — FAQ #2). Removed Soldiers leave Wound markers behind.</li>" +
       (c.mode === "coop" ? "<li><b>Co-op:</b> you gain a claimed Horde card's printed Honor <b>immediately</b> when it is Defeated (FAQ #3); Shame tokens can't be placed on Horde cards.</li>"
         : "<li>Claimed Horde cards score their printed Honor at game end — unless a <b>Shame token</b> was parked on them.</li>") +
-      (c.mod("gk") ? "<li><b>Genghis Khan:</b> whoever claims a Defeated Horde may send <b>1 surviving Soldier</b> from it (not a Bannerman) onto the Khan's Vital spots — from any Section — earning <b>6 Honor per spot</b>. Only Spearmen and Horsemen can Wound him (no Archers, no Wound markers); those Soldiers stay there forever. Cover every active spot on his card and both Skill cards (spots numbered above your player count are inactive) and he is Defeated" + (c.mode === "coop" ? " (in co-op this doesn't end the game — the win conditions are unchanged)" : " — finish the Year, then score") + ".</li>" : "") + "</ul>",
-    src: (c) => (c.mode === "coop" ? "Core p.6, p.10, p.14" : "Core p.6, p.10") + (c.mod("gk") ? " · Stretch Goals p.3" : "") + " · FAQ"
+      (c.mod("gk") ? "<li><b>Genghis Khan:</b> whoever claims a Defeated Horde may send <b>1 surviving Soldier</b> from it (not a Bannerman) onto the Khan's Vital spots — from any Section — earning <b>6 Honor per spot</b>. Only Spearmen and Horsemen can Wound him (no Archers, no Wound markers); those Soldiers stay there forever. Cover every active spot on his card and both Skill cards (spots marked with a " + "<span class=\"ic-nb\">" + GW.icIn("player-number", "Player number") + "&nbsp;Player</span> number above your player count are inactive) and he is Defeated" + (c.mode === "coop" ? " (in co-op this doesn't end the game — the win conditions are unchanged)" : " — finish the Year, then score") + ".</li>" : "") + "</ul>",
+    src: (c) => (c.mode === "coop" ? "Core p.6, p.10, p.14" : "Core p.6, p.10") + (c.mod("gk") ? ", p.16 · Stretch Goals p.3" : "") + " · FAQ"
   },
   {
     title: "Winter — Firing, Assault & Breach",
     when: () => true,
     html: (c) => "<ul><li><b>Firing:</b> left to right, every Archer" + (c.has("bp") ? " (and Bomber/Crossbowman)" : "") + " in a Firing spot Attacks a Horde in its Section, in Tea order (Rest Zone Archers don't Fire; you can't decline — FAQ #39). Then a Horde Defeat check.</li>" +
-      "<li><b>Assault:</b> per Section, Defense (Wall value + 2 per Barricade) vs the sum of the Hordes' Offensive Power (mind their abilities" + (c.has("bp") ? " — errata: a first-row <b>Ladders</b> card automatically Breaches its Section, Killing every Soldier there, <b>even in the Rest Zone</b> (Saving allowed), and discarding its War Machines" : "") + "). Defense ≥ Power holds; otherwise the Wall is <b>Breached</b>.</li>" +
+      "<li><b>Assault:</b> per Section, " + "<span class=\"ic-nb\">" + GW.icIn("defense-value", "Defense value") + "&nbsp;Defense</span> (Wall value + 2 per Barricade) vs the sum of the Hordes' " + "<span class=\"ic-nb\">" + GW.icIn("offensive-power", "Offensive Power") + "&nbsp;Offensive</span> Power (mind their abilities" + (c.has("bp") ? " — errata: a first-row <b>Ladders</b> card automatically Breaches its Section, Killing every Soldier there, <b>even in the Rest Zone</b> (Saving allowed), and discarding its War Machines" : "") + "). Defense ≥ Power holds; otherwise the Wall is <b>Breached</b>.</li>" +
       "<li><b>Breach:</b> per Horde card there, everyone without a Soldier on it takes a <b>Shame token</b>; each card kills Lethality-many of each player's Soldiers on it (Save for 2 Chi each; survivors stay); all <b>Archers</b> on the Section are Killed; Rest Zones are safe" + (c.has("bp") ? " (Ladders excepted)" : "") + ".</li>" +
       "<li>All Barricades are discarded after the Assault" + (c.p <= 2 ? " — except those blocking the unused leftmost Section, which stay all game" : "") + ".</li>" +
       (c.has("bp") ? "<li><b>Wall destruction (Black Powder):</b> Battering Rams swap one row closer after each Assault and, while in the first row, destroy 1 Wall level after the Assault — including the Assault after which they arrive (FAQ #20); Rams in the first and second rows of one Section don't swap, and only 1 level is destroyed (FAQ #29); Trebuchets bombard from the third row each Year. Destroyed levels dump Firing-spot Soldiers into the Rest Zone. If <b>all</b> Wall levels are ever destroyed, everyone <b>loses immediately</b>.</li>" : "") +
       (c.has("bp") ? "<li><b>Towers:</b> put a Spearman in a Tower when you build a Wall level or claim a Defeated Horde next to it (you may evict a rival's — it returns to their pool). At the end of the Assault: <b>+2 Honor</b> per unbreached adjacent Section, a <b>Shame token</b> per breached one; a Breach clears adjacent Towers (Spearmen return to pools — FAQ #19). Placing a Tower Spearman also lets you <b>Shoot</b> an adjacent War Machine.</li>" : "") +
       (c.mod("gk") ? "<li><b>Genghis Khan Skills (Khan's Section only):</b> errata — <b>No retreat</b> reads “During each Assault phase all Soldiers on all Horde cards in this Wall Section are Killed.”</li>" : "") + "</ul>",
-    src: (c) => (c.p <= 2 ? "Core p.10–12" : "Core p.10–11") + (c.has("bp") ? " · Black Powder p.3–4" : "") + (c.mod("gk") ? " · Stretch Goals p.3 · FAQ & errata" : " · FAQ")
+    src: (c) => (c.p <= 2 ? "Core p.10–12, p.16" : "Core p.10–11, p.16") + (c.has("bp") ? " · Black Powder p.3–4" : "") + (c.mod("gk") ? " · Stretch Goals p.3 · FAQ & errata" : " · FAQ")
   },
   {
     title: "Shame, Raids & the Tea Track",
     when: () => true,
-    html: (c) => "<ul><li>A <b>Shame token</b> goes under one of your pool Soldiers (that Soldier is frozen; <b>−5 Honor</b> at game end) or onto a claimed Horde card's Shame slot (that card scores nothing, but costs nothing). Can't place it? Remove it and lose 5 Honor at once." + (c.mode === "standard" ? " Due a token but the pool is empty? Lose 5 Honor at once instead." : "") + " Buy them off in Summer for 2 Chi each." +
+    html: (c) => "<ul><li>A " + "<span class=\"ic-nb\">" + GW.icIn("shame-token", "Shame Token") + "&nbsp;<b>Shame token</b></span> goes under one of your pool Soldiers (that Soldier is frozen; <b>−5 Honor</b> at game end) or onto a claimed Horde card's Shame slot (that card scores nothing, but costs nothing). Can't place it? Remove it and lose 5 Honor at once." + (c.mode === "standard" ? " Due a token but the pool is empty? Lose 5 Honor at once instead." : "") + " Buy them off in Summer for 2 Chi each." +
       (c.mode === "coop" ? " <b>Co-op:</b> Horde-card Shame slots are off-limits and Chi can't buy Shame off — instead lose <b>10 Honor</b> per token, when you receive it or in Summer." : "") + "</li>" +
       "<li><b>Raid:</b> a Horde card that can't fit on a full Section is discarded and <b>players-many</b> Shame tokens leave the pool (human players only — FAQ #4). When the pool empties, the game ends after the next Winter" + (c.mode === "coop" ? " — in co-op, an empty pool when someone must take a token is an <b>immediate loss</b>" : "") + (c.mode === "solo" ? " — in solo, an empty pool means <b>you lose</b>" : "") + ".</li>" +
-      "<li>The <b>Tea track</b> orders everything: Command placement, other-player card effects, Location resolution, tie-breaks, and the final-scoring tiebreaker. The Tea House reshuffles it" + (c.mode === "coop" ? ". Co-op: players choose their own order except for claiming Hordes, which still uses Tea order" : "") + ".</li>" +
-      "<li><b>Tactic cards</b> play from hand at the moment printed on them (one at a time; the seven timing windows are enumerated in FAQ #40); pay the Chi cost to use the <b>Boosted</b> lower half. Hand limit 5.</li></ul>",
-    src: (c) => "Core p.6–7, p.9" + (c.mode === "coop" ? ", p.14" : "") + (c.mode === "solo" ? ", p.13" : "") + " · FAQ"
+      "<li>The " + "<span class=\"ic-nb\">" + GW.icIn("tea", "Tea") + "&nbsp;<b>Tea track</b></span> orders everything: Command placement, other-player card effects, Location resolution, tie-breaks, and the final-scoring tiebreaker. The Tea House reshuffles it" + (c.mode === "coop" ? ". Co-op: players choose their own order except for claiming Hordes, which still uses Tea order" : "") + ".</li>" +
+      "<li>" + "<span class=\"ic-nb\">" + GW.icIn("tactic-card", "Tactic card") + "&nbsp;<b>Tactic cards</b></span> play from hand at the moment printed on them (one at a time; the seven timing windows are enumerated in FAQ #40); pay the Chi cost to use the <b>Boosted</b> lower half. Hand limit 5.</li></ul>",
+    src: (c) => "Core p.6–7, p.9" + (c.mode === "coop" ? ", p.14" : "") + (c.mode === "solo" ? ", p.13" : "") + ", p.16 · FAQ"
   },
   {
     title: "End of the Game & Scoring",
@@ -354,7 +386,7 @@ GW.reference = [
   {
     title: "Black Powder — War Machines",
     when: (c) => c.has("bp"),
-    html: () => "<ul><li>War Machines sit in Wall-Section Rest Zones (FAQ #26), max <b>2 per Section</b>. Build them at the Builders' Encampment (+4 Honor, and you may Shoot with it at once; Warehouse Resources spend first — FAQ #9); also Shoot one adjacent machine whenever you place a Tower Spearman.</li>" +
+    html: () => "<ul><li>" + "<span class=\"ic-nb\">" + GW.icIn("war-machine", "War Machine") + "&nbsp;War</span> Machines sit in Wall-Section Rest Zones (FAQ #26), max <b>2 per Section</b>. Build them at the Builders' Encampment (+4 Honor, and you may Shoot with it at once; Warehouse Resources spend first — FAQ #9); also Shoot one adjacent machine whenever you place a Tower Spearman.</li>" +
       "<li><b>Ballista</b> (4 Wood; free Shot): 2 Wounds per the <b>Ballista</b> Shot card (errata) on one Horde in its Section. <b>Cannon</b> (2 Stone + 2 Wood; 2 Stone per Shot): +1 Honor and Wounds per the Cannon Shot card. <b>Rocket Launcher</b> (4 Gold; 1 Resource of any type per Shot): +2 Honor, draw a Rocket card and deal all its Wounds (reshuffle the Rocket deck when empty — FAQ #33).</li>" +
       "<li>Machine Wounds on already-Wounded or missing spots are wasted; a Soldier on a hit spot is <b>Killed</b> (Save as usual) — hitting another player's Soldier costs the shooter <b>1 Shame token</b> per Shot (even if it's Saved, and however many are hit). Snake Clan tokens and Tanks are immune. A machine can't Shoot when its Section has no Horde card (FAQ).</li></ul>",
     src: () => "Black Powder p.3–4 · FAQ & errata"

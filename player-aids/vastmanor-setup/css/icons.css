@@ -1,0 +1,99 @@
+/* Rulebook icons in the rules reference — DFWGV player-aid standard v1 (tools\icons, October 2026).
+   Copy this file UNCHANGED into <page>/css/icons.css and link it after the page stylesheet.
+   Page tokens (set them in the page's own styles.css, e.g. on :root or the reference container):
+     --aid-ic-size   icon height in lists and rows            (default 32px)
+     --aid-ic-bg     backdrop behind every icon               (default transparent; on dark pages use a light
+                                                              paper colour so dark-outlined icons stay visible)
+     --aid-ic-pad    padding inside that backdrop             (default 0; use ~3px together with --aid-ic-bg)
+     --aid-ic-gap    space between an icon and its text       (default 12px)
+   Markup (see ICONS_STANDARD.md):
+     <ul class="aid-icons"><li><img class="aid-ic" src="images/icons/gold.webp" alt="Gold"><span><b>Gold</b> — …</span></li></ul>
+     <p class="aid-icon-row"><span class="aid-pair"><img class="aid-ic" …><span>Worker</span></span> …</p>
+     … text <img class="aid-ic aid-ic-inline" src="images/icons/retreat.webp" alt="Retreat"> text …          */
+
+.aid-ic {
+  display: inline-block;
+  box-sizing: content-box;
+  height: var(--aid-ic-size, 32px);
+  width: auto;
+  max-width: calc(var(--aid-ic-size, 32px) * 2.4);
+  object-fit: contain;
+  vertical-align: middle;
+  flex: none;
+  padding: var(--aid-ic-pad, 0);
+  background: var(--aid-ic-bg, transparent);
+  border-radius: 6px;
+}
+
+/* an icon inside a sentence or a table cell */
+.aid-ic.aid-ic-inline {
+  height: 1.4em;
+  max-width: 3.4em;
+  vertical-align: -0.38em;
+  margin: 0 0.12em;
+  padding: var(--aid-ic-pad-inline, 0);
+  border-radius: 4px;
+}
+
+/* a list of icons with their meanings: one icon column, text beside it */
+ul.aid-icons.aid-icons {
+  list-style: none;
+  margin-left: 0;
+  padding-left: 0;
+}
+ul.aid-icons.aid-icons > li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--aid-ic-gap, 12px);
+  margin-bottom: 9px;
+  padding-left: 0;
+}
+ul.aid-icons.aid-icons > li::before,
+ul.aid-icons.aid-icons > li::marker { content: none; }
+ul.aid-icons.aid-icons > li > .aid-ic {
+  width: calc(var(--aid-ic-size, 32px) * 1.2);
+  max-width: none;
+}
+ul.aid-icons.aid-icons > li > .aid-ic + * {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-top: max(0px, calc((var(--aid-ic-size, 32px) + 2 * var(--aid-ic-pad, 0px) - 1.5em) / 2));
+}
+
+/* a wrapping row of icon + short label pairs (card types, roles, terrain…) */
+.aid-icon-row.aid-icon-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+}
+.aid-pair {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+/* a small grid of icons, e.g. die faces: icon above a short caption */
+.aid-icon-grid.aid-icon-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  align-items: flex-start;
+}
+.aid-icon-grid > figure {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  max-width: 7.5em;
+  text-align: center;
+  font-size: 0.92em;
+  line-height: 1.25;
+}
+
+@media (max-width: 480px) {
+  ul.aid-icons.aid-icons > li { gap: calc(var(--aid-ic-gap, 12px) - 2px); }
+  .aid-icon-row.aid-icon-row { gap: 8px 14px; }
+}

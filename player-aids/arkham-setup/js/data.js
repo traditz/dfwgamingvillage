@@ -15,6 +15,16 @@
 
 const AH = {};
 
+/* ---- Rulebook icons (DFWGV icons standard v1: css/icons.css) ---------------
+   Pictures in images/icons/ are cropped from the rulebooks themselves: Core p.3
+   (status tokens) & p.24 (Location Icons key), Dunwich p.5 (train icon), KiY p.1
+   (Yellow Sign token), Lurker p.1 (Power token) & p.2 (Gate marker icons) and
+   Miskatonic p.2 (Expansion Icons). The text label always stays beside the icon.
+   File names are written in full at every call so icons_check.py can match them. */
+AH.icon     = (f, alt) => `<img class="aid-ic aid-ic-inline" src="images/icons/${f}.webp" alt="${alt}">`;
+AH.iconPair = (f, name) => `<span class="aid-pair"><img class="aid-ic" src="images/icons/${f}.webp" alt="${name}"><span>${name}</span></span>`;
+AH.iconItem = (f, alt, html) => `<li><img class="aid-ic" src="images/icons/${f}.webp" alt="${alt}"><span>${html}</span></li>`;
+
 /* ---- Expansions ---------------------------------------------------------- */
 AH.expansions = [
   { id: "base",       name: "Arkham Horror (Base Game)", short: "Base", always: true, kind: "base",
@@ -266,8 +276,19 @@ AH.setup = [
   { ph: 2, exp: "lurker", t: "Dark Pact & Reckoning decks (Lurker Herald)", when: c => c.mod("heraldLurker"), src: "Lurker p.2 (‘The Herald’, step 6a)",
     d: "Separate the Dark Pact cards into Blood Pacts, Soul Pacts and Bound Allies (3 decks) by the Herald sheet, and shuffle the Reckoning deck next to the Mythos deck." },
 
-  { ph: 2, exp: "miskatonic", t: "Integrate Miskatonic cross-expansion cards", when: c => c.has("miskatonic"), src: "Miskatonic p.3 (Integrating)",
-    d: "Shuffle all the new Mythos cards into the Mythos deck. Of the new Skill, Gate and Dunwich/Kingsport/Innsmouth Location cards, shuffle in only those whose expansion icons match the expansions in play; return the rest to the box. Shuffle the per-expansion add-ons (Exhibit, Injury/Madness & Dunwich Horror, Cult Encounter, Innsmouth Look, Relationship, Blessings of Nodens, Epic Battle, Reckoning cards) into their decks only if you are using that expansion or module; otherwise box them. New Visions of Hypnos cards (Hypnos Guardian only) are filtered like the Skill/Gate cards: shuffle in only those whose expansion icons are in play." },
+  { ph: 2, exp: "miskatonic", t: "Integrate Miskatonic cross-expansion cards", when: c => c.has("miskatonic"), src: "Miskatonic p.2 (Expansion Icons) · p.3 (Integrating)",
+    d: "Shuffle all the new Mythos cards into the Mythos deck. Of the new Skill, Gate and Dunwich/Kingsport/Innsmouth Location cards, shuffle in only those whose expansion icons match the expansions in play; return the rest to the box. Shuffle the per-expansion add-ons (Exhibit, Injury/Madness & Dunwich Horror, Cult Encounter, Innsmouth Look, Relationship, Blessings of Nodens, Epic Battle, Reckoning cards) into their decks only if you are using that expansion or module; otherwise box them. New Visions of Hypnos cards (Hypnos Guardian only) are filtered like the Skill/Gate cards: shuffle in only those whose expansion icons are in play." +
+      "<p class=\"aid-icon-note\">The expansion icons, printed in tan on every Miskatonic card and sheet. The Miskatonic Horror icon means the card works with just the base game; each other icon names an expansion the card needs (a card showing two icons needs both).</p>" +
+      "<p class=\"aid-icon-row\">" + [
+        AH.iconPair("exp-miskatonic", "Miskatonic Horror"),
+        AH.iconPair("exp-curse", "Dark Pharaoh (Revised)"),
+        AH.iconPair("exp-dunwich", "Dunwich Horror"),
+        AH.iconPair("exp-kingyellow", "King in Yellow"),
+        AH.iconPair("exp-kingsport", "Kingsport Horror"),
+        AH.iconPair("exp-blackgoat", "Black Goat of the Woods"),
+        AH.iconPair("exp-innsmouth", "Innsmouth Horror"),
+        AH.iconPair("exp-lurker", "Lurker at the Threshold")
+      ].join(" ") + "</p>" },
 
   { ph: 2, exp: "kingsport", t: "Set out Epic Battle cards", when: c => c.mod("epicBattle"), src: "Kingsport p.11 · p.6 · Miskatonic p.3",
     d: "Shuffle the green Epic Battle cards into a deck and the red ones into another (8 of each from Kingsport; with Miskatonic Horror, first add its new green cards to the green deck and its new red cards to the red deck). Place the green deck on top of the red. Find the 3 Ancient One Plot cards for this Ancient One, shuffle them and set them aside. Place the Epic Battle cards near the Ancient One sheet. (Not used with Azathoth.)" },
@@ -342,6 +363,20 @@ AH.playerRef = {
 AH.boards = [
   { id: "arkham", name: "Arkham (base board)", when: () => true, items: [
     "<b>Locations & streets.</b> Circular illustrations are locations; rectangular boxes are the nine neighbourhood street areas. Unstable locations (red diamond) are where gates and monsters appear.",
+    "<b>Location icons:</b> each location’s icons show the most likely outcomes of going there:" +
+      "<p class=\"aid-icon-row\">" + [
+        AH.iconPair("loc-allies", "Allies"),
+        AH.iconPair("loc-blessing", "Blessing"),
+        AH.iconPair("loc-clue-tokens", "Clue Tokens"),
+        AH.iconPair("loc-common-items", "Common Items"),
+        AH.iconPair("loc-money", "Money"),
+        AH.iconPair("loc-sanity", "Sanity"),
+        AH.iconPair("loc-skills", "Skills"),
+        AH.iconPair("loc-spells", "Spells"),
+        AH.iconPair("loc-stamina", "Stamina"),
+        AH.iconPair("loc-unique-items", "Unique Items")
+      ].join(" ") + "</p>" +
+      "An icon with its colours reversed (such as the Sanity icon on Arkham Asylum) marks a guaranteed way to get that item at that location. (Core p.24)",
     "<b>The Sky</b> is a holding street area connected to every Arkham street; flying monsters there count against the monster limit.",
     "<b>The Outskirts</b> hold monsters that would exceed the monster limit. Up to 8 − players may wait there. When one more arrives than that limit allows, return ALL Outskirts monsters to the cup and raise the terror level by 1. (Core p.18 · FAQ p.12)",
     "<b>Gates</b> open at unstable locations, drawing any investigator there into the matching Other World (and delaying them). Close a gate by returning from its Other World and passing the check; <b>seal</b> it (spend 5 Clue tokens or an Elder Sign) so no gate can reopen there."
@@ -351,7 +386,7 @@ AH.boards = [
     "Closing a gate returns all monsters of that gate’s dimension symbol to the cup and lets you claim it as a Gate trophy."
   ]},
   { id: "dunwich", name: "Dunwich board", when: c => c.has("dunwich"), items: [
-    "<b>Travel between towns:</b> at the Train Station (Arkham) or a depot (train icon) elsewhere, spend $1 and 1 movement point to move to any other town’s station/depot.",
+    "<b>Travel between towns:</b> at the Train Station (Arkham) or a depot (marked with the " + AH.icon("train", "Train") + " train icon) elsewhere, spend $1 and 1 movement point to move to any other town’s station/depot. (Dunwich p.5)",
     "<b>‘In Arkham’</b> on cards also applies to Dunwich locations and streets. Dunwich streets are adjacent to the Sky.",
     "<b>Monster limit:</b> monsters in Dunwich don’t count against it and don’t go to the Outskirts. Instead, the <b>vortices</b> control them: investigators can never enter a vortex. A monster that enters one returns to the cup, raises the terror level by 1, and adds a Dunwich Horror token to its track (if fewer than 3 are there). (Dunwich p.5, p.7)",
     "<b>The Dunwich Horror:</b> when the 3rd Dunwich Horror token is placed, it appears in the <b>Sentinel Hill street area</b>. While it is in play, each time it moves there is a chance another doom token is added to the doom track. When you enter combat with it, shuffle the Dunwich Horror deck and draw a card for its abilities and most of its stats for that combat (its toughness is always 5). Defeating it empties the track and sets it aside (it returns if the track fills again), and the victor may search the Common Item, Unique Item, Skill, Spell or Ally deck for any 1 card. (Dunwich p.7–8)",
@@ -393,7 +428,7 @@ AH.howToPlay = {
     { h: "Skill Checks", items: [
       "Roll a number of dice equal to the relevant <b>skill ± the modifier</b> on the card/effect. Each <b>5 or 6</b> is a success (<b>Blessed</b>: 4–6; <b>Cursed</b>: 6 only — you can never be both: if you’re Blessed and become Cursed, discard the Blessing, and vice versa; you never hold more than one Bless or Curse card). If the modifier drops you to 0 or fewer dice, the check automatically fails (unless Clue tokens add successes).",
       "The <b>difficulty</b> is the number of successes needed (default 1). Partial successes only matter where a card says so.",
-      "After any check (pass or fail) you may spend <b>Clue tokens</b> one at a time — each gives one extra die, and you get the die even if modifiers had dropped you below 0 dice."
+      { t: "After any check (pass or fail) you may spend " + AH.icon("clue-token", "Clue token") + " <b>Clue tokens</b> one at a time — each gives one extra die, and you get the die even if modifiers had dropped you below 0 dice.", src: "Core p.3, p.13" }
     ]},
 
     { h: "Encounters — Evade & Combat", items: [
@@ -404,7 +439,7 @@ AH.howToPlay = {
     ]},
 
     { h: "Health, Statuses & Being Devoured", items: [
-      "If <b>Sanity or Stamina hits 0</b>: discard half your items, half your Clues (round down), and all Retainers, then restore that track to 1. In Arkham you go to Arkham Asylum (Sanity) or St. Mary’s Hospital (Stamina); in an Other World you are Lost in Time and Space. No encounters that turn.",
+      { t: "If <b>" + AH.icon("sanity-token", "Sanity token") + " Sanity or " + AH.icon("stamina-token", "Stamina token") + " Stamina hits 0</b>: discard half your items, half your Clues (round down), and all Retainers, then restore that track to 1. In Arkham you go to Arkham Asylum (Sanity) or St. Mary’s Hospital (Stamina); in an Other World you are Lost in Time and Space. No encounters that turn.", src: "Core p.3, p.16" },
       "If <b>both</b> tracks are 0 at once, or either maximum is reduced to 0, the investigator is <b>devoured</b>: discard all your cards except unspent trophies, then draw a new investigator at random and set it up as at the start of the game — it enters play at the beginning of the next turn.",
       { t: "<b>Delayed</b> (marker on its side): in your next Movement Phase you get no movement points and don’t move — just stand the marker up. You may still trade, and must still evade or fight monsters in your area, but you can’t use items, abilities or spells to move. You can’t be ‘double delayed’. ‘Lose your next turn’ is harsher: skip every phase except Mythos.", src: "Core p.8, p.16 · FAQ p.5, p.13" },
       "<b>Arrested:</b> go to the Police Station’s Jail Cell, lose half your money (round down), and skip your next turn (you just stand up into the main Police Station area).",
@@ -420,7 +455,7 @@ AH.howToPlay = {
     ]},
     { h: "Gates, Closing & Sealing", items: [
       "When a gate opens on you, you are drawn to the matching Other World and <b>delayed</b>. After exploring, you return to the gate’s location with an explored marker. In the Arkham Encounters Phase, make a <b>Lore or Fight check (your choice)</b> using the number on the gate marker as the modifier to <b>close</b> it and take it as a Gate trophy. If you fail you may try again next turn, but leaving the location discards your explored marker.",
-      "<b>Seal</b> a gate you have just closed by spending <b>5 Clue tokens</b>: place an unused doom token, elder-sign side up, on the location. No further gates can open and no monsters can appear there. Only gates on unstable locations can be sealed. A gate closed by an encounter or card effect goes to the bottom of the gate stack (no trophy) and can’t be sealed.",
+      { t: "<b>Seal</b> a gate you have just closed by spending <b>5 Clue tokens</b>: place an unused " + AH.icon("doom-token", "Doom token") + " doom token, " + AH.icon("elder-sign-token", "Elder Sign token") + " elder-sign side up, on the location. No further gates can open and no monsters can appear there. Only gates on unstable locations can be sealed. A gate closed by an encounter or card effect goes to the bottom of the gate stack (no trophy) and can’t be sealed.", src: "Core p.3, p.18 · FAQ p.3" },
       "The <b>Elder Sign Unique Item</b> closes AND seals with no roll and no Clues. Use it in the Arkham Encounters Phase while on the gate’s location with an explored marker, as if closing it: lose 1 Sanity and 1 Stamina (the seal still happens even if this knocks you out or drives you insane), move a doom token <b>off the Ancient One’s doom track</b> to serve as the seal, take the Gate trophy, and return the card to the box.",
       { t: "<b>Gate Bursts</b> (red gate location on a Mythos card): if the location has an elder sign token (a seal), the seal bursts — the token is removed and a gate/monster appear, but NO doom token is added and bursting the seal is not a monster surge. Whenever a gate burst is drawn, all flying monsters also move. If the location already has an open gate, it is a normal monster surge (FAQ p.26). Flying monsters move even if the burst is prevented (e.g. by Kate Winthrop).", when: c => ["dunwich", "kingsport", "blackgoat", "innsmouth", "lurker", "miskatonic"].some(c.has), tag: c => ["miskatonic", "lurker", "innsmouth", "blackgoat", "kingsport", "dunwich"].find(c.has) },
       { t: "<b>Alternate-gate</b> Mythos cards: the gate (and any burst) uses the upper location; the lower one is used only if the upper is on an expansion board not in play. A Clue token for a location on a board not in play is ignored. When a card offers two Clue locations, use the first if its board is in play, otherwise the second.", when: c => c.has("miskatonic"), tag: "miskatonic", src: "Miskatonic p.4" }
@@ -479,12 +514,21 @@ AH.howToPlay = {
       { t: "<b>Touring Performance:</b> don’t shuffle a Location deck before an Arkham encounter. Take its top card, resolve it, then put it face up on the bottom. Only after going through the whole deck do you turn the cards face down and shuffle.", src: "KiY p.2", when: c => c.mod("kiyTouring"), tag: "kingyellow" }
     ]},
     { id: "lurkerPacts", when: c => c.mod("heraldLurker"), h: "Dark Pacts & Reckonings", tag: "lurker", items: [
-      "Dark Pacts (Blood Pact, Soul Pact, Bound Ally) grant power via <b>Power tokens</b> but expose you to the <b>Reckoning</b> deck.",
+      { t: "Dark Pacts (Blood Pact, Soul Pact, Bound Ally) grant power via " + AH.icon("power-token", "Power token") + " <b>Power tokens</b> but expose you to the <b>Reckoning</b> deck.", src: "Lurker p.1" },
       "Knocked-out or insane investigators keep their Dark Pacts and Power tokens; a <b>devoured</b> investigator loses them all.",
       { t: "If no Power tokens are left, effects that would give them are ignored; if there aren’t enough for everyone, the first player chooses who receives them first. Once the final battle begins you can no longer gain Power tokens, but you may still spend them as your Blood or Soul Pact allows (FAQ).", src: "Lurker p.2 · FAQ p.40–41" }
     ]},
     { id: "lurkerGatesPlay", when: c => c.mod("lurkerGates"), h: "Attribute Gate Markers", tag: "lurker", items: [
-      "Each Lurker Gate marker adds an attribute: <b>Devouring</b> (devours an investigator it opens on), <b>Gate of Doom</b> (+1 doom if it opens on an investigator), <b>Endless</b> (reshuffled, never a trophy), <b>Monstrous / Blood / Madness</b> (penalty on a failed close), <b>Moving</b> (moves like a monster on its symbol), and <b>Split</b> (two Other Worlds).",
+      { t: "Lurker Gate markers work exactly like the Gate markers they replace, but each has one added attribute: the rule for the icon it shows below, or the Split rule for a marker that shows two Other Worlds:" +
+          "<ul class=\"aid-icons\">" +
+          AH.iconItem("gate-devouring", "Devouring Gate", "<b>Devouring Gate</b> — an investigator in its location when it opens is devoured.") +
+          AH.iconItem("gate-doom", "Gate of Doom", "<b>Gate of Doom</b> — if an investigator is in its location when it opens, add a doom token to the doom track.") +
+          AH.iconItem("gate-endless", "Endless Gate", "<b>Endless Gate</b> — can’t be collected as a Gate trophy; each time it is closed or sealed, reshuffle it into the Gate marker stack.") +
+          AH.iconItem("gate-monstrous", "Monstrous Gate", "<b>Monstrous Gate</b> — fail your check to close it and a monster appears in your location (if that would exceed the monster limit, the first player places it in the Outskirts instead).") +
+          AH.iconItem("gate-blood", "Gate of Blood", "<b>Gate of Blood</b> — fail your check to close it and lose 1 Stamina.") +
+          AH.iconItem("gate-madness", "Gate of Madness", "<b>Gate of Madness</b> — fail your check to close it and lose 1 Sanity.") +
+          AH.iconItem("gate-moving", "Moving Gate", "<b>Moving Gate</b> — when its dimension symbol moves, the gate moves like a normal monster (see below).") +
+          "</ul>A <b>Split</b> gate is marked by two Other Worlds on the marker instead (see below).", src: "Lurker p.1–2" },
       { t: "<b>Moving gate:</b> when its dimension symbol moves, it moves like a normal monster (the first player orders several), even in the Mythos Phase it opened. It ignores investigators, never moves into a space that already has a gate or a vortex, and does not normally move into a location that could legally hold an elder sign. Moving onto an investigator pulls them through; moving away from one who explored it costs the explored token.", src: "Lurker p.2 · FAQ p.40" },
       { t: "<b>Split gate:</b> when drawn through, choose either Other World. Returning from either lets you close it (you needn’t explore both). Closing it returns monsters with EITHER dimension symbol in Arkham, the Sky and the Outskirts to the cup.", src: "Lurker p.2" },
       "A gate may only be <b>sealed</b> on an unstable location; a gate that ends up in a street or stable location can be closed but not sealed."
@@ -503,7 +547,7 @@ AH.howToPlay = {
       { t: "If Yog-Sothoth is the Ancient One and awakens while the Dunwich Horror is on the board, his combat modifier increases by 3 (to –8) and he gets 5 extra doom tokens on his doom track (17 in all).", src: "Miskatonic p.4" }
     ]},
     { id: "kiyHerald", when: c => c.mod("heraldKiY"), h: "The King in Yellow (Herald)", tag: "kingyellow", items: [
-      "Whenever the terror level rises, choose: put a Yellow Sign token on the Ancient One’s doom track (it acts just like a doom token) or on the terror track in the space the terror marker just left. The Herald sheet gives the full effects.",
+      { t: "Whenever the terror level rises, choose: put a " + AH.icon("yellow-sign-token", "Yellow Sign token") + " Yellow Sign token on the Ancient One’s doom track (it acts just like a doom token) or on the terror track in the space the terror marker just left. The Herald sheet gives the full effects.", src: "KiY p.1–2" },
       "A Yellow Sign placed on the terror track makes the first player draw a Blight card and put it into play next to the Herald sheet. Once in play, a Blight can never be got rid of.",
       { t: "If a location encounter mentions by name a person on a Blight card in play, ignore the encounter and lose 1 Sanity or 1 Stamina (your choice). An encounter that doesn’t name the person, or uses the name for something else, is not ignored. Mythos cards are unaffected. If the Ancient One awakens, return the Herald sheet to the box.", src: "KiY p.2 · FAQ p.27 · Miskatonic p.3" }
     ]},
@@ -548,8 +592,8 @@ AH.faq = [
     src: "Miskatonic p.3 (step 4 note)",
     when: c => c.has("kingyellow") && c.has("miskatonic") },
   { q: "With the original (non-revised) Curse of the Dark Pharaoh and Miskatonic Horror, what do we use?",
-    a: "Miskatonic Horror is built for the REVISED Curse. With the original edition, use only the new Exhibit Item cards and box the rest of the Pharaoh-icon Miskatonic cards.",
-    src: "Miskatonic p.3 (step 2 note)",
+    a: "Miskatonic Horror is built for the REVISED Curse. With the original edition, use only the new Exhibit Item cards and box the rest of the Miskatonic cards marked with the " + AH.icon("exp-curse", "Dark Pharaoh (Revised)") + " Dark Pharaoh (Revised Edition) expansion icon.",
+    src: "Miskatonic p.2 (Expansion Icons) · p.3 (step 2 note)",
     when: c => c.has("curse") && c.has("miskatonic") },
   { q: "Does an investigator drawn through a gate during an encounter also get delayed?",
     a: "Yes — being drawn through a gate that appears from an encounter (‘A gate appears!’) delays you just like a Mythos-Phase gate.",

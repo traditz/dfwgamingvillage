@@ -388,6 +388,13 @@ section > h2::after {                     /* the glowing light rule after every 
   .ref-body ul.bag-list > li { gap: 11px; }
   .bag-token { flex-basis: 38px; width: 38px; height: 38px; margin-top: -5px; }
 }
+/* Rulebook icons in the reference (css/icons.css, icons standard v1): sized up to match the bag tokens above, so the
+   hex Exploration tokens and Turret Status tokens stay legible. The icons are drawn for the rulebook's dark pages,
+   so no light backdrop (--aid-ic-bg) is used. */
+#reference { --aid-ic-size: 40px; }
+@media (max-width: 600px) { #reference { --aid-ic-size: 36px; } }
+#reference .aid-icon-grid { margin: 8px 0 12px; }
+#reference .aid-icon-grid.die-faces > figure { width: 6.4em; }   /* Combat die: even columns */
 /* numbered lists: "1)" in light blue, as in the rulebook */
 .step-text ol, .ref-body ol, .teach-panel ol { margin: 8px 0 4px; padding-left: 30px; }
 .step-text ol > li, .ref-body ol > li, .teach-panel ol > li { margin-bottom: 6px; padding-left: 4px; }

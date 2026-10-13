@@ -128,6 +128,19 @@ AB.phases = [
     ] }
 ];
 
+/* ---- RULEBOOK ICONS (css/icons.css, DFWGV icons standard v1) ------------------
+   Pictures cropped from the rulebooks into images/icons/ (names and meanings are the text printed beside them):
+   Pearl (Kraken p.5, the crispest print of the base Pearl), Key token / Threat token / Monster token
+   (Base p.3; the rewards legend is Base p.5), Lord Power arrow (Base p.8), Lord Key symbol (the Lord card picture on the
+   Base p.7 legend, taken without its "D" label; meaning Base p.7, p.9), the five Race icons (Ally cards,
+   Base p.11; names Base p.4), kraken Ally icon (Kraken p.3), Nebulis (Kraken p.5), Health point token
+   and Wound token (Leviathan p.2), attack penalties (Leviathan p.4), new-Ally battle icons and the two Monster-token decks
+   (Leviathan p.5), the Outcast Key symbol (De Profundis p.1). Each call names its file literally. */
+AB.ic = (f, alt, cls) => `<img class="aid-ic${cls ? " " + cls : ""}" src="images/icons/${f}.webp" alt="${alt}" title="${alt}">`;
+AB.ici = (f, alt) => `<img class="aid-ic aid-ic-inline" src="images/icons/${f}.webp" alt="${alt}" title="${alt}">`;
+AB.icLi = (f, alt, html, cls) => `<li>${AB.ic(f, alt, cls)}<span>${html}</span></li>`;
+AB.icPair = (f, name, label) => `<span class="aid-pair">${AB.ic(f, name)}<span>${label || name}</span></span>`;
+
 /* ---- REFERENCE SECTIONS ------------------------------------------------------ */
 AB.reference = [
   { id: "turn", title: "Turn Structure",
@@ -147,7 +160,18 @@ ${c.has("leviathan") ? "<p><b>Martial law:</b> to keep more than <b>12 Allies</b
 <ul>
 <li>Reveal Exploration cards one at a time onto the Track, left to right. Each revealed <b>Ally</b> must first be offered to your opponents in clockwise order: the 1st Ally bought this turn costs <b>1 Pearl paid to you</b>, the 2nd costs 2, the 3rd costs 3 — and <b>each opponent may buy only one Ally per turn</b>.</li>
 <li>If nobody buys, either <b>take the Ally yourself for free (ending your turn)</b> or leave it and reveal the next card. An Ally on the <b>last space</b> is still offered to your opponents first; if nobody buys it you must take it and gain 1 bonus Pearl${c.has("leviathan") ? "" : ". A Monster on the last space must be fought, and you gain 1 bonus Pearl on top of the reward"}.</li>
-${!c.has("leviathan") ? `<li>If you reveal a <b>Monster</b>: fight it (automatic victory — take the reward shown for the Threat token's space, return the token to the first space, end your turn) or keep exploring (move the Threat token up one space). Threat rewards climb from 1 Pearl / 1 Monster token up to 2 Keys on the sixth space; Monster tokens are kept facedown and are worth 2–4 IP.</li>` : `<li>If you reveal a <b>Monster</b> (Leviathan rules): choose to <b>fight one Leviathan at the Border</b>, or <b>keep exploring</b> — which forces a new Leviathan onto the Border. Roll both dice for its zone: if the zone is free, place it (health token on top), discard the Monster card, continue. If the zone is occupied, the old Leviathan <b>attacks you first</b> (unavoidable): suffer its printed penalty — Wound tokens (−1 IP each at game end), discard 3 Pearls, discard 3 Allies, or discard one free Lord — then replace it with the newcomer, discard the Monster card and continue exploring.</li>`}
+${!c.has("leviathan") ? `<li>If you reveal a <b>Monster</b>: fight it (automatic victory — take the reward shown at the <span class="ic-nw">${AB.ici("threat-token", "Threat token")} Threat</span> token's space, return the token to the first space, end your turn) or keep exploring (move the Threat token up one space). Threat rewards climb from 1 Pearl / 1 Monster token up to 2 Keys on the sixth space, and some spaces offer a choice between rewards. The rewards:
+<ul class="aid-icons">
+${AB.icLi("pearl", "Pearl", "<b>Pearls</b> — taken from the Treasury.")}
+${AB.icLi("monster-token", "Monster token", "<b>Monster token</b> — drawn at random and kept face down; worth 2, 3 or 4 IP at game end.")}
+${AB.icLi("key-token", "Key token", "<b>Keys</b> — Key tokens; your third Key makes you take a Location.")}
+</ul></li>` : `<li>If you reveal a <b>Monster</b> (Leviathan rules): choose to <b>fight one Leviathan at the Border</b>, or <b>keep exploring</b> — which forces a new Leviathan onto the Border. Roll both dice for its zone: if the zone is free, place it (health token on top), discard the Monster card, continue. If the zone is occupied, the old Leviathan <b>attacks you first</b> (unavoidable): suffer the penalty printed at the lower right of its card, then replace it with the newcomer (health token on top), discard the Monster card and continue exploring. The penalties:
+<ul class="aid-icons ic-tall">
+${AB.icLi("penalty-wounds", "Wound tokens penalty", "<b>Wound tokens</b> — take as many as the Leviathan shows; each costs 1 IP at game end.")}
+${AB.icLi("penalty-pearls", "Discard three Pearls penalty", "<b>Discard three Pearls</b> — all of them if you have fewer; none, no effect.")}
+${AB.icLi("penalty-allies", "Discard three Allies penalty", "<b>Discard three Allies</b> — all of them if you have fewer; none, no effect.")}
+${AB.icLi("penalty-lord", "Discard a free Lord penalty", "<b>Discard one free Lord</b> — Lords already under a Location are protected; none free, no effect.")}
+</ul></li>`}
 <li><b>End of exploration:</b> remaining Allies on the Track go facedown onto their Races' <b>Council</b> stacks${c.has("kraken") ? " (the active player chooses which Council stack each leftover kraken joins)" : ""}; Monsters go to the discard. An exhausted Exploration deck is rebuilt by reshuffling the discard.</li>
 </ul>
 <p class="src-line">Base p.4–6${c.has("kraken") ? " · Kraken p.3" : ""}${c.has("leviathan") ? " · Leviathan p.4" : ""}</p>` },
@@ -156,9 +180,17 @@ ${!c.has("leviathan") ? `<li>If you reveal a <b>Monster</b>: fight it (automatic
     when: (c) => c.has("leviathan"),
     html: () => `
 <ul>
-<li><b>Attack:</b> discard ONE Ally of a Race shown on the Leviathan (a <b>crab always works</b>) and roll ONE die. Attack power = die + Ally value. No Ally of a listed Race? You cannot fight — you must keep exploring and add a Leviathan.</li>
-<li>New Allies help only when they are the Ally you discard to attack, according to their icon: <b>Pearl → +1</b>: after rolling, spend any number of Pearls for +1 Attack each; <b>two dice</b>: roll both dice and keep the higher.</li>
-<li>Power below the Resistance: no effect, gain 1 consolation Pearl. Power ≥ the Resistance: the Leviathan loses 1 Health — or several, if your power meets the <b>sum of consecutive Resistance levels</b>. Each Health lost pays out the printed Monster tokens, chosen freely from either deck (or a mix): base-game tokens are worth 2–4 IP, while the expansion's tokens grant 2–3 Pearls, a Key, or a Council stack — after looking at a new token you may resolve it immediately or hold it face down and reveal it at the start of a later turn, then discard it.</li>
+<li><b>Attack:</b> discard ONE Ally of a Race shown on the Leviathan (a <b><span class="ic-nw">${AB.ici("race-crab", "Crab")} crab</span> always works</b>) and roll ONE die. Attack power = die + Ally value. No Ally of a listed Race? You cannot fight — you must keep exploring and add a Leviathan.</li>
+<li>New Allies help only when they are the Ally you discard to attack, according to their icon:
+<ul class="aid-icons ic-wide-col">
+${AB.icLi("ally-pearl-bonus", "Pearl to +1 icon", "<b>Pearl → +1</b> — after rolling the die, spend as many Pearls as you like: +1 Attack power per Pearl.")}
+${AB.icLi("ally-two-dice", "Two dice icon", "<b>Two dice</b> — roll BOTH dice and count only the higher.")}
+</ul></li>
+<li>Power below the Resistance: no effect, gain 1 consolation Pearl. Power ≥ the Resistance: the Leviathan loses 1 Health (its <span class="ic-nw">${AB.ici("health-token", "Health point token")} Health</span> point token moves to the next space) — or several, if your power meets the <b>sum of consecutive Resistance levels</b>. Each Health lost pays out the printed Monster tokens, chosen freely from either deck (or a mix):
+<ul class="aid-icons ic-tokens">
+${AB.icLi("monster-tokens-base", "Base-game Monster tokens", "<b>Base-game tokens</b> — worth 2 to 4 IP.", "ic-wide")}
+${AB.icLi("monster-tokens-leviathan", "Leviathan Monster tokens", "<b>Leviathan's new tokens</b> — depending on the token, 2–3 Pearls, a Key, or a Council stack. After looking at one you may resolve it immediately or hold it face down and reveal it at the start of a later turn, then discard it.", "ic-wide")}
+</ul></li>
 <li>You may attack the <b>same</b> Leviathan again (only one Leviathan per turn) by discarding a fresh Ally of a listed Race each time; when you stop attacking, <b>your turn ends</b> (no more exploring). Killing it: keep its card faceup in front of you; the kill <b>ends your turn</b> at once. The <b>Scourge of the Abyss</b> figure sits with whoever has the most kills (ties take it from the holder) and is worth <b>+5 IP</b> at game end.</li>
 <li>The Border is never empty: whoever slays the last Leviathan immediately adds a new one (no attack possible from this placement).</li>
 </ul>
@@ -168,32 +200,34 @@ ${!c.has("leviathan") ? `<li>If you reveal a <b>Monster</b>: fight it (automatic
     when: () => true,
     html: (c) => `
 <ul>
+<li><b>The Races</b> — every Ally shows its Race's icon, and a Lord's large cost bubble shows its mandatory Race the same way:
+<p class="aid-icon-row">${AB.icPair("race-squid", "Squid")} ${AB.icPair("race-shellfish", "Shellfish")} ${AB.icPair("race-crab", "Crab")} ${AB.icPair("race-seahorse", "Seahorse")} ${AB.icPair("race-jellyfish", "Jellyfish")}${c.has("kraken") ? " " + AB.icPair("race-kraken", "Kraken", "Kraken (wild)") : ""}</p></li>
 <li><b>Request support from the Council:</b> take one entire Council stack — sight unseen — into your hand.</li>
-<li><b>Recruit:</b> play Allies whose Races and total value meet the Lord's cost — the exact number of different Races shown (the large bubble's Race is mandatory), multiple Allies of a Race allowed, excess value lost. Short on value? Pay <b>1 Pearl per missing point</b> (still at least one Ally of each required Race)${c.has("kraken") ? ", and at most <b>one Nebulis</b>, only once all your Pearls are spent" : ""}.</li>
+<li><b>Recruit:</b> play Allies whose Races and total value meet the Lord's cost — the exact number of different Races shown (the large bubble's Race is mandatory), multiple Allies of a Race allowed, excess value lost. Short on value? Pay <b>1 Pearl per missing point</b> (still at least one Ally of each required Race)${c.has("kraken") ? ", and at most <b>one <span class=\"ic-nw\">" + AB.ici("nebulis", "Nebulis") + " Nebulis</span></b>, only once all your Pearls are spent" : ""}.</li>
 <li><b>Affiliate</b> the lowest-valued Ally you used (your choice on ties) — it stays faceup in front of you for the rest of the game, can no longer be used to recruit, and the strongest affiliated Ally of each Race scores at game end; the rest go to the Exploration discard.${c.has("kraken") ? " <b>Kraken Allies</b> are wild (choose their Race as you play them) but are discarded before affiliation — recruit with only kraken and you affiliate nothing — and each one used or still in hand at game end pays you its printed <b>Nebulis</b>." : ""}</li>
 <li><b>Refill the Court</b> after recruiting: slide the remaining Lords away from the deck (empty spaces end up next to it); with three or more Lords left the gap stays open, with <b>two or fewer you gain 2 Pearls</b> and refill the Court completely${c.has("outcasts") ? " — adding <b>1 Outcast first</b>, then Lords (skip Outcasts once their deck is empty)" : ""}.</li>
-<li>Lord Powers: an arrow = once, on recruitment; no arrow = semi-permanent, until that Lord is slid under a Location (its owner picks when during their turn it applies).</li>
-${c.has("outcasts") ? "<li><b>Outcasts</b> recruit exactly like Lords (some grant a Key on recruitment). Recruiting your <b>2nd Outcast</b> forces a <b>reconquest</b>: take any opponent's Location (never one already held by 2 Outcasts; if none qualifies, the top of the stack) and slide both Outcasts under it. The victim immediately replaces their loss from the top of the stack — Lords under the lost Location slide under the new one." + (c.has("kraken") ? " Reconquering a Kraken <b>Sanctuary</b>: after sliding the Outcasts under it, search the Loot deck as in the Kraken rules; the victim discards the Loot they had gained from it before replacing the Location (an emptied Loot deck can no longer be searched)." : "") + "</li>" : ""}
+<li>Lord Powers: an <span class="ic-nw">${AB.ici("power-arrow", "Arrow")} arrow</span> = once, on recruitment; no arrow = semi-permanent, until that Lord is slid under a Location (its owner picks when during their turn it applies).</li>
+${c.has("outcasts") ? "<li><b>Outcasts</b> recruit exactly like Lords (an Outcast showing the <span class=\"ic-nw\">" + AB.ici("outcast-key", "Key symbol") + " Key</span> symbol gives you a Key token as soon as you recruit it). Recruiting your <b>2nd Outcast</b> forces a <b>reconquest</b>: take any opponent's Location (never one already held by 2 Outcasts; if none qualifies, the top of the stack) and slide both Outcasts under it. The victim immediately replaces their loss from the top of the stack — Lords under the lost Location slide under the new one." + (c.has("kraken") ? " Reconquering a Kraken <b>Sanctuary</b>: after sliding the Outcasts under it, search the Loot deck as in the Kraken rules; the victim discards the Loot they had gained from it before replacing the Location (an emptied Loot deck can no longer be searched)." : "") + "</li>" : ""}
 </ul>
-<p class="src-line">Base p.6–8${c.has("kraken") ? " · Kraken p.3–5" : ""}${c.has("outcasts") ? " · De Profundis p.1–2" : ""}</p>` },
+<p class="src-line">Base p.4, p.6–8${c.has("kraken") ? " · Kraken p.3–5" : ""}${c.has("outcasts") ? " · De Profundis p.1–2" : ""}</p>` },
 
   { id: "locations", title: "Keys & Locations",
     when: () => true,
     html: (c) => `
 <ul>
-<li>Keys come from <b>fighting Monsters</b> (tokens — discarded once used) and <b>Lord cards with a Key symbol</b>. Your <b>third Key</b> forces you to take a Location immediately; over three, you choose which Keys to spend. Ambassadors carry 3 Keys and can claim one alone.</li>
+<li>Keys come from <b>fighting Monsters</b> (<span class="ic-nw">${AB.ici("key-token", "Key token")} Key</span> tokens — discarded once used) and <b>Lord cards with a <span class="ic-nw">${AB.ici("lord-key", "Key symbol")} Key</span> symbol</b>. Your <b>third Key</b> forces you to take a Location immediately; over three, you choose which Keys to spend. Ambassadors carry 3 Keys and can claim one alone.</li>
 <li>Choose a faceup Location — or draw <b>1 to 4</b> from the stack, keep one, and leave the rest faceup for everyone.</li>
 <li>Lords whose Keys you used slide <b>under</b> the Location: their Powers are covered for good, they are no longer “free” (immune to targeting), but their IP still scores.</li>
 ${c.has("kraken") ? `<li><b>Sanctuaries</b> (Cetaceous Cemetery, Abandoned Convoy, Megalodon, Battlefield): on control, draw Loot one card at a time (each card kept scores its number in IP) — a 3 grants a Key, 4 grants 2 Pearls, 5 a Monster token, 6 the top Exploration card (redraw Monsters, moving the Threat token up), 7 nothing. The first card is mandatory; after each card you may stop and keep everything, or draw again. Take each card's reward as it is drawn; if its value matches a card already drawn for this Sanctuary, the search ends and the cards of that value are discarded (rewards already taken are kept). (Loot deck counts: three 3s, four 4s, five 5s, six 6s, seven 7s.)</li>
 <li><b>Sentinels</b> (from the Watcher, Vigil or Lookout): on your turn, reserve a Lord${c.has("outcasts") ? " or an Outcast" : ""} at Court, a Council stack (even an empty one; Allies are still added to it), or a faceup Location — only you may take it. One Sentinel per area of the board; when you claim the reserved element the token returns to you, ready for a new reservation on your next turn.</li>` : ""}
 </ul>
-<p class="src-line">Base p.9${c.has("kraken") ? " · Kraken p.6–7" : ""}${c.has("kraken") && c.has("outcasts") ? " · De Profundis p.2" : ""}</p>` },
+<p class="src-line">Base p.7, p.9${c.has("kraken") ? " · Kraken p.6–7" : ""}${c.has("kraken") && c.has("outcasts") ? " · De Profundis p.2" : ""}</p>` },
 
   { id: "nebulis", title: "Nebulis & Corruption",
     when: (c) => c.has("kraken"),
     html: () => `
 <ul>
-<li>Nebulis are dirty money: each one held at game end costs <b>−1 IP</b>, and the most corrupt player (holder of the <b>Kraken figure</b>) loses <b>5 more</b>. The figure goes to the first player to gain Nebulis and moves to anyone who ties or passes the holder (if several opponents tie, the holder chooses); it returns to the supply if nobody holds Nebulis.</li>
+<li><b><span class="ic-nw">${AB.ici("nebulis", "Nebulis")} Nebulis</span></b>, the black pearls, are dirty money: each one held at game end costs <b>−1 IP</b>, and the most corrupt player (holder of the <b>Kraken figure</b>) loses <b>5 more</b>. The figure goes to the first player to gain Nebulis and moves to anyone who ties or passes the holder (if several opponents tie, the holder chooses); it returns to the supply if nobody holds Nebulis.</li>
 <li><b>Spending:</b> when paying Pearls (buying an Ally on someone's turn, topping up a recruitment) you may include <b>one and only one Nebulis</b> — and only if you're also spending <b>all</b> of your Pearls (or have none). Never usable to Plot at Court. The Smugglers guild bends these rules card by card.</li>
 </ul>
 <p class="src-line">Kraken p.4–5</p>` },
@@ -204,10 +238,10 @@ ${c.has("kraken") ? `<li><b>Sanctuaries</b> (Cetaceous Cemetery, Abandoned Convo
 <ul>
 <li><b>Triggers:</b> a player recruits their <b>7th Lord${c.has("outcasts") ? " and/or Outcast (combined)" : ""}</b>, or the Court can't be fully refilled${c.has("leviathan") ? ", or at the end of a turn the <b>Leviathan deck</b> or <b>either Monster-token deck</b> is empty (Monsters revealed while exploring in the last turns are discarded without effect)" : ""}. The active player finishes normally, then everyone else gets one last turn.</li>
 <li>Then each player <b>affiliates the lowest-value Ally of each Race</b> still in hand — the rest are discarded${c.has("kraken") ? " (kraken Allies pay out their Nebulis instead and never affiliate)" : ""}.</li>
-<li><b>Score:</b> Locations + Lords${c.has("outcasts") ? " + Outcasts" : ""} + the strongest affiliated Ally of each Race + Monster tokens${c.has("leviathan") ? " − 1 IP per Wound token + 5 IP for the Scourge of the Abyss" : ""}${c.has("kraken") ? " + Loot cards kept − 1 IP per Nebulis (−5 more for the most corrupt)" : ""}.</li>
+<li><b>Score:</b> Locations + Lords${c.has("outcasts") ? " + Outcasts" : ""} + the strongest affiliated Ally of each Race + Monster tokens${c.has("leviathan") ? " − 1 IP per <span class=\"ic-nw\">" + AB.ici("wound-token", "Wound token") + " Wound</span> token + 5 IP for the Scourge of the Abyss" : ""}${c.has("kraken") ? " + Loot cards kept − 1 IP per Nebulis (−5 more for the most corrupt)" : ""}.</li>
 <li><b>Ties:</b> most Pearls, then highest-value Lord${c.has("outcasts") ? " or Outcast" : ""}.</li>
 </ul>
-<p class="src-line">Base p.10${c.has("kraken") ? " · Kraken p.3–4, p.7" : ""}${c.has("leviathan") ? " · Leviathan p.7" : ""}${c.has("outcasts") ? " · De Profundis p.2" : ""}</p>` },
+<p class="src-line">Base p.10${c.has("kraken") ? " · Kraken p.3–4, p.7" : ""}${c.has("leviathan") ? " · Leviathan p.2, p.7" : ""}${c.has("outcasts") ? " · De Profundis p.2" : ""}</p>` },
 
   { id: "clarif", title: "Card Clarifications",
     when: () => true,

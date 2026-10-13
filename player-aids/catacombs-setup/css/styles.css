@@ -555,6 +555,15 @@ li::marker { color: var(--teal); }
   border-top: 1px dashed var(--rule-soft);
 }
 .ref-body .src-line::before { display: inline; content: "Source · "; }
+/* Rulebook icons (css/icons.css). The tokens carry fine painted detail, so the reference shows them a little
+   larger than the 32px default (the crops are 64px tall). The Token Reference Guide prints Prince/Princess as two
+   tokens side by side, so that one picture (.ic-wide) keeps its own width instead of the single-token icon column.
+   The two Underworld feature lists print wide room and token pictures (chute room, Imp Assistant token, artifact
+   enhancers, fate room), so those lists (.ic-wide-col) get a wider icon column: every picture keeps its full height
+   and the text still starts on one line. */
+#reference { --aid-ic-size: 36px; }
+#reference ul.aid-icons > li > .aid-ic.ic-wide { width: auto; }
+#reference ul.aid-icons.ic-wide-col > li > .aid-ic { width: calc(var(--aid-ic-size, 32px) * 1.7); }
 
 /* =============================================================================
    SEARCH

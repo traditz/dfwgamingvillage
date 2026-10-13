@@ -491,6 +491,9 @@ main { position: relative; z-index: 1; }
 }
 .ref-body h4:first-child { margin-top: 0; }
 .ref-body p { margin-bottom: 9px; max-width: 76ch; }
+.ref-body p.aid-icon-row { max-width: none; margin-top: 6px; }   /* rulebook icon rows (css/icons.css) use the full width */
+.step-text p.aid-icon-row { max-width: none; margin: 6px 0 2px; }  /* board-label icon rows in setup steps */
+.ref-body ul.aid-icons.aid-icons > li > .aid-ic { width: calc(var(--aid-ic-size, 32px) * 2.1); }   /* wide monarch glyphs (Mother Hydra 130x64) keep the full 32px height */
 .ref-body b { color: var(--ink-head); }
 .ref-body i { color: var(--ink); }
 .note { font-size: 1rem; color: var(--ink-2); }

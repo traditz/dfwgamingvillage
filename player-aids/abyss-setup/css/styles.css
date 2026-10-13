@@ -531,3 +531,17 @@ section h2::after { /* the rod runs in from the page edge, under the pearl, and 
   --comp-line: #5f7d88; --comp-accent: var(--teal); --comp-accent-ink: #ffffff;
   --comp-head-font: "IM Fell English", "Iowan Old Style", Georgia, serif; --comp-radius: 4px;
 }
+
+/* Rulebook icons in the rules reference (css/icons.css, icons standard v1). The page is light, so no icon
+   backdrop is needed. Icon lists sit inside a bullet; the Leviathan attack penalties are tall strips, shown a
+   little larger; the new-Ally battle icons and the Monster-token pairs are printed wider than one token, so
+   they keep their own width (one shared column for the battle icons so both texts line up). The Monster-token
+   pairs show at 48px so the small 'L' on the Leviathan token's back can be read. */
+.ref-body ul.aid-icons { margin: 8px 0 4px; }
+.ref-body li > p.aid-icon-row { margin: 8px 0 2px; max-width: none; }
+.ref-body ul.aid-icons.ic-tall { --aid-ic-size: 44px; }
+.ref-body ul.aid-icons.ic-tall > li > .aid-ic { width: 34px; }
+.ref-body ul.aid-icons.ic-wide-col > li > .aid-ic { width: 84px; object-position: left center; }
+.ref-body ul.aid-icons > li > .aid-ic.ic-wide { width: auto; }
+.ref-body ul.aid-icons.ic-tokens { --aid-ic-size: 48px; }
+.ref-body .ic-nw { white-space: nowrap; }

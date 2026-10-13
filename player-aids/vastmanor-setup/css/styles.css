@@ -386,6 +386,9 @@ section h2 {
 .ref-body ul { margin-bottom: 12px; }
 .ref-body li ul { margin-top: 5px; margin-bottom: 4px; }
 .ref-body li ul > li::before { content: "▹"; font-size: .8em; top: .3em; }
+.ref-body .aid-icon-grid { margin: 8px 0 10px; }   /* rulebook marker pictures (css/icons.css) */
+.ref-body ul.aid-icons { margin-top: 8px; }
+.ic-nw { white-space: nowrap; }   /* an inline rulebook icon stays on the line of the word it marks */
 .ref-table { width: 100%; border-collapse: collapse; margin: 8px 0 14px; font-size: 1rem; line-height: 1.5; }
 .ref-table th, .ref-table td { border: 1px solid var(--line); padding: 7px 10px; text-align: left; vertical-align: top; }
 .ref-table thead th {

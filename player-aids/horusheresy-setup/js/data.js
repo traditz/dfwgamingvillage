@@ -95,6 +95,19 @@ HH.li = function (c, s, html) {
     "<span class='who who-" + s + "'>" + HH.sideName[s] + (mine ? " · you" : "") + "</span> " + html + "</li>";
 };
 
+// Rulebook icons (DFWGV icons standard v1, css/icons.css): cropped from the rulebook into images/icons/.
+// Call with the full literal file name, e.g. HH.ic("phase-event", "Event Phase"); alt = the icon's printed name.
+HH.ic = function (f, alt) {
+  return "<img class='aid-ic' src='images/icons/" + f + ".webp' alt='" + alt + "' title='" + alt + "'>";
+};
+HH.ici = function (f, alt) {   // inline, inside a sentence or a table cell
+  return "<img class='aid-ic aid-ic-inline' src='images/icons/" + f + ".webp' alt='" + alt + "' title='" + alt + "'>";
+};
+// inline icon + the name printed beside it, kept on one line so a wrap never strands the icon from its label
+HH.icl = function (f, alt, label) {
+  return "<span class='ic-nw'>" + HH.ici(f, alt) + " " + label + "</span>";
+};
+
 // Initiative track as pictured on the game board (Rules p.14 strip = spaces 1–19; p.38 board = all 34).
 HH.track = ["start", "", "E", "", "", "E", "O", "", "E", "R", "", "E", "O", "", "E", "R", "S", "E", "O", "",
             "E", "R", "", "E", "O", "", "E", "R", "", "E", "O", "R", "", "V"];
@@ -252,7 +265,7 @@ HH.phases = [
                  "<li>…with the <b>experienced player controlling the Traitor</b>, so the new player commands the Imperium.</li>";
           } else {
             d += "<li>Choose a scenario and sides by one of three methods:<ol>" +
-                 "<li><b>Agree the scenario, draw for sides.</b> Shuffle the bombardment deck, pick one player and reveal the top card. An <b>Imperial Eagle</b> makes that player Imperial; a <b>Chaos Star</b> makes him the Traitor.</li>" +
+                 "<li><b>Agree the scenario, draw for sides.</b> Shuffle the bombardment deck, pick one player and reveal the top card. An " + HH.icl("imperial-eagle", "Imperial Eagle", "<b>Imperial Eagle</b>") + " makes that player Imperial; a " + HH.icl("chaos-star", "Chaos Star", "<b>Chaos Star</b>") + " makes him the Traitor.</li>" +
                  "<li><b>Flip a coin.</b> The winner chooses any scenario; the loser then chooses which side to control.</li>" +
                  "<li><b>Simply agree</b> on a scenario and sides.</li></ol></li>" +
                  "<li>This page is set to <b>Scenario " + s.n + ": “" + s.name + "”</b> (Scenarios " + s.pg + "). " + s.premise + " Pick another under Scenario, above.</li>";
@@ -260,7 +273,7 @@ HH.phases = [
           d += "<li>The Scenario Guide’s six scenarios each have their own unit setup, event deck, corruption and bombardment; the steps below are this scenario’s. The rulebook’s general setup still applies, and every scenario uses the rulebook’s victory conditions.</li></ul>";
           return d;
         },
-        src: (c) => "Rules p.12 · p.9 · Scenarios p.2" + (c.mode === "veteran" && c.scen !== "bab" ? ", " + HH.sc(c).pg : ", p.3") },
+        src: (c) => "Rules p.12 · " + (c.mode === "veteran" ? "p.5, " : "") + "p.9 · Scenarios p.2" + (c.mode === "veteran" && c.scen !== "bab" ? ", " + HH.sc(c).pg : ", p.3") },
       { when: () => true, who: "table",
         t: "Assemble the board",
         d: "<ul><li>Lay the plastic <b>fortifications</b> (<b>3 factories, 6 fortresses and the palace</b>) on the table in the rough arrangement shown in the rulebook’s diagram, matching the holes in the board.</li>" +
@@ -399,11 +412,11 @@ HH.phases = [
         t: (c) => "Corruption: " + HH.sc(c).corr + " draws",
         d: (c) => "<ul>" + HH.li(c, "trt", "makes <b>" + HH.sc(c).corr + " corruption draws</b>. For each:<ol>" +
           "<li>Choose an <b>Imperial Army</b> or <b>Imperial Tank Division</b> on the main map board. They are the only unit types that can be corrupted, and each Imperial unit can be put in jeopardy only <b>once</b> during setup.</li>" +
-          "<li>Draw the top <b>bombardment card</b>. <b>Imperial Eagle</b>: no effect. <b>Chaos Star</b>: the unit is corrupted.</li>" +
+          "<li>Draw the top <b>bombardment card</b>. " + HH.icl("imperial-eagle", "Imperial Eagle", "<b>Imperial Eagle</b>") + ": no effect. " + HH.icl("chaos-star", "Chaos Star", "<b>Chaos Star</b>") + ": the unit is corrupted.</li>" +
           "<li>Move a corrupted unit’s figure from its gray base onto a <b>black Traitor base</b> (rank I for an Army, rank II for a Tank Division). It stays in the same area and is now a Traitor unit. The gray base goes to the Imperial stockpile. Discard the drawn card.</li></ol>") +
           "<li>Only the <b>12 spare black bases</b> (8 rank I for Armies, 4 rank II for Tank Divisions) can be used; bases can’t be borrowed from other Traitor units. With none of the right rank left, that unit type can’t be corrupted.</li>" +
           HH.li(c, "imp", "watches which of his Armies and Tank Divisions change sides.") + "</ul>",
-        src: (c) => "Scenarios " + HH.scPage(c) + " · Rules p.13, p.37" },
+        src: (c) => "Scenarios " + HH.scPage(c) + " · Rules p.5, p.13, p.37" },
       { when: () => true, who: "trt",
         t: (c) => "Bombardment: " + HH.sc(c).bomb + " orbital bombardments",
         d: (c) => "<ul>" + HH.li(c, "trt", "makes <b>" + HH.sc(c).bomb + " orbital bombardments</b>. For each:<ol>" +
@@ -419,7 +432,7 @@ HH.phases = [
       { when: () => true, who: "both",
         t: "Order card setup",
         d: (c) => "<ul>" +
-          "<li>Each player removes all of his <b>starting orders</b> from his order deck. They have a <b>green skull icon</b> in the lower left corner, and by default they are his <b>starting hand</b>.</li>" +
+          "<li>Each player removes all of his <b>starting orders</b> from his order deck. They have a " + HH.icl("starting-order", "Starting order icon", "<b>green skull icon</b>") + " in the lower left corner, and by default they are his <b>starting hand</b>.</li>" +
           HH.li(c, "trt", "places exactly <b>4</b> of his <b>Port Landing</b> and/or <b>Drop Pods</b> starting orders, in any combination, on the strategic map at no initiative cost, in any region(s) he chooses. " +
             (c.scen === "lug" ? "He returns his other Port Landing and Drop Pods starting orders to his order deck." : "He shuffles his other Port Landing and Drop Pods starting orders into his order deck.")) +
           (c.scen === "lug" ? "<li>Then each player chooses <b>any 4 order cards</b> from his order deck and adds them to his starting hand.</li>" +
@@ -461,11 +474,11 @@ HH.reference = [
     when: () => true,
     html: (c) => "<p><b>Every victory condition is immediate:</b> the game ends the moment one is met, even mid-action and before any special phases.</p><ul>" +
       "<li><b>Death of the Emperor or of Horus.</b> If the Emperor is eliminated, the Traitor wins. If Horus is eliminated, the Imperial player wins.</li>" +
-      "<li><b>Spaceport victory (either player).</b> Once at least one initiative marker has moved onto or past the <b>Spaceport Victory</b> space, a player wins by being the only side with units on all four spaceports: <b>Eternity Wall Spaceport, Lions Gate Spaceport, Spaceport Damocles</b> and <b>Spaceport Primus</b>.<ul>" +
+      "<li><b>Spaceport victory (either player).</b> Once at least one initiative marker has moved onto or past the " + HH.icl("space-spaceport-victory", "Spaceport Victory Possible", "<b>Spaceport Victory</b>") + " space, a player wins by being the only side with units on all four spaceports: <b>Eternity Wall Spaceport, Lions Gate Spaceport, Spaceport Damocles</b> and <b>Spaceport Primus</b>.<ul>" +
         "<li>A spaceport with units of both sides, or with no units at all, blocks this for both players.</li>" +
         "<li>Heroes are not units, so an unsupported Hero doesn’t hold a spaceport.</li>" +
         "<li>If you already hold all four when a marker reaches that space, you win at once in that advance initiative marker step.</li></ul></li>" +
-      "<li><b>Imperial hold-out victory.</b> If either initiative marker moves onto the last space of the track (“Imperial Victory”), the Imperial player wins: relief legions have arrived.</li></ul>" +
+      "<li><b>Imperial hold-out victory.</b> If either initiative marker moves onto the last space of the track, " + HH.icl("space-imperial-victory", "Imperial Victory", "“Imperial Victory”") + ", the Imperial player wins: relief legions have arrived.</li></ul>" +
       "<ul><li>All six scenarios share these victory conditions." +
         (c.scen === "ffb" ? " In <b>Fortune Favors the Bold</b> the book warns that the hold-out victory is imperiled: both players should read the event card <b>The Warp Claims a Mighty Armada</b> before the game begins." : "") + "</li></ul>",
     src: (c) => "Rules p.2, p.39–41 · Scenarios p.2" + (c.scen === "ffb" ? ", p.8" : "")
@@ -541,22 +554,27 @@ HH.reference = [
     html: (c) => "<div class='tbl-wrap'><table class='ref-tbl'><thead><tr><th scope='col'>Action</th><th scope='col'>Cost</th><th scope='col'>What you do</th></tr></thead><tbody>" +
       "<tr><th scope='row'>Place an order</th><td>1</td><td>Put an order card from your hand <b>facedown</b> on top of one of the 7 order stacks.</td></tr>" +
       "<tr><th scope='row'>Execute order from strategic map</th><td>1</td><td>Execute one of <b>your</b> orders from the top of a stack, whatever its printed cost. <b>Not</b> one placed since the most recent change of initiative.</td></tr>" +
-      "<tr><th scope='row'>Execute order from hand</th><td>0–3</td><td>Pay one point per cost icon on the card and execute it in the region of your choice. Its strategic effect is ignored.</td></tr>" +
+      "<tr><th scope='row'>Execute order from hand</th><td>0–3</td><td>Pay one point per " + HH.icl("cost-skull", "Cost icon", "cost icon") + " on the card and execute it in the region of your choice. Its strategic effect is ignored.</td></tr>" +
       "<tr><th scope='row'>Bury an order</th><td>1</td><td>Move the top card of any stack (yours or your opponent’s) to the bottom of that stack, without looking at it.</td></tr>" +
       "<tr><th scope='row'>Draw an order</th><td>1</td><td>Take one card of your choice from your reserve, or the top card of your order deck. Not allowed with six order cards in hand.</td></tr>" +
       "</tbody></table></div>" +
       "<ul><li>You may always ignore an executed order’s effects. You still pay the cost, but place no activation markers.</li>" +
-      "<li>An executed order goes to your discard pile, or to your <b>reserve</b> if it has the recycle symbol.</li>" +
+      "<li>An executed order goes to your discard pile, or to your <b>reserve</b> if it has the " + HH.icl("recycle", "Recycle symbol", "recycle symbol") + ".</li>" +
       (HH.scIs(c, "ffb", "cha") ? "<li><b>" + HH.sc(c).name + ":</b> when you place an order or execute one (from the map or from hand), you may spend one of your special tokens to cut that cost by 1, to a minimum of 0. One token per placement or execution; a spent token is gone for good.</li>" : "") +
       "</ul>",
-    src: (c) => "Rules p.14, p.18–20, p.44" + (HH.scIs(c, "ffb", "cha") ? " · Scenarios p.8" + (c.scen === "cha" ? ", p.10" : "") : "")
+    src: (c) => "Rules p.14, p.17–20, p.44" + (HH.scIs(c, "ffb", "cha") ? " · Scenarios p.8" + (c.scen === "cha" ? ", p.10" : "") : "")
   },
   {
     title: "Initiative track & special phases",
     when: () => true,
-    html: (c) => "<p>The track as pictured in the rulebook (34 spaces). The board’s <b>Order Phase</b> icon is the draw orders phase (the index equates them).</p>" + HH.trackHtml() +
-      "<ul><li>That is <b>10 Event</b>, <b>5 Draw Orders</b> and <b>5 Refresh</b> icons, <b>Spaceport Victory</b> on space 17 and <b>Imperial Victory</b> on space 34.</li>" +
-      "<li>Each space’s special phase happens <b>once per game</b>: the first round in which a marker moves past or onto it. A marker reaching an icon that has already been triggered has no effect.</li>" +
+    html: (c) => "<p>The track as pictured in the rulebook (34 spaces).</p>" + HH.trackHtml() +
+      "<h4>The track’s icons</h4><ul class='aid-icons'>" +
+      "<li>" + HH.ic("phase-event", "Event Phase") + "<span><b>Event Phase</b> — 10 spaces: an event phase.</span></li>" +
+      "<li>" + HH.ic("phase-order", "Order Phase") + "<span><b>Order Phase</b> — 5 spaces: a <b>draw orders</b> phase (the rulebook’s index equates the two names).</span></li>" +
+      "<li>" + HH.ic("phase-refresh", "Refresh Phase") + "<span><b>Refresh Phase</b> — 5 spaces: a refresh phase.</span></li>" +
+      "<li>" + HH.ic("space-spaceport-victory", "Spaceport Victory Possible") + "<span><b>Spaceport Victory Possible</b> — space 17: once either marker reaches it, both players can win a spaceport victory (see Winning the game).</span></li>" +
+      "<li>" + HH.ic("space-imperial-victory", "Imperial Victory") + "<span><b>Imperial Victory</b> — space 34, the last: when either marker reaches it, the Imperial player wins.</span></li></ul>" +
+      "<ul><li>Each space’s special phase happens <b>once per game</b>: the first round in which a marker moves past or onto it. A marker reaching an icon that has already been triggered has no effect.</li>" +
       "<li>Only the <b>current player’s</b> marker triggers <b>special phase</b> icons (Event, Draw orders, Refresh). If a card moves your opponent’s marker onto one, it isn’t resolved. The Spaceport Victory and Imperial Victory spaces are different: they count for <b>any</b> marker that reaches them.</li>" +
       (c.mod("pending") ? "<li><b>Table aid:</b> drop a token on each pending icon until it is resolved.</li>" : "<li>Pending icons can be marked with a spare token until resolved.</li>") + "</ul>" +
       "<h4>Event phase</h4><ul><li>The current player draws the top event card and carries out its instructions.</li>" +
@@ -570,11 +588,12 @@ HH.reference = [
   {
     title: "Orders, regions & the strategic map",
     when: () => true,
-    html: (c) => "<h4>Order card anatomy</h4><ul>" +
-      "<li><b>Cost:</b> skull icons down the left edge, one initiative point each when executed <b>from hand</b>.</li>" +
-      "<li><b>Effect</b>, with the areas it activates in <i>italics</i>. No italic text means nothing is activated.</li>" +
-      "<li><b>Strategic effect:</b> a bonus carried out only when the order is executed <b>from the strategic map</b>.</li>" +
-      "<li><b>Starting order icon</b> (green skull, lower left) and <b>recycle symbol</b> (bottom centre).</li></ul>" +
+    html: (c) => "<h4>Order card anatomy</h4><ul class='aid-icons'>" +
+      "<li>" + HH.ic("cost-skull", "Cost icon") + "<span><b>Cost:</b> skull icons down the left edge, one initiative point each when executed <b>from hand</b>.</span></li>" +
+      "<li>" + HH.ic("starting-order", "Starting order icon") + "<span><b>Starting order icon</b> (green skull, lower left): the order is a starting order, by default part of your starting hand.</span></li>" +
+      "<li>" + HH.ic("recycle", "Recycle symbol") + "<span><b>Recycle symbol</b> (bottom centre): the order is recyclable, so when it is discarded it goes to your reserve instead of your discard pile.</span></li></ul>" +
+      "<ul><li><b>Effect</b>, with the areas it activates in <i>italics</i>. No italic text means nothing is activated.</li>" +
+      "<li><b>Strategic effect:</b> a bonus carried out only when the order is executed <b>from the strategic map</b>.</li></ul>" +
       "<h4>Regions and the seven order stacks</h4><ul>" +
       "<li>The strategic map is a high-level version of the main map. Each <b>region</b> is a group of areas and has an <b>order stack</b>. The strategic map shows six regions: Palace, Imperial Plateau, Crucible, Lions Gate, Volcanus and Black Ministry. The <b>Vengeful Spirit</b> is a seventh region (its two areas); its stack sits beside those areas, top right of the board, not on the strategic map itself.</li>" +
       "<li>A new order goes <b>on top</b> of its stack. Offset it slightly so both players can see the orders underneath." + (c.mod("rotate") ? " <b>Table aid:</b> turn it 90° until the next change of initiative." : "") + "</li>" +
@@ -587,12 +606,17 @@ HH.reference = [
       "<li>Specific rules on cards, in scenarios and in Hero abilities override these general rules.</li></ul>" +
       "<h4>Errata (FAQ)</h4><ul><li><b>Forced March</b> (Traitor): “Activate the destination area.” (not “each destination area”).</li>" +
       "<li><b>Unnatural Vigor</b> (Traitor): effect “Remove a normal activation marker from 1 area in this region.”; strategic effect “Remove 1 normal activation marker from 2 different areas in this region.”</li></ul>",
-    src: () => "Rules p.11, p.17–21 · FAQ p.1"
+    src: () => "Rules p.11, p.13, p.17–21 · FAQ p.1"
   },
   {
     title: "Activation markers",
     when: () => true,
-    html: () => "<ul>" +
+    html: () => "<div class='aid-icon-grid act-grid'>" +
+      "<figure>" + HH.ic("activation-imperial", "Imperial Activation Marker (Activation Side)") + "<figcaption>Imperial<br>activation side</figcaption></figure>" +
+      "<figure>" + HH.ic("rout-imperial", "Imperial Activation Marker (Rout Side)") + "<figcaption>Imperial<br>rout side</figcaption></figure>" +
+      "<figure>" + HH.ic("activation-traitor", "Traitor Activation Marker (Activation Side)") + "<figcaption>Traitor<br>activation side</figcaption></figure>" +
+      "<figure>" + HH.ic("rout-traitor", "Traitor Activation Marker (Rout Side)") + "<figcaption>Traitor<br>rout side</figcaption></figure></div>" +
+      "<ul><li>Each marker’s face shows its side’s <b>activation icon</b>; its back shows a <b>rout icon</b>.</li>" +
       "<li>Executing an order usually <b>activates</b> areas. Put one of your activation markers in each, activation icon up.</li>" +
       "<li>You <b>may not order units in an area that holds one of your activation markers</b> (to move, attack and so on), whether it shows the activation or the rout side.</li>" +
       "<li>Units from an unactivated area may still move <b>into</b> an area you’ve activated. A second marker of the same side is never added to an area.</li>" +
@@ -605,7 +629,7 @@ HH.reference = [
       "<li>Thunderhawk flying movement can’t be used from an activated area.</li>" +
       "<li>Drop Pods and Port Landing can’t take units or Heroes from a Vengeful Spirit area holding a Traitor activation marker.</li>" +
       "<li>Units moved by the Vicissitudes of Chaos event don’t activate their new area.</li></ul>",
-    src: () => "Rules p.16, p.20–21 · FAQ p.1–3"
+    src: () => "Rules p.8, p.16, p.20–21 · FAQ p.1–3"
   },
   {
     title: "Movement & flying",
@@ -652,7 +676,11 @@ HH.reference = [
   {
     title: "Battle 2 · Cards & combat iterations",
     when: () => true,
-    html: () => "<h4>Preparing to fight</h4><ul>" +
+    html: () => "<h4>Combat card anatomy</h4><ul class='aid-icons'>" +
+      "<li>" + HH.ic("shield", "Shield icon") + "<span><b>Shields:</b> the icons down the left edge. Discarded to resist, each cancels 1 regular damage (step 4); shields also pay counter costs (step 2).</span></li>" +
+      "<li>" + HH.ic("free-effect", "Free effect icon") + "<span><b>Free effect icon:</b> printed beside a special effect’s unit requirement, it marks a <b>free effect</b> (step 2).</span></li></ul>" +
+      "<ul><li><b>Attack value</b> (top left), and a <b>special effect</b>: name, unit requirement, free effect icon, effect text and counter cost. A blank part means the card doesn’t have it.</li></ul>" +
+      "<h4>Preparing to fight</h4><ul>" +
       "<li>Each player draws combat cards equal to <b>half the total combat rank of his engaged units, rounded up</b>. For example, III + III + I = 7 gives 4 cards. Some orders add more.</li>" +
       "<li>With at least one engaged Hero, also draw <b>2 Hero combat cards</b>: only 1 if all your engaged Heroes are wounded, and never more than 2 however many Heroes fight.</li>" +
       "<li>Hands start empty every battle, and leftovers are discarded when it ends. Both players can see which cards in a hand are Hero cards.</li>" +
@@ -666,8 +694,7 @@ HH.reference = [
       "<li><b>Active player assigns damage</b> among the enemy’s engaged units as he likes. Only if no engaged enemy units remain may it go to enemy Heroes.</li>" +
       "<li><b>Advance the iteration marker.</b> Past the order’s limit (8 in a coexistence battle), the battle ends. The board’s iteration track doesn’t cap a battle that other rules let run longer.</li></ol>" +
       "<ul><li>Fortified defenders cut the attacker’s regular damage by 2 (or 1) in each of the attacker’s active iterations; see Fortifications.</li>" +
-      "<li>FAQ: the 2 extra cards drawn with <b>Hunker Down</b> can’t be played in that iteration.</li></ul>" +
-      "<h4>Combat card anatomy</h4><ul><li><b>Attack value</b> (top left), <b>shields</b> (icons down the left edge), and a <b>special effect</b>: name, unit requirement, free effect icon, effect text and counter cost. A blank part means the card doesn’t have it.</li></ul>",
+      "<li>FAQ: the 2 extra cards drawn with <b>Hunker Down</b> can’t be played in that iteration.</li></ul>",
     src: () => "Rules p.26–29, p.32–34, p.44 · FAQ p.1, p.3"
   },
   {
@@ -703,12 +730,16 @@ HH.reference = [
   {
     title: "Heroes",
     when: () => true,
-    html: (c) => "<div class='tbl-wrap'><table class='ref-tbl'><thead><tr><th scope='col'>Imperial Heroes</th><th scope='col'>Traitor Heroes</th></tr></thead><tbody>" +
+    html: (c) => {
+      // a primarch's legion, with its legion designator (Rules p.7–8)
+      const leg = (f, n) => "<span class='sub'>" + HH.ici(f, n) + " " + n + "</span>";
+      return "<div class='tbl-wrap'><table class='ref-tbl'><thead><tr><th scope='col'>Imperial Heroes</th><th scope='col'>Traitor Heroes</th></tr></thead><tbody>" +
       "<tr><td>The Emperor</td><td>Warmaster Horus</td></tr>" +
-      "<tr><td>Rogal Dorn (Imperial Fists)</td><td>Angron (World Eaters)</td></tr>" +
-      "<tr><td>Jaghatai Khan (White Scars)</td><td>Fulgrim (Emperor’s Children)</td></tr>" +
-      "<tr><td>Sanguinius (Blood Angels)</td><td>Mortarion (Death Guard)</td></tr>" +
-      "<tr><td>The Fabricator General (of Mars)</td><td>Magnus the Red (Thousand Sons)</td></tr></tbody></table></div><ul>" +
+      "<tr><td>Rogal Dorn" + leg("legion-imperial-fists", "Imperial Fists") + "</td><td>Angron" + leg("legion-world-eaters", "World Eaters") + "</td></tr>" +
+      "<tr><td>Jaghatai Khan" + leg("legion-white-scars", "White Scars") + "</td><td>Fulgrim" + leg("legion-emperors-children", "Emperor’s Children") + "</td></tr>" +
+      "<tr><td>Sanguinius" + leg("legion-blood-angels", "Blood Angels") + "</td><td>Mortarion" + leg("legion-death-guard", "Death Guard") + "</td></tr>" +
+      "<tr><td>The Fabricator General (of Mars)</td><td>Magnus the Red" + leg("legion-thousand-sons", "Thousand Sons") + "</td></tr></tbody></table></div>" +
+      "<ul><li>Each primarch’s legion is shown under his name, with the <b>legion designator</b> that marks that legion’s Space Marines or Chaos Space Marines units.</li>" +
       "<li><b>Heroes are not units.</b> They don’t make an area friendly, don’t count toward stacking limits or spaceports, and can’t be hit by defense lasers or orbital bombardment. They do count as units for movement orders, for the movement part of routing and retreating, and for event card effects.</li>" +
       "<li><b>Entering play:</b> a Hero not placed at setup can be put in whenever his owner may place units from his stockpile, for example with Drop Pods, Port Landing or the event “The Righteous Heed the Call”. This is free and doesn’t use up any unit placement.</li>" +
       "<li><b>Common ability:</b> Hero combat cards (2 per battle; 1 if every engaged Hero on your side is wounded).</li>" +
@@ -719,7 +750,7 @@ HH.reference = [
       "<li><b>Wounded:</b> brings 1 Hero combat card instead of 2 but otherwise works normally. The least-wounded engaged Hero on a side sets the draw. Cards already drawn aren’t put back if a Hero is wounded mid-battle.</li>" +
       "<li><b>Defeated:</b> the Hero is eliminated from the game; his marker goes back to the box.</li>" +
       "<li>Regular damage can be assigned to Heroes only when the passive player has <b>no engaged units left</b>, and so can Thunderhawk bombardment damage (FAQ erratum). Some card effects, such as Lead by Example, damage a Hero directly.</li>" +
-      "<li><b>Hero eliminated in battle:</b> his player draws one bombardment card for <b>each</b> of his units in that area, engaged or not (FAQ). A unit whose card shows the other side’s symbol routs.</li></ul>" +
+      "<li><b>Hero eliminated in battle:</b> his player draws one bombardment card for <b>each</b> of his units in that area, engaged or not (FAQ). A unit routs if its card’s symbol doesn’t match its side: an Imperial unit on a " + HH.icl("chaos-star", "Chaos Star", "<b>Chaos Star</b>") + ", a Traitor unit on an " + HH.icl("imperial-eagle", "Imperial Eagle", "<b>Imperial Eagle</b>") + ".</li></ul>" +
       "<h4>Ability timing when several Heroes fight (FAQ)</h4><ol>" +
       "<li><b>Joining battle:</b> Jaghatai Khan, then the Fabricator General.</li>" +
       "<li><b>Engaging units:</b> Fulgrim, Mortarion, Rogal Dorn, Magnus the Red, Angron.</li>" +
@@ -728,8 +759,9 @@ HH.reference = [
       "<h4>Other FAQ rulings</h4><ul>" +
       "<li>Jaghatai Khan can’t use his ability if his area is already activated.</li>" +
       "<li>Orbital bombardments from abilities or events (Magnus the Red, “The Sky Fortress Rises”) follow all the normal bombardment rules.</li>" +
-      "<li>Rogal Dorn and an Imperial Fists Space Marine defend. The Marine takes 3 damage, then the battle ends with attackers surviving. The attackers can’t move into the target area, because the Marine wasn’t eliminated during the battle; it is eliminated after the battle is resolved.</li></ul>",
-    src: () => "Rules p.7, p.12, p.28–29, p.31–33, p.35–38, p.40 · FAQ p.1–3"
+      "<li>Rogal Dorn and an Imperial Fists Space Marine defend. The Marine takes 3 damage, then the battle ends with attackers surviving. The attackers can’t move into the target area, because the Marine wasn’t eliminated during the battle; it is eliminated after the battle is resolved.</li></ul>";
+    },
+    src: () => "Rules p.5, p.7–8, p.12, p.28–29, p.31–33, p.35–38, p.40 · FAQ p.1–3"
   },
   {
     title: "Fortifications, crevasses & breaches",
@@ -761,7 +793,10 @@ HH.reference = [
       "<li><b>Orbital:</b> a <b>Precise</b> and a <b>Reckless</b> result (damage, “No Effect”, or damage + Breach).</li>" +
       "<li><b>Thunderhawk:</b> e.g. “1 Damage per Thunderhawk”, “2 Damage per Thunderhawk”, or “No Effect”.</li>" +
       "<li><b>Defense laser:</b> a Hit or Miss for <b>1, 2, 3 and 4</b> lasers.</li>" +
-      "<li>An <b>Imperial Eagle</b> or <b>Chaos Star</b>, used to pick a random player or side.</li></ul>" +
+      "<li>An <b>Imperial Eagle</b> or <b>Chaos Star</b>, used to pick a random player or side:</li></ul>" +
+      "<div class='aid-icon-grid'>" +
+      "<figure>" + HH.ic("imperial-eagle", "Imperial Eagle") + "<figcaption><b>Imperial Eagle</b><br>Imperial side</figcaption></figure>" +
+      "<figure>" + HH.ic("chaos-star", "Chaos Star") + "<figcaption><b>Chaos Star</b><br>Traitor side</figcaption></figure></div>" +
       "<div class='tbl-wrap'><table class='ref-tbl'><caption>Example cards printed in the rulebook</caption><thead><tr><th scope='col'>Precise</th><th scope='col'>Reckless</th><th scope='col'>Thunderhawk</th><th scope='col'>Lasers 1 / 2 / 3 / 4</th></tr></thead><tbody>" +
       "<tr><td>1 Damage</td><td>3 Damage</td><td>No Effect</td><td>Miss / Miss / Miss / Miss</td></tr>" +
       "<tr><td>2 Damage</td><td>5 Damage + Breach</td><td>2 per Thunderhawk</td><td>Miss / Miss / Hit / Hit</td></tr>" +
@@ -885,7 +920,7 @@ HH.reference = [
       "<li><b>Lightning Raid</b>, <b>Secret Routes</b>: movement exceptions (see Movement).</li>" +
       "<li><b>Forced March</b>, <b>Unnatural Vigor</b> (Traitor): errata, see Orders.</li>" +
       "<li><b>Surprise Attack</b> (Traitor): an enemy activation marker it lets you place must show its normal activation side, not the rout side (FAQ).</li></ul>" +
-      "<p class='note'>Assault, Assemble, Firefight and Redeploy are pictured with the starting-order icon and the recycle symbol.</p>" +
+      "<p class='note'>Assault, Assemble, Firefight and Redeploy are pictured with the " + HH.icl("starting-order", "Starting order icon", "starting-order icon") + " and the " + HH.icl("recycle", "Recycle symbol", "recycle symbol") + ".</p>" +
       "<h4>Combat & Hero combat cards</h4><ul>" +
       "<li><b>Angels of Death</b> (Imperial; attack 1; Space Marines): eliminate 1 opposing unit regardless of its rank [5 shields counter].</li>" +
       "<li><b>Noose of Ruin</b> (Traitor; attack 1): partly covered in the rulebook’s picture. The visible text (“Chaos S…”, “Eliminate … regardles… [5 shields…”) matches Angels of Death.</li>" +
@@ -955,7 +990,7 @@ HH.reference = [
     html: () => "<ul>" +
       "<li>Orders placed on the strategic map since the last change of initiative can’t be executed until after the next one.</li>" +
       "<li>The strategic bonus only applies when an order is executed from the strategic map.</li>" +
-      "<li>Orders with the recycle symbol go to the reserve, not the discard pile.</li>" +
+      "<li>Orders with the " + HH.icl("recycle", "Recycle symbol", "recycle symbol") + " go to the reserve, not the discard pile.</li>" +
       "<li>Heroes not on the board can be placed whenever their owner may place units.</li>" +
       "<li>Heroes and defense lasers don’t count toward stacking limits.</li>" +
       "<li>Non-flying units pay an extra movement point to cross a crevasse.</li>" +
@@ -967,7 +1002,7 @@ HH.reference = [
       "<li>When a Hero is eliminated in battle, friendly units in his area may rout.</li>" +
       "<li>Fortifications attacked by flying units count as breached while the flyers stay engaged.</li>" +
       "<li>Event movement doesn’t activate areas and ignores earlier activation.</li></ul>",
-    src: () => "Rules p.44"
+    src: () => "Rules p.17, p.44"
   },
   {
     title: "Key terms",
@@ -983,7 +1018,7 @@ HH.reference = [
       "<dt>Current player</dt><dd>The player with initiative this round, who chooses and carries out an action.</dd>" +
       "<dt>Destination · origin · target area</dt><dd>Where moving units may go · where engaged attackers attack from · the area being attacked.</dd>" +
       "<dt>Eliminate (kill) · sacrifice</dt><dd>Remove a unit from play · voluntarily eliminate one of your own.</dd>" +
-      "<dt>Free effect</dt><dd>A special effect with the free effect icon; any number may be used each iteration.</dd>" +
+      "<dt>Free effect</dt><dd>A special effect with the " + HH.icl("free-effect", "Free effect icon", "free effect icon") + "; any number may be used each iteration.</dd>" +
       (HH.scIs(c, "hta", "cha") ? "<dt>Impassible area</dt><dd>" + HH.sc(c).name + ": an area marked with a special token at setup. It can’t be entered, bombarded or affected by anything; functionally, it doesn’t exist.</dd>" : "") +
       "<dt>Neutral · contested · friendly · enemy area</dt><dd>No units · both sides’ units · only your units · only your opponent’s units.</dd>" +
       "<dt>Precise · reckless</dt><dd>The two kinds of orbital bombardment.</dd>" +
@@ -995,7 +1030,7 @@ HH.reference = [
       "<dt>Terra</dt><dd>The main map board except the Vengeful Spirit region.</dd>" +
       "<dt>Unsupported</dt><dd>A Hero with no friendly unit in his area.</dd>" +
       "<dt>Wounded · defeated</dt><dd>Hero damage states: one fewer Hero combat card · removed from the game.</dd></dl>",
-    src: (c) => "Rules p.40–41 · FAQ p.1" + ({ hta: " · Scenarios p.7", ffb: " · Scenarios p.8", cha: " · Scenarios p.7–8, p.10" }[c.scen] || "")
+    src: (c) => "Rules p.27, p.40–41 · FAQ p.1" + ({ hta: " · Scenarios p.7", ffb: " · Scenarios p.8", cha: " · Scenarios p.7–8, p.10" }[c.scen] || "")
   },
   {
     title: "Table aids you’ve agreed on",

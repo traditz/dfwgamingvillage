@@ -618,3 +618,16 @@ main { position: relative; z-index: 1; max-width: 1060px; margin: 0 auto; paddin
   --comp-line: var(--ctl); --comp-accent: var(--navy); --comp-accent-ink: var(--gold);
   --comp-head-font: var(--serif); --comp-radius: 16px;
 }
+
+/* Rulebook icons in the reference (css/icons.css, icons standard v1). The Goal tokens are laid out like the
+   rulebooks' own Goal pages (Base p.28, Cold Waters p.11, Coral Reefs p.13): token on the left, its text on
+   the right, two columns where there's room. Tokens show at 56 px (assets 112 px) so their small numerals read. */
+.ref-body ul.aid-icons.aq-goals {
+  --aid-ic-size: 56px;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); column-gap: 24px;
+  margin: 6px 0 12px;
+}
+.ref-body ul.aid-icons.aq-goals > li { margin-bottom: 8px; }
+
+/* Keep an inline rulebook icon on the same line as the word it labels. */
+.ref-body .aq-nw { white-space: nowrap; }

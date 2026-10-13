@@ -53,8 +53,14 @@ T2.modules = [
     description: "Optional rule within Leaders: play with the Leader counters face down; reveal one only (temporarily) when it uses its special skills.", src: "Hope's End p.3 §2.3" }
 ];
 
+/* ---------------------------------------------------------------- rulebook icons
+   DFWGV icons standard v1 (css/icons.css; files in images/icons/, cropped from the scans: the Rules p.16 planet
+   technology-specialty legend, the Rules p.20 Distant Suns domain table, the Hope's End p.3 Leader abilities).
+   Every call names its file literally; the text label always stays beside the icon. */
+T2.ic = (f, alt) => "<img class='aid-ic' src='images/icons/" + f + ".webp' alt='" + alt + "' title='" + alt + "' loading='lazy'>";
+
 /* ---------------------------------------------------------------- shared facts */
-T2.word = (n) => ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"][n] || String(n);
+T2.word =(n) => ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"][n] || String(n);
 T2.galaxyName = (c) => ({ vortex: "Vortex", snowflake: "Snowflake", gauntlet: "Gauntlet" })[c.galaxy] || "standard";
 
 /* Tile dealing for the standard galaxies (Rules p.3–4 §5.0): the 32 system tiles, minus the ones removed unseen. */
@@ -88,12 +94,13 @@ T2.sales = [["Dreadnought", 4], ["Carrier", 4], ["P.D.S.", 4], ["Cruiser", 3], [
 /* Technology flow-chart — Hope's End p.4 ("comprehensive": the base game's 20 technologies plus Hope's End's 4; the
    sheet does not say which four are new). Colours: Rules p.7 §7.5 (Green Biological, Red Weapons, Blue Propulsion,
    Yellow General); the chart's type icons were matched to these. Requirements traced from the chart's connectors;
-   Graviton Negator's matches the rulebook's own example (Rules p.16 §8.4). */
+   Graviton Negator's matches the rulebook's own example (Rules p.16 §8.4). ic: the chart's type symbol, named by the
+   Rules p.16 §8.4 legend (Warfare/Propulsion/Biological); no source names General's, so it has none. */
 T2.techTypes = [
   { id: "General", colour: "Yellow", cls: "t-yel" },
-  { id: "Biological", colour: "Green", cls: "t-grn" },
-  { id: "Propulsion", colour: "Blue", cls: "t-blu" },
-  { id: "Warfare", colour: "Red", cls: "t-red" }
+  { id: "Biological", colour: "Green", cls: "t-grn", ic: "tech-specialty-biological" },
+  { id: "Propulsion", colour: "Blue", cls: "t-blu", ic: "tech-specialty-propulsion" },
+  { id: "Warfare", colour: "Red", cls: "t-red", ic: "tech-specialty-warfare" }
 ];
 T2.tech = [
   { n: "Enviro Compensator", ty: "General", req: "", eff: "Gain one Influence for every Space Dock you own." },
@@ -122,27 +129,28 @@ T2.tech = [
   { n: "Strategic Mathematics", ty: "Warfare", req: "XRD Transporter AND Assault Cannon", eff: "Immediately after winning a Space Combat, half (round down) of your participating Cruisers may move into an adjacent unoccupied system." }
 ];
 
-/* Distant Suns domain effects — Rules back cover p.20 (with the Lazax special rules, p.19) */
+/* Distant Suns domain effects — Rules back cover p.20 (with the Lazax special rules, p.19). ic = the symbol the
+   back-cover domain table prints beside each effect; its Lazax Survivors disc is printed blank, so it has none. */
 T2.domains = [
-  { n: "Biohazard", eff: "The first Ground Force to land here is always destroyed. The first player to invade successfully can't use the planet's resources next round. Then remove the counter." },
-  { n: "Radioactive", eff: "Kills all Ground Forces of the initial invasion. Remove the counter after that first invasion attempt." },
-  { n: "Settlers", eff: "Roll a die: 7 or more, the settlers are your race; 6 or lower, randomly pick one of the other races in play. The settling race immediately gets two free Ground Forces here. Discard." },
-  { n: "Lazax Survivors", eff: "No one believes you: your influence is zero for one whole round. Discard. (Probing it or razing it has its own special rules — see below.)" },
-  { n: "Wealth", eff: "Receive as many credits as the counter shows. Discard." },
-  { n: "Industrial Society", eff: "The invading player may immediately place a free Spacedock here. Discard." },
-  { n: "New Technology", eff: "Receive 5 × the planet's Influence in credit towards your next technology purchase. Discard." },
-  { n: "Hostile Locals", eff: "The number shown of neutral Ground Forces defend the planet. If they aren't all destroyed in one invasion, the next invasion faces the full number again." },
-  { n: "Wormhole", eff: "A new wormhole opens in space near this planet and links to its partner(s) (Alpha or Beta) like a normal wormhole. Leave the counter in space as a reminder." },
-  { n: "Peaceful Invasion", eff: "No significant problems. Discard." }
+  { n: "Biohazard", ic: "ds-biohazard", eff: "The first Ground Force to land here is always destroyed. The first player to invade successfully can't use the planet's resources next round. Then remove the counter." },
+  { n: "Radioactive", ic: "ds-radioactive", eff: "Kills all Ground Forces of the initial invasion. Remove the counter after that first invasion attempt." },
+  { n: "Settlers", ic: "ds-settlers", eff: "Roll a die: 7 or more, the settlers are your race; 6 or lower, randomly pick one of the other races in play. The settling race immediately gets two free Ground Forces here. Discard." },
+  { n: "Lazax Survivors", ic: null, eff: "No one believes you: your influence is zero for one whole round. Discard. (Probing it or razing it has its own special rules — see below.)" },
+  { n: "Wealth", ic: "ds-wealth", eff: "Receive as many credits as the counter shows. Discard." },
+  { n: "Industrial Society", ic: "ds-industrial-society", eff: "The invading player may immediately place a free Spacedock here. Discard." },
+  { n: "New Technology", ic: "ds-new-technology", eff: "Receive 5 × the planet's Influence in credit towards your next technology purchase. Discard." },
+  { n: "Hostile Locals", ic: "ds-hostile-locals", eff: "The number shown of neutral Ground Forces defend the planet. If they aren't all destroyed in one invasion, the next invasion faces the full number again." },
+  { n: "Wormhole", ic: "ds-wormhole", eff: "A new wormhole opens in space near this planet and links to its partner(s) (Alpha or Beta) like a normal wormhole. Leave the counter in space as a reminder." },
+  { n: "Peaceful Invasion", ic: "ds-peaceful-invasion", eff: "No significant problems. Discard." }
 ];
 
-/* Leaders — Hope's End p.3 */
+/* Leaders — Hope's End p.3 (ic = the symbol printed beside each Leader's abilities) */
 T2.leaders = [
-  { n: "General", fx: ["In a battle during the Invasion Combat Segment, re-roll ONE die roll every round of the battle (several friendly Generals still give only one re-roll).", "Dreadnoughts bombarding a planet that holds an enemy General get −4 to their roll."] },
-  { n: "Admiral", fx: ["In a Space Battle, roll one additional die for the ship the Admiral is on.", "No fleet attacked by a fleet with an Admiral may play Skilled Retreat — unless the retreating fleet also has an Admiral.", "Up to three Dreadnoughts that start and end their movement with an Admiral get +1 movement."] },
-  { n: "Diplomat", fx: ["On a planet about to be invaded, may delay the invasion one turn: the invading Ground Forces return to their fleet and can't attack until next turn. Not usable the turn after, nor on Mecatol Rex. It stops invading Ground Forces, not bombardment (FAQ p.2).", "A fleet with a Diplomat may pass through systems with an opponent's ships — only with that opponent's permission."] },
-  { n: "Agent", fx: ["If an Agent joins an invasion attack, enemy P.D.S. may not fire at the invading Ground Forces.", "May be sacrificed at any time to act as a Sabotage card (then removed from play)."] },
-  { n: "Scientist", fx: ["On any planet outside your home system: use double that planet's resource value in credit towards technology purchases in the Technology Phase.", "Once each round, buy one P.D.S. or one Spacedock for only 5 credits on the Scientist's planet. It is placed on that planet even if the Scientist moves on (FAQ p.2)."] }
+  { n: "General", ic: "leader-general", fx: ["In a battle during the Invasion Combat Segment, re-roll ONE die roll every round of the battle (several friendly Generals still give only one re-roll).", "Dreadnoughts bombarding a planet that holds an enemy General get −4 to their roll."] },
+  { n: "Admiral", ic: "leader-admiral", fx: ["In a Space Battle, roll one additional die for the ship the Admiral is on.", "No fleet attacked by a fleet with an Admiral may play Skilled Retreat — unless the retreating fleet also has an Admiral.", "Up to three Dreadnoughts that start and end their movement with an Admiral get +1 movement."] },
+  { n: "Diplomat", ic: "leader-diplomat", fx: ["On a planet about to be invaded, may delay the invasion one turn: the invading Ground Forces return to their fleet and can't attack until next turn. Not usable the turn after, nor on Mecatol Rex. It stops invading Ground Forces, not bombardment (FAQ p.2).", "A fleet with a Diplomat may pass through systems with an opponent's ships — only with that opponent's permission."] },
+  { n: "Agent", ic: "leader-agent", fx: ["If an Agent joins an invasion attack, enemy P.D.S. may not fire at the invading Ground Forces.", "May be sacrificed at any time to act as a Sabotage card (then removed from play)."] },
+  { n: "Scientist", ic: "leader-scientist", fx: ["On any planet outside your home system: use double that planet's resource value in credit towards technology purchases in the Technology Phase.", "Once each round, buy one P.D.S. or one Spacedock for only 5 credits on the Scientist's planet. It is placed on that planet even if the Scientist moves on (FAQ p.2)."] }
 ];
 
 /* FAQ precedence note: the one FAQ-vs-FAQ contradiction, resolved newest-first */
@@ -505,8 +513,13 @@ T2.reference = [
     html: (c) => "<ul>" +
       "<li>Each player may buy <b>one</b> technology per Technology Phase, for <b>30 credits</b> (the Jol-Nar buy green, gold and blue technology for 20).</li>" +
       "<li>You must already own its <b>requirements</b>, printed on the chit's front: <b>AND</b> = both, <b>OR</b> = either. Example: Graviton Negator requires Assault Cannon OR Dacxive Animators.</li>" +
-      "<li><b>Planet specialties:</b> a planet with a technology symbol by its name lets you subtract its <b>resources</b> from the cost of technology of that colour. Example: two red planets worth 6 resources together → red technology costs 24. No planet has a yellow (General) specialty. Resource modifiers such as Sarween Tools count (FAQ p.5–6).</li>" +
-      "<li>Colours: <span class='t-chip t-grn'>Green · Biological</span> <span class='t-chip t-red'>Red · Weapons</span> <span class='t-chip t-blu'>Blue · Propulsion</span> <span class='t-chip t-yel'>Yellow · General</span></li>" +
+      "<li><b>Planet specialties:</b> a planet with a technology symbol by its name lets you subtract its <b>resources</b> from the cost of technology of that colour. Example: two red planets worth 6 resources together → red technology costs 24. No planet has a yellow (General) specialty. Resource modifiers such as Sarween Tools count (FAQ p.5–6)." +
+        "<p class='aid-icon-row'>" +
+        "<span class='aid-pair'>" + T2.ic("tech-specialty-warfare", "Warfare Technology") + "<span>Warfare Technology (red)</span></span>" +
+        "<span class='aid-pair'>" + T2.ic("tech-specialty-propulsion", "Propulsion Technology") + "<span>Propulsion Technology (blue)</span></span>" +
+        "<span class='aid-pair'>" + T2.ic("tech-specialty-biological", "Biological Technology") + "<span>Biological Technology (green)</span></span>" +
+        "</p></li>" +
+      "<li>Colours: <span class='t-chip t-grn'>Green · Biological</span> <span class='t-chip t-red'>Red · Weapons (Warfare)</span> <span class='t-chip t-blu'>Blue · Propulsion</span> <span class='t-chip t-yel'>Yellow · General</span></li>" +
       "<li>Losing a technology (e.g. to Scientist Assassination) doesn't remove the ones that required it, and you may keep buying as if you still had it (FAQ p.6).</li>" +
       (c.mod("leaders") ? "<li><b>Scientist</b> on any planet outside your home system: you may use <b>double that planet's resource value</b> in credit toward the purchase of technology (of any colour) this Technology Phase.</li>" : "") +
       (c.mod("ds") ? "<li><b>New Technology</b> domain counter: 5 × the planet's influence in credit toward your next technology.</li>" : "") +
@@ -517,7 +530,7 @@ T2.reference = [
     title: "Technology tree (Hope's End flow-chart)",
     when: (c) => c.has("he"),
     html: () => "<p>The Hope's End rules print a comprehensive flow-chart of all <b>24</b> technologies — the base game's 20 plus the expansion's 4 (the sheet doesn't mark which are new). No requirement (—) = you may buy it without owning any other technology.</p>" +
-      T2.techTypes.map(tt => "<h4><span class='t-chip " + tt.cls + "'>" + tt.colour + "</span> " + tt.id + "</h4><div class='tbl-wrap'><table class='tbl tech'><thead><tr><th scope='col'>Technology</th><th scope='col'>Requires</th><th scope='col'>Effect</th></tr></thead><tbody>" +
+      T2.techTypes.map(tt => "<h4 class='tt-head'>" + (tt.ic ? T2.ic(tt.ic, tt.id + " Technology") : "<span class='ic-none' aria-hidden='true'></span>") + "<span class='t-chip " + tt.cls + "'>" + tt.colour + "</span> <span>" + tt.id + "</span></h4><div class='tbl-wrap'><table class='tbl tech'><thead><tr><th scope='col'>Technology</th><th scope='col'>Requires</th><th scope='col'>Effect</th></tr></thead><tbody>" +
         T2.tech.filter(t => t.ty === tt.id).map(t => "<tr><th scope='row'>" + t.n + "</th><td>" + (t.req ? t.req.replace(/ (AND|OR) /, " <b>$1</b> ") : "—") + "</td><td>" + t.eff + "</td></tr>").join("") +
         "</tbody></table></div>").join(""),
     src: () => "Hope's End p.4 · Rules p.7 §7.5, p.16 §8.4 · FAQ p.1"
@@ -570,8 +583,8 @@ T2.reference = [
     title: "Distant Suns — domain counters, probing and razing",
     when: (c) => c.mod("ds"),
     html: (c) => "<ul><li>A Domain Counter takes effect <b>immediately on the first invasion</b> of its neutral planet. Its symbol matches one of these:</li></ul>" +
-      "<div class='tbl-wrap'><table class='tbl'><thead><tr><th scope='col'>Counter</th><th scope='col'>Effect</th></tr></thead><tbody>" +
-      T2.domains.map(d => "<tr><th scope='row'>" + d.n + "</th><td>" + d.eff + "</td></tr>").join("") + "</tbody></table></div>" +
+      "<ul class='aid-icons ds-icons'>" + T2.domains.map(d => "<li>" + (d.ic ? T2.ic(d.ic, d.n) : "<span class='ic-none' aria-hidden='true'></span>") +
+        "<span><b>" + d.n + "</b> — " + d.eff + "</span></li>").join("") + "</ul>" +
       "<ul><li>A planet gained <b>without invading</b> (e.g. by Manifest Destiny) ignores its counter — remove it from the game. A planet that turns neutral again gets no new counter.</li>" +
       (c.mod("leaders") ? "<li>If your Ground Forces are wiped out by radiation or a biohazard, a Leader who landed with them escapes back to the ship (FAQ p.2).</li>" : "") + "</ul>" +
       "<h4>Probing (Invasion Combat Segment)</h4><ul>" +
@@ -627,8 +640,8 @@ T2.reference = [
       "<li><b>Ship destroyed in space combat:</b> roll — 1–5 killed · 6–9 captured by the destroyer · 0 escapes to any friendly planet. Destroyed any other way: killed.</li>" +
       "<li><b>Planet successfully invaded:</b> roll — 1–5 captured · 6–9 escapes to any friendly planet · 0 killed. Planet lost by bombardment or any other way: the Leader escapes to another friendly planet.</li>" +
       "<li><b>Captives:</b> kept by the captor, who may execute them at any time or hand them to any player in the Political Phase (handed to their owner, they are freed). Each time you successfully invade a planet of a player holding captives, roll: on <b>0</b> you find one (at random) — yours is freed, anyone else's becomes your captive. A freed Leader is placed at once on any friendly planet.</li></ul>" +
-      "<div class='tbl-wrap'><table class='tbl'><thead><tr><th scope='col'>Leader</th><th scope='col'>Abilities</th></tr></thead><tbody>" +
-      T2.leaders.map(l => "<tr><th scope='row'>" + l.n + "</th><td><ul>" + l.fx.map(f => "<li>" + f + "</li>").join("") + "</ul></td></tr>").join("") + "</tbody></table></div>" +
+      "<h4>Leader abilities</h4><ul class='aid-icons leader-icons'>" +
+      T2.leaders.map(l => "<li>" + T2.ic(l.ic, l.n) + "<div><b>" + l.n + "</b><ul>" + l.fx.map(f => "<li>" + f + "</li>").join("") + "</ul></div></li>").join("") + "</ul>" +
       "<ul><li>With the Mentak, an Admiral doesn't give their Cruisers or an Assault-Cannon Dreadnought an extra pre-combat shot (FAQ p.1–2).</li></ul>",
     src: () => "Hope's End p.2–3 §2.3 · FAQ p.1–2"
   },

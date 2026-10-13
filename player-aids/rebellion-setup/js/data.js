@@ -53,11 +53,34 @@ SWR.modules = [
 SWR.cite = function () { return Array.prototype.slice.call(arguments).filter(Boolean).join(" · "); };
 SWR.ul = function (items) { return "<ul>" + items.filter(Boolean).map(function (i) { return "<li>" + i + "</li>"; }).join("") + "</ul>"; };
 
+/* ---- rulebook icons (DFWGV icons standard v1: css/icons.css, images/icons/<name>.webp) -------------------
+   Cropped from the page's own sources: RR p.7 and p.13 (dice and skill icons, the Rules Reference's own glyphs),
+   RR p.3 (Build Icon), RR p.11 (Recruit icon), RR p.9 (Transport Restriction Icon), LtP p.13 (Immobile Icon,
+   Imperial Loyalty Marker, Subjugation Marker), LtP p.3 (Rebel Loyalty Marker, Time Marker,
+   Reputation Marker, Sabotage Markers), LtP p.5 and p.8 (Starting
+   Mission Icon), LtP p.5 (Project Icon), RotE p.1 (The Darth Vader icon, the Rise of the Empire icon) and
+   RotE p.2 (a unit icon on an advanced tactic card: "The top ability requires a TIE Fighter").
+   Always call these with the full literal file name, e.g. SWR.ic("die-hit", "Hit"). */
+SWR.icon = function (f, alt, inline) {
+  return "<img class='aid-ic" + (inline ? " aid-ic-inline" : "") + "' src='images/icons/" + f + ".webp' alt='" + alt + "' title='" + alt + "'>";
+};
+SWR.ic = function (f, alt) { return SWR.icon(f, alt, true); };                                   /* inline, in a sentence or cell */
+SWR.icList = function (rows) {                                                                       /* [[file, alt, html], …] */
+  return "<ul class='aid-icons'>" + rows.filter(Boolean).map(function (r) {
+    return "<li>" + SWR.icon(r[0], r[1]) + "<span>" + r[2] + "</span></li>";
+  }).join("") + "</ul>";
+};
+SWR.icRow = function (pairs) {                                                                       /* [[file, label], …] */
+  return "<p class='aid-icon-row'>" + pairs.map(function (p) {
+    return "<span class='aid-pair'>" + SWR.icon(p[0], p[1]) + "<span>" + p[1] + "</span></span>";
+  }).join(" ") + "</p>";
+};
+
 /* =============================================================================
    SETUP PHASES
    ============================================================================= */
 (function () {
-  var J = SWR.cite, ul = SWR.ul;
+  var J = SWR.cite, ul = SWR.ul, ic = SWR.ic;
 
   SWR.phases = [
     {
@@ -79,7 +102,7 @@ SWR.ul = function (items) { return "<ul>" + items.filter(Boolean).map(function (
             return ul([
               "Shuffle the expansion's <b>action cards</b> and <b>mission cards</b> into their respective decks.",
               "Mix the expansion's tokens, dice, figures and leaders into the supply of unused components.",
-              "Remove these base-game cards and use the expansion's replacements instead (same name, Rise of the Empire icon):" +
+              "Remove these base-game cards and use the expansion's replacements instead (same name, " + ic("rote-icon", "Rise of the Empire icon") + " Rise of the Empire icon):" +
                 ul(["<b>Sabotage</b> (Rebel mission)", "<b>Son of Skywalker</b> (Rebel action)", "<b>Good Intel</b> (Imperial action)",
                     "<b>Construct Super Star Destroyer</b> (both copies of this Imperial mission)"]),
               "All cards in the expansion are marked with the Rise of the Empire icon."
@@ -111,7 +134,7 @@ SWR.ul = function (items) { return "<ul>" + items.filter(Boolean).map(function (
             a.push((c.team ? "Each faction takes its" : "Each player takes his") + " <b>four leaders without a recruit icon</b> and places them in the <b>Leader Pool</b> on the faction sheet.");
             if (c.team) a.push("<b>Team game:</b> each faction sheet has two leader pools. The <b>Admiral</b> takes the two <b>blue</b> starting leaders and the <b>General</b> the two <b>orange</b> ones, each into his own pool." +
               (c.p === 3 ? " The single Rebel player fills both Rebel pools." : ""));
-            a.push("Place all leaders <b>with</b> a recruit icon near the game board. They can't join a leader pool until they are recruited later in the game.");
+            a.push("Place all leaders <b>with</b> a recruit icon " + ic("recruit", "Recruit icon") + " near the game board. They can't join a leader pool until they are recruited later in the game.");
             if (c.has("rote")) a.push("<b>Rise of the Empire:</b> the expansion's 8 leaders are in the supply with the others. <b>Leader pool limit:</b> " +
               (c.team ? "each team may keep at most <b>8 leaders</b> across its pools; if it ever has more, it chooses 8 and eliminates the rest, taking the excess from the pool of the teammate who has more."
                       : "if a player ever has more than <b>8 leaders</b> in his leader pool, he chooses 8 and eliminates the rest."));
@@ -155,7 +178,7 @@ SWR.ul = function (items) { return "<ul>" + items.filter(Boolean).map(function (
         { when: function () { return true; }, exp: function (c) { return c.first ? "first" : "base"; },
           t: "Action decks",
           d: function (c) {
-            var a = ["Each player takes all of his action cards <b>with a recruit icon</b>, shuffles them and places this <b>action deck</b> facedown next to the faction sheet, on the side labelled <b>Action Deck</b>."];
+            var a = ["Each player takes all of his action cards <b>with a recruit icon</b> " + ic("recruit", "Recruit icon") + ", shuffles them and places this <b>action deck</b> facedown next to the faction sheet, on the side labelled <b>Action Deck</b>."];
             if (c.first) a.push("<b>First game:</b> the action cards <b>without</b> a recruit icon (starting action cards) aren't used. Return them to the box.");
             else a.push("The action cards <b>without</b> a recruit icon are the <b>starting action cards</b>; keep them apart for the <b>Starting action cards</b> step below.");
             if (c.has("rote")) a.push("<b>Rise of the Empire:</b> sort the expansion's action cards (with the replacement <i>Son of Skywalker</i> and <i>Good Intel</i>) together with the base cards: those with a recruit icon go into the action deck.");
@@ -181,15 +204,15 @@ SWR.ul = function (items) { return "<ul>" + items.filter(Boolean).map(function (
           t: "Mission cards",
           d: function (c) {
             var a = [];
-            a.push("<b>Starting missions</b> (an arrow at the bottom of the card): each player sets his <b>four</b> aside.");
-            a.push("<b>Projects</b> (a white star in a blue circle, bottom-right): the Imperial player shuffles them into the <b>project deck</b>, facedown on the <b>Projects</b> space of the board." + (c.has("rote") ? " The Rise of the Empire project cards are shuffled in too." : ""));
+            a.push("<b>Starting missions</b> (an arrow at the bottom of the card " + ic("starting-mission", "Starting mission icon") + "): each player sets his <b>four</b> aside.");
+            a.push("<b>Projects</b> (a white star in a blue circle, bottom-right " + ic("project", "Project icon") + "): the Imperial player shuffles them into the <b>project deck</b>, facedown on the <b>Projects</b> space of the board." + (c.has("rote") ? " The Rise of the Empire project cards are shuffled in too." : ""));
             if (c.has("rote") && c.mod("rotefirst")) {
-              a.push("<b>First game with the expansion:</b> build each mission deck using <b>only</b> the mission cards that have a <b>Darth Vader icon</b> or a <b>leader icon</b> on the left side of the card. All starting missions and projects are still used.");
+              a.push("<b>First game with the expansion:</b> build each mission deck using <b>only</b> the mission cards that have a <b>Darth Vader icon</b> " + ic("darth-vader-icon", "Darth Vader icon") + " or a <b>leader icon</b> on the left side of the card. All starting missions and projects are still used.");
             }
             a.push("<b>Remaining missions:</b> each player shuffles his into a facedown <b>mission deck</b> on the side of the faction sheet labelled <b>Mission Deck</b>.");
             if (c.has("rote") && !c.mod("rotefirst")) {
               a.push("<b>Choosing mission sets</b> (at the end of this step): " + (c.team ? "each faction's <b>General</b>" : "each player") + " chooses any one card from his mission deck and places it facedown; reveal simultaneously." +
-                ul(["<b>Darth Vader icon</b> → that faction uses the <b>Rise of the Empire</b> set: remove every card without a leader icon or a Darth Vader icon.",
+                ul(["<b>Darth Vader icon</b> " + ic("darth-vader-icon", "Darth Vader icon") + " → that faction uses the <b>Rise of the Empire</b> set: remove every card without a leader icon or a Darth Vader icon.",
                     "<b>Leader icon or no icon</b> → that faction uses the <b>base</b> set: remove every card with a Darth Vader icon.",
                     "Removed cards go back in the box. Starting missions and project cards are used in every game."]));
             }
@@ -337,7 +360,7 @@ SWR.ul = function (items) { return "<ul>" + items.filter(Boolean).map(function (
    RULES REFERENCE
    ============================================================================= */
 (function () {
-  var J = SWR.cite, ul = SWR.ul;
+  var J = SWR.cite, ul = SWR.ul, ic = SWR.ic;
   var rote = function (c) { return c.has("rote"); };
 
   SWR.reference = [
@@ -348,7 +371,7 @@ SWR.ul = function (items) { return "<ul>" + items.filter(Boolean).map(function (
         return "<h4>The Empire wins immediately</h4>" + ul([
           "when there are <b>Imperial units in the Rebel base's system and no Rebel units</b> there. This is only possible once the base is revealed.",
           "when the Death Star destroys the Rebel base's system with <i>Superlaser Online</i>, even while the base is still hidden."
-        ]) + "<h4>The Rebels win immediately</h4>" + ul([
+        ]) + "<h4>The Rebels win immediately</h4>" + SWR.icRow([["time-marker", "Time marker"], ["reputation-marker", "Reputation marker"]]) + ul([
           "when the <b>reputation marker and the time marker are in the same space</b> of the time track.",
           "The time marker starts on space 1 and advances one space each Refresh Phase; the reputation marker starts on space 14.",
           "Reputation moves <b>toward</b> the time marker one space at a time; the game ends the instant it enters the time marker's space. Losing reputation moves it away.",
@@ -358,7 +381,7 @@ SWR.ul = function (items) { return "<ul>" + items.filter(Boolean).map(function (
           "<b>Cheating:</b> a player revealed at the end of the game to have cheated, even by accident (e.g. moving from the base to an illegal system, or recruiting a leader that doesn't match the chosen action card), loses."
         ]);
       },
-      src: function () { return J("RR p.4", "RR p.12", "RR p.14", "LtP p.11", "FAQ p.2", "FAQ p.4"); }
+      src: function () { return J("RR p.4", "RR p.12", "RR p.14", "LtP p.3", "LtP p.11", "FAQ p.2", "FAQ p.4"); }
     },
     {
       title: "The game round at a glance",
@@ -373,12 +396,12 @@ SWR.ul = function (items) { return "<ul>" + items.filter(Boolean).map(function (
             "<li>Draw missions: each draws 2, then discards down to 10." + t("General only") + "</li>" +
             "<li>Launch probe droids: the Imperials draw 2 probe cards." + t("Imperial General only") + "</li>" +
             "<li>Draw objective: the Rebels draw 1." + t("Rebel General only") + "</li>" +
-            "<li>Advance the time marker; recruit and/or build if its new space shows those icons (recruit: spaces 2–5; build: spaces 2, 4, 6, 8, 10, 12, 14)." + t("recruiting and building: Admiral only") + "</li>" +
+            "<li>Advance the time marker; recruit and/or build if its new space shows those icons (recruit " + ic("recruit", "Recruit icon") + ": spaces 2–5; build " + ic("build", "Build icon") + ": spaces 2, 4, 6, 8, 10, 12, 14)." + t("recruiting and building: Admiral only") + "</li>" +
             "<li>Deploy units: starting with the Rebels, slide the build queue; units sliding off are deployed (limit 2 new units per system)." + t("Admiral only") + "</li>" +
           "</ol></li></ol>" +
           "<p>Play rounds until one faction wins.</p>";
       },
-      src: function () { return J("LtP p.4", "LtP p.6", "LtP p.20", "RR p.12"); }
+      src: function () { return J("LtP p.4", "LtP p.6", "LtP p.10", "LtP p.20", "RR p.12"); }
     },
     {
       title: "Assignment Phase",
@@ -425,8 +448,8 @@ SWR.ul = function (items) { return "<ul>" + items.filter(Boolean).map(function (
           "<li><b>Subjugate:</b> an Imperial ground unit in a system without Imperial loyalty → place a subjugation marker.</li></ol>" +
           "<h4>Movement rules</h4>" + ul([
             "Each moving ship carries ground units and TIE Fighters up to its <b>transport capacity</b> (the number in the black box on the faction sheet); each takes 1.",
-            "Units with the <b>transport restriction</b> icon move only when units with transport capacity leave the same system. An ability that lets you “ignore transport restrictions” removes this need.",
-            "Units with the <b>immobile</b> icon never move.",
+            "Units with the " + ic("transport-restriction", "Transport restriction icon") + " <b>transport restriction</b> icon move only when units with transport capacity leave the same system. An ability that lets you “ignore transport restrictions” removes this need.",
+            "Units with the " + ic("immobile", "Immobile icon") + " <b>immobile</b> icon never move.",
             "Systems sharing a border are adjacent. You may cross the orange region borders, but not the shaded impassable areas.",
             "You <b>can't move units out of a system that contains one of your leaders</b>, even a leader without tactic values. A leader on the “Rebel Base” space stops units leaving that space, but not the base's system.",
             "Abilities that move units follow all movement rules (transport, immobile …) unless they say otherwise.",
@@ -446,9 +469,9 @@ SWR.ul = function (items) { return "<ul>" + items.filter(Boolean).map(function (
           "<li><b>Send a leader to oppose:</b> the opponent may place <b>one</b> leader from his pool in the system, even if he already has leaders there." + (c.team ? " <i>Team game:</i> only one player from the opposing team may send one." : "") + "</li>" +
           "<li><b>Opposition:</b> no opposing leader there → the mission succeeds. Otherwise both roll dice, the current player first: <b>one die per matching skill icon</b> on all of your leaders in the system. The attempting player needs <b>more successes</b>; a tie fails.</li>" +
           "<li><b>Success:</b> perform the ability, making any choices now.</li>" +
-          "<li><b>Starting missions</b> return to your hand; all other missions (projects too) are discarded. A discarded project goes to the project deck's discard pile.</li></ol>" +
+          "<li><b>Starting missions</b> " + ic("starting-mission", "Starting mission icon") + " return to your hand; all other missions (projects too) are discarded. A discarded project goes to the project deck's discard pile.</li></ol>" +
           "<h4>Dice and odds</h4>" + ul([
-            "Hit and direct hit = <b>1 success</b>; special = <b>2 successes</b>; blank = none. " + (rote(c) ? "Roll red or black dice in any mix; green dice only for minor skill icons or where an ability says so (Rise of the Empire)." : "Any colour of die may be rolled."),
+            "Hit " + ic("die-hit", "Hit") + " and direct hit " + ic("die-direct-hit", "Direct hit") + " = <b>1 success</b>; special " + ic("die-special", "Special") + " = <b>2 successes</b>; blank = none. " + (rote(c) ? "Roll red or black dice in any mix; green dice only for minor skill icons or where an ability says so (Rise of the Empire)." : "Any colour of die may be rolled."),
             "A <b>leader portrait</b> on the card: its owner gains <b>2 extra successes</b> if that leader is assigned to the mission. (On a <i>resolve</i> card, the portrait leader adds an extra effect instead.)",
             "An opposing leader with no matching icons still forces a roll: you need at least one success.",
             "“Count all skill icons”: one die per skill icon of any kind.",
@@ -472,11 +495,12 @@ SWR.ul = function (items) { return "<ul>" + items.filter(Boolean).map(function (
       title: "Skills",
       when: function () { return true; },
       html: function (c) {
-        return ul([
-          "<b>Diplomacy:</b> missions usually give loyalty in systems or more units.",
-          "<b>Intel:</b> Rebel intel missions usually help with objective cards; Imperial ones help find the Rebel base.",
-          "<b>Spec ops:</b> Rebel spec ops missions usually destroy Imperial units; Imperial ones capture Rebel leaders and exploit them.",
-          "<b>Logistics:</b> Rebel logistics missions usually move units to and from the base; Imperial ones build special units or speed up building.",
+        return SWR.icList([
+          ["skill-diplomacy", "Diplomacy", "<b>Diplomacy:</b> missions usually give loyalty in systems or more units."],
+          ["skill-intel", "Intel", "<b>Intel:</b> Rebel intel missions usually help with objective cards; Imperial ones help find the Rebel base."],
+          ["skill-spec-ops", "Spec ops", "<b>Spec ops:</b> Rebel spec ops missions usually destroy Imperial units; Imperial ones capture Rebel leaders and exploit them."],
+          ["skill-logistics", "Logistics", "<b>Logistics:</b> Rebel logistics missions usually move units to and from the base; Imperial ones build special units or speed up building."]
+        ]) + ul([
           "A leader's skill icons show which missions it can attempt and oppose; more matching icons = more dice.",
           rote(c) ? "<b>Minor skills</b> (Rise of the Empire): small skill icons. Each lets the leader roll <b>1 green die</b> in a mission, and counts toward skill requirements. Example: Jabba the Hutt has 4 normal and 2 minor skills, rolling 2 regular dice and 1 green die for an intel mission." : ""
         ]);
@@ -507,8 +531,8 @@ SWR.ul = function (items) { return "<ul>" + items.filter(Boolean).map(function (
               "; a Death Star Under Construction left as the only Imperial ship against Rebel ships is destroyed.</li></ol></li></ol>" +
           "<h4>Resolving an attack</h4><ol>" +
           "<li><b>Roll dice</b> matching the attack values of all your participating units: at most <b>5 black and 5 red</b> (reductions apply before the cap)" + (cin ? ", plus up to 3 green" : "") + ".</li>" +
-          (cin ? "<li><b>Combat actions</b>, any number, any order: " + C + "once per attack, reroll up to your leader's tactic value in dice; or spend a die showing a special to remove 1 damage from one of your units in this theater whose health matches its colour. Tactic cards are never drawn or played during an attack.</li>"
-               : "<li><b>Combat actions</b>, any number, any order: <b>draw</b> a tactic card of this theater by spending a die showing a special (spent dice are set aside), or <b>play</b> a tactic card of this theater (cards with the special icon need a special die spent).</li>") +
+          (cin ? "<li><b>Combat actions</b>, any number, any order: " + C + "once per attack, reroll up to your leader's tactic value in dice; or spend a die showing a special " + ic("die-special", "Special") + " to remove 1 damage from one of your units in this theater whose health matches its colour. Tactic cards are never drawn or played during an attack.</li>"
+               : "<li><b>Combat actions</b>, any number, any order: <b>draw</b> a tactic card of this theater by spending a die showing a special " + ic("die-special", "Special") + " (spent dice are set aside), or <b>play</b> a tactic card of this theater (cards with the special icon need a special die spent).</li>") +
           "<li><b>Assign damage:</b> " + (cin ? C + "first the attacker removes the dice his opponent's “prevent” ability names. Then " : "") + "put hits and direct hits next to enemy units in this theater. A hit only goes on a unit whose <b>health colour matches the die</b>; a direct hit on any unit. Overkill is allowed; you must assign every die you can.</li>" +
           (cin ? "<li><b>Block:</b> " + C + "no tactic cards can be played during an attack, so no block cards are played here.</li>" +
                  "<li><b>Destroy:</b> " + C + "skip this step. Damage stays on units (track it with tokens); at the end of the round of battle, after every unit in that theater has attacked, each unit with damage ≥ health is destroyed. Lesser damage stays until the end of the combat.</li></ol>"
@@ -532,7 +556,7 @@ SWR.ul = function (items) { return "<ul>" + items.filter(Boolean).map(function (
           "<h4>Advanced tactic cards</h4>" + ul([
             "At <b>Draw Tactic Cards</b>, each player picks up his own ground and space tactic decks and may look through them. They are <b>never shuffled</b>: everything not in your discard pile is available.",
             "<b>Before each round of space battle and each round of ground battle</b> (each combat round has one of each):" +
-              "<ol><li>Both players secretly choose 1 card of the current theater and place it facedown.</li><li>Reveal together.</li><li>Starting with the current player, each resolves the card's <b>top or bottom</b> ability. An ability preceded by a unit icon needs at least 1 unit of that type in the system.</li></ol>",
+              "<ol><li>Both players secretly choose 1 card of the current theater and place it facedown.</li><li>Reveal together.</li><li>Starting with the current player, each resolves the card's <b>top or bottom</b> ability. An ability preceded by a unit icon (e.g. " + ic("unit-icon", "Unit icon: TIE Fighter") + " TIE Fighter) needs at least 1 unit of that type in the system.</li></ol>",
             "Each player <b>must</b> play a card every round of battle, but may choose to resolve neither ability and just discard it.",
             "Then the current player rolls and the battle continues. Advanced tactic cards are never played during an attack.",
             "Discard used cards faceup by their deck (anyone may look). They are not reshuffled after combat; when you use your deck's last card, return that deck's discards to it (except the card just used).",
@@ -543,8 +567,8 @@ SWR.ul = function (items) { return "<ul>" + items.filter(Boolean).map(function (
             "Tactic values no longer draw cards. Instead, once during each of your attacks, as a combat action, reroll up to your leader's tactic value (that theater) in dice, all at once; each die only once per attack this way. Use your highest leader values in the system."
           ]) +
           "<h4>Damage</h4>" + ul([
-            "<b>Preventing hits:</b> at the start of Assign Damage, the attacking player removes his dice that match the icons his opponent's ability prevents (e.g. “prevent 2 black hits” removes two black dice showing hits).",
-            "<b>Removing damage:</b> as a combat action, spend a die showing a special to remove 1 damage from one of your units whose health matches the die's colour, in this theater. Specials can no longer draw or play tactic cards.",
+            "<b>Preventing hits:</b> some tactic cards prevent hits " + ic("die-hit", "Hit") + " or direct hits " + ic("die-direct-hit", "Direct hit") + ". At the start of Assign Damage, the attacking player removes his dice that match the icons his opponent's ability prevents (e.g. “prevent 2 black hits” removes two black dice showing hits).",
+            "<b>Removing damage:</b> as a combat action, spend a die showing a special " + ic("die-special", "Special") + " to remove 1 damage from one of your units whose health matches the die's colour, in this theater. Specials can no longer draw or play tactic cards.",
             "<b>Destroying:</b> skip the Destroy Units step. A unit is destroyed at the <b>end of the round of battle</b> if its damage ≥ health; track damage with tokens. A unit destroyed by a tactic card doesn't roll this round and leaves after both cards are resolved (so it still meets unit requirements).",
             "Card damage: place a damage token on a unit of your choice (matching health colour if a colour is given). Damage of more than 1 may be split among several units unless the card names one unit.",
             "The general rules under the base Destroy Units step still apply: damage that hasn't destroyed a unit stays on it into later combat rounds and is removed at the end of the combat, and lone Rebel Transports must retreat or be destroyed (only if an Imperial ship is present)."
@@ -583,9 +607,9 @@ SWR.ul = function (items) { return "<ul>" + items.filter(Boolean).map(function (
       when: function () { return true; },
       html: function (c) {
         return "<div class='tbl-wrap'><table class='ref-table'><thead><tr><th>Result</th><th>In combat</th><th>In a mission</th></tr></thead><tbody>" +
-          "<tr><td><b>Hit</b></td><td>1 damage to a unit whose health colour matches the die</td><td>1 success</td></tr>" +
-          "<tr><td><b>Direct hit</b></td><td>1 damage to a unit with any (black or red) health</td><td>1 success</td></tr>" +
-          "<tr><td><b>Special</b></td><td>" + (rote(c) ? "Remove 1 damage from your unit whose health matches the die (Cinematic Combat)" : "Draw 1 tactic card, or play 1 tactic card with the special icon") + "</td><td>2 successes</td></tr>" +
+          "<tr><td><span class='aid-pair'>" + ic("die-hit", "Hit") + "<b>Hit</b></span></td><td>1 damage to a unit whose health colour matches the die</td><td>1 success</td></tr>" +
+          "<tr><td><span class='aid-pair'>" + ic("die-direct-hit", "Direct hit") + "<b>Direct hit</b></span></td><td>1 damage to a unit with any (black or red) health</td><td>1 success</td></tr>" +
+          "<tr><td><span class='aid-pair'>" + ic("die-special", "Special") + "<b>Special</b></span></td><td>" + (rote(c) ? "Remove 1 damage from your unit whose health matches the die (Cinematic Combat)" : "Draw 1 tactic card, or play 1 tactic card with the special icon") + "</td><td>2 successes</td></tr>" +
           "<tr><td>Blank</td><td>—</td><td>no success</td></tr></tbody></table></div>" +
           ul([
             "Combat: at most <b>5 black and 5 red</b> dice per attack. Missions: at most <b>10 dice</b>, any colour.",
@@ -605,11 +629,11 @@ SWR.ul = function (items) { return "<ul>" + items.filter(Boolean).map(function (
           "<li><b>Draw missions:</b> each draws 2, then discards down to <b>10</b> mission cards. Projects count; objectives don't; starting missions can never be discarded. (You may hold more than 10 until this step.)" + t("only each team's General draws and discards") + "</li>" +
           "<li><b>Launch probe droids:</b> the Imperials draw 2 probe cards and keep them hidden. Each shows a system where the base is <b>not</b>." + t("only the Imperial General") + "</li>" +
           "<li><b>Draw objective:</b> the Rebels draw 1 objective card." + t("the Rebel General") + (rote(c) ? " An <b>Immediate</b> objective is revealed and resolved at once." : "") + "</li>" +
-          "<li><b>Advance the time marker</b> one space, then act on the icons beside its new space. On the time track pictured in the Learn to Play, the <b>recruit</b> icon is on spaces <b>2, 3, 4 and 5</b> and the <b>build</b> icon on spaces <b>2, 4, 6, 8, 10, 12 and 14</b>:" + ul([
-            "<b>Recruit icon:</b> each draws 2 cards from his action deck and recruits one leader shown on either card. " +
+          "<li><b>Advance the time marker</b> one space, then act on the icons beside its new space. On the time track pictured in the Learn to Play, the <b>recruit</b> icon is on spaces <b>2, 3, 4 and 5</b> and the <b>build</b> icon on spaces <b>2, 4, 6, 8, 10, 12 and 14</b>:" + SWR.icList([
+            ["recruit", "Recruit icon", "<b>Recruit icon:</b> each draws 2 cards from his action deck and recruits one leader shown on either card. " +
               (c.first ? "<b>First game:</b> ignore both cards' abilities and return both to the box." : "Keep the chosen card facedown (usable later), but an <b>Immediate</b> card is revealed and resolved at once; put the other on the bottom of your action deck unrevealed.") +
-              " Choices are simultaneous, but the Rebels declare their leader first." + t(c.first ? "the Admiral draws and decides; the leader goes to the pool of its colour (both cards still go back to the box)" : "the Admiral draws and decides; the leader goes to the pool of its colour and that pool's player gets the card"),
-            "<b>Build icon:</b> both build at once: one unit per resource icon in your loyal and subjugated systems (subjugated: <b>left-most icon only</b>), placed on your build queue in the space matching the number beside the icon." + t("Admiral only") + (rote(c) ? " If there's a timing conflict over which units to build, the Rebels choose first (Rise of the Empire)." : "")
+              " Choices are simultaneous, but the Rebels declare their leader first." + t(c.first ? "the Admiral draws and decides; the leader goes to the pool of its colour (both cards still go back to the box)" : "the Admiral draws and decides; the leader goes to the pool of its colour and that pool's player gets the card")],
+            ["build", "Build icon", "<b>Build icon:</b> both build at once: one unit per resource icon in your loyal and subjugated systems (subjugated: <b>left-most icon only</b>), placed on your build queue in the space matching the number beside the icon." + t("Admiral only") + (rote(c) ? " If there's a timing conflict over which units to build, the Rebels choose first (Rise of the Empire)." : "")]
           ]) + "</li>" +
           "<li><b>Deploy units:</b> starting with the Rebels, slide every unit one space down the build queue; units sliding off space 1 are deployed (see Building & deploying)." + t("Admiral only") + "</li></ol>" +
           "<h4>Recruiting rulings</h4>" + ul([
@@ -648,7 +672,8 @@ SWR.ul = function (items) { return "<ul>" + items.filter(Boolean).map(function (
       title: "Loyalty, subjugation & systems",
       when: function () { return true; },
       html: function () {
-        return "<h4>System types</h4>" + ul([
+        return SWR.icRow([["loyalty-rebel", "Rebel loyalty marker"], ["loyalty-imperial", "Imperial loyalty marker"], ["subjugation", "Subjugation marker"]]) +
+          "<h4>System types</h4>" + ul([
           "The board has <b>32 systems</b> in <b>8 regions</b> of 4. <b>Populous</b> systems have a loyalty space and resource icons; <b>remote</b> systems have neither, are always neutral, take no loyalty or subjugation markers, and units can't be deployed there (except where a card or unit ability allows it, see Building &amp; deploying).",
           "<b>Neutral</b> = no Rebel or Imperial loyalty marker. Neutral is about loyalty only: a system can be neutral <b>and</b> subjugated (FAQ errata to RR p.10).",
           "<b>Imperial system</b> = Imperial loyalty or a subjugation marker. <b>Rebel system</b> = Rebel loyalty and no subjugation marker.",
@@ -670,7 +695,7 @@ SWR.ul = function (items) { return "<ul>" + items.filter(Boolean).map(function (
           "Missions, objectives and action cards can still be attempted or resolved there."
         ]);
       },
-      src: function () { return J("RR p.7–8", "RR p.10–14", "LtP p.7", "LtP p.13", "FAQ p.1–2"); }
+      src: function () { return J("RR p.7–8", "RR p.10–14", "LtP p.3", "LtP p.7", "LtP p.13", "FAQ p.1–2"); }
     },
     {
       title: "The Rebel base & probe cards",
@@ -835,13 +860,13 @@ SWR.ul = function (items) { return "<ul>" + items.filter(Boolean).map(function (
       title: "Sabotage markers",
       when: function () { return true; },
       html: function (c) {
-        return ul([
+        return SWR.icRow([["sabotage-marker", "Sabotage marker"]]) + ul([
           "Placed by the Rebel <i>Sabotage</i> mission (" + (rote(c) ? "Rise of the Empire replaces the base card with its own version; the base card's errata reads" : "errata:") + " “Attempt in any populous system.”). At most one per system.",
           "Neither faction can build from that system's resource icons or deploy units there; abilities that “build” or “deploy” there are blocked too. Abilities that “gain” units or “place units on the build queue” are not.",
           "Markers stay until an Imperial mission removes them, or the system is destroyed."
         ]);
       },
-      src: function (c) { return J("RR p.13", "LtP p.12", "FAQ p.1–2", "FAQ p.5", rote(c) && "RotE p.1"); }
+      src: function (c) { return J("RR p.13", "LtP p.3", "LtP p.12", "FAQ p.1–2", "FAQ p.5", rote(c) && "RotE p.1"); }
     },
     {
       title: "Team game (3–4 players)",

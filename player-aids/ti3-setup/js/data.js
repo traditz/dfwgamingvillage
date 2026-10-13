@@ -405,6 +405,25 @@ var T3 = {};
   T3.vp = function (c) { return (c.mod("longwar") ? 14 : 10) - (c.uses("bureaucracy") ? 1 : 0); };
   T3.bonusCount = function (p) { return { 3: 2, 4: 0, 5: 3, 6: 2, 7: 1, 8: 0 }[p]; };
   T3.cardName = function (id) { return T3.scards[id] ? T3.scards[id].name : id; };
+
+  // Rulebook icons (DFWGV icons standard v1 — css/icons.css; files in images/icons/, cropped from the five source
+  // documents). Every call names its file literally; the text label always stays beside the icon.
+  const icTag = function (cls, f, alt) {
+    return '<img class="' + cls + '" src="images/icons/' + f + '.webp" alt="' + alt + '" title="' + alt + '" loading="lazy">';
+  };
+  T3.ic = function (f, alt) { return icTag("aid-ic", f, alt); };
+  T3.icIn = function (f, alt) { return icTag("aid-ic aid-ic-inline", f, alt); };
+  // Icon list: rows of [file, alt, name, text]; null rows are skipped.
+  T3.icList = function (rows) {
+    return '<ul class="aid-icons">' + rows.filter(Boolean).map(function (r) {
+      return "<li>" + T3.ic(r[0], r[1]) + "<span><b>" + r[2] + "</b> — " + r[3] + "</span></li>";
+    }).join("") + "</ul>";
+  };
+  // The four Shattered Empire race symbols that mark some Shards of the Throne cards (SoT p.6)
+  T3.seRaceIcons = function () {
+    return '<span class="ic-set">' + T3.icIn("se-race-symbol-1", "Shattered Empire race symbol") + T3.icIn("se-race-symbol-2", "Shattered Empire race symbol") +
+      T3.icIn("se-race-symbol-3", "Shattered Empire race symbol") + T3.icIn("se-race-symbol-4", "Shattered Empire race symbol") + "</span>";
+  };
 })();
 
 /* =============================================================================
@@ -503,7 +522,7 @@ var T3 = {};
               "Take your race’s <b>Race Sheet, Control Markers, 2 Trade Cards and 16 Command Counters</b>. Lay both Trade Cards <b>Trade Contract side up</b> in your play area.",
               "Unused Home Systems go back in the box.",
               c.has("sot") ? "<b>Ghosts of Creuss:</b> two Home System tiles joined by a “D” wormhole. Only the hexagonal tile goes into the galaxy; the other sits in front of the player. Both count as Home Systems." : "",
-              (c.has("sot") && !c.has("se")) ? "Shards of the Throne cards marked with a Shattered Empire race symbol are only for games with Shattered Empire — leave them in the box." : ""
+              (c.has("sot") && !c.has("se")) ? "Shards of the Throne cards marked with a Shattered Empire race symbol " + T3.seRaceIcons() + " are only for games with Shattered Empire — leave them in the box." : ""
             ]);
           },
           src: (c) => cite(["Base p.4, p.6, p.17–18, p.24, p.31", c.has("se") ? "SE p.6" : "", c.has("sot") ? "SoT p.6, p.8–9" : ""]) },
@@ -528,7 +547,7 @@ var T3 = {};
               c.mod("flagships") ? "<b>Flagships:</b> each player takes his race’s <b>Flagship card</b> and the plastic Flagship of his colour." : "",
               c.mod("rst") ? "<b>Race-Specific Technologies:</b> each player takes his race’s " + rstCount + "." +
                 (c.has("se") && c.has("sot") ? " Use Shards of the Throne’s replacement Berserker Genome (renamed <i>Valkyrie Armor</i> by the FAQ) and Bioptic Recyclers instead of Shattered Empire’s." : "") +
-                (c.has("sot") && !c.has("se") ? " Leave out cards with the red Shattered Empire symbol in the lower left corner." : "") : "",
+                (c.has("sot") && !c.has("se") ? " Leave out cards with the red Shattered Empire symbol " + T3.icIn("se-symbol-red", "Red Shattered Empire symbol") + " in the lower left corner." : "") : "",
               c.mod("leaders") ? "<b>Leaders:</b> each race has 3 Leader counters (placed in your Home System in the starting-forces step)." : ""
             ]);
           },
@@ -541,7 +560,7 @@ var T3 = {};
             "Shuffle the <b>Action Card</b> deck and the <b>" + (c.fote ? "Agenda Card" : "Political Card") + "</b> deck and place them separately in the common play area, with the <b>Fighter and Ground Force Supplement Counters</b>.",
             c.fote ? "<b>Fall of the Empire:</b> the scenario’s <b>Agenda Cards replace the Political deck</b>. They count as Political Cards for other cards; an Agenda that elects a planet cannot target a Home System. Use all of Shards of the Throne’s new Action Cards." : "",
             c.has("se") && !c.fote ? "<b>Shattered Empire:</b> first swap in its replacement cards — 4 <i>Direct Hit</i> and 1 <i>Ruinous Tariff</i> (Action), 1 <i>Open the Trade Routes</i> (Political) — then shuffle in its 40 new Action Cards and 32 new Political Cards." : "",
-            c.has("sot") ? "<b>Shards of the Throne:</b> replace <i>Ghost Ship</i> and <i>Star of Death</i> with its versions and shuffle in its new Action" + (c.fote ? "" : " and Political") + " Cards." + (!c.has("se") || c.fote ? " Cards marked with a Shattered Empire race symbol stay in the box." : "") + " An Action Card with a Trade Good icon may be discarded instead of spending 1 Trade Good when you aren’t playing the optional rule it names." : "",
+            c.has("sot") ? "<b>Shards of the Throne:</b> replace <i>Ghost Ship</i> and <i>Star of Death</i> with its versions and shuffle in its new Action" + (c.fote ? "" : " and Political") + " Cards." + (!c.has("se") || c.fote ? " Cards marked with a Shattered Empire race symbol " + (c.fote ? T3.seRaceIcons() + " " : "") + "stay in the box." : "") + " An Action Card with a Trade Good icon may be discarded instead of spending 1 Trade Good when you aren’t playing the optional rule it names." : "",
             (c.p === 4 || c.p === 8) ? "<b>" + c.p + " players:</b> remove the Action Cards <i>Strategic Flexibility</i> and <i>Strategic Shift</i>." : "",
             (c.varSC || c.swapped) ? "Whenever anyone draws an Action or Political Card that refers to a Strategy Card not in this game, discard it and draw a replacement." : "",
             ((c.has("se") && !c.fote) || c.has("sot")) ? "Supplement counters: the expansions add " + list([c.has("se") && !c.fote ? "Shattered Empire’s 12 Fighter and 12 Ground Force tokens" : "", c.has("sot") ? "Shards of the Throne’s 16 Fighter and 16 Ground Force counters" : ""].filter(Boolean)) + " — each worth <b>3 units</b>, so make change as needed." : "",
@@ -1011,7 +1030,7 @@ var T3 = {};
           "When the last Ground Force leaves a planet, leave a Control Marker to show you still control it.",
           "Passing through a crowded system doesn’t break your Fleet Supply; ending there does (excess ships are removed at once).",
           "Each fleet carrying Ground Forces needs at least one plastic Ground Force with it; Supplement Counters travel only with a real unit of their type.",
-          "<b>Wormholes:</b> systems holding the same wormhole type (Alpha or Beta) are adjacent — for movement only (Transfer Actions included), not for PDS fire or other effects. A wormhole type with only one end in play does nothing." +
+          "<b>Wormholes:</b> systems holding the same wormhole type (" + T3.icIn("wormhole-alpha", "Alpha wormhole") + "Alpha or " + T3.icIn("wormhole-beta", "Beta wormhole") + "Beta) are adjacent — for movement only (Transfer Actions included), not for PDS fire or other effects. A wormhole type with only one end in play does nothing." +
             (c.mod("nexus") ? " The Wormhole Nexus is adjacent to every Alpha and Beta system." : "") + (c.has("sot") && !c.fote ? " The Ghosts of Creuss’ “D” wormhole counts as a wormhole for card and game effects." : "")
         ]),
       src: (c) => cite(["Base p.11, p.19–20, p.27–29, p.38", c.mod("nexus") ? "SE p.10" : "", c.has("sot") && !c.fote ? "SoT p.9" : "", c.mod("flagships") ? "SoT p.10" : "", c.mod("mechs") ? "SoT p.11" : "", "FAQ p.4–8"]) },
@@ -1148,15 +1167,19 @@ var T3 = {};
     {
       title: "Planets, resources and influence",
       when: () => true,
-      html: (c) => ul([
-          "Every planet shows <b>resources</b> (build units, buy technology), <b>influence</b> (Command Counters, some Action Cards, and your votes) and maybe a <b>technology specialty</b>.",
+      html: (c) => "<p>Every planet is printed with its resources and influence, and maybe a technology specialty — on the system tile and on its Planet Card:</p>" + T3.icList([
+          ["planet-resources", "Resources", "Resources", "build units and buy technology."],
+          ["planet-influence", "Influence", "Influence", "acquire Command Counters, play some Action Cards, and provide your votes in the Galactic Council."],
+          ["planet-tech-specialty", "Technology specialty (red)", "Technology specialty", "red, green or blue (red shown): a discount on technology of that colour — see Technology."],
+          c.has("sot") ? ["tech-specialty-yellow", "Yellow technology specialty", "Yellow (general) technology specialty", "works like the others but doesn’t count toward objectives."] : null
+        ]) + ul([
           "To spend, <b>exhaust</b> a Planet Card (turn it face down) for <b>all</b> its resources <b>or all</b> its influence — never both, never part; any excess is lost. Say which before exhausting.",
           "Exhausted planets refresh in the Status Phase. A newly gained Planet Card always arrives exhausted.",
           "<b>Trade Goods</b> substitute for 1 resource or 1 influence each — but never for votes.",
           "<b>Control:</b> land at least one Ground Force" + (c.mod("mechs") ? " (or Mechanized Unit)" : "") + " to take a planet; it stays yours until someone invades it. You can’t hand a planet back to neutrality.",
           "You <b>control a system</b> when you control every planet in it and have at least one non-Fighter ship there; a system without planets needs just a non-Fighter ship and no enemy units.",
           "“I control Mecatol Rex” means the planet, not the system.",
-          (c.has("se") || c.has("sot")) ? "The <b>yellow</b> (general) technology specialty works like the others but doesn’t count toward objectives." : ""
+          (c.has("se") && !c.has("sot")) ? "The <b>yellow</b> (general) technology specialty works like the others but doesn’t count toward objectives." : ""
         ]),
       src: (c) => cite(["Base p.12, p.17, p.19, p.21–23, p.25, p.27", c.has("se") && !c.fote ? "SE p.6" : "", c.has("sot") ? "SoT p.9" : "", c.mod("mechs") ? "SoT p.11" : "", "FAQ p.8", c.mod("mechs") ? "FAQ p.13" : ""]) },
     {
@@ -1172,7 +1195,7 @@ var T3 = {};
           "<b>Empty system</b> (for rules and cards): no units of any player, yours included — planets, Control Markers and Command Counters don’t count. A Special System is never “empty”.",
           c.has("se") && !c.fote ? "<b>Trade Stations</b> (Tsion, Sumerian): never invaded — whoever is the only player with ships in the system controls it (Control Marker + its card, exhausted); no Ground Forces, Space Docks, PDS" + (c.mod("leaders") ? ", Leaders" : "") + (c.mod("facilities") ? " or Facilities" : "") + " there; no Distant Suns counter; capturing one doesn’t break a trade agreement; still a planet for card effects. Its refresh ability gives 2 Trade Goods." : "",
           c.has("se") && !c.fote ? "<b>Refresh abilities</b> (icon beside a planet’s name): in the Status Phase, straight after refreshing, exhaust the planet for its ability instead of its resources — 2 Trade Goods, 2 Shock Troops (Ground Forces without that option), 2 Ground Forces or 2 Fighters, placed on that planet. No Fighters (ships) can be gained this way while enemy ships are in the system, and the planet Mirage has no Fighter capacity of its own." : "",
-          "<b>Wormholes:</b> matching wormholes make systems adjacent for movement only; an unmatched wormhole does nothing."
+          "<b>Wormholes</b> (" + T3.icIn("wormhole-alpha", "Alpha wormhole") + "Alpha, " + T3.icIn("wormhole-beta", "Beta wormhole") + "Beta)<b>:</b> matching wormholes make systems adjacent for movement only; an unmatched wormhole does nothing."
         ]),
       src: (c) => cite(["Base p.18–19, p.25", c.has("se") && !c.fote ? "SE p.6–7" + (c.mod("facilities") ? ", p.11" : "") : "", c.has("sot") && !c.fote ? "SoT p.9" : "", "FAQ p.8" + (c.has("se") && !c.fote ? ", p.11" : "")]) },
     {
@@ -1217,8 +1240,11 @@ var T3 = {};
           "<b>Voting:</b> first debate, threaten and bribe — no promise is binding. Then vote clockwise from the player left of the Speaker (the Speaker votes last). Your votes = total influence of your <b>unexhausted</b> planets (minimum 1); cast all or none, never split. Voting doesn’t exhaust planets; Trade Goods can’t buy votes." + (c.mod("intrigue") ? " With Political Intrigue: accepted Promissory Notes <b>are</b> binding; add your Representative’s bonus votes, and with no living Representative you can’t vote (see Political Intrigue)." : ""),
           "You may abstain. A tie — even 0–0 — is broken by the Speaker.",
           c.varSC ? "<b>Political Card hand</b> (variant set): hand limit 5; the Assembly card makes a player play one from hand (drawing the top card if he has none); discard one instead of a Trade Good at any time." : "",
-          c.fote ? "<b>Agenda Cards</b> (Fall of the Empire) replace Political Cards: icons show Elect Player, Elect Planet (never a Home System) or Event (resolve, discard, draw another)." : ""
-        ]),
+        ]) + (c.fote ? "<p><b>Agenda Cards</b> (Fall of the Empire) replace Political Cards. Many have an icon at the bottom of the card:</p>" + T3.icList([
+          ["agenda-elect-player", "Elect Player", "Elect Player", "this Agenda targets a player."],
+          ["agenda-elect-planet", "Elect Planet", "Elect Planet", "this Agenda targets a planet — never a Home System."],
+          ["agenda-event", "Event", "Event", "when the card is drawn, resolve its text, discard it and draw a new Agenda Card."]
+        ]) : ""),
       src: (c) => cite(["Base p.23, p.37", c.varSC ? "SE p.15" : "", c.fote ? "SoT p.14" : "", c.mod("intrigue") ? "SoT p.13" : "", "FAQ p.5"]) },
     {
       title: "Technology",
@@ -1227,7 +1253,7 @@ var T3 = {};
           "Four fields: <b>red</b> Warfare, <b>green</b> Biotechnology, <b>blue</b> Propulsion, <b>yellow</b> General. Each player’s deck is identical (24 advances in the base game" + (c.has("se") && !c.fote ? "; Shattered Empire adds 4 brand-new advances to every deck, one per field, and replaces Advanced Fighters, Micro Technology and Assault Cannon with revised cards" : "") + (c.has("sot") ? "; Shards of the Throne adds 4 more to every deck" : "") + ").",
           "You get advances mainly from the Technology card (primary: 1 free" + (c.uses("technology2") ? ", then you may buy a second for 8 resources" : "") + "; secondary: 1 for " + (c.uses("technology2") ? "6" : "8") + " resources), and from some Action and Political Cards. Acquired cards go face up in your play area.",
           "You need the <b>prerequisites</b> printed on a card already face up in front of you — where the card offers alternatives (e.g. Micro Technology: Stasis Capsules <i>or</i> Sarween Tools), one is enough. Technologies can’t be given to other players.",
-          "<b>Technology specialties:</b> each planet you control with a red, green or blue specialty cuts 1 off the cost of an advance of that colour when you buy with the Technology secondary — " + (c.has("sot") ? "per specialty symbol (a planet showing two counts twice)," : "per planet,") + " and only while that Planet Card is unexhausted (you needn’t exhaust it)." + ((c.has("se") || c.has("sot")) ? " The yellow specialty works the same way but doesn’t count toward objectives." : ""),
+          "<b>Technology specialties</b> " + T3.icIn("planet-tech-specialty", "Technology specialty (red)") + "<b>:</b> each planet you control with a red, green or blue specialty cuts 1 off the cost of an advance of that colour when you buy with the Technology secondary — " + (c.has("sot") ? "per specialty symbol (a planet showing two counts twice)," : "per planet,") + " and only while that Planet Card is unexhausted (you needn’t exhaust it)." + ((c.has("se") || c.has("sot")) ? " The yellow specialty " + (c.has("sot") ? T3.icIn("tech-specialty-yellow", "Yellow technology specialty") + " " : "") + "works the same way but doesn’t count toward objectives." : ""),
           "Technology tree: Base p.42–43" + (c.has("se") && !c.fote ? "; with the new advances, SE p.18–19" : "") + ".",
           c.mod("rst") ? "<b>Race-Specific Technologies:</b> whenever you may buy a technology, you may buy your race’s instead for the normal cost <b>plus</b> the cost on its card (e.g. Technology primary: just the card’s cost). No prerequisites, no colour — so no specialty or Research Grant discount" + (c.has("se") ? ", and Subsidized Studies doesn’t apply either" : "") + "; otherwise a normal technology. Never another race’s" + (c.has("se") ? " (not even through Sharing of Technology or Technological Society)" : "") + "." : ""
         ]),
@@ -1291,22 +1317,22 @@ var T3 = {};
         "Voluntary Annexation" + (c.uses("diplomacy2") ? " (or Diplomacy II’s annexation)" : "") + " of a planet removes its counter without effect.",
         "Local forces from Domain Counters (such as Hostile Locals" + (c.mod("newds") ? " or Fighter Ambush" : "") + ") are not “opposing” forces — opposing forces belong to another player — so overcoming them doesn’t fulfil objectives that need opposing forces.",
         c.mod("leaders") ? "A Leader whose invasion of a neutral planet fails is killed" + ((c.mod("newds") || c.mod("custodians")) ? "; a Leader on a ship lost to a Fighter Ambush rolls as in a Space Battle, but “captured” means killed" : "") + "." : ""
-      ]) + h("Domain effects") + dl([
-        ["Radiation", "Kill all the Ground Forces of the initial landing — the planet stays uncontrolled — then remove the counter."],
-        ["Biohazard", "The first Ground Force to land here is always eliminated while the counter remains; discard it after a player successfully invades (you can’t leave it in place)."],
-        ["Hostile Locals (number)", "That many local Ground Forces fight any invader (another player rolls for them). A failed invasion restores them to full strength. Can’t be bombarded. Discard after a successful invasion."],
-        ["Lazax Survivors", "You may take this counter: +3 votes on all future political agendas. (Special probing/razing rules above.)"],
-        ["Settlers", "Return your Ground Forces to their Carrier/War Sun and roll: 6+ place 2 free Ground Forces of yours on the planet; 1–5 a random opponent places 2 of his there. Discard."],
-        ["Peaceful Annexation", "The landing proceeds without incident. Discard."],
-        ["Industrial Society", "You may place a free Space Dock here (it can’t build this round), and the Planet Card arrives unexhausted. Discard."],
-        ["Technological Society", "The player on your left picks a free advance from your Technology deck that you have the prerequisites for" + (c.mod("rst") ? " (never another race’s Race-Specific Technology)" : "") + ". Discard."],
-        ["Wormhole Discovery", "Place the counter in the system: a new wormhole that connects to others of its letter (Alpha or Beta). It doesn’t count for the Master of Gates objective" + ((c.has("se") || c.has("sot")) ? " or for Keeper of Gates" : "") + "."],
-        ["Natural Wealth (number)", "Receive that many Trade Goods, if able. Discard."],
-        c.mod("newds") ? ["Fighter Ambush (number)", "After landing, fight a Space Battle against that many local Fighters (another player rolls; no Anti-Fighter Barrage). If you lose, the planet stays uncontrolled, your landed Ground Forces are discarded and the Fighters return to full strength. Discard after winning."] : null,
-        c.mod("newds") ? ["Automated Defense System", "Roll 2 dice: for each 6+ lose 1 ship in the system and one landing Ground Force; with no Ground Forces left the planet stays uncontrolled. The first successful invader removes it and may place a free PDS."] : null,
-        c.mod("newds") ? ["Hidden Factory", "Receive free ships worth up to 2 resources, placed in this system. Discard."] : null,
-        c.mod("newds") ? ["Native Intelligence", "Secretly look at any one face-down Domain Counter on any planet. Discard."] : null,
-        c.mod("newds") ? ["Hostage Situation", "Pay Trade Goods equal to the number of Ground Forces landing, or lose all of the initial landing (the planet stays uncontrolled). Discard."] : null
+      ]) + h("Domain effects") + T3.icList([
+        ["ds-radiation", "Radiation", "Radiation", "Kill all the Ground Forces of the initial landing — the planet stays uncontrolled — then remove the counter."],
+        ["ds-biohazard", "Biohazard", "Biohazard", "The first Ground Force to land here is always eliminated while the counter remains; discard it after a player successfully invades (you can’t leave it in place)."],
+        ["ds-hostile-locals", "Hostile Locals", "Hostile Locals (number)", "That many local Ground Forces fight any invader (another player rolls for them). A failed invasion restores them to full strength. Can’t be bombarded. Discard after a successful invasion."],
+        ["ds-lazax-survivors", "Lazax Survivors", "Lazax Survivors", "You may take this counter: +3 votes on all future political agendas. (Special probing/razing rules above.)"],
+        ["ds-settlers", "Settlers", "Settlers", "Return your Ground Forces to their Carrier/War Sun and roll: 6+ place 2 free Ground Forces of yours on the planet; 1–5 a random opponent places 2 of his there. Discard."],
+        ["ds-peaceful-annexation", "Peaceful Annexation", "Peaceful Annexation", "The landing proceeds without incident. Discard."],
+        ["ds-industrial-society", "Industrial Society", "Industrial Society", "You may place a free Space Dock here (it can’t build this round), and the Planet Card arrives unexhausted. Discard."],
+        ["ds-technological-society", "Technological Society", "Technological Society", "The player on your left picks a free advance from your Technology deck that you have the prerequisites for" + (c.mod("rst") ? " (never another race’s Race-Specific Technology)" : "") + ". Discard."],
+        ["ds-wormhole-discovery", "Wormhole Discovery", "Wormhole Discovery", "Place the counter in the system: a new wormhole that connects to others of its letter (Alpha or Beta). It doesn’t count for the Master of Gates objective" + ((c.has("se") || c.has("sot")) ? " or for Keeper of Gates" : "") + "."],
+        ["ds-natural-wealth", "Natural Wealth", "Natural Wealth (number)", "Receive that many Trade Goods, if able. Discard."],
+        c.mod("newds") ? ["ds-fighter-ambush", "Fighter Ambush", "Fighter Ambush (number)", "After landing, fight a Space Battle against that many local Fighters (another player rolls; no Anti-Fighter Barrage). If you lose, the planet stays uncontrolled, your landed Ground Forces are discarded and the Fighters return to full strength. Discard after winning."] : null,
+        c.mod("newds") ? ["ds-automated-defense-system", "Automated Defense System", "Automated Defense System", "Roll 2 dice: for each 6+ lose 1 ship in the system and one landing Ground Force; with no Ground Forces left the planet stays uncontrolled. The first successful invader removes it and may place a free PDS."] : null,
+        c.mod("newds") ? ["ds-hidden-factory", "Hidden Factory", "Hidden Factory", "Receive free ships worth up to 2 resources, placed in this system. Discard."] : null,
+        c.mod("newds") ? ["ds-native-intelligence", "Native Intelligence", "Native Intelligence", "Secretly look at any one face-down Domain Counter on any planet. Discard."] : null,
+        c.mod("newds") ? ["ds-hostage-situation", "Hostage Situation", "Hostage Situation", "Pay Trade Goods equal to the number of Ground Forces landing, or lose all of the initial landing (the planet stays uncontrolled). Discard."] : null
       ]) + (c.mod("terrds") ? h("Territorial Distant Suns") + ul(["Low-risk counters (Peaceful Annexation, Natural Wealth 2, Native Intelligence, Hostile Locals 1, Biohazard, Hostage Situation, Fighter Ambush 1, Settlers) go randomly on the outer ring and on planets adjacent to Home Systems; then every remaining counter — leftover low-risk ones included — is mixed and placed randomly on the remaining planets."]) : ""),
       src: (c) => cite(["Base p.33–34, p.44", "SE p.13", c.has("se") ? "SE p.20" : "", c.mod("terrds") ? "SE p.11" : "", "FAQ p.4", c.uses("diplomacy2") ? "FAQ p.9" : "", c.mod("rst") ? "FAQ p.10" : "",
         "FAQ p.11", (c.has("se") || c.has("sot")) ? "FAQ p.15" : ""]) },
@@ -1320,12 +1346,12 @@ var T3 = {};
         ["Planet successfully invaded", "Roll: <b>1–5</b> captured · <b>6–9</b> escapes · <b>10</b> killed. Ownership changing any other way: the Leader escapes."],
         ["Captives", "In the Status Phase the captor may hand a captive to any player (to its owner = freed, placed on a friendly planet not under blockade), keep it another round, or execute it."],
         ["Rescue", "After successfully invading a planet of a player holding captives, roll: 9 or 10 finds one (your choice). Someone else’s Leader becomes your captive; your own is placed on a friendly planet not under blockade. Invading a player’s last planet takes all his captives."]
-      ]) + h("Abilities") + dl([
-        ["Scientist", "Technology specialty planet: discount 2 instead of 1" + (c.has("sot") ? " (on a two-specialty planet, one more than the planet’s 2)" : "") + " · new Space Dock there costs 2 · its PDS get +1 on all rolls · with a PDS there, War Suns (and Graviton-Negator Dreadnoughts) can’t bombard it."],
-        ["Diplomat", "Delays an invasion of its planet: the invading Ground Forces return to their Carriers (they may not attack another planet instead). It cancels only that one invasion — another player may still invade the planet this round (even the same player, if his Command Counter leaves that system), and a War Sun may still bombard it. A planet protected by a Diplomat can’t be protected again this round or next. A fleet with a Diplomat may move through a system with an opponent’s ships if he permits."],
-        ["General", "Invading with your Ground Forces: re-roll up to 2 of your own dice each round (2 per General; never the same die twice). Defending: bombardment against its planet is at −4, and defending Ground Forces there get +1."],
-        ["Admiral", "In a Space Battle, 1 extra die for the ship carrying it (only in the combat-dice step). A Dreadnought carrying one gets +1 movement. A fleet attacked by a fleet with an Admiral can’t retreat unless it has an Admiral too (the Naalu ability and Skilled Retreat ignore this)."],
-        ["Agent", "Invading with your Ground Forces: enemy PDS can’t fire at them, and after success you may replace the enemy PDS and Space Dock with your own (not if yours are all built; a captured Space Dock can’t build this round). May be sacrificed as a Sabotage card."]
+      ]) + h("Abilities") + T3.icList([
+        ["leader-scientist", "Scientist", "Scientist", "Technology specialty planet: discount 2 instead of 1" + (c.has("sot") ? " (on a two-specialty planet, one more than the planet’s 2)" : "") + " · new Space Dock there costs 2 · its PDS get +1 on all rolls · with a PDS there, War Suns (and Graviton-Negator Dreadnoughts) can’t bombard it."],
+        ["leader-diplomat", "Diplomat", "Diplomat", "Delays an invasion of its planet: the invading Ground Forces return to their Carriers (they may not attack another planet instead). It cancels only that one invasion — another player may still invade the planet this round (even the same player, if his Command Counter leaves that system), and a War Sun may still bombard it. A planet protected by a Diplomat can’t be protected again this round or next. A fleet with a Diplomat may move through a system with an opponent’s ships if he permits."],
+        ["leader-general", "General", "General", "Invading with your Ground Forces: re-roll up to 2 of your own dice each round (2 per General; never the same die twice). Defending: bombardment against its planet is at −4, and defending Ground Forces there get +1."],
+        ["leader-admiral", "Admiral", "Admiral", "In a Space Battle, 1 extra die for the ship carrying it (only in the combat-dice step). A Dreadnought carrying one gets +1 movement. A fleet attacked by a fleet with an Admiral can’t retreat unless it has an Admiral too (the Naalu ability and Skilled Retreat ignore this)."],
+        ["leader-agent", "Agent", "Agent", "Invading with your Ground Forces: enemy PDS can’t fire at them, and after success you may replace the enemy PDS and Space Dock with your own (not if yours are all built; a captured Space Dock can’t build this round). May be sacrificed as a Sabotage card."]
       ]) + ul(["Leader abilities don’t stack (two Admirals ≠ +2 movement) — except the General’s re-rolls.", c.mod("mechs") ? "Mechanized Units are immune to Leader abilities." : ""]),
       src: (c) => cite(["Base p.34–35", c.has("se") || c.mod("mercs") ? (c.mod("mercs") ? "SoT p.12" : "") : "", "FAQ p.3–4" + (c.has("se") ? ", p.11" : "") + (c.mod("mechs") ? ", p.13" : "") + (c.has("sot") ? ", p.15" : "")]) },
     { title: "Option: Sabotage Runs", when: (c) => c.mod("sabotage"),
@@ -1345,8 +1371,11 @@ var T3 = {};
       ]),
       src: "Variants p.2" },
     { title: "Shattered Empire: Artifacts", when: (c) => c.mod("artifacts"),
-      html: (c) => ul([
-        "When you gain control of a planet with a face-down Artifact token, flip it. A coloured artifact: take its <b>Special Objective card</b> and gain <b>1 VP</b>. A blank “dummy” may be discarded.",
+      html: (c) => "<p>When you gain control of a planet with a face-down Artifact token, flip it:</p>" + T3.icList([
+        ["artifact-back", "Back of Artifact Token", "Back of Artifact Token", "how the token lies on its planet until someone gains control of it."],
+        ["artifact-green-precursor-fossil", "Green Precursor Fossil Artifact", "Coloured artifact (e.g. the Green Precursor Fossil)", "take its <b>Special Objective card</b> and gain <b>1 VP</b>."],
+        ["artifact-dummy", "“Dummy” Artifact", "“Dummy” artifact (no coloured symbol)", "no artifact is present on the planet; the token may be discarded."]
+      ]) + ul([
         "Lose the planet and you lose the card and the point. Anyone taking a planet with a face-up artifact takes the card (from its holder) and the point.",
         "Artifacts are never moved or destroyed; once revealed they stay face up.",
         (c.uses("diplomacy2") ? "Annexing a planet with Diplomacy II reveals its artifact after you take control. " : "") + "A player never has fewer victory points than the artifact planets he controls."
@@ -1428,17 +1457,18 @@ var T3 = {};
     { title: "Shards of the Throne: The Final Frontier", when: (c) => c.mod("frontier"),
       html: () => ul([
         "A system’s Space Domain Counter is revealed as soon as all moving units have ended their movement there; resolve it immediately. It can be used with or without Distant Suns."
-      ]) + dl([
-        ["Abandoned Transport", "The revealer receives 2 Trade Goods."],
-        ["Alien Technology", "The revealer may research any one technology he has the prerequisites for, at no cost."],
-        ["Derelict Ship", "The revealer may gain 1 Cruiser for free in this system."],
-        ["Discovery", "The revealer may draw 1 Action Card."],
-        ["Precursor Space Station", "Stays in play: while a player controls this system, he needs 1 fewer victory point to win."],
-        ["Empty Space", "No effect."],
-        ["Gravity Rift", "Stays in play: the system is now a Gravity Rift."],
-        ["Space Pirates", "The revealer loses all his Trade Goods or is attacked by a Dreadnought (another player rolls for it); with no Trade Goods he is attacked. Then discard."],
-        ["Supernova", "Stays in play: every ship in the system is destroyed and the system is now a Supernova."],
-        ["Alpha / Beta Wormhole Discovery", "Stays in play: the system now has an Alpha (or Beta) wormhole. Doesn’t count for Keeper of Gates."]
+      ]) + T3.icList([
+        ["sd-abandoned-transport", "Abandoned Transport", "Abandoned Transport", "The revealer receives 2 Trade Goods."],
+        ["sd-alien-technology", "Alien Technology", "Alien Technology", "The revealer may research any one technology he has the prerequisites for, at no cost."],
+        ["sd-derelict-ship", "Derelict Ship", "Derelict Ship", "The revealer may gain 1 Cruiser for free in this system."],
+        ["sd-discovery", "Discovery", "Discovery", "The revealer may draw 1 Action Card."],
+        ["sd-precursor-space-station", "Precursor Space Station", "Precursor Space Station", "Stays in play: while a player controls this system, he needs 1 fewer victory point to win."],
+        ["sd-empty-space", "Empty Space", "Empty Space", "No effect."],
+        ["sd-gravity-rift", "Gravity Rift", "Gravity Rift", "Stays in play: the system is now a Gravity Rift."],
+        ["sd-space-pirates", "Space Pirates", "Space Pirates", "The revealer loses all his Trade Goods or is attacked by a Dreadnought (another player rolls for it); with no Trade Goods he is attacked. Then discard."],
+        ["sd-supernova", "Supernova", "Supernova", "Stays in play: every ship in the system is destroyed and the system is now a Supernova."],
+        ["sd-alpha-wormhole-discovery", "Alpha Wormhole Discovery", "Alpha Wormhole Discovery", "Stays in play: the system now has an Alpha wormhole. Doesn’t count for Keeper of Gates."],
+        ["sd-beta-wormhole-discovery", "Beta Wormhole Discovery", "Beta Wormhole Discovery", "Stays in play: the system now has a Beta wormhole. Doesn’t count for Keeper of Gates."]
       ]),
       src: "SoT p.11, p.24 · FAQ p.15" },
     { title: "Shards of the Throne: Mechanized Units", when: (c) => c.mod("mechs"),
@@ -1488,7 +1518,7 @@ var T3 = {};
       html: (c) => ul([
         "Historical scenario during the Lazax Empire: preset map and races (see Setup); the <b>Lazax</b> — the acting rulers, starting with Mecatol Rex — can only be played here.",
         "Strategy Cards: the base game’s set, with <b>Civilization</b> instead of Political and <b>Industry</b> instead of Imperial.",
-        "<b>Agenda Cards</b> replace the Political deck and count as Political Cards; an Agenda electing a planet can’t target a Home System. Icons: Elect Player, Elect Planet, Event (resolve, discard, draw a new Agenda).",
+        "<b>Agenda Cards</b> replace the Political deck and count as Political Cards; an Agenda electing a planet can’t target a Home System. Their Elect Player, Elect Planet and Event icons are explained under Political Cards and the Galactic Council.",
         "Use all of Shards of the Throne’s new Action and Technology Cards and the <b>Mechanized Units</b> rules. No other optional rule and no Shattered Empire component may be used." +
           (c.p === 7 ? " <i>Seven players (this page’s reading): only the seventh colour — its plastic and Technology deck — comes from Shattered Empire, which SoT p.14 requires for a seventh player. Remove that deck’s 4 brand-new Shattered Empire technologies; its Shattered Empire Advanced Fighters, Micro Technology and Assault Cannon stay, as no other version exists in that colour.</i>" : "")
       ]),

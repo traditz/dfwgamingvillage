@@ -14,6 +14,14 @@ CC.expMeta = {
   mod:   { name: "Variant",     cls: "tag-mod" }
 };
 
+/* Rulebook icons (DFWGV icons standard v1, css/icons.css). Every picture is cropped from this page's own
+   rulebooks into images/icons/, and every call names its file in full. The text label always stays beside it.
+   Sources: Core p.5–8, p.10–12, p.14, p.17–18 (Rulebook & Token Reference Guide) · Underworld p.5–9, p.12 ·
+   Lairs p.5–6, p.8 · Adventuring Party p.3, p.5–7. */
+CC.ic = (f, alt, cls) => '<img class="aid-ic' + (cls ? " " + cls : "") + '" src="images/icons/' + f + '.webp" alt="' + alt + '">';
+CC.icIn = (f, alt) => '<img class="aid-ic aid-ic-inline" src="images/icons/' + f + '.webp" alt="' + alt + '">';
+CC.icLi = (f, alt, html, cls) => "<li>" + CC.ic(f, alt, cls) + "<span>" + html + "</span></li>";
+
 CC.expansions = [
   { id: "base",  short: "Clank! Catacombs", year: "2022", blurb: "The standalone tile-crawling Clank!. Always in play." },
   { id: "lairs", short: "Lairs & Lost Chambers", year: "2024", blurb: "12 new tiles with lairs, lost chambers, pit traps and trophies, plus 50 cards." },
@@ -99,7 +107,7 @@ CC.phases = [
         t: "Reserve, Dungeon Deck & Dungeon Row",
         d: (c) => "<ul><li>Create the <b>Reserve</b>: the Goblin card plus three stacks — Mercenary, Explore, Secret Tome" + (c.p >= 5 ? " (add the four extra copies of each from Adventuring Party)" : "") + "." + (c.has("uw") ? " Add the <b>Underworld Guardian</b> card next to the Goblin as a reference." : "") + "</li>" +
           ((c.has("lairs") || c.has("uw") || c.p >= 5) ? "<li>Shuffle into the <b>Dungeon Deck</b>: " + [c.has("lairs") ? "the 50 Lairs & Lost Chambers cards" : "", c.has("uw") ? "the 50 Underworld cards" : "", c.p >= 5 ? "the 35 Adventuring Party cards" : ""].filter(Boolean).join(", ") + ".</li>" : "") +
-          "<li>Shuffle the <b>Dungeon Deck</b> and deal <b>six cards face up</b> as the Dungeon Row. Replace any card showing the <b>Dragon Attack symbol</b> until the Row has six without it; shuffle replaced cards back in. If any card in the starting Row has <b>Arrive</b> text, carry it out before the first player's turn.</li>" +
+          "<li>Shuffle the <b>Dungeon Deck</b> and deal <b>six cards face up</b> as the Dungeon Row. Replace any card showing the " + CC.icIn("dragon-attack", "Dragon Attack symbol") + " <b>Dragon Attack symbol</b> until the Row has six without it; shuffle replaced cards back in. If any card in the starting Row has <b>Arrive</b> text, carry it out before the first player's turn.</li>" +
           "<li>Place the deck next to the Row, leaving room for a Dungeon discard pile.</li>" +
           (c.has("uw") ? "<li>Shuffle the <b>fate deck</b> and place it near the Dungeon Deck; give each player an Underworld <b>reference card</b>.</li>" : "") +
           (c.has("lairs") ? "<li>Place the five <b>monster markers</b> in the Bank: three Living Statues, one Medusa, one Sphinx.</li>" : "") + "</ul>",
@@ -144,7 +152,13 @@ CC.reference = [
     title: "Your Turn — Cards & Resources",
     when: () => true,
     html: () => "<ul><li>Start each turn with five cards; you <b>must play all your cards</b> before ending it, in any order, into your play area.</li>" +
-      "<li>Cards make three pooled resources — <b>Skill</b> (acquire cards, use devices), <b>Swords</b> (fight monsters, prevent tunnel-monster damage), <b>Boots</b> (movement) — plus <b>Gold</b>, <b>Clank!</b>, and card draws. Unused Skill, Swords and Boots are wasted at the end of the turn; Gold is kept in your personal supply (1 point each at game end).</li>" +
+      "<li>Cards make three pooled resources, plus Gold, Clank! and card draws:<ul class='aid-icons'>" +
+        CC.icLi("skill", "Skill", "<b>Skill</b> — acquire cards, use devices.") +
+        CC.icLi("swords", "Swords", "<b>Swords</b> — fight monsters, prevent tunnel-monster damage.") +
+        CC.icLi("boots", "Boots", "<b>Boots</b> — movement.") +
+        CC.icLi("gold", "Gold", "<b>Gold</b> — kept in your personal supply (1 point each at game end).") +
+      "</ul></li>" +
+      "<li>Unused Skill, Swords and Boots are wasted at the end of the turn.</li>" +
       "<li>Take any action <b>as many times as you like</b> if you can pay for it, before, between or after card plays.</li>" +
       "<li><b>Clank!:</b> add cubes from your supply to the Clank! area when you make noise (none if your supply is empty); negative Clank! removes your cubes from the area (creditable later the same turn). Leftover negative Clank! is lost at end of turn.</li>" +
       "<li>Card effects apply regardless of play order (e.g. Rebel General sees a companion played before <i>or</i> after it).</li>" +
@@ -154,36 +168,51 @@ CC.reference = [
   {
     title: "Actions",
     when: () => true,
-    html: (c) => "<ul><li><b>Acquire a Card</b> (Skill): buy blue-banner cards from the Dungeon Row (cost bottom-right; goes to your discard pile) or yellow-banner cards from the Reserve. Row cards are <b>not replaced until end of turn</b>.</li>" +
-      "<li><b>Use a Device</b> (Skill): purple banners; pay the cost and carry out the USE text <b>immediately</b>; the card goes to the Dungeon discard pile.</li>" +
-      "<li><b>Fight a Monster</b> (Swords): red banners; gain the DEFEAT text; the card goes to the Dungeon discard pile. The <b>Goblin</b> in the Reserve stays put and can be fought repeatedly.</li>" +
-      "<li><b>Movement</b> (Boots): 1 Boot per tunnel; <b>footprints</b> = 2 Boots; <b>monster icons</b> = 1 damage each unless you spend a Sword per icon; <b>lock icons</b> need a Lockpick each (placed on the tunnel — permanently unlocked for everyone; two locks in one tunnel = two Lockpicks); <b>one-way tunnels</b> only in the arrow's direction.</li>" +
-      "<li><b>Buy from the Market</b> (7 Gold, in a Market room): any items, multiple buys allowed" + (c.has("uw") ? ". <b>Underworld market rooms</b> sell only the five Underworld items (and vice versa)" : "") + ".</li>" +
-      "<li><b>Take an Artifact</b> (in its room, any point of your turn): you can never hold two (a Backpack allows one more). Taking one moves the <b>Dragon marker up the Rage Track</b>. You're stuck with the one you take!</li>" +
-      "<li><b>Pick a Chest / Library / Prison</b> (spend a Lockpick onto the feature): Chest → random <b>major secret</b>; Library → a <b>Secret Tome</b> from the Reserve free into your discard pile; Prison → free <b>two random Prisoners</b> (kept face up for scoring; their “immediate” effects trigger). Each feature can be picked only once per game, and only if its reward is still available (a Prison can still be picked for the last single Prisoner).</li>" +
-      "<li><b>Wayshrine</b> (special action, while in it): place a cube from your supply on an empty space; gain 1 Gold per Wayshrine you've marked so far. One mark per Wayshrine; no cubes in your supply = can't mark" + (c.p >= 5 ? "; each Wayshrine holds max four cubes — a fifth or sixth player arriving late may be shut out" : "") + ". (Wayshrine cubes never become Clank!.)</li></ul>",
-    src: (c) => (c.p >= 5 ? "Core p.7–8, p.11, p.15, p.18" : "Core p.7–8, p.11, p.18") + (c.has("uw") ? " · Underworld p.9" : "")
+    html: (c) => "<ul><li><b>Acquire a Card</b> (" + CC.icIn("skill", "Skill") + " Skill): buy blue-banner cards from the Dungeon Row (cost bottom-right; goes to your discard pile) or yellow-banner cards from the Reserve. Row cards are <b>not replaced until end of turn</b>.</li>" +
+      "<li><b>Use a Device</b> (" + CC.icIn("skill", "Skill") + " Skill): purple banners; pay the cost and carry out the USE text <b>immediately</b>; the card goes to the Dungeon discard pile.</li>" +
+      "<li><b>Fight a Monster</b> (" + CC.icIn("swords", "Swords") + " Swords): red banners; gain the DEFEAT text; the card goes to the Dungeon discard pile. The <b>Goblin</b> in the Reserve stays put and can be fought repeatedly.</li>" +
+      "<li><b>Movement</b> (" + CC.icIn("boots", "Boots") + " Boots): 1 Boot per tunnel; some tunnels add requirements:<ul class='aid-icons'>" +
+        CC.icLi("footprints", "Footprint", "<b>Footprints</b>: the tunnel needs 2 Boots instead of 1.") +
+        CC.icLi("tunnel-monster", "Monster", "<b>Monster icons</b> = 1 damage each unless you spend a Sword per icon.") +
+        CC.icLi("lock", "Lock", "<b>Lock icons</b> need a Lockpick each (placed on the tunnel — permanently unlocked for everyone; two locks in one tunnel = two Lockpicks).") +
+      "</ul><b>One-way tunnels</b> only in the arrow's direction.</li>" +
+      "<li><b>Buy from the Market</b> (7 Gold, in a " + CC.icIn("market", "Market") + " Market room): any items, multiple buys allowed" + (c.has("uw") ? ". <b>Underworld market rooms</b> sell only the five Underworld items (and vice versa)" : "") + ".</li>" +
+      "<li><b>Take an Artifact</b> " + CC.icIn("artifact", "Artifact") + " (in its room, any point of your turn): you can never hold two (a Backpack allows one more). Taking one moves the <b>Dragon marker up the Rage Track</b>. You're stuck with the one you take!</li>" +
+      "<li><b>Pick a Chest / Library / Prison</b> (spend a Lockpick onto the feature):<ul class='aid-icons'>" +
+        CC.icLi("chest", "Chest", "<b>Chest</b> → random <b>major secret</b>.") +
+        CC.icLi("library", "Library", "<b>Library</b> → a <b>Secret Tome</b> from the Reserve free into your discard pile.") +
+        CC.icLi("prison", "Prison", "<b>Prison</b> → free <b>two random Prisoners</b> (kept face up for scoring; their “immediate” effects trigger).") +
+      "</ul>Each feature can be picked only once per game, and only if its reward is still available (a Prison can still be picked for the last single Prisoner).</li>" +
+      "<li>" + CC.icIn("wayshrine", "Wayshrine") + " <b>Wayshrine</b> (special action, while in it): place a cube from your supply on an empty space; gain 1 Gold per Wayshrine you've marked so far. One mark per Wayshrine; no cubes in your supply = can't mark" + (c.p >= 5 ? "; each Wayshrine holds max four cubes — a fifth or sixth player arriving late may be shut out" : "") + ". (Wayshrine cubes never become Clank!.)</li></ul>",
+    src: (c) => (c.p >= 5 ? "Core p.6–8, p.11, p.15, p.18" : "Core p.6–8, p.11, p.18") + (c.has("uw") ? " · Underworld p.9" : "")
   },
   {
     title: "Discovering Tiles & Tile Features",
     when: () => true,
     html: (c) => "<ul><li>Moving along a tunnel off the dungeon's edge <b>discovers</b> the next tile from the stack: reveal it, rotate it any way you like, and place it sharing an entire edge (never stacked; the long edges of the starting tile line up with either half). Placing it completes the tunnel — you interact with any icons it adds as you finish the move.</li>" +
       "<li>If you can't afford the completed tunnel (Boots/Lockpicks), choose a different orientation; you may pause mid-move to acquire/use/fight for what you need.</li>" +
-      "<li>If the tile stack empties, no more tiles can be discovered.</li>" +
-      "<li><b>Artifact rooms:</b> when placed, stock the room from the Artifact stack" + (c.p >= 5 ? ": with 5–6 players a room with “+” icons gets <b>multiple Artifacts</b>, the top one plus one more per “+” (instead of digging deeper). Whoever takes from a room holding more than one takes the <b>most valuable</b> available, and a Backpack never lets you take two from the same room" : ": the top Artifact, or for each “+” icon one Artifact <b>deeper</b> than the top. Not enough Artifacts below the top for the “+” icons → place the highest-valued Artifact that remains") + ". Empty stack = empty room.</li>" +
-      "<li><b>Crypt:</b> where you start and where you must return <b>with an Artifact</b> to escape.</li>" +
-      "<li><b>Crystal Caves:</b> entering exhausts you — no more Boots this turn (teleports still work).</li>" +
+      "<li>If the tile stack empties, no more tiles can be discovered.</li></ul>" +
+      "<ul class='aid-icons'>" +
+        CC.icLi("artifact-room", "Artifact room", "<b>Artifact rooms:</b> when placed, stock the room from the Artifact stack" + (c.p >= 5 ? ": with 5–6 players a room with " + CC.icIn("artifact-room-plus", "Artifact rooms with plus icons") + " “+” icons gets <b>multiple Artifacts</b>, the top one plus one more per “+” (instead of digging deeper). Whoever takes from a room holding more than one takes the <b>most valuable</b> available, and a Backpack never lets you take two from the same room" : ": the top Artifact, or for each " + CC.icIn("artifact-room-plus", "Artifact rooms with plus icons") + " “+” icon one Artifact <b>deeper</b> than the top. Not enough Artifacts below the top for the “+” icons → place the highest-valued Artifact that remains") + ". Empty stack = empty room.") +
+        CC.icLi("crystal-cave", "Crystal Cave", "<b>Crystal Caves:</b> entering exhausts you — no more Boots this turn (teleports still work).") +
+        CC.icLi("portal", "Portal", "<b>Portals:</b> a tunnel into a portal doesn't stop there: you exit from <b>any other portal</b> on any tile. Room → portal → portal → room costs just <b>one Boot</b>, but both tunnels still apply their Monster, Lock and one-way icons. Teleports can use portals as if the two rooms were adjacent. Afterwards you may keep moving.") +
+      "</ul>" +
+      "<ul><li><b>Crypt:</b> where you start and where you must return <b>with an Artifact</b> to escape.</li>" +
       "<li><b>Haunted tiles</b> (4 of the base game's 22 Depths tiles" + (c.has("uw") ? ", plus Underworld's new haunted Depths and Underworld tiles" : "") + "): when added, put a <b>Ghost cube</b> from the Bank into the Clank! area" + (c.has("uw") ? " (only five Ghosts exist: if none are left in the Bank, add nothing)" : "") + ".</li>" +
-      "<li><b>Portals:</b> a tunnel into a portal doesn't stop there: you exit from <b>any other portal</b> on any tile. Room → portal → portal → room costs just <b>one Boot</b>, but both tunnels still apply their Monster, Lock and one-way icons. Teleports can use portals as if the two rooms were adjacent. Afterwards you may keep moving.</li>" +
-      "<li><b>Room rewards</b> (minor secret, Monkey Idol, Gold, healing): once per room per turn, on entry.</li></ul>",
+      "<li><b>Room rewards</b> — once per room per turn, on entry:<ul class='aid-icons'>" +
+        CC.icLi("minor-secret", "Minor Secret", "<b>Minor secret</b> — take one at random from the Bank (none left = no reward).") +
+        CC.icLi("monkey-idol", "Monkey Idol", "<b>Monkey Idol</b> — take one from the room into your personal supply.") +
+        CC.icLi("gold", "Gold", "<b>Gold</b> — take the amount shown from the Bank.") +
+        CC.icLi("healing", "Healing", "<b>Healing</b> — heal 1 damage.") +
+      "</ul></li></ul>",
     src: (c) => (c.p >= 5 ? "Core p.9–11, p.15" : "Core p.9–11") + (c.has("uw") ? " · Underworld p.2" : "")
   },
   {
     title: "Card Effects",
     when: () => true,
     html: () => "<ul><li><b>Acquire</b> text: carried out once, the moment you acquire the card from the Dungeon Row (not when you later play it).</li>" +
-      "<li><b>Arrive</b> text: carried out as soon as the card is revealed in the Dungeon Row, before any Dragon Attack the refill triggers. Arrive cards in the opening Row resolve before the first player's turn.</li>" +
-      "<li><b>Danger</b>: +1 cube drawn in each Dragon Attack per Danger card in the Row.</li>" +
+      "<li>" + CC.icIn("arrive", "Arrive") + " <b>Arrive</b> text: carried out as soon as the card is revealed in the Dungeon Row, before any Dragon Attack the refill triggers. Arrive cards in the opening Row resolve before the first player's turn.</li>" +
+      "<li>" + CC.icIn("danger", "Danger") + " <b>Danger</b>: +1 cube drawn in each Dragon Attack per Danger card in the Row.</li>" +
       "<li><b>Discard</b>: only an unplayed card from your hand; the discarded card doesn't have its normal effect. If an effect needs a discard, you must actually discard to get it.</li>" +
       "<li><b>Teleport</b>: move straight to another room with no Boots, still exhausted if you entered a Crystal Cave this turn. To an “adjacent room” (connected by a tunnel), ignore that tunnel's icons, even against a one-way arrow. You can teleport off a tile's edge to discover a new tile.</li>" +
       "<li><b>Trash</b>: remove the card from the game (to the box).</li>" +
@@ -193,11 +222,11 @@ CC.reference = [
   {
     title: "Clank!, Dragon Attacks, Health",
     when: () => true,
-    html: (c) => "<ul><li><b>End of turn:</b> (1) discard your play area and draw five; (2) refill the Dungeon Row to six; (3) if any <b>new</b> card shows the Dragon Attack symbol, the dragon attacks <b>once</b>.</li>" +
+    html: (c) => "<ul><li><b>End of turn:</b> (1) discard your play area and draw five; (2) refill the Dungeon Row to six; (3) if any <b>new</b> card shows the " + CC.icIn("dragon-attack", "Dragon Attack symbol") + " Dragon Attack symbol, the dragon attacks <b>once</b>.</li>" +
       "<li><b>Dragon Attack:</b> all cubes in the Clank! area go into the Dragon bag; shake and draw cubes equal to the Rage Track number (+1 per <b>Danger</b> card in the Row). Black cubes are set aside in the Bank; your colored cubes are <b>damage to you</b>; undrawn cubes stay in the bag for later attacks.</li>" +
       "<li><b>Ghost cubes:</b> when drawn, <b>every</b> player takes 1 damage; after the attack the Ghost cubes return to the Clank! area (they'll be in the bag again next time). If you have no cubes in your supply to mark Ghost damage, use a black cube already set aside in the Bank.</li>" +
       "<li>The <b>Rage Track</b> advances every time an Artifact is picked up (and from certain tokens" + (c.has("uw") ? ", e.g. the Dragon Egg minor secret, the Adventurer prisoner, Soul Elixir" : ", e.g. the Dragon Egg minor secret or the Adventurer prisoner") + ").</li>" +
-      "<li><b>Health:</b> damage cubes go on your Health Meter. You can't voluntarily take damage with an empty supply or if it would fill your meter. A full meter <b>knocks you out</b>. Healing returns a cube of yours to your supply.</li>" +
+      "<li><b>Health:</b> damage cubes go on your Health Meter. You can't voluntarily take damage with an empty supply or if it would fill your meter. A full meter <b>knocks you out</b>. " + CC.icIn("healing", "Healing") + " Healing returns a cube of yours to your supply.</li>" +
       "<li>If the Dragon bag is <b>empty after an attack</b>, or the Dungeon Deck can't refill the Row, the game ends immediately — remaining players are knocked out.</li></ul>",
     src: (c) => "Core p.11–12, p.17–18" + (c.has("uw") ? " · Underworld p.12" : "")
   },
@@ -205,51 +234,120 @@ CC.reference = [
     title: "Game End & Scoring",
     when: () => true,
     html: (c) => "<ul><li>The game ends when <b>all players have escaped or been knocked out</b>.</li>" +
-      "<li><b>Escape:</b> reach the <b>Crypt</b> carrying an Artifact — you can't return empty-handed. Finish your turn, then remove your pawn before refilling the Dungeon Row, and take a <b>Mastery token</b> (+20 points).</li>" +
+      "<li><b>Escape:</b> reach the <b>Crypt</b> carrying an Artifact — you can't return empty-handed. Finish your turn, then remove your pawn before refilling the Dungeon Row, and take a " + CC.icIn("mastery", "Mastery token") + " <b>Mastery token</b> (+20 points).</li>" +
       "<li><b>Knocked out:</b> meter full. With no Artifact, or with your pawn in the <b>Depths</b>" + (c.has("uw") ? " or the Underworld" : "") + ", you score <b>0</b>. (The Depths are the darker tiles — 22 in the base game — plus the top half of the starting tile.)</li>" +
       "<li>Escaped/knocked-out players stop taking turns: they add no more Clank!, 'all players' effects skip them, and drawn cubes don't damage them. On each of their turns they put the Clank! area cubes in the bag and draw exactly <b>four</b> cubes (<b>six</b> in a 2-player game), ignoring the Rage Track and Danger.</li>" +
-      "<li><b>Score:</b> Artifact value + all other tokens (Mastery, secrets, prisoners, Monkey Idols…) + Gold + points on your cards (deck, hand and discard pile)." +
-      (c.has("lairs") ? " Trophies (cards and monster markers) in your personal supply add any points they give." : "") +
-      (c.has("uw") ? " Underworld: undercoins score 1 each; reveal and score your fate card(s); an artifact enhancer multiplies your best artifact (round up); an Imp Assistant scores its value per Secret Tome." : "") +
-      " Most points wins; ties go to the most valuable Artifact" + (c.has("uw") ? " (counting its artifact enhancer; if enhancers make two Artifacts equal, the higher unmodified value wins)" : "") + ".</li></ul>",
+      "<li><b>Score:</b> add up<ul class='aid-icons'>" +
+        CC.icLi("artifact", "Artifact", "your Artifact's value;") +
+        CC.icLi("monkey-idol", "Monkey Idol", "all other tokens (Mastery, secrets, prisoners, Monkey Idols…);") +
+        CC.icLi("gold", "Gold", "your Gold;") +
+        CC.icLi("card-points", "Card points", "points on your cards (deck, hand and discard pile; shown in each card's top right corner).") +
+      "</ul>" +
+      (c.has("lairs") ? "Trophies (cards and monster markers) in your personal supply add any points they give. " : "") +
+      (c.has("uw") ? "Underworld: undercoins score 1 each; reveal and score your fate card(s); an artifact enhancer multiplies your best artifact (round up); an Imp Assistant scores its value per Secret Tome. " : "") +
+      "Most points wins; ties go to the most valuable Artifact" + (c.has("uw") ? " (counting its artifact enhancer; if enhancers make two Artifacts equal, the higher unmodified value wins)" : "") + ".</li></ul>",
     src: (c) => "Core p.14" + (c.has("lairs") ? " · Lairs p.4, p.8" : "") + (c.has("uw") ? " · Underworld p.6, p.8–9" : "")
   },
   {
     title: "Token Quick Reference",
     when: () => true,
-    html: (c) => "<ul><li><b>Major secrets</b> (Chests): Catacombs Map (move against one-way arrows, 5 pts), Chalice (7 pts), Greater Skill Boost (+5 Skill), Greater Treasure (5 Gold), Potion of Greater Healing (heal 2).</li>" +
-      "<li><b>Minor secrets</b> (rooms): Dragon Egg (3 pts, rage +1), Lockpick, Magic Spring (trash a card from discard/play area at end of turn), Potion of Healing (heal 1), Potion of Swiftness (+1 Boot), Potion of Strength (+2 Swords) — keep until used on your turn, Puzzle Box (redeem at a Wayshrine for a major secret), Treasure (2 Gold)" + (c.p >= 5 ? ", Potion of Stealth (−1 Clank! for you, +1 for each opponent)" : "") + ".</li>" +
-      "<li><b>Prisoners</b> (Prisons free 2 per Lockpick): Adventurer (rage +1; 3 pts), Barbarian (+2 Swords this turn; 2 pts), Cleric (heal 1; 2 pts), Golden Monkey Bot (counts as a Monkey Idol for all purposes, but 3 pts), Haunted Prisoner (put a Ghost cube from the Bank in the Clank! area; 3 pts), Mayor (5 pts if you have a Mastery token), Monk (1 pt per Wayshrine you've marked), Peasant (2 pts), Primatologist (5 pts with at least one Monkey Idol — the Bot counts), Prince/Princess (5 pts with a Crown), Sorceress (5 pts with at least two Secret Tomes), Warrior (1 pt per Prisoner freed, himself included). The <b>Discount Coupon</b> also comes from Prisons but is <b>not a Prisoner</b> for any purpose (Warrior, Riot, Brave Hero): use it once to pay 5 less Gold for a Market item.</li>" +
-      "<li><b>Market items:</b> Backpack (carry a 2nd Artifact" + (c.p >= 5 ? " — never two from the same room" : "") + ", 5 pts), Blood Amulet (needs 5+ damage; heal 2; 7 pts), Burglar's Kit (2 Lockpicks, 2 pts), Crown (points as shown, best available first)" + (c.p >= 5 ? ", Invisibility Cloak (ignore tunnel monsters, 5 pts)" : "") + ".</li>" +
-      (c.has("uw") ? "<li><b>Underworld tokens:</b> Prisoners — Faithful (take 1 undercoin; 1 pt), Haunted Myrmidon (add a Ghost cube; +1 Sword each turn you're in the Underworld; 1 pt), Soul Elixir (rage +1; once in the Underworld heal 2; <b>not</b> a Prisoner). Major secrets — Book of the Dead (5 pts; becomes a Secret Tome at game end), Greater Potion of Hope (heal 1, or 2 in the Underworld, +1 Boot), Undercoin Cache (counts as 4 undercoins). Minor secrets — Darkiron Ingot (once: −3 Gold on an Underworld market item, else 2 pts), Potion of Hope (+1 Sword; +1 Boot too in the Underworld), Underworld Chute (once, outside the Underworld: place it as a permanent down-only chute; else 1 pt). Regular market — River Lamp (take 3 undercoins; 5 pts). Underworld markets only — Blood Amulet (as Catacombs), Boots of the Wind (+1 Boot each turn; 1 pt), Gauntlets of Destiny (draw 3 fate cards, keep 1; fate limit 2; 6 pts), Jester's Cap (7 pts per Stumble; counts as a crown), River Boat (trashed cards stack under it and score as part of your deck; 8 pts +1 per card).</li>" : "") +
-      "<li><b>Monkey Idols:</b> 5 pts each, not Artifacts, from the Monkey Shrine.</li></ul>",
+    html: (c) => "<h4>Major secrets (from Chests)</h4><ul class='aid-icons'>" +
+        CC.icLi("major-catacombs-map", "Catacombs Map", "<b>Catacombs Map</b> — move against one-way arrows; 5 pts.") +
+        CC.icLi("major-chalice", "Chalice", "<b>Chalice</b> — 7 pts (not an Artifact).") +
+        CC.icLi("major-greater-skill-boost", "Greater Skill Boost", "<b>Greater Skill Boost</b> — +5 Skill.") +
+        CC.icLi("major-greater-treasure", "Greater Treasure", "<b>Greater Treasure</b> — 5 Gold.") +
+        CC.icLi("major-potion-greater-healing", "Potion of Greater Healing", "<b>Potion of Greater Healing</b> — heal 2 (keep until used on your turn).") +
+      "</ul>" +
+      "<h4>Minor secrets (from rooms)</h4><ul class='aid-icons'>" +
+        CC.icLi("minor-dragon-egg", "Dragon Egg", "<b>Dragon Egg</b> — 3 pts, rage +1.") +
+        CC.icLi("minor-lockpick", "Lockpick", "<b>Lockpick</b> — take a Lockpick from the Bank.") +
+        CC.icLi("minor-magic-spring", "Magic Spring", "<b>Magic Spring</b> — trash a card from discard/play area at end of turn.") +
+        CC.icLi("minor-potion-healing", "Potion of Healing", "<b>Potion of Healing</b> — heal 1 (keep until used on your turn).") +
+        CC.icLi("minor-potion-swiftness", "Potion of Swiftness", "<b>Potion of Swiftness</b> — +1 Boot (keep until used on your turn).") +
+        CC.icLi("minor-potion-strength", "Potion of Strength", "<b>Potion of Strength</b> — +2 Swords (keep until used on your turn).") +
+        CC.icLi("minor-puzzle-box", "Puzzle Box", "<b>Puzzle Box</b> — redeem at a Wayshrine for a major secret.") +
+        CC.icLi("minor-treasure", "Treasure", "<b>Treasure</b> — 2 Gold.") +
+        (c.p >= 5 ? CC.icLi("ap-minor-potion-of-stealth", "Potion of Stealth", "<b>Potion of Stealth</b> — −1 Clank! for you, +1 for each opponent.") : "") +
+      "</ul>" +
+      "<h4>Prisoners (Prisons free 2 per Lockpick)</h4><ul class='aid-icons'>" +
+        CC.icLi("prisoner-adventurer", "Adventurer", "<b>Adventurer</b> — rage +1; 3 pts.") +
+        CC.icLi("prisoner-barbarian", "Barbarian", "<b>Barbarian</b> — +2 Swords this turn; 2 pts.") +
+        CC.icLi("prisoner-cleric", "Cleric", "<b>Cleric</b> — heal 1; 2 pts.") +
+        CC.icLi("prisoner-golden-monkey-bot", "Golden Monkey Bot", "<b>Golden Monkey Bot</b> — counts as a Monkey Idol for all purposes, but 3 pts.") +
+        CC.icLi("prisoner-haunted", "Haunted Prisoner", "<b>Haunted Prisoner</b> — put a Ghost cube from the Bank in the Clank! area; 3 pts.") +
+        CC.icLi("prisoner-mayor", "Mayor", "<b>Mayor</b> — 5 pts if you have a Mastery token.") +
+        CC.icLi("prisoner-monk", "Monk", "<b>Monk</b> — 1 pt per Wayshrine you've marked.") +
+        CC.icLi("prisoner-peasant", "Peasant", "<b>Peasant</b> — 2 pts.") +
+        CC.icLi("prisoner-primatologist", "Primatologist", "<b>Primatologist</b> — 5 pts with at least one Monkey Idol (the Bot counts).") +
+        CC.icLi("prisoner-prince-princess", "Prince/Princess", "<b>Prince/Princess</b> — 5 pts with a Crown.", "ic-wide") +
+        CC.icLi("prisoner-sorceress", "Sorceress", "<b>Sorceress</b> — 5 pts with at least two Secret Tomes.") +
+        CC.icLi("prisoner-warrior", "Warrior", "<b>Warrior</b> — 1 pt per Prisoner freed, himself included.") +
+        CC.icLi("discount-coupon", "Discount Coupon", "The <b>Discount Coupon</b> also comes from Prisons but is <b>not a Prisoner</b> for any purpose (Warrior, Riot, Brave Hero): use it once to pay 5 less Gold for a Market item.") +
+      "</ul>" +
+      "<h4>Market items</h4><ul class='aid-icons'>" +
+        CC.icLi("item-backpack", "Backpack", "<b>Backpack</b> — carry a 2nd Artifact" + (c.p >= 5 ? " (never two from the same room)" : "") + "; 5 pts.") +
+        CC.icLi("item-blood-amulet", "Blood Amulet", "<b>Blood Amulet</b> — needs 5+ damage; heal 2; 7 pts.") +
+        CC.icLi("item-burglars-kit", "Burglar's Kit", "<b>Burglar's Kit</b> — 2 Lockpicks; 2 pts.") +
+        CC.icLi("item-crown", "Crown", "<b>Crown</b> — points as shown, best available first.") +
+        (c.p >= 5 ? CC.icLi("ap-item-invisibility-cloak", "Invisibility Cloak", "<b>Invisibility Cloak</b> — ignore tunnel monsters; 5 pts.") : "") +
+      "</ul>" +
+      "<h4>Monkey Idols</h4><ul class='aid-icons'>" +
+        CC.icLi("monkey-idol", "Monkey Idol", "<b>Monkey Idols</b> — 5 pts each, not Artifacts, from the Monkey Shrine.") +
+      "</ul>" +
+      (c.has("uw") ? "<h4>Underworld prisoners</h4><ul class='aid-icons'>" +
+          CC.icLi("uw-prisoner-faithful", "Faithful", "<b>Faithful</b> — take 1 undercoin; 1 pt.") +
+          CC.icLi("uw-prisoner-haunted-myrmidon", "Haunted Myrmidon", "<b>Haunted Myrmidon</b> — add a Ghost cube; +1 Sword each turn you're in the Underworld; 1 pt.") +
+          CC.icLi("uw-soul-elixir", "Soul Elixir", "<b>Soul Elixir</b> — rage +1; once in the Underworld heal 2; <b>not</b> a Prisoner.") +
+        "</ul>" +
+        "<h4>Underworld secrets</h4><ul class='aid-icons'>" +
+          CC.icLi("uw-major-book-of-the-dead", "Book of the Dead", "<b>Book of the Dead</b> (major) — 5 pts; becomes a Secret Tome at game end.") +
+          CC.icLi("uw-major-greater-potion-of-hope", "Greater Potion of Hope", "<b>Greater Potion of Hope</b> (major) — heal 1, or 2 in the Underworld, +1 Boot.") +
+          CC.icLi("uw-major-undercoin-cache", "Undercoin Cache", "<b>Undercoin Cache</b> (major) — counts as 4 undercoins.") +
+          CC.icLi("uw-minor-darkiron-ingot", "Darkiron Ingot", "<b>Darkiron Ingot</b> (minor) — once: −3 Gold on an Underworld market item, else 2 pts.") +
+          CC.icLi("uw-minor-potion-of-hope", "Potion of Hope", "<b>Potion of Hope</b> (minor) — +1 Sword; +1 Boot too in the Underworld.") +
+          CC.icLi("uw-minor-underworld-chute", "Underworld Chute", "<b>Underworld Chute</b> (minor) — once, outside the Underworld: place it as a permanent down-only chute; else 1 pt.") +
+        "</ul>" +
+        "<h4>Market item (regular market)</h4><ul class='aid-icons'>" +
+          CC.icLi("uw-item-river-lamp", "River Lamp", "<b>River Lamp</b> — take 3 undercoins; 5 pts.") +
+        "</ul>" +
+        "<h4>Underworld market items (Underworld market rooms only)</h4><ul class='aid-icons'>" +
+          CC.icLi("uw-item-blood-amulet", "Blood Amulet", "<b>Blood Amulet</b> — as Catacombs.") +
+          CC.icLi("uw-item-boots-of-the-wind", "Boots of the Wind", "<b>Boots of the Wind</b> — +1 Boot each turn; 1 pt.") +
+          CC.icLi("uw-item-gauntlets-of-destiny", "Gauntlets of Destiny", "<b>Gauntlets of Destiny</b> — draw 3 fate cards, keep 1; fate limit 2; 6 pts.") +
+          CC.icLi("uw-item-jesters-cap", "Jester's Cap", "<b>Jester's Cap</b> — 7 pts per Stumble; counts as a crown.") +
+          CC.icLi("uw-item-river-boat", "River Boat", "<b>River Boat</b> — trashed cards stack under it and score as part of your deck; 8 pts +1 per card.") +
+        "</ul>" : ""),
     src: (c) => "Core p.17–18" + (c.p >= 5 ? " · Adventuring Party p.3" : "") + (c.has("uw") ? " · Underworld p.12" : "")
   },
   {
     title: "Underworld — Getting There & Back",
     when: (c) => c.has("uw"),
-    html: () => "<ul><li>The <b>Underworld</b> is a separate area (max six tiles: the starting tile plus tiles A–E placed against it, never rotated). It is <b>not</b> the Depths — Depths effects don't work there — but being knocked out there also scores <b>0</b>. To discover one, reveal the top Underworld tile and place it with its shorter flat edge against the starting tile (you don't choose its orientation). Defeating the <b>Marble Guardian</b> while in the Underworld places a new Underworld tile in an available space next to yours.</li>" +
-      "<li><b>Ladders</b> (on the new Depths tiles, lettered A–E): spend 1 Boot (or a teleport) to descend to the matching Underworld ladder room, discovering its tile if needed. Climb back up the same way — but only if the matching lettered room actually exists in the Depths (mark connected rooms with <b>ladder tokens</b>).</li>" +
-      "<li><b>Underworld chutes</b> (unlettered; the Underworld Chute minor secret can create one): spend 1 Boot to descend to <b>any</b> ladder room — even an undiscovered one, revealing its tile. One-way, down only — not even a teleport takes you back up.</li>" +
-      "<li>The Underworld starting tile's <b>return portal</b> is one-way <b>out</b>: exit to any other portal; you can never enter through it.</li>" +
-      "<li><b>Tolls:</b> starting your turn in the Underworld costs <b>1 undercoin</b> (or +2 Clank! if you can't pay — you can't choose the Clank! if you have a coin). Toll-booth tunnels cost 1 undercoin, no Clank! option (teleports ignore them).</li>" +
-      "<li><b>Undercoins</b> work exactly like Gold (spend for market items, 1 pt each) and are earned from undercoin rooms (once per room each turn) and some cards.</li>" +
-      "<li><b>“When you trash this” cards:</b> you can't trash them whenever you choose — you need some other means, such as an underground lake.</li></ul>",
+    html: () => "<ul><li>The <b>Underworld</b> is a separate area (max six tiles: the starting tile plus tiles A–E placed against it, never rotated). It is <b>not</b> the Depths — Depths effects don't work there — but being knocked out there also scores <b>0</b>. To discover one, reveal the top Underworld tile and place it with its shorter flat edge against the starting tile (you don't choose its orientation). Defeating the <b>Marble Guardian</b> while in the Underworld places a new Underworld tile in an available space next to yours.</li></ul>" +
+      "<ul class='aid-icons ic-wide-col'>" +
+        CC.icLi("ladder-room", "Ladder room", "<b>Ladders</b> (on the new Depths tiles, lettered A–E): spend 1 Boot (or a teleport) to descend to the matching Underworld ladder room, discovering its tile if needed. Climb back up the same way — but only if the matching lettered room actually exists in the Depths (mark connected rooms with <b>ladder tokens</b>).") +
+        CC.icLi("underworld-chute", "Underworld chute", "<b>Underworld chutes</b> (unlettered; the Underworld Chute minor secret can create one): spend 1 Boot to descend to <b>any</b> ladder room — even an undiscovered one, revealing its tile. One-way, down only — not even a teleport takes you back up.") +
+        CC.icLi("return-portal", "Return portal", "The Underworld starting tile's <b>return portal</b> is one-way <b>out</b>: exit to any other portal; you can never enter through it.") +
+        CC.icLi("toll-booth", "Toll booth", "<b>Tolls:</b> starting your turn in the Underworld costs <b>1 undercoin</b> (or +2 Clank! if you can't pay — you can't choose the Clank! if you have a coin). Toll-booth tunnels cost 1 undercoin, no Clank! option (teleports ignore them).") +
+        CC.icLi("undercoin", "Undercoin", "<b>Undercoins</b> work exactly like Gold (spend for market items, 1 pt each) and are earned from " + CC.icIn("undercoin-room", "Undercoin room") + " undercoin rooms (once per room each turn) and some cards.") +
+      "</ul>" +
+      "<ul><li><b>“When you trash this” cards:</b> you can't trash them whenever you choose — you need some other means, such as an underground lake.</li></ul>",
     src: () => "Underworld p.6–7, p.12"
   },
   {
     title: "Underworld — Features & Variants",
     when: (c) => c.has("uw"),
-    html: (c) => "<ul><li><b>Underworld Guardian:</b> entering his room means fight (3 Swords) or take 2 damage (once — staying costs nothing more, and you may fight him later that turn or on a later turn). If you have no cubes in your supply, or the damage would fill your Health Meter, you can't enter his room. Defeating him gives the <b>2× artifact enhancer</b> and the Guardian as a trophy “bonus artifact” (rage +1; doesn't count against your Artifact limit).</li>" +
-      "<li><b>Artifact enhancers:</b> a multiplier on your <b>best</b> artifact's value at game end (round up). After the 2× is claimed, up to two other players may each enter the room and take a 1.5× — one per player. For the artifact tiebreak, the higher <i>unmodified</i> value wins.</li>" +
-      "<li><b>Imp Assistants</b> (Forbidden Library): on first entry you <b>must</b> take the top one (one per player). From then on, each Secret Tome you acquire (or card that “counts as a Secret Tome”) forces you to remove two cards of your choice from the Dungeon Row to the Dungeon discard pile (not trashed). At game end the Imp scores its shown value per Secret Tome you have.</li>" +
-      "<li><b>Magic lyre:</b> a 16-point artifact chained in its room — only a player in its room can take it." + (c.has("lairs") ? " Lairs & Lost Chambers ARRIVE cards that return an artifact to the stack (e.g. Artifact Detector) and lost chambers that take an artifact from elsewhere can't affect it." : "") + "</li>" +
-      "<li><b>Fate rooms:</b> the first time you enter <b>any</b> fate room, draw three <b>fate cards</b>, keep one and put the other two on the bottom of the fate deck (max one fate card per game; Gauntlets of Destiny allows a second). You may look at yours any time; keep it hidden until game end unless it says when to reveal it.</li>" +
-      "<li><b>Harpies</b> (some are found outside the Underworld too): when a tile with a harpy room is discovered, put a harpy token from the Bank in it. Entering means fight (2 Swords) or take 1 damage (once — staying costs nothing more; you may fight it later that turn or on a later turn). If you can't voluntarily take the damage (no cubes in your supply, or it would fill your Health Meter), you can't enter. Defeating one: keep it as a <b>trophy</b> in your personal supply and take 1 undercoin per harpy trophy you have (including it). The <b>Harpy Matriarch</b> card also counts as a harpy trophy, but defeating it pays exactly 2 undercoins.</li>" +
-      "<li><b>Underworld Prison</b> (front side of the Underworld starting tile): the first player to enter frees its Prisoner at once — no Lockpick needed.</li>" +
+    html: (c) => "<ul class='aid-icons ic-wide-col'>" +
+        CC.icLi("underworld-guardian", "Underworld Guardian", "<b>Underworld Guardian:</b> entering his room means fight (3 Swords) or take 2 damage (once — staying costs nothing more, and you may fight him later that turn or on a later turn). If you have no cubes in your supply, or the damage would fill your Health Meter, you can't enter his room. Defeating him gives the <b>2× artifact enhancer</b> and the Guardian as a trophy “bonus artifact” (rage +1; doesn't count against your Artifact limit).") +
+        CC.icLi("artifact-enhancers", "Artifact enhancers", "<b>Artifact enhancers:</b> a multiplier on your <b>best</b> artifact's value at game end (round up). After the 2× is claimed, up to two other players may each enter the room and take a 1.5× — one per player. For the artifact tiebreak, the higher <i>unmodified</i> value wins.") +
+        CC.icLi("imp-assistant", "Imp Assistant", "<b>Imp Assistants</b> (Forbidden Library): on first entry you <b>must</b> take the top one (one per player). From then on, each Secret Tome you acquire (or card that “counts as a Secret Tome”) forces you to remove two cards of your choice from the Dungeon Row to the Dungeon discard pile (not trashed). At game end the Imp scores its shown value per Secret Tome you have.") +
+        CC.icLi("magic-lyre", "Magic lyre", "<b>Magic lyre:</b> a 16-point artifact chained in its room — only a player in its room can take it." + (c.has("lairs") ? " Lairs & Lost Chambers ARRIVE cards that return an artifact to the stack (e.g. Artifact Detector) and lost chambers that take an artifact from elsewhere can't affect it." : "")) +
+        CC.icLi("fate-room", "Fate room", "<b>Fate rooms:</b> the first time you enter <b>any</b> fate room, draw three <b>fate cards</b>, keep one and put the other two on the bottom of the fate deck (max one fate card per game; Gauntlets of Destiny allows a second). You may look at yours any time; keep it hidden until game end unless it says when to reveal it.") +
+        CC.icLi("harpy-token", "Harpy token", "<b>Harpies</b> (some are found outside the Underworld too): when a tile with a harpy room is discovered, put a harpy token from the Bank in it. Entering means fight (2 Swords) or take 1 damage (once — staying costs nothing more; you may fight it later that turn or on a later turn). If you can't voluntarily take the damage (no cubes in your supply, or it would fill your Health Meter), you can't enter. Defeating one: keep it as a <b>trophy</b> in your personal supply and take 1 undercoin per harpy trophy you have (including it). The <b>Harpy Matriarch</b> card also counts as a harpy trophy, but defeating it pays exactly 2 undercoins.") +
+        CC.icLi("underworld-prison", "Underworld Prison", "<b>Underworld Prison</b> (front side of the Underworld starting tile): the first player to enter frees its Prisoner at once — no Lockpick needed.") +
+        CC.icLi("underground-lake", "Underground lake", "<b>Underground lakes:</b> on entry you <i>may</i> trash a card from your play area or discard pile (once each turn per lake room).") +
+        CC.icLi("tower", "Tower", "<b>Towers:</b> start your turn in a tower room and you get 1 Boot.") +
+      "</ul><ul>" +
       "<li><b>Underworld markets:</b> only the five Underworld items can be bought there (and only there). Cards that grant market items another way (Golden Flute, Ogre Merchant) give Underworld items while you're in the Underworld, regular items otherwise.</li>" +
-      "<li><b>Underground lakes:</b> on entry you <i>may</i> trash a card from your play area or discard pile (once each turn per lake room).</li>" +
-      "<li><b>Towers:</b> start your turn in a tower room and you get 1 Boot.</li>" +
       "<li><b>More haunted tiles, same five Ghosts:</b> Underworld adds haunted Depths and Underworld tiles, but there are still only five Ghost cubes — if all five are already out of the Bank when you discover a haunted tile, you don't add another.</li>" +
       (c.mod("fixeddim") ? "<li><b>Fixed Dimensions:</b> the square tiles may not exceed the grid agreed at the start (5×5 or 6×6; the Underworld doesn't count); orient new tiles to respect it, even if every legal orientation causes damage.</li>" : "") +
       (c.has("lairs") ? "<li><b>With Lairs & Lost Chambers:</b> the Guardian marker + card count together as a <b>single trophy</b>, and harpies (tokens and the Harpy Matriarch) are trophies too; fate rooms are <b>lost chambers</b> (so Silver Arch, Swap Meet etc. affect them); the Guardian's room is <b>not</b> a lair.</li>" : "") + "</ul>",
@@ -266,26 +364,35 @@ CC.reference = [
     when: (c) => c.has("lairs"),
     html: () => "<ul><li><b>Trophies:</b> when you Fight a Monster or Use a Device that has TROPHY text, put that card face up in your personal supply (never your play area or discard pile). Its TROPHY text applies to you while it stays there, and its TROPHY points count at game end. The five lair monster markers are also trophies, worth <b>1 point</b> each. A Device with only TROPHY text still counts as “used” (for example, for the Tinkerer).</li>" +
       "<li><b>Entry tunnels:</b> a newly discovered tile with entry tunnels must be placed so you enter through one; afterwards they're normal tunnels.</li>" +
-      "<li><b>Magic barriers:</b> you can't walk through with an artifact (teleporting is fine).</li>" +
+      "<li>" + CC.icIn("magic-barrier", "Magic barrier") + " <b>Magic barriers:</b> you can't walk through with an artifact (teleporting is fine).</li>" +
       "<li><b>Free “acquire” effects</b> (Cavern Prowler, Pack Rat, Acrobatics…) can't be used on monsters (defeated, not acquired) or devices (used, not acquired).</li>" +
       "<li><b>Linked one-way tunnels:</b> the direction you enter from decides which of the pair you use. With the Catacombs Map major secret, you may choose either.</li>" +
-      "<li><b>Pit traps:</b> the first time each turn you enter a Pit Trap room (each pit room checks separately), you must either:<ul><li><b>Fall in</b>: take 1 damage and spend no more Boots this turn (teleports still work).</li><li><b>Evade</b>: trash a non-Stumble card <b>from your hand</b>. If you can't Evade, you must Fall In. <i>(Tip: discover new tiles before playing out your hand.)</i></li></ul>If you can't voluntarily take damage (no cubes in your supply, or it would fill your Health Meter) and can't Evade, you can't enter the room.</li>" +
-      "<li><b>Lost chambers</b> use the Wayshrine cube rules: be in the room, use an empty space, use a cube from your supply, and mark each room only once.<ul><li><b>Aegis Shrine</b>: while your cube is here, you may return it to your supply to prevent damage a Ghost would deal you. Visit again to place a new one.</li><li><b>Bizarre Bazaar</b>: four stalls, one cube each. Pay 3 Gold or trash a trophy:<ul><li>Mystic Stew: heal 3.</li><li>Magic Ointment: trash a card from your play area or discard pile and draw a card.</li><li>Display Case: from the Dungeon Row, acquire a card, use a device or defeat a monster for free.</li><li>Stolen Goods: take a Market item for free.</li></ul></li><li><b>Altar of the Haunted</b>: one space only. Trash a trophy and take 2 Gold; you may also take an artifact from any room (carry limit still applies).</li><li><b>Temple of Gold</b>: while in <i>any</i> Wayshrine, place a cube on a pillar and donate Gold:<ul><li>2: heal 1 + a Lockpick.</li><li>3: heal 2.</li><li>5: heal 1 + a random major secret.</li><li>8: heal 1, and you may take an artifact from any room.</li></ul>Each player may donate only once, and you needn't be able to take every reward.</li><li><b>Umbrok Vessna's Hoard</b>: no cubes. When you enter, take 5 Gold and make +2 Clank!. Taking its artifact or picking its chest teleports you at once to one of the tile's other two rooms.</li></ul></li>" +
-      "<li><b>Lairs</b> (when a lair tile is placed, put its marker(s) from the Bank in the lair; each marker becomes a 1-point trophy):<ul><li><b>Living Statues</b>: three markers. While in the lair, fight one for <b>3 Swords</b>. After each kill you <i>must</i> teleport to another lair or lost chamber, if the dungeon has one.</li><li><b>Medusa</b>: when you enter, you must immediately fight her (<b>2 Swords</b>, and you must play a Secret Tome that turn) or turn to stone and take <b>2 damage</b>. You take no more damage for staying, and may fight her later that turn or on a later turn. Defeat: draw two cards. Her trophy also lets you ignore tunnel monsters. If you can't voluntarily take damage, you can't enter her lair.</li><li><b>Sphinx</b>: while in the lair, fight it with <b>4 Swords</b> <i>or</i> pay <b>7 Skill</b> to solve its riddle. Defeat: take <b>7 Gold</b>.</li></ul></li></ul>",
+      "<li>" + CC.icIn("pit-trap", "Pit Trap") + " <b>Pit traps:</b> the first time each turn you enter a Pit Trap room (each pit room checks separately), you must either:<ul><li><b>Fall in</b>: take 1 damage and spend no more Boots this turn (teleports still work).</li><li><b>Evade</b>: trash a non-Stumble card <b>from your hand</b>. If you can't Evade, you must Fall In. <i>(Tip: discover new tiles before playing out your hand.)</i></li></ul>If you can't voluntarily take damage (no cubes in your supply, or it would fill your Health Meter) and can't Evade, you can't enter the room.</li>" +
+      "<li><b>Lost chambers</b> use the Wayshrine cube rules: be in the room, use an empty space, use a cube from your supply, and mark each room only once.<ul><li><b>Aegis Shrine</b>: while your cube is here, you may return it to your supply to prevent damage a Ghost would deal you. Visit again to place a new one.</li><li><b>Bizarre Bazaar</b>: four stalls, one cube each. Pay 3 Gold or trash a trophy:<ul class='aid-icons'>" +
+        CC.icLi("stall-mystic-stew", "Mystic Stew", "<b>Mystic Stew</b>: heal 3.") +
+        CC.icLi("stall-magic-ointment", "Magic Ointment", "<b>Magic Ointment</b>: trash a card from your play area or discard pile and draw a card.") +
+        CC.icLi("stall-display-case", "Display Case", "<b>Display Case</b>: from the Dungeon Row, acquire a card, use a device or defeat a monster for free.") +
+        CC.icLi("stall-stolen-goods", "Stolen Goods", "<b>Stolen Goods</b>: take a Market item for free.") +
+      "</ul></li><li><b>Altar of the Haunted</b>: one space only. Trash a trophy and take 2 Gold; you may also take an artifact from any room (carry limit still applies).</li><li><b>Temple of Gold</b>: while in <i>any</i> Wayshrine, place a cube on a pillar and donate Gold:<ul><li>2: heal 1 + a Lockpick.</li><li>3: heal 2.</li><li>5: heal 1 + a random major secret.</li><li>8: heal 1, and you may take an artifact from any room.</li></ul>Each player may donate only once, and you needn't be able to take every reward.</li><li><b>Umbrok Vessna's Hoard</b>: no cubes. When you enter, take 5 Gold and make +2 Clank!. Taking its artifact or picking its chest teleports you at once to one of the tile's other two rooms.</li></ul></li>" +
+      "<li><b>Lairs</b> (when a lair tile is placed, put its marker(s) from the Bank in the lair; each marker becomes a 1-point trophy):<ul class='aid-icons'>" +
+        CC.icLi("marker-living-statue", "Living Statue", "<b>Living Statues</b>: three markers. While in the lair, fight one for <b>3 Swords</b>. After each kill you <i>must</i> teleport to another lair or lost chamber, if the dungeon has one.") +
+        CC.icLi("marker-medusa", "Medusa", "<b>Medusa</b>: when you enter, you must immediately fight her (<b>2 Swords</b>, and you must play a Secret Tome that turn) or turn to stone and take <b>2 damage</b>. You take no more damage for staying, and may fight her later that turn or on a later turn. Defeat: draw two cards. Her trophy also lets you ignore tunnel monsters. If you can't voluntarily take damage, you can't enter her lair.") +
+        CC.icLi("marker-sphinx", "Sphinx", "<b>Sphinx</b>: while in the lair, fight it with <b>4 Swords</b> <i>or</i> pay <b>7 Skill</b> to solve its riddle. Defeat: take <b>7 Gold</b>.") +
+      "</ul></li></ul>",
     src: () => "Lairs p.4–8"
   },
   {
     title: "Adventuring Party — 5–6 Players & Characters",
     when: (c) => c.p >= 5 || c.mod("chars"),
     html: (c) => "<ul>" +
-      (c.p >= 5 ? "<li><b>Party in the Catacombs:</b> Artifact rooms with “+” icons hold <b>multiple Artifacts</b> (top of stack + one per “+”) instead of digging deeper; a player taking one takes the most valuable available. Gold versions are claimed before silver, and win scoring ties.</li>" +
+      (c.p >= 5 ? "<li><b>Party in the Catacombs:</b> Artifact rooms with " + CC.icIn("artifact-room-plus", "Artifact rooms with plus icons") + " “+” icons hold <b>multiple Artifacts</b> (top of stack + one per “+”) instead of digging deeper; a player taking one takes the most valuable available. Gold versions are claimed before silver, and win scoring ties.</li>" +
         "<li>A <b>Backpack</b> never lets you take two Artifacts from the same room.</li>" +
         "<li>Wayshrines hold only <b>four cubes</b> — late arrivals can be shut out.</li>" +
         "<li>The <b>side board</b> carries the Dragon's <b>Rage Track</b> (the Dragon marker starts on its first space) and the Health Meters of the fifth and sixth players.</li>" +
         "<li>If the Ape Lord Phantasm is defeated, a Golden Monkey Bot prisoner can't be “returned” to the Monkey Shrine (it was never there).</li>" : "") +
       ((c.p >= 5 || c.mod("chars")) ? "<li><b>React</b> (Adventuring Party cards): when its condition occurs during an opponent's turn (or, for some cards, while the Dungeon Row is refilled between turns), you may play the card from your hand to your play area and immediately draw a replacement. Its resources and text wait until your next turn. You needn't React the moment the condition occurs. On your own turn a React card plays normally, without the extra draw. Always end your turn by drawing your next hand.</li>" : "") +
       (c.p >= 5 ? "<li><b>Arrive Choice:</b> every player chooses, starting with the player about to take their turn (or the current player, if it arrives mid-turn). If two options are offered, each player must pick one.</li>" : "") +
-      (c.mod("chars") ? "<li><b>Characters</b> (any player count; play characters only against other characters; may mix with the Legacy Upper Management and “C” Team packs). Each takes a board, any special tokens, and a 10-card deck of 5 Burgle, 2 Stumble and three unique cards:<ul><li><b>Agnet</b>: 4 conscription tokens. When you acquire a companion, you may spend one (to the box) to put that card on top of your deck. Inspire can top-deck a companion at end of turn.</li><li><b>D'allan</b>: your first dragon egg, artifact, crown and monkey idol go on your board as “Finds”. Collection gives Gold. Competition/Exhibit give one Find reward:<ul><li>egg: −2 Clank!</li><li>idol: trash a Burgle</li><li>crown: no stopping in Crystal Caves this turn</li><li>artifact: may buy from the Market this turn</li></ul></li><li><b>Garignar</b>: the first Monster card you defeat each turn (even the Goblin; not tunnel monsters) advances his carnage token one space clockwise, and you take that space's reward.</li><li><b>Lenara</b>: Channel and Study earn mana (max 10 on the board). Each spell may be cast once per turn:<ul><li>Transfigure, 3 mana: discard then draw.</li><li>Duplicate, 5 mana: copy a card in your play area.</li><li>Levitate, 7 mana: acquire a card free into your hand.</li></ul></li><li><b>Whiskers</b>: Cattitude/Saunter flip a face-up behavior token (Skill, Sword or Boot) for its resource. If all three are face down when you end your turn, you must cause a Dragon Attack drawing exactly 4 cubes (ignore Rage and Danger); your own cubes return to your supply. Then draw your hand, flip all three face up, and refill the Row.</li><li><b>MonkeyBot Prime</b>: 7 cogwheels. Each Dragon Attack that damages you removes the leftmost one (only one per attack, not for other damage, never replaced). Every turn you gain all revealed Skill/Swords/Boots.</li></ul></li>" : "") +
+      (c.mod("chars") ? "<li><b>Characters</b> (any player count; play characters only against other characters; may mix with the Legacy Upper Management and “C” Team packs). Each takes a board, any special tokens, and a 10-card deck of 5 Burgle, 2 Stumble and three unique cards:<ul><li><b>Agnet</b>: 4 " + CC.icIn("token-conscription", "Conscription token") + " conscription tokens. When you acquire a companion, you may spend one (to the box) to put that card on top of your deck. Inspire can top-deck a companion at end of turn.</li><li><b>D'allan</b>: your first dragon egg, artifact, crown and monkey idol go on your board as “Finds”. Collection gives Gold. Competition/Exhibit give one Find reward:<ul><li>egg: −2 Clank!</li><li>idol: trash a Burgle</li><li>crown: no stopping in Crystal Caves this turn</li><li>artifact: may buy from the Market this turn</li></ul></li><li><b>Garignar</b>: the first Monster card you defeat each turn (even the Goblin; not tunnel monsters) advances his " + CC.icIn("token-carnage", "Carnage token") + " carnage token one space clockwise, and you take that space's reward.</li><li><b>Lenara</b>: Channel and Study earn " + CC.icIn("token-mana", "Mana token") + " mana (max 10 on the board). Each spell may be cast once per turn:<ul><li>Transfigure, 3 mana: discard then draw.</li><li>Duplicate, 5 mana: copy a card in your play area.</li><li>Levitate, 7 mana: acquire a card free into your hand.</li></ul></li><li><b>Whiskers</b>: Cattitude/Saunter flip a face-up " + CC.icIn("token-behavior", "Behavior token") + " behavior token (Skill, Sword or Boot) for its resource. If all three are face down when you end your turn, you must cause a Dragon Attack drawing exactly 4 cubes (ignore Rage and Danger); your own cubes return to your supply. Then draw your hand, flip all three face up, and refill the Row.</li><li><b>MonkeyBot Prime</b>: 7 " + CC.icIn("token-cogwheel", "Cogwheel token") + " cogwheels. Each Dragon Attack that damages you removes the leftmost one (only one per attack, not for other damage, never replaced). Every turn you gain all revealed Skill/Swords/Boots.</li></ul></li>" : "") +
       "</ul>",
     src: (c) => c.mod("chars") ? "Core p.15 · Adventuring Party p.2–7" : "Core p.15 · Adventuring Party p.2–4"
   }

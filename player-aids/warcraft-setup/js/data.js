@@ -66,6 +66,13 @@ WC.RACE_TEACH = {
    Helpers
    --------------------------------------------------------------------------- */
 WC.ul = (items) => "<ul>" + items.filter(Boolean).map(i => "<li>" + i + "</li>").join("") + "</ul>";
+/* Rulebook icons in the rules reference (DFWGV icons standard v1, css/icons.css). Each icon is cropped from the
+   page's own sources into images/icons/<name>.webp; its name (alt) is the label printed beside it there.
+   Call these with the file's full literal name, e.g. WC.ic("ability-heal", "Heal"). */
+WC.ic = (f, alt) => "<img class='aid-ic' src='images/icons/" + f + ".webp' alt='" + alt + "' title='" + alt + "'>";
+WC.icIn = (f, alt) => "<img class='aid-ic aid-ic-inline' src='images/icons/" + f + ".webp' alt='" + alt + "' title='" + alt + "'>";
+WC.icList = (rows) => "<ul class='aid-icons'>" + rows.filter(Boolean).map(r => "<li>" + WC.ic(r[0], r[1]) + "<span>" + r[2] + "</span></li>").join("") + "</ul>";
+WC.icPair = (f, name) => "<span class='aid-pair'>" + WC.ic(f, name) + "<span>" + name + "</span></span>";
 /* Join citations with " · ", merging parts that cite the same document ("Rules p.3 · Rules p.5" -> "Rules p.3, p.5"). */
 WC.src = (...parts) => {
   const order = [], pages = {};
@@ -770,7 +777,7 @@ WC.costTable = function (c) {
     ["Melee unit", "1 gold + 1 wood", "printed on the melee buildings (Rules p.6)"],
     ["Flying unit", "as printed on the flying building", "the rulebook’s Orc example pays 2 gold + 2 wood; the text gives no general cost, and the pictured tiles are too small to read (Rules p.3, p.7)"],
     ["Ranged unit", "as printed on the ranged building", "the rulebook text doesn’t state it (Rules p.3, p.6)"],
-    ["Worker", "as printed on your Town interface", "the rulebook text doesn’t state it (Rules p.6)"],
+    ["<span style='white-space:nowrap'>" + WC.icIn("worker-icon", "Worker icon") + " Worker</span>", "as printed on your Town interface", "the rulebook text doesn’t state it (Rules p.6)"],
     ["Building or Outpost", "2 gold + 2 wood each", "also printed on the Town interface (Rules p.7)"],
     ["Upgrade one unit type", "2 gold + 2 wood", "once per type per Spend Step (Rules p.7)"]
   ];
@@ -785,7 +792,7 @@ WC.costTable = function (c) {
 
 WC.racialText = {
   hu: "<b>Human Alliance — Cooperative Building.</b> In your Spend Step you have a fourth option: build <b>complete</b> buildings and Outposts by assigning <b>2 workers</b> and paying <b>3 gold + 3 wood</b> each, instead of 1 worker and 2 + 2. They come into play at once and are never under construction. Afterwards you may still take a second, normal Spend option (train, construct or upgrade), but not with those 2 workers.",
-  ne: "<b>Night Elf Sentinels — Ancients.</b> Your Town is the <b>Tree of Eternity</b>, which can move up to <b>one space per turn</b> in your Move Step. It can’t move into a mountain, water, Town or Outpost space or a space with an enemy worker or unit, and can’t leave a space with enemy units. It doesn’t count against stacking, and wherever it stands is the Night Elf Town space. Each of your <b>Outposts may also move one space</b> in your Move Step, under the same limits, and doesn’t count against stacking. Cards and abilities that affect a unit’s movement, such as Cripple, Fast, Town Portal or Mass Teleport, don’t affect the Tree or your Outposts.",
+  ne: "<b>Night Elf Sentinels — Ancients.</b> Your Town is the " + WC.icIn("tree-of-eternity", "Night Elf Tree of Eternity token") + " <b>Tree of Eternity</b>, which can move up to <b>one space per turn</b> in your Move Step. It can’t move into a mountain, water, Town or Outpost space or a space with an enemy worker or unit, and can’t leave a space with enemy units. It doesn’t count against stacking, and wherever it stands is the Night Elf Town space. Each of your <b>Outposts may also move one space</b> in your Move Step, under the same limits, and doesn’t count against stacking. Cards and abilities that affect a unit’s movement, such as Cripple, Fast, Town Portal or Mass Teleport, don’t affect the Tree or your Outposts.",
   orc: "<b>Orcish Horde — Protective Burrows.</b> During the Move Step, your <b>Town and Outposts can attack as ranged units with Strength 2</b> when they’re in the battlefield or a flank of a battle that has at least one actual participating Orc unit. Each rolls <b>one extra attack per Orc worker</b> in its space; an Outpost with 2 workers rolls 3 attacks. Towns, Outposts and workers still can’t be taken as casualties.",
   ud: "<b>Undead Scourge — Undead Resource Gathering.</b> In your Harvest Step you may harvest wood from any Forest where you have <b>3 melee units</b>; together they count as one worker and may break the worker stacking limit. In your Spend Step you <b>don’t assign workers</b> to construction: you still need one worker in your Town per building, and one in the space of each Outpost, but they stay free. The building or Outpost completes at your next Deploy Step even if those workers move, harvest or are killed."
 };
@@ -820,9 +827,9 @@ WC.reference = [
     ]) + "<h4>After moving</h4>" + WC.ul([
       "Every space with at least one of your units and at least one enemy unit becomes a <b>battle</b>. You resolve all your battles, in any order you choose, before your Move Step ends. Moving onto an enemy worker alone doesn’t start a battle.",
       "Once your battles are resolved, <b>workers and Outposts</b> in spaces with enemy units are destroyed.",
-      "<b>Captured Towns:</b> when all players have finished their Move Steps and all battles are resolved, a player whose Town space holds enemy units puts a <b>partial depletion marker</b> on it, which can never be removed. If one is already there, that player" + (c.teams ? " and his teammates are" : " is") + " <b>eliminated</b>: remove their workers, units and Outposts. If only one player or team is left, it wins."
+      "<b>Captured Towns:</b> when all players have finished their Move Steps and all battles are resolved, a player whose Town space holds enemy units puts a " + WC.icIn("depletion-partial", "Partial depletion") + " <b>partial depletion marker</b> on it, which can never be removed. If one is already there, that player" + (c.teams ? " and his teammates are" : " is") + " <b>eliminated</b>: remove their workers, units and Outposts. If only one player or team is left, it wins."
     ]),
-    src: (c) => WC.src("Rules p.4–6, p.9", "FAQ p.2", c.has("exp") ? "Expansion p.2, p.3" : null, c.mod("heroes") ? "Expansion p.5" : null, WC.creepRules(c) ? "Expansion p.4" : null,
+    src: (c) => WC.src("Rules p.3–6, p.9", "FAQ p.2", c.has("exp") ? "Expansion p.2, p.3" : null, c.mod("heroes") ? "Expansion p.5" : null, WC.creepRules(c) ? "Expansion p.4" : null,
       c.mod("racial") && c.race("ne") ? "Expansion p.3–4" : null, c.scen === "dragon" ? "Expansion p.7–8" : null)
   },
   {
@@ -877,14 +884,19 @@ WC.reference = [
     when: () => true,
     html: (c) => (c.has("exp") ? "<p class='callout'><b>Expansion Set:</b> each race’s <b>Player Reference Sheet</b> has updated versions of these abilities, which <b>replace</b> the base game’s. The Expansion rulebook doesn’t reprint them, so read your sheet. Below are the base-game texts with the FAQ’s revision.</p>" : "") +
       WC.ul([
-        c.has("exp") ? "The icon on a unit tile or creep marker shows its special ability, if any. The top unit tile gives it to all your units of that type." : "The icon on a unit tile shows its special ability, if any. The top unit tile gives it to all your units of that type.",
-        "<b>Area Attack:</b> a unit with this ability that rolls a <b>1</b> for its attack inflicts <b>2 casualties</b> instead of 1.",
-        "<b>Heal</b> (revised by the FAQ): if you have a unit with Heal in the battle, each die your opponent rolls showing a <b>1</b> (not counting modifiers) inflicts <b>one fewer casualty</b>: 0 normally, or 1 with Area Attack. The 1 still counts as a hit and keeps its other effects, so it still triggers Raise Dead. The rulebook’s older Heal, reducing your casualties by 1 each phase, no longer applies.",
-        "<b>Slow Poison:</b> at the start of each round, choose one phase for each unit with this ability you have in the battle. In those phases your units attack and deal casualties <b>first</b> instead of simultaneously. With <b>3 or more</b> such units, you attack first in every phase.",
-        "<b>Bloodlust:</b> in a phase where you are already rolling at least one attack, roll <b>1 extra attack</b> if you have a unit with this ability in the battle.",
-        "<b>Raise Dead:</b> if you have a unit with this ability in the battle, each <b>1</b> you roll also lets you add <b>one melee unit</b> from your reserves to the battlefield, as well as causing its casualty. You may ignore stacking limits while placing them; when the battle ends, return any over the limit to your reserves. It still triggers if the casualty is prevented.",
-        c.has("exp") ? "<b>“Natural” rolls</b> (Expansion Set clarification): an ability triggered by a roll of 1, or any other number, works only if the die itself shows that number. Modifiers such as Faerie Fire don’t trigger it; a 2 modified to a 1 doesn’t trigger Heal." : null
-      ]),
+        c.has("exp") ? "The icon on a unit tile or creep marker shows its special ability, if any. The top unit tile gives it to all your units of that type." : "The icon on a unit tile shows its special ability, if any. The top unit tile gives it to all your units of that type."
+      ]) +
+      /* icons: the rulebook's "Unit Special Abilities" diagram (Rules p.12) */
+      WC.icList([
+        ["ability-area-attack", "Area Attack", "<b>Area Attack:</b> a unit with this ability that rolls a <b>1</b> for its attack inflicts <b>2 casualties</b> instead of 1."],
+        ["ability-heal", "Heal", "<b>Heal</b> (revised by the FAQ): if you have a unit with Heal in the battle, each die your opponent rolls showing a <b>1</b> (not counting modifiers) inflicts <b>one fewer casualty</b>: 0 normally, or 1 with Area Attack. The 1 still counts as a hit and keeps its other effects, so it still triggers Raise Dead. The rulebook’s older Heal, reducing your casualties by 1 each phase, no longer applies."],
+        ["ability-slow-poison", "Slow Poison", "<b>Slow Poison:</b> at the start of each round, choose one phase for each unit with this ability you have in the battle. In those phases your units attack and deal casualties <b>first</b> instead of simultaneously. With <b>3 or more</b> such units, you attack first in every phase."],
+        ["ability-bloodlust", "Bloodlust", "<b>Bloodlust:</b> in a phase where you are already rolling at least one attack, roll <b>1 extra attack</b> if you have a unit with this ability in the battle."],
+        ["ability-raise-dead", "Raise Dead", "<b>Raise Dead:</b> if you have a unit with this ability in the battle, each <b>1</b> you roll also lets you add <b>one melee unit</b> from your reserves to the battlefield, as well as causing its casualty. You may ignore stacking limits while placing them; when the battle ends, return any over the limit to your reserves. It still triggers if the casualty is prevented."]
+      ]) +
+      (c.has("exp") ? WC.ul([
+        "<b>“Natural” rolls</b> (Expansion Set clarification): an ability triggered by a roll of 1, or any other number, works only if the die itself shows that number. Modifiers such as Faerie Fire don’t trigger it; a 2 modified to a 1 doesn’t trigger Heal."
+      ]) : ""),
     src: (c) => WC.src("Rules p.3, p.12", "FAQ p.1–2", c.has("exp") ? "Expansion p.2–3" : null)
   },
   {
@@ -896,9 +908,9 @@ WC.reference = [
         h += "<p class='callout'><b>" + (c.mod("drain") ? "Draining resources" : "Hidden resources") + " is in play:</b> don’t roll the resource die. Each worker collects <b>2</b> of the space’s resource per Harvest Step; see that section below. The die rules here don’t apply.</p>";
       } else {
         h += "<h4>Rolling for resources</h4>" + WC.ul([
-          "For each <b>Goldmine</b> where you have at least one worker, roll the <b>resource die once per worker</b> there and take that many <b>gold</b> tokens each time. Then do the same for each <b>Forest</b>, taking <b>wood</b>.",
+          "For each <b>Goldmine</b> where you have at least one worker, roll the <b>resource die once per worker</b> there and take that many " + WC.icIn("gold", "Gold") + " <b>gold</b> tokens each time. Then do the same for each <b>Forest</b>, taking " + WC.icIn("wood", "Wood") + " <b>wood</b>.",
           "Up to <b>3 workers</b> may harvest one space. Roll <b>one at a time</b>; once a roll leaves the space completely depleted, you make no more rolls there.",
-          "<b>Depletion:</b> each time you roll a <b>3</b>, place a depletion token on the space, <b>partial</b> side up (a single line). If it is already partial, turn it to the <b>complete</b> side (a cross). A completely depleted space produces nothing more; the roll that depletes it still pays.",
+          "<b>Depletion:</b> each time you roll a <b>3</b>, place a depletion token on the space, " + WC.icIn("depletion-partial", "Partial depletion") + " <b>partial</b> side up (a single line). If it is already partial, turn it to the " + WC.icIn("depletion-complete", "Complete depletion") + " <b>complete</b> side (a cross). A completely depleted space produces nothing more; the roll that depletes it still pays.",
           "If a resource pile runs out, keep track of the extra with coins or on paper."
         ]);
       }
@@ -990,10 +1002,10 @@ WC.reference = [
         (c.scen === "elfgate" || c.scen === "necro" || c.scen === "captives" || c.scen === "nordrassil" || c.scen === "dragon" || c.scen === "elements" || c.scen === "altar")
           ? "<b>This scenario</b> isn’t won on victory points." + (WC.S[c.scen].remove ? (c.has("exp") ? " The FAQ removes the base game’s Victory Point cards here; for the Expansion Set’s new decks, see What the books leave open." : " The Victory Point cards are removed from the decks.") : "") : null
       ]) + "<h4>Elimination</h4>" + WC.ul([
-        "A Town space still occupied by enemy units after everyone’s Move Step gets a permanent partial depletion marker. The second time, that player" + (c.teams ? " and his teammates are" : " is") + " eliminated, and his workers, units and Outposts are removed.",
+        "A Town space still occupied by enemy units after everyone’s Move Step gets a permanent " + WC.icIn("depletion-partial", "Partial depletion") + " partial depletion marker. The second time, that player" + (c.teams ? " and his teammates are" : " is") + " eliminated, and his workers, units and Outposts are removed.",
         "If only one player or team is left, the game ends and that player or team wins."
       ]),
-    src: (c) => WC.src("Rules p.2, p.5, p.9", c.teams ? "FAQ p.2" : null, WC.winSrc(c).indexOf("Rules p.2") === 0 ? null : WC.winSrc(c),
+    src: (c) => WC.src("Rules p.2–3, p.5, p.9", c.teams ? "FAQ p.2" : null, WC.winSrc(c).indexOf("Rules p.2") === 0 ? null : WC.winSrc(c),
       c.mod("vp20") ? "FAQ p.2" : null, c.mod("vp20") ? "Expansion p.3" : null, WC.S[c.scen].removeSrc || null,
       c.has("exp") ? "Expansion p.2" : null)
   },
@@ -1122,7 +1134,7 @@ WC.reference = [
     ]) + "<h4>Moving and fighting</h4>" + WC.ul([
       "A hero moves <b>2 spaces</b>, but can’t enter mountain or water spaces. It stops on entering a space with an enemy unit, worker or Outpost, and doesn’t count against stacking limits.",
       "A hero attacks in the phase of its unit type, normally rolling <b>1 die</b> at its Strength.",
-      "A casualty assigned to a hero gives it a <b>wound token</b>, which stays until the hero dies (or is somehow healed). With wounds at least equal to its Life it is killed: return the marker to your reserves and discard its wounds.",
+      "A casualty assigned to a hero gives it a " + WC.icIn("wound-token", "Wound token") + " <b>wound token</b>, which stays until the hero dies (or is somehow healed). With wounds at least equal to its Life it is killed: return the marker to your reserves and discard its wounds.",
       "If your hero is in the battlefield when an enemy hero dies, it gains <b>2 experience points</b>: take an unused 2-point creep marker."
     ]) + "<h4>Abilities and mana</h4>" + WC.ul([
       "Pay an ability’s mana by <b>discarding experience cards</b> with that much mana. Excess mana is wasted.",
@@ -1144,33 +1156,34 @@ WC.reference = [
     when: (c) => c.mod("research"),
     html: () => WC.ul([
       "Players <b>don’t draw cards</b> when a battle begins or for winning one. You still start with 3 cards.",
-      "Each player keeps his race’s <b>2 research tokens</b> with his unit reserves.",
+      "Each player keeps his race’s " + WC.icIn("research-token", "Research token") + " <b>2 research tokens</b> with his unit reserves.",
       "In your Spend Step, if you choose to train, you may also research: pay <b>1 or 2 gold</b> and put that many research tokens on your <b>worker building</b> in place of a worker. At most 2 at a time, and never while training a worker.",
       "In your Deploy Step, remove the tokens and <b>draw that many experience cards</b>."
     ]),
-    src: "Expansion p.6"
+    src: "Expansion p.2, p.6"
   },
   {
     title: "Draining Resources",
     when: (c) => c.mod("drain"),
-    html: () => WC.ul([
-      "Each Goldmine starts with <b>20 gold</b> and each Forest with <b>20 wood</b>, in 10- and 5-value tokens.",
+    html: () => "<p class='aid-icon-row'>" + WC.icPair("gold-10", "10-Gold token") + " " + WC.icPair("gold-5", "5-Gold token") + " " +
+      WC.icPair("wood-10", "10-Wood token") + " " + WC.icPair("wood-5", "5-Wood token") + "</p>" + WC.ul([
+      "Each Goldmine starts with <b>20 gold</b>: one 10-gold and two 5-gold tokens. Each Forest starts with <b>20 wood</b>: one 10-wood and two 5-wood tokens.",
       "In your Harvest Step, <b>don’t roll</b>: collect <b>2 resources per worker</b> from the space, making change from the piles.",
       "A space with no resource tokens left is <b>depleted</b>; no depletion token is needed.",
       "The Night Elf <b>Renew</b> card adds <b>10 wood</b> to a Forest space instead of its normal effect."
     ]),
-    src: "Expansion p.6"
+    src: "Expansion p.2, p.6"
   },
   {
     title: "Hidden Resources",
     when: (c) => c.mod("hidden"),
-    html: () => WC.ul([
+    html: () => "<p class='aid-icon-row'>" + WC.icPair("hidden-gold", "Hidden Gold Token") + " " + WC.icPair("hidden-wood", "Hidden Wood Token") + "</p>" + WC.ul([
       "Every resource space starts with a hidden resource token. Your own adjacent mine and forest hold a face-up <b>20</b>; the others are face down.",
       "In your Harvest Step, <b>don’t roll</b>. With at least one worker on a space with a hidden token, reveal it if needed and discard it to the box. Place that many resources in the space, gold or wood by space type, then collect <b>2 per worker</b>.",
       "From then on each worker there collects 2 per Harvest Step. An empty space is <b>depleted</b>; no depletion token is needed.",
       "The Night Elf <b>Renew</b> card adds <b>10 wood</b> to a Forest space instead of its normal effect."
     ]),
-    src: "Expansion p.6"
+    src: "Expansion p.2, p.6"
   },
   {
     title: "Key Rulings — FAQ & Clarifications",
@@ -1203,9 +1216,19 @@ WC.reference = [
     title: "Board Pieces at a Glance",
     when: () => true,
     html: (c) => WC.ul([
-      "Each board piece is <b>double-sided</b>, cyan and magenta, with a colour and number code on each side. Each base-game piece holds two or more spaces.",
-      "<b>Space types:</b> <b>Town</b> (your units and workers enter play here; worth 3 VP while you hold it), <b>Forest</b> (harvest wood), <b>Goldmine</b> (harvest gold), <b>Mountain</b> (flying units only), <b>Objective</b> (its VP count for anyone with units there) and <b>Clear</b> (no effect)" + (c.has("exp") ? ", plus the Expansion’s <b>water</b> (flyers pass through only)" : "") + "."
-    ]) + "<h4>The 13 base pieces (Scenario Creation Guide)</h4>" + WC.ul([
+      "Each board piece is <b>double-sided</b>, cyan and magenta, with a colour and number code on each side. Each base-game piece holds two or more spaces."
+    ]) + "<h4>Space types</h4>" +
+      /* icons: the space pictures in the rulebook's Components (Rules p.2) and the Expansion's Water Space (Expansion p.2) */
+      WC.icList([
+        ["space-forest", "Forest Space", "<b>Forest</b> — harvest wood."],
+        ["space-goldmine", "Goldmine Space", "<b>Goldmine</b> — harvest gold."],
+        ["space-mountain", "Mountain Space", "<b>Mountain</b> — flying units only."],
+        ["space-objective", "Objective Space", "<b>Objective</b> — its victory points count for anyone with units there."],
+        c.has("exp") ? ["space-water", "Water Space", "<b>Water</b> (Expansion Set) — only flying units may enter, and only to pass through."] : null
+      ]) + WC.ul([
+        "<b>Town</b> — your units and workers enter play here; worth 3 VP while you hold it. Each race has its own Town space.",
+        "<b>Clear</b> — no effect."
+      ]) + "<h4>The 13 base pieces (Scenario Creation Guide)</h4>" + WC.ul([
       "<b>Town pieces 2, 3, 10 and 12</b> each hold one race’s Town space: in a corner on one side, in the middle of an edge on the other. Each side also has 1 forest, 1 goldmine and 1 mountain. In the four-player main game the Night Elf Town is on 2, Orc on 3, Human on 10 and Undead on 12.",
       "<b>Center piece 7:</b> the cyan “feast” side has 3 forests, 3 goldmines and a 2-point objective. The magenta “famine” side has 3 mountains around a 4-point objective, the elf gate.",
       "<b>Diamond pieces 6 and 8:</b> cyan, a goldmine and a 1-point objective (the bandit camp). Magenta: 6 has a forest and another 1-point objective, 8 a goldmine and a mountain.",

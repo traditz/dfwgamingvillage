@@ -4,7 +4,8 @@
    Haunted Hallways booklet. VM.reference = [{ title, when(c), html(c), src(c) }]
    ============================================================================= */
 (function () {
-  var LR = VM.LR, li = VM.li, ol = VM.ol, cites = VM.cites;
+  var LR = VM.LR, li = VM.li, ol = VM.ol, cites = VM.cites, icIn = VM.icIn, icList = VM.icList;
+  var TILE_ICONS = "The Map › Revealing the Map (tile icons)";
   function tbl(head, rows, cls) {
     return "<table class=\"ref-table" + (cls ? " " + cls : "") + "\"><thead><tr>" + head.map(function (h) { return "<th scope=\"col\">" + h + "</th>"; }).join("") +
       "</tr></thead><tbody>" + rows.map(function (r) { return "<tr>" + r.map(function (x, i) { return i === 0 ? "<th scope=\"row\">" + x + "</th>" : "<td>" + x + "</td>"; }).join("") + "</tr>"; }).join("") + "</tbody></table>";
@@ -127,13 +128,13 @@
             "<b>Fill crypts on open edges.</b> Take Dark tiles from the stack and place 1 Dark tile in each crypt touching an open edge of the revealed tile.",
             "<b>Resolve the tile</b> by its icon (below)."
           ]) +
-          tbl(["Tile", "When revealed"], [
-            ["Blood", "Place a blood token here."],
-            ["Treasure", "Place a treasure marker here."],
-            ["Poltergeist", "Place a poltergeist figure here."],
-            ["Pit", "No immediate effect. Later, Skeletons can move here easily (TUNNEL!!)."],
-            ["Armory", "No immediate effect. Later, Skeletons can collect gear cards here (ARM!!)."],
-            ["Shrine", c.has("aknight") ? "No immediate effect. Later, the Armored Knight can use it in an encounter: discard any number of sidequest cards to draw that many (Haunted Hallways p.3)." : "No immediate effect. Later, the Paladin can crusade here to gain 1 Fury, 1 Light or a new favor card."]
+          h("Tile icons — what a revealed tile does") + icList([
+            ["tile-blood", "Blood", "Place a blood token here."],
+            ["tile-treasure", "Treasure", "Place a treasure marker here."],
+            ["tile-poltergeist", "Poltergeist", "Place a poltergeist figure here."],
+            ["tile-pit", "Pit", "No immediate effect. Later, Skeletons can move here easily (TUNNEL!!)."],
+            ["tile-armory", "Armory", "No immediate effect. Later, Skeletons can collect gear cards here (ARM!!)."],
+            ["tile-shrine", "Shrine", c.has("aknight") ? "No immediate effect. Later, the Armored Knight can use it in an encounter: discard any number of sidequest cards to draw that many (Haunted Hallways p.3)." : "No immediate effect. Later, the Paladin can crusade here to gain 1 Fury, 1 Light or a new favor card."]
           ]) + (c.mode === "solo" ? "<p class=\"inline-note\">Solo: revealing an Armory also loses 1 Stability, a Blood tile also gains 1 Terror, and a Pit also gains 1 Stability.</p>" : "");
       },
       src: function (c) { return cites([LR("The Map › Moving Around the Map, Revealing the Map"), LR("Key Action Reference › Revealed Tiles"), c.mode === "solo" ? LR(SEC_SOLO + " › The Paladin › Revealing Tiles") : "", c.has("aknight") ? VM.HH(3) : ""]); }
@@ -161,7 +162,9 @@
             "A piece is <b>visible</b> to you if you can trace a straight line (not diagonal) from your figure to it.",
             "The line can’t pass through a <b>wall</b>, a <b>crypt</b> or a <b>Dark tile</b> — but it can start out of a Dark tile holding your figure, and end in a Dark tile holding the target."
           ]) +
-          h("Breaches and force walls") + li([
+          h("Breaches and force walls") +
+          "<div class=\"aid-icon-grid\"><figure>" + VM.ic("marker-breach", "Breach") + "<figcaption>Breach</figcaption></figure>" +
+            "<figure>" + VM.ic("marker-force-wall", "Force Wall") + "<figcaption>Force Wall</figcaption></figure></div>" + li([
             "A <b>breach</b> over a wall makes it an open edge.",
             "A <b>force wall</b> over an open edge makes it a wall.",
             "The outer wall touching the grounds <b>cannot be breached</b>.",
@@ -203,7 +206,7 @@
               (c.has("shadow") ? "<li><b>Shadow Paladin:</b> their Formidable trait triggers (they lose 1 Health), and Cowardly: they immediately move to the nearest Dark tile.</li>"
                 : (c.has("dragon") || cave) ? "<li><b>Dragon:</b> resolve the hit by The Crystal Caverns’ rules (Attacking by Movement).</li>"
                 : "<li><b>Spider:</b> her Shapeshifter trait triggers.</li>") + "<li><b>Egg:</b> remove all blood tokens from its tile; gain <b>5 Grit</b>.</li><li><b>Poltergeist:</b> gain <b>3 Grit</b>.</li><li>Gain <b>1 Light</b> each time you hit an enemy figure.</li></ul>",
-            "<b>Use Shrine:</b> on a Shrine, gain 1 Fury or 1 Light, <i>or</i> discard a favor card to draw 3 favor cards, keep 1 and discard 2. You can’t discard Vigor or Illuminate. A Shrine can be used many times a game." + (VM.v(c, "paladin", "justicar") ? " <b>Justicar: you cannot use Shrines.</b>" : ""),
+            "<b>Use Shrine:</b> on a " + icIn("tile-shrine", "Shrine", "Shrine") + ", gain 1 Fury or 1 Light, <i>or</i> discard a favor card to draw 3 favor cards, keep 1 and discard 2. You can’t discard Vigor or Illuminate. A Shrine can be used many times a game." + (VM.v(c, "paladin", "justicar") ? " <b>Justicar: you cannot use Shrines.</b>" : ""),
             "<b>Collect treasures:</b> remove each treasure marker on your tile, one at a time. For each, the Manor draws 2 treasure cards, gives you one and discards the other; with no Manor player, draw a treasure card. Keep the card in your hand, or return it to the box to gain <b>5 Grit</b>. If the Manor can’t give you a card because the treasure deck is empty, gain 5 Grit."
           ]) +
           h("Grit") + tbl(["Grit", "Reaching it", "Falling below it"], [
@@ -220,7 +223,7 @@
       },
       src: function (c) {
         var sv = VM.variant(c, "skeletons");
-        return cites([LR("The Paladin (whole chapter)"), VM.SS.paladin, c.mode === "solo" ? LR(SEC_SOLO + " › The Paladin") : "",
+        return cites([LR("The Paladin (whole chapter)"), VM.SS.paladin, LR(TILE_ICONS), c.mode === "solo" ? LR(SEC_SOLO + " › The Paladin") : "",
           sv && (sv.id === "miscreant" || sv.id === "boss") ? LR(VM.variantSec("skeletons", sv)) : "",
           c.has("shadow") ? VM.HH(1) + " · " + VM.HH(2) : "",
           c.has("dragon") ? LR(TR + " › General Rules (Find and Replace, Dead Cards and Abilities, Attacking by Movement)") + " · " + LR(TR + " › Visiting the Manor › Dragon in the Manor") : "",
@@ -246,7 +249,7 @@
           ]) +
           h("Strength and Defense") + li(["Each Skeleton has <b>1 Strength</b> (plus Distracting).", "Each Skeleton has <b>1 Defense, +1 per other Skeleton</b> on its tile."]) +
           h("Your turn") + ol([
-            "<b>Lose Stability:</b> lose 1 Stability per Skeleton on a Lit tile that is not a Pit.",
+            "<b>Lose Stability:</b> lose 1 Stability per Skeleton on a Lit tile that is not a " + icIn("tile-pit", "Pit", "Pit") + ".",
             "<b>Activate Skeletons:</b> activate each Skeleton on the map, one at a time, left to right in the March Order. Each can move <b>up to 5 spaces</b>, then take <b>one action</b>. A Skeleton that enters a tile with a <b>lamp or web</b> ends its movement (it still removes one of each enemy token there).",
             "<b>Summon Skeleton:</b> once per turn, you may spend <b>3 Stability</b> to flip up the leftmost facedown Skeleton card in the March Order, roll the spawn die, and place the matching Skeleton on the matching Spawn.",
             "<b>Gain Stability:</b> gain 2 Stability."
@@ -256,7 +259,7 @@
             "<b>LOOT!!</b> Once per turn, remove a treasure marker from your tile to gain 2 Stability.",
             "<b>BREACH!!</b> Spend 1 Stability to place a breach marker on a wall on your tile (including a wall printed on an adjacent tile touching your tile).",
             "<b>TUNNEL!!</b> While on a Pit, place the Skeleton on any Pit with no enemy figures.",
-            "<b>ARM!!</b> While on an Armory tile (Lit or Dark), draw a gear card."
+            "<b>ARM!!</b> While on an " + icIn("tile-armory", "Armory", "Armory") + " tile (Lit or Dark), draw a gear card."
           ]) +
           h("Abilities") + "<p>Each Skeleton has a unique ability, usable during its activation each turn (even between spaces of movement).</p>" + li([
             "<b>Casty:</b> spend 1 Stability to place a cackling skulls token on an adjacent space. Cackling skulls distract enemy figures in adjacent tiles. Once both are placed, Casty can’t use this ability.",
@@ -268,7 +271,7 @@
           h("Gear") + li(["Any time during your turn, play gear cards from your hand in front of their listed Skeleton. Played gear gives that Skeleton another ability, usable the same turn.", "Stability costs on gear add to the Stability costs of any associated actions."]) +
           h("Pit markers") + li(["Some Skeletons can place pit markers. A tile with a pit marker counts as a Pit tile, even while Dark.", "Pit markers cannot be removed."]);
       },
-      src: function (c) { return cites([LR("The Skeletons (whole chapter)"), VM.SS.skeletons, VM.skelHuntSpider(c) ? LR(c.mixObj.sec) : "", VM.skelHuntSpider(c) && skelPrey(c) === "Spider" ? LR("The Paladin") : "", c.has("hhskel") ? VM.HH(1) : "",
+      src: function (c) { return cites([LR("The Skeletons (whole chapter)"), VM.SS.skeletons, LR(TILE_ICONS), VM.skelHuntSpider(c) ? LR(c.mixObj.sec) : "", VM.skelHuntSpider(c) && skelPrey(c) === "Spider" ? LR("The Paladin") : "", c.has("hhskel") ? VM.HH(1) : "",
         c.has("knight") ? LR(TR + " › General Rules") : "", c.has("aknight") ? VM.HH(3) : "", c.has("shadow") ? VM.HH(1) + " · " + VM.HH(2) : "",
         (c.has("knight") || c.has("dragon") || c.has("thief")) ? LR(TR + " › General Rules › Attacking by Movement") : "",
         caveSeatSrc(c), c.mode === "cave" ? LR(TR + " › General Rules › Attacking by Movement") : ""]); }
@@ -298,7 +301,7 @@
             ["Spiderlings", "Each up to 4 spaces; may cross walls", "Each tile with any Spiderlings, in any order", "Webs", "Loot"]
           ]) +
           h("Power cards") + "<p>Play a power card from your hand to use its effect, then discard it:</p>" + li([
-            "<b>Eyes:</b> reveal a tile. If you reveal a Blood tile, gain 1 Blood.",
+            "<b>Eyes:</b> reveal a tile. If you reveal a " + icIn("tile-blood", "Blood", "Blood") + " tile, gain 1 Blood.",
             "<b>Fangs:</b> attack to gain 1 Blood.",
             "<b>Webs:</b> place a web token on a tile. A tile can hold up to 3 webs."
           ]) +
@@ -315,7 +318,7 @@
             "<b>Blood:</b> whenever your Sorcerer, Giant Spider or a Spiderling is on a tile with a blood token, you may remove it to gain 1 Blood."
           ]);
       },
-      src: function (c) { var sv = VM.variant(c, "spider"); return cites([LR("The Spider (whole chapter)"), VM.SS.spider, sv ? LR(VM.variantSec("spider", sv)) : "", VM.skelHuntSpider(c) ? LR(c.mixObj.sec) : "", caveSeatSrc(c)]); }
+      src: function (c) { var sv = VM.variant(c, "spider"); return cites([LR("The Spider (whole chapter)"), VM.SS.spider, LR(TILE_ICONS), sv ? LR(VM.variantSec("spider", sv)) : "", VM.skelHuntSpider(c) ? LR(c.mixObj.sec) : "", caveSeatSrc(c)]); }
     },
     {
       title: "The Manor",
@@ -326,7 +329,7 @@
           h("Traits") + li([
             "Your avatar on the physical plane is the <b>Wraith</b>.",
             "<b>Ethereal:</b> your Wraith can cross walls, cannot attack or be attacked, ignores the effects of enemy tokens, and does not remove enemy tokens when entering their space.",
-            "<b>Spooky:</b> each time you reveal a Poltergeist tile, you may place the poltergeist on any empty Lit tile."
+            "<b>Spooky:</b> each time you reveal a " + icIn("tile-poltergeist", "Poltergeist", "Poltergeist") + " tile, you may place the poltergeist on any empty Lit tile."
           ]) +
           h("Strength and Defense") + li(["Your Wraith has no Strength or Defense."]) +
           h("Your turn") + ol([
@@ -352,7 +355,7 @@
           tbl(["Filled spaces on the track", "0", "1", "2", "3"], [["Treasures placed", "1", "1", "2", "2"], ["Ritual cards drawn", "0", "1", "2", "3"]]) +
           (VM.v(c, "manor", "keep") || VM.v(c, "manor", "castle") ? "<p class=\"inline-note\">" + VM.variant(c, "manor").name + ": all rituals worth " + (VM.v(c, "manor", "keep") ? "3 Seals" : "1 Seal") + " are out of the game.</p>" : "");
       },
-      src: function (c) { var vv = VM.variant(c, "manor"); return cites([LR("The Manor (whole chapter)"), VM.SS.manor, vv ? LR(VM.variantSec("manor", vv)) : ""]); }
+      src: function (c) { var vv = VM.variant(c, "manor"); return cites([LR("The Manor (whole chapter)"), VM.SS.manor, LR(TILE_ICONS), vv ? LR(VM.variantSec("manor", vv)) : ""]); }
     },
     {
       title: "The Warlock",
@@ -364,7 +367,7 @@
             "<b>Crypt Walker:</b> you can enter crypts (square spaces without tiles).",
             "<b>Ethereal:</b> you can cross walls, cannot attack or be attacked, ignore the effects of enemy tokens, and do not remove enemy tokens when entering their space.",
             "<b>Hexomancer:</b> each time a piece with any curse markers is removed, advance your Spells track once.",
-            "<b>Skittish:</b> each time an enemy figure enters your space, immediately move to the nearest Dark tile, crypt or Pit tile at least 2 spaces away, remove half of your Curses (<b>round down</b>), and advance your Spells track once." +
+            "<b>Skittish:</b> each time an enemy figure enters your space, immediately move to the nearest Dark tile, crypt or " + icIn("tile-pit", "Pit", "Pit") + " tile at least 2 spaces away, remove half of your Curses (<b>round down</b>), and advance your Spells track once." +
               "<div class=\"inline-note\">Sources disagree on rounding: the living rules’ Warlock chapter says round <b>down</b>; their Key Action Reference and the printed setup sheet say round <b>up</b>. This page follows the Warlock chapter.</div>"
           ]) +
           h("Strength and Defense") + li(["The Warlock has no Strength or Defense."]) +
@@ -387,7 +390,7 @@
             "<b>Network:</b> a treasure or poltergeist is in your network if you can trace a path to it through any number of poltergeists or treasures surrounding you, or surrounding other poltergeists or treasures in your network."
           ]);
       },
-      src: function (c) { return cites([LR("The Warlock (whole chapter)"), LR("Key Action Reference › Move"), VM.SS.warlock, VM.v(c, "warlock", "charlatan") ? LR(VM.variantSec("warlock", VM.variants.warlock[0])) : "", caveSeatSrc(c)]); }
+      src: function (c) { return cites([LR("The Warlock (whole chapter)"), LR("Key Action Reference › Move"), VM.SS.warlock, LR(TILE_ICONS), VM.v(c, "warlock", "charlatan") ? LR(VM.variantSec("warlock", VM.variants.warlock[0])) : "", caveSeatSrc(c)]); }
     },
     {
       title: "The Armored Knight (Haunted Hallways)",
@@ -408,7 +411,7 @@
               (c.has("shadow") ? "Shadow Paladin — their Formidable trait triggers (they lose 1 Health) and, Cowardly, they immediately move to the nearest Dark tile"
                 : (c.has("dragon") || cave) ? "Dragon — resolve the hit by The Crystal Caverns’ rules (Attacking by Movement)"
                 : "Spider — her Shapeshifter trait triggers") + "; Egg — remove all blood tokens on its tile, gain <b>5 Grit</b>; Poltergeist — gain <b>3 Grit</b>.",
-            "<b>Use Shrine:</b> on a Shrine, you may discard any number of sidequest cards to draw the same number.",
+            "<b>Use Shrine:</b> on a " + icIn("tile-shrine", "Shrine", "Shrine") + ", you may discard any number of sidequest cards to draw the same number.",
             "<b>Collect treasures:</b> remove each treasure marker on your tile, one at a time; for each, gain <b>5 Grit</b> or gain a <b>javelin token</b> on the matching space of your Throw Javelin box."
           ]) +
           h("Statistics and actions") + li([
@@ -425,7 +428,7 @@
             "<b>Artifacts:</b> play one from your hand any time in Move and Act for a persistent effect; place hero cubes on played artifacts to use their effects any time in that phase (even during an action)."
           ]);
       },
-      src: function (c) { return cites([VM.HH(3), VM.HH(4), VM.HH(1), c.has("shadow") ? VM.HH(2) : "",
+      src: function (c) { return cites([VM.HH(3), VM.HH(4), VM.HH(1), LR(TILE_ICONS), c.has("shadow") ? VM.HH(2) : "",
         c.has("dragon") ? LR(TR + " › General Rules (Find and Replace, Dead Cards and Abilities, Attacking by Movement)") + " · " + LR(TR + " › Visiting the Manor › Dragon in the Manor") : "",
         c.has("goblins") ? LR(TR + " › General Rules (Find and Replace, Attacking by Movement)") + " · " + LR(TR + " › Visiting the Manor › Goblins in the Manor") : "",
         c.mode === "cave" ? LR(TR) + " · " + LR(TR + " › General Rules (Find and Replace, Dead Cards and Abilities, Attacking by Movement)") : ""]); }
@@ -513,7 +516,7 @@
         return "<p>The Paladin enters the Manor alone to destroy the spirits lurking within.</p>" +
           h("Setup") + li(["Set up the map and the Paladin as normal, then: shuffle " + lv.skels + " Skeleton cards face up in a line as the March Order; roll the spawn die to spawn each Skeleton (all begin in play); " + (c.solo.campaign ? "put the Stability and Terror dials nearby at your campaign values (Stability " + VM.campaignRanks[c.solo.ranks.st].st + ", Terror " + VM.campaignRanks[c.solo.ranks.te].te + ") and start with " + VM.campaignRanks[c.solo.ranks.fl].fl + " Fury and " + VM.campaignRanks[c.solo.ranks.fl].fl + " Light" : "put the Stability and Terror dials nearby at 0") + "; place a blood token on the central Pit; start with the <b>Disdain</b> favor card as well as Vigor and Illuminate."]) +
           h("Goal") + li(["<b>Win:</b> hit <b>" + lv.polts + " poltergeists</b>.", "<b>Lose:</b> reach <b>0 Health</b> or <b>" + lv.terror + " Terror</b>."]) +
-          h("Revealing tiles — extra effects") + tbl(["Tile", "Extra effect in solo"], [["Armory", "Lose 1 Stability."], ["Blood", "Gain 1 Terror."], ["Pit", "Gain 1 Stability."]]) +
+          h("Revealing tiles — extra effects in solo") + icList([["tile-armory", "Armory", "Lose 1 Stability."], ["tile-blood", "Blood", "Gain 1 Terror."], ["tile-pit", "Pit", "Gain 1 Stability."]]) +
           h("Other changes") + li([
             "<b>Removing blood:</b> when you remove a blood token by entering a tile, lose 1 Terror.",
             "<b>Hitting a Skeleton:</b> don’t trigger its Undead trait — just remove it and lay it on its side above its card.",
@@ -521,7 +524,7 @@
             "<b>Gain Fury phase</b> now reads: “You gain 1 Fury if you did not hit a poltergeist during this turn. Also, gain 1 Terror.”"
           ]);
       },
-      src: function (c) { return cites([LR(SEC_SOLO + " › Setup, Goal, The Paladin (Revealing Tiles, Removing Blood, Hitting Enemies)"), c.solo.level !== "normal" ? LR(SEC_SOLO + " › Difficulty") : "", c.solo.campaign ? LR(SEC_SOLO + " › Campaign Play") : ""]); }
+      src: function (c) { return cites([LR(SEC_SOLO + " › Setup, Goal, The Paladin (Revealing Tiles, Removing Blood, Hitting Enemies)"), LR(TILE_ICONS), c.solo.level !== "normal" ? LR(SEC_SOLO + " › Difficulty") : "", c.solo.campaign ? LR(SEC_SOLO + " › Campaign Play") : ""]); }
     },
     {
       title: "Solo — the Skeletons’ moves and the Spawn phase",
@@ -604,30 +607,30 @@
           "Tribes at 0 Population cannot enter a tile. Tribes cannot enter the grounds.",
           "Goblins ignore webs in Lit tiles, but a Tribe stops moving when it enters a Dark tile with any webs.",
           "Goblins can spend their action to spawn, even while on the map. If they are on a Spawn and roll that Spawn’s number, they reroll.",
-          "Goblins treat Pit tiles as Dark and can use them to trigger Ambushes. A Tribe on a Spawn may attack because of an Ambush.",
+          "Goblins treat " + icIn("tile-pit", "Pit", "Pit") + " tiles as Dark and can use them to trigger Ambushes. A Tribe on a Spawn may attack because of an Ambush.",
           "A Tribe counts as a single figure for the Paladin gaining Light from a hit.",
           "Overpopulation must affect a Tribe on a tile, if possible.",
           "Their full rules are in The Crystal Caverns — see " + VM.CAVES_LINK + "."]);
       },
-      src: function () { return LR(TR + " › Visiting the Manor › Goblins in the Manor"); }
+      src: function () { return cites([LR(TR + " › Visiting the Manor › Goblins in the Manor"), LR(TILE_ICONS)]); }
     },
     {
       title: "Visiting the Manor — the Dragon",
       when: function (c) { return c.has("dragon"); },
       html: function () {
-        return li(["At <b>11 Wakefulness</b>, the Dragon may surface at any Pit tile.", "The Paladin can attack the underground Dragon by spending <b>1 Fury</b>.",
+        return li(["At <b>11 Wakefulness</b>, the Dragon may surface at any " + icIn("tile-pit", "Pit", "Pit") + " tile.", "The Paladin can attack the underground Dragon by spending <b>1 Fury</b>.",
           "Any Dragon power that scatters a Tribe or makes it hide instead <b>removes Skeletons and poltergeists</b>; each figure removed this way advances his Eaten Goblins track once.",
           "Other players treat <b>Dragon Gems</b> as enemy tokens (one is removed when another role enters its tile).",
           "His full rules are in The Crystal Caverns — see " + VM.CAVES_LINK + "."]);
       },
-      src: function () { return LR(TR + " › Visiting the Manor › Dragon in the Manor"); }
+      src: function () { return cites([LR(TR + " › Visiting the Manor › Dragon in the Manor"), LR(TILE_ICONS)]); }
     },
     {
       title: "Visiting the Manor — the Thief",
       when: function (c) { return c.has("thief"); },
       html: function () {
-        return li(["The Thief can <b>stash</b> treasures while on the Entrance tile or the central Pit tile.", "The Thief ignores all enemy tokens.",
-          "When a Shrine is revealed, also place a <b>vault token</b> on it. Vault tokens are markers (not removed when their tile is entered); the Thief’s Pick Lock action removes them.",
+        return li(["The Thief can <b>stash</b> treasures while on the Entrance tile or the central " + icIn("tile-pit", "Pit", "Pit") + " tile.", "The Thief ignores all enemy tokens.",
+          "When a " + icIn("tile-shrine", "Shrine", "Shrine") + " is revealed, also place a <b>vault token</b> on it. Vault tokens are markers (not removed when their tile is entered); the Thief’s Pick Lock action removes them.",
           "When the Paladin attacks the Thief, he counts the hero cubes placed on crusade in place of Perception to see whether he hits; if he misses, he does not retreat to his origin tile.",
           "<b>Climb:</b> crossing a wall costs 1 cube (not 2).",
           "<b>Pickpocket</b> (only if the target has the item): Skeleton — choose a face-up gear card and put it on the bottom of their gear deck. Spider — she loses 1 Terror."]) +
@@ -635,7 +638,7 @@
           tbl(["Loot drop", "Paladin", "Skeletons"], [["Level 3", "+3 Grit", "+3 Stability"], ["Level 2", "+1 Grit", "+2 Stability"], ["Level 1", "+1 Grit", "+1 Stability"], ["Level 0", "No bonus", "No bonus"]]) +
           "<p>The Thief’s full rules are in The Crystal Caverns — see " + VM.CAVES_LINK + ".</p>";
       },
-      src: function () { return LR(TR + " › Visiting the Manor › Thief in the Manor (Climb, Pickpocket, Backstab, Loot Drop Results)"); }
+      src: function () { return cites([LR(TR + " › Visiting the Manor › Thief in the Manor (Climb, Pickpocket, Backstab, Loot Drop Results)"), LR(TILE_ICONS)]); }
     },
     {
       title: "Visiting the Cave — your role’s rules",
@@ -664,7 +667,7 @@
             "<b>Crypt Walker (Warlock):</b> he can enter crypts.",
             "<b>Ethereal (Manor, Warlock):</b> they can cross walls and don’t remove enemy tokens when entering their space.",
             "<b>Groundskeepers (Skeletons):</b> they can enter the grounds and crypts.",
-            "<b>Skittish (Warlock):</b> if an enemy figure enters his space, he immediately moves to the nearest Dark tile, Pit or crypt, removes half of his Curses and advances his Spells track once. <i>(This reference says “round up”; the Warlock chapter says round down and “at least 2 spaces away” — see the Warlock.)</i>",
+            "<b>Skittish (Warlock):</b> if an enemy figure enters his space, he immediately moves to the nearest Dark tile, " + icIn("tile-pit", "Pit", "Pit") + " or crypt, removes half of his Curses and advances his Spells track once. <i>(This reference says “round up”; the Warlock chapter says round down and “at least 2 spaces away” — see the Warlock.)</i>",
             "<b>Lamps:</b> when a Skeleton enters a tile with a lamp, it stops moving.",
             "<b>Webs:</b> when the Paladin or a Skeleton enters a tile with a web, he or it stops moving."
           ]) +
@@ -678,10 +681,10 @@
             "<b>Undead (Skeletons):</b> a removed Skeleton is immediately respawned (roll the spawn die, matching Spawn); its card moves to the 1st March Order space, cards push right to fill the gap.",
             "<b>Hexomancer (Warlock):</b> advance his Spells track once if a piece with any curse markers is removed."
           ]) +
-          h("Reveal") + ol(["Flip and orient the tile: rotate as you choose, but at least 1 open edge must touch an open edge of an adjacent tile, if possible.", "Fill crypts on open edges with Dark tiles from the stack.", "Resolve the tile. <b>Spooky (Manor):</b> when it reveals a Poltergeist tile, it may place the poltergeist on any empty Lit tile."]) +
+          h("Reveal") + ol(["Flip and orient the tile: rotate as you choose, but at least 1 open edge must touch an open edge of an adjacent tile, if possible.", "Fill crypts on open edges with Dark tiles from the stack.", "Resolve the tile. <b>Spooky (Manor):</b> when it reveals a " + icIn("tile-poltergeist", "Poltergeist", "Poltergeist") + " tile, it may place the poltergeist on any empty Lit tile."]) +
           h("Easy-to-forget Defense values") + tbl(["Figure", "Defense"], [["Poltergeist", "1"], ["Egg", "1 + blood tokens on its tile"], ["Skeleton", "Number of Skeletons on its tile"]]);
       },
-      src: function (c) { return cites([LR("Key Action Reference › Move, Attack, Reveal, Easy-to-Forget Defense Values"), c.mode === "solo" ? LR(SEC_SOLO + " › The Paladin › Hitting Enemies") + " · " + LR(SEC_SOLO + " › The Skeletons › Skeleton Movement, Spawn Phase") + " · " + LR(SEC_SOLO + " › Enemy Dials › Stability") : "", c.mode === "solo" && c.solo.campaign ? LR(SEC_SOLO + " › Campaign Play") : ""]); }
+      src: function (c) { return cites([LR("Key Action Reference › Move, Attack, Reveal, Easy-to-Forget Defense Values"), LR(TILE_ICONS), c.mode === "solo" ? LR(SEC_SOLO + " › The Paladin › Hitting Enemies") + " · " + LR(SEC_SOLO + " › The Skeletons › Skeleton Movement, Spawn Phase") + " · " + LR(SEC_SOLO + " › Enemy Dials › Stability") : "", c.mode === "solo" && c.solo.campaign ? LR(SEC_SOLO + " › Campaign Play") : ""]); }
     },
     {
       title: "About these sources",

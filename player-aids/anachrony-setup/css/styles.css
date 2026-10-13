@@ -500,6 +500,10 @@ section h2::after {                        /* short chamfered bar below */
 }
 .ref-body > h4:first-child { margin-top: 2px; }
 .ref-body .src-line { margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--line); }
+/* rulebook icons (css/icons.css, icons standard v1): room around the Research dice faces */
+.ref-body .aid-icon-grid { margin: 10px 0 4px; }
+/* an inline icon stays on the same line as the word it labels */
+.ref-body .an-icw { white-space: nowrap; }
 
 /* ---- rulebook search ------------------------------------------------------------- */
 .rsearch-wrap { margin-bottom: 16px; }
@@ -621,3 +625,8 @@ section h2::after {                        /* short chamfered bar below */
   --comp-line: var(--ctl); --comp-accent: var(--plum); --comp-accent-ink: #ffffff;
   --comp-head-font: var(--font); --comp-radius: 6px;
 }
+/* Research dice captions (Essential p.13 "Shape die" / "Icon die") */
+.ref-body p.an-die-lbl { margin: 10px 0 0; }
+.ref-body p.an-die-lbl + .aid-icon-grid { margin-top: 4px; }
+/* Alternate Timeline slot symbols are wide (about 2:1): give that list a 64px lead column so they show at full height */
+.ref-body ul.aid-icons.an-wide > li > .aid-ic { width: 64px; }

@@ -412,6 +412,10 @@ main{max-width:1000px; margin:0 auto; padding:24px 28px 64px}
 /* boards: bullets are the red diamonds that mark unstable locations */
 .loc-board li::before{content:""; position:absolute; left:3px; top:.6em; width:8px; height:8px; transform:rotate(45deg); background:#b3261e; box-shadow:0 0 0 1px rgba(90,10,5,.35)}
 .loc-board li b{color:var(--forest-ink)}
+/* rulebook icons (css/icons.css, icons standard v1): spacing inside the reference cards and setup steps */
+.htp-sec ul.aid-icons, .loc-board ul.aid-icons{gap:0; margin:10px 0 8px}
+.loc-board .aid-icon-row, .htp-sec .aid-icon-row, .sd .aid-icon-row{margin:10px 0}
+.sd .aid-icon-note{margin:10px 0 0}
 
 /* ============================ FAQ ============================ */
 .faq-list{display:flex; flex-direction:column; gap:10px; margin-top:6px}

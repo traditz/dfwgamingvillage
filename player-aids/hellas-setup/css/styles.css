@@ -558,3 +558,10 @@ section h2::after {
   --comp-line: var(--frame); --comp-accent: var(--aegean); --comp-accent-ink: #ffffff;
   --comp-head-font: var(--sans); --comp-radius: 3px;
 }
+
+/* Rulebook icons (css/icons.css, icons standard v1): an icon list nested in a striped rule list (the Monster Die
+   faces) sits on its parent's stripe — no stripes, dots or indents of its own */
+.ref-body ul.aid-icons { margin: 10px 0 6px; }
+.ref-body ul.aid-icons > li { background: none; padding: 0; margin: 0 0 8px; }
+/* an inline icon stays on the same line as the first word of its term */
+.lh-icw { white-space: nowrap; }

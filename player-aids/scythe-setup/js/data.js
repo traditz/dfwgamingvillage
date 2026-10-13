@@ -27,6 +27,13 @@
    ============================================================================= */
 var SY = {};
 
+/* Rulebook icons (DFWGV icons standard v1, css/icons.css): every picture is cropped from this game's own
+   PDFs; the text label always stays beside it. Call with the full literal file name (no fragments).
+     SY.ic(name, alt)        one icon inside a sentence or heading
+     SY.icl(name, alt, html) one row of an icon list (<ul class='aid-icons'>)                         */
+SY.ic = function (name, alt) { return "<img class='aid-ic aid-ic-inline' src='images/icons/" + name + ".webp' alt='" + alt + "'>"; };
+SY.icl = function (name, alt, html) { return "<li><img class='aid-ic' src='images/icons/" + name + ".webp' alt='" + alt + "'><span>" + html + "</span></li>"; };
+
 SY.expMeta = {
   core: { name: "Core",           cls: "tag-core" },
   ifa:  { name: "Invaders",       cls: "tag-ifa" },
@@ -91,62 +98,62 @@ SY.triumphs = [
    (Core p.15–17 mat pictures, Invaders p.5, p.7, Rise of Fenris p.22, p.31)
    --------------------------------------------------------------------------- */
 SY.factions = [
-  { id: "nordic", name: "Nordic Kingdom", who: "Bjorn & Mox", set: "core", power: 4, cards: 1,
+  { id: "nordic", name: "Nordic Kingdom", emblem: SY.ic("faction-nordic", "Nordic"), who: "Bjorn & Mox", set: "core", power: 4, cards: 1,
     ability: "<b>Swim</b>: your workers may move across rivers, onto any terrain except lakes (workers only, not your character or mechs).",
     mechs: ["<b>Riverwalk</b>: character and mechs may cross rivers onto forests and mountains",
             "<b>Seaworthy</b>: move to and from lakes, and retreat onto an adjacent lake (or home)",
             "<b>Artillery</b>: before combat, pay 1 power to make your opponent lose 2 power (once per combat)",
             "<b>Speed</b>: move one extra territory per move"],
     src: "Core p.16, p.21" },
-  { id: "rusviet", name: "Rusviet Union", who: "Olga Romanova & Changa", set: "core", power: 3, cards: 2,
+  { id: "rusviet", name: "Rusviet Union", emblem: SY.ic("faction-rusviet", "Rusviet"), who: "Olga Romanova & Changa", set: "core", power: 3, cards: 2,
     ability: "<b>Relentless</b>: you may choose the same Player Mat section as your previous turn(s). It does not apply to Factory cards.",
     mechs: ["<b>Riverwalk</b>: cross rivers onto farms and villages",
             "<b>Township</b>: villages you control and the Factory count as adjacent for your character's and mechs' moves",
             "<b>People's Army</b>: in a combat where you have at least 1 worker, play 1 extra combat card (you still need a character or mech there)",
             "<b>Speed</b>: move one extra territory per move"],
     src: "Core p.16, p.21" },
-  { id: "crimea", name: "Crimean Khanate", who: "Zehra & Kar", set: "core", power: 5, cards: 0,
+  { id: "crimea", name: "Crimean Khanate", emblem: SY.ic("faction-crimea", "Crimea"), who: "Zehra & Kar", set: "core", power: 5, cards: 0,
     ability: "<b>Coercion</b>: once per turn, spend 1 combat card as if it were any 1 resource token (whatever its number).",
     mechs: ["<b>Riverwalk</b>: cross rivers onto farms and tundra",
             "<b>Wayfare</b>: move from a territory or home base to any inactive faction's home base or your own, any distance",
             "<b>Scout</b>: before combat, steal 1 random combat card from your opponent (once per combat)",
             "<b>Speed</b>: move one extra territory per move"],
     src: "Core p.17, p.21" },
-  { id: "polania", name: "Polania Republic", who: "Anna & Wojtek", set: "core", power: 2, cards: 3,
+  { id: "polania", name: "Polania Republic", emblem: SY.ic("faction-polania", "Polania"), who: "Anna & Wojtek", set: "core", power: 2, cards: 3,
     ability: "<b>Meander</b>: pick up to 2 different options per encounter card, in any order (the first may pay for the second). You still draw only one card.",
     mechs: ["<b>Riverwalk</b>: cross rivers onto villages and mountains",
             "<b>Submerge</b>: move to and from lakes, and from any lake to another",
             "<b>Camaraderie</b>: no popularity loss when you force workers to retreat after winning combat as the aggressor",
             "<b>Speed</b>: move one extra territory per move"],
     src: "Core p.17, p.21" },
-  { id: "saxony", name: "Saxony Empire", who: "Gunter von Duisburg with Nacht & Tag", set: "core", power: 1, cards: 4,
+  { id: "saxony", name: "Saxony Empire", emblem: SY.ic("faction-saxony", "Saxony"), who: "Gunter von Duisburg with Nacht & Tag", set: "core", power: 1, cards: 4,
     ability: "<b>Dominate</b>: no limit to the stars you place for objectives and combat victories (you keep your second objective card). If you have a star left after winning combat, you must place it.",
     mechs: ["<b>Riverwalk</b>: cross rivers onto forests and mountains",
             "<b>Underpass</b>: mountains you control and all tunnels count as adjacent for your character's and mechs' moves",
             "<b>Disarm</b>: before combat on a territory with a tunnel or your Mine, your opponent loses 2 power (once per combat)",
             "<b>Speed</b>: move one extra territory per move"],
     src: "Core p.15, p.21" },
-  { id: "albion", name: "Clan Albion", who: "Connor & Max", set: "ifa", power: 3, cards: 0,
+  { id: "albion", name: "Clan Albion", emblem: SY.ic("faction-albion", "Albion"), who: "Connor & Max", set: "ifa", power: 3, cards: 0,
     ability: "<b>Exalt</b>: after your character ends its movement, you may place a Flag token from your supply on its territory (4 Flags).",
     mechs: ["<b>Burrow</b>: character and mechs may cross rivers into or out of any adjacent tunnel territory (your Mine counts; an opponent's Mine does not)",
             "<b>Sword</b>: before combat as the attacker, the defender loses 2 power (once per combat)",
             "<b>Shield</b>: before combat as the defender, gain 2 power (once per combat)",
             "<b>Rally</b>: on a Move action, your character and mechs may move to any territory with one of your workers or a Flag, any distance"],
     src: "Invaders p.4–5" },
-  { id: "togawa", name: "Togawa Shogunate", who: "Akiko & Jiro", set: "ifa", power: 0, cards: 2,
+  { id: "togawa", name: "Togawa Shogunate", emblem: SY.ic("faction-togawa", "Togawa"), who: "Akiko & Jiro", set: "ifa", power: 0, cards: 2,
     ability: "<b>Maifuku</b>: after your character ends its movement, you may place an armed Trap token of your choice on its territory, even one with an opponent's structure (4 Traps).",
     mechs: ["<b>Toka</b>: once per turn when moving, 1 character or 1 mech may cross a river (a mech may carry workers; no crossing several rivers on a Factory card's Move)",
             "<b>Suiton</b>: move to and from lakes; in combat on a lake, play 1 extra combat card (once per combat); you may place a Trap on a lake",
             "<b>Ronin</b>: before a combat where you have exactly 1 unit (1 character or 1 mech, no workers), you may gain 2 power",
             "<b>Shinobi</b>: move to any territory with a Trap, any distance; ending there on a disarmed Trap (not mid-way through a Factory card Move) lets you re-arm it, but only after winning if it led to combat"],
     src: "Invaders p.6–7" },
-  { id: "vesna", name: "Vesna", who: "Vesna & Voltan", set: "rof", power: 1, cards: 1,
+  { id: "vesna", name: "Vesna", emblem: SY.ic("faction-vesna", "Vesna"), who: "Vesna & Voltan", set: "rof", power: 1, cards: 1,
     ability: "<b>Technophile</b>: 3 face-up Factory cards are yours from the start; use them like normal Factory cards, and return each one to the box after you use it (including one gained at the Factory). You may still gain only 1 card at the Factory per game. Her starting Factory cards do not count toward objectives.",
     mechs: ["<b>Riverwalk</b>: move your character and mechs across rivers to or from an adjacent territory containing any player's structure",
             "Two blank spaces, filled each game from her mech ability tokens",
             "<b>Speed</b>: move one extra territory per Move action"],
     src: "Rise of Fenris p.22–23" },
-  { id: "fenris", name: "Fenris", who: "Rasputin & Likho", set: "rof", power: 4, cards: 2,
+  { id: "fenris", name: "Fenris", emblem: SY.ic("faction-fenris", "Fenris"), who: "Rasputin & Likho", set: "rof", power: 4, cards: 2,
     ability: "<b>Influence</b>: after moving your character (and resolving combat and encounters), you may place an Influence token on its territory; if you do, you may place 1 more on any other unoccupied, tokenless primary-terrain territory.",
     mechs: ["<b>Leap</b>: when moving, leap over a territory if the destination is in a straight line (crosses rivers and lakes, avoids enemy units); twice in one turn with a Factory card Move",
             "<b>Horrify</b>: you may give an opponent 1 Influence token (from your supply) for each unit you force to retreat as the aggressor, in or out of combat",
@@ -205,12 +212,40 @@ SY.factionTable = function (c) {
 
 /* The Triumph Track, by variant (Core p.27; Rise of Fenris p.16, p.18, p.37) */
 SY.triumphList = function (c) {
-  if (c.triumph === "war") return "<ul><li>Complete 6 upgrades <b>or</b> build 4 structures (a star for one, not both)</li><li>Deploy all 4 mechs</li><li>Enlist all 4 recruits</li><li>Reveal 1 completed objective</li><li>Win combat: <b>up to 4 stars</b> for everyone (Saxony: unlimited combat and objective stars)</li><li>Reach 16 power</li><li>Have <b>8 combat cards</b> in hand at the end of your turn</li><li>No stars for 8 workers or for maximum popularity</li></ul>";
-  if (c.triumph === "peace") return "<ul><li>Complete 6 upgrades</li><li>Build all 4 structures</li><li>Deploy 4 mechs <b>or</b> enlist 4 recruits (not both)</li><li>All 8 workers on the board</li><li>Objectives: <b>2 stars</b> for everyone; after your objective star, draw a new objective card instead of discarding your other one (if any remain; don't reshuffle discards)</li><li>Reach <b>13</b> popularity</li><li>Claim <b>3 encounter tokens</b></li><li>Gain a <b>Factory card</b> (place the star the turn you gain it)</li><li>Control <b>16 resources</b> in total (any territories)</li><li>No stars for combat victories or 16 power</li></ul>";
+  // Each goal beside the symbol on its space of the track (Core p.27; War track Rise of Fenris p.16, Peace track p.18)
+  if (c.triumph === "war") return "<ul class='aid-icons'>" +
+    SY.icl("triumph-upgrades", "Upgrades", "Complete 6 upgrades <b>or</b> " + SY.ic("triumph-structures", "Structures") + " build 4 structures (a star for one, not both)") +
+    SY.icl("triumph-mechs", "Mechs", "Deploy all 4 mechs") +
+    SY.icl("triumph-recruits", "Recruits", "Enlist all 4 recruits") +
+    SY.icl("triumph-objective", "Objective", "Reveal 1 completed objective") +
+    SY.icl("triumph-combat", "Combat", "Win combat: <b>up to 4 stars</b> for everyone (Saxony: unlimited combat and objective stars)") +
+    SY.icl("triumph-power", "Power", "Reach 16 power") +
+    SY.icl("war-combat-cards", "Combat cards", "Have <b>8 combat cards</b> in hand at the end of your turn") +
+    "</ul><ul><li>No stars for 8 workers or for maximum popularity</li></ul>";
+  if (c.triumph === "peace") return "<ul class='aid-icons'>" +
+    SY.icl("triumph-upgrades", "Upgrades", "Complete 6 upgrades") +
+    SY.icl("triumph-structures", "Structures", "Build all 4 structures") +
+    SY.icl("triumph-mechs", "Mechs", "Deploy 4 mechs <b>or</b> " + SY.ic("triumph-recruits", "Recruits") + " enlist 4 recruits (not both)") +
+    SY.icl("triumph-workers", "Workers", "All 8 workers on the board") +
+    SY.icl("triumph-objective", "Objective", "Objectives: <b>2 stars</b> for everyone; after your objective star, draw a new objective card instead of discarding your other one (if any remain; don't reshuffle discards)") +
+    SY.icl("triumph-popularity", "Popularity", "Reach <b>13</b> popularity") +
+    SY.icl("triumph-encounters", "Encounters", "Claim <b>3 encounter tokens</b>") +
+    SY.icl("triumph-factory-card", "Factory card", "Gain a <b>Factory card</b> (place the star the turn you gain it)") +
+    SY.icl("peace-resources", "Resources", "Control <b>16 resources</b> in total (any territories)") +
+    "</ul><ul><li>No stars for combat victories or 16 power</li></ul>";
   if (c.triumph === "tiles") return c.coop
     ? "<ul><li>Triumph Tiles replace the track: reveal " + SY.desolationTiles(c.p) + " of the 21 tiles (including the 5 Desolation-only tiles)" + (c.p === 1 ? "; solo: don't use the 5-star tile, and if you reveal 2 objective tiles, draw and discard another" : "") + ". The team wins when every tile holds at least one star.</li></ul>"
     : "<ul><li>10 random Triumph Tiles (of 16) cover the 10 slots: read each one before you start.</li><li>Known tiles include: 8 combat cards in hand on your turn · claiming 3 encounter tokens (star after the encounter) · gaining a Factory card (star when you gain it, at end of turn) · controlling 16 resources.</li><li>Saxony keeps its unlimited objective and combat stars even with no tile for them.</li></ul>";
-  return "<ul><li>Complete all 6 upgrades</li><li>Deploy all 4 mechs</li><li>Build all 4 structures</li><li>Enlist all 4 recruits</li><li>Have all 8 workers on the board</li><li>Reveal 1 completed objective card</li><li>Win combat (two spaces: up to 2 times)</li><li>Have 18 popularity</li><li>Have 16 power</li></ul>";
+  return "<ul class='aid-icons'>" +
+    SY.icl("triumph-upgrades", "Upgrades", "Complete all 6 upgrades") +
+    SY.icl("triumph-mechs", "Mechs", "Deploy all 4 mechs") +
+    SY.icl("triumph-structures", "Structures", "Build all 4 structures") +
+    SY.icl("triumph-recruits", "Recruits", "Enlist all 4 recruits") +
+    SY.icl("triumph-workers", "Workers", "Have all 8 workers on the board") +
+    SY.icl("triumph-objective", "Objective", "Reveal 1 completed objective card") +
+    SY.icl("triumph-combat", "Combat", "Win combat (two spaces: up to 2 times)") +
+    SY.icl("triumph-popularity", "Popularity", "Have 18 popularity") +
+    SY.icl("triumph-power", "Power", "Have 16 power") + "</ul>";
 };
 SY.desolationTiles = function (p) { return ({ 1: 5, 2: 8, 3: 10, 4: 12, 5: 14, 6: 16, 7: 18 })[p] || 10; };
 
@@ -608,7 +643,7 @@ SY.phases = [
       { when: function () { return true; }, exp: "core",
         t: "Encounter tokens",
         d: function (c) {
-          return "<ul><li>Place 1 encounter token (green compass) on each territory marked with the encounter symbol" +
+          return "<ul><li>Place 1 encounter token (green compass) on each territory marked with the encounter symbol " + SY.ic("encounter-space", "Encounter space") +
             (c.board === "mod" ? " on your layout." : ": <b>11</b> tokens on the standard board.") + "</li>" +
             (c.camp && c.epId === "7" ? "<li><b>Episode 7:</b> also place the 12th token on the Factory.</li>" : "") + "</ul>";
         },
@@ -698,8 +733,8 @@ SY.phases = [
         t: "Starting power, combat cards, popularity and coins",
         d: function (c) {
           return "<p>Each mat has a box at its far right showing several numbers:</p><ul>" +
-            "<li><b>Faction mat</b> (power symbol and yellow combat card): put your power token on the power number on the Power Track, and draw the number of combat cards shown on the yellow card " + (c.coop ? "(in Desolation, combat cards are public knowledge)" : "(how many you hold is public; what they are is secret)") + ".</li>" +
-            "<li><b>Player mat</b> (objective card, heart, coin): put your popularity token on the heart's number on the Popularity Track, take the coins shown (keep them on your faction mat; you never have to reveal your total), and draw the objective cards shown " + (c.coop ? "(in Desolation, objectives are public knowledge)" : "(secret)") + ". Then return the objective deck to the board.</li>" +
+            "<li><b>Faction mat</b> (power symbol " + SY.ic("power", "Power") + " and yellow combat card " + SY.ic("combat-card", "Combat card") + "): put your power token on the power number on the Power Track, and draw the number of combat cards shown on the yellow card " + (c.coop ? "(in Desolation, combat cards are public knowledge)" : "(how many you hold is public; what they are is secret)") + ".</li>" +
+            "<li><b>Player mat</b> (objective card " + SY.ic("objective", "Objective") + ", heart " + SY.ic("popularity", "Popularity") + ", coin " + SY.ic("coin", "Coin") + "): put your popularity token on the heart's number on the Popularity Track, take the coins shown (keep them on your faction mat; you never have to reveal your total), and draw the objective cards shown " + (c.coop ? "(in Desolation, objectives are public knowledge)" : "(secret)") + ". Then return the objective deck to the board.</li>" +
             (c.triumph === "peace" ? "<li><b>Peace Triumph Track:</b> Saxony draws <b>3</b> objective cards instead of 2.</li>" : "") +
             (c.camp && c.epi >= 3 ? "<li><b>Campaign:</b> add your Setup Bonuses, plus any Perk you buy.</li>" : "") +
             (c.camp && c.epi >= 0 && c.epi < 3 ? "<li><b>Campaign:</b> add any Perk you use this episode.</li>" : "") +
@@ -719,7 +754,7 @@ SY.phases = [
         src: "Core p.7, p.9 · QRG p.1" },
       { when: function () { return true; }, exp: "core",
         t: "Player mat",
-        d: "<ul><li><b>6 technology cubes</b> on the green boxes that have a black square in the corner.</li><li><b>4 structures</b> (Armory, Monument, Mine, Mill) on their matching boxes.</li><li><b>4 recruit tokens</b> (cylinders) on the round spaces of the bottom row.</li><li>Your <b>other 6 workers</b> on the red rectangles above the Produce action.</li><li>Your <b>action token</b> beside the player mat.</li></ul>",
+        d: "<ul><li><b>6 technology cubes</b> on the green boxes that have a black square in the corner " + SY.ic("green-box", "Green box with a black square") + ".</li><li><b>4 structures</b> (Armory, Monument, Mine, Mill) on their matching boxes.</li><li><b>4 recruit tokens</b> (cylinders) on the round spaces of the bottom row.</li><li>Your <b>other 6 workers</b> on the red rectangles above the Produce action.</li><li>Your <b>action token</b> beside the player mat.</li></ul>",
         src: "Core p.8 · QRG p.1" },
       { when: function () { return true; }, exp: "core",
         t: function (c) { return c.opt("firstgame") ? "Riverwalk and quick-start cards" : "Riverwalk cards"; },
@@ -964,12 +999,20 @@ SY.reference = [
     when: function () { return true; },
     html: function (c) {
       return "<p>The top row is in a different order on each player mat, but the actions are the same. An upgrade (a cube moved off a green box) adds one more of that benefit.</p>" +
-        "<h4>Move</h4><ul><li>Move up to <b>2 different units</b> (character, mechs, workers) from a territory or your home base to an adjacent territory, one after the other, <i>or</i> gain <b>$1</b>. Upgraded: 3 units, or $2.</li><li>Each move icon moves one more unit one territory; extra distance only comes from abilities (Speed etc.).</li><li><b>Mine</b> (the structure under Move): once built it's a tunnel only you can use, for all your unit movement.</li></ul>" +
-        "<h4>Bolster</h4><ul><li>Pay <b>$1</b>: gain <b>2 power</b> (upgraded: 3), <i>or</i> draw <b>1 combat card</b> (upgraded: 2).</li><li><b>Monument</b> built: also gain 1 popularity whenever you Bolster.</li></ul>" +
-        "<h4>Trade</h4><ul><li>Pay <b>$1</b>: gain <b>any 2 resources</b> (any mix of oil, metal, food, wood) on a territory you control that has at least one of your workers, <i>or</i> gain <b>1 popularity</b> (upgraded: 2).</li><li>You can't trade for resources if all your workers are on your home base.</li><li><b>Armory</b> built: also gain 1 power whenever you Trade.</li></ul>" +
+        "<h4>Move</h4><ul><li>Move up to <b>2 different units</b> (character, mechs, workers) from a territory or your home base to an adjacent territory, one after the other, <i>or</i> gain <b>$1</b>. Upgraded: 3 units, or $2.</li><li>Each move icon " + SY.ic("move", "Move") + " moves one more unit one territory; extra distance only comes from abilities (Speed etc.).</li><li><b>Mine</b> (the structure under Move): once built it's a tunnel only you can use, for all your unit movement.</li></ul>" +
+        "<h4>Bolster</h4><ul><li>Pay <b>$1</b>: gain <b>2 power</b> " + SY.ic("power", "Power") + " (upgraded: 3), <i>or</i> draw <b>1 combat card</b> " + SY.ic("combat-card", "Combat card") + " (upgraded: 2).</li><li><b>Monument</b> built: also gain 1 popularity whenever you Bolster.</li></ul>" +
+        "<h4>Trade</h4><ul><li>Pay <b>$1</b>: gain <b>any 2 resources</b> " + SY.ic("any-resource", "Any resource") + " (any mix of oil, metal, food, wood) on a territory you control that has at least one of your workers, <i>or</i> gain <b>1 popularity</b> " + SY.ic("popularity", "Popularity") + " (upgraded: 2).</li><li>You can't trade for resources if all your workers are on your home base.</li><li><b>Armory</b> built: also gain 1 power whenever you Trade.</li></ul>" +
         "<h4>Produce</h4><ul><li>Pay the costs on <b>all uncovered red boxes</b> of the Produce row (they appear as workers leave your mat; the rulebook's pictured mat shows 1 power under the 2nd worker space, 1 popularity under the 4th and $1 under the 6th). You must pay it all.</li>" +
-        "<li>Choose up to <b>2 different territories</b> you control (upgraded: 3); every worker on them may produce 1 token of that land. <b>Mill</b> built: its territory can be an extra territory, and the Mill itself produces like a worker (you must control that territory).</li>" +
-        "<li>Mountain → <b>metal</b> · farm → <b>food</b> · tundra → <b>oil</b> · forest → <b>wood</b> · village → <b>worker</b> (take the leftmost worker from your Produce row). Lakes and the Factory produce nothing.</li>" +
+        "<li>Choose up to <b>2 different territories</b> " + SY.ic("produce-territory", "Territory") + " you control (upgraded: 3); every worker on them may produce 1 token of that land. <b>Mill</b> built: its territory can be an extra territory, and the Mill itself produces like a worker (you must control that territory).</li>" +
+        "</ul><ul class='aid-icons'>" +
+          SY.icl("terrain-mountain", "Mountain", "<b>Mountain</b> → " + SY.ic("metal", "Metal") + " <b>metal</b>") +
+          SY.icl("terrain-farm", "Farm", "<b>Farm</b> → " + SY.ic("food", "Food") + " <b>food</b>") +
+          SY.icl("terrain-tundra", "Tundra", "<b>Tundra</b> → " + SY.ic("oil", "Oil") + " <b>oil</b>") +
+          SY.icl("terrain-forest", "Forest", "<b>Forest</b> → " + SY.ic("wood", "Wood") + " <b>wood</b>") +
+          SY.icl("terrain-village", "Village", "<b>Village</b> → " + SY.ic("worker", "Worker") + " <b>worker</b> (take the leftmost worker from your Produce row)") +
+          SY.icl("terrain-lake", "Lake", "<b>Lake</b>: produces nothing") +
+          SY.icl("terrain-factory", "Factory", "<b>Factory</b>: produces nothing") +
+        "</ul><ul>" +
         "<li>Produced tokens stay on their territory. No limit to tokens or workers on a territory. Workers never return to your mat.</li>" +
         (c.act("inframods") ? "<li><b>Automachines</b> (Infrastructure Mod): doubles production by workers and mills, only on the turn you use it.</li>" : "") + "</ul>";
     },
@@ -985,13 +1028,13 @@ SY.reference = [
         "<h4>Units</h4><ul><li><b>Characters</b> fight, have encounters and (once per game) take a Factory card. <b>Mechs</b> fight and carry any number of your workers (not your character). <b>Workers</b> produce, and deploy mechs and build structures where they stand. Any unit may carry any number of resources.</li>" +
         "<li>A mech may pick up and drop off workers and resources during its move; that counts as the mech's move only. A worker it dropped off can then move on its own as another unit. With Speed, mechs may pick up and drop off mid-move.</li>" +
         "<li>Move different units, one at a time; you may use only part of a Move action. No limit to your units on a territory.</li></ul>" +
-        "<h4>Terrain</h4><ul><li><b>Rivers</b> (borders between land territories) and <b>lakes</b> block movement unless an ability says otherwise. A lake counts as touching every adjacent shoreline.</li>" +
-        "<li><b>Tunnels:</b> all tunnel territories are adjacent to each other for every unit's moves. Your <b>Mine</b> is a tunnel only you can use (even if an opponent controls its territory).</li>" +
+        "<h4>Terrain</h4><ul><li><b>Rivers</b> (borders between land territories) and <b>lakes</b> " + SY.ic("terrain-lake", "Lake") + " block movement unless an ability says otherwise. A lake counts as touching every adjacent shoreline.</li>" +
+        "<li><b>Tunnels</b> " + SY.ic("tunnel", "Tunnel") + ": all tunnel territories are adjacent to each other for every unit's moves. Your <b>Mine</b> is a tunnel only you can use (even if an opponent controls its territory).</li>" +
         (c.board === "mod" ? "<li><b>Modular Board:</b> water on a non-lake territory that connects to an adjacent lake is part of that lake (you don't need Riverwalk to cross it, but you do need a lakewalk ability).</li>" : "") + "</ul>" +
         "<h4>Moving into an opponent's territory</h4><ul><li><b>Only their workers there:</b> your character or mech stops; each of their workers retreats to its home base, leaving its resources, and you lose 1 popularity per worker (they retreat even if you can't lose more). Another of your units may then move through. Your workers can't move alone into territories controlled by opponent workers.</li>" +
         "<li><b>Only their structure there:</b> any unit may enter, and you now control the territory.</li>" +
         "<li><b>Their character and/or mechs:</b> your character or mech stops there (they still control it for now). After all your moves, you fight. Your workers can't move alone into or out of territories controlled by opponent characters or mechs.</li>" +
-        "<li><b>Encounter token:</b> your character stops and can't move again this turn.</li>" +
+        "<li><b>Encounter token</b> " + SY.ic("encounter", "Encounter") + ": your character stops and can't move again this turn.</li>" +
         "<li>Finish all your unit moves first, then resolve combats, then encounters and the Factory.</li></ul>";
     },
     src: function (c) { return SY.src("Core p.4–5, p.11, p.15, p.18, p.22, p.24–25, p.31", "Wind Gambit p.7 (errata)", "QRG p.2", c.board === "mod" ? "Modular Board p.3" : ""); }
@@ -1001,11 +1044,15 @@ SY.reference = [
     when: function () { return true; },
     html: function (c) {
       return "<p>Same order on every player mat; costs and coin rewards vary. Take the coins first so you don't forget them (you may decline them). After you complete an action (nothing left to upgrade, etc.) you may still pay for it just for the coins and recruit bonus. Announce it.</p>" +
-        "<h4>Upgrade (oil)</h4><ul><li>Pay the oil; move a technology cube from <b>any green box</b> (top row) to <b>any empty red box with a bracketed border</b> (bottom row). The top action gains a benefit; the bottom action gets cheaper. Solid-bordered red boxes can't be upgraded.</li></ul>" +
-        "<h4>Deploy (metal)</h4><ul><li>Pay the metal; put any mech from your faction mat on a territory you control with at least one of your workers. Never on a lake (even with a lake ability).</li><li>From now on your character and <b>all</b> your mechs (not workers) have the ability that mech uncovered.</li></ul>" +
-        "<h4>Build (wood)</h4><ul><li>Pay the wood; put any structure from your player mat on a territory you control with at least one of your workers.</li><li>Only <b>1 structure per territory</b>, ever. Not on home bases or lakes; the Factory is allowed. Structures are never destroyed or moved.</li><li>Opponents can't use your structures' abilities. You keep yours even without control of the territory, except the Mill (no producing there unless you control it). A lone structure controls its territory; an opponent's unit there takes control.</li><li>The uncovered box is an ongoing bonus to the top action above it: <b>Monument</b> (Bolster: +1 popularity), <b>Mill</b> (Produce: extra territory), <b>Mine</b> (a private tunnel, for all your unit movement), <b>Armory</b> (Trade: +1 power).</li></ul>" +
-        "<h4>Enlist (food)</h4><ul><li>Pay the food; move any recruit token from your player mat to any open <b>one-time bonus</b> space on your faction mat and take it: <b>2 power</b>, <b>2 coins</b>, <b>2 popularity</b> or <b>2 combat cards</b>" + (c.act("fenris") ? " (Fenris's mat: 3 power, $3, 1 popularity or 3 combat cards)" : "") + ". It stays there.</li>" +
-        "<li>The green circle it uncovered is an <b>ongoing bonus</b>: whenever you <b>or the player on your immediate left or right</b> takes that bottom-row action on a player mat, you may gain it (the rulebook's mat shows Upgrade → 1 power, Deploy → $1, Build → 1 popularity, Enlist → 1 combat card). Top-row actions and Factory cards don't trigger it.</li>" +
+        "<h4>" + SY.ic("upgrade", "Upgrade") + " Upgrade (oil)</h4><ul><li>Pay the oil; move a technology cube from <b>any green box</b> " + SY.ic("green-box", "Green box") + " (top row) to <b>any empty red box with a bracketed border</b> " + SY.ic("red-box", "Bracketed red box") + " (bottom row). The top action gains a benefit; the bottom action gets cheaper. Solid-bordered red boxes can't be upgraded.</li></ul>" +
+        "<h4>" + SY.ic("deploy", "Deploy") + " Deploy (metal)</h4><ul><li>Pay the metal; put any mech from your faction mat on a territory you control with at least one of your workers. Never on a lake (even with a lake ability).</li><li>From now on your character and <b>all</b> your mechs (not workers) have the ability that mech uncovered.</li></ul>" +
+        "<h4>" + SY.ic("build", "Build") + " Build (wood)</h4><ul><li>Pay the wood; put any structure from your player mat on a territory you control with at least one of your workers.</li><li>Only <b>1 structure per territory</b>, ever. Not on home bases or lakes; the Factory is allowed. Structures are never destroyed or moved.</li><li>Opponents can't use your structures' abilities. You keep yours even without control of the territory, except the Mill (no producing there unless you control it). A lone structure controls its territory; an opponent's unit there takes control.</li><li>The uncovered box is an ongoing bonus to the top action above it:</li></ul><ul class='aid-icons'>" +
+          SY.icl("monument", "Monument", "<b>Monument</b>: +1 popularity whenever you Bolster") +
+          SY.icl("mill", "Mill", "<b>Mill</b>: when you Produce, its territory may count as an extra territory, and the Mill produces as if it were 1 worker (workers there also produce)") +
+          SY.icl("mine", "Mine", "<b>Mine</b>: a private tunnel, for all your unit movement") +
+          SY.icl("armory", "Armory", "<b>Armory</b>: +1 power whenever you Trade") + "</ul>" +
+        "<h4>" + SY.ic("enlist", "Enlist") + " Enlist (food)</h4><ul><li>Pay the food; move any recruit token from your player mat to any open <b>one-time bonus</b> space on your faction mat and take it: <b>2 power</b>, <b>2 coins</b>, <b>2 popularity</b> or <b>2 combat cards</b>" + (c.act("fenris") ? " (Fenris's mat: 3 power, $3, 1 popularity or 3 combat cards)" : "") + ". It stays there.</li>" +
+        "<li>The green circle it uncovered (below the " + SY.ic("recruit-bonus", "You and your neighbours") + " symbol, which pictures you and your two neighbours) is an <b>ongoing bonus</b>: whenever you <b>or the player on your immediate left or right</b> takes that bottom-row action on a player mat, you may gain it (the rulebook's mat shows Upgrade → 1 power, Deploy → $1, Build → 1 popularity, Enlist → 1 combat card). Top-row actions and Factory cards don't trigger it.</li>" +
         "<li>Several players gaining at once: the active player first, then the player on their left, then on their right. A 6th star from this ends the game immediately.</li>" +
         (c.p === 2 ? "<li><b>2 players:</b> when your opponent's action would give you a recruit bonus, you gain it only once.</li>" : "") +
         (c.act("inframods") ? "<li><b>Machinery, Assembly Line, Construction, Recruitment Office</b> (Infrastructure Mods): take that bottom-row action without paying its cost. They are not extra actions.</li>" : "") + "</ul>";
@@ -1032,7 +1079,7 @@ SY.reference = [
         "<li>Popularity is only lost for retreats you force on <b>your</b> turn: win as a defender against a mech carrying workers and you lose nothing.</li>" +
         "<li><b>Lakes:</b> factions with lake abilities can fight on a lake. If an attacked mech on a lake was carrying workers and the attacker wins, the attacker loses 1 popularity per worker (they retreat with the mech).</li></ul>" +
         "<table class='tbl compact'><caption>The combat deck (42 cards)</caption><thead><tr><th scope='col'>Power</th><th scope='col'>2</th><th scope='col'>3</th><th scope='col'>4</th><th scope='col'>5</th></tr></thead><tbody><tr><th scope='row'>Cards</th><td>16</td><td>12</td><td>8</td><td>6</td></tr></tbody></table>" +
-        ((c.act("mechmods") || c.act("madtesla") || c.coop || c.boxc) ? "<p class='inline-note'>Mods and abilities marked with the no-NPC icon (affecting an opponent's power or combat cards) don't work against non-player units; abilities that only affect you still do.</p>" : "");
+        ((c.act("mechmods") || c.act("madtesla") || c.coop || c.boxc) ? "<p class='inline-note'>Mods and abilities marked with the no-NPC icon " + SY.ic("no-npc", "No-NPC") + " (affecting an opponent's power or combat cards) don't work against non-player units; abilities that only affect you still do.</p>" : "");
     },
     src: function (c) { return SY.src("Core p.22–23, p.26, p.31", "QRG p.2", c.act("mechmods") ? "Rise of Fenris p.6" : "", c.act("madtesla") ? "Rise of Fenris p.41" : "", c.coop ? "Rise of Fenris p.47" : "", c.boxc ? "Rise of Fenris p.28" : "", c.triumph === "war" ? "Rise of Fenris p.16" : "", c.triumph === "peace" ? "Rise of Fenris p.18" : "", c.triumph === "tiles" && !c.coop ? "Rise of Fenris p.37" : ""); }
   },
@@ -1040,14 +1087,14 @@ SY.reference = [
     title: "Encounters & the Factory",
     when: function () { return true; },
     html: function (c) {
-      return "<h4>Encounters</h4><ul><li>Only characters have encounters. When your character moves onto an encounter token, it stops. After all your moves and combats (before any bottom-row action), discard the token and draw an encounter card.</li>" +
+      return "<h4>Encounters</h4><ul><li>Only characters have encounters. When your character moves onto an encounter token " + SY.ic("encounter", "Encounter") + ", it stops. After all your moves and combats (before any bottom-row action), discard the token and draw an encounter card.</li>" +
         "<li>Show everyone the art and read the capitalised text aloud. Choose <b>one</b> option you can pay for (you must choose one and pay its cost), and take as much of its benefit as you like. Put the card on the bottom of the deck, face down." + (SY.factionsInPlay(c).some(function (f) { return f.id === "polania"; }) ? " (Polania may take 2 different options.)" : "") + "</li>" +
         "<li>Everything gained goes on your character's territory (so no structure if one already stands there). An encounter's gains cost nothing extra, give nothing extra and trigger no recruit bonuses.</li>" +
         "<li>If your character had to fight there, the encounter happens only if you win; otherwise the token stays.</li>" +
         (c.triumph === "peace" ? "<li><b>Peace Triumph Track:</b> a star for claiming 3 encounter tokens.</li>" : "") +
         (c.triumph === "tiles" ? "<li><b>Triumph Tile for 3 encounter tokens</b> (if it is in play): place the star after completing the encounter.</li>" : "") +
         (c.camp && c.epId === "7" ? "<li><b>Episode 7:</b> keep each encounter token on your faction mat instead of discarding it (they are how you find Tesla), and the Factory also holds an encounter token: see “This episode: special rules”.</li>" : "") + "</ul>" +
-        "<h4>The Factory</h4><ul><li>The Factory produces nothing and counts as <b>3 territories</b> at the end for whoever controls it.</li>" +
+        "<h4>The Factory</h4><ul><li>The Factory " + SY.ic("terrain-factory", "Factory") + " produces nothing and counts as <b>3 territories</b> at the end for whoever controls it.</li>" +
         "<li>When your Move action is completely over (combat won if needed) and your character is on the Factory <b>for the first time this game</b>, look at the Factory cards on the board, keep 1, and put the rest back. The first visitor sees players + 1 cards; each later visitor, one fewer. One Factory card per player, kept for good.</li>" +
         (c.act("vesna") ? "<li><b>Vesna</b> starts with 3 Factory cards and returns each Factory card to the box after using it, including the one she gains at the Factory (still only 1 from the Factory per game).</li>" : "") +
         "<li>A Factory card is a <b>fifth section</b> of your player mat: top and/or bottom action as usual. It never gives recruit bonuses, structure bonuses or the coins of similar mat actions.</li>" +
@@ -1055,13 +1102,13 @@ SY.reference = [
         (c.air ? "<li>An airship using a Factory card's Move gets +1 range.</li>" : "") +
         (c.camp && (c.epId === "3" || c.epId === "5") ? "<li><b>" + c.ep.name.split(":")[0] + " changes the Factory:</b> see “This episode: special rules”.</li>" : "") + "</ul>";
     },
-    src: function (c) { return SY.src("Core p.21, p.24–25, p.31", "QRG p.2", c.air ? "Wind Gambit p.5" : "", c.triumph === "peace" ? "Rise of Fenris p.18" : "", c.triumph === "tiles" ? "Rise of Fenris p.37" : "", c.act("vesna") ? "Rise of Fenris p.22–23" : "", c.camp && c.epId === "7" ? "Rise of Fenris p.34" : ""); }
+    src: function (c) { return SY.src("Core p.4, p.21, p.24–25, p.31", "QRG p.2", c.air ? "Wind Gambit p.5" : "", c.triumph === "peace" ? "Rise of Fenris p.18" : "", c.triumph === "tiles" ? "Rise of Fenris p.37" : "", c.act("vesna") ? "Rise of Fenris p.22–23" : "", c.camp && c.epId === "7" ? "Rise of Fenris p.34" : ""); }
   },
   {
     title: "Objectives, deals & bribes",
     when: function () { return true; },
     html: function (c) {
-      return "<ul><li>" + (c.coop ? "In Desolation (co-op) objective cards are public knowledge, but each player completes their own without sharing resources, units or territory." : "Your objective cards are secret.") + " On your own turn, before or after a top- or bottom-row action (never during one), reveal a completed objective: place a star on the objective space and discard it and your other objective to the bottom of the deck. (The Quick Reference Guide says “at any time”; follow this rulebook timing.)</li>" +
+      return "<ul><li>" + (c.coop ? "In Desolation (co-op) objective cards " + SY.ic("objective", "Objective") + " are public knowledge, but each player completes their own without sharing resources, units or territory." : "Your objective cards " + SY.ic("objective", "Objective") + " are secret.") + " On your own turn, before or after a top- or bottom-row action (never during one), reveal a completed objective: place a star on the objective space and discard it and your other objective to the bottom of the deck. (The Quick Reference Guide says “at any time”; follow this rulebook timing.)</li>" +
         (c.triumph === "tiles"
           ? "<li><b>Triumph Tiles:</b> objective stars go on an objective tile, if one is in play. <b>Saxony</b> doesn't discard its second card and may score both, even with no objective tile.</li>"
           : "<li>Only <b>1</b> objective star each" + (c.triumph === "peace" ? " (<b>Peace track: 2 each</b>; after the first, draw a new objective instead of discarding your other card, while any remain)" : "") + ". " +
@@ -1151,20 +1198,22 @@ SY.reference = [
           if (c.p >= 6 && f.id === "crimea" && c.board === "mod") mechs[1] += " (6–7 players on the Modular Board: keep Wayfare; any inactive home base qualifies)";
           if (c.camp && c.epId === "3" && f.id === "rusviet") mechs[1] = "<b>Township (revised tile, required this episode)</b>: use the revised Township tile from the punchboard instead of the printed ability (or cover it with a Mech Mod, if unlocked); its text is on the tile";
           if (c.camp && c.epId === "5" && f.id === "rusviet") mechs[1] = "<b>Township (revised tile, required this episode)</b>: move from any village you control to either another village you control or any unoccupied village";
-          return "<h4>" + f.name + " <span class='who'>(" + (f.who ? f.who + " · " : "") + "starts " + f.power + " power, " + f.cards + " combat card" + (f.cards === 1 ? "" : "s") + ")</span></h4>" +
+          return "<h4>" + f.emblem + " " + f.name + " <span class='who'>(" + (f.who ? f.who + " · " : "") + "starts " + f.power + " power, " + f.cards + " combat card" + (f.cards === 1 ? "" : "s") + ")</span></h4>" +
             "<ul><li>" + ab + "</li>" + mechs.map(function (m) { return "<li>" + m + "</li>"; }).join("") + "</ul>";
         }).join("") +
         "<p class='inline-note'>Riverwalk lets you cross any river onto the two named terrains. Lake abilities (Seaworthy, Submerge, Suiton) don't need Riverwalk. Units can't leave workers or resources on a lake after moving off it, and nobody builds or deploys on a lake.</p>";
     },
-    src: function (c) { return SY.src("Core p.11, p.15–17, p.21, p.30–31", c.has("ifa") ? "Invaders p.3–7" : "", c.p >= 6 && c.board === "mod" ? "Modular Board p.2" : "", c.act("vesna") ? "Rise of Fenris p.22–23" : "", c.act("fenris") ? "Rise of Fenris p.30–31" : "", c.camp && c.epId === "3" ? "Rise of Fenris p.20" : "", c.camp && c.epId === "5" ? "Rise of Fenris p.26" : ""); }
+    src: function (c) { return SY.src("Core p.11, p.15–17, p.21, p.30–31", c.has("ifa") ? "Invaders p.2–7" : "", c.p >= 6 && c.board === "mod" ? "Modular Board p.2" : "", c.act("vesna") ? "Rise of Fenris p.22–23" : "", c.act("fenris") ? "Rise of Fenris p.30–31" : "", c.camp && c.epId === "3" ? "Rise of Fenris p.20" : "", c.camp && c.epId === "5" ? "Rise of Fenris p.26" : ""); }
   },
   {
     title: "Invaders from Afar: Flags & Traps",
     when: function (c) { return c.has("ifa"); },
     html: function (c) {
       return "<h4>Placing (Albion's Flags, Togawa's Traps)</h4><ul><li>After your character ends its movement you may place a token on its territory. If it entered a combat or an encounter there, wait until that is resolved (after all your units have moved).</li><li>Only <b>1 faction token</b> per territory (one Flag or one Trap). They are never moved or removed.</li></ul>" +
-        "<h4>Albion's Flags (4)</h4><ul><li>A Flag doesn't give control. At the end, each Flag is <b>+1 territory</b> for Albion if Albion controls its territory (character, mech, worker or unoccupied structure) <b>and</b> it isn't adjacent to Albion's home base. (A Forest plus a Tundra with a Flag = 3 territories.)</li></ul>" +
-        "<h4>Togawa's Traps (4, armed/disarmed)</h4><ul><li>An <b>armed</b> Trap alone gives Togawa control of its territory for scoring; an enemy unit can never stand on an armed Trap.</li>" +
+        "<h4>" + SY.ic("flag", "Flag") + " Albion's Flags (4)</h4><ul><li>A Flag doesn't give control. At the end, each Flag is <b>+1 territory</b> for Albion if Albion controls its territory (character, mech, worker or unoccupied structure) <b>and</b> it isn't adjacent to Albion's home base. (A Forest plus a Tundra with a Flag = 3 territories.)</li></ul>" +
+        "<h4>Togawa's Traps (4, armed/disarmed)</h4>" +
+        "<div class='aid-icon-grid'><figure><img class='aid-ic' src='images/icons/trap-armed.webp' alt='Armed Trap'><figcaption>Armed</figcaption></figure>" +
+        "<figure><img class='aid-ic' src='images/icons/trap-disarmed.webp' alt='Disarmed Trap'><figcaption>Disarmed</figcaption></figure></div><ul><li>An <b>armed</b> Trap alone gives Togawa control of its territory for scoring; an enemy unit can never stand on an armed Trap.</li>" +
         "<li>An opponent's unit moving onto an armed Trap stops; flip the Trap and they suffer its penalty if possible, before anything else (combat, encounter). The Trap stays, disarmed.</li>" +
         "<li><b>Penalties:</b> lose 2 popularity · lose 3 power · lose $4 · discard 2 combat cards at random. Tell everyone before the game.</li>" +
         "<li>Opponents may build on a Trap's territory. At the end, if only that structure and the Trap (armed or not) are there, the structure's owner controls it.</li>" +
@@ -1189,7 +1238,7 @@ SY.reference = [
     title: "Airships (The Wind Gambit)",
     when: function (c) { return c.air; },
     html: function (c) {
-      return "<ul><li>A new kind of unit: moved by a Move action as one of your units, up to its <b>range</b> (the number in the hex at the upper right of the passive tile). Finish one unit's move before moving another.</li>" +
+      return "<ul><li>A new kind of unit: moved by a Move action as one of your units, up to its <b>range</b> (the number in the hex " + SY.ic("range", "Range") + " at the upper right of the passive tile). Finish one unit's move before moving another.</li>" +
         "<li>Ignores rivers and lakes; may fly onto and off any territory, even an opponent's; any number of airships may share a territory. Never onto a home base, never through tunnels or Mines.</li>" +
         "<li><b>Never controls territory:</b> you can't spend resources on its territory unless you control it another way, and an airship alone at the end controls nothing.</li>" +
         "<li>Not a mech or character: no mech abilities, no extra combat cards, doesn't trigger Traps. A Factory card Move gives it +1 range.</li>" +
@@ -1240,7 +1289,7 @@ SY.reference = [
       return "<ul><li>41 tokens of variable mech abilities that <b>replace</b> abilities printed on your faction mat. You may hold only 1 of each Mod.</li>" +
         (c.camp ? "<li><b>Campaign:</b> at the end of each episode, after adding that game's coins to your Wealth, each player draws 2 Mech Mods (the episode's rewards may change the number), redrawing duplicates (within the draw, Mods you own, or abilities on your current faction mat); everyone decides at once and may buy any for $50 each. Unbought Mods go back to the supply. Limit 6 Mech Mods, 1 of each. During setup you may cover abilities on your faction mat with any of yours (or none); no rearranging once the episode starts.</li>"
                 : "<li><b>Modules:</b> draw 4 at random (redraw duplicates), place up to 2 on your faction mat, discard the rest.</li>") +
-        "<li>Mods marked with the no-NPC icon can't be used against non-player units.</li>" +
+        "<li>Mods marked with the no-NPC icon " + SY.ic("no-npc", "No-NPC") + " can't be used against non-player units.</li>" +
         "<li><b>Armor:</b> the attacker decides which card to discard. <b>Feint:</b> after adjusting your dial you must be able to pay the new total; you don't pay the original amount. <b>Stealth:</b> used with another ability (Speed, a Factory card, etc.) to move through a territory where you would start combat, force workers out or trigger a token penalty, you ignore everything there. <b>Tactics:</b> once per combat.</li>" +
         (c.act("vesna") ? "<li>Some of Vesna's mech ability tokens are clarified here too.</li>" : "") + "</ul>" +
         (c.automa ? "<h4>Automa</h4>" + (c.camp ? SY.autoCampMods : SY.autoNotes.mods) : "");
@@ -1264,7 +1313,7 @@ SY.reference = [
     title: "War Triumph Track",
     when: function (c) { return c.triumph === "war"; },
     html: function (c) {
-      return SY.triumphList(c) + "<ul><li>The game ends immediately at a 6th star on the War Triumph Track.</li>" + (c.camp ? "" : "<li>Use it to encourage combat between players; Rivals is designed to go with it.</li>") + "</ul>" + (c.automa ? "<h4>Automa</h4>" + SY.autoNotes.war + (c.camp ? SY.autoNotes.warCamp : "") : "");
+      return "<p>Goals and their symbols: see <b>Triumph Track: placing stars</b>.</p><ul><li>The game ends immediately at a 6th star on the War Triumph Track.</li>" + (c.camp ? "" : "<li>Use it to encourage combat between players; Rivals is designed to go with it.</li>") + "</ul>" + (c.automa ? "<h4>Automa</h4>" + SY.autoNotes.war + (c.camp ? SY.autoNotes.warCamp : "") : "");
     },
     src: function (c) { return SY.src("Rise of Fenris p.16", c.camp ? "" : "p.51", c.automa ? (c.camp ? "p.17" : "p.17, p.50") : ""); }
   },
@@ -1272,7 +1321,7 @@ SY.reference = [
     title: "Peace Triumph Track",
     when: function (c) { return c.triumph === "peace"; },
     html: function (c) {
-      return SY.triumphList(c) + "<ul><li>Remove objective card #23; Saxony starts with 3 objective cards instead of 2 (compensating for the missing combat stars).</li><li>The game ends immediately at a 6th star on the Peace Triumph Track.</li>" + (c.camp ? "" : "<li>Use it to discourage combat between players. It can't be combined with Rivals.</li>") + "</ul>" + (c.automa ? "<h4>Automa</h4>" + SY.autoNotes.peace + (!c.camp && !c.act("alliances") ? SY.autoNotes.peaceNoAlliances : "") : "");
+      return "<p>Goals and their symbols: see <b>Triumph Track: placing stars</b>.</p><ul><li>Remove objective card #23; Saxony starts with 3 objective cards instead of 2 (compensating for the missing combat stars).</li><li>The game ends immediately at a 6th star on the Peace Triumph Track.</li>" + (c.camp ? "" : "<li>Use it to discourage combat between players. It can't be combined with Rivals.</li>") + "</ul>" + (c.automa ? "<h4>Automa</h4>" + SY.autoNotes.peace + (!c.camp && !c.act("alliances") ? SY.autoNotes.peaceNoAlliances : "") : "");
     },
     src: function (c) { return SY.src("Rise of Fenris p.18", c.camp ? "" : "p.51", c.automa ? (c.camp ? "p.19" : "p.19, p.50") : ""); }
   },
@@ -1367,7 +1416,7 @@ SY.reference = [
         "<li>Mad Tesla controls territories and forces workers home like any combat unit. Anyone may attack him, and he may attack anyone.</li></ul>" +
         "<h4>His turn (always last)</h4><ul><li>Roll the <b>blue die</b>, put it on the Mad Tesla tile and move him in that direction. If that first move doesn't start a combat, roll and move once more. Never a third time.</li>" +
         "<li>Moving off the map sends him back to the Factory (which may start a combat). He ignores rivers, may enter lakes, never uses tunnels, and ignores all tokens (encounters, Traps, Influence…). He is a combat unit for all movement and unit interactions.</li></ul>" +
-        "<h4>Fighting Mad Tesla</h4><ol><li>If you enter 2 combats on your turn and one is against Mad Tesla on the Factory, fight that one first.</li><li><b>Gain 1 popularity.</b></li><li>Set your dial and combat cards as usual. His base power is the <b>top 2 cards of the combat discard pile</b>. Mods and abilities that affect an opponent's power or cards (no-NPC icon) don't work on him.</li><li>Roll the <b>orange die</b> onto the Combat slot of his tile and add it to his base power.</li><li>Highest total wins; ties go to the attacker.</li></ol>" +
+        "<h4>Fighting Mad Tesla</h4><ol><li>If you enter 2 combats on your turn and one is against Mad Tesla on the Factory, fight that one first.</li><li><b>Gain 1 popularity.</b></li><li>Set your dial and combat cards as usual. His base power is the <b>top 2 cards of the combat discard pile</b>. Mods and abilities that affect an opponent's power or cards (no-NPC icon " + SY.ic("no-npc", "No-NPC") + ") don't work on him.</li><li>Roll the <b>orange die</b> onto the Combat slot of his tile and add it to his base power.</li><li>Highest total wins; ties go to the attacker.</li></ol>" +
         "<ul><li><b>You lose:</b> retreat as usual, and Mad Tesla also retreats to the Factory (possibly starting another combat).</li>" +
         "<li><b>You win:</b> he retreats to the Factory (if you beat him <b>on</b> the Factory, he goes to an unoccupied adjacent territory of your choice; if none, roll and move him by the tile and he starts a combat). Then gain 1 more popularity, place a combat star if you can, and lower his health by the difference in totals (1 on a tie).</li>" +
         "<li><b>Health 0:</b> he is destroyed and removed. You gain <b>$10</b>, complete your turn, and the game ends immediately" + (c.camp ? " (Episode 8b's end-game scoring lists $10 for this again: see the episode's special rules)" : " (unless your group chose to play on to a 6th star)") + ".</li></ul>" +
@@ -1386,7 +1435,7 @@ SY.reference = [
         "<li>Tokens that target “opponents” (Traps, Influence…) are ignored by everyone; their factions can still use them for movement.</li>" +
         "<li>Objectives and the 16-resources tile use normal competitive rules (no sharing). Objectives and combat cards are public.</li></ul>" +
         "<h4>Desolation's turn (last each round)</h4><ol><li><b>Popularity</b> drops by 1 (a timer). At 13–17 its turn ends; at 1–12 it moves; at 0 Desolation wins.</li><li><b>Movement:</b> roll the blue die; the number is a direction on the Desolation tile; move <b>all</b> Desolation units that way. A unit can't enter a territory with another Desolation unit (move them in the order that lets most move). They cross rivers and enter lakes, but never use tunnels or tokens. Workers alone on a territory they enter retreat home (no popularity loss for Desolation). Resources on a Desolation unit's territory travel with it." + (c.act("deshard") ? " <b>Harder:</b> each worker displaced (movement or combat) also costs Desolation 1 popularity." : "") + "</li></ol>" +
-        "<h4>Combat against Desolation</h4><ol><li>Anyone may attack a Desolation unit, and it attacks players it moves into (players choose the order of several). Set dials and cards <b>openly</b>. Defending together, each player uses their own mech abilities and cards for their units, but only one of you spends power (your own) on the dial. Its base power is the sum of the combat cards beside the Desolation tile (1 at the start). Mods and abilities affecting an opponent's power or cards (no-NPC icon) don't work on it.</li><li>Roll the orange die onto the tile's Combat slot and add it.</li><li>Highest total wins; ties go to the attacker.</li></ol>" +
+        "<h4>Combat against Desolation</h4><ol><li>Anyone may attack a Desolation unit, and it attacks players it moves into (players choose the order of several). Set dials and cards <b>openly</b>. Defending together, each player uses their own mech abilities and cards for their units, but only one of you spends power (your own) on the dial. Its base power is the sum of the combat cards beside the Desolation tile (1 at the start). Mods and abilities affecting an opponent's power or cards (no-NPC icon " + SY.ic("no-npc", "No-NPC") + ") don't work on it.</li><li>Roll the orange die onto the tile's Combat slot and add it.</li><li>Highest total wins; ties go to the attacker.</li></ol>" +
         "<ul><li><b>You lose:</b> a normal loss for you, and Desolation places a star on its tile (its 6th = you all lose).</li><li><b>You win:</b> destroy that unit (remove it from the game), draw a combat card beside the Desolation tile and raise its power on the track (max 16). One of the players involved places a combat star, if a combat Triumph Tile is available (only 1 star per combat).</li></ul>" +
         "<h4>Variants</h4><ul><li><b>Easier:</b> use Mech Mods, Infrastructure Mods and/or Alliances.</li><li><b>Harder:</b> worker displacement speeds the timer (see above).</li><li><b>Wind Gambit airships</b> are allowed but not recommended for your first few plays.</li><li>The Automa doesn't support Desolation.</li></ul>";
     },
@@ -1439,7 +1488,7 @@ SY.reference = [
       return "<p>An autonomous mech that guards the Factory and never moves. The game can now end at a 6th star <b>or</b> by defeating the Annihilator in combat. These rules apply only to Episode 5.</p>" +
         "<h4>Original reveal</h4><ol><li>Place the Annihilator on the Factory. The discoverer rolls the two dice and picks one as its combat power, placing that die on the matching Power Track space.</li><li>Anyone holding objective <b>5, 7 or 22</b> discards it and draws a replacement.</li><li>A worker that moved onto the Factory alone returns to its base.</li><li>If a character or mech revealed it, you must fight it: finish your Move action (other units may still move, even onto the Factory to join the fight), then fight.</li></ol>" +
         "<h4>Combat</h4><ol><li>After you have chosen and revealed your power and any combat cards, draw the top 4 combat cards and add them to the Annihilator's power (the die). Discard them.</li><li>Decide the winner as usual; ties go to the attacker.</li><li>Defeat it: remove it, place a combat star (usual limit), and the game ends immediately.</li></ol>" +
-        "<ul><li>Mods and abilities that affect an opponent's power or combat cards (no-NPC icon) don't apply; there is no way to reduce its power or cards.</li></ul>" +
+        "<ul><li>Mods and abilities that affect an opponent's power or combat cards (no-NPC icon " + SY.ic("no-npc", "No-NPC") + ") don't apply; there is no way to reduce its power or cards.</li></ul>" +
         "<h4>Its turn</h4><ul><li>Whoever discovered it is its controller for this game (though it is an enemy to everyone). Its turn comes just before the controller's (so everyone else plays first).</li><li>On its turn the controller rolls two dice and picks 1 as its power until its next turn, then its turn ends (it never moves).</li></ul>" +
         (c.automa ? "<h4>Automa</h4><ul><li>If the Automa is first to fight it, the Automa loses, along with 4 power and 1 random combat card (instead of drawing an Automa card and combat cards for it). The outcome is otherwise handled as any combat.</li><li>An Automa controller always picks the lower die. In all Automa moves the Annihilator counts as an enemy combat unit.</li><li><b>Popularity:</b> when Box C opens, if its Star Tracker token is on row 1–3, move the Automa's popularity to 2; once the token reaches row 4, to 10.</li></ul>" : "");
     },
@@ -1510,7 +1559,7 @@ SY.reference = [
         "</ul><h4>Movement</h4><ul>" +
         ok("Riverwalk crosses any river onto its two terrain types; lake abilities work regardless of Riverwalk.", "Core p.11, p.15–17") +
         ok("All units, workers included, may use tunnels and your Mine" + (c.air ? "; airships may not" : "") + ".", "Core p.11, p.18" + (c.air ? " · Wind Gambit p.5" : "")) +
-        ok("Each Move icon moves one more unit, not one unit further; a Factory card's Move takes one unit two spaces (plus abilities).", "Core p.11, p.25") +
+        ok("Each Move icon " + SY.ic("move", "Move") + " moves one more unit, not one unit further; a Factory card's Move takes one unit two spaces (plus abilities).", "Core p.11, p.25") +
         ok("A mech carrying workers counts as one unit moved; a dropped worker may then move as another unit.", "Core p.11") +
         ok("Finish all your moves before combat, encounters or the Factory card, except that pushed-out workers leave at once so another unit can pass.", "Core p.11, p.22 · Wind Gambit p.7") +
         ok("A unit's movement ends when your character triggers an encounter or stops on the Factory to take a Factory card, or when a combat unit enters a territory with enemy units.", "Core p.5, p.11, p.24–25") +

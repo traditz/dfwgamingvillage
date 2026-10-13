@@ -497,6 +497,11 @@ ol > li::marker { color: var(--ochre-ink); font-family: var(--head); font-weight
 .ref-body h4 { font-family: var(--head); font-weight: 600; font-size: 17px; font-variant-caps: small-caps; letter-spacing: 0.04em; color: var(--ochre-ink); margin: 14px 0 5px; }
 .ref-body p { margin-bottom: 9px; }
 .ref-body .src-line { margin-top: 12px; }
+/* rulebook icons (css/icons.css): spacing inside the reference bullets */
+.ref-body li > .aid-icon-row { margin: 7px 0 6px; }
+.ref-body ul.aid-icons { margin-top: 8px; }
+.ref-body ul.aid-icons > li > span > ul { margin-top: 5px; }
+.ic-keep { white-space: nowrap; }   /* an inline icon (or a pair) stays on one line with its label (reference and setup steps) */
 
 /* ---- search ------------------------------------------------------------------------------- */
 .rsearch-wrap { margin-bottom: 16px; }

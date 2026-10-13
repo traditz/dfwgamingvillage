@@ -539,6 +539,24 @@ RT.list = function (arr) {            // ["a","b","c"] -> "a, b and c"
   return arr.slice(0, -1).join(", ") + " and " + arr[arr.length - 1];
 };
 
+/* ---------- rulebook icons in the rules reference (DFWGV icons standard v1: images/icons/, css/icons.css) ----------
+   Every icon is cropped from this page's own sources and named as printed beside it. Each call names its file in
+   full (e.g. RT.ic("suit-fox", "Fox")) so the icons checker can match it. Never used in the teaching script. */
+RT.ic = function (file, alt) { return "<img class='aid-ic' src='images/icons/" + file + ".webp' alt='" + alt + "' title='" + alt + "'>"; };
+RT.icIn = function (file, alt) { return "<img class='aid-ic aid-ic-inline' src='images/icons/" + file + ".webp' alt='" + alt + "' title='" + alt + "'>"; };
+RT.icPair = function (file, name) { return "<span class='aid-pair'>" + RT.ic(file, name) + "<span>" + name + "</span></span>"; };
+RT.icRow = function (pairs) { return "<p class='aid-icon-row'>" + pairs.join(" ") + "</p>"; };
+RT.icList = function (rows) {          // [[file, printed name, html], …] -> icon list
+  return "<ul class='aid-icons'>" + rows.map(function (r) { return "<li>" + RT.ic(r[0], r[1]) + "<span>" + r[2] + "</span></li>"; }).join("") + "</ul>";
+};
+/* the Law's item icons (its icon font, Law p.9 §9.2.5; names: LtP p.17–19, Law p.24 §C.1): item name -> icon file */
+RT.itemIcon = { boots: "item-boots", bag: "item-bag", crossbow: "item-crossbow", hammer: "item-hammer",
+  sword: "item-sword", tea: "item-tea", coins: "item-coins", torch: "item-torch" };
+RT.itemAlt = function (name) { return name.charAt(0).toUpperCase() + name.slice(1); };
+RT.itemCell = function (name) {       // table cell: "hammer" -> [hammer icon] hammer; anything else ("no item") stays text
+  return RT.itemIcon[name] ? "<span class='aid-pair'>" + RT.ic(RT.itemIcon[name], RT.itemAlt(name)) + "<span>" + name + "</span></span>" : name;
+};
+
 /* registries filled by the other data files */
 RT.fsetup = {};        // factionId -> { std(c), stdSrc(c), adv(c), advSrc(c) }        (data-setup.js)
 RT.factionRef = {};    // factionId -> { title, html(c), src(c) }                       (data-ref.js / data-factions.js)

@@ -5,6 +5,15 @@
    ============================================================================= */
 var CK = {};
 
+/* Rulebook icons (DFWGV icons standard v1, css/icons.css): images/icons/<name>.webp, each cropped from this
+   page's own rulebooks. Always call these with the full literal file name (the icons checker matches names to files). */
+CK.ic = (f, alt) => '<img class="aid-ic" src="images/icons/' + f + '.webp" alt="' + alt + '" title="' + alt + '">';
+CK.icIn = (f, alt) => '<img class="aid-ic aid-ic-inline" src="images/icons/' + f + '.webp" alt="' + alt + '" title="' + alt + '">';
+CK.icLi = (f, alt, name, text) => "<li>" + CK.ic(f, alt) + "<span><b>" + name + "</b> — " + text + "</span></li>";
+CK.icKeep = (f, alt, label) => '<span class="ic-keep">' + CK.icIn(f, alt) + " " + label + "</span>"; // icon + its label never split across lines
+CK.icPair = (f, name) => '<span class="aid-pair">' + CK.ic(f, name) + "<span>" + name + "</span></span>";
+CK.icFig = (f, alt, cap) => "<figure>" + CK.ic(f, alt) + "<figcaption>" + cap + "</figcaption></figure>";
+
 CK.expMeta = {
   base:     { name: "Clank!",        cls: "tag-base" },
   sunken:   { name: "Sunken Tr.",    cls: "tag-sunken" },
@@ -57,7 +66,7 @@ CK.phases = [
             case "front": return "<ul><li>Place the board with the <b>front</b> side up — recommended for your first game. The Market is a group of spaces near the center of the dungeon.</li></ul>";
             case "back": return "<ul><li>Place the board with the <b>back</b> side up. Here the Market is not a single area — traveling merchants are found on spaces scattered throughout the dungeon.</li></ul>";
             case "sunken": return "<ul><li>Place the <b>Sunken Treasures</b> board, either side up. Many rooms are <b>flooded</b>; tunnels between two flooded rooms carry the underwater icon, and some tunnels carry Clank! icons (the splash of diving in).</li></ul>";
-            case "mummy": return "<ul><li>Place the <b>Mummy's Curse</b> board, either side up. Each side is divided into <b>four zones</b> (three in the Depths, one above), each with its own symbol on a Mummy-marker space (not connected to any room). Place the <b>Mummy marker</b> on the space of the zone whose symbol is the <b>long-necked animal</b> glyph (shown in the Mummy rulebook's Setup, p.2).</li><li>Place the <b>pyramid die</b> next to the board and the <b>Supreme Monkey Idol</b> on its marked space.</li><li><i>Optional ambience:</i> use the Croxobek Dragon marker.</li></ul>";
+            case "mummy": return "<ul><li>Place the <b>Mummy's Curse</b> board, either side up. Each side is divided into <b>four zones</b> (three in the Depths, one above), each with its own symbol on a Mummy-marker space (not connected to any room). Place the <b>Mummy marker</b> on the space of the zone whose symbol is the " + CK.icIn("mummy-start-zone", "Starting zone symbol") + " <b>long-necked animal</b> glyph (shown in the Mummy rulebook's Setup, p.2).</li><li>Place the <b>pyramid die</b> next to the board and the <b>Supreme Monkey Idol</b> on its marked space.</li><li><i>Optional ambience:</i> use the Croxobek Dragon marker.</li></ul>";
             case "mine": return "<ul><li>Place the <b>Gold and Silk</b> board with the <b>Dwarven Mine</b> side up. Note the entrance flag is toward the <b>right side</b> of the board.</li><li>Place the three <b>Mining Bonus tokens</b> (20/10/5) in their spaces below the Clank! area.</li><li><i>Optional ambience:</i> use the Spider marker as the Dragon marker and the miner pawns.</li></ul>";
             case "spider": return "<ul><li>Place the <b>Gold and Silk</b> board with the <b>Spider Queen's Lair</b> side up.</li><li>Return the usual <b>7-point Artifact</b> to the box — this board uses the new <b>8-point Artifact</b> instead.</li><li>Shuffle the <b>12 Web tokens</b> face down (hiding their values) and place one at random on each web space.</li><li><i>Optional ambience:</i> use the Spider marker as the Dragon marker.</li></ul>";
             case "jungle": return "<ul><li>Place the <b>Temple of the Ape Lords</b> board with the <b>Jungle</b> side up.</li><li>Return the usual <b>30-point Artifact</b> to the box — both sides of this board use the new <b>33-point Artifact</b> instead.</li><li>Place three <b>ape-aratus tokens</b> face up on the Bronze Guardian (one cog, one monkey wrench, one banana). Shuffle the remaining 15 face down and place one at random <b>face up</b> on each marked tunnel space.</li><li><i>Optional ambience:</i> use the Boss marker and jungle-trek pawns.</li></ul>";
@@ -168,7 +177,7 @@ CK.phases = [
             (adds.length ? "<li>Shuffle in the " + adds.join(", the ") + ".</li>" : "") +
             (c.has("party") && c.p <= 4 ? "<li><b>Adventuring Party (optional at 2–4 players):</b> you may also shuffle in its <b>35</b> Dungeon cards — they're designed with more players in mind.</li>" : "") +
             (adds.length > 1 || (adds.length === 1 && (c.has("sunken") || c.has("mummy"))) ? "<li><b>FAQ recommendation:</b> avoid mixing cards from more than one expansion at once, and consider removing cards that reference features your board doesn't have (flooded rooms, Curses, etc.). You're still free to mix as you like (e.g. Adventuring Party with Sunken Treasures at 5–6 players). Every expansion card carries a <b>watermark</b> for sorting: waves (Sunken), pyramid (Mummy), “VI” (Adventuring Party).</li>" : "") +
-            "<li>Shuffle the <b>Dungeon Deck</b> and deal <b>six cards</b> face up as the Dungeon Row. Replace any showing the <b>Dragon Attack symbol</b> until none do, shuffling replacements back in.</li>" +
+            "<li>Shuffle the <b>Dungeon Deck</b> and deal <b>six cards</b> face up as the Dungeon Row. Replace any showing the " + CK.icIn("dragon-attack", "Dragon Attack symbol") + " <b>Dragon Attack symbol</b> until none do, shuffling replacements back in.</li>" +
             "<li>Leave room for a Dungeon discard pile.</li>" +
             "<li><b>FAQ:</b> if any of the six starting cards have <b>Arrive</b> text, carry it out before the first player takes a turn — once everyone has their Clank! cubes and the first player is chosen (below).</li></ul>";
         },
@@ -211,7 +220,13 @@ CK.reference = [
     title: "Your Turn — Cards & Resources",
     when: () => true,
     html: (c) => "<ul><li>Start each turn with five cards; you <b>must play them all</b>, in any order, into your play area, and carry out all their text.</li>" +
-      "<li>Cards make three pooled resources — <b>Skill</b> (acquire cards, use devices), <b>Swords</b> (fight monsters, reduce tunnel damage), <b>Boots</b> (movement) — plus <b>Gold</b>, <b>Clank!</b>, and card draws. Resources pool and split freely across actions; unspent resources are wasted.</li>" +
+      "<li>Cards make three resources. They pool and split freely across actions; any you don't spend this turn are wasted:" +
+        "<ul class=\"aid-icons\">" +
+        CK.icLi("skill", "Skill", "Skill", "acquire cards, use Devices.") +
+        CK.icLi("swords", "Swords", "Swords", "fight monsters, reduce tunnel damage.") +
+        CK.icLi("boots", "Boots", "Boots", "movement.") +
+        "</ul></li>" +
+      "<li>Cards also give " + CK.icIn("gold", "Gold") + " <b>Gold</b> (taken from the Bank and kept: 1 point each at game end, or spend it, e.g. at the Market), <b>Clank!</b>, and card draws.</li>" +
       "<li>Take actions before, between, or after card plays — each as often as you can pay for it.</li>" +
       "<li><b>Clank!:</b> add cubes from your supply to the Clank! area; negative Clank! removes your cubes (or credits Clank! you'd make later this turn). Leftover negative Clank! is lost. With no cubes left in your supply you can't take voluntary tunnel damage — but you also can't be forced to add Clank!.</li>" +
       "<li>Card effects apply regardless of play order (Swagger counts Clank! made before you played it — and Clank! you later remove with negative Clank!; The Mountain King sees a Crown bought later).</li>" +
@@ -227,21 +242,26 @@ CK.reference = [
       "<li><b>Use a Device</b> (Skill): purple banners; carry out the USE text immediately; the card goes to the Dungeon discard pile.</li>" +
       "<li><b>Fight a Monster</b> (Swords): red banners; gain the DEFEAT text; the card goes to the Dungeon discard pile. The <b>Goblin</b>" + (c.board === "sunken" ? " (and the <b>Goldfish</b>)" : "") + " in the Reserve stays put and can be fought repeatedly.</li>" +
       "<li><b>Buy from the Market</b> (7 Gold, in a Market room): as many purchases as you can afford, including duplicates. All items are available from any Market room.</li>" +
-      "<li><b>Move through a tunnel</b> (Boots): 1 Boot each; <b>footprints</b> = 2 Boots; <b>monster icons</b> deal that much damage (each Sword spent prevents 1); <b>lock icons</b> need a <b>Master Key</b>; arrow tunnels are one-way; tunnels off the board edge wrap around to the opposite side.</li>" +
+      "<li><b>Move through a tunnel</b> (Boots): 1 Boot each; arrow tunnels are one-way; tunnels off the board edge wrap around to the opposite side. Icons on a tunnel add requirements:" +
+        "<ul class=\"aid-icons\">" +
+        CK.icLi("tunnel-footprints", "Footprints", "Footprints", "2 Boots instead of 1.") +
+        CK.icLi("tunnel-monster", "Monster", "Monster", "deals that much damage, 1 per icon (each Sword you spend prevents 1).") +
+        CK.icLi("tunnel-lock", "Lock", "Lock", "you need a <b>Master Key</b>.") +
+        "</ul></li>" +
       "<li><b>Room tokens</b> (secrets, Monkey Idols): take <b>one</b> when you enter a room — exit and re-enter for another. Picking one up doesn't end your movement." + (c.p >= 5 ? " <b>5–6 players:</b> minor secrets aren't on the board — when you enter a minor-secret space, take one at random from the Bank and reveal it; only one minor secret per room per turn (re-enter on a later turn for another)." : " With two minor secrets, pick one at random before revealing (FAQ).") + "</li>" +
       "<li><b>Take an Artifact</b> (rules update): taking an Artifact is an <b>action</b> you may take any time you're in its room — not only on entry. You can't hold two (a Backpack allows one more" + (c.p >= 5 ? ", but never two from the same room" : "") + "); taking one advances the <b>Rage Track</b>.</li>" +
-      "<li><b>Crystal Caves:</b> entering one (by any means) stops your Boots for the rest of the turn. <b>Teleport</b> effects move you to any adjacent room without Boots, ignoring tunnel monsters, locks and one-way arrows. <b>Fountain of Healing</b> (heal 1 damage) / <b>Treasure rooms:</b> gain the reward on every entry, even in the same turn.</li>" +
+      "<li>" + CK.icIn("crystal-cave", "Crystal Cave") + " <b>Crystal Caves:</b> entering one (by any means) stops your Boots for the rest of the turn.</li><li><b>Teleport</b> effects move you to any adjacent room without Boots, ignoring tunnel monsters, locks and one-way arrows.</li><li>" + CK.icIn("fountain-of-healing", "Fountain of Healing") + " <b>Fountain of Healing</b> (heal 1 damage) / <b>Treasure rooms:</b> gain the reward on every entry, even in the same turn.</li>" +
       "<li><b>Trash:</b> remove a card from your discard pile or play area from the game entirely — the best fate for weak starters.</li></ul>",
     src: (c) => "Base p.6, p.10, p.12" + (c.board === "sunken" ? " · Sunken p.1" : "") + (c.p >= 5 ? " · Adventuring Party p.3" : "") + " · FAQ (2025-08-18) p.1–4"
   },
   {
     title: "Clank!, Dragon Attacks & Health",
     when: () => true,
-    html: (c) => "<ul><li><b>End of turn:</b> discard your play area, draw five, then refill the Dungeon Row to six (the Row refills at the end of <b>every</b> player's turn). Newly revealed cards resolve their <b>Arrive</b> text first; then, if any <b>newly revealed</b> card shows the Dragon Attack symbol, the dragon attacks — once, no matter how many symbols.</li>" +
-      "<li><b>Dragon Attack:</b> all Clank! area cubes go into the Dragon Bag; draw cubes equal to the Rage Track number, +1 per <b>Danger</b> card in the Row. Black cubes are set aside; your colored cubes are damage on your <b>Health Meter</b> (10 spaces). Undrawn cubes stay in the bag.</li>" +
+    html: (c) => "<ul><li><b>End of turn:</b> discard your play area, draw five, then refill the Dungeon Row to six (the Row refills at the end of <b>every</b> player's turn). Newly revealed cards resolve their <b>Arrive</b> text first; then, if any <b>newly revealed</b> card shows the " + CK.icIn("dragon-attack", "Dragon Attack symbol") + " Dragon Attack symbol, the dragon attacks — once, no matter how many symbols.</li>" +
+      "<li><b>Dragon Attack:</b> all Clank! area cubes go into the Dragon Bag; draw cubes equal to the Rage Track number, +1 per " + CK.icKeep("danger", "Danger", "<b>Danger</b>") + " card in the Row. Black cubes are set aside; your colored cubes are damage on your <b>Health Meter</b> (10 spaces). Undrawn cubes stay in the bag.</li>" +
       "<li>The <b>Rage Track</b> advances whenever an Artifact is picked up and whenever a <b>Dragon Egg</b> is found" + (c.board === "temple" ? ". On the Temple board, reaching an RNG space rotates gears — and at maximum rage, further increases reveal RNG tokens from the stack instead" : "") + ".</li>" +
       "<li>Players still outside the dungeon early in the game can be damaged if their cubes are drawn (FAQ).</li>" +
-      "<li>Dragon-attack damage uses the cubes drawn from the bag; tunnel-monster damage you choose to take uses cubes from your <b>supply</b> — and you can't choose it if it would fill your Health Meter. <b>Healing</b> returns your cube from the meter to your supply. A full meter <b>knocks you out</b>: with an Artifact and out of the <b>Depths</b>, the townsfolk rescue you and your points count; otherwise you score nothing.</li>" +
+      "<li>Dragon-attack damage uses the cubes drawn from the bag; tunnel-monster damage you choose to take uses cubes from your <b>supply</b> — and you can't choose it if it would fill your Health Meter. " + CK.icIn("heal", "Heal") + " <b>Healing</b> returns your cube from the meter to your supply. A full meter <b>knocks you out</b>: with an Artifact and out of the <b>Depths</b>, the townsfolk rescue you and your points count; otherwise you score nothing.</li>" +
       "<li>You can't leave the dungeon (or be rescued) without an Artifact. If the Dungeon Deck ever runs out, the game ends immediately — everyone still inside is knocked out (FAQ).</li></ul>",
     src: (c) => "Base p.7–8, p.10" + (c.board === "temple" ? " · Ape Lords p.3" : "") + " · FAQ (2025-08-18) p.2–3"
   },
@@ -249,19 +269,54 @@ CK.reference = [
     title: "The Countdown Track, Game End & Scoring",
     when: () => true,
     html: () => "<ul><li>Escaped or knocked-out players stop taking normal turns, add no Clank!, and are unaffected by cards that affect all players (their drawn cubes count as black).</li>" +
-      "<li>The <b>first</b> player to leave the dungeon or get knocked out puts their pawn on the <b>Countdown Track</b>. Each of their turns advances it one space: spaces 2–4 trigger instant Dragon Attacks with <b>+1 / +2 / +3</b> extra cubes; the fifth space <b>knocks out everyone</b> still in the dungeon. (Later leavers don't use the track. Row-triggered attacks don't get the extra cubes — FAQ.)</li>" +
-      "<li><b>Escape bonus:</b> leaving the dungeon entirely earns a <b>Mastery token</b> (+20 points). Leaving doesn't have to be the last thing you do on your turn; your Clank! stays in the area (FAQ).</li>" +
+      "<li>The <b>first</b> player to leave the dungeon or get knocked out puts their pawn on the <b>Countdown Track</b>. Each of their turns advances it one space: spaces 2–4 trigger instant Dragon Attacks with <b>+1 / +2 / +3</b> extra cubes (the " + CK.icKeep("danger", "Danger", "Danger") + " icons printed on those spaces); the fifth space <b>knocks out everyone</b> still in the dungeon. (Later leavers don't use the track. Row-triggered attacks don't get the extra cubes — FAQ.)</li>" +
+      "<li><b>Escape bonus:</b> leaving the dungeon entirely earns a " + CK.icIn("mastery-token", "Mastery token") + " <b>Mastery token</b> (+20 points). Leaving doesn't have to be the last thing you do on your turn; your Clank! stays in the area (FAQ).</li>" +
       "<li><b>Game end:</b> once <b>all</b> players are out of the dungeon or knocked out, the game ends (the Countdown's fifth space forces this).</li>" +
-      "<li><b>Score</b> (if you escaped, or were knocked out with an Artifact outside the Depths): Artifact value + all tokens + Gold + points on your cards. Most points wins; ties go to the most valuable Artifact.</li></ul>",
-    src: () => "Base p.8–9 · FAQ (2025-08-18) p.2–3"
+      "<li><b>Score</b> (if you escaped, or were knocked out with an Artifact outside the Depths) — add up:" +
+        "<ul class=\"aid-icons\">" +
+        CK.icLi("artifact", "Artifact", "Artifact", "its value.") +
+        CK.icLi("monkey-idol", "Tokens", "Tokens", "the points on all your other tokens.") +
+        CK.icLi("gold", "Gold", "Gold", "1 point each.") +
+        CK.icLi("card-points", "Card points", "Card points", "the points in the top right corner of the cards in your deck.") +
+        "</ul></li>" +
+      "<li>Most points wins; ties go to the most valuable Artifact.</li></ul>",
+    src: () => "Base p.8–10 · Adventuring Party p.7 · FAQ (2025-08-18) p.2–3"
   },
   {
     title: "Token & Market Reference",
     when: () => true,
-    html: (c) => "<ul><li><b>Major Secrets:</b> Potion of Greater Healing (heal 2), Greater Skill Boost (+5 Skill), Greater Treasure (5 Gold), Flash of Brilliance (draw 3), Chalice (7 pts; not an Artifact)" + (c.has("sunken") ? "; Potion of Heroism (+1 Boot, +1 Sword, heal 1)" : "") + (c.board === "mummy" ? "; Mummy's Treasure (5 Gold) and Mummy's Chalice (7 pts) — each also rolls the pyramid die" : "") + ".</li>" +
-      "<li><b>Minor Secrets:</b> Potion of Healing (heal 1), Potion of Swiftness (+1 Boot), Potion of Strength (+2 Swords) — potions are kept until used on your turn; Skill Boost (+2 Skill), Treasure (2 Gold), Magic Spring (<b>rules update:</b> trash a card from your discard pile or play area <i>by</i> the end of the turn), Dragon Egg (3 pts; Rage +1)" + (c.board === "mummy" ? "; Scarab (3 pts; roll the pyramid die)" : "") + (c.p >= 5 ? "; Potion of Stealth (on your turn: −1 Clank! for you, +1 for each opponent; usable even if you have no Clank! to remove)" : "") + ".</li>" +
-      "<li><b>Market items (7 Gold each):</b> Master Key (use locked tunnels; 5 pts), Backpack (carry an additional Artifact; 5 pts" + (c.p >= 5 ? "; never two from the same room" : "") + "), Crown (points as shown; best available first)" + (c.board === "sunken" ? ", SCUBA (5 pts; see Sunken Treasures)" : "") + (c.has("mummy") ? ", Ankh (heal 1 when bought; 7 pts)" : "") + ((c.board === "jungle" || c.board === "temple") ? ", Time Winder (remove three of your cubes from the Dragon Bag when bought; 5 pts)" : "") + (c.p >= 5 || c.has("party") ? ", Invisibility Cloak (ignore monsters in tunnels; 5 pts)" : "") + ".</li>" +
-      "<li><b>Monkey Idols:</b> 5 pts each, from the Monkey Shrine — you pick one up on <b>every</b> entry (FAQ)" + (c.board === "mummy" ? "; the Supreme Monkey Idol is worth 10 pts and is otherwise a normal Monkey Idol" : "") + ".</li></ul>",
+    html: (c) => "<h4>" + CK.icIn("major-secret-back", "Major Secret (face down)") + " Major Secrets</h4><ul class=\"aid-icons\">" +
+        CK.icLi("potion-of-greater-healing", "Potion of Greater Healing", "Potion of Greater Healing", "heal 2.") +
+        CK.icLi("greater-skill-boost", "Greater Skill Boost", "Greater Skill Boost", "+5 Skill.") +
+        CK.icLi("greater-treasure", "Greater Treasure", "Greater Treasure", "5 Gold.") +
+        CK.icLi("flash-of-brilliance", "Flash of Brilliance", "Flash of Brilliance", "draw 3.") +
+        CK.icLi("chalice", "Chalice", "Chalice", "7 pts; not an Artifact.") +
+        (c.has("sunken") ? CK.icLi("potion-of-heroism", "Potion of Heroism", "Potion of Heroism", "+1 Boot, +1 Sword, heal 1.") : "") +
+        (c.board === "mummy" ? CK.icLi("mummys-treasure", "Mummy's Treasure", "Mummy's Treasure", "5 Gold; also roll the pyramid die.") +
+          CK.icLi("mummys-chalice", "Mummy's Chalice", "Mummy's Chalice", "7 pts; also roll the pyramid die.") : "") +
+      "</ul><h4>" + CK.icIn("minor-secret-back", "Minor Secret (face down)") + " Minor Secrets</h4><ul class=\"aid-icons\">" +
+        CK.icLi("potion-of-healing", "Potion of Healing", "Potion of Healing", "heal 1.") +
+        CK.icLi("potion-of-swiftness", "Potion of Swiftness", "Potion of Swiftness", "+1 Boot.") +
+        CK.icLi("potion-of-strength", "Potion of Strength", "Potion of Strength", "+2 Swords.") +
+        CK.icLi("skill-boost", "Skill Boost", "Skill Boost", "+2 Skill.") +
+        CK.icLi("treasure", "Treasure", "Treasure", "2 Gold.") +
+        CK.icLi("magic-spring", "Magic Spring", "Magic Spring", "<b>rules update:</b> trash a card from your discard pile or play area <i>by</i> the end of the turn.") +
+        CK.icLi("dragon-egg", "Dragon Egg", "Dragon Egg", "3 pts; Rage +1.") +
+        (c.board === "mummy" ? CK.icLi("scarab", "Scarab", "Scarab", "3 pts; roll the pyramid die.") : "") +
+        (c.p >= 5 ? CK.icLi("potion-of-stealth", "Potion of Stealth", "Potion of Stealth", "on your turn: −1 Clank! for you, +1 for each opponent; usable even if you have no Clank! to remove.") : "") +
+      "</ul><p><b>Potions</b> (major and minor) are kept until you use them on your turn.</p>" +
+      "<h4>Market items (7 Gold each)</h4><ul class=\"aid-icons\">" +
+        CK.icLi("master-key", "Master Key", "Master Key", "use locked tunnels; 5 pts.") +
+        CK.icLi("backpack", "Backpack", "Backpack", "carry an additional Artifact; 5 pts" + (c.p >= 5 ? "; never two from the same room" : "") + ".") +
+        CK.icLi("crown", "Crown", "Crown", "points as shown; best available first.") +
+        (c.board === "sunken" ? CK.icLi("scuba", "SCUBA", "SCUBA", "5 pts; see Sunken Treasures.") : "") +
+        (c.has("mummy") ? CK.icLi("ankh", "Ankh", "Ankh", "heal 1 when bought; 7 pts.") : "") +
+        ((c.board === "jungle" || c.board === "temple") ? CK.icLi("time-winder", "Time Winder", "Time Winder", "remove three of your cubes from the Dragon Bag when bought; 5 pts.") : "") +
+        (c.p >= 5 || c.has("party") ? CK.icLi("invisibility-cloak", "Invisibility Cloak", "Invisibility Cloak", "ignore monsters in tunnels; 5 pts.") : "") +
+      "</ul><h4>Monkey Idols</h4><ul class=\"aid-icons\">" +
+        CK.icLi("monkey-idol", "Monkey Idol", "Monkey Idol", "5 pts each, from the Monkey Shrine — you pick one up on <b>every</b> entry (FAQ).") +
+        (c.board === "mummy" ? CK.icLi("supreme-monkey-idol", "Supreme Monkey Idol", "Supreme Monkey Idol", "10 pts; otherwise a normal Monkey Idol.") : "") +
+      "</ul>",
     src: (c) => {
       const s = ["Base p.1–2, p.6, p.12"];
       if (c.has("sunken")) s.push("Sunken p.2");
@@ -275,25 +330,28 @@ CK.reference = [
   {
     title: "Sunken Treasures — Swimming & SCUBA",
     when: (c) => c.has("sunken"),
-    html: (c) => "<ul>" +
-      (c.board === "sunken"
-        ? "<li><b>Swimming:</b> if you begin your turn in a <b>flooded room</b>, you must enter a non-flooded room at some point that turn or take 1 damage at its end. <b>SCUBA</b> (7 Gold, 5 pts) avoids this. (If you must take the damage with no cubes left, you're knocked out.)</li>" +
-          "<li><b>Underwater tunnels</b> (between two flooded rooms): 2 Boots — or 1 with SCUBA.</li>" +
-          "<li><b>Clank! tunnels:</b> moving through adds Clank! per icon (the splash). Teleporting doesn't; with no cubes left, you move free.</li>" +
-          "<li><b>Treasure rooms:</b> gain the shown Gold on every entry.</li>" +
+    html: (c) => (c.board === "sunken"
+        ? "<ul class=\"aid-icons\">" +
+          CK.icLi("flooded-room", "Flooded room", "Swimming", "if you begin your turn in a <b>flooded room</b>, you must enter a non-flooded room at some point that turn or take 1 damage at its end. " + CK.icKeep("scuba", "SCUBA", "<b>SCUBA</b>") + " (7 Gold, 5 pts) avoids this. (If you must take the damage with no cubes left, you're knocked out.)") +
+          CK.icLi("underwater-tunnel", "Underwater tunnel icon", "Underwater tunnels", "between two flooded rooms: 2 Boots — or 1 with SCUBA.") +
+          CK.icLi("sunken-clank-tunnel", "Clank! icon", "Clank! tunnels", "moving through adds Clank! per icon (the splash). Teleporting doesn't; with no cubes left, you move free.") +
+          CK.icLi("treasure-room", "Treasure room", "Treasure rooms", "gain the shown Gold on every entry.") +
+          "</ul><ul>" +
           "<li><b>Goldfish</b> (Reserve): fight it repeatedly, like the Goblin.</li>"
-        : "<li>The Sunken Treasures <b>board</b> isn't in play — its cards, Market Board and Secrets still are. Flooded-room rules apply only on its board.</li>") +
+        : "<ul><li>The Sunken Treasures <b>board</b> isn't in play — its cards, Market Board and Secrets still are. Flooded-room rules apply only on its board.</li>") +
       "<li><b>“When you discard this” cards:</b> trigger only when discarded <b>during</b> your turn (e.g. to Sleight of Hand) — not at end-of-turn cleanup, and not when acquired.</li></ul>",
     src: (c) => "Sunken p.1–2 · FAQ p.2" + (c.board === "sunken" ? ", p.4" : "")
   },
   {
     title: "The Mummy's Curse — Curses & the Mummy",
     when: (c) => c.has("mummy"),
-    html: (c) => "<ul><li><b>Curses:</b> each is <b>−2 points</b> at game end. Curses can be removed from yourself (never an opponent), returning them to the Bank. Curse tokens aren't limited — if the Bank runs out, use any substitute.</li>" +
+    html: (c) => "<ul class=\"aid-icons\">" +
+      CK.icLi("curse-token", "Curse token", "Curses", "each is <b>−2 points</b> at game end. Curses can be removed from yourself (never an opponent), returning them to the Bank. Curse tokens aren't limited — if the Bank runs out, use any substitute.") +
+      (c.board === "mummy" ? CK.icLi("curse-tunnel", "Curse icon", "Curse tunnels", "moving through one gives you a Curse per Curse icon.") : "") +
+      "</ul><ul>" +
       (c.board === "mummy"
-        ? "<li><b>Curse tunnels:</b> moving through one gives you a Curse per Curse icon.</li>" +
-          "<li><b>The Mummy</b> can be fought only when its marker is in the <b>zone</b> containing your room. Two ways to defeat it: <b>2 Swords</b> → 4 Gold but take a Curse; <b>3 Swords</b> → remove <b>half your Curses</b> (rounded up).</li>" +
-          "<li>After each defeat, roll the <b>pyramid die</b> and move the Mummy to the rolled zone. If it <b>moves</b>, every player in a room of its new zone takes a Curse. (Some cards' Arrive text also rolls the die.) You may defeat it more than once per turn — if you can follow it.</li>"
+        ? "<li><b>The Mummy</b> can be fought only when its marker is in the <b>zone</b> containing your room. Two ways to defeat it: <b>2 Swords</b> → 4 Gold but take a Curse; <b>3 Swords</b> → remove <b>half your Curses</b> (rounded up).</li>" +
+          "<li>After each defeat, roll the " + CK.icIn("pyramid-die", "Pyramid die") + " <b>pyramid die</b> and move the Mummy to the rolled zone. If it <b>moves</b>, every player in a room of its new zone takes a Curse. (Some cards' Arrive text also rolls the die.) You may defeat it more than once per turn — if you can follow it.</li>"
         : "<li>The Mummy's Curse <b>board</b> (and the Mummy itself) isn't in play — its cards, Ankhs and Curse tokens still are, but its Secrets are used only with its board.</li>") +
       "</ul>",
     src: (c) => c.board === "mummy" ? "Mummy p.2–3" : "Mummy p.2"
@@ -301,39 +359,51 @@ CK.reference = [
   {
     title: "Gold and Silk — Mine & Spider's Lair",
     when: (c) => c.has("goldsilk"),
-    html: (c) => "<ul>" +
-      (c.board === "mine"
-        ? "<li><b>Mining:</b> in a room touching a gold vein, spend <b>2 Skill</b> to take the shown Gold and cover the vein with one of your Clank! cubes (no cube, no mining; each vein mines once). After mining, <b>no more Boots</b> this turn (teleports still work).</li>" +
-          "<li><b>Mining Bonus:</b> at game end, most veins mined takes the <b>20-point</b> token, second most <b>10</b>, third <b>5</b> (ties: deepest vein wins). You must have mined at least once <i>and</i> have a score to claim one.</li>" +
-          "<li><b>Elevators:</b> pay <b>1 Gold</b> to the bank each time you ride one to or from the Depths.</li>"
+    html: (c) => (c.board === "mine"
+        ? "<ul class=\"aid-icons\">" +
+          CK.icLi("gold-vein", "Gold vein", "Mining", "in a room touching a gold vein, spend <b>2 Skill</b> to take the shown Gold and cover the vein with one of your Clank! cubes (no cube, no mining; each vein mines once). After mining, <b>no more Boots</b> this turn (teleports still work).") +
+          CK.icLi("mining-bonus", "Mining Bonus token", "Mining Bonus", "at game end, most veins mined takes the <b>20-point</b> token, second most <b>10</b>, third <b>5</b> (ties: deepest vein wins). You must have mined at least once <i>and</i> have a score to claim one.") +
+          CK.icLi("elevator", "Elevator", "Elevators", "pay <b>1 Gold</b> to the bank each time you ride one to or from the Depths.") +
+          "</ul>"
         : "") +
       (c.board === "spider"
-        ? "<li><b>Web tokens:</b> to move through one, spend <b>a Sword or one extra Boot</b>; take the token face down — its hidden points are yours at game end, and the passage is clear for everyone after.</li>" +
-          "<li><b>Webbed rooms:</b> the gold/secret/Monkey Idol inside must be “cut loose” by spending <b>a Sword</b> when you first enter; otherwise exit and re-enter to try again. (Cards that take tokens from adjacent rooms skip the Sword — FAQ.)</li>" +
-          "<li><b>The Queen's Web Cache:</b> spend <b>8 Skill</b> to take any one of the eight treasures (gold, healing used immediately, Boots/Swords for this turn, often a Secret Tome from the Reserve if any remain), marking it with one of your Clank! cubes (no cube, no treasure). Each treasure is claimed once per game.</li>"
+        ? "<ul class=\"aid-icons\">" +
+          CK.icLi("web-token", "Web token", "Web tokens", "to move through one, spend <b>a Sword or one extra Boot</b>; take the token face down — its hidden points are yours at game end, and the passage is clear for everyone after.") +
+          CK.icLi("webbed-room", "Webbed room", "Webbed rooms", "the gold/secret/Monkey Idol inside must be “cut loose” by spending <b>a Sword</b> when you first enter; otherwise exit and re-enter to try again. (Cards that take tokens from adjacent rooms skip the Sword — FAQ.)") +
+          "</ul><ul>" +
+          "<li><b>The Queen's Web Cache:</b> spend <b>8 Skill</b> to take any one of the eight treasures (gold, healing used immediately, Boots/Swords for this turn, often a Secret Tome from the Reserve if any remain), marking it with one of your Clank! cubes (no cube, no treasure). Each treasure is claimed once per game.</li></ul>"
         : "") +
-      ((c.board !== "mine" && c.board !== "spider") ? "<li>Neither Gold and Silk board is selected — this expansion adds no cards, so beyond its extra Gold (and optional Market Board) it has no effect on other boards.</li>" : "") +
-      "</ul>",
+      ((c.board !== "mine" && c.board !== "spider") ? "<ul><li>Neither Gold and Silk board is selected — this expansion adds no cards, so beyond its extra Gold (and optional Market Board) it has no effect on other boards.</li></ul>" : ""),
     src: (c) => c.board === "spider" ? "Gold & Silk p.2 · FAQ p.4" : "Gold & Silk p.1"
   },
   {
     title: "Temple of the Ape Lords — Jungle & Temple",
     when: (c) => c.has("apelords"),
-    html: (c) => "<ul>" +
+    html: (c) => {
+      const apeTokens = "<p class=\"aid-icon-row\">" + CK.icPair("ape-cog", "Cog") + " " + CK.icPair("ape-monkey-wrench", "Monkey wrench") + " " + CK.icPair("ape-banana", "Banana") + "</p>";
+      return "<ul>" +
       ((c.board === "jungle" || c.board === "temple") ? "<li><b>Time Winder</b> (Market, 7 Gold): on purchase, immediately remove <b>three of your cubes</b> from the Dragon Bag; worth 5 pts.</li>" : "") +
       (c.board === "jungle"
-        ? "<li><b>Clank! tunnels</b> (vines): add 1 Clank! per icon when moving (not when teleporting).</li>" +
-          "<li><b>Ape-aratus tokens:</b> moving along a marked tunnel <b>with Boots</b> (not teleporting) takes its token. The <b>Bronze Guardian</b> is a monster printed on the board (other effects treat it as a monster and a monster card, e.g. Garignar's carnage reward): 3 Swords defeats it for one of its three tokens (no reward once they're gone).</li>" +
+        ? "<li>" + CK.icIn("jungle-clank-tunnel", "Clank! icon") + " <b>Clank! tunnels</b> (vines): add 1 Clank! per icon when moving (not when teleporting).</li>" +
+          "<li><b>Ape-aratus tokens:</b> moving along a marked tunnel <b>with Boots</b> (not teleporting) takes its token. The <b>Bronze Guardian</b> is a monster printed on the board (other effects treat it as a monster and a monster card, e.g. Garignar's carnage reward): 3 Swords defeats it for one of its three tokens (no reward once they're gone)." + apeTokens + "</li>" +
           "<li><b>Scoring:</b> score each token type (cog, monkey wrench, banana) separately by how many of it you collected: 1 → 1, 2 → 4, 3 → 9, 4 → 16, 5 → 25, 6 → 36 pts (the table above the Bronze Guardian).</li>"
         : "") +
       (c.board === "temple"
         ? "<li><b>Gears</b> reshape the tunnels; a tunnel that doesn't line up with the gear is a dead end (not even teleports). Branching gear tunnels depend on your direction of travel — you can't change direction on a gear.</li>" +
-          "<li><b>Rotating gears:</b> as an action while adjacent to a gear, turn one of your <b>ape-aratus tokens</b> with the matching symbol face up (then to the box) to set that gear to any orientation. Each token is used once; unused tokens score nothing.</li>" +
-          "<li><b>RNG tokens:</b> when the Boss marker reaches a Rage Track space with one, reveal it and rotate the indicated gears one turn clockwise (all three gears with that symbol, all nine, or none). If rage would increase while the marker is already on the top space (five cubes), reveal one from the stack above the track instead. Return each resolved RNG token to the box.</li>"
+          "<li><b>Rotating gears:</b> as an action while adjacent to a gear, turn one of your <b>ape-aratus tokens</b> with the matching symbol face up (then to the box) to set that gear to any orientation. Each token is used once; unused tokens score nothing." + apeTokens + "</li>" +
+          "<li><b>RNG tokens:</b> when the Boss marker reaches a Rage Track space with one, reveal it and rotate the indicated gears one turn clockwise:" +
+            "<div class=\"aid-icon-grid\">" +
+            CK.icFig("rng-cog", "RNG token: cog", "the 3 cog gears") +
+            CK.icFig("rng-monkey-wrench", "RNG token: monkey wrench", "the 3 monkey-wrench gears") +
+            CK.icFig("rng-banana", "RNG token: banana", "the 3 banana gears") +
+            CK.icFig("rng-all-nine", "RNG token: all nine", "all 9 gears") +
+            CK.icFig("rng-none", "RNG token: blank", "no gears") +
+            "</div>" +
+            "If rage would increase while the marker is already on the top space (five cubes), reveal one from the stack above the track instead. Return each resolved RNG token to the box.</li>"
         : "") +
       (c.mod("campaign") ? "<li><b>Mini-Campaign:</b> play the Jungle, award Campaign tokens by final score (20/10/5; knocked out in the Depths = none), then play the Temple keeping your Campaign token and your collected ape-aratus tokens (face up). Add the Campaign token to your final score; unused ape-aratus tokens score nothing.</li>" : "") +
       ((c.board !== "jungle" && c.board !== "temple") ? "<li>Neither Ape Lords board is selected — this expansion adds boards only (no cards), so it has no effect on other boards.</li>" : "") +
-      "</ul>",
+      "</ul>"; },
     src: (c) => c.board === "jungle" ? "Base p.6 · Ape Lords p.2" + (c.mod("campaign") ? ", p.4" : "") + " · FAQ p.1" : (c.board === "temple" ? (c.mod("campaign") ? "Base p.6 · Ape Lords p.2–4" : "Base p.6 · Ape Lords p.2–3") : (c.mod("campaign") ? "Ape Lords p.1, p.4" : "Ape Lords p.1"))
   },
   {
@@ -344,7 +414,14 @@ CK.reference = [
         "<li><b>Minor secrets</b> come face down from the Bank when you enter a minor-secret space (one per room per turn).</li>" +
         "<li>The <b>side board</b> adds Health Meters for the fifth and sixth players and the Rage Track used for the game.</li>" : "") +
       (c.mod("chars") ? "<li><b>Characters:</b> six thieves, each with a character board and a 10-card custom deck containing three unique cards (e.g. Agnet's conscription tokens put acquired companions on top of her deck; D'allan's cards reward his displayed “Finds”). Play characters only against other characters.</li>" +
-        "<li><b>Character powers:</b> <b>Agnet</b>: 4 conscription tokens; when you acquire a companion you may spend one (to the box) to put it on top of your deck. <b>D'allan</b>: your first dragon egg, artifact, crown and monkey idol go on your board as “Finds” for Collection/Competition/Exhibit. <b>Garignar</b>: the first time each turn you defeat a Monster card (even the Goblin, or the Bronze Guardian per the FAQ; not monsters in tunnels), advance the carnage token one space clockwise and take that reward. <b>Lenara</b>: hold at most 10 mana; on your turn cast each spell at most once: Transfigure (3: discard a card, then draw a card), Duplicate (5: copy a card in your play area), Levitate (7: acquire a card without paying its Skill cost, into your hand). <b>Whiskers</b>: if all three behavior tokens are face down when you end your turn (before refilling the Row), you must cause a Dragon Attack of exactly four cubes (ignoring the Rage Track and any extra danger); your own cubes return to your supply without damage. Then draw your hand, flip the tokens face up, and refill the Row. <b>MonkeyBot Prime</b>: when damaged in a Dragon Attack, remove the leftmost cogwheel (only one per attack; not for other damage; never replaced); each turn you get every reward revealed.</li>" : "") +
+        "<li><b>Character powers:</b><ul>" +
+          "<li><b>Agnet</b>: 4 " + CK.icIn("conscription-token", "Conscription token") + " conscription tokens; when you acquire a companion you may spend one (to the box) to put it on top of your deck.</li>" +
+          "<li><b>D'allan</b>: your first dragon egg, artifact, crown and monkey idol go on your board as “Finds” for Collection/Competition/Exhibit.</li>" +
+          "<li><b>Garignar</b>: the first time each turn you defeat a Monster card (even the Goblin, or the Bronze Guardian per the FAQ; not monsters in tunnels), advance the " + CK.icIn("carnage-token", "Carnage token") + " carnage token one space clockwise and take that reward.</li>" +
+          "<li><b>Lenara</b>: hold at most 10 " + CK.icIn("mana-token", "Mana token") + " mana; on your turn cast each spell at most once: Transfigure (3: discard a card, then draw a card), Duplicate (5: copy a card in your play area), Levitate (7: acquire a card without paying its Skill cost, into your hand).</li>" +
+          "<li><b>Whiskers</b>: if all three " + CK.icIn("behavior-token", "Behavior token") + " behavior tokens are face down when you end your turn (before refilling the Row), you must cause a Dragon Attack of exactly four cubes (ignoring the Rage Track and any extra danger); your own cubes return to your supply without damage. Then draw your hand, flip the tokens face up, and refill the Row.</li>" +
+          "<li><b>MonkeyBot Prime</b>: when damaged in a Dragon Attack, remove the leftmost " + CK.icIn("cogwheel-token", "Cogwheel token") + " cogwheel (only one per attack; not for other damage; never replaced); each turn you get every reward revealed.</li>" +
+        "</ul></li>" : "") +
       "<li><b>New card terms:</b> <b>React</b> (when its condition occurs during an opponent's turn, or for some cards between turns while the Row refills, you may play it from your hand to your play area, now or later that turn, and immediately draw a replacement; its resources and text resolve on your next turn. Played on your own turn it works normally but draws no extra card) and <b>Arrive Choice</b> (when it arrives in the Row, each player chooses whether to take what it offers, starting with the player about to begin their turn, or the active player if it arrives mid-turn; if the card offers two options, each player must choose one).</li></ul>",
     src: (c) => c.p >= 5 ? (c.mod("chars") ? "Adventuring Party p.2–7 · FAQ p.1" : "Adventuring Party p.2–4") : "Adventuring Party p.2, p.4–7 · FAQ p.1"
   },

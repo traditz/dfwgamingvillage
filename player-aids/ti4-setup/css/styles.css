@@ -729,6 +729,8 @@ span.sub { font-size: 15px; }
 }
 .ref-body h4:first-child { margin-top: 2px; }
 .ref-body .src-line { margin-top: 14px; }
+/* rulebook icons (css/icons.css, icons standard v1): keep an inline icon on the same line as the word it illustrates */
+.ic-nb { white-space: nowrap; }
 
 /* =============================================================================
    SEARCH

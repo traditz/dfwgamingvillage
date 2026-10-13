@@ -210,10 +210,10 @@ RT.factionRef.corvid = { title: "Corvid Conspiracy",
         "<b>Draw</b> one card plus one per face-up extortion on the map; discard down to five."
       ]) +
       "<h4>Plot tokens</h4><table class='rt'><thead><tr><th>Plot</th><th>Effect</th></tr></thead><tbody>" +
-      "<tr><td>Bomb</td><td>When flipped, remove all enemy pieces in its clearing, then remove the bomb.</td></tr>" +
-      "<tr><td>Snare</td><td>While face up, enemy pieces can't be placed in or moved from its clearing." + (c.vbH ? " (The Vagabond's Slip ignores this.)" : "") + "</td></tr>" +
-      "<tr><td>Extortion</td><td>When flipped, take a random card from each enemy with faction pieces in its clearing. While face up, draw another card in Evening.</td></tr>" +
-      "<tr><td>Raid</td><td>Whenever removed (face up or down), place one warrior in each adjacent clearing — but not if removed by Exposure.</td></tr></tbody></table>" +
+      "<tr><td>" + RT.icPair("plot-bomb", "Bomb") + "</td><td>When flipped, remove all enemy pieces in its clearing, then remove the bomb.</td></tr>" +
+      "<tr><td>" + RT.icPair("plot-snare", "Snare") + "</td><td>While face up, enemy pieces can't be placed in or moved from its clearing." + (c.vbH ? " (The Vagabond's Slip ignores this.)" : "") + "</td></tr>" +
+      "<tr><td>" + RT.icPair("plot-extortion", "Extortion") + "</td><td>When flipped, take a random card from each enemy with faction pieces in its clearing. While face up, draw another card in Evening.</td></tr>" +
+      "<tr><td>" + RT.icPair("plot-raid", "Raid") + "</td><td>Whenever removed (face up or down), place one warrior in each adjacent clearing — but not if removed by Exposure.</td></tr></tbody></table>" +
       RT.frogNote(c, "corvid");
   },
   src: function (c) { return RT.join(["Law p.14–15 §13", "Underworld p.4–5", c.vbH ? "Law p.10 §9.4.2" : "", c.fac("diaspora") ? "Homeland p.7" : ""]); } };
@@ -267,8 +267,8 @@ RT.factionRef.hundreds = { title: "Lord of the Hundreds",
           "<table class='rt'><thead><tr><th>Clearings</th><th>1–2</th><th>3–4</th><th>5</th><th>6+</th></tr></thead><tbody><tr><td>Points</td><td>1</td><td>2</td><td>3</td><td>4</td></tr></tbody></table>",
         "<b>Draw</b> one card; discard down to five."
       ]) +
-      "<h4>Moods</h4><table class='rt'><thead><tr><th>Mood</th><th>Not if your Hoard has</th><th>Effect</th></tr></thead><tbody>" +
-      RT.hundredsMoods.map(function (m) { return "<tr><td>" + m[0] + "</td><td>" + m[1] + "</td><td>" + m[2] + "</td></tr>"; }).join("") + "</tbody></table>" +
+      "<h4>Moods</h4><table class='rt rt-moods'><thead><tr><th>Mood</th><th>Not if your Hoard has</th><th>Effect</th></tr></thead><tbody>" +
+      RT.hundredsMoods.map(function (m) { return "<tr><td>" + m[0] + "</td><td>" + RT.itemCell(m[1]) + "</td><td>" + m[2] + "</td></tr>"; }).join("") + "</tbody></table>" +
       ((c.fac("knaves") || c.hire) ? "<h4>Interactions</h4>" + RT.ul([
         c.fac("knaves") ? "<b>Knaves' Prisoners</b> don't count when checking whether Anoint can replace a warrior, and Anoint can't replace a Prisoner." : "",
         c.hire ? "<b>Hirelings:</b> Anoint can't replace a hireling warrior, and Advance the Warlord can't move hirelings." : ""]) : "");
@@ -335,14 +335,15 @@ RT.factionRef.diaspora = { title: "Lilypad Diaspora",
     var others = ["alliance", "eyrie", "lizard", "riverfolk", "corvid", "keepers"].filter(function (id) { return c.human(id); });
     return "<p>The Diaspora found <b>enclaves</b> that bring the <b>frog suit</b> to the Woodland and score by spending cards matching their <b>Peaceful</b> enclaves. <b>Militant</b> enclaves give warriors but drive them to battle every turn.</p>" +
       "<h4>Enclaves and the frog suit</h4>" + RT.ul([
-        "12 double-sided enclave tokens: <b>Peaceful</b> / <b>Militant</b>. One enclave per clearing.",
-        "<b>Peaceful</b> adds frog to its clearing (dual-suited). <b>Militant</b> covers the clearing's suit — it's frog only.",
+        "12 double-sided enclave tokens: <b>Peaceful</b> / <b>Militant</b>. One enclave per clearing. " + RT.icList([
+          ["enclave-peaceful", "Peaceful enclave", "<b>Peaceful</b> — adds frog to its clearing (dual-suited)."],
+          ["enclave-militant", "Militant enclave", "<b>Militant</b> — covers the clearing's suit: it's frog only."]]),
         "<b>Matching:</b> a Militant-enclave clearing matches frog; a Peaceful-enclave clearing matches frog <i>or</i> its printed suit. (E.g. the Alliance could spend a fox and a frog card to revolt in a fox clearing with a Peaceful enclave.)",
         "<b>Crafting pieces</b> there: at a Peaceful enclave, use the piece for a frog icon or the printed suit (not both); at a Militant enclave, only for a frog icon. The frog icon can be used as a wild icon.",
         "<b>Crafting (Diaspora):</b> during <b>Birdsong</b>, by activating enclaves."
       ]) +
       "<h4>Frog cards and the Pond</h4>" + RT.ul([
-        "<b>14 frog cards</b> are shuffled into the shared deck in setup" + (c.two ? " — <b>13</b> here: Frog Dominance is removed with two players" : "") + ". They have the frog suit; some have frog crafting icons (you need a crafting piece in a frog clearing). Many force the Diaspora to act; the Diaspora can craft them to act themselves.",
+        "<b>14 " + RT.icIn("frog-card", "Frog card") + " frog cards</b> are shuffled into the shared deck in setup" + (c.two ? " — <b>13</b> here: Frog Dominance is removed with two players" : "") + ". They have the frog suit; some have frog crafting icons (you need a crafting piece in a frog clearing). Many force the Diaspora to act; the Diaspora can craft them to act themselves.",
         "<b>The Pond:</b> a discarded frog card goes face up on the Pond placard, not the discard pile" + (c.human("lizard") ? " (and not the Lizard Cult's Lost Souls)" : "") + ". Whenever any player draws, they may take their <b>first</b> card from the top of the Pond. When the deck is reshuffled, shuffle the Pond into it.",
         c.two ? "" : "<b>Frog Dominance:</b> a player who activates it wins at the start of their Birdsong if they rule <b>at least two enclaves on the river</b>, and now follows <b>Enclave Defense</b>: when the Diaspora defends in a clearing with an enclave, the Frog Dominance player's faction warriors there join as defenders, taking hits after the Diaspora's — unless that player is the attacker." +
           (c.fac("council") ? " With Peacekeepers too, the Diaspora chooses the mix of Council and Enclave Defense warriors that take hits after their own." : "")
@@ -392,7 +393,8 @@ RT.factionRef.council = { title: "Twilight Council",
     return "<p>The Council convenes <b>assemblies</b> to suppress the war. Assemblies score, banish enemy warriors and gain <b>Loyalists</b>; Governing assemblies restrict enemies, and in Evening the Council scores for Governing assemblies that share a clearing with enemy buildings or tokens.</p>" +
       "<h4>Abilities</h4>" + RT.ul([
         "<b>Loyalists:</b> up to 4 warriors on the Council's board. Placed by Entreat and Assemble. The Council may return them to its supply at any time.",
-        "<b>Assemblies:</b> two sides, <b>Closed</b> (closed tent) and <b>Governing</b> (open tent). When an enemy of the Council removes an assembly, the Council removes 1 Loyalist.",
+        "<b>Assemblies:</b> two sides, <b>Closed</b> (closed tent) and <b>Governing</b> (open tent). When an enemy of the Council removes an assembly, the Council removes 1 Loyalist. " +
+          RT.icRow([RT.icPair("assembly-closed", "Closed Assembly"), RT.icPair("assembly-governing", "Governing Assembly")]),
         "<b>Governors:</b> at a <b>Governing</b> assembly, enemies of the Council can't activate crafting pieces and can't place, remove, take or flip pieces — except in battle." + (c.vbH ? " (So the Vagabond can't craft there.)" : ""),
         "<b>Entreating:</b> any number of times on their turn, an enemy may <b>force</b> the Council to flip any assembly to Closed. The Council then either places any number of Loyalists at that assembly or puts 1 warrior in its Loyalists.",
         "<b>Peacekeepers:</b> when an enemy chooses <b>another enemy</b> as defender at an assembly, Council warriors there join as defenders, taking hits only once the defender's own warriors are gone. Ignored if the Vagabond is defending. (The Council can't ambush or use battle effects there.)" +
@@ -411,7 +413,7 @@ RT.factionRef.council = { title: "Twilight Council",
           "<b>Banish</b> (non-bird card): battle in a clearing with a matching assembly. Defending warriors hit aren't removed — you <b>force</b> them to move to a single destination you choose, ignoring rule (one move, for triggering other effects). You can't hit buildings or tokens, and you ignore rolled hits you take (not ambush or extra hits). The Hundreds' warlord, the Vagabond and hirelings can't take Banish hits.",
           "<b>Agitate</b> (non-bird card): spend it and choose a matching assembly; put 1 warrior in your Loyalists, then flip that assembly to Governing if it's Closed. (No matching assembly, no Loyalist.)",
           "<b>Empower</b> (bird card): choose an assembly and roll one battle die; remove that many Council warriors from it. Put them in your Loyalists, <i>or</i> score 1 point if you rule the assembly."]),
-        "<b>Inspire:</b> you may craft with assemblies. If you craft <b>nothing</b>, draw one card per card-draw icon showing on your Assemblies track.",
+        "<b>Inspire:</b> you may craft with assemblies. If you craft <b>nothing</b>, draw one card per " + RT.icIn("draw-bonus", "Draw bonus") + " card-draw icon showing on your Assemblies track.",
         "<b>Adjourn:</b> you may remove any of your assemblies. Flip assemblies you rule to Governing.",
         "<b>Oversee:</b> count Governing assemblies in a clearing with any <b>enemy buildings or tokens</b>." +
           "<table class='rt'><thead><tr><th>Assemblies</th><th>1</th><th>2–3</th><th>4</th><th>5–6</th></tr></thead><tbody><tr><td>Points</td><td>1</td><td>2</td><td>3</td><td>4</td></tr></tbody></table>",
@@ -466,7 +468,7 @@ RT.factionRef.knaves = { title: "Knaves of the Deepwood",
         "<b>Retire:</b> flip the Acting Captain's card face down and return it to your supply, by your board."
       ]) +
       "<table class='rt'><thead><tr><th>Item</th><th>Action</th></tr></thead><tbody>" +
-      RT.knavesItems.map(function (k) { return "<tr><td>" + k[1] + "</td><td><b>" + k[0] + ":</b> " + k[2] + "</td></tr>"; }).join("") + "</tbody></table>" +
+      RT.knavesItems.map(function (k) { return "<tr><td>" + RT.itemCell(k[1]) + "</td><td><b>" + k[0] + ":</b> " + k[2] + "</td></tr>"; }).join("") + "</tbody></table>" +
       "<h4>Evening (in order)</h4>" + RT.ol([
         "<b>Mock the Powerful:</b> score 1 point per <b>2 Prisoners</b>, and 1 point per <b>2 acclaim</b> on the map (count them separately).",
         "<b>Protect the Weak:</b> once per acclaim, you may spend a matching card to place 1 Skunk at it.",
@@ -630,7 +632,7 @@ RT.coreExc.craft = [
 };
   var pond = RT.coreExc.cards.filter(function (e) { return /Pond \(Lilypad/.test(e.t); })[0];
   pond.html = function (c) {
-    return "<b>Frog cards and the Pond (Lilypad Diaspora):</b> " + (c.two ? "13" : "14") + " frog cards add a fifth suit to the deck. Discarded frog cards go face up to the <b>Pond</b>" +
+    return "<b>Frog cards and the Pond (Lilypad Diaspora):</b> " + (c.two ? "13" : "14") + " " + RT.icIn("frog-card", "Frog card") + " frog cards add a fifth suit to the deck. Discarded frog cards go face up to the <b>Pond</b>" +
       (c.human("lizard") ? " (not Lost Souls)" : "") + ". Whenever you draw, your first card may come from the top of the Pond. When the deck is reshuffled, shuffle the Pond in too.";
 };
   var rivers = RT.coreExc.map.filter(function (e) { return /Rivers as paths/.test(e.t); })[0];

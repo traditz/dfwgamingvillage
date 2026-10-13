@@ -153,6 +153,21 @@ TI.cite = function (c, keys, extra) {
   return out.concat(extra || []).join(" · ");
 };
 
+/* Rulebook icons in the rules reference (DFWGV icons standard v1: css/icons.css, images/icons/<name>.webp,
+   cropped from this game's own PDFs). TI.ic("tech-biotic", "Biotic") is an icon; TI.ic(…, true) sits inline in
+   a sentence or table cell; TI.icPair(file, alt, label) is an icon + label pair for an icon row; TI.icRow(file,
+   alt, html) is one row of an icon list (ul.aid-icons).
+   Always pass the literal file name (the icons checker matches it). Never used in the teaching script.
+   Icon source note: gamma-wormhole.webp is the Creuss gamma wormhole token pictured on PoK p.8 ("1 Creuss Gamma
+   Wormhole Token"); it carries the same gamma swirl as the 3 generic gamma tokens on PoK p.7, which can't be cropped
+   cleanly there (the Creuss token overlaps them), so the label stays the generic "Gamma wormhole". */
+TI.ic =(f, alt, inline) => "<img class=\"aid-ic" + (inline ? " aid-ic-inline" : "") + "\" src=\"images/icons/" + f + ".webp\" alt=\"" + alt + "\" title=\"" + alt + "\">";
+TI.icPair = (f, alt, label) => "<span class=\"aid-pair\">" + TI.ic(f, alt) + "<span>" + label + "</span></span>";
+TI.icRow = (f, alt, html) => "<li>" + TI.ic(f, alt) + "<span>" + html + "</span></li>";
+/* TI.ici(file, alt, before, after): an inline icon glued (no line break) to the words beside it, e.g.
+   "the legendary " + TI.ici("legendary-planet", "Legendary planet icon", "icon", ".") */
+TI.ici = (f, alt, before, after) => "<span class=\"ic-nb\">" + (before ? before + " " : "") + TI.ic(f, alt, true) + (after || "") + "</span>";
+
 /* ---------------- tags, sets, modes ------------------------------------------ */
 TI.expMeta = {
   base:  { name: "Base game",         cls: "tag-base" },
@@ -596,14 +611,15 @@ TI.reference = [
   {
     id: "ref-anomalies", title: (c) => c.has("pok") ? "Anomalies, wormholes, the wormhole nexus & hyperlanes" : "Anomalies & wormholes", when: () => true,
     html: (c) => "<h4>Anomalies</h4><p class=\"sub\">Anomaly tiles have a red border on their corners; some contain planets and are still anomalies. Abilities can make a system an anomaly, or two kinds of anomaly at once.</p>" +
-      "<div class=\"table-wrap\"><table><thead><tr><th>Anomaly</th><th>Rule</th></tr></thead><tbody>" +
-      "<tr><td><b>Asteroid field</b></td><td>Ships can’t move through or into it.</td></tr>" +
-      "<tr><td><b>Supernova</b></td><td>Ships can’t move through or into it.</td></tr>" +
-      "<tr><td><b>Nebula</b></td><td>Ships can move into it only if it is the active system, and can’t move through it. A ship that starts the Movement step in a nebula has move 1 for that step (other effects can raise it). In a space combat there, the <b>defender</b> applies +1 to their ships’ combat rolls.</td></tr>" +
-      "<tr><td><b>Gravity rift</b></td><td>A ship that moves out of or through a rift applies <b>+1 to its move</b> — but each rift gives a given ship that bonus <b>only once</b> (newest ruling, below). Immediately before it exits the rift, roll 1 die for it: on <b>1–3</b> it is <b>removed</b> (returned to reinforcements — not “destroyed”), together with anything it transports (transported units aren’t rolled for). It rolls each time it exits a rift, even the same rift twice in one move; several rifts in one system count as one.</td></tr>" +
-      "</tbody></table></div>" +
+      "<ul class=\"aid-icons\">" +
+      TI.icRow("asteroid-field", "Asteroid field", "<b>Asteroid field</b> — ships can’t move through or into it.") +
+      TI.icRow("supernova", "Supernova", "<b>Supernova</b> — ships can’t move through or into it.") +
+      TI.icRow("nebula", "Nebula", "<b>Nebula</b> — ships can move into it only if it is the active system, and can’t move through it. A ship that starts the Movement step in a nebula has move 1 for that step (other effects can raise it). In a space combat there, the <b>defender</b> applies +1 to their ships’ combat rolls.") +
+      TI.icRow("gravity-rift", "Gravity rift", "<b>Gravity rift</b> — a ship that moves out of or through a rift applies <b>+1 to its move</b> — but each rift gives a given ship that bonus <b>only once</b> (newest ruling, below). Immediately before it exits the rift, roll 1 die for it: on <b>1–3</b> it is <b>removed</b> (returned to reinforcements — not “destroyed”), together with anything it transports (transported units aren’t rolled for). It rolls each time it exits a rift, even the same rift twice in one move; several rifts in one system count as one.") +
+      "</ul>" +
       "<p class=\"note\">Newest ruling (Thunder’s Edge p.16, 2025): a gravity rift can contribute its movement bonus to a ship passing through it only once per ship — “a change from previous rulings” (LRR §41.3 let the same rift affect a ship several times in one move). Applied to every game here as the newest official ruling.</p>" +
-      "<h4>Wormholes</h4><ul>" +
+      "<h4>Wormholes</h4><p class=\"aid-icon-row\">" + TI.icPair("alpha-wormhole", "Alpha wormhole", "Alpha wormhole") + " " + TI.icPair("beta-wormhole", "Beta wormhole", "Beta wormhole") +
+      (c.has("pok") ? " " + TI.icPair("gamma-wormhole", "Gamma wormhole", "Gamma wormhole (PoK)") : "") + "</p><ul>" +
       "<li>Systems with <b>matching wormholes</b> (alpha–alpha, beta–beta) are adjacent for all purposes, so players can be neighbors and transact through them.</li>" +
       "<li>PDS with the PDS unit upgrade can fire Space Cannon into adjacent systems, including through wormholes.</li>" +
       "<li><b>Delta</b> wormholes: on the Creuss Gate tile and the Ghosts of Creuss home system.</li>" +
@@ -611,7 +627,7 @@ TI.reference = [
       (c.has("pok") ? "<h4>Wormhole nexus (PoK)</h4><ul><li>Starts in play off the map, <b>inactive</b> side up (only a gamma wormhole); it is part of the game board, on its edge.</li><li>After a player moves or places a unit into it, or gains control of its planet <b>Mallice</b>, flip it to its <b>active</b> side (alpha, beta and gamma). A ship moving in activates it at the <b>end</b> of the Movement step.</li></ul>" +
         "<h4>Hyperlanes (PoK)</h4><ul><li>Each continuous line across one or more hyperlane tiles is a hyperlane; the systems it connects are <b>adjacent for all purposes</b>.</li><li>Hyperlane tiles are not systems: no units can be on them and they can’t be targeted by abilities.</li><li class=\"note flag\"><b>Sources disagree — board edge on hyperlane maps.</b> LRR §39.2 — followed here — puts a system on the edge if any of its sides doesn’t touch another system tile, and hyperlane tiles are not systems (§44.2). The TI4 Wiki FAQ (Hyperlanes) reports the designer’s intent that a side touching a hyperlane tile doesn’t count as an edge.</li></ul>" : "") +
       "<p class=\"sub\">Board edge: a system tile is on the edge of the board if any side doesn’t touch another system tile. The Ghosts of Creuss home system" + (c.has("pok") ? " and the wormhole nexus are" : " is") + " on the edge.</p>",
-    src: (c) => TI.cite(c, ["anomalies", "asteroid", "supernova", "nebula", "gravityrift", "wormholes", "gameboard"].concat(c.has("pok") ? ["nexus", "hyperlanes"] : []), (c.has("pok") ? ["PoK p.11, p.16", "Wiki FAQ (Hyperlanes; Units & Unit Abilities)"] : ["Wiki FAQ (Units & Unit Abilities)"]).concat(["TE p.16"]))
+    src: (c) => TI.cite(c, ["anomalies", "asteroid", "supernova", "nebula", "gravityrift", "wormholes", "gameboard"].concat(c.has("pok") ? ["nexus", "hyperlanes"] : []), (c.mode === "firstgame" ? [] : ["LtP p.14"]).concat(c.has("pok") ? ["PoK p.8, p.11, p.16", "Wiki FAQ (Hyperlanes; Units & Unit Abilities)"] : ["Wiki FAQ (Units & Unit Abilities)"]).concat(["TE p.16"]))
   },
   {
     id: "ref-cannon", title: "Space cannon — offense & defense", when: () => true,
@@ -632,7 +648,7 @@ TI.reference = [
     html: () => "<p class=\"sub\">If two players have ships in the active system after space cannon offense, they must fight. The active player is the <b>attacker</b>, the other the <b>defender</b>. “Before combat” abilities happen just before anti-fighter barrage.</p><ol>" +
       "<li><b>Anti-fighter barrage</b> (first round only) — both players may, simultaneously, roll for their units with <b>Anti-Fighter Barrage X (xY)</b>; each hit destroys one of the opponent’s fighters in the system (extra hits are lost). Combat-roll modifiers and rerolls don’t apply. The step happens even with no fighters present. If a player then has no ships left, the combat ends.</li>" +
       "<li><b>Announce retreats</b> — defender first; if the defender announces, the attacker can’t this round. You need an eligible system to retreat to.</li>" +
-      "<li><b>Roll dice</b> — one die per ship (a combat value with several burst icons rolls that many dice); each result equal to or above the ship’s combat value is a hit. Roll by combat value (1s first, then 2s…); the attacker rolls everything before the defender. Resolve rerolls and die-affecting abilities right after rolling all your dice.</li>" +
+      "<li><b>Roll dice</b> — one die per ship (a combat value with several burst " + TI.ici("burst-icons", "Two burst icons", "icons") + " rolls that many dice); each result equal to or above the ship’s combat value is a hit. Roll by combat value (1s first, then 2s…); the attacker rolls everything before the defender. Resolve rerolls and die-affecting abilities right after rolling all your dice.</li>" +
       "<li><b>Assign hits</b> — each player chooses and destroys one of their own ships per hit scored against them; <b>Sustain Damage</b> may cancel hits first.</li>" +
       "<li><b>Retreat</b> — a player who announced a retreat (and still has an eligible system) must retreat: move all their ships that have a move value to <b>one adjacent system</b> that contains their units and/or a planet they control and <b>no other player’s ships</b>. Retreating ships may transport fighters and ground forces up to their capacity — including ground forces picked up from planets in the active system. Fighters and ground forces that can’t move or be transported are removed. Place a command token from reinforcements in that system (from your command sheet if you have none; none if one is already there). If the opponent has no ships left, the combat simply ends.</li></ol>" +
       "<ul><li>While both players still have ships, repeat from <b>Announce retreats</b>. The player with ships left is the <b>winner</b>; if neither has any, it is a draw. The winner then removes fighters and ground forces beyond their ships’ capacity.</li>" +
@@ -641,7 +657,7 @@ TI.reference = [
       "<li>If neither side can possibly win (e.g. certain Non-Euclidean Shielding and Duranium Armor combinations), the attacker must retreat; if they can’t, their units in the combat are destroyed.</li>" +
       "<li>“Start of combat” and “start of combat round” effects share a window in round 1; “end of combat” and “end of combat round” share one in the last round.</li>" +
       "<li><b>Opponent:</b> the other player who had ships in the system at the start of the space combat (or ground forces on the planet at the start of a ground combat). Players with no units on either side aren’t opponents — they can’t use abilities that work against an opponent, or be targeted by them.</li></ul>",
-    src: (c) => TI.cite(c, ["spacecombat", "afb", "sustain", "rerolls", "attacker", "defender", "opponent", "transport"], ["LRR FAQ p.40–41"].concat(c.has("codex1") ? ["Codex I p.14"] : []).concat(["Wiki FAQ (Units & Unit Abilities)"]))
+    src: (c) => TI.cite(c, ["spacecombat", "afb", "sustain", "rerolls", "attacker", "defender", "opponent", "transport"], (c.mode === "firstgame" ? [] : ["LtP p.14"]).concat(["LRR FAQ p.40–41"]).concat(c.has("codex1") ? ["Codex I p.14"] : []).concat(["Wiki FAQ (Units & Unit Abilities)"]))
   },
   {
     id: "ref-invasion", title: "Invasion & ground combat (incl. bombardment and the custodians)", when: () => true,
@@ -658,14 +674,14 @@ TI.reference = [
   {
     id: "ref-production", title: "Producing units, blockades & reinforcements", when: () => true,
     html: (c) => "<ul><li>In the Production step you may use the <b>Production</b> ability of each of your units in the active system; a unit’s Production value is the most units it can produce, and values in the same system add up. Space dock: Production = the planet’s resource value + 2.</li>" +
-      "<li>Pay resources equal to or above the <b>cost</b> — you may total the cost of everything you’re producing first; excess is lost. A cost with two icons (fighters, infantry) buys two units, and each counts toward the production limit; you may take just one but still pay the full cost.</li>" +
+      "<li>Pay resources equal to or above the <b>cost</b> — you may total the cost of everything you’re producing first; excess is lost. A cost with two " + TI.ici("two-unit-icons", "Two unit icons", "icons") + " (fighters, infantry) buys two units, and each counts toward the production limit; you may take just one but still pay the full cost.</li>" +
       "<li><b>Ships</b> are placed in the active system; <b>ground forces</b> on the planet whose unit produced them (a unit producing from the space area may put them on a planet you control in that system, or in space).</li>" +
       "<li><b>Blockade:</b> a Production unit in a system that has other players’ ships and none of yours is blockaded — it can’t produce ships (ground forces are fine). You can’t produce ships in a system containing other players’ ships.</li>" +
       "<li><b>Reinforcements are limited</b> to the plastic in your color. If none of a unit is left, you may remove that unit from any system without your command token and produce it immediately. Fighters and infantry can use tokens from the supply — each token must be accompanied by at least one plastic piece of that type, or it is replaced (or destroyed if you can’t).</li>" +
       "<li class=\"note flag\"><b>Sources disagree.</b> LRR §36.3a and §46.3a — followed here — say a fighter or infantry token that can’t be replaced with a plastic piece is <b>destroyed</b>. The TI4 Wiki FAQ (Excess Fighters/Infantry) reports an official answer that such unaccompanied tokens are <b>removed</b>, not destroyed.</li>" +
       "<li>Producing through an ability other than Production: the ability says how many and where; you can’t produce on a planet you don’t control, and you must still pay." + (TI.isTF(c) ? "" : " “Sarween Tools” applies only to the Production ability.") + "</li>" +
       "<li><b>Structures</b> (PDS, space docks) have no cost — they are placed" + (TI.isTF(c) ? " by card effects" : ", mostly with the Construction card") + ": at most <b>1 space dock</b> and <b>2 PDS</b> per planet; they can’t move.</li></ul>",
-    src: (c) => TI.cite(c, ["producing", "production", "blockaded", "cost", "limits", "fightertokens", "infantrytokens", "structures", "spacedock"], ["LRR FAQ p.41", "faction sheet “Space Dock I” (shown LtP p.6)", "Wiki FAQ (Excess Fighters/Infantry)"].concat(TI.isTF(c) ? ["TF p.6"] : []))
+    src: (c) => TI.cite(c, ["producing", "production", "blockaded", "cost", "limits", "fightertokens", "infantrytokens", "structures", "spacedock"], (c.mode === "firstgame" ? [] : ["LtP p.16"]).concat(["LRR FAQ p.41", "faction sheet “Space Dock I” (shown LtP p.6)", "Wiki FAQ (Excess Fighters/Infantry)"]).concat(TI.isTF(c) ? ["TF p.6"] : []))
   },
   {
     id: "ref-units", title: "Units at a glance", when: () => true,
@@ -690,8 +706,8 @@ TI.reference = [
       "<li><b>Component limits:</b> units are limited to the plastic in the game, except fighters and ground forces; control, trade good, fighter and infantry tokens may be substituted with coins or beads if they run out; other tokens are limited; dice are unlimited; when a deck runs out, shuffle its discard pile.</li>" +
       (TI.isTF(c) ? "<li><b>Unit upgrades (Twilight’s Fall):</b> unit upgrade splice cards are placed over a unit on your King’s sheet and count as unit upgrade technologies with no color. Gain a second one for the same slot and you keep one and discard the other — except mechs, which can have several.</li>" :
         "<li><b>Unit upgrades:</b> place the upgrade card over the unit on your faction sheet; from then on all those units use its values. White arrows on the sheet mark the values that improve." + (c.has("pok") ? " Mech unit cards are not technologies." : "") + "</li>") +
-      "<li><b>Combat X with burst icons:</b> roll one die per burst icon.</li></ul>",
-    src: (c) => TI.cite(c, ["units", "ships", "groundforces", "structures", "limits", "upgrades", "combat"].concat(c.has("pok") ? ["mechs"] : []), TI.isTF(c) ? ["King faction sheets (shown TF p.6–7)", "TF p.9"] : ["faction sheet (shown LtP p.6)"])
+      "<li><b>Combat X with burst</b> " + TI.ici("burst-icons", "Two burst icons", "<b>icons</b>", ":") + " roll one die per burst icon.</li></ul>",
+    src: (c) => TI.cite(c, ["units", "ships", "groundforces", "structures", "limits", "upgrades", "combat"].concat(c.has("pok") ? ["mechs"] : []), (TI.isTF(c) ? ["King faction sheets (shown TF p.6–7)", "TF p.9"] : ["faction sheet (shown LtP p.6)"]).concat(c.mode === "firstgame" ? [] : ["LtP p.14 (burst icons)"]))
   },
   {
     id: "ref-economy", title: "Planets, resources, influence, trade goods & commodities", when: () => true,
@@ -718,7 +734,9 @@ TI.reference = [
   {
     id: "ref-tech", title: "Technology", when: (c) => !TI.isTF(c),
     html: (c) => "<ul><li>Research with the <b>Technology</b> strategy card (primary: 1 free + 1 more for 6 resources; secondary: 1 strategy token + 4 resources) or other effects: take the card from your technology deck and place it faceup; you own it for the rest of the game. You can look through your deck at any time.</li>" +
-      "<li><b>Prerequisites:</b> the colored symbols in a card’s lower-left corner — for each, you must own a technology of that color. Colors: <b>Biotic</b> (green), <b>Warfare</b> (red), <b>Propulsion</b> (blue), <b>Cybernetic</b> (yellow); a technology’s own color is in its lower-right corner.</li>" +
+      "<li><b>Prerequisites:</b> the colored symbols in a card’s lower-left corner — for each, you must own a technology of that color; a technology’s own color is in its lower-right corner. The four colors:" +
+      "<p class=\"aid-icon-row\">" + TI.icPair("tech-biotic", "Biotic", "<b>Biotic</b> (green)") + " " + TI.icPair("tech-warfare", "Warfare", "<b>Warfare</b> (red)") + " " +
+      TI.icPair("tech-propulsion", "Propulsion", "<b>Propulsion</b> (blue)") + " " + TI.icPair("tech-cybernetic", "Cybernetic", "<b>Cybernetic</b> (yellow)") + "</p></li>" +
       "<li><b>Unit upgrades</b> have no color and don’t satisfy prerequisites.</li>" +
       "<li><b>Technology specialty:</b> exhaust a planet with that symbol to ignore one prerequisite of the matching color — but an exhausted planet can’t be used this way, and a planet exhausted for its specialty can’t also pay resources.</li>" +
       "<li>You can’t research another faction’s faction technology.</li>" +
@@ -846,19 +864,19 @@ TI.reference = [
   {
     id: "ref-explore", title: "Exploration, frontier tokens, attachments & relics (PoK)", when: (c) => c.has("pok"),
     html: (c) => "<h4>Exploring planets</h4><ul>" +
-      "<li>When you gain control of a planet that <b>isn’t already controlled by another player</b>, explore it: draw the top card of the exploration deck matching its <b>trait</b> — cultural, hazardous or industrial — and resolve it. A planet with several traits: choose the deck. Planets without a trait (Mecatol Rex, home planets) can’t be explored.</li>" +
+      "<li>When you gain control of a planet that <b>isn’t already controlled by another player</b>, explore it: draw the top card of the exploration deck matching its <b>trait</b> — " + TI.ici("trait-cultural", "Cultural", "", " cultural,") + " " + TI.ici("trait-hazardous", "Hazardous", "", " hazardous") + " or " + TI.ici("trait-industrial", "Industrial", "", " industrial") + " — and resolve it. A planet with several traits: choose the deck. Planets without a trait (Mecatol Rex, home planets) can’t be explored.</li>" +
       "<li>Gaining several planets at once: choose an order and fully resolve each — gain A, explore A, gain B, explore B (Wiki FAQ). Transactions may happen after a card is revealed and before it resolves, but no other abilities can be used until it has resolved (Wiki FAQ).</li>" +
       "<li>After resolving, discard the card — unless it is a <b>relic fragment</b> or has an <b>Attach</b> header. An empty exploration deck is reshuffled from its discards.</li></ul>" +
       "<h4>Attachments</h4><ul><li>An “Attach” card goes partly under the explored planet’s card and its matching token goes on the planet; it changes the planet’s values/abilities and stays with the planet (and its ready state) when control changes. If the planet card is purged, its attachments are purged too.</li></ul>" +
-      "<h4>Frontier tokens</h4><ul><li>Placed at setup in every non-home system without planets, anomalies included (never on hyperlanes; 1 per system). You can explore a frontier token only " + (TI.isTF(c) ? "when a card lets you (Twilight’s Fall uses no technology deck)" : "with the <b>Dark Energy Tap</b> technology or an ability that says so") + ": draw from the <b>frontier deck</b>, then discard the token.</li></ul>" +
+      "<h4>Frontier tokens</h4><ul><li>Placed at setup in every non-home system without planets, anomalies included (never on hyperlanes; 1 per system). You can explore a frontier " + TI.ici("frontier-token", "Frontier token", "token") + " only " + (TI.isTF(c) ? "when a card lets you (Twilight’s Fall uses no technology deck)" : "with the <b>Dark Energy Tap</b> technology or an ability that says so") + ": draw from the <b>frontier deck</b>, then discard the token.</li></ul>" +
       "<h4>Relic fragments &amp; relics</h4><ul>" +
       "<li>Relic fragments stay faceup in your play area; their abilities (e.g. <b>purge 3 fragments of the same type to gain 1 relic</b>) let you draw relics. Fragments <b>can</b> be traded in transactions." + (TI.geEvent(c, "ageOfExploration") ? " <b>Age of Exploration</b> (galactic event): a relic needs only <b>2</b> matching fragments (Codex IV p.16)." : "") + "</li>" +
       "<li>Gaining a relic: draw the top card of the relic deck and place it faceup — if the deck is empty you gain nothing (you may still purge fragments — Wiki FAQ). Use its ability as written. Relics <b>can’t</b> be traded.</li></ul>",
-    src: (c) => TI.cite(c, ["exploration", "attach", "frontier", "relics"], ["PoK p.11, p.16", "Wiki FAQ (Exploration)"].concat(TI.isTF(c) ? ["TF p.6, p.10"] : []).concat(TI.geEvent(c, "ageOfExploration") ? ["Codex IV p.16"] : []))
+    src: (c) => TI.cite(c, ["exploration", "attach", "frontier", "relics"], ["PoK p.8, p.11, p.16", "Wiki FAQ (Exploration)"].concat(TI.isTF(c) ? ["TF p.6, p.10"] : []).concat(TI.geEvent(c, "ageOfExploration") ? ["Codex IV p.16"] : []))
   },
   {
     id: "ref-legendary", title: "Legendary planets, capture & purge (PoK)", when: (c) => c.has("pok"),
-    html: () => "<h4>Legendary planets</h4><ul><li>Marked with the legendary icon. Gaining control of one also gives you its <b>legendary planet ability card</b> — readied if taken from the deck, in its current state if taken from a player. Prophecy of Kings’ legendary planet abilities are used at the end of your turn (the card is exhausted to use it). If the planet card is purged, the ability card is purged too.</li></ul>" +
+    html: () => "<h4>Legendary planets</h4><ul><li>Marked with the legendary " + TI.ici("legendary-planet", "Legendary planet icon", "icon", ".") + " Gaining control of one also gives you its <b>legendary planet ability card</b> — readied if taken from the deck, in its current state if taken from a player. Prophecy of Kings’ legendary planet abilities are used at the end of your turn (the card is exhausted to use it). If the planet card is purged, the ability card is purged too.</li></ul>" +
       "<h4>Capture</h4><ul>" +
       "<li><b>Non-fighter ships and mechs</b> you capture go on your faction sheet. They return to their owner’s reinforcements only if you return them in a transaction, if an ability makes you return them (usually as a cost), or if their owner <b>blockades one of your space docks</b>.</li>" +
       "<li><b>Fighters and infantry</b> you capture go back to their owner’s reinforcements; you put a matching token from the supply on your sheet instead. Those tokens belong to no one: they can’t be traded or returned by a blockade, and go back to the supply only when an ability says so.</li>" +

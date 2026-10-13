@@ -185,6 +185,7 @@ function buildHowToPlay(c) {
   };
   // An item may carry a nested list: { t, sub: [...], num: true } renders the
   // sub-entries as a numbered (num) or bulleted sequence under the lead-in.
+  // `ics` = a rulebook-icon row or grid (RL.icRow / RL.icGrid) shown under the text.
   const subList = i => {
     if (!i.sub) return "";
     const entries = i.sub
@@ -198,7 +199,7 @@ function buildHowToPlay(c) {
       .filter(i => typeof i === "string" || !i.when || i.when(c))
       .map(i => typeof i === "string"
         ? `<li>${i}</li>`
-        : `<li>${i.tag ? tagHtml(i.tag) : ""}${i.t}${i.src ? ` <span class="htp-src">${i.src}</span>` : ""}${subList(i)}</li>`)
+        : `<li>${i.tag ? tagHtml(i.tag) : ""}${i.t}${i.src ? ` <span class="htp-src">${i.src}</span>` : ""}${i.ics || ""}${subList(i)}</li>`)
       .join("");
     const head = (tag ? tagHtml(tag) : "") + title;
     return lis ? `<section class="htp-sec ${cls}"><h5>${head}</h5><ul>${lis}</ul></section>` : "";
@@ -219,12 +220,20 @@ function buildHowToPlay(c) {
 
 /* ---- Boards & spaces reference -------------------------------------------- */
 function buildBoards(c) {
+  // Items: string, or { t, when?, src?, ic?, alt? }. Consecutive items with an `ic`
+  // (a rulebook icon, e.g. a Threat deck's card back) render as an icon list.
+  const text = i => typeof i === "string" ? i : i.t + (i.src ? ` <span class="htp-src">${i.src}</span>` : "");
   let blocks = "";
   RL.boards.filter(b => b.when(c)).forEach(b => {
-    blocks += `<section class="loc-board"><h5>${b.name}</h5><ul>${
-      b.items.filter(i => typeof i === "string" || !i.when || i.when(c))
-        .map(i => `<li>${typeof i === "string" ? i : i.t}</li>`).join("")
-    }</ul></section>`;
+    const runs = [];
+    b.items.filter(i => typeof i === "string" || !i.when || i.when(c)).forEach(i => {
+      const icon = typeof i === "object" && !!i.ic;
+      if (!runs.length || runs[runs.length - 1].icon !== icon) runs.push({ icon, items: [] });
+      runs[runs.length - 1].items.push(i);
+    });
+    blocks += `<section class="loc-board"><h5>${b.name}</h5>${runs.map(r => r.icon
+      ? `<ul class="aid-icons">${r.items.map(i => `<li><img class="aid-ic" src="${i.ic}" alt="${i.alt}"><span>${text(i)}</span></li>`).join("")}</ul>`
+      : `<ul>${r.items.map(i => `<li>${text(i)}</li>`).join("")}</ul>`).join("")}</section>`;
   });
   return `<div class="locations"><h3>Boards & Notable Spaces</h3>
       <div class="legend">The tiers, areas and key spaces on your table — where to buy wargear and Power cards, shed Corruption, respawn, and cross between tiers.</div>

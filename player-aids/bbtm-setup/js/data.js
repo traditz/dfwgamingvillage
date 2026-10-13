@@ -8,6 +8,17 @@
    ============================================================================= */
 const BBTM = {};
 
+/* Rulebook icons (images/icons/*.webp, cropped from the rulebooks; DFWGV icons standard, tools\icons).
+   Every call names its file in full, e.g. BBTM.ic.inl("die-tackler-down", "Tackler Down").
+   Used by the Game Reference and by the team special rules on the Teams & Leagues tab. */
+BBTM.ic = {
+  inl: (f, alt) => `<img class="aid-ic aid-ic-inline" src="images/icons/${f}.webp" alt="${alt}" title="${alt}">`,
+  img: (f, alt) => `<img class="aid-ic" src="images/icons/${f}.webp" alt="${alt}" title="${alt}">`,
+  fig: (f, alt, cap) => `<figure><img class="aid-ic" src="images/icons/${f}.webp" alt="${alt}" title="${alt}"><figcaption>${cap}</figcaption></figure>`,
+  pair:(f, name, alt = name) => `<span class="aid-pair"><img class="aid-ic" src="images/icons/${f}.webp" alt="${alt}" title="${alt}"><span>${name}</span></span>`,
+  li:  (f, name, text) => `<li><img class="aid-ic" src="images/icons/${f}.webp" alt="${name}" title="${name}"><span><b>${name}</b> — ${text}</span></li>`
+};
+
 /* ---- Content sources (expansions / modules) ------------------------------ */
 BBTM.sources = {
   core:      { id:"core",      name:"Core Box",          short:"Core", cls:"src-core", always:true,
@@ -106,13 +117,15 @@ BBTM.teams = [
     difficulty:"Low", style:"Versatile", since:"2380", location:"Naggarond",
     stadium:"Unknown", coach:"Duriath Helblade",
     blurb:"More aggressive than their Elven cousins. Merciless players who always look to exploit an opponent’s weakness and find the quickest path to victory — even if it means eviscerating the competition. Versatility and brutality, plain and simple.",
-    special:[{name:"Regeneration & Downed skills",text:"Sudden Death’s Regeneration downed skill reflects the DSS teams’ tenacity (roll 2 dice; on a ✖ result — the Tackler-Down face — you may stand the player); downed skills resolve the moment a player is downed."}],
+    special:[{name:"Regeneration & Downed skills",text:"Sudden Death’s Regeneration downed skill reflects the DSS teams’ tenacity (roll 2 dice; on a Tackler Down result you may stand the player); downed skills resolve the moment a player is downed.",
+      html:`Sudden Death’s Regeneration downed skill reflects the DSS teams’ tenacity (roll 2 dice; on a ${BBTM.ic.inl("die-tackler-down", "Tackler Down")} Tackler Down result you may stand the player); downed skills resolve the moment a player is downed.`}],
     stars:["Asperon Thorn","Arkhul Blackhand","Meriann Lightning"] },
   { id:"champions-of-death", league:"dss", name:"Champions of Death", race:"Undead",
     difficulty:"Low", style:"Regeneration", since:"2439", location:"Underearth",
     stadium:"Pain Park, Underearth", coach:"Tomolandry the Undying",
     blurb:"Not even mortality can stand between an Undead player and the pitch. Zombies and Skeletons aren’t durable, but they survive nearly any beating and come back for more — and woe to anyone facing a Mummy or Wight.",
-    special:[{name:"Regeneration & Downed skills",text:"Listed style: Regeneration. An optional downed skill, never used on commit: roll 2 dice and choose one; applying a ✖ result (the Tackler-Down face) lets you return the player to standing. Resolve it left to right in sequence with the player’s other downed skills. If he stands, his later downed skills are not used and his standing skills are ignored (Sudden Death p.3)."}],
+    special:[{name:"Regeneration & Downed skills",text:"Listed style: Regeneration. An optional downed skill, never used on commit: roll 2 dice and choose one; applying a Tackler Down result lets you return the player to standing. Resolve it left to right in sequence with the player’s other downed skills. If he stands, his later downed skills are not used and his standing skills are ignored (Sudden Death p.3).",
+      html:`Listed style: Regeneration. An optional downed skill, never used on commit: roll 2 dice and choose one; applying a ${BBTM.ic.inl("die-tackler-down", "Tackler Down")} Tackler Down result lets you return the player to standing. Resolve it left to right in sequence with the player’s other downed skills. If he stands, his later downed skills are not used and his standing skills are ignored (Sudden Death p.3).`}],
     stars:["G’Ral Blodschüker","Skrull Halfheight","Throttlesnot «The Impaler»"] },
 
   /* PPG — Putrid Players’ Guild (Foul Play) */
@@ -202,7 +215,10 @@ BBTM.teams = [
     difficulty:"High", style:"Synergy / Food Tokens", since:"2465", location:"Greenfield",
     stadium:"Dinner Dome", coach:"Hungry Draco",
     blurb:"The Halflings began to take themselves more seriously, training for the pitch as well as the buffet table. In 2476 they became the first (and only) team to score two touchdowns without the ball touching the ground.",
-    special:[{name:"Food tokens",text:"During Maintenance, 15 Food tokens are mixed face-down into a pool. When an effect assigns a Food token, draw one at random, place it as instructed and reveal it — 6× give +1 Star Power, 2× give +2, 2× reduce power by 2 (min 0), 3× grant an immediate fan, 2× do nothing. If the pool is empty when a Food token would be assigned, ignore that ability. The effect lasts until the Scoreboard phase; a power-boosting token works whether the player is standing or downed; an injured player returns the token to the pool (re-mix it face-down)."}],
+    special:[{name:"Food tokens",text:"During Maintenance, 15 Food tokens are mixed face-down into a pool. When an effect assigns a Food token, draw one at random, place it as instructed and reveal it — 6× give +1 Star Power, 2× give +2, 2× reduce power by 2 (min 0), 3× grant an immediate fan, 2× do nothing. If the pool is empty when a Food token would be assigned, ignore that ability. The effect lasts until the Scoreboard phase; a power-boosting token works whether the player is standing or downed; an injured player returns the token to the pool (re-mix it face-down).",
+      html:`During Maintenance, 15 Food tokens are mixed face-down into a pool. When an effect assigns a Food token, draw one at random, place it as instructed and reveal it (Legendary p.30):
+        <div class="aid-icon-grid sp-grid">${BBTM.ic.fig("food-fan", "Food token: Fan", "×3 · gain 1 fan immediately")}${BBTM.ic.fig("food-nothing", "Food token: 0", "×2 · nothing happens")}${BBTM.ic.fig("food-plus-1", "Food token: +1", "×6 · Star Power +1")}${BBTM.ic.fig("food-plus-2", "Food token: +2", "×2 · Star Power +2")}${BBTM.ic.fig("food-minus-2", "Food token: −2", "×2 · Star Power −2 (min 0)")}</div>
+        If the pool is empty when a Food token would be assigned, ignore that ability. The effect lasts until the Scoreboard phase; a power-boosting token works whether the player is standing or downed; an injured player returns the token to the pool (re-mix it face-down).`}],
     stars:["Jingo Merrychap","«Big» Jobo Hairyfeet"] },
 
   /* TCD — Tomb Crushers Division (Legendary) */
@@ -212,19 +228,28 @@ BBTM.teams = [
     blurb:"The oldest team on the circuit — it is said some of its players were already there for their first game. The Khemri are tenacious, and they don’t like to die: it annoys them. A curse follows them, though no one yet knows whom it concerns.",
     special:[
       {name:"Immortality",text:"The Tomb Prince’s “Immortal” ability prevents him from being downed or injured by any effect — his manager may ignore any tackle, team upgrade or staff upgrade that would down him or remove him from play."},
-      {name:"Pharaoh skill",text:"An exclusive skill: once a player with the Pharaoh skill is committed to a matchup, friendly players committed there afterwards may use their Pharaoh abilities (e.g. a Thro-Ra committed after the Tomb Prince can Pass and also Sprint)."}],
+      {name:"Pharaoh skill",text:"An exclusive skill: once a player with the Pharaoh skill is committed to a matchup, friendly players committed there afterwards may use their Pharaoh abilities (e.g. a Thro-Ra committed after the Tomb Prince can Pass and also Sprint).",
+       html:`An exclusive skill, and the abilities it unlocks (Legendary p.34):
+        <ul class="aid-icons">${BBTM.ic.li("skill-pharaoh", "Pharaoh skill", "once a player with the Pharaoh skill is committed to a matchup, friendly players committed there afterwards may use their Pharaoh abilities.")}${BBTM.ic.li("pharaoh-ability", "Pharaoh ability", "marks a “When you commit this player to a matchup” ability; the player can use it when committed to a matchup where a Pharaoh skill is present.")}</ul>
+        E.g. a Thro-Ra committed after the Tomb Prince can Pass and also Sprint.`}],
     stars:["Setekh","Ramtut III","Ithaca Benoin","Sinnedbad"] },
   { id:"underworld-creepers", league:"tcd", name:"Underworld Creepers", race:"Underworld",
     difficulty:"Very High", style:"Synergy / Warpstone", since:"2440", location:"Naggaroth",
     stadium:"Underworld Coliseum", coach:"Lance Fleshbarb",
     blurb:"An alliance of Goblins and Skaven that triggers an absolute health emergency. They can’t agree for more than ten minutes except to collect Warpstone — and they’ve won the prize for ‘team that killed the most of its own players’ 14 times in 20 years.",
-    special:[{name:"Warpstone fragments",text:"Players come into play with Warpstone fragments. A player’s green Warpstone value adds to the matchup’s Warpstone total as long as he stays committed there, standing or downed. An ability marked with a black Warpstone icon is active only while the matchup’s total is equal to or greater than the number in the icon (an “X” icon means any amount). A grey Warpstone value is the total needed to activate that player’s downed skills."}],
+    special:[{name:"Warpstone fragments",text:"Players come into play with Warpstone fragments. A player’s green Warpstone value adds to the matchup’s Warpstone total as long as he stays committed there, standing or downed. An ability marked with a black Warpstone icon is active only while the matchup’s total is equal to or greater than the number in the icon (an “X” icon means any amount). A grey Warpstone value is the total needed to activate that player’s downed skills.",
+      html:`Players come into play with Warpstone fragments (Legendary pp.35–36):
+        <ul class="aid-icons">${BBTM.ic.li("warpstone-value", "Green Warpstone value", "added to the matchup’s Warpstone total as long as the player stays committed there, standing or downed.")}${BBTM.ic.li("warpstone-downed", "Grey Warpstone value", "the Warpstone total needed to activate that player’s downed skills.")}${BBTM.ic.li("warpstone-3", "Black Warpstone icon", "an ability marked with it is active only while the matchup’s Warpstone total is equal to or greater than the number in the icon.")}${BBTM.ic.li("warpstone-x", "“X” Warpstone icon", "any amount of Warpstone.")}</ul>`}],
     stars:["Split Tendoncutter","Garbage Throttlesnot","Grograt Crunchskull","Rasta Tailspike"] },
   { id:"bruendar-grimjacks", league:"tcd", name:"Bruendar Grimjacks", race:"Necromantic",
     difficulty:"Very High", style:"Synergy / Moon Phase", since:"Unknown", location:"Unknown",
     stadium:"The Graveyard", coach:"Unknown",
     blurb:"Creatures of the night under a Necromancer’s orders — they tend to howl at the moon if a match drags on, and often field around 180 (pieces of) players per game.",
-    special:[{name:"Moon phases",text:"A two-sided Moon Phases card starts each week on the Morrslieb side. Morrslieb activates only dark-background Morrslieb abilities; Mannslieb activates only Mannslieb abilities. The mandatory ‘Moon Phase change’ skill is always resolved last (only if the player is still standing) and sets the card to the side its icon shows."}],
+    special:[{name:"Moon phases",text:"A two-sided Moon Phases card starts each week on the Morrslieb side. Morrslieb activates only dark-background Morrslieb abilities; Mannslieb activates only Mannslieb abilities. The mandatory ‘Moon Phase change’ skill is always resolved last (only if the player is still standing) and sets the card to the side its icon shows.",
+      html:`A two-sided Moon Phases card starts each week on the Morrslieb side (Legendary pp.37–38):
+        <ul class="aid-icons">${BBTM.ic.li("moon-morrslieb", "Morrslieb", "activates only Morrslieb abilities (this icon precedes them, on a black background). The starting phase each week.")}${BBTM.ic.li("moon-mannslieb", "Mannslieb", "activates only Mannslieb abilities (this icon precedes them, on a normal background).")}</ul>
+        The mandatory ‘Moon Phase change’ skill is always resolved last (only if the player is still standing) and sets the card to the side its icon shows:
+        <ul class="aid-icons">${BBTM.ic.li("moon-change-morrslieb", "Moon Phase change: Morrslieb", "set the Moon Phases card on its Morrslieb side.")}${BBTM.ic.li("moon-change-mannslieb", "Moon Phase change: Mannslieb", "set the Moon Phases card on its Mannslieb side.")}</ul>`}],
     stars:["Frank N. Stein","Helmut Wulf","Slarga Foulstrike","G’Ral Blödschuker"] },
 
   /* FFS — Foul Fiends Syndicate (Legendary) */
@@ -253,7 +278,8 @@ BBTM.teams = [
     difficulty:"High", style:"Synergy / Chomp Tokens", since:"2435", location:"Orcland",
     stadium:"Skull Stadium", coach:"Cruel-Eye",
     blurb:"An impressive track record on the NFC Championship and an equally impressive history. Saved from bankruptcy when King Ironclaw of Orcland bought the team and hired Ogre ex-torturer Cruel-Eye to ready them for strong competition.",
-    special:[{name:"Chomp! tokens",text:"During Maintenance, place the 3 “Chomp!” tokens (one each for Tackle, Pass and Sprint) in front of you. When a card effect assigns a Chomp! token to a matchup, you must place the matching token there if it is available. It cancels the next use of that skill by an opponent: once an opposing player with that skill symbol is committed to the matchup, he can’t use that skill and the token is discarded (unavailable) until the end of the Scoreboard phase. Take all 3 back during Maintenance."}],
+    special:[{name:"Chomp! tokens",text:"During Maintenance, place the 3 “Chomp!” tokens (one each for Tackle, Pass and Sprint) in front of you. When a card effect assigns a Chomp! token to a matchup, you must place the matching token there if it is available. It cancels the next use of that skill by an opponent: once an opposing player with that skill symbol is committed to the matchup, he can’t use that skill and the token is discarded (unavailable) until the end of the Scoreboard phase. Take all 3 back during Maintenance.",
+      icons:`<p class="aid-icon-row sp-row"><span>The tokens (Legendary p.45):</span>${BBTM.ic.pair("chomp-tackle", "Tackle", "Tackle Chomp! token")}${BBTM.ic.pair("chomp-pass", "Pass", "Pass Chomp! token")}${BBTM.ic.pair("chomp-sprint", "Sprint", "Sprint Chomp! token")}</p>`}],
     stars:["Gorbag «Rabid» Foamface","Ugar Rancid","Grishnak Lancegobelin"] },
   { id:"evil-gitz", league:"naf", name:"Evil Gitz", race:"Goblins / Squigs",
     difficulty:"High", style:"Giant Squig / Ingested players", since:"2450", location:"Unknown",
@@ -267,7 +293,10 @@ BBTM.teams = [
     difficulty:"High", style:"Synergy", since:"2494", location:"Bögenhafen",
     stadium:"Bögenhafen Stadium", coach:"Tobias Rheinlich",
     blurb:"Founded only six years ago by lifelong fan Dietrich Lugendörf, yet already a powerhouse of the Nobility leagues — a huge stadium, a roster of the best players money can buy, and a feverishly devoted fanbase.",
-    special:[{name:"Banner tokens",text:"During Maintenance, place the 3 Banner tokens in front of you. When a card effect assigns a Banner to a matchup, you may place that Banner there if it is available. It affects all friendly players committed to that matchup: Banner of Glory (you gain 1 Fan during the Scoreboard phase), Banner of Prestige (they gain Stand Firm), Banner of Strength (+1 Star Power). Once assigned to a matchup, a Banner can only be moved or discarded by Team Upgrade cards."}],
+    special:[{name:"Banner tokens",text:"During Maintenance, place the 3 Banner tokens in front of you. When a card effect assigns a Banner to a matchup, you may place that Banner there if it is available. It affects all friendly players committed to that matchup: Banner of Glory (you gain 1 Fan during the Scoreboard phase), Banner of Prestige (they gain Stand Firm: while this player is the ball carrier, opposing players cannot tackle him), Banner of Strength (+1 Star Power). Once assigned to a matchup, a Banner can only be moved or discarded by Team Upgrade cards.",
+      html:`During Maintenance, place the 3 Banner tokens in front of you. When a card effect assigns a Banner to a matchup, you may place that Banner there if it is available. It affects all friendly players committed to that matchup (Legendary p.46):
+        <ul class="aid-icons">${BBTM.ic.li("banner-glory", "Banner of Glory", "you gain 1 Fan during the Scoreboard phase.")}${BBTM.ic.li("banner-prestige", "Banner of Prestige", "they gain Stand Firm (while this player is the ball carrier, opposing players cannot tackle him).")}${BBTM.ic.li("banner-strength", "Banner of Strength", "they increase their Star Power by 1.")}</ul>
+        Once assigned to a matchup, a Banner can only be moved or discarded by Team Upgrade cards.`}],
     stars:["Griff Oberwald","Lietpold Hegunden","Jorge Bergen"] }
 ];
 
@@ -428,6 +457,7 @@ BBTM.setupCallouts = [
 /* =============================================================================
    GAME REFERENCE
    ============================================================================= */
+
 BBTM.reference = {
   rounds: {
     id:"sec-round", title:"The Game Round",
@@ -457,14 +487,14 @@ BBTM.reference = {
 
   skills: {
     id:"sec-skills", title:"Skills",
-    intro:"Skills are the icons between a player’s art and text box, used left-to-right when the player is committed. Cheating is mandatory; everything else is optional. A skill must be fully resolved before the next.",
+    intro:"Skills are the icons between a player’s art and text box, used left-to-right when the player is committed. Cheating is mandatory; everything else is optional. A skill must be fully resolved before the next. (Rulebook p.10–11, p.20 · Sudden Death p.3 · Foul Play p.2)",
     items:[
-      { k:"Cheating", icon:"cheating", tag:"core", t:"Mandatory. For each icon, draw one random cheating token from the pool and place it facedown (skull-up) on the player. Tokens are revealed and resolved in the Scoreboard phase." },
-      { k:"Passing", icon:"passing", tag:"core", t:"Optional. Take the ball if it’s at midfield; if an opponent is the ball carrier, move it to midfield; if a teammate holds it, you may take it or leave it. Extra pass icons on a player who already carries the ball are ignored. The carrier adds +2 Star Power to their team." },
-      { k:"Sprinting", icon:"sprinting", tag:"core", t:"Optional. For each icon, draw the top card of your Team deck, then discard one card from your hand (it may be the one just drawn)." },
-      { k:"Tackling", icon:"tackling", tag:"core", t:"Optional. For each icon, attempt one tackle against an opposing player at the matchup (see Tackle Outcomes). Multiple icons resolve separately." },
-      { k:"Regeneration", icon:"regeneration", tag:"sudden", t:"Optional downed skill (Sudden Death p.3 · Foul Play p.2); never used when the player is committed. On a downed player, roll 2 dice and choose one; a ✖ result (the Tackler-Down face) lets you return the player to standing — all other results are ignored. Resolve it in sequence (left to right) with the player’s other downed skills; if he stands, any downed skills after it are not used and his standing skills are ignored. Also part of Foul Play, so it applies with either expansion." },
-      { k:"Fouling", icon:"fouling", tag:"foul", t:"Optional (Foul Play p.2). Choose an opposing manager at the matchup and randomly take one card from their hand; secretly look, then either return it or discard it (they then draw one). Needs an opponent at the matchup." }
+      { k:"Cheating", icon:"skill-cheating", tag:"core", t:"Mandatory. For each icon, draw one random cheating token from the pool and place it facedown (skull-up) on the player. Tokens are revealed and resolved in the Scoreboard phase." },
+      { k:"Passing", icon:"skill-passing", tag:"core", t:"Optional. Take the ball if it’s at midfield; if an opponent is the ball carrier, move it to midfield; if a teammate holds it, you may take it or leave it. Extra pass icons on a player who already carries the ball are ignored. The carrier adds +2 Star Power to their team." },
+      { k:"Sprinting", icon:"skill-sprinting", tag:"core", t:"Optional. For each icon, draw the top card of your Team deck, then discard one card from your hand (it may be the one just drawn)." },
+      { k:"Tackling", icon:"skill-tackling", tag:"core", t:"Optional. For each icon, attempt one tackle against an opposing player at the matchup (see Tackle Outcomes). Multiple icons resolve separately." },
+      { k:"Regeneration", icon:"skill-regeneration", tag:"sudden", t:`Optional downed skill (Sudden Death p.3 · Foul Play p.2); never used when the player is committed. On a downed player, roll 2 dice and choose one; a ${BBTM.ic.inl("die-tackler-down", "Tackler Down")} Tackler Down result lets you return the player to standing — all other results are ignored. Resolve it in sequence (left to right) with the player’s other downed skills; if he stands, any downed skills after it are not used and his standing skills are ignored. Also part of Foul Play, so it applies with either expansion.` },
+      { k:"Fouling", icon:"skill-fouling", tag:"foul", t:"Optional (Foul Play p.2). Choose an opposing manager at the matchup and randomly take one card from their hand; secretly look, then either return it or discard it (they then draw one). Needs an opponent at the matchup." }
     ],
     downed:"Downed skills (Sudden Death p.3 · Foul Play p.2): icons printed next to a player’s downed Star Power resolve the instant that player is downed, interrupting the active turn; then the active manager’s turn resumes and he may use the remaining standing skills on the card he just played. If players of two managers are downed at the same time, the active manager resolves his downed skills first. Downed skills resolve left-to-right (cheating is mandatory, the rest optional); a downed tackle uses the downed Star Power; the player still loses all printed abilities."
   },
@@ -478,9 +508,9 @@ BBTM.reference = {
       { c:"Tackler SP < Target SP", d:"Roll 2 dice — the opposing manager picks one result." }
     ],
     results:[
-      { k:"Target Down", icon:"target-down", t:"The tackle succeeds: a standing target becomes downed; a downed target becomes injured." },
-      { k:"Target Missed", icon:"target-missed", t:"The tackle fails, with no other effect." },
-      { k:"Tackler Down", icon:"tackler-down", t:"The target evades: a standing tackler becomes downed; a downed tackler becomes injured. (Not a ‘successful tackle’.)" }
+      { k:"Target Down", icon:"die-target-down", t:"The tackle succeeds: a standing target becomes downed; a downed target becomes injured." },
+      { k:"Target Missed", icon:"die-target-missed", t:"The tackle fails, with no other effect." },
+      { k:"Tackler Down", icon:"die-tackler-down", t:"The target evades: a standing tackler becomes downed; a downed tackler becomes injured. (Not a ‘successful tackle’.)" }
     ],
     states:[
       { k:"Standing", t:"Upright; uses standing Star Power (top-left of the card)." },
@@ -491,15 +521,28 @@ BBTM.reference = {
 
   cheating: {
     id:"sec-cheat", title:"Cheating Tokens",
-    intro:"Cheating tokens are drawn blind from the pool and stay facedown on the player until the Scoreboard phase. When a matchup is resolved, the first manager flips every assigned token at that matchup and applies them in this order:",
+    intro:"Cheating tokens are drawn blind from the pool and stay facedown on the player until the Scoreboard phase. When a matchup is resolved, the first manager flips every assigned token at that matchup and applies them in this order (Rulebook p.13):",
     order:[
-      { k:"1 · Ejection (whistle)", t:"The ref caught him: remove the player from the matchup to his manager’s discard pile and discard his other cheating tokens without resolving them. An ejected ball carrier drops the ball to midfield." },
-      { k:"2 · Fan Frenzy (flag)", t:"For each flag icon, that player’s manager immediately gains one fan." },
-      { k:"3 · Star Power (star)", t:"Star-Power tokens are cumulative and count toward the team’s total in the Determine Winner step." }
+      { k:"1 · Ejection (whistle)", icon:"token-ejection", alt:"Ejection", t:"The ref caught him: remove the player from the matchup to his manager’s discard pile and discard his other cheating tokens without resolving them. An ejected ball carrier drops the ball to midfield." },
+      { k:"2 · Fan Frenzy (flag)", icon:"token-fan-1", alt:"Fan Frenzy", t:"For each flag icon, that player’s manager immediately gains one fan." },
+      { k:"3 · Star Power (star)", icon:"token-star-1", alt:"Star Power", t:"Star-Power tokens are cumulative and count toward the team’s total in the Determine Winner step." }
     ],
+    poolCite:"Rulebook p.20 · Foul Play p.2",
     pool:[
-      { src:"core", h:"Base pool (30 tokens)", t:"6× whistle (ejection) · 4× ★0 · 9× ★+1 · 4× ★+2 · 2× ★+3 · 4× one flag (+1 fan) · 1× two flags (+2 fans)." },
-      { src:"foul", h:"Foul Play adds 8", t:"4× Penalty (the player’s manager takes a penalty, applied at the end of the Reveal Cheating Tokens step) · 2× ★+1 · 1× ★+2 · 1× ★+3." }
+      { src:"core", h:"Base pool (30 tokens)", faces:[
+          ["token-ejection", "Ejection", "6× whistle (ejection)"],
+          ["token-star-0", "Star Power 0", "4× ★0"],
+          ["token-star-1", "Star Power 1", "9× ★+1"],
+          ["token-star-2", "Star Power 2", "4× ★+2"],
+          ["token-star-3", "Star Power 3", "2× ★+3"],
+          ["token-fan-1", "Fan Frenzy, one flag", "4× one flag (+1 fan)"],
+          ["token-fan-2", "Fan Frenzy, two flags", "1× two flags (+2 fans)"] ] },
+      { src:"foul", h:"Foul Play adds 8", faces:[
+          ["fp-token-penalty", "Penalty", "4× Penalty"],
+          ["fp-token-star-1", "Star Power 1", "2× ★+1"],
+          ["fp-token-star-2", "Star Power 2", "1× ★+2"],
+          ["fp-token-star-3", "Star Power 3", "1× ★+3"] ],
+        note:"Penalty: the player’s manager takes a penalty, applied at the end of the Reveal Cheating Tokens step." }
     ],
     notes:[
       "No one may look at a facedown token unless a card ability allows it.",
@@ -521,27 +564,38 @@ BBTM.reference = {
       "Fans are gained immediately; cards go facedown into your improvement pile.",
       "Sudden Death p.3 / Foul Play p.2 clarification: Scoreboard-phase abilities that score fans for winning or losing a matchup are resolved after the Determine Winner step."
     ],
+    iconsCite:"Rulebook p.15 · Sudden Death p.2",
     icons:[
-      { k:"Fan", icon:"fan", t:"Gain one fan per icon (turn the scoreboard dials)." },
-      { k:"Star Player", icon:"star-player", t:"Draw one from your subdivision per icon, draft one, return the rest to the bottom of the deck." },
-      { k:"Team Upgrade", icon:"team-upgrade", t:"Draw one per icon, keep one, return the rest to the bottom." },
-      { k:"Staff Upgrade", icon:"staff-upgrade", t:"Draw one per icon, keep one, return the rest to the bottom." },
-      { k:"Either / Or", t:"A central payout split by a slash — the winner chooses one of the listed rewards." },
-      { k:"Contract", icon:"contract", tag:"sudden", t:"(Sudden Death p.2) Draw a facedown Contract token per icon; reveal and score its fans only at the end of the game." }
+      { k:"Fan", icon:"payout-fan", t:"Gain one fan per icon (turn the scoreboard dials)." },
+      { k:"Star Player", icon:"payout-star-player", t:"Draw one from your subdivision per icon, draft one, return the rest to the bottom of the deck." },
+      { k:"Team Upgrade", icon:"payout-team-upgrade", t:"Draw one per icon, keep one, return the rest to the bottom." },
+      { k:"Staff Upgrade", icon:"payout-staff-upgrade", t:"Draw one per icon, keep one, return the rest to the bottom." },
+      { k:"Either / Or", icon:"payout-either-or", t:"A central payout split by a slash — the winner chooses one of the listed rewards." },
+      { k:"Contract", icon:"payout-contract", alt:"Cabalvision Contract", tag:"sudden", t:"(Sudden Death p.2) The Cabalvision Contract icon: draw a facedown Contract token per icon; reveal and score its fans only at the end of the game." }
     ]
   },
 
   mechanics: {
     id:"sec-mech", title:"Expansion Mechanics",
     items:[
-      { src:"sudden", h:"Contracts", t:"Earn facedown Contract tokens from Cabalvision Contract icons on Highlights/Tournaments. They stay hidden until after all ‘End of Game’ abilities, then are revealed and scored as fans (15 tokens: 6× 2 fans, 4× 3 fans, 3× 4 fans, 2× 5 fans). If the supply is empty, gain 2 fans instead. Contracts don’t count as improvements." },
-      { src:"sudden", h:"Either/Or skills", t:"Skill icons split by slashes form skill sets. When you commit such a player you must choose one set to use (you may use every icon on that side); the other sets are ignored while the card is in play." },
-      { src:"sudden", h:"Blood tokens", t:"Bloodlust (Black Fangs) gains Blood tokens; each adds +1 to standing and downed Star Power until ‘Clear the Pitch’. Limited to the supply." },
-      { src:"sudden", h:"Enchanted Balls (optional)", t:"Optional rule (all managers agree): return the base balls to the box. In each ‘Prepare for Kickoff’ the first manager mixes the Enchanted Balls facedown and places one at random, faceup, on every Highlight and Tournament. Besides breaking ties as normal, each ball gives one effect: Star Power (if your player holds it during the Scoreboard phase, add the printed amount to your team’s total when determining the winner), Fans (if your player holds it during the Scoreboard phase, gain the printed fans), or a Skill (each time a player becomes its carrier, his manager may immediately use the icon, interrupting the active turn; a mandatory icon such as cheating must be used). (Sudden Death p.4)" },
-      { src:"foul", h:"Penalties", t:"You receive a penalty from a revealed penalty cheating token (applied at the end of the ‘Reveal Cheating Tokens’ step), from collecting the LOSE! payout of the Goblin Tribal Leeg tournament, and, if used, from the Corrupt Ref and Stadium restrictions. For each penalty, draw one Penalty card and place it facedown without looking. At the end of the ‘Reveal Improvement Pile’ step every manager flips his Penalty cards and resolves them one at a time; they stay faceup until a card tells you to discard them. If a penalty makes you lose a payout type you don’t have, ignore it. (Foul Play p.2)" },
-      { src:"foul", h:"Disease tokens", t:"Spread Disease drops tokens at midfield; any player committed/moved there takes them all. Each lowers standing and downed Star Power by 1 (min 0) until ‘Clear the Pitch’. Limited to the supply — none can be placed while it’s empty." },
+      { src:"sudden", h:"Contracts", t:`Earn facedown Contract tokens from ${BBTM.ic.inl("payout-contract", "Cabalvision Contract")} Cabalvision Contract icons on Highlights/Tournaments. They stay hidden until after all ‘End of Game’ abilities, then are revealed and scored as fans (15 tokens: 6× 2 fans, 4× 3 fans, 3× 4 fans, 2× 5 fans). If the supply is empty, gain 2 fans instead. Contracts don’t count as improvements. (Sudden Death p.2)` },
+      { src:"sudden", h:"Either/Or skills", t:`Skill icons split by slashes ${BBTM.ic.inl("either-or-skills", "Either/Or skills")} form skill sets. When you commit such a player you must choose one set to use (you may use every icon on that side); the other sets are ignored while the card is in play. (Sudden Death p.2)` },
+      { src:"sudden", h:"Blood tokens", t:`Bloodlust (Black Fangs) gains ${BBTM.ic.inl("token-blood", "Blood token")} Blood tokens; each adds +1 to standing and downed Star Power until ‘Clear the Pitch’. Limited to the supply. (Sudden Death p.3)` },
+      { src:"sudden", h:"Enchanted Balls (optional)", t:"Optional rule (all managers agree): return the base balls to the box. In each ‘Prepare for Kickoff’ the first manager mixes the Enchanted Balls facedown and places one at random, faceup, on every Highlight and Tournament. Besides breaking ties as normal, each ball gives one effect (Sudden Death p.4):",
+        icons:[
+          ["ball-star-power", "Star Power", "if your player holds it during the Scoreboard phase, add the printed amount to your team’s total when determining the winner."],
+          ["ball-fans", "Fans", "if your player holds it during the Scoreboard phase, gain the printed fans."],
+          ["ball-skill", "Skill", "each time a player becomes its carrier, his manager may immediately use the ball’s skill icon, interrupting the active turn; a mandatory icon such as cheating must be used."] ] },
+      { src:"foul", h:"Penalties", t:`You receive a penalty from a revealed cheating token showing the ${BBTM.ic.inl("penalty", "Penalty")} penalty icon (applied at the end of the ‘Reveal Cheating Tokens’ step), from collecting the LOSE! payout of the Goblin Tribal Leeg tournament, and, if used, from the Corrupt Ref and Stadium restrictions. For each penalty, draw one Penalty card and place it facedown without looking. At the end of the ‘Reveal Improvement Pile’ step every manager flips his Penalty cards and resolves them one at a time; they stay faceup until a card tells you to discard them. If a penalty makes you lose a payout type you don’t have, ignore it. (Foul Play p.2)` },
+      { src:"foul", h:"Disease tokens", t:`Spread Disease drops ${BBTM.ic.inl("token-disease", "Disease token")} disease tokens at midfield; any player committed/moved there takes them all. Each lowers standing and downed Star Power by 1 (min 0) until ‘Clear the Pitch’. Limited to the supply — none can be placed while it’s empty. (Foul Play p.3)` },
       { src:"foul", h:"The Corrupt Ref (optional)", t:"In ‘Prepare for Kickoff’ of each Maintenance phase, the first manager places him at midfield of any matchup (2 managers: at any matchup after the two unused highlights are removed). Each time a player is committed to his matchup, that player is immediately assigned one cheating token faceup (faceup tokens take effect only when revealed by a game effect or in the ‘Reveal Cheating Tokens’ step). Then the ref moves toward the Spike! Magazine deck one matchup per point of that player’s printed standing Star Power. If he is at the matchup nearest the Spike! deck with spaces left, he moves to the matchup furthest from the deck and keeps moving. At the start of the Scoreboard phase at his matchup, each team there without at least one player holding a faceup cheating token receives one penalty; then all faceup cheating tokens at that matchup are removed without taking effect. (Foul Play p.3)" },
-      { src:"foul", h:"Stadiums (optional)", t:"Optional venue cards laid in a line between the Spike! Magazine and Highlight decks; each rolled Highlight is placed on a Stadium so their payouts combine (one highlight per stadium). A stadium’s restrictive effect lasts all game — a Banned Skill (using it earns a penalty; a banned Cheating icon also makes cheating optional there), a Player Limit per team zone (exceeding it earns a penalty), or a Star Power Requirement (committing/moving a player whose printed standing Star Power is outside the range earns a penalty). Stadiums also add extra payouts to the team zone of the highlight on them." }
+      { src:"foul", h:"Stadiums (optional)", t:"Optional venue cards laid in a line between the Spike! Magazine and Highlight decks; each rolled Highlight is placed on a Stadium so their payouts combine (one highlight per stadium). Stadiums also add extra payouts to the team zone of the highlight on them. A stadium’s restrictive effect lasts all game (Foul Play p.4):",
+        icons:[
+          ["stadium-banned-skill", "Banned Skill", "the depicted skill is banned at that stadium: each time a player uses it there, his manager receives one penalty."],
+          ["stadium-banned-cheating", "Banned Cheating skill", "a banned cheating skill icon also makes cheating optional at that stadium (at any other stadium it is mandatory as normal)."],
+          ["stadium-player-limit", "Player Limit", "the number inside the helmet is the limit for each team zone: committing or moving a player that takes a team zone there over the limit earns a penalty."],
+          ["stadium-min-star-power", "Minimum Star Power", "a Star Power Requirement: committing or moving a player to that matchup whose printed standing Star Power is lower than the number in the star earns a penalty."],
+          ["stadium-max-star-power", "Maximum Star Power", "a Star Power Requirement: committing or moving a player to that matchup whose printed standing Star Power is higher than the number in the star earns a penalty."] ] }
     ]
   },
 
@@ -550,7 +604,7 @@ BBTM.reference = {
     intro:"The keyword abilities printed on Player cards (base game) — Rulebook p.17, with FAQ p.1–3 clarifications.",
     items:[
       ["Dauntless","When attacking a higher-SP player, roll only one die and apply the result."],
-      ["Dirty Player","If this player injures an opponent, gain a fan."],
+      ["Dirty Player",`If this player injures an opponent, gain a ${BBTM.ic.inl("payout-fan", "Fan")} fan.`],
       ["Dodge","During a tackle against this player, you may force the opponent to reroll all dice."],
       ["Dump-off","If this player would become the ball carrier or drop the ball, you may move the ball to a friendly player at this matchup — even a downed one (FAQ p.2)."],
       ["Fend","If an opponent successfully tackles this player, you may stand one of your other downed players here."],
@@ -559,9 +613,9 @@ BBTM.reference = {
       ["Guard","When an opponent successfully tackles one of your other players, you may apply the dice result to this player instead (after the roll, before applying). A Guard player can’t guard himself, and Guard can’t interfere with rolls that aren’t tackle attempts, such as Hired Wizard or Eshin Assassination Coordinator (FAQ p.2–3)."],
       ["Juggernaut","When this player attempts a tackle, opponents cannot use Guard."],
       ["Nerves of Steel","While this player is the ball carrier, his Star Power is +1."],
-      ["Piling On","Each time you roll two Target-Down results (a double) on this player’s tackle attempt, he may attempt another tackle against a different opponent. An opponent he has already successfully tackled can’t be targeted by him again this round (FAQ p.2)."],
+      ["Piling On",`Each time you roll two ${BBTM.ic.inl("die-target-down", "Target Down")} Target-Down results (a double) on this player’s tackle attempt, he may attempt another tackle against a different opponent. An opponent he has already successfully tackled can’t be targeted by him again this round (FAQ p.2).`],
       ["Stand Firm","While this player is the ball carrier, opponents cannot tackle him."],
-      ["Strip Ball","Instead of using a Tackling icon, you may place the ball at midfield."],
+      ["Strip Ball",`Instead of using a ${BBTM.ic.inl("skill-tackling", "Tackling")} Tackling icon, you may place the ball at midfield.`],
       ["Sure Hands","If this ball carrier becomes downed, he does not drop the ball (but loses the ability while downed)."],
       ["Throw Team-mate","When played, you may move one of your players from this matchup to a different matchup. If you move the ball carrier, give the ball to any of your players at this matchup."]
     ]

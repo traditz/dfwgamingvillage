@@ -13,6 +13,20 @@
 
 const RL = {};
 
+/* ---- Rulebook icons (DFWGV icons standard v1: css/icons.css + images/icons/) ----
+   Every picture is cropped from the Relic, Nemesis and Halls of Terra rulebooks; its
+   name and meaning come from the text printed beside it. The text label always stays
+   beside the icon (search and screen readers rely on it). Call these with the full
+   literal file name, e.g. RL.icIn("charge", "Charge icon").                         */
+RL.ic   = (name, alt) => `<img class="aid-ic" src="images/icons/${name}.webp" alt="${alt}">`;
+RL.icIn = (name, alt) => `<img class="aid-ic aid-ic-inline" src="images/icons/${name}.webp" alt="${alt}">`;
+/* icon row: [[name, alt, label], …] — short lists of named symbols */
+RL.icRow = list => `<p class="aid-icon-row">${list.map(([n, alt, label]) =>
+  `<span class="aid-pair">${RL.ic(n, alt)}<span>${label}</span></span>`).join(" ")}</p>`;
+/* icon grid: [[name, alt, caption], …] — a legend of icons with a short caption each */
+RL.icGrid = list => `<div class="aid-icon-grid">${list.map(([n, alt, cap]) =>
+  `<figure>${RL.ic(n, alt)}<figcaption>${cap}</figcaption></figure>`).join("")}</div>`;
+
 /* ---- Expansions ---------------------------------------------------------- */
 RL.expansions = [
   { id: "base",    name: "Relic (Base Game)", short: "Base", always: true, kind: "base",
@@ -70,8 +84,8 @@ RL.setup = [
   { ph: 0, exp: "halls", t: "Cards only: pull the Sol System missions", when: c => c.has("halls") && !c.solBoard, src: "Halls of Terra p.3 (Using this Expansion)",
     d: "You are playing without the Sol System board, so remove the Halls of Terra <b>Mission cards</b> from the game (or ignore them when drawn) — they specifically interact with the Sol System board. The rest of the expansion's cards, characters and scenarios may still be used." },
 
-  { ph: 0, exp: "nemesis", t: "Shuffle in the Nemesis cards & sheets", when: c => c.has("nemesis"), src: "Nemesis p.4",
-    d: "Shuffle all Nemesis-icon <b>Wargear, Relic and Threat cards</b> into the matching base-game decks, and mix the new <b>character and scenario sheets</b> with the base-game sheets. The nemesis boards, nemesis tokens, nemesis sheets, Nemesis decks and Imperium deck are used only in the Enemies of the Imperium mode" + " — leave them in the box otherwise." },
+  { ph: 0, exp: "nemesis", t: "Shuffle in the Nemesis cards & sheets", when: c => c.has("nemesis"), src: "Nemesis p.2, 4",
+    d: "Shuffle all " + RL.icIn("nemesis-icon", "Nemesis icon") + " Nemesis-icon <b>Wargear, Relic and Threat cards</b> into the matching base-game decks, and mix the new <b>character and scenario sheets</b> with the base-game sheets. The nemesis boards, nemesis tokens, nemesis sheets, Nemesis decks and Imperium deck are used only in the Enemies of the Imperium mode" + " — leave them in the box otherwise." },
   { ph: 0, exp: "halls", t: "Shuffle in the Halls of Terra cards & sheets", when: c => c.solBoard, src: "Halls of Terra p.3, 8",
     d: "Mix all Halls of Terra <b>Mission, Corruption, Relic and red/blue/yellow Threat cards</b> into the matching base-game decks, and mix the new <b>character and scenario sheets</b> with the base-game sheets. The <b>orange Threat cards stay separate</b> — they form their own deck. (The Abraxis Synethi nemesis sheet, its Nemesis deck, the nemesis piece and the Imperium tokens are used only with the Nemesis expansion's Enemies of the Imperium mode.)" },
   { ph: 0, exp: "halls", t: "Shuffle in the Halls of Terra cards & sheets", when: c => c.has("halls") && !c.solBoard, src: "Halls of Terra p.3, 6, 8",
@@ -195,27 +209,29 @@ RL.boards = [
     "<b>Guardian of the Rift</b>: a movement box and the Relic board's only door to the Inner tier — you need a <b>relic</b> to pass."
   ]},
   { id: "inner", name: "Relic board — Inner tier & scenario space", when: () => true, items: [
-    "No areas, no Threat cards. You move <b>one space per turn following the directional arrows</b> — movement die, movement points and movement abilities don't work here, and you can never go back (unless vanquished or corrupted).",
+    { src: "Core p.21", t: "No areas, no Threat cards. You move <b>one space per turn following the " + RL.icIn("inner-arrow", "Directional arrow") + " directional arrows</b> — movement die, movement points and movement abilities don't work here, and you can never go back (unless vanquished or corrupted)." },
     "<b>Warp Rift</b> (first space): entering ends your Movement phase; its text box skips you ahead 1 space plus 1 per condition you meet (you resolve only the space you land on).",
     "Deeper spaces are brutal text boxes — e.g. <b>Crone World Yllen Satari</b> forces Corruption draws on the way to the centre.",
     "<b>Scenario space</b> (centre): landing here immediately triggers the scenario's <b>Confrontation</b>; you can no longer move, and you re-resolve the Confrontation every Engagement phase until you fulfil the win condition."
   ]},
   { id: "threat", name: "Threat decks", when: () => true, items: [
-    "<b>Red</b> deck: mostly Strength enemies with the <b>Ork</b> trait.",
-    "<b>Blue</b> deck: mostly Willpower enemies with the <b>Tyranid</b> trait.",
-    "<b>Yellow</b> deck: mostly Cunning enemies with the <b>Eldar</b> trait.",
-    { t: "<b>Orange</b> deck (Halls of Terra): enemies, encounters, assets and events themed on the Sol System; orange threat icons appear on some spaces in the Mars and Holy Terra areas and work exactly like the other colours. Orange cards carry an orange skull indicator by the trait box.", when: c => c.solBoard },
+    /* `ic` = the deck's card back, printed beside each deck in "Threat Deck Composition" (Core p.8) */
+    { t: "<b>Red</b> deck: mostly Strength enemies with the <b>Ork</b> trait.", ic: "images/icons/deck-red.webp", alt: "Red Threat deck" },
+    { t: "<b>Blue</b> deck: mostly Willpower enemies with the <b>Tyranid</b> trait.", ic: "images/icons/deck-blue.webp", alt: "Blue Threat deck" },
+    { t: "<b>Yellow</b> deck: mostly Cunning enemies with the <b>Eldar</b> trait.", ic: "images/icons/deck-yellow.webp", alt: "Yellow Threat deck", src: "Core p.8" },
+    { t: "<b>Orange</b> deck (Halls of Terra): enemies, encounters, assets and events themed on the Sol System; orange " + RL.icIn("threat-orange", "Orange threat icon") + " threat icons appear on some spaces in the Mars and Holy Terra areas and work exactly like the other colours. Orange cards carry an orange " + RL.icIn("orange-skull", "Orange threat indicator") + " skull indicator by the trait box.", when: c => c.solBoard,
+      ic: "images/icons/deck-orange.webp", alt: "Orange Threat deck", src: "Halls of Terra p.6" },
     "A card's colour is the deck it came from — with mixed backs, the coloured border on the <b>front</b> decides."
   ]},
   { id: "sol", name: "Sol System board — Sol tier", when: c => c.solBoard, items: [
     "Twelve green-shaded spaces forming their own movement loop; normal movement rules apply. Clockwise/anticlockwise effects treat each board as an independent loop.",
-    "<b>Titan</b> and <b>Luna</b>: the only two access points to the Relic board, joined by <b>gateway arrows</b> (Titan ↔ Grey Knight Envoy, Luna ↔ Battlefleet Antias). Crossing costs <b>2 influence + all remaining movement points</b> and skips your Exploration and Engagement phases that turn.",
+    { t: "<b>Titan</b> and <b>Luna</b>: the only two access points to the Relic board, joined by " + RL.icIn("gateway-arrow", "Gateway arrow") + " <b>gateway arrows</b> (Titan ↔ Grey Knight Envoy, Luna ↔ Battlefleet Antias). Crossing costs <b>2 influence + all remaining movement points</b> and skips your Exploration and Engagement phases that turn.", src: "Halls of Terra p.4–5" },
     "<b>Mars area</b> (also a Forge World area): five spaces — three with orange threat icons, plus text boxes granting affiliations, wargear and Mission cards — e.g. the Palace of the Fabricator General can reveal a Wargear card you acquire at no cost.",
     "<b>Holy Terra area</b> (also a Hive World area): five spaces including the <b>Scholastia Psykana</b> (Power cards / Willpower) and the <b>Palace Gates</b> — its movement box lets a player with <b>3+ affiliations</b> spend all remaining movement points to move to the Titanolith.",
     "Sol-tier text-box spaces reward <b>affiliations</b>; Titan's Chamber of Trials and Luna's Great Crossroads offer optional challenges and long-range travel."
   ]},
   { id: "palace", name: "Sol System board — Imperial Palace tier", when: c => c.solBoard, items: [
-    "Five yellow-shaded spaces that work like the Inner tier: no movement roll and no spending movement points, no Threat cards, one space per turn along the directional arrows; enter only through the Palace Gates. No card or ability can modify your movement here except the text box on your current space. You stay in the tier until you are vanquished or corrupted or a text box moves you, and nothing else can move you in or out. Any game component other than the board itself that says “Inner tier” also means the Imperial Palace tier.",
+    { src: "Halls of Terra p.5", t: "Five yellow-shaded spaces that work like the Inner tier: no movement roll and no spending movement points, no Threat cards, one space per turn along the " + RL.icIn("directional-arrow", "Directional arrow") + " directional arrows; enter only through the Palace Gates. No card or ability can modify your movement here except the text box on your current space. You stay in the tier until you are vanquished or corrupted or a text box moves you, and nothing else can move you in or out. Any game component other than the board itself that says “Inner tier” also means the Imperial Palace tier." },
     "<b>Titanolith</b>: landing here ends your Movement phase; its Engagement text box (<i>Petitioner's Plea</i>, test 8 on your highest printed attribute) decides which direction you may proceed next turn — fail and you lose 1 of that attribute and are sent back to the Palace Gates.",
     "<b>Eternity Gate</b> (<i>Cleanse and Purify</i>): lose 1 Life per Corruption card, then test 7 on your lowest printed attribute — pass to gain 1 of it and <b>discard all your Corruption cards</b>; fail and you're sent back to the Titanolith and your Engagement phase ends.",
     "<b>Administratum Archives</b> (<i>Cyclopean Bureaucracy</i>): test 5 using your <b>influence</b> instead of an attribute — fail and you lose an affiliation, are sent back to the Titanolith, and your Engagement phase ends.",
@@ -230,9 +246,9 @@ RL.boards = [
 RL.howToPlay = {
   core: [
     { h: "The Game Turn", items: [
-      { t: "Each turn the active player resolves four phases in order — then play passes clockwise (the oldest player goes first):", num: true, sub: [
+      { t: "Each turn the active player resolves four phases in order — then play passes clockwise (the oldest player goes first):", num: true, src: "Core p.8–11", sub: [
         "<b>Movement</b> — roll 1 die and move <b>exactly</b> that many spaces, clockwise or anticlockwise. You cannot stay put, and cannot reverse once you start. (Inner tier: move 1 space along the arrows instead.)",
-        "<b>Exploration</b> — for each threat icon on your space not already matched by a faceup Threat card of its colour, draw one card from that Threat deck onto your space. Threat icons printed on cards add to the count.",
+        "<b>Exploration</b> — for each " + RL.icIn("threat-red", "Red threat icon") + RL.icIn("threat-blue", "Blue threat icon") + " threat icon (a red, blue or yellow wax seal) on your space not already matched by a faceup Threat card of its colour, draw one card from that Threat deck onto your space. Threat icons printed on cards add to the count.",
         "<b>Engagement</b> — resolve the Threat cards on your space; if there are none, resolve your space's text box (“Choose One or End Engagement Phase” boxes are optional).",
         "<b>Experience</b> — spend trophies for levels, optionally trade 3 completed missions for a relic, draw a Mission card if you have no active mission, then discard down to your power and asset limits."
       ]},
@@ -262,15 +278,17 @@ RL.howToPlay = {
       ]},
       "<b>Multiple enemies</b> with the same attribute battle together — one enemy roll plus <i>all</i> their attribute values against your single score. Different attributes fight separate battles, in the order you choose.",
       "<b>Evading</b> (only when an ability allows it): evade before the battle starts. The evaded enemy stays on its space but is ignored this turn. Against several same-attribute enemies you choose which ones to evade, and the rest still fight. Evading does not end your Engagement phase.",
-      "A roll of <b>6 explodes</b>: roll another die and add it — cumulatively, without limit. With several dice, each individual 6 explodes (dice never combine — a 3 and a 3 don't count as a 6).",
+      { t: "A roll of " + RL.icIn("die-6", "6 result") + " <b>6 explodes</b>: roll another die and add it — cumulatively, without limit. With several dice, each individual 6 explodes (dice never combine — a 3 and a 3 don't count as a 6).", src: "Core p.20" },
       "Scenario sheets can be battled too: the sheet counts as an enemy for abilities, but has no traits, is not a Threat card and can never be a trophy."
     ]},
     { h: "Skill Tests & Bonuses", items: [
       "“Test Strength 10” = roll 1 die + your Strength + modifiers. <b>Equal or higher passes</b>.",
-      "A natural <b>1 automatically fails</b> (with several dice, only if every die shows a 1). A natural <b>6 explodes</b>, just like in battle.",
-      "<b>Skill bonuses</b> (plain coloured circle) add to skill tests of that attribute only — declare before rolling.",
-      "<b>Battle bonuses</b> (spiked circle) add to battle scores only — declare during Prepare for Battle. A <b>grey battle bonus</b> works in any battle form.",
-      { t: "A <b>grey skill bonus</b> (Halls of Terra) can be added to any <i>attribute</i> skill test — but not to tests that don't test an attribute (like a test of your level or influence).", when: c => c.has("halls"), tag: "halls" }
+      { t: "A natural " + RL.icIn("die-1", "1 result") + " <b>1 automatically fails</b> (with several dice, only if every die shows a 1). A natural " + RL.icIn("die-6", "6 result") + " <b>6 explodes</b>, just like in battle.", src: "Core p.14" },
+      { t: "<b>Skill bonuses</b> (plain coloured circle) add to skill tests of that attribute only — declare before rolling. Rulebook examples:", src: "Core p.18",
+        ics: RL.icRow([["skill-bonus-strength", "Strength skill bonus", "+2 to a Strength skill score"], ["skill-bonus-willpower", "Willpower skill bonus", "+2 to a Willpower skill score"], ["skill-bonus-cunning", "Cunning skill bonus", "+1 to a Cunning skill score"]]) },
+      { t: "<b>Battle bonuses</b> (spiked circle) add to battle scores only — declare during Prepare for Battle. A <b>grey battle bonus</b> works in any battle form. Rulebook examples:", src: "Core p.19",
+        ics: RL.icRow([["battle-bonus-strength", "Strength battle bonus", "+3 in a Strength battle"], ["battle-bonus-willpower", "Willpower battle bonus", "+3 in a Willpower battle"], ["battle-bonus-cunning", "Cunning battle bonus", "+3 in a Cunning battle"], ["battle-bonus-any", "Grey battle bonus", "+2 in any battle (grey)"]]) },
+      { t: "A " + RL.icIn("skill-bonus-grey", "Grey skill bonus") + " <b>grey skill bonus</b> (Halls of Terra) can be added to any <i>attribute</i> skill test — but not to tests that don't test an attribute (like a test of your level or influence).", when: c => c.has("halls"), tag: "halls", src: "Halls of Terra p.5" }
     ]},
     { h: "Power Cards", items: [
       "One-shot hidden abilities. Playing them is always optional and unlimited per turn — but each card gives <b>either</b> its power number <b>or</b> its ability, never both, then is discarded.",
@@ -305,13 +323,24 @@ RL.howToPlay = {
       "<b>Wargear</b> (weapon / armour / equipment) is bought at <b>Battlefleet Antias</b> for the influence cost printed top-left. All Wargear cards are assets.",
       "<b>Assets</b> work only from your play area and count against your <b>asset limit</b> (enforced at the end of your Experience phase — voluntary discards happen then too).",
       "Weapons and armour work only in battle, never in skill tests: <b>max 1 weapon + 1 armour per battle</b>; equipment is unlimited.",
-      "<b>Charges:</b> cards with charge icons arrive with that many charge tokens. Spend at most <b>1 charge per card per turn</b>; when the last token leaves a card, discard it. Effects can add tokens beyond the printed value.",
+      { t: "<b>Charges:</b> cards with " + RL.icIn("charge", "Charge icon") + " charge icons arrive with that many charge tokens. Spend at most <b>1 charge per card per turn</b>; when the last token leaves a card, discard it. Effects can add tokens beyond the printed value.", src: "Core p.19" },
       "<b>Forced discards:</b> you choose which card unless told otherwise; with none of the required cards you discard nothing; told to discard more than you have, discard all of that type. Any tokens on a discarded card are removed.",
       "<b>Influence</b> is the currency: start with 3; earn more from battles, missions, level rewards, cards and text boxes."
     ]},
     { h: "Levels & Trophies", items: [
       "Beaten enemies become <b>trophies</b> worth their attribute value in trophy points. In your Experience phase, every <b>6 trophy points</b> spent = 1 level; excess above multiples of 6 is lost.",
-      "On gaining a level, move the peg right and collect <b>every reward in the column</b> beneath it, top to bottom — attributes, Life, influence, Power cards, completed missions or your character's special reward.",
+      { t: "On gaining a level, move the peg right and collect <b>every reward in the column</b> beneath it, top to bottom — attributes, Life, influence, Power cards, completed missions or your character's special reward. The level reward icons:", src: "Core p.14, 24",
+        ics: RL.icGrid([
+          ["reward-strength", "Gain 1 Strength", "Gain 1 Strength"],
+          ["reward-willpower", "Gain 1 Willpower", "Gain 1 Willpower"],
+          ["reward-cunning", "Gain 1 Cunning", "Gain 1 Cunning"],
+          ["reward-attribute", "Gain 1 attribute of your choice", "Gain 1 attribute of your choice"],
+          ["reward-life", "Gain 1 Life", "Gain 1 Life"],
+          ["reward-influence", "Gain 2 influence", "Gain 2 influence"],
+          ["reward-power-card", "Draw 1 Power card", "Draw 1 Power card"],
+          ["reward-mission", "Gain 1 completed mission", "Gain 1 completed mission"],
+          ["reward-special", "Receive special reward", "Special reward described on your character sheet"]
+        ]) },
       "Maximum level is <b>12</b>; levelling past it grants a completed mission instead."
     ]},
     { h: "Vanquished, Eliminated & Missing Turns", items: [
@@ -364,11 +393,12 @@ RL.howToPlay = {
     ]},
     { id: "nemTurn", when: c => c.eoti, h: "The Nemesis Turn", tag: "nemesis", items: [
       "A nemesis is <b>not a player</b> and <b>not an enemy</b> — card text saying “player” or “enemy” never means a nemesis. Nemeses never read the board's text boxes, and when encountering spaces nemeses never read vertical cards while characters never read horizontal cards.",
-      { t: "The nemesis turn:", num: true, sub: [
+      { t: "The nemesis turn:", num: true, src: "Nemesis p.9–11, 13", sub: [
         "<b>Movement</b> — normal die movement; never into the Inner tier.",
         "<b>Exploration</b> — on a space with a character it may declare a battle. Otherwise it draws <b>Imperium cards</b> to match the space's threat icons (colour ignored) — or, with no icons and no Imperium cards, draws 1 secret <b>Nemesis card</b>.",
         "<b>Engagement</b> — resolve the battle, the Imperium cards, or the drawn Nemesis card.",
-        "<b>Experience</b> — spend trophies (6 points = 1 level; max level 9, then +1 infamy per level) and discard unwanted arsenal/Might cards. There is no hand limit. Nemesis level rewards add two icons: <b>gain 1 infamy</b>, and <b>draw 1 Nemesis card and resolve it immediately</b>."
+        "<b>Experience</b> — spend trophies (6 points = 1 level; max level 9, then +1 infamy per level) and discard unwanted arsenal/Might cards. There is no hand limit. Nemesis level rewards add two icons found only on nemesis sheets:" +
+          RL.icGrid([["reward-nemesis-card", "Nemesis Card level reward", "<b>Nemesis Card:</b> draw 1 Nemesis card and resolve it immediately"], ["reward-infamy", "Infamy level reward", "<b>Infamy:</b> gain 1 infamy"]])
       ]},
       { t: "<b>Imperium cards</b> resolve in strict order:", num: true, sub: [
         "<b>Events</b> — resolve, then discard.",
@@ -404,12 +434,24 @@ RL.howToPlay = {
     ]},
     { id: "sol", when: c => c.solBoard, h: "Navigating the Sol System", tag: "halls", items: [
       "The Sol tier is a normal movement loop; each board is its own loop for clockwise/anticlockwise effects.",
-      "<b>Gateway arrows</b> (Titan ↔ Grey Knight Envoy, Luna ↔ Battlefleet Antias): crossing costs <b>2 influence + all remaining movement points</b> and skips your Exploration and Engagement phases that turn. Can't pay? Can't cross.",
-      "The <b>Imperial Palace tier</b> is entered only through the Palace Gates movement box (3+ affiliations). Inside, follow the arrows one space per turn — the Titanolith's text box sets your direction — and any game component other than the board itself that references the Inner tier also means this tier.",
-      { t: "Nemeses move between the boards freely, <b>ignoring gateway arrows</b>, but can never enter the Imperial Palace tier. <b>Imperium tokens</b> on Sol-tier text-box spaces act as temporary threat icons for nemeses only: draw Imperium cards normally, then discard one token from the space (only if a card was actually drawn). A Sol text-box space with no tokens and no Imperium cards yields a Nemesis card draw.", when: c => c.eoti, tag: "nemesis" }
+      { t: RL.icIn("gateway-arrow", "Gateway arrow") + " <b>Gateway arrows</b> (Titan ↔ Grey Knight Envoy, Luna ↔ Battlefleet Antias): crossing costs <b>2 influence + all remaining movement points</b> and skips your Exploration and Engagement phases that turn. Can't pay? Can't cross.", src: "Halls of Terra p.4–5" },
+      { t: "The <b>Imperial Palace tier</b> is entered only through the Palace Gates movement box (3+ affiliations). Inside, follow the " + RL.icIn("directional-arrow", "Directional arrow") + " directional arrows one space per turn — the Titanolith's text box sets your direction — and any game component other than the board itself that references the Inner tier also means this tier.", src: "Halls of Terra p.4–5, 7" },
+      { t: "Nemeses move between the boards freely, <b>ignoring gateway arrows</b>, but can never enter the Imperial Palace tier. " + RL.icIn("imperium-token", "Imperium token") + " <b>Imperium tokens</b> on Sol-tier text-box spaces act as temporary threat icons for nemeses only: draw Imperium cards normally, then discard one token from the space (only if a card was actually drawn). A Sol text-box space with no tokens and no Imperium cards yields a Nemesis card draw.", when: c => c.eoti, tag: "nemesis", src: "Halls of Terra p.8–9" }
     ]},
     { id: "affiliations", when: c => c.solBoard, h: "Affiliations & Champion Cards", tag: "halls", items: [
-      "Nine Imperial <b>affiliations</b> (Adepta Sororitas, Adeptus Arbites, Adeptus Astartes, Adeptus Astra Telepathica, Adeptus Mechanicus, Imperial Guard, Imperial Nobility, Inquisition, Officio Assassinorum). You start with your character's printed affiliation and can hold at most <b>one token of each</b> — gaining a duplicate is ignored.",
+      { t: "Nine Imperial <b>affiliations</b>, each with its own icon — shown on its affiliation token and on cards, board spaces and text boxes:", src: "Halls of Terra p.6, 12",
+        ics: RL.icGrid([
+          ["aff-adepta-sororitas", "Adepta Sororitas", "Adepta Sororitas"],
+          ["aff-adeptus-arbites", "Adeptus Arbites", "Adeptus Arbites"],
+          ["aff-adeptus-astartes", "Adeptus Astartes", "Adeptus Astartes"],
+          ["aff-adeptus-astra-telepathica", "Adeptus Astra Telepathica", "Adeptus Astra Telepathica"],
+          ["aff-adeptus-mechanicus", "Adeptus Mechanicus", "Adeptus Mechanicus"],
+          ["aff-imperial-guard", "Imperial Guard", "Imperial Guard"],
+          ["aff-imperial-nobility", "Imperial Nobility", "Imperial Nobility"],
+          ["aff-inquisition", "Inquisition", "Inquisition"],
+          ["aff-officio-assassinorum", "Officio Assassinorum", "Officio Assassinorum"]
+        ]) },
+      "You start with your character's printed affiliation and can hold at most <b>one token of each</b> — gaining a duplicate is ignored.",
       "Whenever you may <b>spend</b> influence, you may discard affiliation tokens at <b>2 influence each</b> — but never to cover a forced influence <i>loss</i>.",
       "The <b>Sanctum Imperialis</b> grants a <b>Champion card</b> matching one of your affiliations: a permanent power that can never be forcibly discarded (nor can its matching token). Champion cards are open information; one of each exists."
     ]}

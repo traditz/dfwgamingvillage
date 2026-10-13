@@ -666,6 +666,13 @@ main { position: relative; z-index: 1; display: block; }
   margin-top: 16px; padding-top: 12px;
   border-top: 1px dashed rgba(212, 192, 102, 0.3);
 }
+/* rulebook icons (css/icons.css): the icons are printed for a dark page, so no backdrop token is needed;
+   on phones, tighten the die-face grids so all six Shoot die faces fit on one row */
+@media (max-width: 480px) {
+  .ref-body .aid-icon-grid.aid-icon-grid { column-gap: 11px; }
+}
+/* keep an inline icon together with the word it labels (and icon sets together) at line wraps */
+.rt-icp { white-space: nowrap; }
 
 /* =============================================================================
    SEARCH — the facility terminal (glossary-blue chapter)

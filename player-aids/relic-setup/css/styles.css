@@ -444,6 +444,14 @@ main{max-width:1140px; margin:0 auto; padding:52px 28px 72px}
 /* ---- Boards & spaces ---- */
 .loc-board li::before{content:""; position:absolute; left:3px; top:.58em; width:8px; height:8px; transform:rotate(45deg);
   background:var(--ink-2); box-shadow:0 0 0 2px rgba(255,255,255,.8)}
+.loc-board ul + ul{margin-top:10px}
+
+/* ---- Rulebook icons in the reference (shared css/icons.css, icons standard v1) ---- */
+.htp-sec .aid-icon-row,.htp-sec .aid-icon-grid{margin:10px 0 4px}
+.htp-sec .aid-icon-row{gap:8px 16px}
+.htp-sec .aid-icon-grid.aid-icon-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(6.6em,1fr)); gap:12px 10px}
+.htp-sec .aid-icon-grid > figure{font-size:1rem; max-width:none}
+.loc-board ul.aid-icons{gap:6px}
 
 /* ---- FAQ ---- */
 .faq-list{display:flex; flex-direction:column; gap:10px; margin-top:20px}

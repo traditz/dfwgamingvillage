@@ -737,3 +737,6 @@ ul.cols > li { break-inside: avoid; }
   body, .topbar { background: #fff; }
   .page { box-shadow: none; break-inside: auto; }
 }
+
+/* MarsBot board table: a tag icon stays on one line with its tag's first word (plain inline, so the text keeps one baseline) */
+.tm-nowrap { white-space: nowrap; }

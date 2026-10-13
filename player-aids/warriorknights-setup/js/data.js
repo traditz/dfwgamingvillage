@@ -105,6 +105,14 @@ WK.cite = function () {
   }).join(" · ");
 };
 
+/* Rulebook icons (DFWGV icons standard v1, css/icons.css). Each file name is passed literally, e.g. WK.ic("port", "Port").
+   Sources of the pictures (cropped, never redrawn): Noble shapes = the Noble pieces in the battle diagrams (Rules p.15
+   circle, square, triangle; p.16 star); port = Rules p.13 sea-movement diagram; casualty, breach and siege tokens =
+   Rules p.4; Knowledge and Garrison tokens = C&G p.2; Riot and Scholar tokens = C&G p.3; King token = C&G p.4;
+   expansion icon = C&G p.1. The words beside each icon always stay. */
+WK.ic = (f, alt) => "<img class='aid-ic aid-ic-inline' src='images/icons/" + f + ".webp' alt='" + alt + "' title='" + alt + "'>";
+WK.icl = (f, alt) => "<img class='aid-ic' src='images/icons/" + f + ".webp' alt='" + alt + "' title='" + alt + "'>";
+
 /* Short lines for the optional rules chosen, used by the setup step and the teach */
 WK.optLines = {
   openpm: "<li><b>Open Private Motions</b> — a Private Motion may propose anything (for example, banning sieges or all road movement); it is still voted on like any other Agenda.</li>",
@@ -156,7 +164,7 @@ WK.phases = [
         t: "Lay out the board and the decks",
         d: (c) => {
           let d = "<ul><li>Unfold the board. Put the <b>Agenda deck</b>, the <b>Mercenary deck</b> and the <b>" + WK.neutralTotal(c) + " Neutral Action cards</b> beside it; the <b>Fate deck</b> and the <b>Event deck</b> go on their spaces on the board.</li>";
-          if (!WK.fg(c) && WK.anyCG(c)) d += "<li><b>Crown and Glory:</b> of the expansion's cards, use only those of the variant" + (WK.mis(c) && WK.king(c) ? "s" : "") + " you chose; the rest stay out of the base game's decks (every Crown and Glory card has the expansion icon on its front, so they're easy to sort out).</li>";
+          if (!WK.fg(c) && WK.anyCG(c)) d += "<li><b>Crown and Glory:</b> of the expansion's cards, use only those of the variant" + (WK.mis(c) && WK.king(c) ? "s" : "") + " you chose; the rest stay out of the base game's decks (every Crown and Glory card has the " + WK.ic("expansion-icon", "Expansion icon") + "expansion icon on its front, so they're easy to sort out).</li>";
           if (WK.fg(c)) d +="<li><b>For Glory</b> — before shuffling:<ul>" +
             "<li>shuffle the <b>25 new Agenda cards</b> and the <b>20 new Event cards</b> into their decks;</li>" +
             "<li>shuffle the <b>12 new Mercenary cards</b> (a Leader and a Herald for each nationality) into the Mercenary deck;</li>" +
@@ -325,10 +333,10 @@ WK.reference = [
       "<li><b>Check for victory</b> (see “Winning the Game”).</li>" +
       "<li><b>Gain Influence</b>: 1 per city you control.</li>" +
       "<li><b>Revolts</b>: each city you control without one of your Nobles in its area may revolt" + (WK.fg(c) ? " or riot" : "") + ".</li>" +
-      "<li><b>Sea movement arrivals</b>: Nobles on port icons move into the port's area.</li>" +
+      "<li><b>Sea movement arrivals</b>: Nobles on " + WK.ic("port", "Port") + "port icons move into the port's area.</li>" +
       "<li><b>Refresh Nobles</b>: flip exhausted Noble cards faceup" + (WK.fg(c) ? "; exhausted Advancement cards refresh too" : "") + ".</li>" +
       "<li><b>Return Nobles to the board</b> (and transfer troops between Nobles in the same area).</li></ol>",
-    src: (c) => WK.cite("Rules p.7–8, p.20", WK.fg(c) ? "C&G p.2–3" : "")
+    src: (c) => WK.cite("Rules p.7–8, p.13, p.20", WK.fg(c) ? "C&G p.2–3" : "")
   },
   {
     title: "Special Phases — Triggers & Where Each Card Goes",
@@ -354,7 +362,7 @@ WK.reference = [
     title: "Baron Action Cards",
     when: () => true,
     html: (c) => "<ul>" +
-      "<li><b>Levy Taxes</b> — gain <b>1 crown for each area</b> (Kingdom or overseas) holding at least one of your Nobles; one crown per area however many Nobles are there. Nobles on a port icon don't count. These are separate from Taxation income.</li>" +
+      "<li><b>Levy Taxes</b> — gain <b>1 crown for each area</b> (Kingdom or overseas) holding at least one of your Nobles; one crown per area however many Nobles are there. Nobles on a " + WK.ic("port", "Port") + "port icon don't count. These are separate from Taxation income.</li>" +
       "<li><b>Draft Soldiers</b> — place one of your Baron markers <b>free</b> on any available spot of the Mercenary Track (never a spot numbered higher than the number of Barons). It may trigger a Mercenary Draft.</li>" +
       "<li><b>Rally Support</b> — gain <b>2 Votes</b>. If you now have more Votes than every other Baron, you become <b>Chairman of the Assembly</b> and take the Chairman token.</li>" +
       "<li><b>Serve the Church</b> — gain <b>1 Faith</b>. If you now have more Faith than every other Baron, you become <b>Head of the Church</b>. Then choose which area the card goes to.</li>" +
@@ -364,7 +372,7 @@ WK.reference = [
         "<li><b>Enrich Mind</b> (For Glory, two per Baron) — gain <b>1 Knowledge</b>; if you now have more Knowledge than every other Baron, take the <b>Scholar</b> token; then you may buy <b>one</b> of the available Advancement cards (as many as you can afford if you are the Scholar).</li>" : "") +
       "</ul><h4>Chairman and Head of the Church</h4><ul><li>These tokens change hands only through <b>Rally Support</b> and <b>Serve the Church</b> — “except for a few Agent and Event cards”, in the FAQ's words. If the Head of the Church loses Faith so that you now have the most, you do <b>not</b> take the token until you play Serve the Church.</li>" +
       "<li>The rulebook adds one more case: a Chairman who is <b>banned</b> from the Assembly loses the token to the Baron with the most Votes (see “The Assembly”)" + (c.mod("elim") ? "; with <b>Player Elimination</b>, an eliminated Baron's tokens pass on too" : "") + ".</li></ul>",
-    src: (c) => WK.cite("Rules p.7–9, p.12, p.15", c.mod("elim") ? "Rules p.20" : "", "FAQ p.2", WK.fg(c) ? "C&G p.2–3" : "")
+    src: (c) => WK.cite("Rules p.7–9, p.12–13, p.15", c.mod("elim") ? "Rules p.20" : "", "FAQ p.2", WK.fg(c) ? "C&G p.2–3" : "")
   },
   {
     title: "Neutral Action Cards",
@@ -414,7 +422,7 @@ WK.reference = [
       "<li><b>Start:</b> the Chairman may start one expedition that isn't already underway (none if all three are underway).</li>" +
       "<li><b>Fund:</b> starting with the Chairman and going clockwise, each Baron may place <b>up to 5 crowns</b> below it with one of his Baron markers. Funding is optional, even for the Chairman.</li>" +
       "<li><b>Bless:</b> the Head of the Church may pay <b>1 Faith</b> to bless it (the Faith token stays on the track): when a blessed expedition is resolved, draw <b>one extra Fate card</b> and use the better result.</li>" +
-      "<li><b>Mark:</b> the Chairman places an expedition marker on spot “1” — no marker if he didn't start one (the rulebook's example places it because at least one Baron funded).</li>" +
+      "<li><b>Mark:</b> the Chairman places an " + WK.ic("expedition-marker", "Expedition marker") + "expedition marker on spot “1” — no marker if he didn't start one (the rulebook's example places it because at least one Baron funded).</li>" +
       "<li><b>Advance:</b> expeditions already on “1” or “2” — not one just started — move up one spot.</li>" +
       "<li><b>Resolve:</b> draw 1 Fate card (2 if blessed) for each expedition now on “3”.</li></ol>" +
       "<h4>Expedition results</h4><ul>" +
@@ -423,7 +431,7 @@ WK.reference = [
       (WK.fg(c) ? "<li><b>Funds Needed</b> (For Glory): each funder either pays <b>2 crowns</b> to the treasury or loses his investment (his crowns on the expedition go to the treasury). The card is then treated as a “No Result” card (the sheet's wording; No News is the base game's no-result outcome).</li>" : "") +
       "<li><b>Fleet Lost:</b> all crowns invested go to the treasury; the marker is removed and the expedition may be started again later.</li></ul>" +
       (WK.fg(c) ? "<p><b>For Glory</b> order of results, best to worst (for picking the better of a blessed draw): highest payout (5x, 4x, 3x, 2x, 1x), No News, Funds Needed, Fleet Lost.</p>" : ""),
-    src: (c) => WK.cite("Rules p.9–10", WK.fg(c) ? "C&G p.4" : "")
+    src: (c) => WK.cite("Rules p.4, p.9–10", WK.fg(c) ? "C&G p.4" : "")
   },
   {
     title: "Taxation & Wages",
@@ -436,14 +444,14 @@ WK.reference = [
       "<li>Each Baron in turn, Chairman first and then clockwise, pays each troop's wage (the gold coin on its Troop card) to the treasury.</li>" +
       "<li><b>Regular Troops first</b> — all of them, even those with an off-board Noble or in an army with casualty tokens. Pay as many as you can; unpaid Regular Troops don't desert." + (WK.king(c) ? " <b>King's Army</b> cards are Regular Troops: paid before any Mercenary, and they never desert." : "") + "</li>" +
       "<li>Then choose which <b>Mercenaries</b> to pay. Any Mercenary not paid in full <b>deserts</b> and is shuffled back into the Mercenary deck.</li>" +
-      "<li><b>Circle Nobles</b> pay no wages for the troops assigned to them while those troops number <b>400 or less</b>; at 450 or more, all must be paid. Their +200 doesn't count toward the 450; <b>maintained troops</b> do (FAQ). This ability works even when the Noble is exhausted.</li>" +
+      "<li>" + WK.ic("noble-circle", "Circle") + "<b>Circle Nobles</b> pay no wages for the troops assigned to them while those troops number <b>400 or less</b>; at 450 or more, all must be paid. Their +200 doesn't count toward the 450; <b>maintained troops</b> do (FAQ). This ability works even when the Noble is exhausted.</li>" +
       "<li><b>Maintained troops</b> (from offices) add strength but never need wages.</li>" +
       "<li>Casualty tokens don't reduce wages: you pay for every troop (FAQ).</li>" +
       "<li>If a desertion leaves an army with casualties equal to or greater than its troops, its Noble dies (FAQ)" + (c.mod("aband") ? " — with <b>Abandoned Nobles</b>, he is abandoned instead of dead" : "") + ".</li>" +
       (WK.fg(c) ? "<li><b>Garrisons</b> (For Glory) must be paid every Wages phase; for each one not paid, discard a Garrison card and one of your Garrison tokens.</li>" +
         "<li><b>Town Levies</b> (For Glory) are never paid — but if any Mercenary assigned to a Noble deserts during Wages, <b>all</b> Town Levies with that Noble are discarded.</li>" : "") +
       "<li>Then return all the cards in the Wages stack to their owners.</li></ul>",
-    src: (c) => WK.cite("Rules p.11, p.17, p.19", "FAQ p.1–2", c.mod("aband") ? "FAQ p.3" : "", WK.fg(c) ? "C&G p.2–3" : "", WK.king(c) ? "C&G p.4" : "")
+    src: (c) => WK.cite("Rules p.11, p.15, p.17, p.19", "FAQ p.1–2", c.mod("aband") ? "FAQ p.3" : "", WK.fg(c) ? "C&G p.2–3" : "", WK.king(c) ? "C&G p.4" : "")
   },
   {
     title: "The Assembly",
@@ -509,7 +517,7 @@ WK.reference = [
       "<li>You can't move through an area containing another Baron's Noble or city unless that Baron allows it. An area holding only another Baron's stronghold (no Nobles) needs no permission (FAQ).</li>" +
       "<li>After moving and/or attacking, a Noble is <b>exhausted</b> (flip his card). Exhausted Nobles can't move or attack, but defend if attacked. Every Noble that moves or attacks is exhausted, not only the commander (FAQ).</li></ul>" +
       "<h4>Sea movement</h4><ul>" +
-      "<li>A Noble who <b>starts</b> his move in an area with a <b>port</b> may move to any other port: place him on the destination's port icon and exhaust him.</li>" +
+      "<li>A Noble who <b>starts</b> his move in an area with a <b>port</b> may move to any other port: place him on the destination's " + WK.ic("port", "Port") + "port icon and exhaust him.</li>" +
       "<li>In the Upkeep phase he moves into that area and refreshes; next round he acts normally.</li>" +
       "<li>Sea movement can't be combined with road movement. A Noble on a port icon can't attack or be attacked, and doesn't count for Levy Taxes.</li>" +
       "<li>Ports in areas with razed cities work, and you don't need to own the city to use its port (FAQ).</li></ul>" +
@@ -523,16 +531,17 @@ WK.reference = [
     title: "Nobles & Their Abilities",
     when: () => true,
     html: (c) => "<p>Each Baron has four Nobles; the shape on a Noble's base matches the icon on his Noble card and names his ability:</p>" +
-      "<table class='tbl'><thead><tr><th>Shape</th><th>Ability</th></tr></thead><tbody>" +
-      "<tr><td>★ Star</td><td>“May inflict 100 extra casualties in battle” — counts as an extra <i>Deal 100 Casualties</i> card.</td></tr>" +
-      "<tr><td>■ Square</td><td>“May prevent 100 casualties in battle” — counts as an extra <i>Prevent 100 Casualties</i> card.</td></tr>" +
-      "<tr><td>▲ Triangle</td><td>“+1 Victory in battle” — one extra victory when victories are counted.</td></tr>" +
-      "<tr><td>● Circle</td><td>“Does not pay wages for troops if army size is under 450” — works even while exhausted.</td></tr></tbody></table><ul>" +
+      "<ul class='aid-icons'>" +
+      "<li>" + WK.icl("noble-star", "Star") + "<span><b>Star</b> — “May inflict 100 extra casualties in battle”: counts as an extra <i>Deal 100 Casualties</i> card.</span></li>" +
+      "<li>" + WK.icl("noble-square", "Square") + "<span><b>Square</b> — “May prevent 100 casualties in battle”: counts as an extra <i>Prevent 100 Casualties</i> card.</span></li>" +
+      "<li>" + WK.icl("noble-triangle", "Triangle") + "<span><b>Triangle</b> — “+1 Victory in battle”: one extra victory when victories are counted.</span></li>" +
+      "<li>" + WK.icl("noble-circle", "Circle") + "<span><b>Circle</b> — “Does not pay wages for troops if army size is under 450”: works even while exhausted.</span></li></ul>" +
+      "<p class='note'>The shapes as the rulebook's battle diagrams draw the Noble pieces. A piece's colour is only its Baron's; the shape is what names the ability.</p><ul>" +
       "<li>Only the <b>commanding Noble's</b> ability and +200 count in a battle. An exhausted commander still adds his +200 but can't use his ability.</li>" +
       "<li>The <b>+200</b> is leadership, not troops: it matters only when drawing Fate cards and in the siege strength comparison, and never counts as troops (so a Noble with 100 + 200 troops dies when his third casualty token arrives) (FAQ).</li>" +
       "<li>An <b>army</b> is a Noble with the Troop cards under his card; troops at a stronghold with no Noble are also an army.</li>" +
       (WK.fg(c) ? "<li><b>For Glory:</b> a Leader or Herald Mercenary grants its Noble an extra ability, usable even when he is exhausted (max one Leader and one Herald per Noble).</li>" : "") + "</ul>",
-    src: (c) => WK.cite("Rules p.2–3, p.11–12, p.14–15, p.19", "FAQ p.1", WK.fg(c) ? "C&G p.2" : "")
+    src: (c) => WK.cite("Rules p.2–3, p.11–12, p.14–16, p.19", "FAQ p.1", WK.fg(c) ? "C&G p.2" : "")
   },
   {
     title: "Battles — Starting a Battle",
@@ -557,21 +566,21 @@ WK.reference = [
     when: () => true,
     html: (c) => "<h4>Prepare for battle</h4><ol>" +
       "<li><b>Declare commanders</b> (attacker first): with more than one Noble in the battle, each side names one commander. Only his ability and +200 count; he commands all your troops fighting, whichever Noble they're assigned to. A lone Noble commands by default.</li>" +
-      "<li><b>Draw Fate cards:</b> 1 per <b>100</b> troop strength fighting (rounded down: the rulebook's example draws 2 for 250 troops), plus <b>2</b> for the commander's +200; each casualty token on your armies is −100. <b>Maximum " + WK.fateMax(c) + " cards</b> in this step" + (WK.fg(c) ? " — For Glory's larger Fate deck raises the FAQ errata's limit of 10 to 20" : " (FAQ errata)") + "; cards from “Draw 1 Fate” later don't count.</li>" +
+      "<li><b>Draw Fate cards:</b> 1 per <b>100</b> troop strength fighting (rounded down: the rulebook's example draws 2 for 250 troops), plus <b>2</b> for the commander's +200; each " + WK.ic("casualty-token", "Casualty token") + "casualty token on your armies is −100. <b>Maximum " + WK.fateMax(c) + " cards</b> in this step" + (WK.fg(c) ? " — For Glory's larger Fate deck raises the FAQ errata's limit of 10 to 20" : " (FAQ errata)") + "; cards from “Draw 1 Fate” later don't count.</li>" +
       (WK.fg(c) ? "<li class='fg-li'><b>For Glory — Advancements:</b> declare any Advancement you'll use right after drawing, before discarding or revealing (attacker first). One Advancement per Baron per battle, used in addition to Fate cards and Noble abilities.</li>" : "") +
       "<li><b>Discard Fate cards:</b> each side with a commanding Noble discards <b>2</b> (facedown to the bottom of the deck); if that would leave you with none because you drew only two, keep one. You may discard more than two.</li>" +
       "<li><b>Reveal</b> simultaneously.</li></ol>" +
       "<h4>Resolve the battle</h4><ol>" +
       "<li><b>Draw additional Fate:</b> each “Draw 1 Fate” card draws another card, and so on while they keep coming." + (WK.fg(c) ? " (For Glory: resolve Retreat/Draw 1 Fate results first — see “For Glory — New Fate Deck”.)" : "") + "</li>" +
-      "<li><b>Tally casualties</b> simultaneously: your <i>Deal 100 Casualties</i> cards minus his <i>Prevent 100 Casualties</i> cards is what he takes, and vice versa. A star commander may add a Deal, a square commander a Prevent.</li>" +
+      "<li><b>Tally casualties</b> simultaneously: your <i>Deal 100 Casualties</i> cards minus his <i>Prevent 100 Casualties</i> cards is what he takes, and vice versa. A " + WK.ic("noble-star", "Star") + "star commander may add a Deal, a " + WK.ic("noble-square", "Square") + "square commander a Prevent.</li>" +
       "<li><b>Assign casualties:</b> one casualty token per 100, placed one by one on your armies in the battle — you may split them (FAQ). An army can take no more tokens than it has troops; when its tokens equal or exceed its troops, its Noble <b>dies</b>. Once all your Nobles in the battle are dead, assign no more. The defender may watch the attacker assign first. If either side now has no living Nobles in the battle, skip step 4.</li>" +
-      "<li><b>Count victories:</b> each side's <i>+1 Victory</i> cards, plus one for a triangle commander:<ul>" +
+      "<li><b>Count victories:</b> each side's <i>+1 Victory</i> cards, plus one for a " + WK.ic("noble-triangle", "Triangle") + "triangle commander:<ul>" +
         "<li><b>Full victory</b> — two or more ahead: the opposing Nobles with troops fighting are <b>killed</b>;</li>" +
         "<li><b>Partial victory</b> — one ahead: the opposing Nobles with troops fighting <b>retreat</b>;</li>" +
         "<li><b>Stalemate</b> — equal: nothing happens.</li></ul></li>" +
       "<li><b>Resolve Noble deaths.</b> Casualty tokens stay on surviving armies until removed by Muster Troops.</li></ol>" +
       "<p>The battle is over, even if both sides still have armies in the area. (The Quick Reference also skips Count Victories when the defender has 0 strength.)</p>",
-    src: (c) => WK.cite("Rules p.14–16, p.20", "FAQ p.1–2", WK.fg(c) ? "C&G p.2–3" : "")
+    src: (c) => WK.cite("Rules p.4, p.14–16, p.20", "FAQ p.1–2", WK.fg(c) ? "C&G p.2–3" : "")
   },
   {
     title: "Assaulting a City (and Breaches)",
@@ -580,7 +589,7 @@ WK.reference = [
       "<li>Use the open-field procedure, but the defender adds the <b>city's strength</b> (the left-hand number under its name; income is on the right): 1 Fate card per 100 of troops <i>and</i> city. Fortified cities add 100" + (WK.fg(c) ? "; a Garrison adds 100 (a city holds at most one)" : "") + ". Example: 200 troops in Vecht (strength 300) draw 5 + 2 = 7 cards; 8 if Vecht is fortified.</li>" +
       "<li>A <b>neutral city</b> is played by another Baron (not the attacker), drawing for its strength; it has no commander, so it doesn't discard two cards.</li></ul>" +
       "<h4>Breaches</h4><ul>" +
-      "<li>The defender may take casualties as <b>breaches</b> on the city instead of casualty tokens on his armies: each breach = 100 casualties and lowers the city's strength by 100. A city can take breaches up to its current strength; with more than 100 casualties he may split them between breaches and troops.</li>" +
+      "<li>The defender may take casualties as <b>breaches</b> on the city instead of casualty tokens on his armies: place a " + WK.ic("breach-token", "Breach token") + "breach token next to the city for each breach. Each breach = 100 casualties and lowers the city's strength by 100. A city can take breaches up to its current strength; with more than 100 casualties he may split them between breaches and troops.</li>" +
       "<li>At 0 strength a city takes no more breaches; further casualties go on the defender's armies.</li>" +
       "<li>Breaches stay after the battle (and when the city changes hands) until repaired with Upgrade Defenses.</li></ul>" +
       "<h4>Capturing the city</h4><ul>" +
@@ -588,19 +597,19 @@ WK.reference = [
       "<li>Place your control marker under the city (fortified side up if it was fortified).</li>" +
       "<li>FAQ: if your attacking Noble dies while reducing the city to 0, you don't capture it. Assaulting a 0-strength city wins automatically. A neutral city that scores two or more victories more than the attacker kills the attacking Noble, just as in Noble-versus-Noble combat.</li></ul>" +
       "<h4>Razing instead</h4><ul><li>Immediately after gaining control of a city you may <b>raze</b> it: remove the plastic city (and your control marker) and take <b>3 × its income</b> in crowns. Razed cities can never be controlled.</li></ul>",
-    src: (c) => WK.cite("Rules p.16–18", "FAQ p.1–2", WK.fg(c) ? "C&G p.2–3" : "")
+    src: (c) => WK.cite("Rules p.4, p.16–18", "FAQ p.1–2", WK.fg(c) ? "C&G p.2–3" : "")
   },
   {
     title: "Sieges",
     when: () => true,
     html: () => "<ul>" +
       "<li>You may siege only if your <b>total strength is greater</b> than the defender's. The defender counts the city's strength; both sides add +200 for their would-be commanders; special abilities don't count; casualties and breaches <b>do</b> count (FAQ). A neutral city has no commander.</li>" +
-      "<li>Declare the siege and place a <b>siege marker</b> on the city. No Fate cards are drawn: the attacker takes no casualties and the city's defenses stay intact. (Example: 50 troops + 200 = 250 against a 200-strength neutral city is a legal siege.)</li>" +
+      "<li>Declare the siege and place a " + WK.ic("siege-marker", "Siege marker") + "<b>siege marker</b> on the city. No Fate cards are drawn: the attacker takes no casualties and the city's defenses stay intact. (Example: 50 troops + 200 = 250 against a 200-strength neutral city is a legal siege.)</li>" +
       "<li><b>While besieged:</b> Nobles in the city can't move out, transfer troops, or receive troops during the Upkeep or the Mercenary Draft; the city gives no Influence and no Taxation income; it can't be fortified or repaired.</li>" +
       "<li>The besieged Baron may still move Nobles <i>into</i> the city to reinforce it (they can't leave until the siege is lifted) (FAQ). Nobles inside may attack the besiegers — an open-field battle, without the city's strength.</li>" +
       "<li><b>The siege is lifted</b> if the besiegers' leading Nobles are killed or forced to retreat, or if all the attacker's armies leave the area for any reason. Remove the marker. Another of your Nobles may join the siege, or take it over, as long as the area is never left without your Nobles (FAQ).</li>" +
       "<li><b>The city falls</b> if, in a <b>later game round</b>, the same Baron sieges it again with the siege never lifted in between: he gains control and any defending Nobles in the city die. He must meet the strength test again when he announces the second siege; losing strength in between doesn't lift the siege. It can be any later round, not just the next (FAQ).</li></ul>",
-    src: () => "Rules p.16–17 · FAQ p.2–3"
+    src: () => "Rules p.4, p.16–17 · FAQ p.2–3"
   },
   {
     title: "Strongholds",
@@ -645,7 +654,7 @@ WK.reference = [
       "<li>When you capture a city, place one of your control markers under it.</li></ul>" +
       "<h4>Revolts (Upkeep step 3)</h4><ul>" +
       "<li>One at a time, for each city you control <b>without one of your Nobles in its area</b>, draw a Fate card. On <b>Revolt</b> the city becomes neutral (remove your control marker) unless you pay <b>1 Faith</b> or <b>twice its income</b> in crowns.</li>" +
-      (WK.fg(c) ? "<li><b>For Glory — Riot</b> (on about 1 in 5 of the new Fate cards): pay twice the city's income or 1 Faith, or a <b>riot token</b> goes on the city. A rioting city gives no crowns at Taxation and no Influence at Upkeep; a second Riot on a rioting city counts as a Revolt. The token is removed when you have a Noble or Garrison at the city, or if you lose the city.</li>" : "") + "</ul>" +
+      (WK.fg(c) ? "<li><b>For Glory — Riot</b> (on about 1 in 5 of the new Fate cards): pay twice the city's income or 1 Faith, or a " + WK.ic("riot-token", "Riot token") + "<b>riot token</b> goes on the city. A rioting city gives no crowns at Taxation and no Influence at Upkeep; a second Riot on a rioting city counts as a Revolt. The token is removed when you have a Noble or Garrison at the city, or if you lose the city.</li>" : "") + "</ul>" +
       "<h4>Fortified cities</h4><ul>" +
       "<li>Fortify with <b>Upgrade Defenses</b> (4 crowns): <b>+1 crown</b> at Taxation, <b>+100 strength</b> when defending.</li>" +
       "<li>A fortified city stays fortified when another Baron takes it (his marker goes fortified side up), but loses the status if it becomes neutral (for example by revolt). Breaches stay either way.</li>" +
@@ -690,13 +699,13 @@ WK.reference = [
     title: "For Glory — Knowledge, Advancements & the Scholar",
     when: (c) => WK.fg(c),
     html: (c) => "<ul>" +
-      "<li><b>Knowledge</b> is a new resource, gained with the <b>Enrich Mind</b> Baron Action card (1 per card). It buys <b>Advancement cards</b>.</li>" +
+      "<li>" + WK.ic("knowledge-token", "Knowledge token") + "<b>Knowledge</b> is a new resource, gained with the <b>Enrich Mind</b> Baron Action card (1 per card). It buys <b>Advancement cards</b>.</li>" +
       "<li><b>Buying:</b> when you resolve Enrich Mind you may buy <b>one</b> of the three available Advancements for the Knowledge shown at the bottom of the card — the <b>Scholar</b> may buy as many as he can afford. Place it faceup in front of you; draw a replacement after <b>each</b> purchase.</li>" +
       "<li><b>Limits:</b> one copy of each Advancement per Baron, and at most <b>three</b> Advancements: discard down to three (your choice) to the bottom of the Advancement deck.</li>" +
       "<li><b>Using:</b> at no cost, when the card says; state that you're activating it, carry out the effect, and exhaust it if told to. An exhausted Advancement lies facedown until the Refresh Nobles step of the Upkeep.</li>" +
       "<li><b>In battle:</b> one Advancement per Baron per battle, declared right after drawing Fate cards and before discarding or revealing them — the attacker declares first. It works in addition to Fate cards and Noble abilities.</li></ul>" +
       "<h4>The Scholar</h4><ul>" +
-      "<li>The Baron who plays Enrich Mind and then has more Knowledge than every other Baron takes the <b>Scholar token</b>." + (c.p === 2 ? " (Two Barons: nobody starts with it.)" : " A random Baron who is neither Chairman nor Head of the Church starts with it.") + "</li>" +
+      "<li>The Baron who plays Enrich Mind and then has more Knowledge than every other Baron takes the " + WK.ic("scholar-token", "Scholar token") + "<b>Scholar token</b>." + (c.p === 2 ? " (Two Barons: nobody starts with it.)" : " A random Baron who is neither Chairman nor Head of the Church starts with it.") + "</li>" +
       "<li>The Scholar may buy any number of Advancements with Enrich Mind, and uses the special options on <b>Research</b> and <b>Uncertain Times</b>.</li></ul>",
     src: () => "C&G p.1–3"
   },
@@ -704,7 +713,7 @@ WK.reference = [
     title: "For Glory — New Troops",
     when: (c) => WK.fg(c),
     html: () => "<h4>Garrisons (8)</h4><ul>" +
-      "<li>Hired only through the new <b>Upgrade Defenses</b>: each Baron may hire one for one of his un-garrisoned cities for <b>1 crown</b>. Place the Garrison card in front of you and a Garrison token on the city.</li>" +
+      "<li>Hired only through the new <b>Upgrade Defenses</b>: each Baron may hire one for one of his un-garrisoned cities for <b>1 crown</b>. Place the Garrison card in front of you and a " + WK.ic("garrison-token", "Garrison token") + "Garrison token on the city.</li>" +
       "<li>Assigned to a city, not a Noble: <b>+100 strength</b> to the city while defending; it never attacks or moves. When all eight are hired, no more can be hired until one is free.</li>" +
       "<li>Paid <b>every Wages phase</b>: for each Garrison not paid, discard a Garrison card and one of your Garrison tokens. Lose control of a garrisoned city and its token is discarded with one of your Garrison cards. Discarded Garrison cards return to the Garrison deck.</li>" +
       "<li>A Garrison at a rioting city removes the riot token.</li></ul>" +
@@ -721,7 +730,7 @@ WK.reference = [
     title: "For Glory — New Fate Deck",
     when: (c) => WK.fg(c),
     html: () => "<p>The new 48-card Fate deck (blue backs) completely replaces the original and serves all the same functions. Because it's bigger, each Baron may draw up to <b>20 Fate cards</b> at the start of a battle (the FAQ errata's limit for the original deck is 10).</p>" +
-      "<h4>Riot (revolt result)</h4><ul><li>On about 1 in 5 of the new cards. Drawn for a city in the Revolts step: its owner pays twice its income or 1 Faith, or a <b>riot token</b> goes on it — no Taxation crowns and no Upkeep Influence from it. A second Riot on a rioting city is treated as a Revolt. The token goes when your Noble or Garrison is present at the city, or when you lose it.</li></ul>" +
+      "<h4>Riot (revolt result)</h4><ul><li>On about 1 in 5 of the new cards. Drawn for a city in the Revolts step: its owner pays twice its income or 1 Faith, or a " + WK.ic("riot-token", "Riot token") + "<b>riot token</b> goes on it — no Taxation crowns and no Upkeep Influence from it. A second Riot on a rioting city is treated as a Revolt. The token goes when your Noble or Garrison is present at the city, or when you lose it.</li></ul>" +
       "<h4>Retreat/Draw 1 Fate (battle result)</h4><ul>" +
       "<li>After all Fate cards are revealed, both sides count their Retreat/Draw 1 Fate results. If the <b>defender</b> has more, he may <b>retreat</b> voluntarily. Otherwise — or if he chooses not to — each counts as a Draw 1 Fate result.</li>" +
       "<li>Retreating: no casualties are dealt and no mercenaries retreat; the defender moves his army as for a normal retreat (the sheet cites “page 18”). If he retreats from an area with one of his cities or his stronghold, the attacker gains the city (or eliminates the stronghold) as if he had won an assault.</li>" +
@@ -743,7 +752,7 @@ WK.reference = [
     title: "The King",
     when: (c) => WK.king(c),
     html: (c) => "<ul>" +
-      "<li><b>Setup:</b> " + WK.pool(c) + " Influence per Baron in the pool; the King token and King's Army cards wait beside the board.</li>" +
+      "<li><b>Setup:</b> " + WK.pool(c) + " Influence per Baron in the pool; the " + WK.ic("king-token", "King token") + "King token and King's Army cards wait beside the board.</li>" +
       "<li><b>Crowning:</b> when the pool runs out, the Baron with the most Influence (ties broken as normal) becomes <b>King</b> and takes the King token. The game continues.</li>" +
       "<li><b>King's Army:</b> the new King immediately gains <b>" + c.p + " King's Army cards</b> (one per Baron), assigned at once to his stronghold and/or any of his Nobles at his stronghold or at cities he controls. They are Regular Troops: they never desert, but must be paid at Wages before any Mercenary. They are never discarded or lost unless another Baron becomes King.</li>" +
       "<li><b>The King's Influence:</b> the King gains <b>+1 Influence</b> in the Gain Influence step of every later Upkeep.</li>" +

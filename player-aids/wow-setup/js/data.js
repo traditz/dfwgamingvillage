@@ -39,13 +39,15 @@ WW.tbcModes = [
 ];
 
 WW.overlords = [
-  { id: "kt", name: "Kel’Thuzad", he: "he", blurb: "Five special Event cards join the Event deck." },
-  { id: "nef", name: "Nefarian", he: "he", blurb: "Moves after each Event card draw, by its Fate number." },
-  { id: "kaz", name: "Lord Kazzak", he: "he", blurb: "The elusive one: five Overlord counters." },
+  /* dsym: the overlord's symbol on his Shadow of War Destiny cards (Shadow of War p.3);
+     lairIcon: the dungeon symbol on an Outland Overlord's sheet (The Burning Crusade p.18, back cover) */
+  { id: "kt", name: "Kel’Thuzad", he: "he", dsym: "destiny-kelthuzad", blurb: "Five special Event cards join the Event deck." },
+  { id: "nef", name: "Nefarian", he: "he", dsym: "destiny-nefarian", blurb: "Moves after each Event card draw, by its Fate number." },
+  { id: "kaz", name: "Lord Kazzak", he: "he", dsym: "destiny-kazzak", blurb: "The elusive one: five Overlord counters." },
   { id: "rag", name: "Ragnaros", he: "he", tbc: true, blurb: "The Burning Crusade’s Lordaeron Overlord. Playing Without Outland only." },
-  { id: "kael", name: "Kael’Thas", he: "he", tbc: true, outland: true, lair: "Tempest Keep", blurb: "Outland Overlord; lair: Tempest Keep." },
-  { id: "vashj", name: "Lady Vashj", he: "she", tbc: true, outland: true, lair: "Coilfang Reservoir", blurb: "Outland Overlord; lair: Coilfang Reservoir." },
-  { id: "illidan", name: "Illidan Stormrage", he: "he", tbc: true, outland: true, lair: "The Black Temple", blurb: "Outland Overlord; lair: The Black Temple. The longest, hardest endgame." }
+  { id: "kael", name: "Kael’Thas", he: "he", tbc: true, outland: true, lair: "Tempest Keep", lairIcon: "dungeon-tempest-keep", blurb: "Outland Overlord; lair: Tempest Keep." },
+  { id: "vashj", name: "Lady Vashj", he: "she", tbc: true, outland: true, lair: "Coilfang Reservoir", lairIcon: "dungeon-coilfang-reservoir", blurb: "Outland Overlord; lair: Coilfang Reservoir." },
+  { id: "illidan", name: "Illidan Stormrage", he: "he", tbc: true, outland: true, lair: "The Black Temple", lairIcon: "dungeon-black-temple", blurb: "Outland Overlord; lair: The Black Temple. The longest, hardest endgame." }
 ];
 
 /* Class order as listed in the base rulebook (Base p.15). Base sheets: the Paladin is
@@ -119,6 +121,20 @@ WW.teams = {
       return doc + " " + pgs.join(", ");
     }).join(" · ");
   };
+  /* Rulebook icons (icons standard v1, css/icons.css): every file is cropped from this game's own books and is
+     always called with its full literal name, e.g. ic("type-melee", "Melee icon"). The text label stays beside it. */
+  const ic = (f, alt) => "<img class=\"aid-ic\" src=\"images/icons/" + f + ".webp\" alt=\"" + alt + "\" title=\"" + alt + "\">";
+  const ici = (f, alt) => "<img class=\"aid-ic aid-ic-inline\" src=\"images/icons/" + f + ".webp\" alt=\"" + alt + "\" title=\"" + alt + "\">";
+  /* keep an inline icon on the same line as the word it labels */
+  const nw = (html) => "<span class=\"ic-nw\">" + html + "</span>";
+  const icPair = (f, alt, label) => "<span class=\"aid-pair\">" + ic(f, alt) + "<span>" + label + "</span></span>";
+  const icRow = (f, alt, html) => "<li>" + ic(f, alt) + "<span>" + html + "</span></li>";
+  /* the four Item decks, by the symbols on their card backs ("Item Type Icons", Base p.8) */
+  const itemTypeRow = () => "<p class=\"aid-icon-row\">" +
+    icPair("item-triangle", "Triangle Item icon", "Triangle (white)") + " " +
+    icPair("item-square", "Square Item icon", "Square (blue)") + " " +
+    icPair("item-circle", "Circle Item icon", "Circle (purple)") + " " +
+    icPair("item-cup", "Special Item (cup) icon", "Special Item (cup)") + "</p>";
   const ovOf = (c) => WW.overlords.find((o) => o.id === c.ov) || WW.overlords[0];
   const clsName = (id) => (WW.classes.find((k) => k.id === id) || {}).name || id;
   const partyLine = (c) => {
@@ -162,16 +178,16 @@ WW.teams = {
             if (c.outland) {
               h += "<li><b>The Burning Crusade:</b> place the <b>Outland game board</b> next to the Lordaeron board — both boards are used.</li>" +
                 "<li>Mark the four <b>Lordaeron dungeons</b> with their Dungeon tokens:<ul>" +
-                "<li><b>Shadowfang Keep</b> → Olsen’s Farthing (Silverpine Forest)</li>" +
-                "<li><b>The Scarlet Monastery</b> → Scarlet Monastery (Tirisfal Glades)</li>" +
-                "<li><b>Stratholme</b> → Stratholme (Eastern Plaguelands)</li>" +
-                "<li><b>Scholomance</b> → Caer Darrow (Western Plaguelands)</li></ul></li>" +
-                "<li>The Outland dungeons are printed on the Outland board — no tokens needed.</li>" +
+                "<li>" + ici("dungeon-shadowfang-keep", "Shadowfang Keep dungeon icon") + " <b>Shadowfang Keep</b> → Olsen’s Farthing (Silverpine Forest)</li>" +
+                "<li>" + ici("dungeon-scarlet-monastery", "Scarlet Monastery dungeon icon") + " <b>The Scarlet Monastery</b> → Scarlet Monastery (Tirisfal Glades)</li>" +
+                "<li>" + ici("dungeon-stratholme", "Stratholme dungeon icon") + " <b>Stratholme</b> → Stratholme (Eastern Plaguelands)</li>" +
+                "<li>" + ici("dungeon-scholomance", "Scholomance dungeon icon") + " <b>Scholomance</b> → Caer Darrow (Western Plaguelands)</li></ul></li>" +
+                                "<li>The Outland dungeons are printed on the Outland board — no tokens needed.</li>" +
                 "<li>Short of space? Keep the unused creatures in the box lid, put decks and the Overlord sheet on a second table, and bag the tokens until needed.</li>";
             }
             return h + "</ul>";
           },
-          src: (c) => (c.outland ? "Base p.6 · The Burning Crusade p.7, p.16" : "Base p.6") },
+          src: (c) => (c.outland ? "Base p.6 · The Burning Crusade p.6–7, p.16 · The Burning Crusade back cover" : "Base p.6") },
 
         { when: () => true, exp: "base",
           t: "Choose classes",
@@ -270,7 +286,7 @@ WW.teams = {
         { when: () => true, exp: "base",
           t: "Shuffle the Item decks",
           d: (c) => {
-            let h = "<ul><li>Sort the <b>Item cards</b> by the symbol on their backs — <b>Triangle</b> (white), <b>Square</b> (blue), <b>Circle</b> (purple) and the <b>Special Item</b> deck (cup). Shuffle each and place it next to the board.</li>";
+            let h = "<ul><li>Sort the <b>Item cards</b> into four decks by the symbol on their backs, shuffle each and place it next to the board:" + itemTypeRow() + "</li>";
             if (c.mod("sow-items")) h += "<li><b>Shadow of War:</b> shuffle its new Triangle, Square, Circle and Special Item cards into the matching decks. Its <b>Bonus Item</b> cards (green star backs) form a <b>fifth</b> Item deck.</li>";
             if (c.outland) h += "<li><b>The Burning Crusade:</b> shuffle its new Item cards into their decks and place the new <b>hexagon (orange)</b> Item deck beside the others.</li>";
             return h + "</ul>";
@@ -355,8 +371,9 @@ WW.teams = {
           d: (c) => {
             const base = ["kt", "kaz", "nef"].includes(c.ov);
             return "<ul>" + (base
-              ? "<li>Keep only the <b>6 overlord-specific Destiny cards</b> for " + ovOf(c).name + " (his symbol is at the base of the card) and remove the other overlord-specific cards.</li>"
-              : "<li>Shadow of War’s overlord-specific Destiny cards carry the symbol of Kel’Thuzad, Lord Kazzak or Nefarian. None corresponds to " + ovOf(c).name + ", so <b>remove all the overlord-specific cards</b> (Shadow of War’s rule applied as written — The Burning Crusade adds no Destiny cards).</li>") +
+              ? "<li>Keep only the <b>6 overlord-specific Destiny cards</b> for " + ovOf(c).name + " (his symbol " + ici(ovOf(c).dsym, ovOf(c).name + " symbol") + " is at the base of the card) and remove the other overlord-specific cards.</li>"
+              : "<li>Shadow of War’s overlord-specific Destiny cards carry the symbol of " + nw("Kel’Thuzad " + ici("destiny-kelthuzad", "Kel’Thuzad symbol")) +
+                ", " + nw("Lord Kazzak " + ici("destiny-kazzak", "Lord Kazzak symbol")) + " or " + nw("Nefarian " + ici("destiny-nefarian", "Nefarian symbol")) + ". None corresponds to " + ovOf(c).name + ", so <b>remove all the overlord-specific cards</b> (Shadow of War’s rule applied as written — The Burning Crusade adds no Destiny cards).</li>") +
               "<li>Shuffle the Destiny deck, reveal the top card and put it into play faceup next to the board.</li>" +
               "<li>Check the <b>Destiny Number</b> on the hourglass in its lower left corner:<ul>" +
               "<li><b>0:</b> resolve it immediately and reveal another (repeat while you keep drawing zeros).</li>" +
@@ -413,7 +430,7 @@ WW.teams = {
           h += "<li><b>No turn limit (The Burning Crusade):</b> after turn 30, return the turn marker to the “Start” space and keep playing until the Overlord is defeated. From then on, an item icon on the turn track draws the top <b>hexagon (orange)</b> Item card into the Merchant pile instead of the item shown.</li>" +
             "<li>The Outland Overlords are fought at the end of their lair dungeon — see “Dungeons”." + (c.ov === "illidan" ? " Illidan may make the game longer than the other Outland Overlords." : "") + "</li>";
         } else if (c.mod("dto")) {
-          h += "<li><b>Defeat the Overlord! (variant):</b> after turn 30, don’t move the marker into “End” — move it back to space “1”. The game continues until one side defeats the Overlord. On the second lap, an item icon adds a round (purple) Item card to the Merchant instead of the type shown.</li>";
+          h += "<li><b>Defeat the Overlord! (variant):</b> after turn 30, don’t move the marker into “End” — move it back to space “1”. The game continues until one side defeats the Overlord. On the second lap, an item icon adds a round (purple) " + ici("item-circle", "Circle Item icon") + " Item card to the Merchant instead of the type shown.</li>";
         } else {
           h += "<li><b>Final PvP battle:</b> when the turn marker reaches “End” (after the 30th turn), the normal game is over:<ol>" +
             "<li>The faction with the higher combined XP are the <b>attackers</b> (random if tied).</li>" +
@@ -433,20 +450,20 @@ WW.teams = {
       title: "The faction turn",
       when: () => true,
       html: (c) => "<ol>" +
-        "<li><b>Character actions.</b> Every character of the active faction takes <b>two actions</b>" + (c.outland ? " (only one for a character who stays in a dungeon — see “Dungeons”)" : "") + ". The faction picks the order freely and may interleave characters (C2, C1, C1, C2, C3, C3 is fine). Flip an Action token after each action.</li>" +
+        "<li><b>Character actions.</b> Every character of the active faction takes <b>two actions</b>" + (c.outland ? " (only one for a character who stays in a dungeon — see “Dungeons”)" : "") + ". The faction picks the order freely and may interleave characters (C2, C1, C1, C2, C3, C3 is fine). Flip an " + ici("action-token", "Action token") + " Action token to its grey side after each action.</li>" +
         "<li><b>Character Management.</b> Equip and unequip Power and Item cards between your sheet and your Spellbook/Bag. Normally the only time you may do so" +
         ((c.mod("sow-class") || c.outland) ? " (fast-equip cards are the exception)" : "") + ".</li>" +
         (c.outland ? "<li><b>Dungeon phase (The Burning Crusade).</b> Every active-faction character in a dungeon must fight the boss of the stage they’re next to (characters on the Outland Overlord’s sheet fight the Overlord) — one dungeon at a time, in the order the faction chooses; skipped if nobody is in a dungeon. The book places it after all of the faction’s actions and says that when it ends “the turn marker is moved”, so this page runs it after Character Management.</li>" : "") +
         "<li><b>Advance the turn marker</b> one space." + (c.outland ? " After turn 30 it returns to “Start” (The Burning Crusade)." :
           c.mod("dto") ? " After turn 30 it returns to space “1” (Defeat the Overlord!)." : " Into “End”: the game ends at once and the final PvP battle begins.") + "</li>" +
         (c.mod("sow-destiny") ? "<li><b>Destiny check (Shadow of War).</b> If the marker reaches the Destiny hit token, the Destiny card expires: resolve its expiry text <b>before</b> anything else on that space, discard it (unless it says otherwise) and reveal a new one.</li>" : "") +
-        "<li><b>Event card / Merchant check.</b> Event icon on the new space: draw and resolve an Event card. Item icon: draw the top card of that Item deck and put it faceup in the Merchant pile" +
+        "<li><b>Event card / Merchant check.</b> Event card icon " + ici("event-card", "Event card symbol") + " on the new space: draw and resolve an Event card. " + nw("Item icon " + ici("item-triangle", "Item icon (Triangle Item symbol)")) + " (an Item deck’s symbol): draw the top card of that Item deck and put it faceup in the Merchant pile" +
         (c.outland ? " (a hexagon Item after turn 30)" : c.mod("dto") ? " (on the second lap, a round purple Item instead — Defeat the Overlord!)" : "") + ".</li>" +
         (c.outland ? "<li><b>Exchange quests (optional, The Burning Crusade).</b> After advancing the marker, the faction may trade non-Outland quests for Outland quests — see “Outland, flying mounts and level 6”.</li>" : "") +
         "<li>The other faction becomes the active faction.</li></ol>" +
         "<ul><li><b>Faction decisions</b> (action order, who gets which items): if the faction can’t agree, the player whose character has the most XP decides; ties are broken randomly.</li>" +
         "<li><b>Open information:</b> gold, Health, Energy, Bag and Spellbook contents are open to everyone, and anyone may look through the Merchant deck.</li></ul>",
-      src: (c) => J(["Base p.7–9, p.12, p.37", c.mod("sow-class") && "Shadow of War p.4", c.mod("sow-destiny") && "Shadow of War p.6–7", c.outland && "The Burning Crusade p.8, p.9, p.13, p.17–18"])
+      src: (c) => J(["Base p.7–9, p.12, p.24, p.37", c.mod("sow-class") && "Shadow of War p.4", c.mod("sow-destiny") && "Shadow of War p.6–7", c.outland && "The Burning Crusade p.8, p.9, p.13, p.17–18"])
     },
     {
       title: "The five character actions",
@@ -455,7 +472,8 @@ WW.teams = {
         "<li><b>Exception — independent creatures:</b> if your region holds blue (independent) creatures, your <b>next action must be a Challenge</b> against one group of them. If you end your second action there and they’re still there, your first action next turn must challenge them (FAQ)." +
         (c.tbc ? " Purple creatures are quest creatures: they never stop movement or force a Challenge." : "") + "</li>" +
         "<li><b>Travel:</b> move up to <b>2</b> adjacent regions. Entering a region with independent creatures ends the move. Never cross a black border, and never enter the enemy’s starting region (Alliance never into Brill, Horde never into Southshore).<ul>" +
-        "<li><b>Flight paths:</b> spend one movement step to go from a region with a friendly flight path icon to any other region with one (4 per faction; never enemy flight paths).</li>" +
+        "<li><b>Flight paths:</b> spend one movement step to go from a region with a friendly flight path icon " +
+          nw("(" + ici("flight-alliance", "Alliance flight path icon") + " Alliance") + ", " + nw(ici("flight-horde", "Horde flight path icon") + " Horde)") + " to any other region with one (4 per faction; never enemy flight paths).</li>" +
         (c.outland ? "<li><b>Dungeons:</b> in a region with a dungeon, spend a movement step to enter it — you lose any remaining actions.</li>" +
           "<li><b>To Outland:</b> from a Lordaeron region with a friendly flight path, spend a movement step to go to the Dark Portal region on Outland. Back: from the Dark Portal, one movement step to any friendly flight path region on Lordaeron. The Dark Portal is the only link between the boards.</li>" : "") +
         "</ul></li>" +
@@ -463,7 +481,7 @@ WW.teams = {
         "<li><b>Challenge:</b> fight one group in your region — independent creatures, a group of quest creatures spawned by a <b>friendly</b> quest (never an enemy quest’s), " +
         (c.outland ? "a <b>boss</b> from an Event" + (c.mod("sow-destiny") ? " or the boss of a “Boss” Destiny card" : "") + " (an Outland Overlord is fought in its lair instead — see “Dungeons”)" : "a <b>boss</b> (the Overlord" + (c.mod("sow-destiny") ? ", a boss from an Event, or the boss of a “Boss” Destiny card" : " or a boss from an Event") + ")") + ", or <b>all</b> the enemy characters there (PvP). Invite friendly characters in your region to join; each joiner spends an action (no actions left, no joining).</li>" +
         "<li><b>Training:</b> buy Power cards from your Class deck with a level requirement no higher than your level; pay their gold cost and put them under your Spellbook.</li>" +
-        "<li><b>Town</b> (region with a friendly town icon) — any or all, in any order: regain Health and Energy totalling <b>your level</b>; buy and sell Item cards with the Merchant; buy Power cards as in Training." +
+        "<li><b>Town</b> (region with a friendly town icon: " + nw(ici("town-alliance", "Alliance town icon") + " Alliance") + ", " + nw(ici("town-horde", "Horde town icon") + " Horde") + ") — any or all, in any order: regain Health and Energy totalling <b>your level</b>; buy and sell Item cards with the Merchant; buy Power cards as in Training." +
         (c.outland ? " Not possible inside a dungeon." : "") + "</li>" +
         "<li><b>Group</b> = all independent creatures of one type in a region, or all quest creatures of one type in a region. A single creature is a group; independent and quest creatures are never grouped together.</li>" +
         "<li><b>Trading:</b> after resolving an action, if you share a region with a friendly character you may give or exchange gold and Bag items. Power cards and soulbound items never change hands.</li></ul>",
@@ -480,7 +498,7 @@ WW.teams = {
         "<li><b>Dice Pool:</b> collect the dice from every equipped card that says “Add X to your dice pool” (pay any Energy cost now), then roll them all.</li>" +
         "<li><b>Reroll:</b> reroll up to your <b>Reroll value</b> in dice; each die can be rerolled only once.</li>" +
         "<li><b>Place Tokens:</b> each result equal to or higher than the creature’s <b>Threat</b> is a hit:<ul>" +
-        "<li><b>blue</b> hit → hit token in the <b>damage</b> box;</li><li><b>red</b> hit → hit token in the <b>defense</b> box;</li><li><b>green</b> hit → <b>armor</b> token in the defense box.</li></ul>" +
+        "<li><b>blue</b> hit → " + ici("hit-token", "Hit token") + " hit token in the <b>damage</b> box;</li><li><b>red</b> hit → hit token in the <b>defense</b> box;</li><li><b>green</b> hit → " + ici("armor-token", "Armor token") + " <b>armor</b> token in the defense box.</li></ul>" +
         "Then add hit tokens equal to your <b>Attrition value</b> to the <b>attrition</b> box.</li></ol>" +
         "<h4>2 · Defense Phase — once per round</h4><ol>" +
         "<li><b>Ranged Strike:</b> if the damage box holds hits equal to or more than a creature’s Health, discard that many and defeat the creature; repeat. The last creature down ends the combat.</li>" +
@@ -506,9 +524,17 @@ WW.teams = {
         "<li><b>“Add X to your dice pool”</b> cards are used at the start of your Dice Pool step.</li>" +
         "<li><b>Instant powers</b> cost their Energy every use, paid before the effect; a card’s secondary abilities are free once the first ability’s cost is paid.</li>" +
         "<li><b>Simultaneous effects:</b> the active character chooses the order; with no active player (e.g. the Defense Phase), the active faction decides" + (c.outland || c.mod("dto") ? "" : "; in the final PvP battle, randomly pick which faction decides each conflict") + ".</li>" +
-        "<li><b>Dice symbols:</b> blue, red or green die = that colour; <b>black</b> = any colour; <b>two-coloured</b> = either colour; a <b>number inside</b> = that result on that colour; a <b>“+”</b> = that result or higher.</li>" +
         "<li><b>FAQ:</b> “the previous combat round” means the round just before this one, in this combat. A “rolled result” is a die’s current result, rerolls included.</li>" +
-        "<li><b>Friendly participating character</b> includes you — and you must be in the combat to use such an ability.</li></ul>",
+        "<li><b>Friendly participating character</b> includes you — and you must be in the combat to use such an ability.</li></ul>" +
+        "<h4>The dice symbols</h4><p>Many cards use these symbols for dice and die results:</p><ul class=\"aid-icons\">" +
+        icRow("die-blue", "Blue die symbol", "<b>Blue</b> — a blue die.") +
+        icRow("die-red", "Red die symbol", "<b>Red</b> — a red die.") +
+        icRow("die-green", "Green die symbol", "<b>Green</b> — a green die.") +
+        icRow("die-black", "Black die symbol", "<b>Black</b> — any colour die: a red, blue or green die.") +
+        icRow("die-dual", "Two-coloured die symbol", "<b>Two colours</b> — a die of either of these colours.") +
+        icRow("die-number", "Number inside the die symbol", "<b>Number inside</b> — this result, on this colour die.") +
+        icRow("die-plus", "Plus sign next to the die symbol", "<b>“+” beside the die</b> — this result <b>or higher</b>, on this colour die.") +
+        "</ul>",
       src: (c) => J(["Base p.15–19, p.27–29, p.37 · FAQ p.1–3", c.tbc && "The Burning Crusade p.8"])
     },
     {
@@ -540,7 +566,7 @@ WW.teams = {
         "<li><b>Decks:</b> grey (level 1 — setup only), green (levels 2–3), yellow (3–4), red (4–5)" + (c.tbc ? ", and The Burning Crusade’s <b>purple</b> deck, harder than red" : "") + ". Each faction keeps <b>" + quests(c) + "</b> quests faceup.</li>" +
         "<li><b>New quests</b> are drawn after completing one (the faction chooses green, yellow" + (c.tbc ? ", red or purple" : " or red") + ") or when an Event says so. Each spawns its creatures at once — remember the Quest token.</li>" +
         "<li><b>Completing:</b> whoever defeats the <b>last</b> remaining quest creature of a card completes it and takes the whole reward; partial progress earns nothing.</li>" +
-        "<li><b>Rewards:</b> gold, XP and items. Each item symbol shows a Draw Number (1–3): draw that many from that deck, keep one, put the rest facedown on the bottom; resolve symbols one at a time in order. A special item in red bold is searched for in the Special Item (cup) deck.</li>" +
+        "<li><b>Rewards:</b> gold, XP and items. Each item symbol shows a Draw Number (1–3): draw that many from that deck, keep one, put the rest facedown on the bottom; resolve symbols one at a time in order. A special item in red bold is searched for in the Special Item (cup) deck." + itemTypeRow() + "</li>" +
         "<li><b>Groups:</b> split gold and XP as evenly as possible; leftovers go to the character(s) with the fewest XP (ties random); share items by agreement. A character defeated in the fight still gets an equal XP share if the group completes the quest — but no gold or items.</li>" +
         "<li><b>XP penalty:</b> quest level lower than your level → subtract the difference from the XP that quest gives you (down to 0 — you never lose XP you already have). <b>XP bonus:</b> quest level higher → gain the difference, but only one character in a group gets it (the one with the fewest XP; ties random).</li>" +
         "<li><b>Running out of figures:</b> no independent figure left → skip that spawn. If even one of a quest’s quest creatures can’t be placed because all those figures are in use → spawn nothing from that card (not even its independent creatures), put it facedown at the bottom of its deck and draw another. (Base p.22’s next sentence says such a quest “should be discarded” instead; this page follows the step-by-step procedure.)</li>" +
@@ -549,20 +575,28 @@ WW.teams = {
         "<li>No XP for defeating enemy characters or independent creatures" + (c.mod("sow-blue") ? " — except through blue quests" : "") + ".</li>" +
         "<li><b>Quest errata (FAQ):</b> the red Horde quest “Brutes in the Barrows” should say “The Infectis Scar”, not “Hearthglen” (the mini-maps are right)." +
         (c.tbc ? " The Burning Crusade’s red Horde quest “A Sample of Slime” should show 1 green Ooze and 1 purple Ooze, both in The Sepulcher (not Agmand Mills)." : "") + "</li></ul>",
-      src: (c) => J(["Base p.7, p.17–18, p.20–23, p.40 · FAQ p.1" + (c.tbc ? ", p.4" : ""), c.chars === 4 && (c.p === 2 ? "Base p.35" : "Base p.36"), c.mod("sow-blue") && "Shadow of War p.5", c.tbc && "The Burning Crusade p.5" + (c.outland ? ", p.15–16" : "")])
+      src: (c) => J(["Base p.7–8, p.17–18, p.20–23, p.40 · FAQ p.1" + (c.tbc ? ", p.4" : ""), c.chars === 4 && (c.p === 2 ? "Base p.35" : "Base p.36"), c.mod("sow-blue") && "Shadow of War p.5", c.tbc && "The Burning Crusade p.5" + (c.outland ? ", p.15–16" : "")])
     },
     {
       title: "Character sheet, powers and items",
       when: () => true,
       html: (c) => "<ul>" +
         "<li><b>Card areas:</b> one card per area (plus add-ons). The icons above an area say which card <b>types</b> fit; Item cards must also match one of its <b>traits</b> (“All” = any trait). Power cards only need the type — e.g. the Druid’s Bear Form fits a “mace or sword” melee area (FAQ). Warrior Stance powers go only in the Stance-only area.</li>" +
-        "<li>You can’t equip a card above your level (you may carry it). A card placed over a preprinted card replaces it; uncover the preprinted card and it works again.</li>" +
-        "<li><b>Card types:</b> melee (usually red dice), ranged (blue), armor (green), general items, <b>Bag items</b> (used straight from the Bag, never equipped — still not above your level), <b>instant powers</b> (pay Energy each use) and <b>active powers</b> (pay the Energy when equipped, then free).</li>" +
-        "<li><b>Add-on items</b> (“+” before the type icon): traits read function – normal (e.g. Helmet – Leather); they must match the area’s normal trait (FAQ: the Hunter can’t wear the mail Thorium Helm); they sit on top of an area’s normal item; any number per area but only one of each function.</li>" +
+        "<li>You can’t equip a card above your level (you may carry it). A card placed over a preprinted card replaces it; uncover the preprinted card and it works again.</li></ul>" +
+        "<h4>Card type icons</h4><p>A card’s type is the icon in its upper left-hand corner:</p><ul class=\"aid-icons\">" +
+        icRow("type-melee", "Melee icon", "<b>Melee</b> — usually items that grant red dice.") +
+        icRow("type-ranged", "Ranged icon", "<b>Ranged</b> — usually items that grant blue dice.") +
+        icRow("type-armor", "Armor icon", "<b>Armor</b> — usually items that grant green dice.") +
+        icRow("type-instant", "Instant Power icon", "<b>Instant power</b> — pay its Energy cost each time you use it.") +
+        icRow("type-active", "Active Power icon", "<b>Active power</b> — pay its Energy cost when you equip it; then it gives a constant benefit for free.") +
+        icRow("type-general", "General Item icon", "<b>General item</b> — usually exotic items that grant some specific benefit when equipped.") +
+        icRow("type-bag", "Bag Item icon", "<b>Bag item</b> — used straight from the Bag, never placed on the character sheet (still not above your level).") +
+        icRow("type-addon", "Add-On icon", "<b>Add-on item</b> — a “+” in front of the type icon (here an Armor add-on). Its traits read function – normal (e.g. Helmet – Leather) and must match the area’s normal trait (FAQ: the Hunter can’t wear the mail Thorium Helm); it sits on top of an area’s normal item — any number per area, but only one of each function.") +
+        "</ul><ul>" +
         "<li><b>Unique categories</b> (e.g. Paladin Aura, Blessing and Seal; Warlock Demon): only one equipped Power card per category. Talents have no category (FAQ).</li>" +
         "<li><b>Pets and Demons:</b> place Health tokens on the card equal to its Health capacity; you may take a wound on it instead of yourself; at 0 it goes back to your Spellbook (re-equip later, paying its Energy). Defeat unequips it. Pets heal only through Mend Pet or by unequipping and re-equipping in Character Management (FAQ).</li>" +
         "<li><b>Bag:</b> up to <b>3</b> items" + (c.mod("sow-items") ? " — plus up to <b>7 Bonus Items</b> (Shadow of War)" : "") + ". Over the limit, put one (new or old) into the Merchant deck for nothing — the only way to discard an item. Equipping from a full Bag, you may swap the Bag item straight with the one on your sheet (FAQ). The Spellbook has no limit.</li>" +
-        ((c.mod("sow-class") || c.outland) ? "<li><b>Fast-equip</b> (Spellbook icon in the card’s upper right): at the start of any of your actions — including a Challenge or joining one — you may equip the card from your Spellbook" + (c.outland ? " or Bag" : "") + ", paying an active power’s Energy and matching the area; " + (c.outland && c.mod("sow-class") ? "to make room, a Shadow of War power may replace one equipped <b>power</b>, while a Burning Crusade fast-equip card may replace any card (even one without the icon)" : c.outland ? "to make room you may unequip any card (even one without the icon)" : "to make room you may unequip one equipped <b>power</b>") + ".</li>" : "") +
+        ((c.mod("sow-class") || c.outland) ? "<li><b>Fast-equip</b> (Spellbook icon" + (c.outland ? " " + ici("spellbook-icon", "Spellbook icon") : "") + " in the card’s upper right): at the start of any of your actions — including a Challenge or joining one — you may equip the card from your Spellbook" + (c.outland ? " or Bag" : "") + ", paying an active power’s Energy and matching the area; " + (c.outland && c.mod("sow-class") ? "to make room, a Shadow of War power may replace one equipped <b>power</b>, while a Burning Crusade fast-equip card may replace any card (even one without the icon)" : c.outland ? "to make room you may unequip any card (even one without the icon)" : "to make room you may unequip one equipped <b>power</b>") + ".</li>" : "") +
         "<li><b>Gain vs regain:</b> “regain” stops at your capacity; “gain” may exceed it for the ability’s duration. If a capacity boost ends, remove the excess at once.</li>" +
         "<li><b>Merchant:</b> on a Town action, look through the Merchant deck and buy any number of items (pay the gold cost; higher-level items allowed); sell any number from your sheet or Bag for <b>half their value, rounded up</b>. Power cards and soulbound items can never be sold; soulbound items can’t be given away either.</li>" +
         "<li><b>Item errata (FAQ):</b> Pyric Caduceus has the ranged icon, not melee; Crackling Staff works at the “End of your Dice Pool step”, not the end of the Reroll step; of the two “Scroll of Lesser Strength” cards, the one adding two blue dice is “Scroll of Lesser Spirit”.</li></ul>",
@@ -572,14 +606,14 @@ WW.teams = {
       title: "Events, wars and auctions",
       when: () => true,
       html: (c) => "<ul>" +
-        "<li>When the turn marker enters an <b>Event</b> icon space, draw an Event card, read it aloud and resolve it; it stays faceup by the board until its requirements are met, then it’s discarded.</li>" +
+        "<li>When the turn marker enters a space with the <b>Event card</b> symbol " + ici("event-card", "Event card symbol") + ", draw an Event card, read it aloud and resolve it; it stays faceup by the board until its requirements are met, then it’s discarded.</li>" +
         "<li><b>Bonus Events</b> (“+” at the bottom): resolve and discard (unless the card says otherwise), then draw another. Stop when you draw a normal Event, or a Bonus Event with the same title as one already drawn this step (discard that one without effect).</li>" +
         "<li><b>Auction House:</b> everyone announces their gold, then bids secretly in a closed fist; reveal together. The highest bidder pays and takes the Auction Item; ties are settled randomly (everyone bidding 0 is a tie — FAQ). Auction Items aren’t normal items (not in the Bag; they sit in front of you) and are all discarded if their owner is defeated.</li>" +
         "<li><b>Stronger / weaker faction:</b> the faction with more combined XP is stronger; if tied, both count as stronger.</li>" +
-        "<li><b>Wars:</b> put a matching pair of War tokens on the two named regions. A faction with characters in both at the end of its enemy’s faction turn wins the reward; then remove the tokens and discard the card.</li>" +
+        "<li><b>Wars:</b> put a matching pair of " + ici("war-tokens", "War tokens") + " War tokens (same colour) on the two named regions. A faction with characters in both at the end of its enemy’s faction turn wins the reward; then remove the tokens and discard the card.</li>" +
         (c.outland ? "<li><b>Bosses</b> from Events are fought with a Challenge in their region (an Outland Overlord is fought in its lair — see “Dungeons”)."
           : "<li><b>Bosses</b> from Events — and the Overlord — are fought with a Challenge in their region.") +
-        " The book recommends marking an Event boss’s region with a <b>Point of Interest</b> token.</li>" +
+        " The book recommends marking an Event boss’s region with a " + ici("poi-token", "Point of Interest token") + " <b>Point of Interest</b> token.</li>" +
         "<li>The <b>Fate number</b> (0–2) in each Event card’s lower right corner sets how far Nefarian moves after each Event card draw.</li>" +
         (c.ov === "kt" ? "<li><b>Kel’Thuzad’s</b> five special Event cards are in the deck this game.</li>" : "") +
         (c.mod("sow-events") ? "<li>Shadow of War’s Event cards work exactly like the base game’s.</li>" : "") + "</ul>",
@@ -596,9 +630,11 @@ WW.teams = {
         "<li>lose any remaining actions. You may also remove all your Curse tokens; your pet or demon is unequipped; your Auction Items are discarded.</li></ol></li>" +
         (c.outland ? "<li><b>Defeated in a dungeon:</b> move to the nearest graveyard or friendly town on the same board as the dungeon.</li>" : "") +
         "<li>Brought back by the Priest’s Resurrection or the Shaman’s Reincarnation? Treat it as a defeat: you lose your remaining actions, get no gold or items from that quest (XP yes) and may be looted if your faction loses the PvP combat you were fighting in (FAQ).</li>" +
-        "<li><b>Stun</b> (mainly Spiders): for each Stun token, remove <b>2 dice</b> of your choice before rolling each round; if you can’t, you’re defeated before the Reroll step. Remove Stun tokens when the combat ends or you’re defeated.</li>" +
-        "<li><b>Curse</b> (mainly Wraiths): for each Curse token, remove <b>1 die</b> before rolling and suffer REROLL −1 and ATTRITION −1. Curses stay after combat: a Rest removes one (all in a friendly town) and defeat removes them all. Unable to remove a die? You are <b>not</b> instantly defeated (FAQ).</li>" +
-        (c.tbc ? "<li><b>Poison</b> (The Burning Crusade): at the start of each Damage step lose 1 Health per Poison token (a pet or demon may take some). Poison tokens go when the combat ends or you’re defeated.</li>" : "") +
+        "</ul><ul class=\"aid-icons\">" +
+        icRow("stun-token", "Stun token", "<b>Stun</b> (mainly Spiders): for each Stun token, remove <b>2 dice</b> of your choice before rolling each round; if you can’t, you’re defeated before the Reroll step. Remove Stun tokens when the combat ends or you’re defeated.") +
+        icRow("curse-token", "Curse token", "<b>Curse</b> (mainly Wraiths): for each Curse token, remove <b>1 die</b> before rolling and suffer REROLL −1 and ATTRITION −1. Curses stay after combat: a Rest removes one (all in a friendly town) and defeat removes them all. Unable to remove a die? You are <b>not</b> instantly defeated (FAQ).") +
+        (c.tbc ? icRow("poison-token", "Poison token", "<b>Poison</b> (The Burning Crusade): at the start of each Damage step lose 1 Health per Poison token (a pet or demon may take some). Poison tokens go when the combat ends or you’re defeated.") : "") +
+        "</ul><ul>" +
         "<li><b>Component limits:</b> only the dice and the creature figures are limited — substitute anything else" + (c.tbc ? " (out of hit tokens? use gold tokens)" : "") + ".</li></ul>",
       src: (c) => J(["Base p.17, p.25–26, p.36–37 · FAQ p.2–3", c.tbc && "The Burning Crusade p.4, p.8" + (c.outland ? ", p.12, p.16" : "")])
     },
@@ -618,7 +654,7 @@ WW.teams = {
         };
         h += per[o.id];
         if (o.outland) {
-          h += "<li><b>Outland Overlord:</b> no counter and no travelling to fight " + (o.he === "she" ? "her" : "him") + ". " + o.name + "’s lair is <b>" + o.lair + "</b> (dungeon symbol in the sheet’s top left corner).</li>" +
+          h += "<li><b>Outland Overlord:</b> no counter and no travelling to fight " + (o.he === "she" ? "her" : "him") + ". " + o.name + "’s lair is <b>" + o.lair + "</b> (dungeon symbol " + ici(o.lairIcon, o.lair + " dungeon icon") + " in the sheet’s top left corner).</li>" +
             "<li>Characters who defeat <b>Stage 2</b> of the lair move onto the <b>Overlord sheet</b> instead of the Stage 3 deck. No dungeon cards are drawn (no minions, items or rewards); the Overlord is fought normally in the next Dungeon phase, and anyone defeated follows the dungeon defeat rules. Win that fight and your faction wins.</li>";
           if (o.id === "illidan") h += "<li><b>You Are Not Prepared!</b> Illidan is the most powerful enemy in the game — gather the best Power, Talent and Item cards first. He can make the game longer than the other Outland Overlords.</li>";
         } else {
@@ -637,7 +673,7 @@ WW.teams = {
       title: "Shadow of War — new rules",
       when: (c) => c.sow,
       html: (c) => "<ul>" +
-        "<li>The expansion is designed to be used whole, but you may use only some of its cards (e.g. just the powers and talents, or just the items). Its cards carry a broken-shield symbol." + (c.tbc ? " All of it works with The Burning Crusade too." : "") + "</li>" +
+        "<li>The expansion is designed to be used whole, but you may use only some of its cards (e.g. just the powers and talents, or just the items). Its cards carry a broken-shield symbol " + ici("sow-symbol", "Shadow of War symbol") + "." + (c.tbc ? " All of it works with The Burning Crusade too." : "") + "</li>" +
         (c.mod("sow-class") ? "<li><b>New powers and talents:</b> 10 + 10 per class, same rules as the base cards. Cards with the <b>Spellbook icon</b> can be fast-equipped at the start of any of your actions (including a Challenge or joining one): the card must be in your Spellbook, you pay an active power’s Energy, the type must match the area, and you may unequip one power to make room. Some talents let you equip at other times (e.g. the Warrior’s Tactical Mastery: “Start of the combat round: You may equip one power”).</li>" : "") +
         (c.mod("sow-items") ? "<li><b>Bonus Item cards</b> (green star backs, a fifth deck): they don’t count toward the 3-item Bag limit — you may hold up to <b>7 Bonus Items</b> as well; an eighth sends one Bonus Item (new or old) to the Merchant deck for nothing.</li>" +
           "<li><b>Experience Reward cards</b> (in the Bonus Item deck) aren’t Item cards: take the XP at once (a group splits it normally), then discard the card. Defeated characters can still receive this XP; a full Bag doesn’t matter.</li>" : "") +
@@ -656,8 +692,8 @@ WW.teams = {
       html: (c) => "<ul>" +
         "<li><b>Purple creatures</b> are the deadliest version of each type. They’re quest creatures: they never stop movement or force a Challenge. Nine new creature types appear through quests and events as usual.</li>" +
         "<li><b>New Creature Reference Sheets</b> replace the base ones (even without Outland): they add the new types and purple versions and make some green, red and blue base creatures tougher.</li>" +
-        "<li><b>Poison:</b> at the start of each Damage step, lose 1 Health per Poison token (you may take some from a pet or demon). Removed at the end of combat or on defeat.</li>" +
-        (c.outland ? "<li><b>Fast-equip powers and items</b> (Spellbook icon): at the start of any of your actions, equip from your Spellbook or Bag into any legal area, or replace a card already there. Normal costs and restrictions apply.</li>" : "") +
+        "<li><b>Poison</b> " + ici("poison-token", "Poison token") + ": at the start of each Damage step, lose 1 Health per Poison token (you may take some from a pet or demon). Removed at the end of combat or on defeat.</li>" +
+        (c.outland ? "<li><b>Fast-equip powers and items</b> (Spellbook icon " + ici("spellbook-icon", "Spellbook icon") + "): at the start of any of your actions, equip from your Spellbook or Bag into any legal area, or replace a card already there. Normal costs and restrictions apply.</li>" : "") +
         "<li><b>Dice limit 10</b> per colour (3 extra dice of each colour), even without Outland. Extra hit tokens are included; if you still run out, use gold tokens.</li>" +
         (c.outland ? "<li><b>Hexagon (orange) items</b> come mainly from Outland quests and Outland dungeons; they work like other items.</li>" : "") +
         (c.nool ? "<li><b>Without Outland:</b> choose a base Overlord or Ragnaros; no level 6 (Lordaeron’s Experience Track), so none of the expansion’s Power and Talent cards — they are all level 6; no Outland quests; " +
@@ -671,13 +707,13 @@ WW.teams = {
       title: "Dungeons (The Burning Crusade)",
       when: (c) => c.outland,
       html: () => "<table class='ref-table'><thead><tr><th>Dungeon</th><th>Where</th><th>Stages</th><th>Level on key*</th></tr></thead><tbody>" +
-        "<tr><td>Shadowfang Keep</td><td>Olsen’s Farthing (Silverpine Forest)</td><td>2</td><td>II</td></tr>" +
-        "<tr><td>The Scarlet Monastery</td><td>Scarlet Monastery (Tirisfal Glades)</td><td>2</td><td>III</td></tr>" +
-        "<tr><td>Stratholme</td><td>Stratholme (Eastern Plaguelands)</td><td>2</td><td>IV</td></tr>" +
-        "<tr><td>Scholomance</td><td>Caer Darrow (Western Plaguelands)</td><td>2</td><td>IV</td></tr>" +
-        "<tr><td>Tempest Keep</td><td>Outland — Kael’Thas’s lair</td><td>3</td><td>VI</td></tr>" +
-        "<tr><td>Coilfang Reservoir</td><td>Outland — Lady Vashj’s lair</td><td>3</td><td>VI</td></tr>" +
-        "<tr><td>The Black Temple</td><td>Outland — Illidan Stormrage’s lair</td><td>3</td><td>VI</td></tr></tbody></table>" +
+        "<tr><td>" + ici("dungeon-shadowfang-keep", "Shadowfang Keep dungeon icon") + " Shadowfang Keep</td><td>Olsen’s Farthing (Silverpine Forest)</td><td>2</td><td>II</td></tr>" +
+        "<tr><td>" + ici("dungeon-scarlet-monastery", "Scarlet Monastery dungeon icon") + " The Scarlet Monastery</td><td>Scarlet Monastery (Tirisfal Glades)</td><td>2</td><td>III</td></tr>" +
+        "<tr><td>" + ici("dungeon-stratholme", "Stratholme dungeon icon") + " Stratholme</td><td>Stratholme (Eastern Plaguelands)</td><td>2</td><td>IV</td></tr>" +
+        "<tr><td>" + ici("dungeon-scholomance", "Scholomance dungeon icon") + " Scholomance</td><td>Caer Darrow (Western Plaguelands)</td><td>2</td><td>IV</td></tr>" +
+        "<tr><td>" + ici("dungeon-tempest-keep", "Tempest Keep dungeon icon") + " Tempest Keep</td><td>Outland — Kael’Thas’s lair</td><td>3</td><td>VI</td></tr>" +
+        "<tr><td>" + ici("dungeon-coilfang-reservoir", "Coilfang Reservoir dungeon icon") + " Coilfang Reservoir</td><td>Outland — Lady Vashj’s lair</td><td>3</td><td>VI</td></tr>" +
+        "<tr><td>" + ici("dungeon-black-temple", "The Black Temple dungeon icon") + " The Black Temple</td><td>Outland — Illidan Stormrage’s lair</td><td>3</td><td>VI</td></tr></tbody></table>" +
         "<p class='ref-note'>*Each Stage deck’s level is printed at the bottom left of its card back (the stage number is at the bottom right) — check the deck in front of you. The back-cover key pictures one card back per dungeon, with the level shown here; it doesn’t list every stage. The book confirms that Tempest Keep’s three stages are all level VI (p.9) and that the Scarlet Monastery Stage 1 deck is level III (p.12).</p>" +
         "<h4>Entering</h4><ul>" +
         "<li>In a dungeon’s region, spend one movement step of a Travel action to enter: your figure leaves the board and stands by the <b>Stage 1</b> deck — or, if friendly characters are already inside, by their Stage deck (you can’t redo stages they’ve beaten). You <b>lose any remaining actions</b>.</li>" +
@@ -790,7 +826,7 @@ WW.teams = {
      =========================================================================== */
   WW.classNotes = {
     druid: (c) => [
-      "<b>Bear Form</b> is a power with the melee icon: it may go in the melee area even though that area lists “mace or sword” — powers only need to match the type (FAQ).",
+      "<b>Bear Form</b> is a power with the melee icon " + ici("type-melee", "Melee icon") + ": it may go in the melee area even though that area lists “mace or sword” — powers only need to match the type (FAQ).",
       "<b>Ferocious Bite</b> (“Change one blue die into a red 8 for each energy you spend”): swap the rolled blue die for a red die you didn’t roll; with all " + dice(c) + " red dice rolled you can’t use it — you may choose not to roll them all (FAQ).",
       "First-game pick: Artumnis Moondream (Alliance) — Rejuvenation and Bear Form; first talent Ferocity."
     ],

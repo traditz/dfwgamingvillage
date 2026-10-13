@@ -148,52 +148,51 @@ function renderReference() {
     <div class="phase-grid">${R.rounds.phases.map(p =>
       `<div class="phase-col"><h4>${p.h}</h4><ul>${p.items.map(i => `<li>${esc(i)}</li>`).join("")}</ul></div>`).join("")}</div></section>`;
 
+  // Rulebook icon legends (css/icons.css standard): icon beside its name, text after. Fields that carry
+  // BBTM.ic markup (skill/result/token/payout text, mechanics, abilities) are trusted data and not escaped.
+  const icRow = (file, alt, name, tag, text) =>
+    `<li class="skill-row">${BBTM.ic.img(file, esc(alt))}
+        <div class="skill-body"><span class="dk">${esc(name)}</span>${tag ? " " + srcTag(tag) : ""}<div class="dt">${text}</div></div>
+      </li>`;
+
   // Skills
   h += `<section class="ref-card" id="${R.skills.id}"><h2>${R.skills.title}</h2><p class="ref-intro">${R.skills.intro}</p>
-    <ul class="skill-list">${R.skills.items.map(s =>
-      `<li class="skill-row">
-        <img class="skill-icon" loading="lazy" src="images/skills/${s.icon}.png" alt="${esc(s.k)} skill icon">
-        <div class="skill-body"><span class="dk">${esc(s.k)}</span> ${srcTag(s.tag)}<div class="dt">${esc(s.t)}</div></div>
-      </li>`).join("")}</ul>
+    <ul class="aid-icons skill-list">${R.skills.items.map(s => icRow(s.icon, s.k, s.k, s.tag, s.t)).join("")}</ul>
     <p class="ref-foot">${esc(R.skills.downed)}</p></section>`;
 
   // Tackle
   h += `<section class="ref-card" id="${R.tackle.id}"><h2>${R.tackle.title}</h2><p class="ref-intro">${R.tackle.intro}</p>
     <div class="mini-grid">${R.tackle.dice.map(d => `<div class="mini"><b>${esc(d.c)}</b><span>${esc(d.d)}</span></div>`).join("")}</div>
     <div class="two-col">
-      <div><h4>Results <span class="h4-note">(tackle die face)</span></h4><ul class="dice-list">${R.tackle.results.map(r =>
-        `<li class="dice-row">
-          <img class="dice-icon" loading="lazy" src="images/dice/${r.icon}.png" alt="${esc(r.k)} die face">
-          <div class="skill-body"><span class="dk">${esc(r.k)}</span><div class="dt">${esc(r.t)}</div></div>
-        </li>`).join("")}</ul></div>
+      <div><h4>Results <span class="h4-note">(tackle die face · Rulebook p.11)</span></h4><ul class="aid-icons dice-list">${R.tackle.results.map(r =>
+        icRow(r.icon, r.k, r.k, null, r.t)).join("")}</ul></div>
       <div><h4>Player States</h4><ul class="def-list">${R.tackle.states.map(r => `<li><span class="dk">${esc(r.k)}</span><span class="dt">${esc(r.t)}</span></li>`).join("")}</ul></div>
     </div></section>`;
 
-  // Cheating tokens — reveal order + pool composition
+  // Cheating tokens — reveal order + pool composition (token faces as printed in the rulebooks)
   h += `<section class="ref-card" id="${R.cheating.id}"><h2>${R.cheating.title}</h2><p class="ref-intro">${esc(R.cheating.intro)}</p>
-    <ul class="def-list">${R.cheating.order.map(o => `<li><span class="dk">${esc(o.k)}</span><span class="dt">${esc(o.t)}</span></li>`).join("")}</ul>
-    <h4>Token pool</h4><ul class="def-list">${R.cheating.pool.map(p =>
-      `<li>${srcTag(p.src)}<span class="dk">${esc(p.h)}</span><span class="dt">${esc(p.t)}</span></li>`).join("")}</ul>
+    <ul class="aid-icons dice-list">${R.cheating.order.map(o => icRow(o.icon, o.alt, o.k, null, o.t)).join("")}</ul>
+    <h4>Token pool <span class="h4-note">(${esc(R.cheating.poolCite)})</span></h4><ul class="def-list token-pool">${R.cheating.pool.map(p =>
+      `<li>${srcTag(p.src)}<span class="dk">${esc(p.h)}</span><div class="dt">
+        <div class="aid-icon-grid">${p.faces.map(([f, alt, cap]) => BBTM.ic.fig(f, esc(alt), esc(cap))).join("")}</div>
+        ${p.note ? `<p class="pool-note">${esc(p.note)}</p>` : ""}</div></li>`).join("")}</ul>
     <ul class="bullet" style="margin-top:12px">${R.cheating.notes.map(n => `<li>${esc(n)}</li>`).join("")}</ul></section>`;
 
   // Winner & payouts
   h += `<section class="ref-card" id="${R.winner.id}"><h2>${R.winner.title}</h2><p class="ref-intro">${R.winner.intro}</p>
     <ul class="bullet">${R.winner.bullets.map(b => `<li>${esc(b)}</li>`).join("")}</ul>
-    <h4>Payout icons</h4><ul class="skill-list">${R.winner.icons.map(i =>
-      `<li class="skill-row">
-        ${i.icon ? `<img class="skill-icon" loading="lazy" src="images/payouts/${i.icon}.png" alt="${esc(i.k)} payout icon">`
-                 : `<span class="skill-icon slash">/</span>`}
-        <div class="skill-body"><span class="dk">${esc(i.k)}</span> ${i.tag ? srcTag(i.tag) : ""}<div class="dt">${esc(i.t)}</div></div>
-      </li>`).join("")}</ul></section>`;
+    <h4>Payout icons <span class="h4-note">(${esc(R.winner.iconsCite)})</span></h4><ul class="aid-icons skill-list">${R.winner.icons.map(i =>
+      icRow(i.icon, i.alt || i.k, i.k, i.tag, i.t)).join("")}</ul></section>`;
 
-  // Mechanics
+  // Mechanics (an item may carry its own icon list, e.g. Enchanted Ball effects or Stadium restrictions)
   h += `<section class="ref-card" id="${R.mechanics.id}"><h2>${R.mechanics.title}</h2>
     <ul class="def-list">${R.mechanics.items.map(m =>
-      `<li>${srcTag(m.src)}<span class="dk">${esc(m.h)}</span><span class="dt">${esc(m.t)}</span></li>`).join("")}</ul></section>`;
+      `<li>${srcTag(m.src)}<span class="dk">${esc(m.h)}</span><div class="dt">${m.t}${m.icons
+        ? `<ul class="aid-icons">${m.icons.map(([f, name, text]) => BBTM.ic.li(f, esc(name), text)).join("")}</ul>` : ""}</div></li>`).join("")}</ul></section>`;
 
   // Abilities
   h += `<section class="ref-card" id="${R.abilities.id}"><h2>${R.abilities.title}</h2><p class="ref-intro">${R.abilities.intro}</p>
-    <ul class="def-list cols">${R.abilities.items.map(a => `<li><span class="dk">${esc(a[0])}</span><span class="dt">${esc(a[1])}</span></li>`).join("")}</ul></section>`;
+    <ul class="def-list cols">${R.abilities.items.map(a => `<li><span class="dk">${esc(a[0])}</span><span class="dt">${a[1]}</span></li>`).join("")}</ul></section>`;
 
   // Additional rulings
   h += `<section class="ref-card" id="${R.extra.id}"><h2>${R.extra.title}</h2><p class="ref-intro">${esc(R.extra.intro)}</p>
@@ -274,8 +273,10 @@ function renderTeams() {
 }
 
 function teamCard(t) {
+  // sp.text is the plain-text rule (the team search reads it); sp.html, when present, is the same rule with its
+  // rulebook icons (BBTM.ic); sp.icons is an icon row shown after the text.
   const special = (t.special || []).map(sp =>
-    `<div class="sp-rule"><b>${esc(sp.name)}</b> — ${esc(sp.text)}</div>`).join("");
+    `<div class="sp-rule"><b>${esc(sp.name)}</b> — ${sp.html || esc(sp.text)}${sp.icons || ""}</div>`).join("");
   return `<article class="team-card">
       <div class="tc-top">
         <div class="tc-icon"><img loading="lazy" src="images/teams/${t.id}.png" alt="${esc(t.name)} emblem"></div>

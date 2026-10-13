@@ -537,3 +537,6 @@ section h2::after {          /* gold rule ending in a thunder-spiral, like the r
   --comp-line: var(--ctl); --comp-accent: var(--slate); --comp-accent-ink: #ffffff;
   --comp-head-font: var(--f-display); --comp-radius: 3px;
 }
+
+/* Rulebook icons: keep an inline icon on the same line as the word it labels */
+.ic-nb { white-space: nowrap; }

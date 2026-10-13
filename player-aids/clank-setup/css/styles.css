@@ -582,6 +582,9 @@ button:focus-visible, summary:focus-visible, #rsearch:focus-visible {
 .ref-body li::marker { color: var(--crimson); }
 .ref-body b { color: #6e1512; }
 .ref-body i { font-style: italic; }
+/* rulebook icons (css/icons.css): breathing room for icon rows and grids inside reference bullets */
+.ref-body .aid-icon-row, .ref-body .aid-icon-grid { margin: 6px 0 8px; }
+.ic-keep { white-space: nowrap; }
 
 /* ---- search ---------------------------------------------------------------- */
 .rsearch-wrap { position: relative; margin-bottom: 16px; }

@@ -94,13 +94,13 @@ AQ.phases = [
           }
           if (c.mode === "solo") {
             return c.has("cw")
-              ? "Use only the Ocean Characters marked with <b>one</b> of the two symbols (from the base game and Cold Waters) — 15 different Characters. Shuffle and deal <b>6 faceup</b> into the Character row."
-              : "Remove one of the two identical sets of Ocean Characters (by the symbol in the corner) — you play with a single set. Shuffle and deal <b>6 faceup</b> into the Character row.";
+              ? "Use only the Ocean Characters marked with <b>one</b> of the two corner symbols (from the base game and Cold Waters) — 15 different Characters. Base solo: box every card with the <b>○</b> symbol and play with the <b>◇</b> set. <b>Tribes Solo</b>: use only the <b>○</b> set instead. Shuffle and deal <b>6 faceup</b> into the Character row."
+              : "Remove the set of Ocean Characters with the <b>○</b> symbol in the bottom-right corner and box it — you play with the single remaining set. Shuffle and deal <b>6 faceup</b> into the Character row.";
           }
-          if (c.has("cr")) return "Form the two symbol decks (base + Coral Reefs Characters; Cold Waters' sea creatures optional), shuffle each <b>separately</b>, then stack one on top of the other — <b>no cards are removed</b>, regardless of player count. Deal <b>6 faceup</b> into the Character row.";
+          if (c.has("cr")) return "Form the two symbol decks, <b>○</b> and <b>◇</b> (base + Coral Reefs Characters; Cold Waters' sea creatures optional), shuffle each <b>separately</b>, then stack one on top of the other — <b>no cards are removed</b>, regardless of player count. Deal <b>6 faceup</b> into the Character row.";
           if (c.has("cw")) {
-            const cut = c.p >= 5 ? "shuffle both symbol decks together with no discards" : (c.p === 4 ? "discard 5 random cards from one symbol deck, then shuffle both together" : "discard 10 random cards from one symbol deck, then shuffle both together");
-            return "Form two decks by corner symbol (base + Cold Waters = 15 different Characters each). For " + c.p + " players: " + cut + ". Deal <b>6 faceup</b> into the Character row.";
+            const cut = c.p >= 5 ? "shuffle the <b>○</b> and <b>◇</b> decks together with no discards" : (c.p === 4 ? "discard 5 random cards from one symbol deck, then shuffle both together" : "discard 10 random cards from one symbol deck, then shuffle both together");
+            return "Form two decks by corner symbol, <b>○</b> and <b>◇</b> (base + Cold Waters = 15 different Characters each). For " + c.p + " players: " + cut + ". Deal <b>6 faceup</b> into the Character row.";
           }
           return "Shuffle the Ocean Character deck (two identical sets) and deal <b>6 faceup</b> into the Character row.";
         },
@@ -185,6 +185,17 @@ AQ.phases = [
     ] }
 ];
 
+/* ---- Rulebook icons (icons standard v1: css/icons.css) ---------------------------
+   Every images/icons/*.webp is cropped from this page's own rulebooks; each name and
+   meaning is the text printed beside it (Base p.9, p.11, p.24, p.28, p.29 · Cold Waters
+   p.9, p.11 · Coral Reefs p.8, p.9, p.13). Call these with the full literal file name. */
+AQ.ic = {
+  img: (f, alt) => `<img class="aid-ic" src="images/icons/${f}.webp" alt="${alt}" title="${alt}">`,
+  inline: (f, alt) => `<img class="aid-ic aid-ic-inline" src="images/icons/${f}.webp" alt="${alt}" title="${alt}">`,
+  item: (f, alt, html) => `<li>${AQ.ic.img(f, alt)}<span>${html}</span></li>`,
+  pair: (f, alt, label) => `<span class="aid-pair">${AQ.ic.img(f, alt)}<span>${label}</span></span>`
+};
+
 /* ---- REFERENCE SECTIONS -------------------------------------------------------- */
 AQ.reference = [
   { id: "turn", title: "Turn Structure & Actions",
@@ -192,7 +203,7 @@ AQ.reference = [
     html: (c) => `
 <ul>
 <li><b>Main Action (mandatory):</b> play one Character card and resolve its effects <b>in the printed order</b>, doing <b>as much of each as you can</b> — the only optional effect is <b>Scout</b> (updated rule). Opponent-hitting cards (Meg, Researcher…) are mandatory for the opponents too (FAQ). Played cards go faceup on your personal discard pile — except <b>Matrona</b>, who can't be discarded and stays in your hand: playing her takes <b>all</b> your discarded Characters back into your hand and readies (unflips) all your Mantas (Base p.7, p.10, p.31; FAQ #24).</li>
-<li><b>Additional actions (unlimited):</b> flip a <b>ready Manta</b> for its effect (it turns tired), or <b>exploit the top Depth</b> of one of your Locations, sliding it up one. Resource Depths (coins/power) may only be exploited <b>during</b> your Main Action; effect Depths only <b>before or after</b> it — never interrupting it (FAQ). One resource Depth per Location per Main Action (Base p.31); you must use at least part of any effect you exploit (FAQ). <i>Community FAQ #41 (from a BGG thread, not the rulebooks) suggests one exception: The Grabber chaining two back-to-back type-specific conquer Depths on a Volcano. The rulebook F.A.Q. lists no exception.</i> An <b>empty Depth</b> gives nothing and can't be exploited — that Location is blocked until a Raise effect slides it past (Base p.13, p.31).</li>
+<li><b>Additional actions (unlimited):</b> flip a <b>ready Manta</b> for its effect (it turns tired), or <b>exploit the top Depth</b> of one of your Locations, sliding it up one. Resource Depths <span class="aq-nw">(${AQ.ic.inline("coins", "Coins")} coins</span> / <span class="aq-nw">${AQ.ic.inline("power", "Power")} power)</span> may only be exploited <b>during</b> your Main Action; effect Depths only <b>before or after</b> it — never interrupting it (FAQ). One resource Depth per Location per Main Action (Base p.31); you must use at least part of any effect you exploit (FAQ). <i>Community FAQ #41 (from a BGG thread, not the rulebooks) suggests one exception: The Grabber chaining two back-to-back type-specific conquer Depths on a Volcano. The rulebook F.A.Q. lists no exception.</i> An <b>empty Depth</b> gives nothing and can't be exploited — that Location is blocked until a Raise effect slides it past (Base p.13, p.31).</li>
 <li><b>Resources don't carry over</b> — coins and power exist only within the turn, and only in support of your Main Action (FAQ).</li>
 ${c.has("cw") ? "<li><b>Delayed Effects</b> (purple box, Cold Waters): active while that Character tops your discard pile. Resolve it before you take your next Main Action, before the new card's own effects. It still fires if an opponent's effect is what made you discard it there. If any other card covers it (even through an opponent's action), it is switched off.</li>" : ""}
 </ul>
@@ -202,27 +213,79 @@ ${c.has("cw") ? "<li><b>Delayed Effects</b> (purple box, Cold Waters): active wh
     when: () => true,
     html: (c) => `
 <ul>
-<li><b>Recruit</b> — pay the coin cost shown under an Ocean Character in the row; it goes to your hand. Slide the row left and refill from the deck. No limit on duplicates.${c.has("cr") ? " <b>Coral Reefs:</b> every Recruit also takes the <b>Reef token below the chosen Character</b> — you must place it above one of your five Location slots (a Reef stacked on top switches off the one below; the FAQ also lets you tuck a new Reef underneath); the Reef row refreshes like the Character row." : ""}</li>
-<li><b>Buy / Conquer Location</b> — pay coins (buy) or power (conquer) shown on a Location in either row; slot it into an empty space on your player board, top Depth showing. Board full (5) = no new Locations. The emptied space in the row is <b>not refilled</b> — only a Scout refills the Location rows (FAQ #44). ${c.has("cr") ? "On the Coral Reefs board, buying <i>or</i> conquering from the top row gives <b>+1 Coral straight into your own reserve</b> (not onto a Location, and it doesn't count as a Seed) instead of the base board's −1 power conquer discount." : "Top-row Locations cost <b>1 less power to conquer</b> (never cheaper to buy)."} Locations without Depths show only their Prosperity row.</li>
+<li><b>Recruit</b> — pay the coin cost shown under an Ocean Character in the row; it goes to your hand. Slide the row left and refill from the deck. No limit on duplicates.${c.has("cr") ? ` <b>Coral Reefs:</b> every <span class="aq-nw">${AQ.ic.inline("recruit", "Recruit")} Recruit</span> also takes the <span class="aq-nw">${AQ.ic.inline("reef", "Reef")} <b>Reef token</b></span> <b>below the chosen Character</b> — you must place it above one of your five Location slots (a Reef stacked on top switches off the one below; the FAQ also lets you tuck a new Reef underneath); the Reef row refreshes like the Character row.` : ""}</li>
+<li><b>Buy / Conquer Location</b> — pay coins (buy) or power (conquer) shown on a Location in either row; slot it into an empty space on your player board, top Depth showing. Board full (5) = no new Locations. The emptied space in the row is <b>not refilled</b> — only a Scout refills the Location rows (FAQ #44). ${c.has("cr") ? `On the Coral Reefs board, buying <i>or</i> conquering from the top row gives <span class="aq-nw">${AQ.ic.inline("coral", "Coral")} <b>+1 Coral</b></span> <b>straight into your own reserve</b> (not onto a Location, and it doesn't count as a Seed) instead of the base board's −1 power conquer discount.` : "Top-row Locations cost <b>1 less power to conquer</b> (never cheaper to buy)."} Locations without Depths show only their Prosperity row.</li>
 <li><b>Raise</b> — slide a Location up the shown number of Depths (splitting between Locations if the effect allows), losing whatever the covered Depths held. A raise effect on a Location can never raise <b>itself</b>, and you can't use a raise effect if you have nothing to raise (FAQ). A <b>fully risen</b> Location immediately grants the <b>Wild Manta</b> shown at its bottom (if it has one), ready to use at once (Base p.21, p.31).</li>
 <li><b>Score</b> — move one fully risen Location to your (secret) Scoring Pile; only scored Locations pay Prosperity. A score effect can't score the Location it's printed on (FAQ).</li>
-<li><b>Other icons</b> (Reference Sheet) — <b>+2 power on a Location-type badge</b> can only be used to conquer a Location of that type (Shark Bay, Sunken Ships, Decayed Civilizations, Ocean Volcanoes); <b>free Recruit</b> recruits 1 Character without paying coins; <b>take back</b> returns 1 Character of your choice from your discard pile to your hand; <b>fully rise</b> slides a different Location up until all its Depths are covered.</li>
-${c.has("cw") ? "<li><b>Frosty Depths</b> (Cold Waters) — a fifth Location type that works like the others. Some of them show two new effects: <b>all other players must each flip 1 of their ready Mantas</b>, and <b>copy</b> the effect of any visible Depth on another Location on your player board (effects only, never a Depth with Resources) (Cold Waters p.9).</li>" : ""}
+${c.has("cw") ? `<li><b>Frosty Depths</b> (Cold Waters) — a fifth Location type that works like the others. Some of them show two new effects, listed with their icons under <i>Effect icons</i> below (Cold Waters p.9).</li>` : ""}
 <li><b>Scout</b> — now optional: discard the top Location row, keep at most 4 from the bottom row and slide them up, refill the bottom with 6.</li>
 ${c.has("cr") ? "<li><b>Seed</b> (Coral Reefs) — place 1 Coral from the supply onto any of your Locations (even fully risen); multi-seeds spread across different Locations. Corals reach your reserve when their Location is scored, and each is <b>1 Prosperity</b> at game end (in Tribes play they can also pay for Tribes).</li><li><b>Defend</b> (Coral Reefs) — park one of your Mantas (even tired) on a board Location: nobody may buy or conquer it. When it would be discarded, it comes to <b>your</b> board instead (full board = discarded; no Coral either way) and your Manta returns <b>ready</b>.</li><li><b>Reef effects</b> (Coral Reefs) — always <b>optional</b>. Only the top Reef in a slot is active. Most work on the Location in the slot beneath them and trigger when a Location is placed there (once only), when you use that Location's effects or resources, or after you seed it. An adjacent-slot Reef affects only the nearest slot to its left or right, and you may apply it at any moment of your turn when its condition is met or right after your Main Action. A score-a-Location Reef works only on a fully risen Location, before or after you play your Character card (Coral Reefs p.8, p.11–12).</li>" : ""}
 </ul>
-<p class="src-line">Base p.14–23, p.29${c.has("cw") ? " · Cold Waters p.9, p.11" : " · Cold Waters p.11"}${c.has("cr") ? " · Coral Reefs p.8–12" : ""} · FAQ #40–48${c.has("cr") ? ", 54" : ""}</p>` },
+<h4>Effect icons</h4>
+<ul class="aid-icons">
+${AQ.ic.item("gain-2-coins", "Gain 2 Coins", "<b>Gain 2 Coins</b>")}
+${AQ.ic.item("gain-2-power", "Gain 2 Power", "<b>Gain 2 Power</b>")}
+${AQ.ic.item("raise-1", "Raise 1 Depth", "<b>Raise 1</b> — raise a different Location 1 Depth.")}
+${AQ.ic.item("raise-2", "Raise 2 Depths", "<b>Raise 2</b> — raise a different Location (or Locations) by 2 Depths.")}
+${AQ.ic.item("fully-rise", "Fully rise", "<b>Fully rise</b> — slide a different Location up until all its Depths are covered.")}
+${AQ.ic.item("recruit-free", "Recruit 1 Character for free", "<b>Free Recruit</b> — recruit 1 Character without paying coins.")}
+${AQ.ic.item("take-back", "Take a Character back", "<b>Take back</b> — return 1 Character of your choice from your discard pile to your hand.")}
+${AQ.ic.item("score", "Score", "<b>Score</b> — score 1 fully risen Location from your player board.")}
+${c.has("cw") ? AQ.ic.item("flip-mantas", "All other players flip 1 ready Manta", "<b>All other players</b> must each <b>flip 1 of their ready Mantas</b> (Cold Waters).") : ""}
+${c.has("cw") ? AQ.ic.item("copy-effect", "Copy", "<b>Copy</b> (Cold Waters) — copy the effect of any visible Depth on another Location on your player board (effects only, never a Depth with Resources).") : ""}
+</ul>
+<p><b>Location types</b> — each Location card shows its type with one of these badges:</p>
+<p class="aid-icon-row">${AQ.ic.pair("type-shark-bay", "Shark Bay", "Shark Bay")} ${AQ.ic.pair("type-sunken-ships", "Sunken Ships", "Sunken Ships")} ${AQ.ic.pair("type-ocean-volcanoes", "Ocean Volcanoes", "Ocean Volcanoes")} ${AQ.ic.pair("type-decayed-civilizations", "Decayed Civilizations", "Decayed Civilizations")}${c.has("cw") ? " " + AQ.ic.pair("type-frosty-depths", "Frosty Depths", "Frosty Depths") : ""}</p>
+<p><b>+2 Power on a Location-type badge</b> — that Power can only be used to conquer a Location of that type:</p>
+<p class="aid-icon-row">${AQ.ic.pair("power-shark-bay", "+2 Power for a Shark Bay Location", "Shark Bay")} ${AQ.ic.pair("power-sunken-ships", "+2 Power for a Sunken Ships Location", "Sunken Ships")} ${AQ.ic.pair("power-decayed-civilizations", "+2 Power for a Decayed Civilizations Location", "Decayed Civilizations")} ${AQ.ic.pair("power-ocean-volcanoes", "+2 Power for an Ocean Volcanoes Location", "Ocean Volcanoes")}</p>
+<p class="src-line">Base p.9, p.14–23, p.29${c.has("cw") ? " · Cold Waters p.9, p.11" : " · Cold Waters p.11"}${c.has("cr") ? " · Coral Reefs p.8–12" : ""} · FAQ #40–48${c.has("cr") ? ", 54" : ""}</p>` },
 
   { id: "goals", title: "Goals",
     when: (c) => c.mode !== "tribes",
     html: (c) => `
 <ul>
 <li>Meet a Goal's condition on your turn and you may place one of your <b>original Trained Mantas</b> (ready or tired) on its next free track spot — earlier spots pay more Prosperity. Claiming is <b>optional</b>, free, and legal even mid-Main-Action (FAQ) — but each Goal only once per player.</li>
-<li><b>Printed Goals:</b> 8 Character cards in hand (King counts) · 5 Locations on your board · 3+ Locations scored · 2+ Wild Mantas.</li>
-${AQ.help.goalTokens(c) ? "<li><b>Base tokens:</b> 11 Locations board+scored · 15+ Prosperity scored · 3+ Wild Mantas · all but 1 Character discarded (via normal play — Matrona stays) · 4 different types scored · 4 of one type owned · 10+ Characters in discard · 5+ Conquer-effect Characters owned · 5 fully risen at once · recruit a 5-coin Character (paying the coins, FAQ).</li>" : ""}
-${AQ.help.goalTokens(c) && c.has("cw") ? "<li><b>Cold Waters tokens:</b> 5 board Locations with different Prosperity values · 7+ scored · 5 board Locations with different unexploited Depth counts · 4+ scored worth ≤3 each.</li>" : ""}
-${AQ.help.goalTokens(c) && c.has("cr") ? "<li><b>Coral Reefs tokens:</b> 9 Corals in reserve · 4 board Locations with Corals · 4 scored with the same coin cost · 4 scored with the same power cost · 4 board Locations with different Prosperity · 5 scored with different Prosperity · 5 scored without a Manta icon · 4 scored worth 5+ · 5 Reefs on your board (stacked, inactive Reefs count) · 4 Locations in Reef slots.</li>" : ""}
 </ul>
+${!AQ.help.goalTokens(c) ? `<h4>Printed Goals</h4>
+<ul class="aid-icons aq-goals">
+${AQ.ic.item("goal-8-characters-in-hand", "Goal: 8 Character cards in hand", "<b>8 Character cards</b> in hand (King counts)")}
+${AQ.ic.item("goal-5-locations-on-board", "Goal: 5 Locations on your board", "<b>5 Locations</b> on your board")}
+${AQ.ic.item("goal-3-locations-scored", "Goal: 3 or more Locations scored", "<b>3+ Locations</b> scored")}
+${AQ.ic.item("goal-2-wild-mantas", "Goal: 2 or more Wild Mantas", "<b>2+ Wild Mantas</b>")}
+</ul>` : ""}
+${AQ.help.goalTokens(c) ? `<h4>Base Goal tokens</h4>
+<ul class="aid-icons aq-goals">
+${AQ.ic.item("goal-11-locations", "Goal token: at least 11 Locations on your board and scored", "<b>11+ Locations</b> on your board + scored")}
+${AQ.ic.item("goal-15-prosperity-scored", "Goal token: 15 Prosperity scored", "<b>15+ Prosperity</b> scored")}
+${AQ.ic.item("goal-3-wild-mantas", "Goal token: 3 or more Wild Mantas", "<b>3+ Wild Mantas</b>")}
+${AQ.ic.item("goal-discard-all-but-1", "Goal token: discard all but 1 Character", "<b>All but 1 Character</b> discarded (via normal play — Matrona stays)")}
+${AQ.ic.item("goal-4-types-scored", "Goal token: 4 different types scored", "<b>4 different types</b> scored")}
+${AQ.ic.item("goal-4-of-one-type", "Goal token: 4 Locations of one type", "<b>4 of one type</b> owned (board and/or scored)")}
+${AQ.ic.item("goal-10-characters-discarded", "Goal token: 10 or more Characters in your discard pile", "<b>10+ Characters</b> in your discard pile")}
+${AQ.ic.item("goal-5-conquer-characters", "Goal token: 5 or more Conquer-effect Characters", "<b>5+ Conquer-effect Characters</b> in hand and/or discard")}
+${AQ.ic.item("goal-5-fully-risen", "Goal token: 5 fully risen Locations at once", "<b>5 fully risen</b> on your board at once")}
+${AQ.ic.item("goal-recruit-5-coin-character", "Goal token: recruit a Character that costs 5 Coins", "<b>Recruit a 5-coin Character</b> (paying the coins, FAQ)")}
+</ul>` : ""}
+${AQ.help.goalTokens(c) && c.has("cw") ? `<h4>Cold Waters Goal tokens</h4>
+<ul class="aid-icons aq-goals">
+${AQ.ic.item("goal-cw-5-different-prosperity", "Goal token: 5 board Locations with different Prosperity values", "<b>5 board Locations</b> with different Prosperity values")}
+${AQ.ic.item("goal-cw-7-scored", "Goal token: 7 or more Locations scored", "<b>7+ Locations</b> scored")}
+${AQ.ic.item("goal-cw-5-different-depths", "Goal token: 5 board Locations with different unexploited Depth counts", "<b>5 board Locations</b> with different unexploited Depth counts")}
+${AQ.ic.item("goal-cw-4-scored-worth-3-or-less", "Goal token: 4 or more scored Locations worth 3 or less", "<b>4+ scored</b> worth ≤3 Prosperity each")}
+</ul>` : ""}
+${AQ.help.goalTokens(c) && c.has("cr") ? `<h4>Coral Reefs Goal tokens</h4>
+<ul class="aid-icons aq-goals">
+${AQ.ic.item("goal-cr-9-corals", "Goal token: 9 Corals in your reserve", "<b>9 Corals</b> in your reserve")}
+${AQ.ic.item("goal-cr-4-locations-with-corals", "Goal token: 4 board Locations with Corals", "<b>4 board Locations</b> with Corals")}
+${AQ.ic.item("goal-cr-4-same-coin-cost", "Goal token: 4 scored Locations with the same coin cost", "<b>4 scored</b> with the same coin cost")}
+${AQ.ic.item("goal-cr-4-same-power-cost", "Goal token: 4 scored Locations with the same power cost", "<b>4 scored</b> with the same power cost")}
+${AQ.ic.item("goal-cr-4-different-prosperity-board", "Goal token: 4 board Locations worth different Prosperity", "<b>4 board Locations</b> with different Prosperity")}
+${AQ.ic.item("goal-cr-5-different-prosperity-scored", "Goal token: 5 scored Locations worth different Prosperity", "<b>5 scored</b> with different Prosperity")}
+${AQ.ic.item("goal-cr-5-scored-without-manta", "Goal token: 5 scored Locations without a Manta icon", "<b>5 scored</b> without a Manta icon")}
+${AQ.ic.item("goal-cr-4-scored-worth-5", "Goal token: 4 scored Locations worth 5 or more Prosperity", "<b>4 scored</b> worth 5+ Prosperity")}
+${AQ.ic.item("goal-cr-5-reefs", "Goal token: 5 Reefs on your player board", "<b>5 Reefs</b> on your board (stacked, inactive Reefs count)")}
+${AQ.ic.item("goal-cr-4-locations-in-reef-slots", "Goal token: 4 Locations in slots with Reefs", "<b>4 Locations</b> in Reef slots")}
+</ul>` : ""}
 <p class="src-line">Base p.24, p.28${c.has("cw") && AQ.help.goalTokens(c) ? " · Cold Waters p.11" : ""}${c.has("cr") ? " · Coral Reefs p.7–8, p.13" : ""} · FAQ #49–52</p>` },
 
   { id: "tribes", title: "The Tribes",
@@ -232,7 +295,7 @@ ${AQ.help.goalTokens(c) && c.has("cr") ? "<li><b>Coral Reefs tokens:</b> 9 Coral
 <li><b>Recruiting a Tribe</b> uses a card with the <b>Recruit</b> effect (that use can't also recruit an Ocean Character). Cost = base cost <b>+1 coin per Manta already on the card</b>. Pay like a Location — and you may also discard Locations <b>from your Scoring Pile</b>, each worth its Prosperity in coins (that card is gone from the game, FAQ)${c.has("cr") ? ", or spend Corals" : ""}.</li>
 <li>Place one of your original <b>Trained Mantas</b> on the Tribe — it's retired for the game. One recruitment per Tribe per player.</li>
 <li><b>Dark-blue (I) Tribes</b>: an ongoing bonus usable <b>once per turn</b>, plus fixed end-game Prosperity. <b>Light-blue (II) Tribes</b>: an instant bonus on recruitment, plus conditional end-game Prosperity.</li>
-<li>Rulings: starting cards count as “Ocean Characters” for card effects (FAQ #6)${c.has("cr") ? " — the seed-scoring Southern Tribe already counts Medusa Arcadio and Wave-Teller in your starting hand (Coral Reefs p.12)" : ""}${c.has("cw") ? "; but <b>Red Thunder</b> scores only market-recruited Ocean Characters, not starting cards, and its bottom icon retrieves your discard pile like Matrona (FAQ #35–36); <b>Spirit Hunters</b> give +2 coins or +2 power (FAQ #38)" : ""}${c.has("cr") ? "; <b>Seastar Syndicate / Turtle Kin</b> count hand + discard (FAQ #37); <b>Coral Carvers</b> score 4 Prosperity per Location slot with a Reef (max 5 slots = 20), not per stacked Reef (FAQ #32)" : ""}.</li>
+<li>Rulings: starting cards count as “Ocean Characters” for card effects (FAQ #6)${c.has("cr") ? " — the seed-scoring Southern Tribe already counts Medusa Arcadio and Wave-Teller in your starting hand (Coral Reefs p.12)" : ""}${c.has("cw") ? `; but <b>Red Thunder</b> scores only market-recruited Ocean Characters, not starting cards, and its bottom icon ${AQ.ic.inline("red-thunder-instant-bonus", "Red Thunder instant bonus: All, take back")} retrieves your discard pile like Matrona (FAQ #35–36); <b>Spirit Hunters</b> give +2 coins or +2 power (FAQ #38)` : ""}${c.has("cr") ? "; <b>Seastar Syndicate / Turtle Kin</b> count hand + discard (FAQ #37); <b>Coral Carvers</b> score 4 Prosperity per Location slot with a Reef (max 5 slots = 20), not per stacked Reef (FAQ #32)" : ""}.</li>
 </ul>
 <p class="src-line">Cold Waters ${c.has("cw") ? "p.4, " : ""}p.9–10${c.has("cr") ? " · Coral Reefs p.3, p.7, p.9, p.12" : ""} · FAQ #6, 32–39</p>` },
 

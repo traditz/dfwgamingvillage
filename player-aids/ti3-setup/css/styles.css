@@ -645,6 +645,9 @@ main { max-width: 1000px; margin: 0 auto; padding: 22px 16px 64px; }
 .defs dt { margin-top: 10px; font-family: "Arimo", Arial, sans-serif; font-weight: 700; font-size: 1rem; color: var(--navy); }
 .defs dd { margin: 2px 0 0 18px; }
 
+/* Rulebook icons (css/icons.css, icons standard v1): a set of inline icons that belong together never wraps apart */
+.ic-set { white-space: nowrap; }
+
 /* =============================================================================
    Search
    ============================================================================= */

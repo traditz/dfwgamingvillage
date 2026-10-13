@@ -528,3 +528,7 @@ mark{color:inherit; background:linear-gradient(180deg, transparent 10%, #f0d46a 
   --comp-line: #766c64; --comp-accent: var(--blood); --comp-accent-ink: #ffffff;
   --comp-head-font: var(--serif); --comp-radius: 6px;
 }
+
+/* Rulebook icons (css/icons.css, icons standard v1) — spacing inside the reference boxes */
+.htp-sec .aid-icon-row,.loc-board .aid-icon-row{margin:8px 0 2px}
+.htp-sec li .sub-title + .aid-icon-row{margin-top:6px}

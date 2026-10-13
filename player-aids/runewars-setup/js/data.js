@@ -101,6 +101,12 @@ RW.andList = function (a) { return a.length <= 1 ? a.join("") : a.slice(0, -1).j
 RW.runesToWin = function (c) { return c.mod("rotfc") ? 7 : 6; };
 /* The Victory marker: a Victory card, or — original-edition copy without Banners of War — an unused unit (Revised Gameplay p.2). */
 RW.vMark = function (c) { return (c.orig && !c.has("bow")) ? "an unused unit of his faction" : "his faction's Victory card"; };
+/* Rulebook icons in the rules reference (DFWGV icons standard v1, css/icons.css). Every call names its file in full,
+   e.g. RW.ic("destiny-gold", …) -> images/icons/destiny-gold.webp; all are cropped from this game's own rulebooks. */
+RW.ic = function (file, alt) { return "<img class='aid-ic' src='images/icons/" + file + ".webp' alt='" + alt + "' title='" + alt + "'>"; };
+RW.icIn = function (file, alt) { return "<img class='aid-ic aid-ic-inline' src='images/icons/" + file + ".webp' alt='" + alt + "' title='" + alt + "'>"; };
+RW.icPair = function (file, alt, label) { return "<span class='aid-pair'>" + RW.ic(file, alt) + "<span>" + label + "</span></span>"; };
+RW.icLi = function (file, alt, html) { return "<li>" + RW.ic(file, alt) + "<span>" + html + "</span></li>"; };
 
 /* =============================================================================
    SETUP PHASES — c = { has(set), mod(id), p, orig, copy, fac(id), facs[] }
@@ -369,7 +375,12 @@ RW.reference = [
   {
     title: "Season Cards — the Secondary Abilities",
     when: () => true,
-    html: (c) => "<ul>" +
+    html: (c) => "<p>Each season's cards show its secondary ability as icons at the bottom of the card:</p>" +
+      "<p class='aid-icon-row'>" +
+      RW.icPair("season-spring", "Spring secondary ability icons", "Spring") + " " +
+      RW.icPair("season-summer", "Summer secondary ability icons", "Summer") + " " +
+      RW.icPair("season-fall", "Fall secondary ability icons", "Fall") + " " +
+      RW.icPair("season-winter", "Winter secondary ability icons", "Winter") + "</p><ul>" +
       "<li><b>Spring:</b> each player removes all his activation tokens from the board and returns all his Order cards to his hand. Then every routed figure stands up, neutral units and heroes included." +
       (c.has("bow") ? " <b>Banners of War:</b> also remove one cryomancy token from each area." : "") + "</li>" +
       "<li><b>Summer:</b> a <b>Quest Phase</b>. Each hero may heal, train or move, and after moving may duel or attempt a Quest (see Heroes).</li>" +
@@ -396,7 +407,7 @@ RW.reference = [
       "<tr><td>7</td><td><b>Acquire Power</b></td><td>Gain influence as provided by your resources.</td><td>Claim a Title card by spending more influence than is on it; remove that influence and place yours on it.</td></tr>" +
       "<tr><td>8</td><td><b>Fortify</b></td><td>Any of, once each: build a stronghold (lose 1 ore and 1 wood); repair one (lose 1 ore); move rune tokens between 2 friendly areas.</td><td>None — it is always your highest card.</td></tr>" +
       "</tbody></table></div>" +
-      "<ul><li>One Mobilize can start only <b>one battle</b>. You may attempt diplomacy and fight one battle, but you can't move units into an area if it would cause a second battle that turn. So if you already fought and the bonus's diplomacy draws the red symbol, you must retreat.</li>" +
+      "<ul><li>One Mobilize can start only <b>one battle</b>. You may attempt diplomacy and fight one battle, but you can't move units into an area if it would cause a second battle that turn. So if you already fought and the bonus's diplomacy draws the " + RW.icIn("destiny-red", "Red destiny symbol") + " red symbol, you must retreat.</li>" +
       (c.has("bow") ? "<li>Garrison is numbered 0, so under the same rule its Supremacy Bonus works only when no other Order card is faceup in your play area — in practice, as your first Order of the year.</li>" : "") +
       (c.orig ? "<li><b>Original-edition copy:</b> your Mobilize and Conquer cards also move <b>heroes</b>.</li>" : "") + "</ul>",
     src: (c) => RW.cite("Rules p.12–14, p.33–36", c.has("bow") && "BoW p.8", c.mod("dev") && "BoW p.9", c.mod("cmd") && "BoW p.10", c.orig && "Revised Gameplay p.1")
@@ -405,7 +416,7 @@ RW.reference = [
     title: "Resource Dials, Harvest & Recruit",
     when: () => true,
     html: (c) => "<h4>The dials</h4><ul>" +
-      "<li>Three dials track your <b>food</b>, <b>wood</b> and <b>ore</b>. They start on the red numbers.</li>" +
+      "<li>Three dials track your " + RW.icIn("res-food", "Food") + " <b>food</b>, " + RW.icIn("res-wood", "Wood") + " <b>wood</b> and " + RW.icIn("res-ore", "Ore") + " <b>ore</b>. They start on the red numbers.</li>" +
       "<li>Dials change <b>only</b> when a card or ability says so, so they often don't match what your areas produce.</li>" +
       "<li>Most spaces show a <b>unit</b>, a <b>Tactics card</b> or an <b>influence</b> icon. You gain them only when told to — Recruit, Strategize's bonus, Acquire Power — counting the current space <b>and every lower space</b>. Gaining them never lowers a dial.</li>" +
       "<li>Your <b>food</b> dial also caps the units in each area every winter.</li></ul>" +
@@ -503,7 +514,9 @@ RW.reference = [
       "<h4>Heroes</h4><ul>" +
       "<li>Heroes move with Strategize, Mobilize or Conquer, and up to 2 areas in the Quest Phase. They pass through enemy and neutral areas, start no battles (they may duel), and may leave activated areas. Routed heroes can't move.</li>" +
       (c.mod("cmd") ? "<li><b>Commanders</b> move like units with Strategize, Mobilize and Conquer; they can't leave activated areas or move while routed, even in the Quest Phase.</li>" : "") + "</ul>" +
-      "<h4>Borders and limits</h4><ul>" +
+      "<h4>Borders and limits</h4>" +
+      "<p class='aid-icon-row'>" + RW.icPair("border-mountain", "A mountain border", "Mountain border (red corners)") + " " +
+      RW.icPair("border-water", "A water border", "Water border (blue corners)") + "</p><ul>" +
       "<li><b>Mountain (red)</b> and <b>water (blue)</b> borders are impassable, except: <b>flying</b> figures ignore them (but flying units still can't move over enemy or neutral areas); in <b>winter</b> water borders don't count; and cards such as “Mountain Pass”. Every other border is open, whatever the art shows.</li>" +
       (c.has("bow") ? "<li><b>Cryomancy</b> token: units ignore the water borders of that area as though it were winter.</li>" : "") +
       "<li>Holes in the board can never be crossed, even flying.</li>" +
@@ -517,10 +530,11 @@ RW.reference = [
     html: () => "<h4>Diplomacy — after moving into an area holding only unallied neutral units</h4><ol>" +
       "<li><b>Spend</b> 1 to 6 influence. With no influence you can't attempt diplomacy.</li>" +
       "<li><b>Draw</b> that many Fate cards — always the full number.</li>" +
-      "<li><b>Choose one</b> and resolve the <b>destiny symbol</b> at its top center:<ul>" +
-      "<li><b>Gold symbol:</b> all neutral units there <b>ally</b> with you and stay alongside your units.</li>" +
-      "<li><b>Silver symbol:</b> all the neutral units retreat to one adjacent area and are routed, even if already routed. The player to your left picks among legal areas; with none, they are destroyed.</li>" +
-      "<li><b>Red symbol:</b> you must start a battle there, or retreat all your units from the area into one adjacent area.</li></ul></li></ol>" +
+      "<li><b>Choose one</b> and resolve the <b>destiny symbol</b> at its top center:<ul class='aid-icons'>" +
+      RW.icLi("destiny-gold", "Gold destiny symbol", "<b>Gold symbol:</b> all neutral units there <b>ally</b> with you and stay alongside your units.") +
+      RW.icLi("destiny-silver", "Silver destiny symbol", "<b>Silver symbol:</b> all the neutral units retreat to one adjacent area and are routed, even if already routed. The player to your left picks among legal areas; with none, they are destroyed.") +
+      RW.icLi("destiny-red", "Red destiny symbol", "<b>Red symbol:</b> you must start a battle there, or retreat all your units from the area into one adjacent area.") +
+      "</ul></li></ol>" +
       "<ul><li>Battle or diplomacy is against <b>every</b> neutral unit in the area at once.</li>" +
       "<li>The Fate discard pile is open to everyone: check which symbols are gone before you try.</li></ul>" +
       "<h4>Allied units</h4><ul>" +
@@ -580,11 +594,18 @@ RW.reference = [
       "<li>All damage tokens come off at the end of the battle.</li></ul>" +
       "<h4>Base shapes and Fate cards</h4><ul>" +
       "<li>Each Fate card has a destiny symbol, four sections (triangle, rectangle, hexagon, circle) and a unique number from 1 to 30.</li>" +
-      "<li>A section shows a <b>special ability</b> icon, a <b>rout</b> flag with a number, a <b>damage</b> icon with a number, or nothing (a <b>miss</b>).</li>" +
-      "<li><b>Triangle</b> units are the most common: they miss 40% of the time and deal at most 1 damage.</li>" +
-      "<li><b>Circle</b> units trigger specials twice as often; heroes use the circle section in duels.</li>" +
-      "<li><b>Rectangle</b> units often have more health, hit more often and usually deal up to 2.</li>" +
-      "<li><b>Hexagon</b> units are large and very powerful, and count their strength even when routed.</li></ul>" +
+      "<li>A section shows one of these icons, or nothing (a <b>miss</b>):<ul class='aid-icons'>" +
+      RW.icLi("fate-special", "Special ability icon", "<b>Special ability</b> — the unit triggers its special ability, as printed on its faction or reference sheet.") +
+      RW.icLi("fate-rout", "Rout icon", "<b>Rout</b> — a flag with a number: that many enemy units become routed.") +
+      RW.icLi("fate-damage", "Damage icon", "<b>Damage</b> — an icon with a number: the opponent must deal that much damage to his units.") +
+      "</ul></li></ul>" +
+      "<p>Each unit's base shape is its class; the faction sheet shows it as an icon beside the unit:</p>" +
+      "<ul class='aid-icons'>" +
+      RW.icLi("base-triangle", "Triangle base", "<b>Triangle</b> units are the most common: they miss 40% of the time and deal at most 1 damage.") +
+      RW.icLi("base-circle", "Circle base", "<b>Circle</b> units trigger specials twice as often; heroes use the circle section in duels.") +
+      RW.icLi("base-rectangle", "Rectangle base", "<b>Rectangle</b> units often have more health, hit more often and usually deal up to 2.") +
+      RW.icLi("base-hexagon", "Hexagon base", "<b>Hexagon</b> units are large and very powerful, and count their strength even when routed.") +
+      "</ul>" +
       (c.has("bow") ? "<h4>Tactical Fate cards</h4><ul><li>A Tactical Fate card played this way resolves its Fate symbols like a Fate card, then goes to the Tactics discard pile; its text is ignored. It can't be used in the season it was drawn.</li></ul>" : "") +
       "<h4>Rulings (FAQ 1.2)</h4><ul>" +
       "<li>A unit forced to retreat mid-battle (such as by the Sorceress) leaves the battle at once, following the normal retreat rules: it draws no Fate cards and doesn't count for strength.</li>" +
@@ -592,7 +613,7 @@ RW.reference = [
       "<li>Same initiative, both specials: the attacker's resolves first. A Berserker routed by an attacking Pegasus Rider can't use its ability, which needs it standing.</li>" +
       "<li>Reanimates created by a Necromancer stay after the battle. A Necromancer can't destroy your own Reanimates elsewhere to make them.</li>" +
       "<li>“Destroy 2▲ or 1■” (▲ = triangle units, ■ = rectangle units) when you have 1▲ and 1■: you must destroy the 1■, the only option you can fully meet. With only 1▲ there, destroy it — fulfil as much as possible.</li></ul>",
-    src: (c) => RW.cite("Rules p.19, p.21–22", "Revised Gameplay p.1", "FAQ 1.2 p.1", c.has("bow") && "BoW p.7, p.12")
+    src: (c) => RW.cite("Rules p.19–23", "Revised Gameplay p.1", "FAQ 1.2 p.1", c.has("bow") && "BoW p.7, p.12")
   },
   {
     title: "Retreats",
@@ -611,7 +632,7 @@ RW.reference = [
     title: "Heroes — Gaining, Supporting & the Quest Phase",
     when: () => true,
     html: (c) => "<h4>Heroes</h4><ul>" +
-      "<li>Heroes are <b>not units</b>. A Hero card shows alignment (white good, green neutral, black evil), ability, strength, agility and wisdom, health, and a circle base for duels.</li>" +
+      "<li>Heroes are <b>not units</b>. A Hero card shows alignment (white good, green neutral, black evil), ability, the attributes strength " + RW.icIn("attr-strength", "Strength") + ", agility " + RW.icIn("attr-agility", "Agility") + " and wisdom " + RW.icIn("attr-wisdom", "Wisdom") + ", health, and a circle base for duels.</li>" +
       "<li>A new hero's card goes faceup in your play area and its figure at one of your strongholds. You may control at most <b>three heroes</b>" + (c.mod("cmd") ? " (commanders don't count)" : "") + ". Gain a fourth and you choose one to desert, even one that normally can't.</li>" +
       "<li>Heroes may look at rune tokens in the area they stand in, including enemy areas.</li></ul>" +
       "<h4>Supporting a battle (battle step 3)</h4><ul>" +
@@ -644,11 +665,11 @@ RW.reference = [
       "<h4>Duels (Quest Phase only)</h4><ol>" +
       "<li><b>Declare the defender:</b> one enemy hero in your hero's area.</li>" +
       "<li><b>Start-of-duel abilities:</b> attacker, then defender.</li>" +
-      "<li><b>Four rounds:</b> each draws one Fate card (attacker first) and resolves its <b>circle</b> section:<ul>" +
-      "<li>Special ability: deal 1 damage, or use one Reward card's ability.</li>" +
-      "<li>Rout flag: prevent that much damage this round. It doesn't rout anyone.</li>" +
-      "<li>Damage: the other hero takes that much.</li>" +
-      "<li>Blank: nothing. All duel damage is simultaneous.</li></ul></li>" +
+      "<li><b>Four rounds:</b> each draws one Fate card (attacker first) and resolves its <b>circle</b> section:<ul class='aid-icons'>" +
+      RW.icLi("fate-special", "Special ability icon", "Special ability: deal 1 damage, or use one Reward card's ability.") +
+      RW.icLi("fate-rout", "Rout icon", "Rout flag: prevent that much damage this round. It doesn't rout anyone.") +
+      RW.icLi("fate-damage", "Damage icon", "Damage: the other hero takes that much.") +
+      "</ul><ul><li>Blank: nothing. All duel damage is simultaneous.</li></ul></li>" +
       "<li><b>End</b> after four rounds, or when a hero is defeated (finish that round). Damage stays on surviving heroes; nobody retreats.</li></ol><ul>" +
       "<li>A hero who starts a duel can't attempt a Quest that phase. Routed heroes can't start duels, but can be dragged into one and then fight as if standing.</li>" +
       (c.has("bow") ? "<li>Tactical Fate cards may also replace Fate draws in a duel.</li>" : "") + "</ul>" +
@@ -657,7 +678,7 @@ RW.reference = [
       "<li>Defeated in a duel: the winner gives all the loser's Reward cards to his heroes in that area.</li>" +
       "<li>Defeated any other way, or both at once: his Reward cards go beside the board under a numbered <b>defeated hero marker</b>, and the matching marker is placed in that area. Any hero there during his controller's turn may take them.</li>" +
       "<li><b>Desertion</b> (usually a hero whose alignment doesn't match, when a Season card says so): remove the figure, shuffle his card back into the Hero deck, and discard his Reward cards faceup by the Reward deck.</li></ul>",
-    src: (c) => RW.cite("Rules p.25–28", c.has("bow") && "BoW p.7")
+    src: (c) => RW.cite("Rules p.21, p.25–28", c.has("bow") && "BoW p.7")
   },
   {
     title: "Rune Tokens — Receiving, Looking, Revealing",
@@ -730,20 +751,20 @@ RW.reference = [
     html: (c) => "<ul>" +
       "<li>After a hero takes the Quest Phase Move action and ends his movement (if any), flip any exploration token in his area and resolve it <b>before</b> he duels or quests. Not when a hero retreats into the area.</li>" +
       "<li><b>Events</b> (yellow arrow) are discarded after use. <b>Locations</b> stay, with ongoing effects. <b>Destructible locations</b> stay too, but a player controlling the area with <b>at least six units</b> during his turn may discard them.</li></ul>" +
-      "<div class='tbl-wrap'><table class='rtable'><thead><tr><th>Token</th><th>Type</th><th>Effect</th></tr></thead><tbody>" +
-      "<tr><td><b>Dragon Throne</b></td><td>Destructible location</td><td>Stays faceup. The area's controller has one additional dragon rune; a rune token may also be placed here.</td></tr>" +
-      "<tr><td><b>Village</b></td><td>Destructible location</td><td>Stays faceup. The area produces +1 of the resource shown.</td></tr>" +
-      "<tr><td><b>Magic Portal</b></td><td>Destructible location</td><td>Stays faceup. Anyone moving units or heroes may spend 1 influence to treat this area as adjacent to every other faceup Magic Portal.</td></tr>" +
-      "<tr><td><b>Dungeon</b></td><td>Location</td><td>A hero entering it in the Quest Phase moves no further that phase (he may still duel or quest).</td></tr>" +
-      "<tr><td><b>Temple</b></td><td>Location</td><td>A hero ending his Quest Phase action here: his controller gains 2 influence.</td></tr>" +
-      "<tr><td><b>Hall of Kellos</b></td><td>Location</td><td>A hero ending his Quest Phase action here: his controller draws 1 Tactics card.</td></tr>" +
-      "<tr><td><b>Traveling Merchant</b></td><td>Event</td><td>Pay 3 influence for this hero to receive 1 Reward card. Discard the token, paid or not.</td></tr>" +
-      "<tr><td><b>Raiding Party</b></td><td>Event</td><td>The hero takes 1 damage. If neutral or enemy units are here, he also discards 1 Reward card or takes 1 more damage.</td></tr>" +
-      "<tr><td><b>Scroll of Sight</b></td><td>Event</td><td>Look at all facedown rune and exploration tokens in one area.</td></tr>" +
-      "<tr><td><b>Training</b></td><td>Event</td><td>The hero may raise one attribute by 1 (still at most one training token per attribute).</td></tr>" +
-      (c.has("bow") ? "<tr><td><b>Flooded Area</b> <i>(BoW)</i></td><td>Location</td><td>Stays faceup for the rest of the game. When revealed, the player to the left moves the hero up to two areas (units unaffected). Figures without Flying can't enter or leave except in winter or with a cryomancy token there — as if all six borders were water.</td></tr>" +
-        "<tr><td><b>Defensible Area</b> <i>(BoW)</i></td><td>Destructible location</td><td>Stays faceup. The defender gains +1 strength when the winner of a battle here is determined.</td></tr>" : "") +
-      "</tbody></table></div>",
+      "<ul class='aid-icons'>" +
+      RW.icLi("explore-dragon-throne", "Dragon Throne token", "<b>Dragon Throne</b> <i>(destructible location)</i> — Stays faceup. The area's controller has one additional dragon rune; a rune token may also be placed here.") +
+      RW.icLi("explore-village", "Village token", "<b>Village</b> <i>(destructible location)</i> — Stays faceup. The area produces +1 of the resource shown.") +
+      RW.icLi("explore-magic-portal", "Magic Portal token", "<b>Magic Portal</b> <i>(destructible location)</i> — Stays faceup. Anyone moving units or heroes may spend 1 influence to treat this area as adjacent to every other faceup Magic Portal.") +
+      RW.icLi("explore-dungeon", "Dungeon token", "<b>Dungeon</b> <i>(location)</i> — A hero entering it in the Quest Phase moves no further that phase (he may still duel or quest).") +
+      RW.icLi("explore-temple", "Temple token", "<b>Temple</b> <i>(location)</i> — A hero ending his Quest Phase action here: his controller gains 2 influence.") +
+      RW.icLi("explore-hall-of-kellos", "Hall of Kellos token", "<b>Hall of Kellos</b> <i>(location)</i> — A hero ending his Quest Phase action here: his controller draws 1 Tactics card.") +
+      RW.icLi("explore-traveling-merchant", "Traveling Merchant token", "<b>Traveling Merchant</b> <i>(event)</i> — Pay 3 influence for this hero to receive 1 Reward card. Discard the token, paid or not.") +
+      RW.icLi("explore-raiding-party", "Raiding Party token", "<b>Raiding Party</b> <i>(event)</i> — The hero takes 1 damage. If neutral or enemy units are here, he also discards 1 Reward card or takes 1 more damage.") +
+      RW.icLi("explore-scroll-of-sight", "Scroll of Sight token", "<b>Scroll of Sight</b> <i>(event)</i> — Look at all facedown rune and exploration tokens in one area.") +
+      RW.icLi("explore-training", "Training token", "<b>Training</b> <i>(event)</i> — The hero may raise one attribute by 1 (still at most one training token per attribute).") +
+      (c.has("bow") ? RW.icLi("explore-flooded-area", "Flooded Area token", "<b>Flooded Area</b> <i>(location, BoW)</i> — Stays faceup for the rest of the game. When revealed, the player to the left moves the hero up to two areas (units unaffected). Figures without Flying can't enter or leave except in winter or with a cryomancy token there — as if all six borders were water.") +
+        RW.icLi("explore-defensible-area", "Defensible Area token", "<b>Defensible Area</b> <i>(destructible location, BoW)</i> — Stays faceup. The defender gains +1 strength when the winner of a battle here is determined.") : "") +
+      "</ul>",
     src: (c) => RW.cite("Rules p.37", c.has("bow") && "BoW p.11")
   },
   {
@@ -760,18 +781,18 @@ RW.reference = [
       "<li>Not usable in the season it was drawn.</li></ul>" +
       "<h4>Garrison Order card (0)</h4><ul><li>When defending in battle this season, +2 strength (at Tally Strength). <b>Supremacy:</b> recruit 2 triangle units of your faction at any strongholds you control.</li></ul>" +
       "<h4>Guildmaster of Merchants (Title card)</h4><ul><li>+2 resources of any one type each time you resolve Harvest (a different type each time if you like), and you may ignore resource loss from a Season card's primary ability.</li></ul>" +
-      "<h4>Desolation and cryomancy tokens</h4><ul>" +
-      "<li><b>Desolation:</b> when placed, the area's controller immediately gains the resources the area provides. Never in a home realm, or where a desolation or cryomancy token already is. It stays until a card or ability removes it.</li>" +
-      "<li><b>Cryomancy:</b> units ignore that area's water borders as in winter (adjacent areas are unaffected). Never in a home realm or with a desolation token; several may share an area. Each spring, remove one from each area.</li>" +
-      "<li>While either is in an area, it has <b>no resource icons</b>, and a city there gives nothing to Rally Support and no dragon rune. Rune and exploration tokens there are unaffected.</li></ul>" +
+      "<h4>Desolation and cryomancy tokens</h4><ul class='aid-icons'>" +
+      RW.icLi("token-desolation", "Desolation token", "<b>Desolation:</b> when placed, the area's controller immediately gains the resources the area provides. Never in a home realm, or where a desolation or cryomancy token already is. It stays until a card or ability removes it.") +
+      RW.icLi("token-cryomancy", "Cryomancy token", "<b>Cryomancy:</b> units ignore that area's water borders as in winter (adjacent areas are unaffected). Never in a home realm or with a desolation token; several may share an area. Each spring, remove one from each area.") +
+      "</ul><ul><li>While either is in an area, it has <b>no resource icons</b>, and a city there gives nothing to Rally Support and no dragon rune. Rune and exploration tokens there are unaffected.</li></ul>" +
       "<h4>Map tile 12 and the Lost City</h4><ul>" +
       "<li>Strongholds may not be built on tile 12.</li>" +
       "<li>A Quest that places the Lost City puts it on tile 12 with its blue water border over the yellow one. If tile 12 has a desolation or cryomancy token, don't place the city: remove those tokens instead.</li>" +
       "<li>The Lost City is a city in every way, and can be destroyed and found again later. It adds resource icons to the area and gives its controller a dragon rune. Banners of War points to Rise of the Free Cities' rules for that rune: it counts only toward winning, and effects that target rune tokens can't touch it. If an effect would place the city while it's already out, ignore the effect.</li></ul>" +
       "<h4>Also</h4><ul>" +
-      "<li><b>Supplemental influence:</b> a “3” token is worth three influence; swap them in if normal tokens run short.</li>" +
+      "<li><b>Supplemental influence:</b> a " + RW.icIn("token-influence-3", "Supplemental influence token") + " “3” token is worth three influence; swap them in if normal tokens run short.</li>" +
       "<li><b>Revealing rune tokens</b> to trigger a card (such as “Game of Power”) requires tokens not already revealed.</li>" +
-      "<li>Every Banners of War card carries the expansion's icon on its front, so it can be sorted out afterwards.</li></ul>",
+      "<li>Every Banners of War card carries the expansion's icon " + RW.icIn("bow-icon", "Banners of War icon") + " on its front, so it can be sorted out afterwards.</li></ul>",
     src: "BoW p.2, p.4–8, p.11 · Rules p.30"
   },
   {

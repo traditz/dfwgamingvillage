@@ -455,6 +455,20 @@ main { max-width: var(--wrap); margin: 0 auto; padding: 0 24px 34px; }
   border: 1px solid var(--ink); border-left-width: 6px;
   padding: 10px 14px; margin-bottom: 12px;
 }
+/* rulebook icons (css/icons.css): an empty icon slot where the source prints no symbol (the domain table's blank
+   Lazax Survivors disc), and an icon row tucked under the bullet it illustrates */
+.ref-body ul.aid-icons > li > .ic-none { flex: none; width: calc(var(--aid-ic-size, 32px) * 1.2); height: var(--aid-ic-size, 32px); }
+.ref-body ul.aid-icons > li > .ic-none + * {
+  flex: 1 1 auto; min-width: 0;
+  padding-top: max(0px, calc((var(--aid-ic-size, 32px) - 1.5em) / 2));
+}
+.ref-body li > .aid-icon-row { margin: 8px 0 2px; }
+/* the domain table's pale grey symbols and the Leader roundels need a little more size to read */
+.ref-body .ds-icons, .ref-body .leader-icons { --aid-ic-size: 40px; }
+/* technology-tree headings: the chart's type symbol (named by the Rules p.16 legend) before the colour chip; General
+   has no named symbol, so it gets an empty slot that keeps the chips aligned */
+.ref-body h4.tt-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.ref-body h4.tt-head > .aid-ic, .ref-body h4.tt-head > .ic-none { flex: none; width: calc(var(--aid-ic-size, 32px) * 1.2); height: var(--aid-ic-size, 32px); }
 
 /* tables: the back cover's "Unit Values" box */
 .tbl-wrap { overflow-x: auto; margin: 8px 0 12px; -webkit-overflow-scrolling: touch; }

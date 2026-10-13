@@ -17,6 +17,15 @@ const el = (t, c, h) => { const n = document.createElement(t); if (c) n.classNam
 const esc = s => String(s).replace(/[&<>]/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;" }[m]));
 const srcTag = id => { const s = TAL.sources[id]; return s ? `<span class="etag ${s.cls}">${esc(s.short)}</span>` : ""; };
 
+/* Rulebook icons (css/icons.css): expand the [[ic:file|Name]] placeholders in already-escaped text into inline
+   icons, and [[grid:id]] into a grid of token faces (TAL.iconGrids) that splits the paragraph around it. */
+const icx = s => s.replace(/\[\[ic:([a-z0-9-]+)\|([^\]|]+)\]\]/g,
+  (m, f, n) => `<img class="aid-ic aid-ic-inline" src="images/icons/${f}.webp" alt="${n}" title="${n}">`);
+const icGrid = id => `<div class="aid-icon-grid">${((TAL.iconGrids || {})[id] || []).map(([f, n]) =>
+  `<figure><img class="aid-ic" src="images/icons/${f}.webp" alt="${esc(n)}" title="${esc(n)}"><figcaption>${esc(n)}</figcaption></figure>`).join("")}</div>`;
+const richParas = s => esc(s).split(/\[\[grid:([a-z0-9-]+)\]\]/)
+  .map((part, i) => i % 2 ? icGrid(part) : (part.trim() ? `<p>${icx(part.trim())}</p>` : "")).join("");
+
 /* ---- Config helpers ------------------------------------------------------ */
 const hasSrc = id => id === "base" || state.sources.has(id);
 
@@ -142,7 +151,7 @@ function renderSetup() {
       const d = typeof s.d === "function" ? s.d(c) : s.d;
       html += `<li><span class="snum">${n}</span><div class="sbody">
           <span class="st">${esc(s.t)}</span> ${srcTag(s.src)} <span class="ssrc">${esc(s.page)}</span>
-          <div class="sd">${esc(d)}</div>
+          <div class="sd">${icx(esc(d))}</div>
         </div></li>`;
     });
     html += `</ol></section>`;
@@ -156,7 +165,7 @@ function renderSetup() {
   if (chosenOpts.length || callouts.length) {
     notes += `<div class="callouts"><h3>Notes for this configuration</h3>`;
     chosenOpts.forEach(o => { notes += `<div class="callout"><span class="etag s-var">Variant</span> <b>${esc(o.name)}</b><p>${esc(o.desc)}</p></div>`; });
-    callouts.forEach(co => { notes += `<div class="callout">${srcTag(typeof co.src === "function" ? co.src(c) : co.src)} <b>${esc(co.t)}</b><p>${esc(typeof co.d === "function" ? co.d(c) : co.d)}</p></div>`; });
+    callouts.forEach(co => { notes += `<div class="callout">${srcTag(typeof co.src === "function" ? co.src(c) : co.src)} <b>${esc(co.t)}</b>${richParas(typeof co.d === "function" ? co.d(c) : co.d)}</div>`; });
     notes += `</div>`;
   }
   $("#setupNotes").innerHTML = notes;
@@ -179,7 +188,7 @@ function renderReference() {
 
   const itemsCard = (s, extra = "") => `<section class="ref-card" id="${s.id}"><h2>${esc(s.title)}</h2>
     <p class="ref-intro">${esc(s.intro)}</p>${extra}
-    <ul class="def-list">${s.items.map(i => `<li><span class="dk">${esc(i.k)}</span><span class="dt">${esc(i.t)}</span></li>`).join("")}</ul>
+    <ul class="def-list">${s.items.map(i => `<li><span class="dk">${esc(i.k)}</span><span class="dt">${icx(esc(i.t))}</span></li>`).join("")}</ul>
     ${s.notes ? `<ul class="bullet">${s.notes.map(b => `<li>${esc(b)}</li>`).join("")}</ul>` : ""}</section>`;
 
   h += stepsCard(R.turn);

@@ -162,7 +162,7 @@ RT.botHook = function (hook, c) {
     case "general": return RT.botGeneral(c, c.adv);
     case "map": return c.rb ? RT.priorityHtml(c, true) : "";
     case "score": return c.v("campaign") ? "<b>Campaign:</b> the Mechanical Marquise's score marker starts on <b>3 points for each game</b> you've won so far." : "";
-    case "items": return c.mmorig && !c.rb ? "<b>Original Mechanical Marquise:</b> take a <b>sword, boots, bag and tea</b> from the item supply and place them in the <b>Items for Sale</b> box on its faction board." : "";
+    case "items": return c.mmorig && !c.rb ? "<b>Original Mechanical Marquise:</b> take a <b>" + RT.icIn("item-sword", "Sword") + " sword, " + RT.icIn("item-boots", "Boots") + " boots, " + RT.icIn("item-bag", "Bag") + " bag and " + RT.icIn("item-tea", "Tea") + " tea</b> from the item supply and place them in the <b>Items for Sale</b> box on its faction board." : "";
     case "coop":
       if (!c.v("coop")) return "";
       if (RT.mmOnly(c)) return "<b>Cooperative play:</b> you win as a team if <b>every player</b> scores 30 points before the Mechanical Marquise does. It also scores <b>1 point per human player</b> in each Birdsong, and recruits in <b>all clearings matching the suit of the crafting cost</b>, regardless of rule." +
@@ -540,12 +540,12 @@ RT.botRef.corvbot = { title: "Cogwheel Corvids",
         "<b>The Plot Thickens:</b> if any clearing has no plot and three or more Corvid warriors, remove one Corvid warrior there to place a random face-down plot (tie: most Corvid warriors)."
       ]) + "<h4>Evening</h4>" + RT.ol(["<b>Score</b> 1 point per face-up Extortion plot on the map.", "<b>Discard</b> the order card."]) +
       "<h4>Plots (the bot's)</h4><table class='rt'><thead><tr><th>Plot</th><th>Effect</th></tr></thead><tbody>" +
-      "<tr><td>Bomb</td><td>When flipped, remove all enemy pieces in its clearing, then swap the bomb with a random plot from your supply, placed face up (it doesn't trigger, and can be another bomb).</td></tr>" +
-      "<tr><td>Snare</td><td>While face up, enemy pieces can't be placed in or moved from its clearing (as normal).</td></tr>" +
-      "<tr><td>Extortion</td><td>When flipped, each player with faction pieces in its clearing discards one card at random.</td></tr>" +
-      "<tr><td>Raid</td><td>When removed, place one warrior in each adjacent clearing (as normal).</td></tr></tbody></table>";
+      "<tr><td>" + RT.icPair("plot-bomb", "Bomb") + "</td><td>When flipped, remove all enemy pieces in its clearing, then swap the bomb with a random plot from your supply, placed face up (it doesn't trigger, and can be another bomb).</td></tr>" +
+      "<tr><td>" + RT.icPair("plot-snare", "Snare") + "</td><td>While face up, enemy pieces can't be placed in or moved from its clearing (as normal).</td></tr>" +
+      "<tr><td>" + RT.icPair("plot-extortion", "Extortion") + "</td><td>When flipped, each player with faction pieces in its clearing discards one card at random.</td></tr>" +
+      "<tr><td>" + RT.icPair("plot-raid", "Raid") + "</td><td>When removed, place one warrior in each adjacent clearing (as normal).</td></tr></tbody></table>";
   },
-  src: function (c) { return RT.join(["Rootbotics p.22–23 §11", RT.diffTraitsSrc(c, "corvid")]); } };
+  src: function (c) { return RT.join(["Rootbotics p.22–23 §11", "Underworld p.4 (plot tokens)", RT.diffTraitsSrc(c, "corvid")]); } };
 
 RT.botRef.mmorig = { title: "Original Mechanical Marquise",
   html: function (c) {
@@ -563,7 +563,7 @@ RT.botRef.mmorig = { title: "Original Mechanical Marquise",
         "<b>Recruit</b> by the order's crafting cost" + RT.ul([
           "<b>1–3 of one suit:</b> that many warriors in each clearing you rule of that suit.",
           "<b>One of each suit:</b> one warrior in each clearing you rule.",
-          "<b>Four of any suits</b> (“?” icons): four warriors in the keep's clearing.",
+          "<b>Four of any suits</b> (" + RT.icIn("craft-any-suit", "Any suit") + " “?” icons): four warriors in the keep's clearing.",
           "<b>No crafting cost:</b> restart Daylight with the next order card — if the Schedule has none left, go to Evening.",
           c.v("coop") ? "<b>Cooperative game:</b> it recruits in <b>all clearings matching the suit of the crafting cost</b>, regardless of rule." : ""
         ])

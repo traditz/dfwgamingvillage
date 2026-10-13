@@ -602,21 +602,12 @@ li.flagged::before { display: none; }
   color: #fbf3e6; background: var(--ink-2); border-radius: 2px;
 }
 
-/* faction colours on the faction headings (order fixed by SY.factions: the five
-   core factions first, then Albion and Togawa when Invaders from Afar is on) */
-.ref-body:has(> h4 > .who) > h4:nth-of-type(-n+5)::before,
-body:has(#expansions > .chip:nth-child(2).on) .ref-body:has(> h4 > .who) > h4:nth-of-type(-n+7)::before {
-  content: ""; display: inline-block; width: 18px; height: 18px; margin: 0 10px 0 1px; border-radius: 50%;
-  vertical-align: -1px; background: var(--fc, transparent);
-  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.35), 0 0 0 1.5px rgba(35, 31, 32, 0.75);
-}
-.ref-body:has(> h4 > .who) > h4:nth-of-type(1) { --fc: #2f6db3; }  /* Nordic: blue */
-.ref-body:has(> h4 > .who) > h4:nth-of-type(2) { --fc: #b42a1f; }  /* Rusviet: red */
-.ref-body:has(> h4 > .who) > h4:nth-of-type(3) { --fc: #e2b01c; }  /* Crimea: yellow */
-.ref-body:has(> h4 > .who) > h4:nth-of-type(4) { --fc: #f6f3ec; }  /* Polania: white */
-.ref-body:has(> h4 > .who) > h4:nth-of-type(5) { --fc: #1f1d1e; }  /* Saxony: black */
-.ref-body:has(> h4 > .who) > h4:nth-of-type(6) { --fc: #3a7d3a; }  /* Albion: green */
-.ref-body:has(> h4 > .who) > h4:nth-of-type(7) { --fc: #6d3f8f; }  /* Togawa: purple */
+/* token faces (Togawa's Traps) in the rules reference: a little larger than list icons so the printed
+   penalty stays legible (icons standard token, css/icons.css) */
+.ref-body .aid-icon-grid { --aid-ic-size: 44px; margin: 4px 0 10px; }
+
+/* faction headings carry each faction's emblem, cropped from the rulebooks (js/data.js SY.factions[].emblem,
+   css/icons.css); it replaces the drawn colour dots these headings used to have */
 
 /* ---- teaching script: the green "Designer's Note" plaque -------------------- */
 #teachBtn, .teach-copy {

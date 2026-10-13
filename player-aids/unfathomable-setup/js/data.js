@@ -84,6 +84,17 @@ UF.ul = (items) => "<ul>" + items.filter(Boolean).map(i => "<li>" + i + "</li>")
 UF.ol = (items) => "<ol>" + items.filter(Boolean).map(i => "<li>" + i + "</li>").join("") + "</ol>";
 UF.src = (...parts) => parts.filter(Boolean).join(" · ");
 
+/* Rulebook icons (DFWGV icons standard v1, css/icons.css). Every file is cropped from this game's own books:
+   skill, activation, track and resource icons from the Learn to Play p.28 Quick Reference legend; boon, the
+   three horrors and the horror icon from the From the Abyss p.12 legend; the expansion icon from From the
+   Abyss p.3. Always call these with the full literal file name, e.g. UF.ic("skill-lore", "Lore"). */
+UF.ic = (f, alt) => "<img class='aid-ic' src='images/icons/" + f + ".webp' alt='" + alt + "' title='" + alt + "'>";
+UF.icIn = (f, alt) => "<img class='aid-ic aid-ic-inline' src='images/icons/" + f + ".webp' alt='" + alt + "' title='" + alt + "'>";
+UF.icPair = (f, name) => "<span class='aid-pair'>" + UF.ic(f, name) + "<span>" + name + "</span></span>";
+UF.icRow = (pairs) => "<p class='aid-icon-row'>" + pairs.filter(Boolean).join(" ") + "</p>";
+/* items: [icon html, explanation html] — falsy items are skipped (gating) */
+UF.icList = (items) => "<ul class='aid-icons'>" + items.filter(Boolean).map(([img, html]) => "<li>" + img + "<span>" + html + "</span></li>").join("") + "</ul>";
+
 /* Loyalty deck for a configuration. Standard: Rules Ref p.23 (also Learn to Play p.28 and
    From the Abyss p.12). Learning game: Learn to Play p.7 (Cultist replaced by a Human).
    No-Cultist variant: Rules Ref p.18. */
@@ -153,7 +164,7 @@ UF.phases = [
           "<b>Remove</b> every character-specific (green) mythos card from the mythos deck and <b>set them aside</b> — they are still used, at the “Create play areas” step.",
           "<b>Replace</b> with the updated versions: the Captain title card, the Keeper of the Tome title card, the Jam Tin Grenade item card, the 6 player reference sheets and the 3 traitor reference sheets.",
           "Keep the rest of the expansion ready: 3 horror figures, 4 horror cards and the horror token; 23 boon cards; 12 ally cards; 2 overlay tiles (boon and ally); the 8 new characters (sheets, feat cards, standees and their character-specific mythos cards); 3 expansion reference sheets" + ", and the 15 optional prelude cards.",
-          "Every expansion card and sheet carries the <b>From the Abyss icon</b>, so you can sort them back out later."
+          "Every expansion card and sheet carries the " + UF.icIn("fta-expansion", "From the Abyss icon") + " <b>From the Abyss icon</b>, so you can sort them back out later."
         ]),
         src: (c) => UF.src("From the Abyss p.2–3", c.mode === "learning" ? "Rules Ref p.23" : "") }
     ]
@@ -184,12 +195,18 @@ UF.phases = [
           }
           if (c.mode === "learning" && (c.p === 4 || c.p === 6)) items.push("<b>Learning game:</b> the Learn to Play starts every dial at 8" + (D.d ? " (before the difficulty adjustment)" : "") + " even at four and six players, although its loyalty deck swaps the Cultist for a Human card — the lower 7/6/6/7 start belongs only to the Rules Reference’s No-Cultist variant.");
           items.push("A resource can never go above <b>10</b>; gains beyond 10 are ignored. If <b>any</b> dial reaches <b>0</b>, the game ends at once — a Deep One victory.");
+          items.unshift("Each dial is marked on the board by its resource icon:" + UF.icRow([
+            UF.icPair("res-fuel", "Fuel"),
+            UF.icPair("res-food", "Food"),
+            UF.icPair("res-sanity", "Sanity"),
+            UF.icPair("res-souls", "Souls")
+          ]));
           return UF.ul(items);
         },
         src: (c) => {
           const D = UF.dials(c);
           const lrn46 = c.mode === "learning" && (c.p === 4 || c.p === 6);
-          return UF.src("Rules Ref p.20 (step 3)", "Learn to Play p.5" + (lrn46 ? ", p.28" : ""),
+          return UF.src("Rules Ref p.20 (step 3)", "Learn to Play p.5, p.8" + (lrn46 ? ", p.28" : ""),
             (D.nc || D.d || lrn46) ? "Rules Ref p.18 (Appendix " + (D.nc && D.d ? "I–II" : D.nc ? "I" : D.d && lrn46 ? "I–II" : D.d ? "II" : "I") + ")" : "", "Rules Ref p.11 (§29.5–29.6)", "Rules Ref p.12 (§36.1)");
         } },
       { when: () => true, exp: "core",
@@ -212,14 +229,21 @@ UF.phases = [
       { when: () => true, exp: (c) => c.has("fta") ? "fta" : "core",
         t: "Create the skill decks",
         d: (c) => UF.ul([
-          "Separate the skill cards by type — <b>influence</b> (orange), <b>lore</b> (purple), <b>observation</b> (green), <b>strength</b> (red), <b>will</b> (blue) and <b>treachery</b> (black) — shuffle each type into its own deck and place each deck facedown beside the board next to its label.",
-          c.has("fta") ? "<b>From the Abyss:</b> place the <b>boon overlay tile</b> on the board edge to the left of the treachery label, shuffle the <b>boon cards</b> and place them facedown next to the tile." : ""
+          "Separate the skill cards by type — <b>influence</b> (orange), <b>lore</b> (purple), <b>observation</b> (green), <b>strength</b> (red), <b>will</b> (blue) and <b>treachery</b> (black) — shuffle each type into its own deck and place each deck facedown beside the board next to its label:" + UF.icRow([
+            UF.icPair("skill-influence", "Influence"),
+            UF.icPair("skill-lore", "Lore"),
+            UF.icPair("skill-observation", "Observation"),
+            UF.icPair("skill-strength", "Strength"),
+            UF.icPair("skill-will", "Will"),
+            UF.icPair("skill-treachery", "Treachery")
+          ]),
+          c.has("fta") ? "<b>From the Abyss:</b> place the <b>boon overlay tile</b> on the board edge to the left of the " + UF.icIn("skill-treachery", "Treachery") + " treachery label, shuffle the <b>boon cards</b> and place them facedown next to the tile." : ""
         ]),
         src: (c) => UF.src("Rules Ref p.21 (step 5)", "Learn to Play p.5, p.28", c.has("fta") ? "From the Abyss p.3" : "") },
       { when: () => true, exp: (c) => c.has("fta") ? "fta" : "core",
         t: "Create the damage and mythos decks",
         d: (c) => UF.ul([
-          "Shuffle the <b>damage deck</b> and place it beside the board next to its label.",
+          "Shuffle the <b>damage deck</b> and place it beside the board next to its label " + UF.icIn("label-damage", "Damage deck label") + ".",
           "Shuffle the <b>mythos deck</b> and place it near the board.",
           c.has("fta") ? "<b>From the Abyss:</b> the mythos deck now includes the expansion’s 72 cards (with the 12 Personal Crisis cards) and <b>no</b> character-specific cards — those were set aside." : ""
         ]),
@@ -269,7 +293,7 @@ UF.phases = [
       { when: () => true, exp: "core",
         t: "Gather items",
         d: "<ul><li>Each player takes the <b>starting item</b> named on the back of their character sheet from the item deck and places it faceup in their play area.</li>" +
-           "<li>Shuffle the remaining items to form the <b>item deck</b> and place it beside the board next to its label.</li></ul>",
+           "<li>Shuffle the remaining items to form the <b>item deck</b> and place it beside the board next to its label " + UF.icIn("label-item", "Item deck label") + ".</li></ul>",
         src: "Rules Ref p.22 (step 11) · Learn to Play p.6" },
       { when: () => true, exp: "core",
         t: "Place characters",
@@ -315,11 +339,11 @@ UF.phases = [
         src: (c) => UF.src("Rules Ref p.23 (step 15)", "Learn to Play p.7", c.has("fta") ? "From the Abyss p.2–3" : "") },
       { when: (c) => c.has("fta"), exp: "fta",
         t: "Create the ally deck (new step)",
-        d: "<ul><li>Place the <b>ally overlay tile</b> on the board edge to the left of the item card label. Shuffle the <b>ally cards</b> and place them facedown next to the tile.</li>" +
+        d: "<ul><li>Place the <b>ally overlay tile</b> on the board edge to the left of the " + UF.icIn("label-item", "Item deck label") + " item card label. Shuffle the <b>ally cards</b> and place them facedown next to the tile.</li>" +
            "<li>Roll the die <b>twice</b>, rerolling until the two results are <b>different</b>. Spawn <b>one ally</b> (faceup) in the <b>interior space</b> matching each result:" +
              "<ul><li>1–2 Bridge · 3 Chapel · 4 Captain’s Cabin · 5 Cargo Hold · 6 Galley · 7–8 Boiler Room</li></ul></li>" +
            "<li>As written, two different results can still name the same room (1 and 2 are both the Bridge; 7 and 8 both the Boiler Room).</li></ul>",
-        src: "From the Abyss p.3–4 · Learn to Play p.11 (space numbers)" },
+        src: "From the Abyss p.3–4 · Learn to Play p.6 (item label), p.11 (space numbers)" },
       { when: (c) => c.has("fta") && c.mod("prelude"), exp: "fta",
         t: "Resolve preludes (optional)",
         d: (c) => {
@@ -526,17 +550,40 @@ UF.reference = [
         c.has("fta") ? "<b>From the Abyss:</b> no green character-specific cards in the deck; <b>Personal Crisis</b> cards send a player to their own facedown character-specific card (see From the Abyss — Personal Crisis)." :
           "<b>Green</b> cards are <b>character-specific</b>: if that character isn’t in the game, is in the Brig or has revealed as a traitor, discard it and draw another. If you’re looking at mythos cards in secret and any of them are green cards that would be discarded this way, reveal and discard them, then look at that many more cards (repeat if any of the new cards would also be discarded).",
         "Some crises go into a player’s play area and grant abilities while they stay there."
-      ]) + "<h4>Icons (lower-right corner)</h4>" + UF.ul([
-        "<b>Activation</b>: Deep Ones · Father Dagon · Mother Hydra" + (c.has("fta") ? " · Shoggoth · Drowned Spirit · Grasping Tendril · the generic horror icon" : "") + ". Activation icons printed in a crisis’s text resolve left to right.",
-        "<b>Track</b>: travel · ritual · <b>choice of tracks</b> (the current player picks; if they’re in the Brig, the <b>Captain</b> picks)" + (c.has("fta") ? " · the horror icon acts as a track icon while no horror is on the board" : "") + ".",
+      ]) + "<h4>Activation icons — lower-right corner</h4>" + UF.icList([
+        [UF.ic("act-deep-one", "Deep One"), "<b>Deep One</b> — each Deep One on the board activates."],
+        [UF.ic("act-father-dagon", "Father Dagon"), "<b>Father Dagon</b> — Father Dagon activates."],
+        [UF.ic("act-mother-hydra", "Mother Hydra"), "<b>Mother Hydra</b> — Mother Hydra activates."],
+        c.has("fta") && [UF.ic("act-shoggoth", "Shoggoth"), "<b>Shoggoth</b> — the Shoggoth activates; if it isn’t on the board, this activation spawns it."],
+        c.has("fta") && [UF.ic("act-drowned-spirit", "Drowned Spirit"), "<b>Drowned Spirit</b> — the Drowned Spirit activates; if it isn’t on the board, this activation spawns it."],
+        c.has("fta") && [UF.ic("act-grasping-tendril", "Grasping Tendril"), "<b>Grasping Tendril</b> — the Grasping Tendril activates; if it isn’t on the board, this activation spawns it."],
+        c.has("fta") && [UF.ic("horror", "Horror"), "<b>Horror</b> — not a specific horror. With one or more horrors on the board it is an <b>activation</b> icon; with none, it is a <b>track</b> icon (advance the horror track). See From the Abyss — horrors."]
+      ]) + UF.ul([
+        "Activation icons printed in a crisis’s text resolve left to right."
+      ]) + "<h4>Track icons — lower-right corner</h4>" + UF.icList([
+        [UF.ic("track-travel", "Travel Track"), "<b>Travel Track</b> — advance the travel track 1 space."],
+        [UF.ic("track-ritual", "Ritual Track"), "<b>Ritual Track</b> — advance the ritual track 1 space."],
+        [UF.ic("track-choice", "Choice of Tracks"), "<b>Choice of Tracks</b> — the current player chooses one track and advances it 1 space; if they’re in the Brig, the <b>Captain</b> chooses."]
+      ]) + UF.ul([
+        c.has("fta") ? "<b>From the Abyss:</b> the <b>horror</b> icon (above) acts as a track icon while no horror is on the board." : "",
         "A <b>human in the Brig</b> resolves only the icons of their mythos card — never the crisis."
       ]),
-    src: (c) => UF.src("Rules Ref p.2 (§1.2, §1.11)", "Rules Ref p.9–10 (§28)", "Rules Ref p.6 (§9.7)", "Learn to Play p.12–13", c.has("fta") ? "From the Abyss p.7, p.9, p.12" : "")
+    src: (c) => UF.src("Rules Ref p.2 (§1.2, §1.11)", "Rules Ref p.9–10 (§28)", "Rules Ref p.6 (§9.7)", "Learn to Play p.12–13, p.28 (icons)", c.has("fta") ? "From the Abyss p.6–7, p.9, p.12" : "")
   },
   {
     title: "Skill checks and the chaos deck",
     when: () => true,
-    html: (c) => UF.ol([
+    html: (c) => "<h4>Skill icons</h4>" +
+      "<p>A skill check shows a target number and two or more skill icons: those are its <b>supporting</b> skills. Every skill type not shown is <b>opposing</b>" + (c.has("fta") ? " — except <b>boon</b> cards, which always support" : "") + ".</p>" +
+      UF.icRow([
+        UF.icPair("skill-influence", "Influence"),
+        UF.icPair("skill-lore", "Lore"),
+        UF.icPair("skill-observation", "Observation"),
+        UF.icPair("skill-strength", "Strength"),
+        UF.icPair("skill-will", "Will"),
+        c.has("fta") ? UF.icPair("skill-boon", "Boon") : "",
+        UF.icPair("skill-treachery", "Treachery")
+      ]) + "<h4>Resolving a skill check</h4>" + UF.ol([
         "<b>Announce</b> the target number and supporting skills (every other skill type opposes" + (c.has("fta") ? "; <b>boon</b> cards always support" : "") + "). “Before any cards are added” abilities are used now.",
         "<b>Chaos cards</b> — the current player puts the top <b>2</b> chaos cards facedown to start the skill check pile.",
         "<b>Add cards</b> — starting with the player to the current player’s <b>left</b> and ending with the current player, each player gets <b>one</b> chance to add any number of cards facedown (or none). Humans in the Brig and revealed traitors: <b>1 card max</b>.",
@@ -550,21 +597,21 @@ UF.reference = [
         "Open information: how many cards each player adds and how many are in the check — never which ones.",
         "The Captain’s Cabin and Brig checks only say what happens on a pass; if they fail, nothing happens."
       ]),
-    src: (c) => UF.src("Rules Ref p.14 (§42)", "Rules Ref p.6 (§10)", "Rules Ref p.11 (§30.7–30.8, §31)", "Rules Ref p.17 (§52.3)", "Learn to Play p.16–17", c.has("fta") ? "From the Abyss p.3, p.8" : "")
+    src: (c) => UF.src("Rules Ref p.14 (§42)", "Rules Ref p.10 (§28.15)", "Rules Ref p.6 (§10)", "Rules Ref p.11 (§30.7–30.8, §31)", "Rules Ref p.17 (§52.3)", "Learn to Play p.9, p.16–17, p.28 (icons)", c.has("fta") ? "From the Abyss p.3, p.8, p.12" : "")
   },
   {
     title: "Monsters — Deep Ones and the monarchs",
     when: () => true,
-    html: (c) => "<h4>Deep Ones — each activates on its own, in the order the current player chooses, doing the first thing it can:</h4>" + UF.ol([
+    html: (c) => "<h4>" + UF.icIn("act-deep-one", "Deep One") + " Deep Ones — each activates on its own, in the order the current player chooses, doing the first thing it can:</h4>" + UF.ol([
         "<b>Attack</b> a human in its space (current player picks the defender; never a revealed traitor) — a roll of <b>6+</b> defeats the human.",
         "<b>Defeat a passenger</b> in its space (only if no human is there; with several there, the current player picks which).",
         "<b>Damage its space</b> — only an undamaged interior space.",
         "<b>Move</b> — water or deck space: follow the arrow. Interior space: one space toward the <b>closest undamaged interior space</b>; ties → the one with the <b>highest printed number</b>."
       ]) + "<p>No Deep Ones on the board (the Deep doesn’t count)? <b>Spawn 2 Deep Ones in the Deep</b>. Then, if 4+ Deep Ones are in the Deep, roll and move <b>all monsters</b> in the Deep — monarchs included — to the matching water space (1–4 or 5–8).</p>" +
-      "<h4>Father Dagon</h4>" + UF.ul([
+      "<h4>" + UF.icIn("act-father-dagon", "Father Dagon") + " Father Dagon</h4>" + UF.ul([
         "Spawn <b>2 Deep Ones</b> in the deck space adjacent to him (his arrow points to it). Then he moves <b>1 water space toward the front</b> (not if already at 1–4 or 5–8).",
         "In the Deep instead: spawn 2 Deep Ones in the Deep; if 4+ are there, roll and move Father Dagon <b>and all Deep Ones</b> in the Deep to the matching water space."
-      ]) + "<h4>Mother Hydra</h4>" + UF.ul([
+      ]) + "<h4>" + UF.icIn("act-mother-hydra", "Mother Hydra") + " Mother Hydra</h4>" + UF.ul([
         "Damage the <b>interior space closest to her</b> (follow the arrows from her space). Already damaged? Damage the undamaged interior space closest to it (ties → highest printed number). Then she moves <b>1 water space toward the front</b> (not if already there).",
         "In the Deep instead: spawn 2 Deep Ones in the Deep; if 4+ are there, roll and move Mother Hydra <b>and all Deep Ones</b> in the Deep to the matching water space."
       ]) + "<h4>Facts</h4>" + UF.ul([
@@ -607,7 +654,7 @@ UF.reference = [
         "<b>Advance</b> = move away from Start (overflow past the end continues from Start after the reset). <b>Retreat</b> = toward Start, stopping there. <b>Reset</b> = back to Start.",
         "Four advances take a token from Start to Arrive or Cast."
       ]) + "<h4>Travel track</h4>" + UF.ul([
-        "Advanced by travel icons and the Boiler Room.",
+        "Advanced by " + UF.icIn("track-travel", "Travel Track") + " travel icons and the Boiler Room.",
         "For <b>each</b> space it advances, every monster" + (f ? " and passenger" : "") + " in a water space moves 1 water space toward the <b>back</b>. Anything already at the back: " + (f ? "monarchs and Deep Ones go to <b>the Deep</b>; horrors and passengers are <b>defeated</b>." : "moves to <b>the Deep</b>.") + " Retreating the track moves nothing.",
         "<b>Arrive</b> with waypoints in play totaling <b>12+</b> → the game ends: the human objective is met.",
         "<b>Arrive</b> with less than 12 → the <b>Captain</b> looks at the top 2 waypoint cards, places 1 in the row of waypoints beside the board and resolves it, puts the other on the bottom, then <b>resets</b> the travel track.",
@@ -618,13 +665,13 @@ UF.reference = [
         "Revealed traitors, clockwise from the current player, each give their <b>new</b> card to a human of their choice (who then reviews all their cards).",
         "Resume where the game left off (usually the end of a mythos card)."
       ]) + "<h4>Ritual track — the greater banishment</h4>" + UF.ul([
-        "Advanced by ritual icons and the Chapel.",
+        "Advanced by " + UF.icIn("track-ritual", "Ritual Track") + " ritual icons and the Chapel.",
         f ? "At <b>Cast</b>: move the monarchs to <b>the Deep</b>, then <b>defeat each Deep One, horror, passenger, ally and character in every deck and water space</b>. Then reset the ritual track."
           : "At <b>Cast</b>: return every Deep One in deck and water spaces to the supply; move Father Dagon and Mother Hydra to the Deep; defeat each passenger in each deck space; defeat each character in each deck space. Then reset the ritual track.",
         "Anyone and anything in an <b>interior</b> space is unaffected. Defeated humans go to the Sick Bay; defeated revealed traitors to the Brig (the Rules Reference corrects the Learn to Play, which sends every character to the Sick Bay)."
       ]);
     },
-    src: (c) => UF.src("Rules Ref p.16–17 (§50)", "Rules Ref p.18 (§54)", "Rules Ref p.5 (§7–8)", "Learn to Play p.14–15, p.23", c.has("fta") ? "From the Abyss p.2 (updated traitor sheet), p.4, p.7" : "")
+    src: (c) => UF.src("Rules Ref p.16–17 (§50)", "Rules Ref p.18 (§54)", "Rules Ref p.5 (§7–8)", "Learn to Play p.14–15, p.23, p.28 (icons)", c.has("fta") ? "From the Abyss p.2 (updated traitor sheet), p.4, p.7" : "")
   },
   {
     title: "Damage and repair",
@@ -644,7 +691,12 @@ UF.reference = [
     title: "Passengers",
     when: () => true,
     html: (c) => UF.ul([
-        "Tokens stay <b>facedown</b>; each face shows one or more resource icons or an <b>X</b>.",
+        "Tokens stay <b>facedown</b>; each face shows one or more resource icons or an <b>X</b>." + UF.icRow([
+          UF.icPair("res-fuel", "Fuel"),
+          UF.icPair("res-food", "Food"),
+          UF.icPair("res-sanity", "Sanity"),
+          UF.icPair("res-souls", "Souls")
+        ]),
         "<b>Risk a passenger</b>: roll and place a passenger from the supply facedown, unseen, in the matching <b>deck space</b>" + (c.has("fta") ? " (with the expansion this counts as <b>spawning</b> it)" : "") + "; risking several means a separate roll for each. Too few in the supply → risk as many as you can; if risking is a <b>cost</b> (like the Bridge), you can’t pay it without enough.",
         "<b>Rescue</b>: the token goes back to the supply facedown, unseen.",
         "<b>Defeat</b>: flip it, lose 1 of each resource per matching icon, remove it from the game (X = no loss). A dial hitting 0 this way ends the game.",
@@ -653,7 +705,7 @@ UF.reference = [
         c.has("fta") ? "<b>From the Abyss:</b> passengers can spawn in or be moved into <b>water spaces</b>; the travel track pushes them toward the back, and one already at the back is <b>defeated</b>. The ritual’s banishment defeats passengers in water too. <b>Rescue</b> now saves <b>each</b> passenger in your space, or <b>one</b> passenger in an adjacent water space, and spawns <b>one ally</b> in your space. A revealed traitor may also defeat a passenger in an <b>adjacent water space</b>, but only if no human is in the <b>traitor’s</b> space." : "",
         "The box has 9 passenger tokens; how many are in the supply is open information."
       ]),
-    src: (c) => UF.src("Rules Ref p.11–12 (§32)", "Rules Ref p.11 (§30.3)", "Learn to Play p.3, p.11, p.21", c.has("fta") ? "From the Abyss p.2, p.4" : "")
+    src: (c) => UF.src("Rules Ref p.11–12 (§32)", "Rules Ref p.11 (§30.3)", "Learn to Play p.3, p.11, p.21, p.28 (resource icons)", c.has("fta") ? "From the Abyss p.2, p.4" : "")
   },
   {
     title: "The Brig and the Sick Bay",
@@ -663,7 +715,7 @@ UF.reference = [
         "Moving to the Brig costs a human <b>all their titles</b>.",
         "While there: add at most <b>1 card</b> to each skill check; no <b>item</b> abilities, and your active Improvement doesn’t count; “if you are not in the Brig” abilities don’t work — including the harmful part of a reveal ability.",
         "You still draw your <b>full</b> skill set and may use skill card abilities.",
-        "A <b>human’s</b> Mythos step resolves only the card’s icons (choice of tracks → the Captain chooses).",
+        "A <b>human’s</b> Mythos step resolves only the card’s icons (" + UF.icIn("track-choice", "Choice of Tracks") + " choice of tracks → the Captain chooses).",
         "Leaving: a <b>human</b> uses the Brig’s action (skill check 8, lore + strength; not blocked by a revealed traitor there). A <b>revealed traitor</b> discards skill cards worth <b>12+</b>, all at once, and moves. Other movement effects work only if they say “Brig”.",
         "Defeated in the Brig → you stay. It can’t be damaged; Deep Ones" + (c.has("fta") ? ", horrors and allies" : "") + " can’t enter."
       ]) + "<h4>The Sick Bay</h4>" + UF.ul([
@@ -672,7 +724,7 @@ UF.reference = [
         "Leave with a normal move. Moved out before your turn (e.g. a granted action)? You draw your full set.",
         "Defeated here → you stay. It can’t be damaged; Deep Ones" + (c.has("fta") ? ", horrors and allies" : "") + " can’t enter; no voluntary moves in."
       ]) + "<p class='note'>Sending an innocent human to the Brig makes the game harder for the humans; it can neutralize a hidden traitor.</p>",
-    src: (c) => UF.src("Rules Ref p.5–6 (§9)", "Rules Ref p.13 (§40)", "Learn to Play p.11, p.13, p.25", c.has("fta") ? "From the Abyss p.5, p.7" : "")
+    src: (c) => UF.src("Rules Ref p.5–6 (§9)", "Rules Ref p.13 (§40)", "Learn to Play p.11, p.13, p.25, p.28 (icons)", c.has("fta") ? "From the Abyss p.5, p.7" : "")
   },
   {
     title: "Titles — Captain and Keeper of the Tome",
@@ -680,13 +732,13 @@ UF.reference = [
     html: (c) => UF.ul([
         "Each title goes at setup to the character highest on its <b>line of succession</b> (on the back of the title card).",
         "You lose your titles when you <b>move to the Brig</b> or <b>reveal as a traitor</b>. The title passes to the highest eligible character — not revealed traitors, not humans in the Brig, not characters out of play. The loser stays eligible only if every other human is in the Brig (and they aren’t revealing); if all humans are in the Brig, the highest of them takes it.",
-        "<b>Captain</b>: holds the waypoint deck; at Arrive looks at the top 2 waypoints, resolves 1, bottoms the other; makes the choice on many crises; picks the track when a human in the Brig draws a choice-of-tracks icon.",
+        "<b>Captain</b>: holds the waypoint deck; at Arrive looks at the top 2 waypoints, resolves 1, bottoms the other; makes the choice on many crises; picks the track when a human in the Brig draws a " + UF.icIn("track-choice", "Choice of Tracks") + " choice-of-tracks icon.",
         "<b>Keeper of the Tome</b>: holds the spell deck. Action: " + (c.has("fta")
           ? "look at the <b>top 3</b> spells, put <b>2 on the bottom</b> in any order, then resolve the remaining one (updated card)"
           : "look at the <b>top 2</b> spells, put 1 on the bottom, resolve the other") + ". Limit once per turn. Resolved spells are removed from the game; with an empty spell deck, no spells. Also makes the choice on several crises.",
         "A hidden traitor with a title can do real damage: a Captain choosing short waypoints, a Keeper casting spells that hurt more than help."
       ]),
-    src: (c) => UF.src("Rules Ref p.16 (§49)", "Rules Ref p.15 (§46)", "Learn to Play p.16, p.22", c.has("fta") ? "From the Abyss p.2–3" : "")
+    src: (c) => UF.src("Rules Ref p.16 (§49)", "Rules Ref p.15 (§46)", "Rules Ref p.10 (§28.27)", "Learn to Play p.16, p.22, p.28 (icons)", c.has("fta") ? "From the Abyss p.2–3" : "")
   },
   {
     title: "Revealing as a traitor — and life as a revealed traitor",
@@ -793,20 +845,20 @@ UF.reference = [
     title: "From the Abyss — horrors",
     when: (c) => c.has("fta"),
     html: () => "<p>Three horrors — monsters, but not monarchs or Deep Ones. Each has its own activation icon; activating a horror that isn’t on the board <b>spawns</b> it first. Then it does the first thing it can:</p>" +
-      "<h4>Shoggoth — spawns in the deck space matching a roll</h4>" + UF.ol([
+      "<h4>" + UF.icIn("act-shoggoth", "Shoggoth") + " Shoggoth — spawns in the deck space matching a roll</h4>" + UF.ol([
         "Attack <b>each</b> human in its space, <b>+1</b> to each roll.",
         "Defeat <b>each</b> passenger in its space.",
         "Damage its space (an undamaged interior space).",
         "Remove the top <b>4 item cards</b> from the game unseen, then move: water → deck → interior along the arrows; inside, toward the closest undamaged interior space (ties → highest number)."
-      ]) + "<h4>Drowned Spirit — spawns in the interior space matching a roll</h4>" + UF.ol([
+      ]) + "<h4>" + UF.icIn("act-drowned-spirit", "Drowned Spirit") + " Drowned Spirit — spawns in the interior space matching a roll</h4>" + UF.ol([
         "Damage its space (an undamaged interior space).",
         "Remove the top <b>4 spell cards</b> from the game unseen, then move as the Shoggoth does."
-      ]) + "<h4>Grasping Tendril — spawns in the water space matching a roll</h4>" +
+      ]) + "<h4>" + UF.icIn("act-grasping-tendril", "Grasping Tendril") + " Grasping Tendril — spawns in the water space matching a roll</h4>" +
       "<p>It occupies a water space <b>and</b> the adjacent deck space, and never enters the interior.</p>" + UF.ol([
         "Attack a human in its deck space, <b>+1</b> to the roll; then move 1 space toward the front.",
         "Move each passenger from its deck space into its water space; then move 1 toward the front.",
         "Spawn a passenger in its water space (still moves if none are left); then move 1 toward the front."
-      ]) + "<h4>The horror icon</h4>" + UF.ul([
+      ]) + "<h4>" + UF.icIn("horror", "Horror") + " The horror icon</h4>" + UF.ul([
         "<b>No horrors on the board</b>: it’s a track icon — advance the horror track (Start → one space → Spawn). At <b>Spawn</b>, set the token aside and draw and resolve the top horror card (usually a specific horror’s activation icon). The <i>Ominous Visions</i> card instead gives the current player 1 boon and 1 treachery card, goes to the bottom of the horror deck, and you draw another horror card.",
         "<b>Exactly one horror</b> on the board: it activates.",
         "<b>More than one</b>: flip horror cards until one names a horror on the board; that one activates; shuffle the flipped cards back.",
@@ -824,13 +876,13 @@ UF.reference = [
     title: "From the Abyss — boons, treachery and new skill cards",
     when: (c) => c.has("fta"),
     html: () => UF.ul([
-        "<b>Boon</b> cards always <b>support</b> a skill check. They can be drawn only when an ability says “boon”. Humans and traitors alike may draw them and use their abilities.",
-        "<b>Treachery</b>: abilities can now make humans draw treachery cards; humans may add them to skill checks and discard them for other abilities. Only <b>revealed traitors</b> may use treachery card abilities.",
+        UF.icIn("skill-boon", "Boon") + " <b>Boon</b> cards always <b>support</b> a skill check. They can be drawn only when an ability says “boon”. Humans and traitors alike may draw them and use their abilities.",
+        UF.icIn("skill-treachery", "Treachery") + " <b>Treachery</b>: abilities can now make humans draw treachery cards; humans may add them to skill checks and discard them for other abilities. Only <b>revealed traitors</b> may use treachery card abilities.",
         "<b>Chaos deck</b>: every new chaos deck also gets 2 boon and 2 treachery cards.",
         "<b>New values</b>: each deck gains a <b>6</b> (same ability as that deck’s 5s — except treachery) and a <b>0</b>. Influence/lore/observation/strength/will 0s trigger <b>after</b> the check fully resolves (e.g. <i>Oust</i>: the current player moves 1 Deep One from any space to another); boon and treachery 0s apply <b>while</b> in the check (e.g. <i>Revelation</i>: treachery becomes a supporting skill). Several 0s → the current player orders them.",
         "Adding a 0: you may not say you’re adding a 0 or that you aren’t helping."
       ]),
-    src: () => "From the Abyss p.8"
+    src: () => "From the Abyss p.8, p.12 (icons)"
   },
   {
     title: "From the Abyss — Personal Crisis cards and preludes",

@@ -386,7 +386,7 @@ function buildHowToPlay(c, obj) {
       .filter(i => typeof i === "string" || !i.when || i.when(c))
       .map(i => typeof i === "string"
         ? `<li>${i}</li>`
-        : `<li>${i.tag ? tagHtml(i.tag) : ""}${i.t}${i.src ? ` <span class="htp-src">${i.src}</span>` : ""}</li>`)
+        : `<li>${i.tag ? tagHtml(i.tag) : ""}${i.t}${i.src ? ` <span class="htp-src">${typeof i.src === "function" ? i.src(c) : i.src}</span>` : ""}</li>`)
       .join("");
     return lis ? `<section class="htp-sec ${cls}"><h5>${title}</h5><ul>${lis}</ul></section>` : "";
   };
@@ -440,13 +440,17 @@ function buildCombatChart(c) {
   const secHtml = BSG.combat.sections
     .filter(s => !s.fleet || fleet)   // hide Cylon-Fleet-only sections when no fleet board
     .map(s => {
-      const li = i => typeof i === "string"
-        ? `<li>${i}</li>`
-        : i.icon
-          ? `<li class="ic"><img class="li-icon" loading="lazy" src="images/charts/icn/${i.icon}.png" alt=""><span>${i.t}</span></li>`
-          : `<li>${i.t}</li>`;
       const items = s.items.filter(i => typeof i === "string" || ((!i.fleet || fleet) && (!i.when || i.when(c))));  // per-item fleet / config gating
-      const body = `<ul>${items.map(li).join("")}</ul>`;
+      // Consecutive items that carry a rulebook icon form one icon list (icons standard v1, css/icons.css);
+      // the rest stay a plain bulleted list.
+      const runs = [];
+      items.forEach(i => {
+        const ic = typeof i !== "string" && !!i.icon, last = runs[runs.length - 1];
+        if (last && last.ic === ic) last.list.push(i); else runs.push({ ic, list: [i] });
+      });
+      const body = runs.map(r => r.ic
+        ? `<ul class="aid-icons">${r.list.map(i => `<li><img class="aid-ic" src="images/icons/${i.icon}.webp" alt="${i.alt}"><span>${i.t}</span></li>`).join("")}</ul>`
+        : `<ul>${r.list.map(i => `<li>${typeof i === "string" ? i : i.t}</li>`).join("")}</ul>`).join("");
       return `<section class="cc-sec${s.fleet ? " fleet" : ""}">
         <h5>${s.h}${s.fleet ? ` <span class="cc-flag">Cylon Fleet</span>` : ""}</h5>
         ${body}

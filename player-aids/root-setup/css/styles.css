@@ -472,6 +472,9 @@ table.rt th, table.rt td { border: 1px solid #9c8a66; padding: 6px 9px; vertical
 table.rt th { background: var(--tan); font-weight: 700; }
 table.rt td { background: rgba(255, 253, 240, 0.6); }
 table.rt tr.sel td { background: #fdf0b4; font-weight: 700; }
+/* rulebook icons (css/icons.css) in reference tables: on a phone the three-column Moods table stacks every
+   icon + item-name pair (name under its icon), so the column is uniform and the table still fits the screen */
+@media (max-width: 480px) { table.rt-moods .aid-pair { flex-direction: column; align-items: flex-start; gap: 2px; white-space: normal; } }
 
 /* ---------- rulebook search ---------- */
 .rsearch-wrap { position: relative; margin-bottom: 18px; max-width: calc(var(--measure) + 56px); }

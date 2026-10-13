@@ -62,6 +62,14 @@ var TI_TE = (function () {
   function hyperTE(c) { return c.p === 5 || (c.p === 4 && c.has("pok")); }
   function uses(c) { return c.has("te"); }
   function veiled(c) { return c.mod("tf-veiledheart"); }
+  /* rulebook icons (DFWGV icons standard v1: css/icons.css, images/icons/<name>.webp, cropped from this game's PDFs).
+     ici("relic-icon", "Relic icon", "<b>icon</b>", ".") → inline in a sentence, glued to the words beside it;
+     icRow(file, alt, html) → one row of an icon list.
+     Always pass the literal file name (the icons checker matches it). Never used in the teaching script. */
+  function ic(f, alt, inline) { return "<img class=\"aid-ic" + (inline ? " aid-ic-inline" : "") + "\" src=\"images/icons/" + f + ".webp\" alt=\"" + alt + "\" title=\"" + alt + "\">"; }
+  function icRow(f, alt, html) { return "<li>" + ic(f, alt) + "<span>" + html + "</span></li>"; }
+  /* ici(file, alt, before, after): an inline icon glued (no line break) to the words beside it */
+  function ici(f, alt, before, after) { return "<span class=\"ic-nb\">" + (before ? before + " " : "") + ic(f, alt, true) + (after || "") + "</span>"; }
   function num(n) { return ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight"][n] || String(n); }
   function joinSrc(a) { var out = []; for (var i = 0; i < a.length; i++) { if (a[i] && out.indexOf(a[i]) === -1) out.push(a[i]); } return out.join(" · "); }
   /* cite({TE:[4,6,7], LRR:["4–6"], PoK:[9]}) → "TE p.4, p.6–7 · LRR p.4–6 · PoK p.9"
@@ -120,7 +128,7 @@ var TI_TE = (function () {
       rings: [
         ["85A", "99", "31", "121A", "68", "100"],
         ["110", "87A", "40", "24", "39", "124A", "116", "123A", "97", "102", "41", "88A"],
-        ["86A", "84A", "75", "H:If I Only Had A [blue tech icon]", "62", "111", "H:Once Upon A War Sun", "115", "119A", "122A", "120A", "113", "H:The Cheeky Rift", "109", "46", "H:Roll For Initiative", "76", "83A"]
+        ["86A", "84A", "75", "H:If I Only Had " + ici("tech-propulsion", "Propulsion", "A", "") + "|its name ends with the blue <b>Propulsion</b> technology symbol", "62", "111", "H:Once Upon A War Sun", "115", "119A", "122A", "120A", "113", "H:The Cheeky Rift", "109", "46", "H:Roll For Initiative", "76", "83A"]
       ]
     },
     "te-map-legendary": {
@@ -139,7 +147,7 @@ var TI_TE = (function () {
     for (var i = 0; i < r.length; i++) {
       var t = r[i];
       if (t === "M") out.push("<b>minor faction</b>");
-      else if (t.indexOf("H:") === 0) out.push("<i>home “" + t.slice(2) + "”</i>");
+      else if (t.indexOf("H:") === 0) { var hp = t.slice(2).split("|"); out.push("<i>home “" + hp[0] + "”</i>" + (hp[1] ? " (" + hp[1] + ")" : "")); }
       else if (/A$/.test(t)) out.push(t + " <i>(hyperlane)</i>");
       else out.push(t);
     }
@@ -167,7 +175,7 @@ var TI_TE = (function () {
         "<li>Minor faction systems <b>don’t count as home systems</b>, and their planets have <b>all three traits</b> — cultural, industrial and hazardous.</li>" +
         "<li>When a player controls <b>every planet</b> in a minor faction system, they take that faction’s <b>alliance card</b> — from the deck or from whoever had it — place it in their play area and can use its ability.</li></ul></li>";
     } else if (id === "te-map-redvsblue") {
-      s += "<li><b>Teams:</b> the <b>west</b> seats (“Roll For Initiative”, upper left, and “The Cheeky Rift”, lower left) against the <b>east</b> seats (“If I Only Had A [blue tech icon]”, upper right, and “Once Upon A War Sun”, lower right). The book calls it a <b>2v2 alliance mode deathmatch</b> — the team rules are the Alliance game variant (TE p.13)" + (alliance(c) ? "" : "; turn on <b>“Alliance game variant”</b> under Options to add its rules") + ".</li>" +
+      s += "<li><b>Teams:</b> the <b>west</b> seats (“Roll For Initiative”, upper left, and “The Cheeky Rift”, lower left) against the <b>east</b> seats (“If I Only Had " + ici("tech-propulsion", "Propulsion", "A", "”") + " — its name ends with the blue <b>Propulsion</b> technology symbol — upper right, and “Once Upon A War Sun”, lower right). The book calls it a <b>2v2 alliance mode deathmatch</b> — the team rules are the Alliance game variant (TE p.13)" + (alliance(c) ? "" : "; turn on <b>“Alliance game variant”</b> under Options to add its rules") + ".</li>" +
         "<li>Both hyperlane rings (83A–88A above Mecatol Rex, 119A–124A below it) must be <b>oriented exactly as pictured</b>. Each team has only <b>two kinds of technology specialties</b> nearby.</li>";
     } else if (id === "te-map-legendary") {
       s += "<li>An <b>off-balance six-player arena</b> that drives everyone to the centre: the systems equidistant from the home systems — all <b>legendary</b> — form ring 1. (The named home spaces each sit one space clockwise from the usual ring-3 corners.)</li>";
@@ -193,7 +201,7 @@ var TI_TE = (function () {
   function boardItems(c, isTF) {
     var pok = c.has("pok"), p = c.p, s = "";
     var deal = p === 3 ? "6 blue and 2 red" : p === 4 ? (hyperTE(c) ? "3 blue and 2 red" : "5 blue and 3 red") : p === 5 ? "3 blue and 2 red" : p === 6 ? "3 blue and 2 red" : "4 blue and 2 red";
-    s += "<li>Place <b>Mecatol Rex</b> in the centre — Thunder’s Edge’s Mecatol Rex tile, the one with the <b>legendary planet icon</b>. The galaxy has " + (p >= 7 ? "<b>four</b>" : "<b>three</b>") + " rings around it" + (hyperTE(c) ? "" : "; home systems sit at set positions in the outer ring (LRR p.6 diagram)") + ".</li>";
+    s += "<li>Place <b>Mecatol Rex</b> in the centre — Thunder’s Edge’s Mecatol Rex tile, the one with the <b>legendary planet</b> " + ici("te-legendary", "Legendary planet icon", "<b>icon</b>", ".") + " The galaxy has " + (p >= 7 ? "<b>four</b>" : "<b>three</b>") + " rings around it" + (hyperTE(c) ? "" : "; home systems sit at set positions in the outer ring (LRR p.6 diagram)") + ".</li>";
     if (hyperTE(c)) s += hyperItem(c);
     else if (p === 7 && pok) s += "<li><b>Hyperlanes:</b> place tiles <b>83A–88A</b> exactly as in the seven-player diagram (LRR p.6).</li>";
     if (pok) s += "<li><b>Wormhole nexus:</b> beside the board, gamma-only side faceup, with the 3 gamma wormhole tokens next to it.</li>";
@@ -295,14 +303,14 @@ var TI_TE = (function () {
         var pok = c.has("pok");
         return "<ul>" +
           "<li><b>Strategy cards:</b> use Thunder’s Edge’s revised <b>Construction</b> and <b>Warfare</b> cards instead of the older ones.</li>" +
-          "<li><b>Mecatol Rex:</b> use the Mecatol Rex system tile that has a <b>legendary planet icon</b>.</li>" +
-          "<li><b>Codex content:</b> Thunder’s Edge includes the Twilight Codex gameplay content as revised cards (marked with the Codex icon). If you own an earlier Codex, replace all of its components with these; use Thunder’s Edge’s own <b>Alliance</b> and <b>Faction Reference</b> card sets, not the print-and-play ones. First time? The full add/replace list is in the reference (“Thunder’s Edge — what’s new”).</li>" +
+          "<li><b>Mecatol Rex:</b> use the Mecatol Rex system tile that has a <b>legendary planet</b> " + ici("te-legendary", "Legendary planet icon", "<b>icon</b>", ".") + "</li>" +
+          "<li><b>Codex content:</b> Thunder’s Edge includes the Twilight Codex gameplay content as revised cards (marked with the Codex " + ici("codex-icon", "Twilight Codex expansion icon", "icon", ").") + " If you own an earlier Codex, replace all of its components with these; use Thunder’s Edge’s own <b>Alliance</b> and <b>Faction Reference</b> card sets, not the print-and-play ones. First time? The full add/replace list is in the reference (“Thunder’s Edge — what’s new”).</li>" +
           (pok ? "<li><b>Jol-Nar:</b> replace the “Ta Zern” leader with “Agnlan Oln”.</li>"
                : "<li><b>No Prophecy of Kings?</b> Remove all <b>leaders</b>, <b>mechs</b> and <b>exploration cards</b>, and the <b>“Cultural Exchange Program”</b> galactic event.</li>") +
           "<li>Combine Thunder’s Edge’s other new cards with their decks. Its system tiles are numbered <b>92–128</b>; shuffle its new red-backed and blue-backed tiles into their piles. Twilight’s Fall components aren’t used in a normal game.</li>" +
           "</ul>";
       },
-      src: function () { return "TE p.4"; } },
+      src: function () { return "TE p.4, p.10"; } },
 
     { id: "te-galactic-event", after: "lrr-setup-1", exp: "te",
       when: function (c) { return uses(c) && c.mode === "standard"; },   // events are standard-game only here: the Codex IV module is too, and the scenarios use fixed maps (Codex I p.12, Codex IV pp.15, 18)
@@ -408,7 +416,7 @@ var TI_TE = (function () {
         if (id) te.push(MAPDATA[id].pageNo); else te.push(14, 15);
         if (id === "te-map-subjugation") te.push(10, 12, 16);
         if (id === "te-map-redvsblue") te.push(4, 13);
-        return cite({ TE: te, LRR: c.has("pok") ? [4] : [], "Codex IV": id === "te-map-subjugation" ? [15] : [] });
+        return cite({ TE: te, LRR: c.has("pok") ? (id === "te-map-redvsblue" ? [4, 34] : [4]) : [], "Codex IV": id === "te-map-subjugation" ? [15] : [] });
       } },
 
     { id: "te-fracture-aside", after: "lrr-setup-6", exp: "te",
@@ -501,9 +509,9 @@ var TI_TE = (function () {
       },
       src: function (c) {
         var id = teMap(c);
-        if (id) return cite({ TF: [7], TE: [6, MAPDATA[id].pageNo].concat(id === "te-map-redvsblue" ? [4, 13] : []), LRR: c.has("pok") ? [4] : [] });
+        if (id) return cite({ TF: [7], TE: [6, MAPDATA[id].pageNo].concat(id === "te-map-redvsblue" ? [4, 13] : []), LRR: c.has("pok") ? (id === "te-map-redvsblue" ? [4, 34] : [4]) : [] });
         if (otherBuild(c)) return "TF p.7 · " + otherBuildSrc(c);
-        var s = boardPages(c); s.TF = [7];
+        var s = boardPages(c); s.TF = [7]; s.TE.push(10);   /* TE p.10 pictures the legendary planet icon */
         return cite(s);
       } },
 
@@ -621,15 +629,15 @@ var TI_TE = (function () {
         return "<ul>" +
           "<li>The <b>second expansion</b>: the Thunder’s Edge <b>expedition</b>, faction-specific <b>breakthroughs</b>, and <b>The Fracture</b> — a hellish dimension overrun by the Vuil’raith in the eons past.</li>" +
           "<li><b>Six new factions</b>, including the Council Keleres (previously only in the Twilight Codices). Factions the rulebook names in its setup and components include the Crimson Rebellion, the Deepwrought Scholarate, the Firmament (which can become the Obsidian), Last Bastion and the Ral Nel Consortium.</li>" +
-          "<li>Every card and sheet carries the <b>Thunder’s Edge icon</b>; new system tiles are numbered <b>92–128</b>.</li>" +
-          "<li>All Twilight Codex gameplay content is included as <b>revised cards</b> marked with the Codex icon.</li>" +
+          "<li>Every card and sheet carries the <b>Thunder’s Edge</b> " + ici("te-expansion", "Thunder’s Edge expansion icon", "<b>icon</b>", ";") + " new system tiles are numbered <b>92–128</b>.</li>" +
+          "<li>All Twilight Codex gameplay content is included as <b>revised cards</b> marked with the Codex " + ici("codex-icon", "Twilight Codex expansion icon", "icon", ".") + "</li>" +
           "<li>Also includes the <b>Twilight’s Fall</b> game mode (its components aren’t used in a normal game).</li></ul>" +
           "<h4>Integration (once, when you open the box)</h4><ol>" +
           "<li>Find the cards packed with the “Codex Cards” cover card.</li>" +
           "<li><b>No earlier Codex?</b> Add to your components: 20 action cards, 3 relics, 6 exploration cards, the Keleres faction sheet, mech, 5 leaders, promissory note and 2 faction technologies, and the “Custodia Vigilia” planet card and legendary planet ability card. Then use the other Codex cards to <b>replace</b> the matching base/PoK cards: 3 faction technologies, 8 “Magen Defense Grid”, 8 “X-89 Bacterial Weapon”, 3 secret objectives, 5 promissory notes, 1 mech and 6 leaders.</li>" +
           "<li><b>Own an earlier Codex?</b> Replace all of its components with the updated Thunder’s Edge versions.</li>" +
           "<li>Use Thunder’s Edge’s own <b>Alliance</b> and <b>Faction Reference</b> card sets (not the print-and-play ones).</li>" +
-          "<li>Replace the <b>Construction</b> and <b>Warfare</b> strategy cards with the revised ones, and the <b>Mecatol Rex</b> tile with the one bearing a legendary planet icon.</li>" +
+          "<li>Replace the <b>Construction</b> and <b>Warfare</b> strategy cards with the revised ones, and the <b>Mecatol Rex</b> tile with the one bearing a legendary planet " + ici("te-legendary", "Legendary planet icon", "icon", ".") + "</li>" +
           "<li>" + (c.has("pok") ? "With Prophecy of Kings: replace Jol-Nar’s “Ta Zern” leader with “Agnlan Oln”." : "Without Prophecy of Kings: remove all leaders, mechs and exploration cards, and the “Cultural Exchange Program” galactic event.") + "</li>" +
           "<li>Combine the remaining new cards with their decks; shuffle the new red- and blue-backed tiles into their piles.</li></ol>" +
           "<h4>Components</h4><ul>" +
@@ -637,7 +645,7 @@ var TI_TE = (function () {
           "<li><b>Board:</b> 33 system and hyperlane tiles · 3 Fracture system tiles · 63 plastic neutral units.</li>" +
           "<li><b>Tokens:</b> Thunder’s Edge (1) · ingress (7) · diplomacy (1) · commerce (5) · Avernus planet (1) · Nano-Forge attachment (1) · Empyrean Void Tether (2) · Nekro Z Assimilator (7) · Crimson Breach (7, double-sided) and Sever (1) · Bastion Galvanize (7 — the setup text on p.6 says 8) · Helios (6: 3 Nekro, 3 Bastion) · control (85) · command (80).</li></ul>";
       },
-      src: function () { return "TE p.4–5"; } },
+      src: function () { return "TE p.4–5, p.10"; } },
 
     { id: "te-strategy-cards", after: "ref-cards", title: "Revised strategy cards — Warfare & Construction (Thunder’s Edge)",
       when: function (c) { return uses(c) && std(c); },
@@ -660,7 +668,13 @@ var TI_TE = (function () {
         return "<ul>" +
           "<li>Thunder’s Edge starts <b>in play, off the board</b>, expedition side (six “slices”) faceup.</li>" +
           "<li><b>At the end of your turn</b> you may commit to the expedition: choose an <b>unclaimed</b> slice, pay its cost, and place one of your <b>control tokens</b> on it.</li>" +
-          "<li><b>The six costs</b> (one per slice): spend <b>5 resources</b> · spend <b>5 influence</b> · spend <b>3 trade goods</b> · discard <b>2 action cards</b> · discard <b>1 unscored secret objective</b> · exhaust <b>1 technology-specialty planet</b>.</li>" +
+          "<li><b>The six costs</b> (one per slice):<ul class=\"aid-icons\">" +
+            icRow("exp-resources", "Spend 5 Resources", "Spend <b>5 resources</b>") +
+            icRow("exp-influence", "Spend 5 Influence", "Spend <b>5 influence</b>") +
+            icRow("exp-trade-goods", "Spend 3 Trade Goods", "Spend <b>3 trade goods</b>") +
+            icRow("exp-action-cards", "Discard 2 Action Cards", "Discard <b>2 action cards</b>") +
+            icRow("exp-secret", "Discard 1 Unscored Secret Objective", "Discard <b>1 unscored secret objective</b>") +
+            icRow("exp-specialty", "Exhaust 1 Technology Specialty Planet", "Exhaust <b>1 technology-specialty planet</b>") + "</ul></li>" +
           "<li>A claimed slice can’t be claimed by anyone else — later contributors pay a different cost. You may claim several slices over the game, a different one each time.</li>" +
           "<li>The <b>first time</b> you claim a slice, you gain your faction’s <b>breakthrough</b>.</li></ul>" +
           "<h4>Completing the expedition</h4><ol>" +
@@ -675,7 +689,7 @@ var TI_TE = (function () {
       html: function () {
         return "<ul>" +
           "<li>A <b>breakthrough</b> is a faction-specific card, most often gained through the expedition (your first slice). It gives your faction a unique new ability and <b>synergy</b> between two technology colours.</li>" +
-          "<li><b>Synergy:</b> a technology or technology specialty of either linked colour can count as the other colour for <b>researching technology</b> and for <b>technology-related objectives</b> — but only as one colour at any given time.</li>" +
+          "<li><b>Synergy</b> (e.g. " + ici("synergy-red-yellow", "Red-yellow synergy", "", " red–yellow,") + " as printed on the breakthrough): a technology or technology specialty of either linked colour can count as the other colour for <b>researching technology</b> and for <b>technology-related objectives</b> — but only as one colour at any given time.</li>" +
           "<li><b>The Fracture roll:</b> whenever a player gains their breakthrough — from any source — while The Fracture is not in play, they roll one die. On a <b>1 or 10</b>, they put The Fracture into play.</li></ul>";
       },
       src: function () { return "TE p.8"; } },
@@ -689,14 +703,14 @@ var TI_TE = (function () {
           "<li>The Fracture is three tiles — a three-space tile and two two-space tiles. In the four-or-more diagram the three-space tile sits just beyond one home system, and the two-space tiles run along the outside of the board to just beyond the neighbouring home systems.</li>" +
           "<li>Then place the <b>neutral units</b> shown on the back of The Fracture’s tiles.</li></ul>" +
           "<h4>Ingress tokens</h4><ul>" +
-          (tf(c) ? "" : "<li><b>Brought in by a breakthrough roll:</b> for <b>each synergy colour</b> on the roller’s breakthrough, they choose <b>three systems</b> containing a matching technology specialty (if able) and place an ingress token in each. At most one ingress per system, and at most six placed this way.</li>") +
-          "<li><b>Brought in by another ability" + (tf(c) ? "" : ", or by a breakthrough without synergy (e.g. the Nekro Virus)") + ":</b> the player chooses <b>four planets</b> — each in a <b>different system</b>, each with a <b>different technology specialty</b> — and places an ingress token in each planet’s system. If fewer than four specialties are in play, the rest aren’t placed.</li>" +
+          (tf(c) ? "" : "<li><b>Brought in by a breakthrough roll:</b> for <b>each synergy colour</b> on the roller’s breakthrough, they choose <b>three systems</b> containing a matching technology specialty (if able) and place an ingress " + ici("ingress-token", "Ingress token", "token") + " in each. At most one ingress per system, and at most six placed this way.</li>") +
+          "<li><b>Brought in by another ability" + (tf(c) ? "" : ", or by a breakthrough without synergy (e.g. the Nekro Virus)") + ":</b> the player chooses <b>four planets</b> — each in a <b>different system</b>, each with a <b>different technology specialty</b> — and places an ingress " + (tf(c) ? ici("ingress-token", "Ingress token", "token") : "token") + " in each planet’s system. If fewer than four specialties are in play, the rest aren’t placed.</li>" +
           "<li><b>Finally</b> an ingress goes in the <b>Thunder’s Edge</b> system if it is in play — otherwise in the <b>Mecatol Rex</b> system (expedition not completed).</li></ul>" +
           "<h4>Moving in and out</h4><ul>" +
           "<li>Fracture systems are <b>not adjacent</b> to the board systems they touch, and each counts as being on the <b>edge</b> of the board.</li>" +
           "<li>A system with an <b>ingress</b> is adjacent to every Fracture system that contains an <b>egress</b>. Ingress systems are not adjacent to other ingress systems; egress systems are not adjacent to other egress systems.</li></ul>" +
           "<h4>Inside</h4><ul>" +
-          "<li>Every Fracture planet has a <b>relic icon</b>. <b>Styx</b> is also a <b>legendary planet</b> (its card: gain 1 victory point when you gain it, lose 1 when you lose it).</li>" +
+          "<li>Every Fracture planet has a <b>relic</b> " + ici("relic-icon", "Relic icon", "<b>icon</b>", ".") + " <b>Styx</b> is also a <b>legendary planet</b> (its card: gain 1 victory point when you gain it, lose 1 when you lose it).</li>" +
           (tf(c) ? "" : "<li>Thunder’s Edge can’t be placed in The Fracture; the Creuss hero <b>Riftwalker Meian</b> can’t swap Fracture systems (or the Ahk Creuxx system); the <b>Age of Exploration</b> event can’t place new tiles off Fracture tiles.</li>") + "</ul>";
       },
       src: function (c) { return "TE p.8–10, p.16" + (tf(c) ? " · TF p.6" : ""); } },
@@ -705,10 +719,10 @@ var TI_TE = (function () {
       when: function (c) { return uses(c); },
       html: function (c) {
         return "<h4>Relics</h4><ul>" +
-          "<li>When you gain a planet card <b>from the planet deck</b> that has a <b>relic icon</b>, or an effect tells you to draw a relic: draw the top card of the relic deck and place it faceup in your play area.</li>" +
+          "<li>When you gain a planet card <b>from the planet deck</b> that has a <b>relic</b> " + ici("relic-icon", "Relic icon", "<b>icon</b>", ",") + " or an effect tells you to draw a relic: draw the top card of the relic deck and place it faceup in your play area.</li>" +
           (c.has("pok") ? "" : "<li>Thunder’s Edge uses the relic deck even without Prophecy of Kings.</li><li>If the relic deck is empty, you don’t gain a relic. Relics can’t be traded.</li>") +
           "</ul><h4>Legendary planets</h4><ul>" +
-          "<li>Many Thunder’s Edge planets are <b>legendary</b> (legendary icon). When you take control of one, also place its <b>legendary planet ability card</b> in your play area.</li>" +
+          "<li>Many Thunder’s Edge planets are <b>legendary</b> (legendary " + ici("te-legendary", "Legendary icon", "icon", ").") + " When you take control of one, also place its <b>legendary planet ability card</b> in your play area.</li>" +
           "<li>If you gain control of an <b>exhausted</b> legendary planet ability card, it stays exhausted.</li>" +
           (c.has("pok") ? "" : "<li>An ability card taken from the deck is <b>readied</b>. If a legendary planet’s planet card is purged, its ability card is purged too.</li>") +
           "<li>Thunder’s Edge’s <b>Mecatol Rex</b> system tile carries a legendary planet icon.</li>" +
@@ -737,15 +751,15 @@ var TI_TE = (function () {
           "<li><b>Infantry</b> — combat 8</li>" +
           "<li><b>PDS</b> — Planetary Shield · Space Cannon 6</li>" +
           "<li><b>Space dock</b> — no values printed</li></ul>" +
-          "<p><i>“2 dice / 3 dice” = the burst icons printed beside the combat value; roll one die per burst icon.</i></p>";
+          "<p><i>“2 dice / 3 dice” = the burst " + ici("burst-icons", "Two burst icons", "icons") + " printed beside the combat value; roll one die per burst icon.</i></p>";
       },
-      src: function () { return "TE p.10 · LRR p.13"; } },
+      src: function () { return "TE p.10 · LRR p.13 · LtP p.14 (burst icons)"; } },
 
     { id: "te-space-stations", title: "Space stations",
       when: function (c) { return uses(c); },
       html: function (c) {
         return "<ul>" +
-          "<li>Some systems contain <b>space stations</b> (space station icon on the tile).</li>" +
+          "<li>Some systems contain <b>space stations</b> (space station " + ici("space-station", "Space station icon", "icon") + " on the tile).</li>" +
           "<li><b>Control:</b> you gain a station — from the deck or from another player — when you are the <b>only player with ships</b> in its system. You don’t lose it if those ships move out.</li>" +
           "<li>Each station has a <b>planet card</b>: gained <b>exhausted</b>, spent and readied as if it were a planet.</li>" +
           "<li>But structures and ground forces can’t be placed on or committed to a station, and it doesn’t count as a planet for " + (tf(c) ? "" : "<b>voting</b>, ") + "<b>objectives</b> or <b>controlling a home system</b>.</li>" +
@@ -761,7 +775,7 @@ var TI_TE = (function () {
       when: function (c) { return uses(c); },
       html: function (c) {
         return "<h4>Entropic scar (anomaly)</h4><ul>" +
-          "<li>Unit abilities — <b>Sustain Damage, Production, Planetary Shield, Space Cannon, Bombardment, Deploy, Anti-Fighter Barrage</b> — can’t be used <b>by or against</b> units inside an entropic scar. Text abilities are unaffected.</li>" +
+          "<li>Unit abilities — <b>Sustain Damage, Production, Planetary Shield, Space Cannon, Bombardment, Deploy, Anti-Fighter Barrage</b> — can’t be used <b>by or against</b> units inside an entropic " + ici("entropic-scar", "Entropic scar", "scar", ".") + " Text abilities are unaffected.</li>" +
           "<li>Wormholes that would be placed inside an entropic scar are <b>discarded</b> instead.</li>" +
           "<li><b>Start of the status phase:</b> a player with ships in an entropic scar may spend a token from their <b>strategy pool</b> to gain one of their <b>faction-specific technologies</b>." +
           (tf(c) ? " <i>(Twilight’s Fall: gaining technology gives one of your King’s faction technologies — or 2 command tokens if you have both.)</i>" : "") + "</li></ul>" +
@@ -926,7 +940,7 @@ var TI_TE = (function () {
           "<li><b>No technology deck</b>: abilities count as technologies, specialty planets help score technology objectives, and each King has two faction technologies.</li>" +
           "<li><b>Eight new strategy cards</b> (Lux, Noctis, Tyrannus, Civitas, Amicus, Calamitas, Magus, Aeterna) and <b>Twilight’s Fall action cards</b>.</li>" +
           "<li>Not used: standard strategy and action cards, agendas, technologies, promissory notes, standard faction sheets, leaders, standard mechs, faction command and control tokens, breakthroughs, galactic events, the Thunder’s Edge token (see setup).</li>" +
-          "<li>Each King technology’s second ability is marked with the Prophecy of Kings icon — " + (c.has("pok") ? "active in this game (you play with PoK)" : "<b>inactive</b> in this game (no PoK)") + ".</li></ul>";
+          "<li>Each King technology’s second ability is marked with the Prophecy of Kings " + ici("pok-icon", "Prophecy of Kings expansion icon", "icon") + " — " + (c.has("pok") ? "active in this game (you play with PoK)" : "<b>inactive</b> in this game (no PoK)") + ".</li></ul>";
       },
       src: function () { return "TF p.6–11"; } },
 
@@ -954,7 +968,7 @@ var TI_TE = (function () {
           "<li>Each King has two: a <b>wavelength</b> and an <b>antimatter</b> technology in their colour.</li>" +
           "<li>Gain one by taking it <b>instead of a card</b> when you take part in a splice (in the inaugural splice only at the final decision).</li>" +
           "<li>No prerequisites, <b>no colour</b>, and they can’t be lost.</li>" +
-          "<li>Each has two abilities; the second is marked with the Prophecy of Kings icon and works only with PoK" + (c.has("pok") ? " (active in this game)" : " (inactive in this game)") + ".</li></ul>" +
+          "<li>Each has two abilities; the second is marked with the Prophecy of Kings " + ici("pok-icon", "Prophecy of Kings expansion icon", "icon") + " and works only with PoK" + (c.has("pok") ? " (active in this game)" : " (inactive in this game)") + ".</li></ul>" +
           "<h4>Technology without a tech deck</h4><ul>" +
           "<li>Technology can’t be researched; <b>technology objectives</b> are met through ability cards.</li>" +
           "<li>When scoring objectives you may <b>exhaust planets with technology specialties</b>: each counts as one technology of that colour.</li>" +
@@ -1162,7 +1176,7 @@ var TI_TE = (function () {
     "GALAXY (core c.galaxy / c.mod('gal-<id>')): the core builds the TE hyperlane boards itself (galaxy builds hyper4 and TE-aware hyper5; 'deal' unavailable at 5p and 4p+PoK when te is on), so this file does not replace setup step 6 for them. It adds te-hyperlane-tiles just BEFORE step 6 (anchor lrr-setup-5; audit 2 moved it there so the table knows the tile numbers before step 6 places the hyperlanes) (standard mode, te && (p===5 || p===4&&pok), no TE map/other build): the tile positions (read from TE's 'Red vs Blue' map) and, for four players, the second-ring tile question below. Teach te-hyperlanes and te-map-* carry replace:'galaxy'. MAPS: each te-map-* excludes the map-type core builds (gal-premade, gal-large, gal-alt, gal-ltp), the Codex presets (rightCatSoup, paxPresets) and the other TE maps. It deliberately does NOT exclude the plain builds gal-deal / gal-hyper4 / gal-hyper5: app.js normalize() deletes a module that excludes every available build (no alternative left — so a map excluding them could never be switched on). With a TE map on, te-board-map replaces step 6 (galaxyFrom 'option'), the remaining plain build is shown as superseded, and the core 'Our galaxy' teach is hidden — so only one map source is ever active. If the integrator changes normalize() to keep a module whose excludes cover every build, the plain builds can be added to MAP_EXCLUDES. In Twilight's Fall, draft step ③ builds the galaxy itself (standard build with TE rules, TE hyperlane layout, a TE map, or the core premade/large/alternate build) because core step 6 is replaced there.",
     "FOUR-PLAYER HYPERLANE TILES (open question for Joe): TE p.7 says its layouts always use 119A–124A, but the four-player diagram has TWO six-tile rings (12 hyperlane spaces) and 'is used only when also playing with PoK'. TE's own four-player map 'Red vs Blue' (p.15) builds the upper ring from PoK 83A–88A and the lower ring from 119A–124A; the page presents the setup that way and says so. Audit 1: RvB's upper ring is exactly PoK p.9's numbered 83A–88A formation (85A next to Mecatol, 86A far side, 87A/88A beside the ring's centre, 83A/84A outer) rotated 180°, and its lower ring maps 83A→119A … 88A→124A position for position — so the reading is well supported.",
     "INTERNAL TE CONFLICT: Last Bastion Galvanize tokens — 8 in the setup text (TE p.6), 7 in the component list (TE p.5); neither picture shows a count. The page shows both and says to take all of them.",
-    "RED VS BLUE prints tile 18 (base-game Mecatol Rex) in the centre although TE's integration replaces that tile (the other three TE maps show TE's tile 112); the page notes it. The seat name 'If I Only Had A…' ends in the blue technology-specialty icon — written as '[blue tech icon]'.",
+    "RED VS BLUE prints tile 18 (base-game Mecatol Rex) in the centre although TE's integration replaces that tile (the other three TE maps show TE's tile 112); the page notes it. The seat name 'If I Only Had A…' ends in the blue Propulsion technology symbol (TE p.15) — shown with the rulebook icon (tech-propulsion.webp, cropped from LRR p.34) plus the words 'blue Propulsion technology symbol'.",
     "SUBJUGATION: TE p.14 lists its twelve factions only as faction SYMBOLS. Audit 1 matched each against symbols printed beside faction names elsewhere in the sources (LtP p.6; Codex I p.12; Codex IV p.17; PoK p.7 Titans sheet; TE p.5–6 Crimson/Deepwrought/Ral Nel/Last Bastion cards; Codex III p.17 Keleres note) — top row Arborec, Letnev, Sardakk N'orr, Nekro, Nomad, Titans of Ul; bottom row Crimson Rebellion, Deepwrought, Firmament/Obsidian (by elimination), Last Bastion, Ral Nel, Keleres — and te-subjugation-factions now names them, flagged as identified from the symbols. The map's Minor Factions setup is FOLDED INTO the map preset (te-board-map + te-subjugation-factions): red spaces at random, Keleres/Firmament/Creuss/Crimson rules (TE p.14, p.16), 3 neutral infantry per minor faction system, not home systems, all three traits, alliance card for controlling every planet (Codex IV p.15 wording, flagged as superseded by TE's printed card where it differs). No module-to-module requirement is needed. CODEX (agent B): gate ge-minor-factions (the dealt-galaxy Minor Factions setup) with && !c.mod('te-map-subjugation'), and have B's activePreset() treat TE maps as presets. Standard mode only (TF p.6 boxes galactic events).",
     "ALLIANCE VARIANT — TE's version is complete in this file and shows whenever te is on with the 'alliance' module (p = 4, 6 or 8): setup steps te-alliance-allies (after lrr-setup-2: allies, reference cards, Mahact fleet-pool token), te-alliance-commanders (after lrr-setup-4, PoK only: purge 'Alliance' notes, unlock commanders), te-alliance-track (after lrr-setup-12: 14-point track, 14 + 10 to win); reference te-alliance (setup, transactions, movement & control, combat & unit abilities, abilities & effects, elimination, winning — every TE p.13 rule, with the Codex II differences flagged); teach te-alliance (self-contained). Nothing is taken from Codex II. CODEX (agent B): gate alliance-pairs / alliance-cards / alliance-track / alliance-ref and B's 'Alliances' teach with !c.has('te'); make the 'alliance' module available with codex2 OR te (requires: [['codex2','te']]) since TE prints the variant. Differences TE makes (TE p.13 vs Codex II p.13): reference card taken at step 2; NEW Mahact note; purge/unlock only with PoK (Codex II mislabels it 'step 3 Choose Color' — LRR step 4); land on planets your ally CONTROLS (Codex II: 'that contain your ally's ground forces'); 'transport, support and commit' (Codex II: transport); NEW: activation triggers don't fire between allies; NEW: unit abilities don't affect your ally; NEW: agents can be used on your ally; ally planets don't count for objectives or the Imperial point (Codex II: objectives or unlocking leaders).",
     "GALACTIC EVENTS — one TE version for the generic parts: with te on, my te-galactic-event step (after lrr-setup-1: choose/draw after the speaker is determined, events may modify setup, several allowed, no-PoK rules; names the event chosen in B's 'galacticEvents' module) and te-events teach always show, and te-galactic-events (reference) carries TE's general rules and TE p.16 clarifications. What I RELY ON from agent B when codex4's module is also on: the four Codex IV event texts, which TE's rulebook doesn't print — keep B's ge-minor-factions (setup, already TE-aware; gate it off under te-map-subjugation) and galactic-events-ref (rules). B should gate ge-pick and its 'Galactic event' teach insert with !c.has('te') (my step/teach replace them). While B's module is on, te-galactic-events points to B's section instead of repeating the Minor Factions / Age of Exploration clarifications. TE vs Codex IV: event chosen at step 1 (TE p.6); Age of Exploration and Wild, Wild Galaxy playable WITHOUT PoK (TE p.16; Codex IV p.16 said Age of Exploration requires PoK — TE wins); Cultural Exchange Program removed without PoK (TE p.4); TE p.7 minor-faction example and TE p.16 Creuss/Crimson clarification; neutral forces are TE's plastic neutral units with the TE p.10 rules (Codex IV p.15: proxies, combat 8 — consistent). Galactic events aren't used in Twilight's Fall (TF p.6).",

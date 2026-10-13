@@ -134,7 +134,10 @@ EH.helpers = {
   cite: (c, m, first) => {
     const ks = Object.keys(m).filter(k => c.has(k));
     return (first ? ks.slice(0, 1) : ks).map(k => " · " + m[k]).join("");
-  }
+  },
+  /* a rulebook icon (icons standard v1, css/icons.css): always pass the full literal file name, e.g.
+     ic("skill-will", "Will") for an icon list or row, ic("reckoning", "Reckoning icon", true) inside a sentence */
+  ic: (f, alt, inline) => `<img class="aid-ic${inline ? " aid-ic-inline" : ""}" src="images/icons/${f}.webp" alt="${alt}" title="${alt}">`
 };
 
 /* ---- THE SETUP SEQUENCE ------------------------------------------------------ */
@@ -303,8 +306,8 @@ EH.reference = [
 <ul>
 <li><b>Travel</b> — move to an adjacent space; then spend travel tickets (max 2 held) to move one extra space each (Train tickets on Train paths, Ship tickets on Ship paths).</li>
 <li><b>Prepare for Travel</b> — on a City space, gain 1 travel ticket matching a path connected to your space.</li>
-<li><b>Acquire Assets</b> — on a City space with no Monster: test <b>Influence</b>; gain reserve Assets totaling ≤ your successes${c.has("mon") ? " (spend Resources for +1 success each)" : ""}.${EH.helpers.sideBoard(c) === "antarctica" ? " With the Antarctica side board out, you may spend 2 successes to move to Miskatonic Outpost." : ""}${(EH.helpers.sideBoard(c) !== "antarctica" && c.has("mom") && (!c.mod("noPrelude") || c.mod("campaign"))) ? " If the Doomsayer From Antarctica Prelude set up the Antarctica side board, you may spend 2 successes to move to Miskatonic Outpost." : ""} No cards gained? You may discard one reserve card. Refill the reserve afterward.</li>
-<li><b>Rest</b> — no Monster on your space: recover 1 Health and 1 Sanity${c.has("mon") ? " (spend Resources for +1 Health or Sanity each)" : ""}${c.ao && c.ao.id === "hypnos" ? " — <b>against Hypnos: only Health or only Sanity, chosen first</b>" : ""}.${EH.helpers.sideBoard(c) === "dreamlands" ? " Off the Dreamlands side board, Resting also lets you spend 1 Clue or test Will–1: spend it or pass → move to The Enchanted Wood." : ""}${EH.helpers.sideBoard(c) !== "dreamlands" && c.has("td") && (!c.mod("noPrelude") || c.mod("campaign")) ? " If the Otherworldly Dreams Prelude set up the Dreamlands: off the side board, Resting also lets you spend 1 Clue or test Will–1 → move to The Enchanted Wood." : ""}</li>
+<li><b>Acquire Assets</b> — on a City space with no Monster: test ${EH.helpers.ic("skill-influence", "Influence", true)} <b>Influence</b>; gain reserve Assets totaling ≤ your successes${c.has("mon") ? " (spend Resources for +1 success each)" : ""}.${EH.helpers.sideBoard(c) === "antarctica" ? " With the Antarctica side board out, you may spend 2 successes to move to Miskatonic Outpost." : ""}${(EH.helpers.sideBoard(c) !== "antarctica" && c.has("mom") && (!c.mod("noPrelude") || c.mod("campaign"))) ? " If the Doomsayer From Antarctica Prelude set up the Antarctica side board, you may spend 2 successes to move to Miskatonic Outpost." : ""} No cards gained? You may discard one reserve card. Refill the reserve afterward.</li>
+<li><b>Rest</b> — no Monster on your space: recover 1 Health and 1 Sanity${c.has("mon") ? " (spend Resources for +1 Health or Sanity each)" : ""}${c.ao && c.ao.id === "hypnos" ? " — <b>against Hypnos: only Health or only Sanity, chosen first</b>" : ""}.${EH.helpers.sideBoard(c) === "dreamlands" ? " Off the Dreamlands side board, Resting also lets you spend 1 Clue or test " + EH.helpers.ic("skill-will", "Will", true) + " Will–1: spend it or pass → move to The Enchanted Wood." : ""}${EH.helpers.sideBoard(c) !== "dreamlands" && c.has("td") && (!c.mod("noPrelude") || c.mod("campaign")) ? " If the Otherworldly Dreams Prelude set up the Dreamlands: off the side board, Resting also lets you spend 1 Clue or test " + EH.helpers.ic("skill-will", "Will", true) + " Will–1 → move to The Enchanted Wood." : ""}</li>
 <li><b>Trade</b> — exchange possessions (Assets, Artifacts, Clues, Spells, travel tickets${(c.has("mom") || c.has("sr") || c.has("td") || c.has("cir") || c.has("utp") || c.has("soc") || c.has("mon")) ? ", Unique Assets" : ""}${c.has("mon") ? ", Resources" : ""}) with an investigator on your space. Traded items are not “gained.”</li>
 ${(c.has("mom") || c.has("sr") || c.has("td") || c.has("mon")) ? "<li><b>Focus</b> — gain 1 Focus token (max 2). Spend a Focus to reroll one die during any test, any number of times. Focus is not a possession and is lost when defeated.</li>" : ""}
 ${c.has("mon") ? "<li><b>Gather Resources</b> — gain 1 Resource token (max 2).</li>" : ""}
@@ -314,27 +317,39 @@ ${c.has("mon") ? "<li><b>Gather Resources</b> — gain 1 Resource token (max 2).
 <ul>
 <li>Each investigator (Lead first, clockwise) resolves <b>one encounter</b>.</li>
 <li>On a space with Monsters you <b>must</b> resolve a Combat Encounter against each one, in your chosen order${(c.has("fl") || c.has("mom") || c.has("sr") || c.has("utp") || c.has("soc") || c.has("td") || c.has("cir") || c.has("mon")) ? " — <b>all non-Epic Monsters before any Epic Monster</b>" : ""}. Clear them all and you may still take a normal encounter.</li>
-<li>Otherwise choose: a <b>location encounter</b> (your space's regional deck or the General deck — resolve the entry matching your space's type or name) or a <b>token encounter</b>: Clue → Research Encounter; Gate → Other World Encounter; Active Expedition → Expedition Encounter; Rumor → that Rumor's encounter; defeated investigator → the encounter on their sheet back${c.has("cir") ? "; devastated space → Devastation Encounter (its only option besides tokens)" : ""}${EH.helpers.mysticRuins(c) ? "; Mystic Ruins token → top Mystic Ruins card" : ""}${EH.helpers.sideBoard(c) === "dreamlands" ? "; Dream-Quest token → top Dream-Quest card" : ""}${!EH.helpers.mysticRuins(c) && (c.has("sr") || c.has("mon")) && (!c.mod("noPrelude") || c.mod("campaign")) ? "; Mystic Ruins token (only if a Prelude — " + [c.has("sr") ? "In Cosmic Alignment" : "", c.has("mon") ? "The Stars Align" : ""].filter(Boolean).join(" or ") + " — set up that deck) → top Mystic Ruins card" : ""}${EH.helpers.sideBoard(c) !== "dreamlands" && c.has("td") && (!c.mod("noPrelude") || c.mod("campaign")) ? "; Dream-Quest token (only if the Otherworldly Dreams Prelude set up the Dreamlands side board) → top Dream-Quest card" : ""}${EH.helpers.sideBoard(c) === "antarctica" ? "; Clue on the Antarctica side board → Antarctica Research Encounter (side-board spaces use the Outpost/Mountain decks for location encounters)" : ""}${(EH.helpers.sideBoard(c) !== "antarctica" && c.has("mom") && (!c.mod("noPrelude") || c.mod("campaign"))) ? "; Clue on the Antarctica side board (only if the Doomsayer From Antarctica Prelude set it up) → Antarctica Research Encounter (side-board spaces use the Outpost/Mountain decks for location encounters)" : ""}.</li>
+<li>Otherwise choose: a <b>location encounter</b> (your space's regional deck or the General deck — resolve the entry matching your space's type or name) or a <b>token encounter</b> with a token on your space:
+<ul class="aid-icons">
+<li>${EH.helpers.ic("token-clue", "Clue token")}<span><b>Clue</b> → Research Encounter${EH.helpers.sideBoard(c) === "antarctica" ? "; a Clue on the Antarctica side board → Antarctica Research Encounter (side-board spaces use the Outpost/Mountain decks for location encounters)" : ""}${(EH.helpers.sideBoard(c) !== "antarctica" && c.has("mom") && (!c.mod("noPrelude") || c.mod("campaign"))) ? "; a Clue on the Antarctica side board (only if the Doomsayer From Antarctica Prelude set it up) → Antarctica Research Encounter (side-board spaces use the Outpost/Mountain decks for location encounters)" : ""}</span></li>
+<li>${EH.helpers.ic("token-gate", "Gate token")}<span><b>Gate</b> → Other World Encounter</span></li>
+<li>${EH.helpers.ic("token-active-expedition", "Active Expedition token")}<span><b>Active Expedition</b> → Expedition Encounter</span></li>
+<li>${EH.helpers.ic("token-rumor", "Rumor token")}<span><b>Rumor</b> → that Rumor's encounter</span></li>
+${EH.helpers.mysticRuins(c) || ((c.has("sr") || c.has("mon")) && (!c.mod("noPrelude") || c.mod("campaign"))) ? "<li>" + (c.has("sr") ? EH.helpers.ic("token-mystic-ruins", "Mystic Ruins token") : EH.helpers.ic("token-mystic-ruins-masks", "Mystic Ruins token")) + "<span><b>Mystic Ruins</b>" + (EH.helpers.mysticRuins(c) ? "" : " (only if a Prelude — " + [c.has("sr") ? "In Cosmic Alignment" : "", c.has("mon") ? "The Stars Align" : ""].filter(Boolean).join(" or ") + " — set up that deck)") + " → top Mystic Ruins card</span></li>" : ""}
+${EH.helpers.sideBoard(c) === "dreamlands" || (c.has("td") && (!c.mod("noPrelude") || c.mod("campaign"))) ? "<li>" + EH.helpers.ic("token-dream-quest", "Dream-Quest token") + "<span><b>Dream-Quest</b>" + (EH.helpers.sideBoard(c) === "dreamlands" ? "" : " (only if the Otherworldly Dreams Prelude set up the Dreamlands side board)") + " → top Dream-Quest card</span></li>" : ""}
+</ul></li>
+<li>A <b>defeated investigator's token</b> on your space → the encounter on their sheet back.${c.has("cir") ? " On a <b>devastated space</b> → Devastation Encounter (its only option besides tokens)." : ""}</li>
 <li><b>Complex encounters</b> (Expedition, Other World, Special${c.has("cir") ? ", Devastation" : ""}${EH.helpers.mysticRuins(c) ? ", Mystic Ruins" : ""}${EH.helpers.sideBoard(c) === "dreamlands" ? ", Dream-Quest" : ""}${!EH.helpers.mysticRuins(c) && (c.has("sr") || c.has("mon")) && (!c.mod("noPrelude") || c.mod("campaign")) ? ", Mystic Ruins (if a Prelude set it up)" : ""}${EH.helpers.sideBoard(c) !== "dreamlands" && c.has("td") && (!c.mod("noPrelude") || c.mod("campaign")) ? ", Dream-Quest (if a Prelude set it up)" : ""}): resolve the top box; pass → middle box, fail → bottom box.</li>
 <li>“As an encounter” effects follow normal encounter rules — Monsters must be gone first. “Instead of resolving an encounter” effects (like Detained) work even with Monsters present (FAQ).</li>
 </ul>
 <h4>3 · Mythos Phase</h4>
-<p>The Lead Investigator draws the top Mythos card and resolves its icons <b>left to right, top to bottom</b>:</p>
-<ol>
-<li><b>Advance Omen</b> — move the Omen token one space clockwise, then advance Doom 1 per Gate matching the new Omen space.</li>
-<li><b>Reckoning</b> — trigger every reckoning-icon effect in play, in order: Monsters, Ancient One sheet, ongoing Mythos cards, then investigator possessions/Conditions. Components added mid-reckoning don't trigger this pass (FAQ).</li>
-<li><b>Spawn Gates</b> — per the Reference card (top Gate token + 1 random Monster on its space).</li>
-<li><b>Monster Surge</b> — at each Gate matching the current Omen: spawn the Reference card's number of Monsters. No matching Gates? Spawn one Gate instead.</li>
-<li><b>Spawn Clues</b> — per the Reference card.</li>
-<li><b>Place Rumor token</b> on the space listed / <b>Place Eldritch tokens</b>: the listed number on this Mythos card.</li>
-<li><b>Resolve the text</b> — an <i>Event</i> resolves and discards; an <i>Ongoing</i> card stays in play.</li>
-</ol>
+<p>The Lead Investigator draws the top Mythos card and resolves its icons <b>in the order they appear — left to right, top to bottom</b>:</p>
+<ul class="aid-icons">
+<li>${EH.helpers.ic("mythos-advance-omen", "Advance Omen")}<span><b>Advance Omen</b> — move the Omen token one space clockwise, then advance Doom 1 per Gate matching the new Omen space.</span></li>
+<li>${EH.helpers.ic("mythos-reckoning", "Resolve Reckoning Effects")}<span><b>Resolve Reckoning Effects</b> — resolve every effect preceded by the ${EH.helpers.ic("reckoning", "Reckoning icon", true)} icon on components in play (those components carry the red reckoning icon in their lower-right corner), in order: Monsters, Ancient One sheet, ongoing Mythos cards, then investigator possessions/Conditions. Components added mid-reckoning don't trigger this pass (FAQ).</span></li>
+<li>${EH.helpers.ic("mythos-spawn-gates", "Spawn Gates")}<span><b>Spawn Gates</b> — per the Reference card (top Gate token + 1 random Monster on its space).</span></li>
+<li>${EH.helpers.ic("mythos-monster-surge", "Monster Surge")}<span><b>Monster Surge</b> — at each Gate matching the current Omen: spawn the Reference card's number of Monsters. No matching Gates? Spawn one Gate instead.</span></li>
+<li>${EH.helpers.ic("mythos-spawn-clues", "Spawn Clues")}<span><b>Spawn Clues</b> — per the Reference card.</span></li>
+<li>${EH.helpers.ic("mythos-place-rumor", "Place Rumor Token")}<span><b>Place Rumor Token</b> — on the space listed.</span></li>
+<li>${EH.helpers.ic("mythos-place-eldritch", "Place Eldritch Tokens")}<span><b>Place Eldritch Tokens</b> — the listed number, on this Mythos card.</span></li>
+</ul>
+<p>Then <b>resolve the text</b> — an <i>Event</i> resolves and discards; an <i>Ongoing</i> card stays in play.</p>
 <p>Only icons printed on the card are resolved. At the end of the phase the Lead Investigator may pass the Lead token to anyone. If a Mythos card can't be drawn (deck empty), the Mythos Phase ends; <b>then</b>, if you have not won the game, <b>you lose</b> (errata).</p>
-<p class="src-line">Base Rulebook p.6–12 · FAQ/Errata p.1${c.ao && c.ao.id === "hypnos" ? ", p.11" : ""}${(c.has("mom") || c.has("sr") || c.has("td") || c.has("mon")) ? ", p.14" : ""}, p.17–18, p.21${EH.helpers.cite(c, { fl: "FL p.2", mom: (EH.helpers.sideBoard(c) === "antarctica" || (EH.helpers.sideBoard(c) !== "antarctica" && c.has("mom") && (!c.mod("noPrelude") || c.mod("campaign")))) ? "MoM p.4–6" : "MoM p.5–6", sr: (EH.helpers.mysticRuins(c) || (!c.mod("noPrelude") || c.mod("campaign"))) ? "SR p.2–3" : "SR p.3", utp: "UtP p.5–6", soc: "SoC p.2–3", td: EH.helpers.sideBoard(c) === "dreamlands" ? "The Dreamlands p.5–6" : (!c.mod("noPrelude") || c.mod("campaign")) ? "The Dreamlands p.4–6" : "The Dreamlands p.6", cir: "CiR p.2–3", mon: (EH.helpers.mysticRuins(c) || (!c.mod("noPrelude") || c.mod("campaign"))) ? "Masks p.4–5" : "Masks p.5" })}</p>` },
+<p class="src-line">Base Rulebook p.6–12 · FAQ/Errata p.1${c.ao && c.ao.id === "hypnos" ? ", p.11" : ""}${(c.has("mom") || c.has("sr") || c.has("td") || c.has("mon")) ? ", p.14" : ""}, p.17–18, p.21${EH.helpers.cite(c, { fl: "FL p.2", mom: (EH.helpers.sideBoard(c) === "antarctica" || (EH.helpers.sideBoard(c) !== "antarctica" && c.has("mom") && (!c.mod("noPrelude") || c.mod("campaign")))) ? "MoM p.4–6" : "MoM p.5–6", sr: (EH.helpers.mysticRuins(c) || (!c.mod("noPrelude") || c.mod("campaign"))) ? "SR p.2–3" : "SR p.3", utp: "UtP p.5–6", soc: "SoC p.2–3", td: EH.helpers.sideBoard(c) === "dreamlands" ? "The Dreamlands p.3, p.5–6" : (!c.mod("noPrelude") || c.mod("campaign")) ? "The Dreamlands p.3–6" : "The Dreamlands p.6", cir: "CiR p.2–3", mon: (EH.helpers.mysticRuins(c) || (!c.mod("noPrelude") || c.mod("campaign"))) ? (c.has("sr") ? "Masks p.4–5" : "Masks p.3–5") : "Masks p.5" })}</p>` },
 
   { id: "tests", title: "Tests, Skills & Rerolls",
     when: () => true,
     html: (c) => `
+<p>Each investigator has five skills. On cards, a test is declared by the skill's icon in parentheses:</p>
+<p class="aid-icon-row">${[["skill-lore", "Lore"], ["skill-influence", "Influence"], ["skill-observation", "Observation"], ["skill-strength", "Strength"], ["skill-will", "Will"]].map(([f, n]) => `<span class="aid-pair">${EH.helpers.ic(f, n)}<span>${n}</span></span>`).join(" ")}</p>
 <ul>
 <li>Roll dice equal to the tested <b>skill</b> (sheet value ± Improvement/Impairment tokens) plus any modifier printed with the test (e.g. “–1”) plus bonuses. <b>5s and 6s are successes</b>; one success passes unless the effect says otherwise. Your final pool below 1 die? Roll <b>1 die</b>.</li>
 <li>Only <b>one bonus per test</b> — add the single highest bonus that applies, e.g. “Gain +3 Will” (errata). Rerolls, dice-manipulation and “additional dice” effects stack freely on top.</li>
@@ -350,9 +365,9 @@ ${c.has("mon") ? "<li><b>Gather Resources</b> — gain 1 Resource token (max 2).
     when: () => true,
     html: (c) => `
 <ul>
-<li>Flip the Monster token and read its back. Resolve the <b>Will test</b> first: lose Sanity equal to (its <b>horror</b> − your successes). Then the <b>Strength test</b>: lose Health equal to (its <b>damage</b> − your successes), and the Monster loses <b>Health equal to your successes</b>.</li>
+<li>Flip the Monster token and read its back. Resolve the ${EH.helpers.ic("skill-will", "Will", true)} <b>Will test</b> first: lose Sanity equal to (its <b>horror</b> − your successes). Then the ${EH.helpers.ic("skill-strength", "Strength", true)} <b>Strength test</b>: lose Health equal to (its <b>damage</b> − your successes), and the Monster loses <b>Health equal to your successes</b>.</li>
 <li>A Monster with total lost Health ≥ its <b>toughness</b> is defeated → back to the cup (toughness reduced to 0 also defeats it). Undefeated Monsters keep their damage tokens.</li>
-${(c.has("fl") || c.has("mom") || c.has("utp")) ? "<li><b>Alternate tests:</b> a different skill icon replaces Will or Strength on some Monsters — test that skill instead.</li>" : ""}
+${(c.has("fl") || c.has("mom") || c.has("utp")) ? "<li><b>Alternate tests:</b> a different skill icon replaces " + EH.helpers.ic("skill-will", "Will", true) + " Will or " + EH.helpers.ic("skill-strength", "Strength", true) + " Strength on some Monsters — test that skill instead.</li>" : ""}
 <li><b>Epic Monsters</b> (red, clipped corner): immune to being moved, discarded or returned to the cup — except that a solved Rumor discards the Epic Monsters it placed (errata); defeated ones (lost Health ≥ toughness) go to the box. Spawned only by name${(c.has("fl") || c.has("mom") || c.has("sr") || c.has("utp") || c.has("soc") || c.has("td") || c.has("cir") || c.has("mon")) ? "; fight all non-Epics on your space first" : ""}.</li>
 <li><b>Ambush:</b> “a Monster ambushes you” — draw from the cup, fight immediately, then return it to the cup win or lose, and continue the interrupted effect.</li>
 ${(c.has("mom") || c.has("sr") || c.has("utp") || c.has("soc") || c.has("cir") || c.has("mon")) ? "<li><b>Physical Resistance</b>: no dice-pool bonuses apply except from Spells and MAGICAL possessions." + ((c.has("mom") || c.has("utp")) ? " <b>Magical Resistance</b>: no bonuses from Spells or MAGICAL possessions." : "") + " Rerolls, dice manipulation and “additional dice” effects (e.g. Jim Culver, Agnes Baker) always work. Test-substitution spells (Storm of Spirits) aren't bonuses and slip past " + ((c.has("mom") || c.has("utp")) ? "both" : "it") + " — though bonuses to the substituted skill are still filtered as usual (FAQ).</li>" : ""}
@@ -417,8 +432,11 @@ ${(c.has("mom") || c.has("sr") || c.has("utp") || c.has("soc") || c.has("td") ||
     when: (c) => ["mom", "sr", "utp", "soc", "td", "cir", "mon"].some(id => c.has(id)),
     html: (c) => {
       const bits = [];
-      if (c.has("mom") || c.has("sr") || c.has("td") || c.has("mon"))
-        bits.push("<li><b>Focus</b> (action): gain 1 token, max 2; spend to reroll one die per token, unlimited per test.</li>");
+      /* token pictures: the rules page (SR) when selected, else that set's p.3 components list (also cited below) */
+      const focusSet = ["sr", "mom", "td", "mon"].find(id => c.has(id));
+      const focusIc = { sr: EH.helpers.ic("token-focus", "Focus token", true), mom: EH.helpers.ic("token-focus-mom", "Focus token", true), td: EH.helpers.ic("token-focus-td", "Focus token", true), mon: EH.helpers.ic("token-focus-mon", "Focus token", true) };
+      if (focusSet)
+        bits.push("<li><b>Focus</b> " + focusIc[focusSet] + " (action): gain 1 token, max 2; spend to reroll one die per token, unlimited per test.</li>");
       if (c.has("mon"))
         bits.push("<li><b>Resources</b> (Gather Resources action): max 2, tradable. Spend during Rest (+1 Health/Sanity each) or Acquire Assets (+1 success each).</li>");
       if (c.has("utp") || c.has("soc"))
@@ -426,11 +444,14 @@ ${(c.has("mom") || c.has("sr") || c.has("utp") || c.has("soc") || c.has("td") ||
       if (c.has("cir"))
         bits.push("<li><b>Disasters & Devastation</b>: Disaster cards (read by the Lead Investigator, resolved immediately) devastate named City spaces — discard its Clues and defeated investigator tokens, box its Expedition cards, place a Devastation token. A devastated space has no space type (it is no longer a City space): you can't resolve a General Encounter or its location encounter there; instead, during the Encounter Phase you may draw and resolve the top Devastation Encounter. Clues can't spawn or move there. <b>All nine main-board cities devastated = you lose.</b></li>");
       const prelude = EH.helpers.hasPreludes(c) && (!c.mod("noPrelude") || c.mod("campaign"));
-      if ((prelude && (c.has("mom") || c.has("sr") || c.has("utp") || c.has("td"))) || (c.has("mon") && (!c.ao || c.ao.id === "nyarlathotep")))
-        bits.push("<li><b>Adventures</b> (specific Preludes/Ancient Ones): staged stories. The active investigator places each drawn Adventure faceup and resolves “when this card enters play.” Complete it via its printed effect, then resolve “when this Adventure is completed” (usually drawing the next stage). Then discard the Adventure, any tokens on it, and any tokens its effects placed. The Adventure token marks where the action is.</li>");
+      const advSet = ["sr", "mom", "utp", "td"].find(id => prelude && c.has(id)) || ((c.has("mon") && (!c.ao || c.ao.id === "nyarlathotep")) ? "mon" : undefined);
+      const advIc = { sr: EH.helpers.ic("token-adventure", "Adventure token", true), mom: EH.helpers.ic("token-adventure-mom", "Adventure token", true), utp: EH.helpers.ic("token-adventure-utp", "Adventure token", true), td: EH.helpers.ic("token-adventure-td", "Adventure token", true), mon: EH.helpers.ic("token-adventure-mon", "Adventure token", true) };
+      if (advSet)
+        bits.push("<li><b>Adventures</b> (specific Preludes/Ancient Ones): staged stories. The active investigator places each drawn Adventure faceup and resolves “when this card enters play.” Complete it via its printed effect, then resolve “when this Adventure is completed” (usually drawing the next stage). Then discard the Adventure, any tokens on it, and any tokens its effects placed. The " + advIc[advSet] + " Adventure token marks where the action is.</li>");
       if (c.mod("stories") || c.mod("campaign"))
         bits.push("<li><b>Personal Stories</b>: your Mission's completion grants the Reward, its failure the Consequence — permanent, undiscardable, not a possession. A dead investigator's story dies too.</li>");
-      return "<ul>" + bits.join("") + "</ul><p class='src-line'>" + [["mom", "MoM p.5"], ["sr", "SR p.2–3"], ["utp", "UtP p.5"], ["soc", "SoC p.2"], ["td", "The Dreamlands p.4, p.6"], ["cir", "CiR p.2"], ["mon", "Masks p.4–6"]].filter(([id]) => c.has(id)).map(x => x[1]).join(" · ") + ((c.mod("stories") || c.mod("campaign")) ? " · FAQ p.7" : "") + "</p>";
+      const p3 = (id) => (focusSet === id && id !== "sr") || (advSet === id && id !== "sr");
+      return "<ul>" + bits.join("") + "</ul><p class='src-line'>" + [["mom", p3("mom") ? "MoM p.3, p.5" : "MoM p.5"], ["sr", "SR p.2–3"], ["utp", p3("utp") ? "UtP p.3, p.5" : "UtP p.5"], ["soc", "SoC p.2"], ["td", p3("td") ? "The Dreamlands p.3–4, p.6" : "The Dreamlands p.4, p.6"], ["cir", "CiR p.2"], ["mon", p3("mon") ? "Masks p.3–6" : "Masks p.4–6"]].filter(([id]) => c.has(id)).map(x => x[1]).join(" · ") + ((c.mod("stories") || c.mod("campaign")) ? " · FAQ p.7" : "") + "</p>";
     } },
 
   { id: "rulings", title: "Rulings Worth Remembering (FAQ & Errata)",

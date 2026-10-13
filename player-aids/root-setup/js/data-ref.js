@@ -33,7 +33,7 @@ RT.core = [
         "<b>No interrupting:</b> you cannot interrupt an action (even a compound one like the Marquise's March), ability or persistent effect with another effect unless it explicitly allows it (e.g. a card that says “In battle…”).",
         "<b>End of turn:</b> once you begin the last step of your turn you cannot take actions, except those that say “end of Evening” or “end of turn” (such as hirelings).",
         "Unless noted, you may take the actions listed in a phase in any order and take a given action more than once.",
-        "Most factions end Evening the same way: <b>draw one card plus one per uncovered draw bonus, then discard down to five</b>."
+        "Most factions end Evening the same way: <b>draw one card plus one per uncovered " + RT.icIn("draw-bonus", "Draw bonus") + " draw bonus, then discard down to five</b>."
       ]) + RT.excHtml(c, "turn");
     },
     src: function (c) { return RT.join(["Law p.2 §1.4 · LtP p.2, p.10–11", RT.excSrc(c, "turn")]); } },
@@ -74,7 +74,8 @@ RT.core = [
     html: function (c) {
       return RT.ul([
         "You draw from the top of the <b>shared deck</b> and discard to a shared discard pile. If the deck is ever empty, shuffle the discard pile at once to form a new deck.",
-        "Every card has a suit: <b>bird, fox, rabbit or mouse</b>. Most cards also have an effect you can craft.",
+        "Every card has a suit: <b>bird, fox, rabbit or mouse</b>. Most cards also have an effect you can craft. " +
+          RT.icRow([RT.icPair("suit-bird", "Bird"), RT.icPair("suit-fox", "Fox"), RT.icPair("suit-rabbit", "Rabbit"), RT.icPair("suit-mouse", "Mouse")]),
         "<b>Birds are wild:</b> you can treat a bird card as any other suit, even when spending, taking or giving several cards of one suit." + RT.ul([
           "<b>Forced effects:</b> if you must discard or give cards of a non-bird suit, your birds count as that suit.",
           "<b>Reverse substitution:</b> if you must spend, discard, take or give a <i>bird</i> card, no other suit can stand in for it."]),
@@ -85,14 +86,15 @@ RT.core = [
         c.deck !== "standard" ? "This game uses the <b>" + RT.decks.filter(function (d) { return d.id === c.deck; })[0].name + "</b> deck instead of the base deck." : ""
       ]) + RT.excHtml(c, "cards");
     },
-    src: function (c) { return RT.join(["Law p.2–3 §1.2, §2.1", c.deck !== "standard" ? "Law p.22 §A.2" : "", "LtP p.6", RT.excSrc(c, "cards")]); } },
+    src: function (c) { return RT.join(["Law p.2–3 §1.2, §2.1", c.deck !== "standard" ? "Law p.22 §A.2" : "", "LtP p.6–7, p.15", RT.excSrc(c, "cards")]); } },
 
   { id: "map", title: "The Woodland: clearings, paths, forests and rule",
     when: function () { return true; },
     html: function (c) {
       return RT.ul([
         "<b>Clearings</b> are linked by <b>paths</b>; a clearing is adjacent to every clearing a path links it to.",
-        "<b>Suit:</b> each clearing is mouse, rabbit or fox" + (c.map === "autumn" ? " (shown by its symbol and the colour of its trees)" : " (here, by the suit markers placed in setup)") + ".",
+        "<b>Suit:</b> each clearing is " + RT.icIn("suit-mouse", "Mouse") + " mouse, " + RT.icIn("suit-rabbit", "Rabbit") + " rabbit or " + RT.icIn("suit-fox", "Fox") + " fox" +
+          (c.map === "autumn" ? " (shown by its symbol and the colour of its trees)" : " (here, by the suit markers placed in setup)") + ".",
         "<b>Slots:</b> each building fills an open slot (white box). No open slot, no building — but tokens can still be placed.",
         "<b>Ruins</b> fill the slots marked “R” and can't be removed unless a rule says so (such as the Vagabond's Explore).",
         "<b>Rivers</b> link many clearings. They are <b>not paths</b> unless a rule says to treat them as paths, and they don't divide clearings or forests" + (c.map === "winter" ? " — except on this Winter map, where the Raging River divides forests" : "") + ".",
@@ -101,7 +103,7 @@ RT.core = [
           (c.human("eyrie") ? " <i>Exception in play: the Eyrie's Lords of the Forest — they rule ties if they have a piece there.</i>" : "")
       ]) + RT.excHtml(c, "map");
     },
-    src: function (c) { return RT.join(["Law p.3 §2.2–2.5", c.map === "winter" ? "Law p.27 §M.2.1" : "", c.human("eyrie") ? "Law p.6 §7.2.2" : "", "LtP p.5–6", RT.excSrc(c, "map")]); } },
+    src: function (c) { return RT.join(["Law p.3 §2.2–2.5", c.map === "winter" ? "Law p.27 §M.2.1" : "", c.human("eyrie") ? "Law p.6 §7.2.2" : "", "LtP p.5–7, p.15", RT.excSrc(c, "map")]); } },
 
   { id: "move", title: "Move",
     when: function () { return true; },
@@ -140,7 +142,7 @@ RT.core = [
         return "<tr><td>" + RT.F[id].name + "</td><td>" + RT.F[id].craft + "</td></tr>";
       }).join("");
       return RT.ul([
-        "To craft a card from your hand, <b>activate crafting pieces</b> in clearings matching the suits in the card's bottom-left corner. A crafting piece's suit is its clearing's suit. Each crafting piece can be activated <b>once per turn</b>. A three-colour question mark means a piece of any suit.",
+        "To craft a card from your hand, <b>activate crafting pieces</b> in clearings matching the suits in the card's bottom-left corner. A crafting piece's suit is its clearing's suit. Each crafting piece can be activated <b>once per turn</b>. A three-colour question mark " + RT.icIn("craft-any-suit", "Any suit") + " means a piece of any suit.",
         "<b>Immediate effect</b> (paper box): resolve it, then discard the card. If it shows an <b>item</b>, take that item from the item supply on the map into your Crafted Items box and score the card's points. If the item isn't in the supply, you can't craft the card.",
         c.vbH ? "<b>Vagabond:</b> crafted items go face up into his Satchel or onto their item track — he has no Crafted Items box." : "",
         c.human("eyrie") ? "<b>Eyrie Dynasties — Disdain for Trade:</b> when they craft an item they score only 1 point, not the card's points (extra crafting points from effects such as Master Engravers still count). While the <b>Builder</b> is their leader, they ignore this and score normally." : "",
@@ -149,7 +151,7 @@ RT.core = [
       ]) + (rows ? "<table class='rt'><thead><tr><th>Faction</th><th>Crafts by activating…</th></tr></thead><tbody>" + rows + "</tbody></table>" : "") + RT.excHtml(c, "craft");
     },
     src: function (c) {
-      var parts = ["Law p.3 §2.1.2–2.1.3, §3.2.2", "Law p.4 §4.1", "LtP p.7"].concat(c.humanFacs.map(function (id) { return RT.F[id].craftSrc; }),
+      var parts = ["Law p.3 §2.1.2–2.1.3, §3.2.2", "Law p.4 §4.1", "LtP p.7", "Riverfolk p.7"].concat(c.humanFacs.map(function (id) { return RT.F[id].craftSrc; }),
         [c.human("eyrie") ? "Law p.6–7 §7.2.3, §7.8.1" : ""], RT.excItems(c, "craft").map(function (e) { return e.srcFn ? e.srcFn(c) : e.src; }));
       return RT.join(parts.filter(function (s, i, a) { return s && a.indexOf(s) === i; }));
     } },
@@ -201,7 +203,7 @@ RT.factionRef.marquise = { title: "Marquise de Cat",
         "<b>Recruit:</b> one warrior at <b>each</b> recruiter — only once per turn.",
         "<b>Build:</b> choose a clearing you rule with an open slot and a building type; take the leftmost building of that type from your board. Pay its cost by removing wood from the chosen clearing, adjacent clearings you rule, or clearings linked to it through any number of clearings you rule. Place it and score the points it uncovers.",
         "<b>Overwork:</b> spend a card matching the clearing of a sawmill to place one wood there."
-      ]) + "<h4>Evening</h4>" + RT.ul(["Draw one card, plus one per uncovered draw bonus (the recruiter track); discard down to five."]) +
+      ]) + "<h4>Evening</h4>" + RT.ul(["Draw one card, plus one per uncovered " + RT.icIn("draw-bonus", "Draw bonus") + " draw bonus (the recruiter track); discard down to five."]) +
       "<h4>Buildings track (cost and points, in the order you build them)</h4>" +
       "<table class='rt'><thead><tr><th>Built</th><th>1st</th><th>2nd</th><th>3rd</th><th>4th</th><th>5th</th></tr></thead><tbody>" +
       "<tr><td>Wood cost</td><td>1</td><td>2</td><td>3</td><td>3</td><td>4</td></tr>" +
@@ -239,7 +241,7 @@ RT.factionRef.eyrie = { title: "Eyrie Dynasties",
         "<b>Rest:</b> end Daylight and begin Evening."
       ]) + "<h4>Evening</h4>" + RT.ol([
         "<b>Score</b> the points on the rightmost empty space of your Roosts track.",
-        "<b>Draw</b> one card plus one per uncovered draw bonus; discard down to five."
+        "<b>Draw</b> one card plus one per uncovered " + RT.icIn("draw-bonus", "Draw bonus") + " draw bonus; discard down to five."
       ]) + "<h4>Leaders</h4><table class='rt'><thead><tr><th>Leader</th><th>Viziers start on</th><th>Ability</th></tr></thead><tbody>" +
       "<tr><td>Builder</td><td>Recruit, Move</td><td>Ignore Disdain for Trade when crafting.</td></tr>" +
       "<tr><td>Charismatic</td><td>Recruit, Battle</td><td>Each Recruit action places <b>two</b> warriors.</td></tr>" +
@@ -275,8 +277,8 @@ RT.factionRef.alliance = { title: "Woodland Alliance",
 
 RT.vagabondRefHtml = function (c) {
   return "<p>The Vagabond plays all sides: he scores by improving <b>relationships</b> through Aid, by removing warriors of factions <b>Hostile</b> to him, by exploring ruins and by completing <b>quests</b>. Everything he does costs <b>items</b>.</p>" +
-    "<h4>Items</h4>" + RT.ul([
-      "Item icons: boots, bag, crossbow, hammer, sword, tea, coins, torch.",
+    "<h4>Items</h4>" + RT.icRow(["<span>Item icons:</span>", RT.icPair("item-boots", "Boots"), RT.icPair("item-bag", "Bag"), RT.icPair("item-crossbow", "Crossbow"), RT.icPair("item-hammer", "Hammer"),
+      RT.icPair("item-sword", "Sword"), RT.icPair("item-tea", "Tea"), RT.icPair("item-coins", "Coins"), RT.icPair("item-torch", "Torch")]) + RT.ul([
       "Items are face up or face down, damaged or undamaged. <b>Exhaust</b> = flip a face-up undamaged item face down to take an action.",
       "<b>Tea, coins and bags</b> have their own tracks (3 spaces each): whenever one is face up in the Satchel, put it on an empty space of its track if you can; when one on a track is flipped face down (exhausted), it moves to the Satchel. Boots, swords, crossbows, hammers and torches go face up in the <b>Satchel</b>.",
       "<b>Taking hits:</b> damage one undamaged item per hit (it goes to the Damaged box); with none left, ignore further hits."
@@ -292,22 +294,22 @@ RT.vagabondRefHtml = function (c) {
       "<b>Allied:</b> each later Aid to that faction scores <b>2</b>. When you move you may force one Allied faction's warriors to move with you; at the start of a battle you attack in, you may treat one Allied faction's warriors there as your own (max rolled hits = their warriors + your undamaged swords; not against that same faction). If you take more hits on Allied warriors than on your items in that battle, they become Hostile.",
       "<b>Hostile:</b> removing a warrior of a non-Hostile faction makes it Hostile. <b>Infamy:</b> each piece of a Hostile faction you remove in battle on your turn scores one extra point (not the warrior that made it Hostile). Moving into a clearing with Hostile warriors costs <b>an extra boot</b>, even if forced. You can still Aid a Hostile faction to take its items, but never improve it."
     ]) + "<h4>Birdsong</h4>" + RT.ol([
-      "<b>Refresh:</b> flip two exhausted items face up per face-up tea on the Refresh track (not counting tea flipped now), then three more.",
+      "<b>Refresh:</b> flip two exhausted items face up per face-up " + RT.icIn("item-tea", "Tea") + " tea on the Refresh track (not counting tea flipped now), then three more.",
       "<b>Slip:</b> you may move into an adjacent clearing <b>or forest</b> without exhausting boots, even into a Hostile clearing; this ignores effects that stop movement out of a clearing."
     ]) + "<h4>Daylight</h4><p>Exhaust items for these actions, in any order and number:</p>" + RT.ul([
-      "<b>Move</b> (boots; one more if the destination has Hostile warriors). Not into a forest.",
-      "<b>Battle</b> (sword).",
-      "<b>Explore</b> (torch): take an item from under a ruin in your clearing, reveal it and place it face up; <b>+1 point</b>. Remove the ruin when its last item is taken.",
+      "<b>Move</b> (" + RT.icIn("item-boots", "Boots") + " boots; one more if the destination has Hostile warriors). Not into a forest.",
+      "<b>Battle</b> (" + RT.icIn("item-sword", "Sword") + " sword).",
+      "<b>Explore</b> (" + RT.icIn("item-torch", "Torch") + " torch): take an item from under a ruin in your clearing, reveal it and place it face up; <b>+1 point</b>. Remove the ruin when its last item is taken.",
       "<b>Aid</b> (any item): give a card matching your clearing to a player with faction pieces there (even Hostile); you may take one item from their Crafted Items box.",
       "<b>Quest:</b> pick a face-up quest matching your clearing and exhaust the two items it lists. Then score <b>1 point per completed quest of that suit</b> (this one included) or draw two cards; draw a new quest.",
-      "<b>Strike</b> (crossbow): remove an enemy warrior in your clearing — or, if that enemy has no warriors there, another of its faction pieces.",
-      "<b>Repair</b> (hammer): move a damaged item back to the Satchel, keeping its side.",
-      "<b>Craft</b> (hammers), and your character's <b>Special Action</b> (exhausting the items it lists)."
+      "<b>Strike</b> (" + RT.icIn("item-crossbow", "Crossbow") + " crossbow): remove an enemy warrior in your clearing — or, if that enemy has no warriors there, another of its faction pieces.",
+      "<b>Repair</b> (" + RT.icIn("item-hammer", "Hammer") + " hammer): move a damaged item back to the Satchel, keeping its side.",
+      "<b>Craft</b> (" + RT.icIn("item-hammer", "Hammer") + " hammers), and your character's <b>Special Action</b> (exhausting the items it lists)."
     ]) + "<h4>Evening</h4>" + RT.ol([
       "<b>Rest:</b> if you're in a forest, repair all damaged items and flip them face up.",
-      "<b>Draw</b> one card plus one per face-up coins on the Coins track.",
+      "<b>Draw</b> one card plus one per face-up " + RT.icIn("item-coins", "Coins") + " coins on the Coins track.",
       "<b>Discard</b> down to five cards.",
-      "<b>Item capacity:</b> six plus two per face-up bag on the Bags track; remove any excess from the Satchel and Damaged box permanently."
+      "<b>Item capacity:</b> six plus two per face-up " + RT.icIn("item-bag", "Bag") + " bag on the Bags track; remove any excess from the Satchel and Damaged box permanently."
     ]) + (c.twovb ? "<h4>Two Vagabonds</h4>" + RT.ul([
       "Each ruin holds <b>two</b> “R” items. Whoever explores (or razes) a ruin with two items looks at both and takes one; a second Explore can take the other.",
       "You can't take an “R” item if you already have the same type of “R” item on your board. Exploring without taking an item scores nothing, but the torch is still exhausted.",
@@ -440,13 +442,14 @@ RT.appendix = [
     html: function (c) {
       return "<h4>Gaining and losing hirelings</h4>" + RT.ul([
         "<b>From the supply:</b> when your score marker enters a space with a hireling marker (4, 8, 12), take that marker and put it below your Evening. At the <b>end of your turn</b> take any hireling card from the supply, <b>roll for control</b>, and flip the marker.",
-        "<b>Roll for control:</b> roll the control die and put that many control markers on the card — counting only the <b>gold pips</b> if you have the most points (or are tied for most), and <b>all pips</b> otherwise (including after activating a dominance card).",
+        "<b>Roll for control:</b> roll the " + RT.icIn("control-die", "Control die") + " control die and put that many control markers on the card — counting only the <b>gold pips</b> if you have the most points (or are tied for most), and <b>all pips</b> otherwise (including after activating a dominance card).",
         "<b>Losing interest:</b> at the end of each of your turns, remove one control marker from each hireling you gained on an earlier turn. A hireling with none left must be given, with a hireling marker, to <b>any other player</b> (even the leader), who rolls for control at once."
-      ]) + "<h4>Actions and abilities (card icons)</h4>" + RT.ul([
-        "<b>When-hired action:</b> the new controller must take it on gaining control.",
-        "<b>Ability:</b> always active, or says when it happens.",
-        "<b>Start-of-Birdsong action:</b> the controller must or may take it at the start of their Birdsong, as written.",
-        "<b>Once-per-Daylight action:</b> the controller may take it once in their Daylight.",
+      ]) + "<h4>Actions and abilities (card icons)</h4>" + RT.icList([
+        ["hire-when-hired", "When-Hired Action", "<b>When-hired action</b> — the new controller must take it on gaining control."],
+        ["hire-ability", "Ability", "<b>Ability</b> — always active, or says when it happens."],
+        ["hire-birdsong", "Start-of-Birdsong Action", "<b>Start-of-Birdsong action</b> — the controller must or may take it at the start of their Birdsong, as written."],
+        ["hire-daylight", "Once-Per-Daylight Action", "<b>Once-per-Daylight action</b> — the controller may take it once in their Daylight."]
+      ]) + RT.ul([
         "Text starting “<b>Controller:</b>” is gained by the controlling player. Promoted hirelings have pieces; Demoted ones usually give abilities instead."
       ]) + "<h4>Rules</h4>" + RT.ul([
         "<b>Rule:</b> the controller treats hireling pieces as their own <b>only for rule</b> (and can rule with hirelings alone — even Lords of the Forest applies). Uncontrolled hirelings rule clearings as if they were players.",

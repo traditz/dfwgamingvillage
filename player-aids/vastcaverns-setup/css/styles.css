@@ -329,6 +329,8 @@ section h2 {
 .ref-body p { margin-bottom: 10px; }
 .ref-body ul, .ref-body ol { margin: 4px 0 12px 1.35em; }
 .ref-body li { margin-bottom: 5px; padding-left: 2px; }
+/* rulebook icons (css/icons.css): keep an inline icon on the same line as its label */
+.ref-body .ic-nw { white-space: nowrap; }
 
 /* tables: the book's "Gain Grit / Lose Grit" rules (Rules p.7) */
 .tbl-wrap { overflow-x: auto; margin: 10px 0 16px; -webkit-overflow-scrolling: touch; }

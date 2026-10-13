@@ -130,6 +130,14 @@ var TM_AUTOMA = (function () {
   function p(x) { return x ? "<p>" + x + "</p>" : ""; }
   function h(x) { return "<h4>" + x + "</h4>"; }
   function note(x) { return x ? "<p class='inline-note'>" + x + "</p>" : ""; }
+  /* rulebook icons (images/icons/, DFWGV icons standard): every call names its file in full (the icons check matches
+     literal names); alt = the name the Automa books print beside the icon */
+  function ic(f, alt) { return "<img class='aid-ic' src='images/icons/" + f + ".webp' alt='" + alt + "' title='" + alt + "'>"; }
+  function ici(f, alt) { return "<img class='aid-ic aid-ic-inline' src='images/icons/" + f + ".webp' alt='" + alt + "' title='" + alt + "'>"; }
+  /* one track action: icon, printed name, what MarsBot does */
+  function act(f, alt, name, text) {
+    return "<li>" + ic(f, alt) + "<span><b>" + name + "</b> — " + text + "</span></li>";
+  }
   /* rows: arrays of cells, or {cells:[...], cls:"is-current"}; the first cell is the row header */
   function tbl(head, rows, cls) {
     var body = rows.filter(Boolean).map(function (r) {
@@ -871,9 +879,23 @@ var TM_AUTOMA = (function () {
   function amzNote(c, what) {
     return noBoard(c) ? note("Not covered: " + what + " The Automa books cover six maps (" + SIX_MAPS + ") and never mention Amazonis Planitia (Automa A p.2; Automa C p.8).") : "";
   }
+  /* the tag names in ROWS → the tag icon printed on MarsBot's boards and cards */
+  var TAG_ICONS = { "building": ici("tag-building", "Building tag"), "space": ici("tag-space", "Space tag"), "event": ici("tag-event", "Event tag"),
+    "science": ici("tag-science", "Science tag"), "energy (power)": ici("tag-power", "Power tag"), "Jovian": ici("tag-jovian", "Jovian tag"),
+    "Earth": ici("tag-earth", "Earth tag"), "city": ici("tag-city", "City tag"), "plant": ici("tag-plant", "Plant tag"),
+    "microbe": ici("tag-microbe", "Microbe tag"), "animal": ici("tag-animal", "Animal tag"), "Venus": ici("tag-venus", "Venus tag") };
+  function tagCell(s) {
+    /* the icon stays on one line with the tag's first word (and its comma); longer names wrap after it */
+    var a = s.split(", ");
+    return a.map(function (t, i) {
+      var w = t + (i < a.length - 1 ? "," : ""), sp = w.indexOf(" ");
+      if (!TAG_ICONS[t]) return w;
+      return "<span class='tm-nowrap'>" + TAG_ICONS[t] + (sp > 0 ? w.slice(0, sp) + "</span>" + w.slice(sp) : w + "</span>");
+    }).join(" ");
+  }
   function trackRows(c) {
-    var rows = ROWS[boardId(c)].map(function (r) { return [r[0], r[1], r[2]]; });
-    if (venus(c)) rows.push(["Venus (Venus Next board)", "Venus", "—"]);
+    var rows = ROWS[boardId(c)].map(function (r) { return [r[0], tagCell(r[1]), r[2]]; });
+    if (venus(c)) rows.push(["Venus (Venus Next board)", tagCell("Venus"), "—"]);
     return rows;
   }
 
@@ -988,7 +1010,7 @@ var TM_AUTOMA = (function () {
           (ma(c) && mapId(c) !== "tharsis" ? note("With the M&A tiles MarsBot uses its Tharsis board on every map (Automa C p.13).") : "") +
           amzNote(c, "there's no MarsBot board for Amazonis Planitia, so the books don't say which tags share a track on this map.") +
           ul([
-            prelude(c) ? "<b>Wild tag</b> (Prelude): advance the least-advanced track, the topmost if tied." : "",
+            prelude(c) ? ici("tag-wild", "Wild tag") + " <b>Wild tag</b> (Prelude): advance the least-advanced track, the topmost if tied." : "",
             "“Topmost” (tracks) means as printed on your MarsBot board; “leftmost” (milestones and awards) means as laid out on the game board."
           ]);
       },
@@ -1001,26 +1023,26 @@ var TM_AUTOMA = (function () {
         var fl = venus(c) ? "Put a resource token on the floater storage area to the right of its Venus track."
           : (colonies(c) ? "Put a resource token in the Titan storage area of its Colonies shipping board." : "Ignore it (needs Venus Next or Colonies).");
         return p("When a tracker lands on an icon, MarsBot does that action at once. If it <b>can't</b>, it takes a <b>Failed Action</b> (" + failMC(c) + " M€). An icon for an expansion you aren't using is simply <b>ignored</b>, with no Failed Action.") +
-          tbl(["Icon", "Action", "What MarsBot does"], [
-            ["Red arrow", "Advance tracker", easy(c) ? "<b>Easy: ignore it.</b>" : "Move this tracker to the next space; that may set off another action."],
-            ["Another track's tag", "Advance another track", "Advance the track with that tag; that may set off another action."],
-            ["Orange TR icon", "Gain TR", "Gain the number of TR the icon shows."],
-            ["Black “M” banner", "Claim milestone", "Claim, for free, an unclaimed milestone it qualifies for. If it qualifies for several: 1) one you also qualify for, 2) the one you're closest to, 3) the leftmost" + (venus(c) ? " (Hoverlord counts as last)" : "") + ". Failed Action if 3 are claimed or it qualifies for none."],
-            ["Gold “A” disc", "Fund award", "Fund, for free, the award it's <b>most ahead of you</b> on (ties: the leftmost" + (venus(c) ? ", with Venuphile last" : "") + "). Failed Action if 3 are funded or it isn't ahead of you on any."],
-            ["Thermometer", "Raise temperature", "Raise the temperature 1 step."],
-            ["Green hex with a tree", "Place a greenery (+ raise oxygen)", "Place a greenery tile with its player marker, then raise oxygen 1 step (see <i>Where MarsBot places tiles</i>)."],
-            ["Blue hex with a drop", "Place ocean", "Place an ocean tile on an ocean-reserved space."],
-            ["Grey hex with a skyline", "Place a city", "Place a city tile with its player marker."],
-            ["Venus “V” gauge", "Raise Venus 1 step", venus(c) ? "Raise Venus 1 step and gain 1 TR as normal. Failed Action if Venus is maxed." : "Ignore it (needs Venus Next)."],
-            ["Cloud on a yellow square (floater)", "Gain floater", fl],
-            ["Dark triangle with a dome (colony)", "Place a colony (Utopia Planitia board)", colonies(c) ? "Place a colony the way Outer System Foothold and Expedited Construction do, gaining 2 resources in that tile's storage area." : "Ignore it (needs Colonies)."]
-          ]) +
+          "<ul class='aid-icons'>" + [
+            act("advance-tracker", "Advance Tracker", "Advance tracker", easy(c) ? "<b>Easy: ignore it.</b>" : "Move this tracker to the next space; that may set off another action."),
+            act("advance-another-track", "Advance Another Track", "Advance another track", "When the space shows another track's tag, advance that track; that may set off another action."),
+            act("tr", "Gain TR", "Gain TR", "Gain the number of TR the icon shows."),
+            act("claim-milestone", "Claim Milestone", "Claim milestone", "Claim, for free, an unclaimed milestone it qualifies for. If it qualifies for several: 1) one you also qualify for, 2) the one you're closest to, 3) the leftmost" + (venus(c) ? " (Hoverlord counts as last)" : "") + ". Failed Action if 3 are claimed or it qualifies for none."),
+            act("fund-award", "Fund Award", "Fund award", "Fund, for free, the award it's <b>most ahead of you</b> on (ties: the leftmost" + (venus(c) ? ", with Venuphile last" : "") + "). Failed Action if 3 are funded or it isn't ahead of you on any."),
+            act("temperature", "Raise Temperature", "Raise temperature", "Raise the temperature 1 step."),
+            act("greenery", "Place a Greenery (+ Raise Oxygen)", "Place a greenery (+ raise oxygen)", "Place a greenery tile with its player marker, then raise oxygen 1 step (see <i>Where MarsBot places tiles</i>)."),
+            act("ocean", "Place Ocean", "Place ocean", "Place an ocean tile on an ocean-reserved space."),
+            act("city", "Place a City", "Place a city", "Place a city tile with its player marker."),
+            act("venus-scale", "Raise Venus 1 Step", "Raise Venus 1 step", venus(c) ? "Raise Venus 1 step and gain 1 TR as normal. Failed Action if Venus is maxed." : "Ignore it (needs Venus Next)."),
+            act("floater", "Gain Floater", "Gain floater", fl),
+            act("colony", "Place a Colony", "Place a colony (Utopia Planitia board)", colonies(c) ? "Place a colony the way Outer System Foothold and Expedited Construction do, gaining 2 resources in that tile's storage area." : "Ignore it (needs Colonies).")
+          ].join("") + "</ul>" +
           h("For awards") + ul([
             "For awards that count leftover resources (Thermalist, Miner and so on), MarsBot compares its value with your current resources <b>plus your production</b>.",
             easy(c) ? "Easy: MarsBot's award values are all 5 lower." : ""
           ]);
       },
-      src: function (c) { return join("Automa A pp.8–9", easy(c) ? "Automa A p.11" : "", venus(c) ? "Automa C p.2" : "", colonies(c) ? "Automa C p.4" : "", "Automa C p.8"); } },
+      src: function (c) { return join("Automa A pp.8–9", easy(c) ? "Automa A p.11" : "", "Automa C p.2", colonies(c) ? "Automa C p.4" : "", "Automa C p.8"); } },
 
     /* ---- tile placement ---- */
     { id: "mb-ref-placement", title: "Where MarsBot places tiles",
@@ -1126,7 +1148,7 @@ var TM_AUTOMA = (function () {
         var label = ma(c) ? "Milestones & Awards tiles (on MarsBot's Tharsis board)" : mapName(c);
         var ms = msRows(c), aw = awRows(c);
         return h("Claiming and funding") + ul([
-          "MarsBot claims milestones and funds awards <b>for free</b>, when an “M” or “A” track icon or a bonus card tells it to." + (hard(c) ? " (The Hard milestone rule is the exception: that purchase costs it 8 M€.)" : ""),
+          "MarsBot claims milestones and funds awards <b>for free</b>, when an “M” " + ici("claim-milestone", "Claim Milestone") + " or “A” " + ici("fund-award", "Fund Award") + " track icon or a bonus card tells it to." + (hard(c) ? " (The Hard milestone rule is the exception: that purchase costs it 8 M€.)" : ""),
           "<b>Milestone:</b> an unclaimed one it qualifies for. If several: 1) one you also qualify for, 2) the one you're closest to, 3) the leftmost" + (venus(c) ? ", with Hoverlord counting as last" : "") + ".",
           "<b>Award:</b> the one it's most ahead of you on (ties: the leftmost" + (venus(c) ? ", with Venuphile last" : "") + "). For awards that count leftover resources, your value is your resources plus your production.",
           "<b>Final scoring:</b> 5 VP to the award winner and, in a two-player game, <b>no second place</b>. Ties are friendly: both get the 5 VP.",
@@ -1166,7 +1188,7 @@ var TM_AUTOMA = (function () {
           noBoard(c)
             ? "<b>Awards:</b> the books don't rate Amazonis Planitia's own awards for MarsBot, since it has no board reference card" + (venus(c) ? "; Venuphile is its Venus track, as on any map" : "") + (easy(c) ? " (5 lower on Easy)" : "") + ". See <i>Milestones &amp; awards</i>."
             : "<b>Awards:</b> rated by " + (ma(c) ? "Automa C's list for the Milestones &amp; Awards tiles" : "the " + boardName(c) + " board reference card") + " (see <i>Milestones &amp; awards</i>)" + (easy(c) ? ", 5 lower on Easy" : "") + ".",
-          hard(c) ? "<b>Cards:</b> 1 VP for each card in its played pile with a <b>non-negative VP icon</b> (" + LEVEL_NAMES[level(c)] + "); no other VP from its cards." : "<b>No VP from the cards it played.</b>",
+          hard(c) ? "<b>Cards:</b> 1 VP for each card in its played pile with a <b>non-negative VP icon</b> " + ici("vp", "Victory points") + " (" + LEVEL_NAMES[level(c)] + "); no other VP from its cards." : "<b>No VP from the cards it played.</b>",
           "<b>Neural Instance:</b> 1 VP for each space next to its Neural Instance tile that <b>you don't occupy</b> (empty, or holding one of its tiles). No tile in play, no VP.",
           "<b>Leftover M€:</b> VP by the generation the game ended in, with fractions rounded down (table).",
           turmoil(c) ? "<b>Turmoil:</b> you and MarsBot each score 1 VP per Party Leader and 1 VP for the Chairman." : ""
@@ -1175,7 +1197,7 @@ var TM_AUTOMA = (function () {
           p("<b>You win only if you beat MarsBot's score. A tie is a win for MarsBot.</b>") +
           (pcards(c) ? "" : note("Example (Automa A p.10): you finish terraforming in generation 14 and MarsBot has 24 M€: 1 VP per 6 M€, so it gains 4 VP. Had it been generation 16, it would gain 6 VP."));
       },
-      src: function (c) { return join("Automa A p.10", "Base p.12", prelude(c) ? "Automa C p.1" : "", ma(c) ? "Automa C pp.13–15" : "", noBoard(c) ? "Automa C p.8" : "", hard(c) || easy(c) ? "Automa A p.11" : "", turmoil(c) ? "Automa C p.7" : ""); } },
+      src: function (c) { return join("Automa A p.10", "Base p.12", hard(c) ? "Base p.14" : "", prelude(c) ? "Automa C p.1" : "", ma(c) ? "Automa C pp.13–15" : "", noBoard(c) ? "Automa C p.8" : "", hard(c) || easy(c) ? "Automa A p.11" : "", turmoil(c) ? "Automa C p.7" : ""); } },
 
     /* ---- difficulty ---- */
     { id: "mb-ref-difficulty", title: "MarsBot difficulty levels",
@@ -1246,8 +1268,8 @@ var TM_AUTOMA = (function () {
       html: function (c) {
         return ul([
           "<b>Venus tags</b> advance MarsBot's Venus track (Venus Next MarsBot board). It works exactly like its other tracks.",
-          "<b>Raise Venus</b> icon: raise Venus 1 step and gain 1 TR as normal; Failed Action if Venus is maxed.",
-          "<b>Gain Floater</b> icon: put a resource token on the floater storage area to the right of its Venus track.",
+          ici("venus-scale", "Raise Venus 1 Step") + " <b>Raise Venus</b> icon: raise Venus 1 step and gain 1 TR as normal; Failed Action if Venus is maxed.",
+          ici("floater", "Gain Floater") + " <b>Gain Floater</b> icon: put a resource token on the floater storage area to the right of its Venus track.",
           "<b>Floaters buy cards:</b> at the end of the Research phase, if Hoverlord can no longer be claimed and MarsBot has 5+ floaters, it spends 5. Drafting: it keeps its 4th drafted card instead of discarding it. Not drafting: it gains a 4th card from the project deck. Brutal: it gains a 5th card.",
           "<b>Government Intervention (B16)</b> goes into every new action deck, the first included. Only the first that applies: on an even generation, or once Venus is complete, it advances the Martian parameter furthest from completion (ties: oxygen, ocean, temperature); otherwise it raises Venus 1 step. MarsBot gets no TR and no M€ bonuses from it, even for knock-on raises.",
           "<b>Solar Phase step 2</b> (World Government Terraforming) is never carried out: Government Intervention replaces it.",

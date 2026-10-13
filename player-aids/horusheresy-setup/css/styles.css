@@ -624,6 +624,14 @@ dl.scen-dl dt.on { box-shadow: inset 4px 0 0 var(--plum); }
 .ref-body ul, .ref-body ol { margin: 4px 0 10px; padding-left: 24px; max-width: calc(var(--measure) + 24px); }
 .ref-body li { margin-bottom: 6px; }
 .ref-body li ul, .ref-body li ol { margin-top: 5px; margin-bottom: 4px; }
+/* rulebook icons (css/icons.css, icons standard v1): the track tiles and markers are detailed, so the
+   reference shows its icon lists and grids a little larger than the 32px default */
+#reference { --aid-ic-size: 40px; }
+.ref-body .aid-icon-grid { margin: 4px 0 12px; }
+.ic-nw { white-space: nowrap; }   /* an inline icon stays on the same line as the name printed beside it */
+@media (max-width: 480px) {   /* the four activation-marker faces as a 2 x 2 block, Imperial over Traitor */
+  .ref-body .aid-icon-grid.act-grid { display: grid; grid-template-columns: repeat(2, max-content); }
+}
 
 /* ---- search ---------------------------------------------------------------------------- */
 .rsearch-wrap { margin-bottom: 16px; }

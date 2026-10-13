@@ -12,6 +12,13 @@
     return "No Goblins player: Claw, Scratch and Hiss can't eat Goblins (FAQ p.15)" + (e.length ? ", except that Claw on the " + e.join(" or ") + " counts as eating 1 Goblin and Scratch as eating 3 (" + cites + ")" : "") +
       ". Use <b>Slither</b> to move Hunger cubes to Greed or Pride" + (e.length ? " when you can't fill Hunger that way" : "") + ".";
   };
+  /* Rulebook icons (DFWGV icons standard v1, css/icons.css): each call names its file in full — images/icons/<file>.webp,
+     cropped from this game's own books. The text label always stays beside the icon. */
+  const ic = (file, alt) => "<img class='aid-ic' src='images/icons/" + file + ".webp' alt='" + alt + "'>";
+  const icIn = (file, alt, label, pre) => "<span class='ic-nw'>" + (pre || "") + "<img class='aid-ic aid-ic-inline' src='images/icons/" + file + ".webp' alt='" + alt + "'> " + label + "</span>";   /* icon + its label (and any opening bracket) never split across lines */
+  const icList = (rows) => "<ul class='aid-icons'>" + rows.filter(Boolean).map((r) => "<li>" + ic(r[0], r[1]) + "<span>" + r[2] + "</span></li>").join("") + "</ul>";
+  const icRow = (pairs) => "<p class='aid-icon-row'>" + pairs.filter(Boolean).map((p) => "<span class='aid-pair'>" + ic(p[0], p[1]) + "<span>" + p[2] + "</span></span>").join(" ") + "</p>";
+  const darkSyms = icIn("dark-fangs", "Fangs", "Fangs", "(") + ", " + icIn("dark-bones", "Bones", "Bones") + " or " + icIn("dark-eye", "Eye", "Eye)");   /* Dark-side symbols (Rules p.2, p.22) */
   const tbl = (head, rows, cls) => "<div class='tbl-wrap'><table" + (cls ? " class='" + cls + "'" : "") + "><thead><tr>" + head.map((h) => "<th>" + h + "</th>").join("") + "</tr></thead><tbody>" +
     rows.map((r) => "<tr>" + r.map((x) => "<td>" + x + "</td>").join("") + "</tr>").join("") + "</tbody></table></div>";
 
@@ -53,9 +60,14 @@
     /* ------------------------------------------------------------------ */
     { title: "The map: tiles, revealing and visibility",
       when: () => true,
-      html: (c) => "<h4>Cave tiles</h4>" + L([
-          "Every Cave tile has a <b>Dark side</b> (a Goblin Tribe symbol: Fangs, Bones or Eye) and a <b>Lit side</b> (a piece of the Cave, with walls).",
-          "52 Cave tiles: <b>15 Ambush</b>, <b>9 Crystal</b>, <b>15 Event</b>, <b>6 Treasure Room</b>, <b>6 Vault</b> and the <b>Entrance</b>." + (has(c, "ghost", "caveghost") ? " Plus <b>6 Ghost tiles</b> (Fearsome Foes): their Lit side shows an Ambush, Event or Treasure symbol and the Ghost symbol." : ""),
+      html: (c) => "<h4>Cave tiles</h4>" +
+        "<p class='ic-cap'>Every Cave tile has a <b>Dark side</b>, showing a Goblin Tribe symbol:</p>" +
+        icRow([["dark-fangs", "Fangs", "Fangs"], ["dark-bones", "Bones", "Bones"], ["dark-eye", "Eye", "Eye"]]) +
+        "<p class='ic-cap'>Its <b>Lit side</b> shows a piece of the Cave, with walls. The 52 Cave tiles:</p>" +
+        icRow([["tile-ambush", "Ambush", "<b>15</b> Ambush"], ["tile-crystal", "Crystal", "<b>9</b> Crystal"], ["tile-event", "Event", "<b>15</b> Event"],
+          ["tile-treasure-room", "Treasure Room", "<b>6</b> Treasure Room"], ["tile-vault", "Vault", "<b>6</b> Vault <i>(Thief only)</i>"], ["tile-entrance", "Entrance", "<b>1</b> Entrance"]]) +
+        L([
+          has(c, "ghost", "caveghost") ? "Plus <b>6 Ghost tiles</b> (Fearsome Foes): their Lit side shows an Ambush, Event or Treasure symbol and the " + icIn("ghost-symbol", "Ghost symbol", "Ghost symbol") + "." : "",
           "<b>Adjacent</b> = the 4 tiles touching in the cardinal directions. <b>Surrounding</b> = all 8, diagonals included. Count distances orthogonally, never diagonally."
         ]) +
         "<h4>Revealing a Dark tile — before anything else</h4><ol>" +
@@ -72,7 +84,7 @@
           "<b>Unoccupied</b>: no player pieces or tokens.",
           "<b>Visible</b>: a straight cardinal line between two objects that passes through no walls, Dark tiles or open spaces. Objects on a Dark tile can still be visible."
         ]),
-      src: (c) => VC.cite(["Rules p.2, p.4–5, p.23", has(c, "knight") ? "Rules p.6" : "", "FAQ p.3", has(c, "unicorn") ? "Unicorn p.2" : "", has(c, "ghost", "caveghost") ? "Ghost p.4, p.7" : ""]) },
+      src: (c) => VC.cite(["Rules p.2, p.4–6, p.8, p.22–23", "FAQ p.3", has(c, "unicorn") ? "Unicorn p.2" : "", has(c, "ghost", "caveghost") ? "Ghost p.4, p.7" : ""]) },
 
     /* ------------------------------------------------------------------ */
     { title: "The Collapse and removing tiles",
@@ -166,7 +178,7 @@
     { title: "The Dragon die",
       when: () => true,
       html: (c) => L([
-        "The <b>center</b> mark is the roller's own space; the other 8 marks are the surrounding spaces.",
+        "On the " + icIn("dragon-die", "Dragon die", "Dragon die") + ", the <b>center</b> mark is the roller's own space; the other 8 marks are the surrounding spaces.",
         "Apply the effect to every <b>white</b> space on the rolled face — except open spaces with no tile, even if the effect adds tiles there.",
         "An effect that needs “the center tile affected” happens on any of the <b>three</b> faces that show the center mark.",
         "Effects that apply to all affected tiles use only the tiles present when the die was rolled.",
@@ -177,9 +189,12 @@
     /* ================================================================== */
     { title: "The Knight",
       when: (c) => c.has("knight"),
-      html: (c) => "<h4>Statistics</h4>" + L([
-          "<b>Movement</b>: tiles you can move (track 1 / 3 / 5 / 7). <b>Perception</b>: Encounters you can have, and your defense against the Thief (1 / 2 / 3 / 4). <b>Strength</b>: which attacks you can make, and your defense outside your turn (1 / 2 / 3 / 4).",
-          "All three start at 1 at the start of every turn (the leftmost icon spaces only show your base stats)."
+      html: (c) => "<h4>Statistics</h4>" + icList([
+          ["knight-movement", "Movement (boot)", "<b>Movement</b> — tiles you can move (track 1 / 3 / 5 / 7)."],
+          ["knight-perception", "Perception (torch)", "<b>Perception</b> — Encounters you can have, and your defense against the Thief (1 / 2 / 3 / 4)."],
+          ["knight-strength", "Strength (fist)", "<b>Strength</b> — which attacks you can make, and your defense outside your turn (1 / 2 / 3 / 4)."]
+        ]) + L([
+          "All three start at 1 at the start of every turn: the leftmost spaces, with the boot, torch and fist icons, only show your base stats (FAQ p.7)."
         ]) +
         "<h4>Your turn</h4><ol><li><b>Pick Up Hero Cubes</b>: take every cube on your board except those on the Grit track and discarded ones. (First turn: the 2 you set aside.)</li>" +
         "<li><b>Move and Act</b>: move up to your Movement and spend up to your Perception in Encounters, in any order — but you can only move while you have an Encounter left.</li></ol>" +
@@ -196,10 +211,14 @@
           "A Treasure you left on a tile costs an Encounter to take later."]) +
         "<h4>Revealing a tile</h4>" + L([
           "Entering a Dark tile you <b>must</b> reveal it: connect it to the tile you came from (open side to open side if you came through an open side). The Cave then fills its open edges — before you resolve the tile or interact with anything on it.",
-          "Resolve it, then <b>gain 1 Grit</b> (before interacting with other pieces or tokens there).",
-          "<b>Event</b>: " + (c.v.noCave ? "draw and resolve an Event card." : "the Cave draws 3 Event cards and plays one on you.") + " Entering or starting your turn on an Event token: resolve it like an Event tile, then remove the token — before you move away.",
-          "<b>Ambush</b>: first you may add Hero cubes to Strength; then a hidden Goblin Tribe with Strength greater than yours may attack: you lose 1 Health, the Tribe scatters, Rage −1." + (c.v.inf ? " (No Goblins player: the Goblin Infestation card resolves Ambushes; if it has you draw a Monster, you may add cubes after seeing its Strength — FAQ p.7.)" : "") + " Only when first revealed by entering it.",
-          "<b>Treasure Room</b>: place a Treasure token; take it now or leave it. <b>Crystal</b>: place a Crystal token; smash it now or leave it." + (has(c, "thief") ? " <b>Vault</b>: place a Vault token (for the Thief)." : ""),
+          "Resolve it, then <b>gain 1 Grit</b> (before interacting with other pieces or tokens there)."
+        ]) + icList([
+          ["tile-event", "Event", "<b>Event</b> — " + (c.v.noCave ? "draw and resolve an Event card." : "the Cave draws 3 Event cards and plays one on you.") + " Entering or starting your turn on an Event token: resolve it like an Event tile, then remove the token — before you move away."],
+          ["tile-ambush", "Ambush", "<b>Ambush</b> — first you may add Hero cubes to Strength; then a hidden Goblin Tribe with Strength greater than yours may attack: you lose 1 Health, the Tribe scatters, Rage −1." + (c.v.inf ? " (No Goblins player: the Goblin Infestation card resolves Ambushes; if it has you draw a Monster, you may add cubes after seeing its Strength — FAQ p.7.)" : "") + " Only when first revealed by entering it."],
+          ["tile-treasure-room", "Treasure Room", "<b>Treasure Room</b> — place a Treasure token; take it now or leave it."],
+          ["tile-crystal", "Crystal", "<b>Crystal</b> — place a Crystal token; smash it now or leave it."],
+          has(c, "thief") ? ["tile-vault", "Vault", "<b>Vault</b> — place a Vault token (for the Thief)."] : null
+        ]) + L([
           "Tiles revealed another way (Flare, <i>Vantage Point</i>) get their tokens but don't affect you until you enter them."
         ]) +
         "<h4>Attacking</h4>" + L([
@@ -250,10 +269,11 @@
     /* ================================================================== */
     { title: "The Goblins",
       when: (c) => c.has("goblins"),
-      html: (c) => "<h4>Tribes</h4>" + L([
-          "<b>Fangs</b>: a permanent Strength disc (+1 Strength, never lost). Special action: <b>+1 Rage</b>.",
-          "<b>Bones</b>: can hold <b>2 Monsters</b>. Special action: <b>draw and assign 1 Monster</b>.",
-          "<b>Eye</b>: more powerful Secrets. Special action: <b>draw 1 Secrets card</b>.",
+      html: (c) => "<h4>Tribes</h4>" + icList([
+          ["tribe-fangs", "Fangs", "<b>Fangs</b> — a permanent Strength disc (+1 Strength, never lost). Special action: <b>+1 Rage</b>."],
+          ["tribe-bones", "Bones", "<b>Bones</b> — can hold <b>2 Monsters</b>. Special action: <b>draw and assign 1 Monster</b>."],
+          ["tribe-eye", "Eye", "<b>Eye</b> — its Population has special interactions with certain cards. Special action: <b>draw 1 Secrets card</b>."]
+        ]) + L([
           "<b>Population</b> = Goblin discs under the piece. <b>Strength</b> = Population + Strength discs. <b>Perception</b> = Population + 1.",
           "A Tribe on your board is <b>hidden</b>: it can't be targeted and can't move" + (c.has("knight") ? ", but can <b>Ambush</b> the Knight when she reveals an Ambush tile or Ambush Event card: she may first add Hero cubes to Strength, then a hidden Tribe (lurking ones included) with Strength greater than hers may attack — she loses 1 Health, the Tribe scatters, Rage −1 (Rules p.6, p.9; FAQ p.13)." + (c.has("dragon") ? " Tribes can't Ambush the Dragon (FAQ p.13)." : "") : ". With no Knight, Ambush tiles have no effect: the Goblins can't use them to attack anyone (FAQ p.21).") + " A Tribe on the map is <b>revealed</b>. A Tribe with 0 Population can't act."
         ]) +
@@ -305,7 +325,8 @@
         "<li><b>Pick Up Treasure</b> (after all movement): take Treasure tokens on your tile; give one to the Cave to satisfy <b>Greed</b>. Keep extras and give one per later turn. Once Greed is empty, extra Treasures go back to the Cave with no effect.</li>" +
         "<li><b>Place Dragon Gem</b>: you may place one of your Gems on your current tile.</li>" +
         "<li><b>Replace Hand</b>: discard your hand, shuffle all Power cards, draw cards equal to your <b>Spirit</b>.</li></ol>" +
-        "<h4>Powers (cost in Power symbols; <b>?</b> = any symbol)</h4>" +
+        "<h4>Powers</h4><p class='ic-cap'>Costs are in Power symbols: discard Power cards that show them.</p>" +
+        icRow([["power-claw", "Claw", "Claw"], ["power-flame", "Flame", "Flame"], ["power-wing", "Wing", "Wing"], ["power-any", "Question mark", "<b>?</b> = any symbol"]]) +
         tbl(["Power", "Cost", "Effect"], [
           ["Claw", "Claw", "Roll the Dragon die. Affected tiles: every Goblin Tribe scatters and you eat Goblins equal to the Population scattered; you may move the Knight 1 space; the Thief is killed."],
           ["Flame", "Flame", "Roll the die. Reveal affected Dark tiles (only tiles present at the roll)."],
@@ -334,7 +355,7 @@
         "<h4>Sloth, Wakefulness and awakening</h4>" + L([
           "<b>Greed</b> (4 cubes): give the Cave 1 Treasure token. <b>Hunger</b> (4): lower Eaten Goblins by 2. <b>Pride</b>: reveal an Event tile (4), or don't move this turn (1), or place a Dragon Gem while another Gem is on the map (1).",
           "Up to <b>3 cubes per turn, 1 per track</b> — Pride counts as one track (one cube from the whole Pride section per turn). Pride's three parts don't share cubes; only Slither moves cubes between them.",
-          "Armor and Spirit come from the highest Wakefulness row with a cube (the shield space takes no cube). Armor rises at once; Spirit at your next Replace Hand.",
+          "Armor and Spirit come from the highest Wakefulness row with a cube (the top row's " + icIn("dragon-shield", "Shield icon", "Shield icon") + " space takes no cube). Armor rises at once; Spirit at your next Replace Hand.",
           "At <b>" + (c.v.valid ? VC.num.wake(c) : 11) + " Wakefulness</b> you awaken" + (c.lvl("dragon") === 4 ? " (and you must have used Shriek on three separate turns)" : "") + ": swap to the Awakened piece. You never fall asleep again.",
           "<b>Surface</b> by ending your turn on a Crystal tile (smashing any Crystal token there; a smashed Crystal tile works). Awakening while on a Crystal tile surfaces you at once, in any phase.",
           "Surfaced, enter the <b>Entrance tile</b> to win.",
@@ -484,7 +505,7 @@
           "Terror cards go face up. Each has a persistent or once-per-turn effect, and a once-per-game effect (then remove the card; “During this turn” ones at the end of the turn). Not both effects of one card in a turn, nor the once-per-game effects of two identical cards in one turn."
         ]) +
         "<h4>Skittering</h4>" + L([
-          c.mod("skitter") ? "<b>Skitter Variant (in use)</b>: you name a Dark symbol (Fangs, Bones, Eye) matching an unoccupied Dark tile; your opponent in the attack places you on such a tile — or, if there are none, on any unoccupied space surrounding the Entrance. Attacks not involving another player use the standard rules below." : "After you attack or are attacked, the other player names a Dark symbol (Fangs, Bones or Eye) shown on an unoccupied Dark tile; you move to any unoccupied Dark tile with that symbol.",
+          c.mod("skitter") ? "<b>Skitter Variant (in use)</b>: you name a Dark symbol " + darkSyms + " matching an unoccupied Dark tile; your opponent in the attack places you on such a tile — or, if there are none, on any unoccupied space surrounding the Entrance. Attacks not involving another player use the standard rules below." : "After you attack or are attacked, the other player names a Dark symbol " + darkSyms + " shown on an unoccupied Dark tile; you move to any unoccupied Dark tile with that symbol.",
           "No other player involved (e.g. smashing a Crystal with no Cave player, or the Shadow Unicorn's attack): use the symbol on the top tile of the stack; during the Collapse, a random collapsed tile's symbol.",
           "No unoccupied Dark tiles left: go to any unoccupied space surrounding the Entrance."
         ]) +
@@ -497,7 +518,7 @@
           has(c, "thief") ? "<b>Thief</b>: enters only with Stealth greater than your Defense. Pickpocket: a Treasure token from your board or a Terror card (shuffled back). Backstab: −1 movement on your next turn per cube spent." : ""
         ]) +
         "<h4>Also</h4>" + L(["Forced movement can't take you through walls or onto other players.", "If you're also playing with the Ghost, set up the Ghoul's variant first, then add the Ghost."]),
-      src: (c) => VC.cite(["Ghoul p.2–5", "FAQ p.6, p.19", c.mod("skitter") ? "Ghoul p.4" : ""]) },
+      src: (c) => VC.cite(["Ghoul p.2–5", "FAQ p.6, p.19", c.mod("skitter") ? "Ghoul p.4" : "", "Rules p.2, p.22"]) },
 
     /* ================================================================== */
     { title: "The Vile Ghoul (Fearsome Foes)",
@@ -522,7 +543,7 @@
         ]) +
         "<h4>From the Ghoul's rules</h4>" + L([
           "Moving: 1 per space, Lit or Dark, no revealing; +1 through a wall. Collect a Treasure/Gem for 2 movement (Gem: Dragon die center = skitter).",
-          "After any attack you make or suffer, you <b>skitter</b>: the other player names a Dark symbol and you move to an unoccupied Dark tile showing it." + (c.mod("skitter") ? " <b>Skitter Variant in use:</b> you name the symbol; they place you." : ""),
+          "After any attack you make or suffer, you <b>skitter</b>: the other player names a Dark symbol " + darkSyms + " and you move to an unoccupied Dark tile showing it." + (c.mod("skitter") ? " <b>Skitter Variant in use:</b> you name the symbol; they place you." : ""),
           "You may keep moving and attacking after you skitter (FAQ p.19).",
           "No other player involved (e.g. smashing a Crystal with no Cave player, or the Shadow Unicorn's attack): use the symbol on the top tile of the Cave tile stack; during the Collapse, a random collapsed tile's symbol" + (c.mod("skitter") ? " (standard rules, even with the Skitter Variant)" : "") + ".",
           "No unoccupied Dark tiles: " + (c.mod("skitter") ? "your opponent in the attack places you on" : "go to") + " any unoccupied space surrounding the Entrance.",
@@ -535,7 +556,7 @@
           has(c, "unicorn") ? "<b>Unicorn</b>: enters freely and attacks; at 3 Anger you also discard a Terror card." : "",
           has(c, "thief") ? "<b>Thief</b>: enters only with Stealth greater than your Defense. Pickpocket: a Treasure token from your board or a Terror card (shuffled back). Backstab: −1 movement on your next turn per cube spent." : ""
         ]) : ""),
-      src: (c) => VC.cite(["Ghoul p.2–4, p.6–7", "FAQ p.6, p.19"]) },
+      src: (c) => VC.cite(["Ghoul p.2–4, p.6–7", "FAQ p.6, p.19", "Rules p.2, p.22"]) },
 
     /* ================================================================== */
     { title: "The Nightmare Unicorn (Fearsome Foes)",
@@ -676,7 +697,7 @@
         ]) +
         "<h4>Ghost tiles</h4>" + L([
           has(c, "cave") ? "The Cave must place a Ghost tile from its hand before any other tile, even Crystal tiles, even on other players' turns." : "No Cave player: Ghost tiles are placed like any other tile when drawn.",
-          "Their Lit side shows an Ambush, Event or Treasure symbol plus the Ghost symbol. Without a locked Artifact they can't be collapsed (take the next eligible tile)."
+          "Their Lit side shows an Ambush, Event or Treasure symbol plus the " + icIn("ghost-symbol", "Ghost symbol", "Ghost symbol") + ", which shows that the tile can lock an Artifact. Without a locked Artifact they can't be collapsed (take the next eligible tile)."
         ]) +
         (c.mod("focused") ? "<h4>Fully Focused (in use)</h4>" + L(["After locking your Artifacts, end a turn on a Ghost tile without a locked Artifact (or simply lock one more); then escape via the Entrance."]) : ""),
       src: (c) => VC.cite(["Ghost p.2–5", "FAQ p.6, p.19"]) },
@@ -705,7 +726,7 @@
         "<p class='inline-note'>The Isolation row values are read from the Cave Ghost board pictured on Ghost p.1.</p>" +
         "<h4>Also</h4>" + L([
           "Follow the Cave's rules for Cave tiles, Treasures, Events and the Collapse — but you can't look at the top Event cards.",
-          "Ghost tiles on the map add to your Omens; their symbols just mark them. A Ghost tile removed before the Collapse returns to your supply.",
+          "Ghost tiles on the map add to your Omens; their " + icIn("ghost-symbol", "Ghost symbol", "Ghost symbols") + " only show which tiles are Ghost tiles, with no other effect. A Ghost tile removed before the Collapse returns to your supply.",
           "Other players can't target you with anything (except as the rules say). There is no solo Cave Ghost."
         ]),
       src: (c) => VC.cite(["Ghost p.1–3, p.6–7", "Rules p.3, p.13", "FAQ p.16–17, p.20", c.mod("crowded") ? "Ghost p.7" : ""]) },

@@ -38,6 +38,13 @@ TM.u = {
   mapSrc: (c) => { const m = TM.u.map(c); return m.id === "tharsis" ? "" : m.src; },
   corpDeal: (c) => (c.mod("corp-deal") ? c.choice("corp-deal") : null),
   setName: (id) => ({ venus: "Venus Next", prelude: "Prelude", colonies: "Colonies" }[id] || id),
+  /* rulebook icons (images/icons/, cropped from the rulebooks; DFWGV icons standard): ic = an icon beside its label,
+     ici = an icon inside a sentence or table cell, icli = one row of an icon list, icons = the list. Every call
+     names its file in full (the icons check matches the literal names); alt = the name the rulebook prints. */
+  ic: (f, alt) => "<img class='aid-ic' src='images/icons/" + f + ".webp' alt='" + alt + "' title='" + alt + "'>",
+  ici: (f, alt) => "<img class='aid-ic aid-ic-inline' src='images/icons/" + f + ".webp' alt='" + alt + "' title='" + alt + "'>",
+  icli: (f, alt, name, text) => "<li>" + TM.u.ic(f, alt) + "<span><b>" + name + "</b> — " + text + "</span></li>",
+  icons: (items) => "<ul class='aid-icons'>" + items.filter(Boolean).join("") + "</ul>",
   /* true when js/data-automa.js (TM_AUTOMA) is loaded: its MarsBot steps/teach then cover the MarsBot-specific
      lines, so the core text avoids repeating them */
   automaModule: () => { try { return typeof TM_AUTOMA !== "undefined" && !!TM_AUTOMA; } catch (e) { return false; } }
@@ -399,10 +406,10 @@ TM.phases = [
         t: (c) => TM.u.preludeCards(c) ? "Project deck & Prelude deck" : "Project deck",
         d: (c) => {
           const U = TM.u, it = [];
-          if (c.mod("ce")) it.push("<b>Corporate Era:</b> keep every card with the red-and-white icon (lower-left corner) in the project deck and among the corporations — including the <b>2 Corporate Era corporations</b>" + (U.solo(c) ? " (the solo game is the Corporate Era’s solo variant)" : "") + ".");
-          else it.push("Make sure there are <b>no Corporate Era cards</b> in the project deck or among the corporations — they have a red-and-white icon at the lower-left corner.");
+          if (c.mod("ce")) it.push("<b>Corporate Era:</b> keep every card with the red-and-white icon " + U.ici("corporate-era", "Corporate Era icon") + " (lower-left corner) in the project deck and among the corporations — including the <b>2 Corporate Era corporations</b>" + (U.solo(c) ? " (the solo game is the Corporate Era’s solo variant)" : "") + ".");
+          else it.push("Make sure there are <b>no Corporate Era cards</b> in the project deck or among the corporations — they have a red-and-white icon " + U.ici("corporate-era", "Corporate Era icon") + " at the lower-left corner.");
           const add = [];
-          if (c.has("venus")) add.push("<b>Venus Next:</b> 49 project cards (blue-and-white V icon)");
+          if (c.has("venus")) add.push("<b>Venus Next:</b> 49 project cards (blue-and-white V icon " + U.ici("venus-mark", "Venus Next icon") + ")");
           if (c.has("prelude")) add.push("<b>Prelude:</b> its 7 project cards (Prelude icon, lower left)");
           if (c.has("colonies")) add.push("<b>Colonies:</b> its project cards (49 in the box)");
           if (c.has("turmoil")) add.push("<b>Turmoil:</b> its 16 project cards");
@@ -558,12 +565,12 @@ TM.reference = [
       if (U.solo(c)) {
         it.push(c.mod("tr-solo")
           ? "<b>TR solo:</b> your goal is a terraform rating of <b>63</b> within <b>" + U.soloGens(c) + " generations</b> — the global parameters no longer need finishing."
-          : "<b>Solo:</b> complete terraforming — <b>temperature</b> (+" + m.params.temp + " °C), <b>oxygen</b> (" + m.params.o2 + " %)" + (c.has("venus") ? ", <b>oceans</b> (" + m.params.oceans + ") <b>and Venus</b> (30 %)" : " and <b>oceans</b> (" + m.params.oceans + ")") + " at their goals — before the end of generation <b>" + U.soloGens(c) + "</b>, or you <b>lose</b>. If you make it, score as many victory points as you can.");
+          : "<b>Solo:</b> complete terraforming — <b>temperature</b> (+" + m.params.temp + " °C), <b>oxygen</b> (" + m.params.o2 + " %)" + (c.has("venus") ? ", <b>oceans</b> (" + m.params.oceans + ") <b>and Venus</b> (30 %)" : " and <b>oceans</b> (" + m.params.oceans + ")") + " at their goals — before the end of generation <b>" + U.soloGens(c) + "</b>, or you <b>lose</b>. If you make it, score as many victory points " + U.ici("vp", "Victory points") + " as you can.");
       } else {
-        it.push("Most <b>victory points</b> (VP) wins: your final TR, plus milestones, awards, greenery and city tiles on the map, and VP on your cards. " +
+        it.push("Most <b>victory points</b> (VP) " + U.ici("vp", "Victory points") + " wins: your final TR, plus milestones, awards, greenery and city tiles on the map, and VP on your cards. " +
           (U.automa(c) ? "<b>Against MarsBot</b> you must <b>beat MarsBot’s score</b> — a tie is a win for MarsBot (MarsBot scores by its own rules)." : "<b>Ties:</b> most M€ wins."));
       }
-      it.push("Your <b>Terraform Rating (TR)</b> starts at <b>" + (U.solo(c) ? 14 : 20) + "</b>. It goes up 1 step each time you raise a global parameter — temperature, oxygen or an ocean" + (c.has("venus") ? ", or Venus" : "") + " — and some cards raise it directly, as printed on them. It is both your <b>income</b> every generation and your <b>base score</b>.");
+      it.push("Your " + U.ici("tr", "Terraform Rating (TR)") + " <b>Terraform Rating (TR)</b> starts at <b>" + (U.solo(c) ? 14 : 20) + "</b>. It goes up 1 step each time you raise a global parameter — temperature, oxygen or an ocean" + (c.has("venus") ? ", or Venus" : "") + " — and some cards raise it directly, as printed on them. It is both your <b>income</b> every generation and your <b>base score</b>.");
       if (U.solo(c)) it.push("<b>Game end:</b> solo, you always play <b>" + U.soloGens(c) + " generations</b>. After the last one you may convert plants into greeneries — normal rules, but <b>without raising the oxygen</b> — then score.");
       else it.push("<b>Game end:</b> when <b>temperature</b> (+" + m.params.temp + " °C), <b>oxygen</b> (" + m.params.o2 + " %) and <b>oceans</b> (" + m.params.oceans + ") have all reached their goals, the game ends after that generation’s production phase" + (U.solar(c) ? " (Solar phase step 1)" : "") + ": everyone gets one last chance to turn plants into greeneries, in player order, then final scoring." + (c.has("venus") && !U.solo(c) ? " Venus is <b>not</b> an end condition." : ""));
       if (c.has("turmoil")) it.push(U.automa(c)
@@ -572,7 +579,7 @@ TM.reference = [
       return U.ul(it);
     },
     src: (c) => { const U = TM.u;
-      return U.src("Base p.3, p.4, p.12", U.solo(c) && "Base p.13", U.solo(c) && (c.mod("tr-solo") || U.preludeCards(c)) && "Prelude p.3", c.has("venus") && "Venus p.2–3",
+      return U.src("Base p.3, p.4, p.12, p.14", U.solo(c) && "Base p.13", U.solo(c) && (c.mod("tr-solo") || U.preludeCards(c)) && "Prelude p.3", c.has("venus") && "Venus p.2–3",
         U.map(c).id === "amazonis" && "A&V wrap", c.has("turmoil") && "Turmoil p.6", U.automa(c) && "Automa A p.2, p.10", U.automa(c) && c.has("turmoil") && "Automa C p.6–7"); }
   },
   {
@@ -677,8 +684,8 @@ TM.reference = [
           "removes red-bordered resources from any player, when you can’t or don’t want to."]),
         "<b>Pay</b> the cost (top left). Blue cards may give discounts; <b>steel</b> pays for <b>building</b> cards at 2 M€ each, <b>titanium</b> for <b>space</b> cards at 3 M€ each — no change for overpaying." + (c.has("turmoil") ? " (While Unity rules, titanium is worth 1 M€ extra.)" : ""),
         "<b>Immediate effects</b> (bottom panel) — in any order you choose:" + U.ul([
-          "production changes (brown boxes) <b>must</b> be performed;",
-          "<b>red border</b> = any player you choose (even yourself); red-bordered resource removal is optional or partial (all from one player), but a red-bordered <b>production</b> decrease must happen — if no opponent has it, lower your own or don’t play the card;",
+          "production changes (" + U.ici("production", "Production") + " brown boxes) <b>must</b> be performed;",
+          U.ici("red-border", "Red border") + " <b>red border</b> = any player you choose (even yourself); red-bordered resource removal is optional or partial (all from one player), but a red-bordered <b>production</b> decrease must happen — if no opponent has it, lower your own or don’t play the card;",
           "a tile must be placed if possible — being unable to doesn’t stop you playing the card;",
           "a card marked (*) is an exception: read the text in parentheses."]),
         "<b>Place the card:</b> <b>events</b> (red) face down in your event pile — their tags count only while being played; <b>automated</b> (green) in a stack with the top row showing — their tags still count; <b>active</b> (blue) with the top panel showing — effects are always on, actions once per generation."
@@ -690,15 +697,21 @@ TM.reference = [
     id: "ref-resources",
     title: "Resources & production",
     when: () => true,
-    html: (c) => TM.u.ul([
-      "<b>Resource cubes</b> come as bronze = 1, silver = 5, gold = 10, and can be any resource — where you put them decides what they are.",
-      "<b>M€</b> pays for everything. Income each generation = <b>TR + M€ production</b>. M€ production is the only production that can go negative — <b>never below −5</b>.",
-      "<b>Steel</b> — only for building-tag cards, worth 2 M€. <b>Titanium</b> — only for space-tag cards, worth 3 M€" + (c.has("turmoil") ? " (+1 M€ while Unity rules)" : "") + ".",
-      "<b>Plants</b> — 8 make a greenery (action F). <b>Energy</b> — used by cards; all leftover energy turns into heat at the start of production. <b>Heat</b> — 8 raise the temperature (action G).",
-      "<b>Production</b> is shown by a resource symbol in a brown box. It isn’t capped at 10: leave a marker on 10 and start another.",
-      "<b>Card resources</b> — animals, microbes" + (c.has("venus") ? ", <b>floaters</b>" : "") + " and others — live on their cards, usually the card that makes them." + (c.has("venus") ? " A <b>?</b> in a square resource box is a wild resource: see the card text." : ""),
-      "A card icon means: draw a card for free."
-    ]),
+    html: (c) => {
+      const U = TM.u;
+      return U.ul(["<b>Resource cubes</b> come as bronze = 1, silver = 5, gold = 10, and can be any resource — where you put them decides what they are."]) +
+        U.icons([
+          U.icli("megacredit", "MegaCredit (M€)", "M€", "pays for everything. Income each generation = <b>TR + M€ production</b>. M€ production is the only production that can go negative — <b>never below −5</b>."),
+          U.icli("steel", "Steel", "Steel", "only for building-tag cards, worth 2 M€."),
+          U.icli("titanium", "Titanium", "Titanium", "only for space-tag cards, worth 3 M€" + (c.has("turmoil") ? " (+1 M€ while Unity rules)" : "") + "."),
+          U.icli("plants", "Plants", "Plants", "8 make a greenery (action F)."),
+          U.icli("energy", "Energy", "Energy", "used by cards; all leftover energy turns into heat at the start of production."),
+          U.icli("heat", "Heat", "Heat", "8 raise the temperature (action G)."),
+          U.icli("production", "Production", "Production", "shown by a resource symbol in a brown box. It isn’t capped at 10: leave a marker on 10 and start another."),
+          U.icli("other-resources", "Other resources", "Card resources", "animals, microbes" + (c.has("venus") ? ", floaters" : "") + " and others — live on their cards, usually the card that makes them."),
+          U.icli("card", "Cards", "Card", "the card icon means: draw a card for free.")
+        ]);
+    },
     src: (c) => TM.u.src("Base p.5–6, p.14–15", c.has("venus") && "Venus p.2", c.has("turmoil") && "Turmoil p.6")
   },
   {
@@ -709,16 +722,18 @@ TM.reference = [
       const U = TM.u, m = U.map(c);
       const it = [
         "First check the restrictions: areas reserved for oceans or specific cities, and any restriction on the card.",
-        "<b>Placement bonus:</b> take what’s printed on the area, plus <b>2 M€ for each adjacent ocean tile</b> (even when placing an ocean).",
-        "<b>Ocean:</b> only on ocean-reserved areas; +1 TR; owned by nobody.",
-        "<b>Greenery:</b> must go next to one of your own tiles if possible (otherwise anywhere available); your marker on it; raises oxygen and your TR — if oxygen is maxed, no TR. Worth 1 VP, plus 1 VP to each adjacent city.",
-        "<b>City:</b> never next to another city" + (m.id === "tharsis" ? " (exception: Noctis City always goes on its reserved area)" : "") + "; your marker on it; 1 VP per adjacent greenery, whoever owns it. (Capital also scores adjacent oceans, as its card says.)",
-        "<b>Special tiles</b> (brown symbol): placed and restricted as the card says; your marker on it."
+        "<b>Placement bonus:</b> take what’s printed on the area, plus <b>2 M€ for each adjacent ocean tile</b> (even when placing an ocean)."
       ];
-      it.push("<b>" + m.name + ":</b> " + m.special.filter((s) => /Noctis|volcan/i.test(s)).join(" "));
-      if (c.has("venus")) it.push("<b>Venus board</b> city areas, for specific cards only: Maxwell Base, Stratopolis, Luna Metropolis and Dawn City.");
-      if (c.has("turmoil")) it.push("<b>Turmoil policies</b>, only during the Action phase while that party rules: Mars First — 1 steel whenever you place any tile on Mars; Greens — 4 M€ whenever you place a greenery.");
-      return U.ul(it);
+      const tiles = [
+        U.icli("ocean", "Ocean tile", "Ocean", "only on ocean-reserved areas; +1 TR; owned by nobody."),
+        U.icli("greenery", "Greenery tile", "Greenery", "must go next to one of your own tiles if possible (otherwise anywhere available); your marker on it; raises oxygen and your TR — if oxygen is maxed, no TR. Worth 1 VP, plus 1 VP to each adjacent city."),
+        U.icli("city", "City tile", "City", "never next to another city" + (m.id === "tharsis" ? " (exception: Noctis City always goes on its reserved area)" : "") + "; your marker on it; 1 VP per adjacent greenery, whoever owns it. (Capital also scores adjacent oceans, as its card says.)"),
+        U.icli("special-tile", "Special tile", "Special tiles", "the brown symbol: placed and restricted as the card says; your marker on it.")
+      ];
+      const more = ["<b>" + m.name + ":</b> " + m.special.filter((s) => /Noctis|volcan/i.test(s)).join(" ")];
+      if (c.has("venus")) more.push("<b>Venus board</b> city areas, for specific cards only: Maxwell Base, Stratopolis, Luna Metropolis and Dawn City.");
+      if (c.has("turmoil")) more.push("<b>Turmoil policies</b>, only during the Action phase while that party rules: Mars First — 1 steel whenever you place any tile on Mars; Greens — 4 M€ whenever you place a greenery.");
+      return U.ul(it) + U.icons(tiles) + U.ul(more);
     },
     src: (c) => TM.u.src("Base p.4–5, p.15", TM.u.map(c).id !== "tharsis" && TM.u.map(c).specialSrc, c.has("venus") && "Venus p.2", c.has("turmoil") && "Turmoil p.4, p.6")
   },
@@ -850,7 +865,7 @@ TM.reference = [
     when: (c) => ["ce", "draft", "beginner", "corp-deal", "venus-nowgt", "prelude-nocards", "p2-extended", "tr-solo"].some((id) => c.mod(id)),
     html: (c) => {
       const U = TM.u, it = [];
-      if (c.mod("ce")) it.push("<b>Corporate Era</b> (extended game): all cards with the red-and-white icon, including 2 corporations; players start with <b>no extra production</b>. Economy and technology rather than terraforming — longer and more complex. It combines with any other variant.");
+      if (c.mod("ce")) it.push("<b>Corporate Era</b> (extended game): all cards with the red-and-white icon " + U.ici("corporate-era", "Corporate Era icon") + ", including 2 corporations; players start with <b>no extra production</b>. Economy and technology rather than terraforming — longer and more complex. It combines with any other variant.");
       if (c.mod("draft")) it.push("<b>Draft</b> (Research phase, from generation 2): " + (U.automa(c) ? "against MarsBot, follow the MarsBot drafting procedure (Automa A p.4)." :
         "each player takes 4 cards, sets 1 aside and passes the rest to the next player; keep 1 of the 3 you receive and pass on; keep 1 of the 2 and pass the last; then receive your fourth card. Buy any of your 4 drafted cards at 3 M€ each and discard the rest. Pass <b>clockwise in even-numbered</b> generations and <b>counter-clockwise in odd-numbered</b> ones."));
       if (c.mod("beginner")) it.push("<b>Beginner corporations:</b> a new player takes a Beginner Corporation (colorless back): 42 M€ and 10 project cards drawn as the starting hand — no corporation or card choices.");
@@ -873,14 +888,17 @@ TM.reference = [
     when: (c) => c.has("venus"),
     html: (c) => {
       const U = TM.u;
-      return U.ul([
-        "The <b>Venus scale</b> is a fourth global parameter (“Venus” on the cards), from <b>0 % to 30 %</b> in 15 steps. Each step raises your TR like any parameter; once maxed it gives no TR." +
-          (U.map(c).id === "amazonis" ? " (These are the standard Venus board’s values: the Amazonis &amp; Vastitas box’s optional Venus board has a longer track that its wrap doesn’t describe.)" : ""),
+      return U.icons([
+        U.icli("venus-scale", "Venus scale", "Venus scale", "a fourth global parameter (“Venus” on the cards), from <b>0 % to 30 %</b> in 15 steps. Each step raises your TR like any parameter; once maxed it gives no TR." +
+          (U.map(c).id === "amazonis" ? " (These are the standard Venus board’s values: the Amazonis &amp; Vastitas box’s optional Venus board has a longer track that its wrap doesn’t describe.)" : "")),
+        U.icli("floater", "Floaters", "Floaters", "a new card resource that works like microbes and animals."),
+        U.icli("wild-resource", "Wild resource", "Wild resource", "a <b>?</b> in a square resource box: an unspecified resource — see the card."),
+        U.icli("tag-venus", "Venus tag", "Venus tag", "marks a Venus card.")
+      ]) + U.ul([
         "<b>Not an end condition</b>" + (U.solo(c) ? (c.mod("tr-solo") ? " — and in TR solo it isn’t part of your goal either: only reaching TR 63 counts." : " — but in solo it is part of your goal: all four parameters, Venus included, must be maxed by the end of the last generation to win.") : ": only temperature, oxygen and oceans end the game."),
         "<b>Bonus steps:</b> reach <b>8 %</b> — draw a card for free; reach <b>16 %</b> — an extra TR.",
         "<b>Air Scrapping</b> standard project: 15 M€ to raise Venus 1 step (+1 TR).",
         "Cards that change global requirements (Adaptation Technology, Special Design, the Inventrix corporation) also affect Venus requirements.",
-        "<b>Floaters</b> — a new card resource that works like microbes and animals. A <b>?</b> in a square resource box = a wild (unspecified) resource: see the card. The <b>Venus tag</b> marks a Venus card.",
         "Four special <b>city areas</b> on the Venus board, for specific project cards: Maxwell Base (surface), Stratopolis (atmosphere), Luna Metropolis (our Moon), Dawn City (Mercury).",
         U.solo(c) ? "Hoverlord and Venuphile aren’t used in solo." : "<b>Hoverlord</b> milestone: at least 7 floaters on your cards. <b>Venuphile</b> award: most Venus tags in play. With them, 3 of 6 milestones may be claimed and 3 of 6 awards funded.",
         U.automa(c) ? "<b>World Government Terraforming</b> (Solar phase step 2) is <b>not carried out against MarsBot</b> — its Government Intervention bonus card does the equivalent, and MarsBot can’t be played with Venus Next without it." :
@@ -899,7 +917,7 @@ TM.reference = [
       const U = TM.u, it = [];
       if (U.preludeCards(c)) {
         it.push("<b>Prelude cards:</b> " + (c.mod("p2-extended") ? 6 : 4) + " dealt with the corporations, <b>2 kept for free</b>, played after the corporations in player order (setup step 7b); the rest are discarded. They work like <b>green cards</b> and stay in play with their tags visible. All of setup is part of generation 1.");
-        it.push("<b>Wild tag</b> (a round <b>?</b>): once played, whenever you perform an action it counts as a tag of your choice — so it doesn’t trigger anything when it enters play, and it <b>never counts for awards</b>, but you can use it, for example, to claim a milestone.");
+        it.push(U.ici("tag-wild", "Wild tag") + " <b>Wild tag</b> (a round <b>?</b>): once played, whenever you perform an action it counts as a tag of your choice — so it doesn’t trigger anything when it enters play, and it <b>never counts for awards</b>, but you can use it, for example, to claim a milestone.");
       } else it.push("<b>No Prelude cards this game</b> (variant): the 35 Prelude cards stay in the box; Prelude’s 7 project cards and 5 corporations may still be used.");
       if (U.solo(c) && U.preludeCards(c)) it.push("<b>Solo with Prelude cards:</b> only <b>12 generations</b> to finish.");
       it.push("<b>TR solo</b> (a solo variant for any expansion): reach TR 63 in 14 generations (12 with the Prelude cards); new standard project Buffer Gas, 16 M€ for 1 TR.");
@@ -923,9 +941,10 @@ TM.reference = [
     when: (c) => c.has("colonies"),
     html: (c) => {
       const U = TM.u;
-      return U.ul([
-        "<b>Build a colony</b> (standard project, <b>17 M€</b>): put your player marker on the <b>lowest free spot</b> of a Colony tile’s track (moving the white marker up 1 step if needed) and take the placement bonus printed there. At most <b>3 colonies per tile — no exceptions</b>, and only 1 per player per tile (unless a card says otherwise).",
-        "<b>Trade</b> (a new action, not a standard project): pay <b>9 M€, 3 energy or 3 titanium</b> and move your trade fleet from the Trade Fleets tile onto an available Colony tile (not onto its track). One trade fleet per Colony tile at a time.",
+      return U.icons([
+        U.icli("colony", "Building a colony", "Build a colony", "a standard project, <b>17 M€</b>: put your player marker on the <b>lowest free spot</b> of a Colony tile’s track (moving the white marker up 1 step if needed) and take the placement bonus printed there. At most <b>3 colonies per tile — no exceptions</b>, and only 1 per player per tile (unless a card says otherwise)."),
+        U.icli("trade", "Trading with a Colony Tile", "Trade", "a new action, not a standard project: pay <b>9 M€, 3 energy or 3 titanium</b> and move your trade fleet from the Trade Fleets tile onto an available Colony tile (not onto its track). One trade fleet per Colony tile at a time.")
+      ]) + U.ul([
         "Trading pays the <b>trade income</b> the white marker points to, and every colony on that tile gives its owner the <b>colony bonus</b>. Then move the white marker as far left as possible — it stops next to the colonies, or at the bottom of the track.",
         "<b>Colony production</b> (Solar phase step 3): all fleets return to the Trade Fleets tile and each white marker moves 1 step up its track.",
         U.automa(c) ? "<b>Titan, Enceladus, Miranda:</b> against MarsBot they start on the highlighted second step like every other Colony tile, so they’re open from the start."
@@ -943,12 +962,12 @@ TM.reference = [
     html: (c) => {
       const U = TM.u;
       return U.ul([
-        "<b>Lobbying</b> (new action, not a standard project, any number of times per generation): move one of your delegates from the <b>Delegate Reserve (5 M€)</b> or the <b>Lobby (free)</b> into a party’s delegate area.",
+        "<b>Lobbying</b> (new action, not a standard project, any number of times per generation): move one of your " + U.ici("delegate", "Delegate") + " delegates from the <b>Delegate Reserve (5 M€)</b> or the <b>Lobby (free)</b> into a party’s delegate area.",
         "<b>The Lobby:</b> each generation starts with 1 of your delegates there. Spent Lobby delegates are replaced from your Reserve at the end of the generation — if your Reserve is empty, you get none.",
-        "<b>Party Leader:</b> the first delegate in a party becomes its leader. Whoever — the neutral “player” included — gets <b>more delegates</b> in a party than the current leader’s owner replaces the leader with one of their own (the old leader becomes a normal delegate in that party). A leader also counts as a delegate.",
+        U.ici("party-leader", "Party Leader") + " <b>Party Leader:</b> the first delegate in a party becomes its leader. Whoever — the neutral “player” included — gets <b>more delegates</b> in a party than the current leader’s owner replaces the leader with one of their own (the old leader becomes a normal delegate in that party). A leader also counts as a delegate.",
         "<b>Dominant party:</b> the one with the most delegates holds the Dominance marker; a party with <b>more</b> delegates takes it over. The Dominant party rules next generation.",
         "<b>Ruling party:</b> its Policy tile is on top; the policy works <b>only during the Action phase</b>.",
-        "<b>Influence</b> (0–3): 1 for owning the <b>Chairman</b>, 1 for owning the <b>leader of the Dominant party</b>, 1 for having 1+ <b>non-leader delegates in the Dominant party</b>.",
+        U.ici("influence", "Influence") + " <b>Influence</b> (0–3): 1 for owning the " + U.ici("chairman", "Chairman") + " <b>Chairman</b>, 1 for owning the <b>leader of the Dominant party</b>, 1 for having 1+ <b>non-leader delegates in the Dominant party</b>.",
         "<b>Max 5:</b> a Global Event that counts anything (resources, production, cards, tiles, tags, TR…) counts at most 5 — then your influence changes that number up or down, even beyond 5.",
         "<b>Global Events:</b> seen 3 generations ahead. When one is first shown (Distant), a neutral delegate joins the party at its top left; when it becomes Current, another joins the party at its mid-right. The Current event is resolved in the Turmoil step. If an event lets the “first player” do something (like place an ocean), they get no bonuses or TR for it.",
         "<b>Neutral delegates</b> belong to no one but count as a separate player; they can become Party Leader and Chairman.",
@@ -973,13 +992,14 @@ TM.reference = [
     title: "Turmoil — the six parties",
     when: (c) => c.has("turmoil"),
     html: (c) => {
+      const U = TM.u;
       const rows = [
-        ["Mars First", "1 M€ per building tag", "When you place any tile on Mars, gain 1 steel."],
-        ["Scientists", "1 M€ per science tag", "Pay 10 M€ to draw 3 cards — once per generation per player."],
-        ["Unity", "1 M€ per Venus, Earth and Jovian tag", "Titanium is worth 1 M€ extra."],
-        ["Greens", "1 M€ per plant, microbe and animal tag", "Gain 4 M€ each time you place a greenery tile."],
-        ["Reds", "The player with the lowest TR gains 1 TR (friendly ties)" + (TM.u.solo(c) ? "; <b>solo:</b> you gain 1 TR if your TR is 20 or below" : "; in solo, 1 TR if your TR is 20 or below"), "You lose 3 M€ for each step your TR is raised; with less than 3 M€ you may not raise your TR."],
-        ["Kelvinists", "1 M€ per heat production", "Pay 10 M€ to raise your heat and energy production 1 step each — any number of times."]
+        [U.ici("party-mars-first", "Mars First") + " Mars First", "1 M€ per building tag", "When you place any tile on Mars, gain 1 steel."],
+        [U.ici("party-scientists", "Scientists") + " Scientists", "1 M€ per science tag", "Pay 10 M€ to draw 3 cards — once per generation per player."],
+        [U.ici("party-unity", "Unity") + " Unity", "1 M€ per Venus, Earth and Jovian tag", "Titanium is worth 1 M€ extra."],
+        [U.ici("party-greens", "Greens") + " Greens", "1 M€ per plant, microbe and animal tag", "Gain 4 M€ each time you place a greenery tile."],
+        [U.ici("party-reds", "Reds") + " Reds", "The player with the lowest TR gains 1 TR (friendly ties)" + (TM.u.solo(c) ? "; <b>solo:</b> you gain 1 TR if your TR is 20 or below" : "; in solo, 1 TR if your TR is 20 or below"), "You lose 3 M€ for each step your TR is raised; with less than 3 M€ you may not raise your TR."],
+        [U.ici("party-kelvinists", "Kelvinists") + " Kelvinists", "1 M€ per heat production", "Pay 10 M€ to raise your heat and energy production 1 step each — any number of times."]
       ];
       return "<table class='rtable'><thead><tr><th scope='col'>Party</th><th scope='col'>" + (TM.u.automa(c) ? "Ruling bonus (when it takes power; MarsBot ignores it)" : "Ruling bonus (all players, when it takes power)") + "</th><th scope='col'>Ruling policy (Action phase, while it rules)</th></tr></thead><tbody>" +
         rows.map((r) => "<tr><th scope='row'>" + r[0] + "</th><td>" + r[1] + "</td><td>" + r[2] + "</td></tr>").join("") + "</tbody></table>" +
@@ -993,15 +1013,33 @@ TM.reference = [
     when: () => true,
     html: (c) => {
       const U = TM.u;
-      return U.ul([
-        "Cards have <b>0–3 tags</b>; tags have no rules of their own — other cards and goals refer to them.",
-        "<b>Building</b> (steel may pay) · <b>Space</b> (titanium may pay) · <b>Power</b> · <b>Science</b> · <b>Jovian</b> (the outer solar system) · <b>Earth</b> · <b>Plant</b> · <b>Microbe</b> · <b>Animal</b> (generates VP) · <b>City</b> (places a city tile) · <b>Event</b> (one-time; red cards, face down after play)" +
-          (c.has("venus") ? " · <b>Venus</b>" : "") + (c.has("prelude") ? " · <b>Wild</b> (a round ?) — after it is played, a tag of your choice whenever you take an action (e.g. to claim a milestone); it triggers nothing when the card is played and never counts for awards" : "") + ".",
-        "A resource icon means resource cubes; the same icon inside a <b>brown box</b> means production of it.",
-        "A <b>red border</b> means any player (you or an opponent): removed resources come from any one player (optional, or only partly); a production decrease must be performed — if no opponent has that production, lower your own or don’t play the card; a red tile icon targets any or all players’ tiles; a red tag icon counts every card with that tag, yours and everyone else’s.",
-        "Temperature, oxygen and ocean icons each mean a 1-step raise (and 1 TR); greenery and city hexes mean you place that tile with your marker; brown hexes are special tiles.",
-        "Not sure what a card does? Read the text in parentheses."
-      ]);
+      return U.ul(["Cards have <b>0–3 tags</b>; tags have no rules of their own — other cards and goals refer to them."]) +
+        "<h4>Tags</h4>" + U.icons([
+          U.icli("tag-building", "Building tag", "Building", "construction on Mars; steel may pay for the card."),
+          U.icli("tag-space", "Space tag", "Space", "space technology; titanium may pay for the card."),
+          U.icli("tag-power", "Power tag", "Power", "energy production or handling."),
+          U.icli("tag-science", "Science tag", "Science", "scientific knowledge; some cards require science tags."),
+          U.icli("tag-jovian", "Jovian tag", "Jovian", "the outer solar system (having to do with Jupiter)."),
+          U.icli("tag-earth", "Earth tag", "Earth", "activities on Earth."),
+          U.icli("tag-plant", "Plant tag", "Plant", "plant life or other photosynthesizing organisms."),
+          U.icli("tag-microbe", "Microbe tag", "Microbe", "microbes for specific purposes."),
+          U.icli("tag-animal", "Animal tag", "Animal", "animals; generates VP."),
+          U.icli("tag-city", "City tag", "City", "places a city tile."),
+          U.icli("tag-event", "Event tag", "Event", "a one-time event: red cards, turned face down after play."),
+          c.has("venus") && U.icli("tag-venus", "Venus tag", "Venus", "a Venus card."),
+          c.has("prelude") && U.icli("tag-wild", "Wild tag", "Wild", "a round <b>?</b> — after it is played, a tag of your choice whenever you take an action (e.g. to claim a milestone); it triggers nothing when the card is played and never counts for awards.")
+        ]) +
+        "<h4>Symbols</h4>" + U.icons([
+          U.icli("temperature", "Temperature", "Temperature", "raise the temperature 1 step (and your TR 1 step)."),
+          U.icli("oxygen", "Oxygen", "Oxygen", "raise the oxygen level 1 step (and your TR 1 step)."),
+          U.icli("ocean", "Ocean tile", "Ocean tile", "place an ocean tile — and raise your TR 1 step (plus any placement bonus)."),
+          U.icli("greenery", "Greenery tile", "Greenery tile", "place a greenery tile with your marker (it raises oxygen and your TR too, as its oxygen symbol shows)."),
+          U.icli("city", "City tile", "City tile", "place a city tile with your marker."),
+          U.icli("special-tile", "Special tile", "Special tile", "a brown hex: place the special tile the card describes, with your marker."),
+          U.icli("production", "Production", "Production", "a resource icon means resource cubes; the same icon inside a <b>brown box</b> means production of it."),
+          U.icli("red-border", "Red border", "Red border", "any player (you or an opponent): removed resources come from any one player (optional, or only partly); a production decrease must be performed — if no opponent has that production, lower your own or don’t play the card; a red tile icon targets any or all players’ tiles; a red tag icon counts every card with that tag, yours and everyone else’s.")
+        ]) +
+        U.ul(["Not sure what a card does? Read the text in parentheses."]);
     },
     src: (c) => TM.u.src("Base p.6, p.14–15", c.has("venus") && "Venus p.2", c.has("prelude") && "Prelude p.3")
   },

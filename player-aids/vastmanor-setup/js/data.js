@@ -312,6 +312,17 @@ VM.makeCtx = function (s) {
 VM.v = function (c, role, id) { return c.diff(role) === id; };
 VM.li = function (arr) { return "<ul>" + arr.filter(Boolean).map(function (x) { return "<li>" + x + "</li>"; }).join("") + "</ul>"; };
 VM.ol = function (arr) { return "<ol>" + arr.filter(Boolean).map(function (x) { return "<li>" + x + "</li>"; }).join("") + "</ol>"; };
+/* Rulebook icons (DFWGV icons standard v1, css/icons.css). Pictures are the living rules' own: the six tile icons
+   (LR › The Map › Revealing the Map) and the breach / force wall markers (LR › A Few More Concepts... › Breaches
+   and Force Walls). Always call with the full literal file name, e.g. VM.ic("tile-pit", "Pit"). */
+VM.ic = function (f, alt) { return "<img class=\"aid-ic\" src=\"images/icons/" + f + ".webp\" alt=\"" + alt + "\">"; };
+VM.icIn = function (f, alt, word) {   // inline icon; with word, the icon and its word never wrap apart
+  var img = "<img class=\"aid-ic aid-ic-inline\" src=\"images/icons/" + f + ".webp\" alt=\"" + alt + "\">";
+  return word ? "<span class=\"ic-nw\">" + img + " " + word + "</span>" : img;
+};
+VM.icList = function (rows) {   // rows: [file, printed name, meaning]
+  return "<ul class=\"aid-icons\">" + rows.filter(Boolean).map(function (r) { return "<li>" + VM.ic(r[0], r[1]) + "<span><b>" + r[1] + "</b> — " + r[2] + "</span></li>"; }).join("") + "</ul>";
+};
 VM.varTag = function (role, id) {
   var v = (VM.variants[role] || []).find(function (x) { return x.id === id; });
   return v ? " <i>(" + v.name + " variant)</i>" : "";
@@ -504,7 +515,7 @@ VM.phases = [
           return VM.li([
             "Lay out the <b>map board</b>: a grid of square <b>crypts</b> ringed by the <b>grounds</b> (rectangular spaces behind the hedges; the Skeletons’ numbered <b>Spawns</b> are there).",
             "Place the <b>starting Pit tile</b> <i>(marked “S”)</i> <b>face up</b> on the center space.",
-            "Place the <b>4 Armory tiles</b> <i>(crossed swords)</i> <b>facedown</b> on the four matching spaces.",
+            "Place the <b>4 Armory tiles</b> <i>(crossed <span class=\"ic-nw\">swords " + VM.icIn("tile-armory", "Armory") + ")</span></i> <b>facedown</b> on the four matching spaces.",
             "Place the <b>Entrance tile</b> <i>(marked “E”)</i> <b>face up</b> on the space above the staircase at the bottom, with the <b>wall facing the center space</b>.",
             "Collect the other <b>45 tiles</b>, shuffle them facedown into a stack, and place <b>six</b> facedown as shown in the rulebook’s setup picture." +
               "<div class=\"inline-note\">The living rules say “as shown right”, but the site leaves that setup picture out (it omits some diagrams) — use the printed rulebook’s picture for where the six go.</div>"
