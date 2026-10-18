@@ -403,3 +403,46 @@ body:not(.view-watch) #arena-stream { max-width: 360px; justify-self: end; }
 .adm-list li > div:first-child { display: flex; flex-direction: column; min-width: 0; flex: 1 1 260px; }
 .adm-list li span { color: var(--muted); font-size: .92em; }
 .adm-btns { display: flex; gap: 6px; }
+/* the Fortress (docs/fortress/PHASE6.md 4.7): the siege's banner, its live plan and its panel */
+.special.fortress { flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 8px; border-color: var(--line); }
+.fort-layer .asl-head { flex-wrap: wrap; gap: 0 8px; }
+.special.fortress b small.test { margin-left: 8px; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); font-weight: 400; text-transform: none; letter-spacing: 0; }
+.special.fortress b.side { color: var(--text); text-transform: none; letter-spacing: 0; font-size: 1em; }
+.special.fortress .held { color: var(--text); }
+.special.fortress .facts { color: var(--muted); font-variant-numeric: tabular-nums; }
+.fort-layers { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+.fort-layer { display: flex; flex-direction: column; gap: 5px; }
+.fort-layer .name { font-weight: 700; }
+.fort-layer.live .name, .fort-layer.live .role { color: var(--gold); }
+.fort-layer.live .raid-bar { border-color: var(--gold); }
+.fort-layer.fallen { opacity: .55; }
+.fort-layer.fallen .name { text-decoration: line-through; }
+.fort-layer.fallback .role { color: #8fb4f5; }
+.fort-layer.fallback .raid-bar { border-color: #3d63a8; }
+.fort-cast { display: flex; flex-direction: column; gap: 5px; }
+.fort-cast .name { font-weight: 700; }
+.fort-cast .raid-bar i { background: linear-gradient(90deg, #6b2a8a, #a04ac8); }
+.fort-cast.asleep .raid-bar i, .fort-cast.none .raid-bar i { background: #3a3842; }
+.fort-cast.rage .raid-bar { border-color: var(--gold); }
+.fort-cast.rage .raid-bar i { background: linear-gradient(90deg, #c4721e, #e8a13c); }
+.fort-cast.rage .role, .fort-cast.dead .role { color: var(--gold); }
+.fort-box { background: #121a12; }
+.fort-box svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.fort-box .fp { stroke: rgba(0, 0, 0, .55); stroke-width: 6; transition: fill 1s; }
+.fort-box .fp.ok { fill: #b8b2a2; }
+.fort-box .fp.hurt { fill: #d8b25a; }
+.fort-box .fp.bad { fill: #e07d3c; }
+.fort-box .fp.crit { fill: #d9443a; }
+.fort-box .fp.down { fill: #2d2a26; stroke-dasharray: 10 8; }
+.fort-box .fp.front { stroke: var(--gold); stroke-width: 8; }
+.fort-box .ft { fill: #8db6ff; stroke: #0b1428; stroke-width: 5; }
+.fort-box .ft.dead { fill: #3a3a40; }
+.fort-box .ftrap { stroke: #a57a3a; stroke-width: 6; fill: none; opacity: .7; }
+.ctf-map-head .legend .fleg { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: -4px; border: 1px solid rgba(0, 0, 0, .6); }
+.fleg.ok { background: #b8b2a2; } .fleg.bad { background: #e07d3c; } .fleg.down { background: #2d2a26; } .fleg.tur { background: #8db6ff; border-radius: 50%; }
+.fleg.trp { background: transparent; border: 2px solid #a57a3a; border-radius: 0; transform: rotate(45deg); width: 8px; height: 8px; }
+.fort-panel select:disabled { opacity: .45; }
+.fort-panel h4 { margin-top: 12px; }
+.fort-panel b.side { color: var(--gold); }
+.feed li.fortress b { color: var(--gold); }
+@media (prefers-reduced-motion: reduce) { .fort-box .fp { transition: none; } }

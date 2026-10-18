@@ -397,7 +397,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     const app = $("#app");
     const st = S.live, mons = (st && st.monsters) || [];
     if (S.view === "watch") {
-      $("#watch-status").innerHTML = statusLine(st) + ctfBanner(st) + raidBanner(st) + assaultBanner(st) + specialBanner(st) + modeVoteBanner(st);
+      $("#watch-status").innerHTML = statusLine(st) + ctfBanner(st) + raidBanner(st) + assaultBanner(st) + siegeBanner(st) + specialBanner(st) + modeVoteBanner(st);
       $("#watch-feed").innerHTML = feedList(st);
       app.innerHTML = panel(mons);
     } else if (S.view === "bestiary") {
@@ -419,7 +419,9 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
   function statusLine(st) {
     const on = !!(st && st.online), mons = (st && st.monsters) || [], rounds = st && st.rounds;
     return '<div class="status"><span><i class="dot' + (on ? " on" : "") + '"></i>' + (on ? "live" : "the arena is offline right now") + "</span>" +
-      (on ? "<span>" + esc(st.mode === "ctf" ? "capture the flag" : st.mode === "raid" ? "the raid" : st.mode === "assault" ? "the assault" : (st.mode || "") + " mode") + "</span><span>round " + esc(st.round || "") + (rounds && rounds.phase ? " · " + esc(rounds.phase) + (rounds.seconds != null ? " " + Math.floor(rounds.seconds / 60) + ":" + String(rounds.seconds % 60).padStart(2, "0") : "") : "") + "</span><span>" + mons.length + " alive</span>" : "") + "</div>";
+      (on ? "<span>" + esc(st.mode === "ctf" ? "capture the flag" : st.mode === "raid" ? "the raid" : st.mode === "assault" ? "the assault" : st.mode === "fortress" ? "the fortress" : (st.mode || "") + " mode") + "</span><span>" +
+        (st.fortress ? "siege " + esc(st.fortress.number) + " · " + esc(st.fortress.phase === "siege" ? "the siege " + hms(st.fortress.clock) : st.fortress.phase === "muster" ? "the muster" : "the results") : "round " + esc(st.round || "") + (rounds && rounds.phase ? " · " + esc(rounds.phase) + (rounds.seconds != null ? " " + Math.floor(rounds.seconds / 60) + ":" + String(rounds.seconds % 60).padStart(2, "0") : "") : "")) +
+        "</span><span>" + mons.length + " alive</span>" : "") + "</div>";
   }
   // ---- Capture the Flag: the match over the stream's status line, and a live map of the forts under it
   const CTF_MAP = { xMin: -2752, yMax: 1792, w: 5504, h: 3584, basement: -100, deck: 200, red: [-2560, 0], blue: [2560, 0] };      // tools/arena/ctf2fort.json
@@ -492,11 +494,140 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
       "<span>" + esc(hint) + (halves ? " " + esc(halves) : "") + (side ? " You: <b class=\"side\">" + esc(side) + "</b>." : "") +
       (a.bets ? " Pot " + a.pot + " in " + a.bets + (a.bets === 1 ? " bet" : " bets") + (a.bets_open ? "" : " (closed)") + "." : "") + "</span></div>";
   }
+  // ---- the Fortress (docs/fortress/PHASE6.md 4.7): the siege over the stream's status line, its walls on a live plan under it, the
+  // siege's panel beside the stream. The record is the state document's "fortress"; the plan is arena_public/fortress_plan (once a plan)
+  const FORT_LAYERS = { 1: "Outer curtain", 2: "Inner curtain", 3: "The keep" };
+  const FORT_STATE = { live: "the front", fallen: "fallen", fallback: "next, after the fallback", waiting: "stands" };
+  const FORT_VERBS = [["crew", "Crew a turret", "free"], ["repair", "Repair", "4 essence"], ["trap", "Re-arm a trap", "2 essence"], ["upgrade", "Upgrade a turret", "15/25 essence"],
+                      ["horn", "Sound the horn", "3 essence"], ["sally", "Sally out", "6 essence"]];
+  // which selects a verb reads (the others are greyed: a sally reads neither, crew and upgrade a turret, the rest a section)
+  const FORT_USES = { crew: ["fturret"], upgrade: ["fturret"], sally: [], repair: ["fsec"], horn: ["fsec"], trap: ["fsec"] };
+  const HEXV = "0123456789abcdef";
+  function fortLive() { const st = S.live; return !!(st && st.online && st.fortress); }
+  function hms(s) { s = Math.max(0, Math.floor(s || 0)); return Math.floor(s / 3600) + ":" + String(Math.floor(s / 60) % 60).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0"); }
+  function mss(s) { s = Math.max(0, Math.floor(s || 0)); return s >= 3600 ? hms(s) : Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); }
+  function fortSide() { const f = S.live && S.live.fortress; return (f && myId() && (f.side_of || {})[myId()]) || ""; }
+  function fortDoors(side) { return side === "attack" ? [1, 2, 3, 4, 5] : side === "defend" ? [6, 7, 8] : [1, 2, 3, 4, 5, 6, 7, 8]; }
+  function brokenPct(L) { return L && L.need2 ? Math.max(0, Math.min(100, Math.round(100 * L.down2 / L.need2))) : 0; }
+  function rows(list) { return (list || []).map((r) => (Array.isArray(r) ? r : (r && r.items) || [])); }        // (Firestore keeps an inner list as {items})
+  function fortPlanFor(f) {
+    // the plan of the siege on air: read once a plan id (the bridge writes it once a plan)
+    const id = f && f.plan && f.plan.id;
+    if (!id) return null;
+    if (S.fortPlan && S.fortPlan.id === id) return S.fortPlan;
+    if (!db) return null;
+    if (S.fortPlanAsk !== id) {
+      S.fortPlanAsk = id;
+      readDoc(pub("fortress_plan")).then((d) => { if (d && d.id === id) { S.fortPlan = d; render(); } else S.fortPlanAsk = null; });
+    }
+    return null;
+  }
+  function fortTargets(f) {
+    // the front's sections (its runs and gates) and its standing turrets, for the siege's selects
+    const plan = fortPlanFor(f);
+    if (!plan) return { secs: [], turrets: [] };
+    const front = (f.fallen || []).includes(3) ? 3 : Math.min(3, f.front || 1), names = {};
+    (plan.sections || []).forEach((x) => { names[x.id] = x.name; });
+    const secs = (plan.sections || []).filter((x) => x.layer === front && (x.kind === "run" || x.kind === "gate"));
+    const thp = String(f.turrets || "");
+    const turrets = rows(plan.turrets).filter((t) => t[3] === front && thp.charAt(t[0]) !== "0").map((t) => ({ idx: t[0], label: (t[5] || "turret") + " #" + t[0] + " · " + (names[t[4]] || "the walls") }));
+    return { secs: secs, turrets: turrets };
+  }
+  function siegeBanner(st) {
+    const f = st && st.online && st.fortress;
+    if (!f) return st && st.online && st.mode === "fortress" ? '<div class="special fortress"><b>The Fortress</b><span>The game is moving to the valley; the next siege musters in a moment.</span></div>' : "";
+    const plan = f.plan || {}, name = plan.name || "the fortress", side = fortSide();
+    const phase = f.phase === "siege" ? ((f.fallen || []).includes(3) ? "the hall" : f.fallback != null ? "fallback" : "siege") : f.phase;
+    const clock = f.phase === "siege" ? hms(f.clock) + " of " + hms(f.clock_limit) : f.phase === "muster" ? (f.seconds ? "begins in " + mss(f.seconds) : "rising") : "next in " + mss(f.seconds);
+    const layers = (f.layers || []).map((L) => {
+      const pct = L.need2 ? Math.max(0, Math.min(100, Math.round(100 * L.down2 / L.need2))) : 0;
+      return '<div class="fort-layer ' + esc(L.state) + '"><div class="asl-head"><span class="name">' + esc(FORT_LAYERS[L.L] || "Layer " + L.L) + '</span><span class="role">' + esc(FORT_STATE[L.state] || L.state) + "</span></div>" +
+        '<div class="raid-bar" role="img" aria-label="' + esc((FORT_LAYERS[L.L] || "Layer") + ": " + brokenPct(L) + "% broken") + '"><i style="width:' + pct + '%"></i><span>' +
+        (L.state === "fallen" ? "fallen" : brokenPct(L) + "% broken") + "</span></div></div>";
+    }).join("");
+    const c = f.castellan || {}, cpct = c.state === "awake" ? Math.max(0, Math.min(100, c.pct || 0)) : c.state === "dead" ? 0 : 100;
+    const cword = c.state === "awake" ? cpct + "%" + (c.rage ? " · raging" : "") : c.state === "dead" ? "slain" : "asleep on its throne";
+    const cast = '<div class="fort-cast ' + esc(c.state || "none") + (c.rage ? " rage" : "") + '"><div class="asl-head"><span class="name">The Castellan' + (plan.castellan ? ", the " + esc(plan.castellan) : "") +
+      '</span><span class="role">' + esc(cword) + '</span></div><div class="raid-bar" role="img" aria-label="The Castellan: ' + esc(cword) + '"><i style="width:' + cpct + '%"></i><span>' + esc(cword) + "</span></div></div>";
+    const sd = f.sides || {}, camp = f.camp || {}, w = f.works || {};
+    const facts = ["attack " + (sd.attack_n || 0) + ((sd.attack || []).length ? " (" + sd.attack.slice(0, 5).map(esc).join(", ") + ((sd.attack_n || 0) > 5 ? "…" : "") + ")" : ""),
+      "defend " + (sd.defend_n || 0) + ((sd.defend || []).length ? " (" + sd.defend.slice(0, 5).map(esc).join(", ") + ((sd.defend_n || 0) > 5 ? "…" : "") + ")" : ""),
+      (camp.attack || 0) + " waiting in the camp", "traps armed " + (w.armed || 0) + "/" + (w.total || 0), "alarm " + (f.alarm || 0) + " of 5"];
+    if (f.pot) facts.push("pot " + num(f.pot));
+    if (f.wagon_in != null) facts.push("next wagon " + mss(f.wagon_in));
+    const hint = f.phase === "muster" ? "Pick a side: attack or defend (locked until the fortress falls or holds). Attackers break three walls, then the Castellan; defenders crew, repair, re-arm and horn."
+      : f.phase === "siege" ? "Attackers send monsters (they wait in the siege camp for room at the walls) and rally the camp; defenders crew, repair, re-arm, upgrade, horn and sally. Four hours on the clock, then the fortress holds."
+        : (f.result && (f.result.caption || f.result.text) ? String(f.result.caption || f.result.text) : "The fortress " + (f.outcome || "held") + "; the next siege musters in a moment.");
+    return '<div class="special fortress"><b>The Fortress · siege ' + f.number + " · " + esc(name) + " · " + esc(phase) + " " + esc(clock) + (f.enabled !== "on" ? ' <small class="test">a test siege</small>' : "") + "</b>" +
+      (plan.faction ? '<span class="held">Held by ' + esc(plan.faction) + (plan.castellan ? ", the " + esc(plan.castellan) + " on its throne" : "") + ".</span>" : "") +
+      '<div class="fort-layers">' + layers + "</div>" + cast + '<span class="facts">' + facts.join(" · ") + "</span>" +
+      "<span>" + esc(hint) + (side ? ' You: <b class="side">' + esc(side === "attack" ? "attacking" : "defending") + "</b>." : "") + "</span></div>";
+  }
+  function fortPieceClass(q, layer, front) {
+    const v = HEXV.indexOf(q);
+    return "fp " + (v <= 0 ? "down" : v >= 12 ? "ok" : v >= 8 ? "hurt" : v >= 4 ? "bad" : "crit") + (layer === front ? " front" : "");
+  }
+  const FORT_SIZE = { wall: 44, kwall: 44, tower: 60, ktower: 64, gate: 56, kgate: 60, stake: 26, plat: 44, watch: 44, barracks: 52, hall: 70 };
+  function fortMap(host, st, f) {
+    const plan = fortPlanFor(f);
+    if (!plan) { host.hidden = false; if (host.dataset.map !== "fort-wait") { host.dataset.map = "fort-wait"; host.innerHTML = '<div class="ctf-map-head"><h3>The fortress, live</h3></div><p class="arena-muted">Loading the plan…</p>'; } return; }
+    const b = plan.bounds || [-2560, -2816, 2560, 2304], W = b[2] - b[0], H = b[3] - b[1];
+    const X = (x) => x - b[0], Y = (y) => b[3] - y;
+    const front = (f.fallen || []).includes(3) ? 4 : (f.front || 1);
+    if (host.dataset.map !== "fort" + plan.id) {
+      host.dataset.map = "fort" + plan.id;
+      // a piece is drawn its own size (its footprint follows sp2 in the row), else a square by its group
+      const pieces = rows(plan.pieces).map((r) => { const sz = FORT_SIZE[r[5]] || 40, w = Math.max(24, r[7] || sz), h = Math.max(24, r[8] || sz); return '<rect data-p="' + r[0] + '" data-l="' + r[3] + '" x="' + (X(r[1]) - w / 2) + '" y="' + (Y(r[2]) - h / 2) + '" width="' + w + '" height="' + h + '" rx="6"><title>' + esc(r[5] + " #" + r[0]) + "</title></rect>"; }).join("");
+      const turrets = rows(plan.turrets).map((r) => '<circle data-t="' + r[0] + '" cx="' + X(r[1]) + '" cy="' + Y(r[2]) + '" r="34"><title>' + esc(r[5] + " turret #" + r[0]) + "</title></circle>").join("");
+      const traps = rows(plan.traps).map((r) => '<path class="ftrap" d="M' + (X(r[1]) - 14) + " " + (Y(r[2]) - 14) + "l28 28m0 -28l-28 28" + '"><title>' + esc(r[5] + " trap") + "</title></path>").join("");
+      host.innerHTML = '<div class="ctf-map-head"><h3>' + esc(plan.name || "The fortress") + ', live</h3><span class="legend"><i class="mdot red"></i>attackers <i class="mdot blue"></i>defenders <i class="fleg ok"></i>wall <i class="fleg bad"></i>breaking <i class="fleg down"></i>down <i class="fleg tur"></i>turret <i class="fleg trp"></i>trap</span></div>' +
+        '<div class="ctf-map-box fort-box" style="aspect-ratio:' + W + " / " + H + '"><svg viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="none" role="img" aria-label="The plan of the fortress: its walls coloured by their health, its turrets and traps">' +
+        '<g class="traps">' + traps + '</g><g class="pieces">' + pieces + '</g><g class="turrets">' + turrets + '</g></svg><div class="layer"></div></div>';
+    }
+    const hp = String(f.pieces || ""), thp = String(f.turrets || "");
+    host.querySelectorAll("rect[data-p]").forEach((el) => { const i = +el.dataset.p; el.setAttribute("class", fortPieceClass(hp.charAt(i) || "f", +el.dataset.l, front)); });
+    host.querySelectorAll("circle[data-t]").forEach((el) => { const q = thp.charAt(+el.dataset.t) || "f"; el.setAttribute("class", "ft" + (q === "0" ? " dead" : "")); });
+    const layer = host.querySelector(".layer"), seen = {};
+    (st.monsters || []).filter((m) => m.xy).forEach((m) => {
+      const id = "m" + m.id;
+      let el = layer.querySelector('[data-k="' + id + '"]');
+      if (!el) { el = document.createElement("i"); el.dataset.k = id; layer.appendChild(el); }
+      const mine = S.me && S.me.account && m.owner === S.me.account.name;
+      el.className = "mdot " + (m.door >= 1 && m.door <= 5 ? "red" : "blue") + (mine ? " mine" : "");
+      el.style.left = Math.max(0, Math.min(100, X(m.xy[0]) / W * 100)) + "%"; el.style.top = Math.max(0, Math.min(100, Y(m.xy[1]) / H * 100)) + "%";
+      el.title = m.name + " #" + m.id + (m.owner ? " (" + m.owner + ")" : "") + (m.door >= 6 ? " · a defender" : " · an attacker");
+      seen[id] = 1;
+    });
+    layer.querySelectorAll("[data-k]").forEach((el) => { if (!seen[el.dataset.k]) el.remove(); });
+  }
+  function fortressPanel() {
+    const f = S.live.fortress, side = fortSide(), costs = f.costs || {}, t = fortTargets(f);
+    const bets = (S.cat && S.cat.costs && S.cat.costs.bet) || [2, 5, 10, 20];
+    const open = (f.books || []).filter((x) => x && x.open);
+    const secOpts = '<option value="here">where the pressure is</option>' + t.secs.map((x) => '<option value="' + esc(x.name) + '">' + esc(x.name) + "</option>").join("");
+    const turOpts = '<option value="">the nearest</option>' + t.turrets.map((x) => '<option value="' + x.idx + '">' + esc(x.label) + "</option>").join("");
+    const sideRow = side ? '<p class="sub">You <b class="side">' + (side === "attack" ? "attack" : "defend") + "</b> this siege, until the fortress falls or holds.</p>"
+      : '<p class="sub">Pick a side for this siege: it stays yours until the fortress falls or holds. Attackers get a free starter, defenders a free crewman.' +
+        (f.balance ? " " + esc(f.balance.charAt(0).toUpperCase() + f.balance.slice(1)) + "." : "") + "</p>" +
+        '<div class="form-row"><button class="red big" data-act="fcmd" data-cmd="!attack">Attack</button><button class="big" data-act="fcmd" data-cmd="!defend">Defend</button></div>';
+    const fv = S.form.fverb || "crew", uses = FORT_USES[fv] || ["fsec", "fturret"];
+    const defend = side !== "attack" ? '<h4>Defend the walls</h4><div class="form-row"><label>Do<select data-bind="fverb">' + FORT_VERBS.map(([k, l, c]) => '<option value="' + k + '"' + (k === fv ? " selected" : "") + ">" + l + " · " + (costs[k] === 0 ? "free" : costs[k] != null && k !== "upgrade" && k !== "trap" ? costs[k] + " essence" : c) + "</option>").join("") +
+      '</select></label><label>Where<select data-bind="fsec"' + (uses.includes("fsec") ? "" : " disabled") + ">" + secOpts + '</select></label><label>Turret<select data-bind="fturret"' + (uses.includes("fturret") ? "" : " disabled") + ">" + turOpts + '</select></label><button class="gold" data-act="fverb">Do it</button></div>' +
+      (side ? "" : '<p class="inline-note">A defender\'s action makes you a defender.</p>') : "";
+    const attack = side !== "defend" ? '<h4>Attack</h4><div class="form-row"><label>Rally the camp at<select data-bind="frally">' + secOpts + '</select></label><button class="gold" data-act="frally">Rally · ' + (costs.rally != null ? costs.rally : 3) + " essence</button>" +
+      '<button data-act="fcmd" data-cmd="!camp">My camp</button><button data-act="fcmd" data-cmd="!camp clear">Take my camp back</button></div>' : "";
+    const bet = '<h4>Bet</h4><div class="form-row"><label>It<select data-bind="fbet">' + (side !== "defend" ? '<option value="fall">falls</option>' : "") + (side !== "attack" ? '<option value="hold">holds</option>' : "") +
+      '</select></label><label>Essence<select data-bind="betAmt">' + bets.map((x) => '<option value="' + x + '">' + x + "</option>").join("") + '</select></label><button data-act="fbet"' + (open.length ? "" : " disabled") + ">Place the bet</button>" +
+      '<span class="inline-note">' + (open.length ? "a book is open; the pot is " + num(f.pot || 0) : "the books open at the muster and after each wall falls") + "</span></div>";
+    return '<div class="panel fort-panel"><h3>The siege</h3>' + sideRow + walletChip(null) + attack + defend + bet + "</div>";
+  }
   function mapPos(x, y, M) { M = M || CTF_MAP; return [Math.max(0, Math.min(100, (x - M.xMin) / M.w * 100)), Math.max(0, Math.min(100, (M.yMax - y) / M.h * 100))]; }
   function updateMinimap(st) {
     // the dots are kept from one update to the next and only moved, so they glide (a CSS transition) instead of jumping
     const host = $("#ctf-map");
     if (!host) return;
+    const fort = st && st.online && st.fortress;
+    if (fort) { host.hidden = false; fortMap(host, st, fort); return; }
     const asl = st && st.online && st.assault, c = st && st.online && (st.ctf || asl);
     if (!c) { host.hidden = true; return; }
     host.hidden = false;
@@ -584,7 +715,8 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     const a = S.me.account;
     const wallet = a ? '<div class="chips"><span class="chip">level <b>' + a.level + "</b></span><span class=\"chip\">essence <b>" + num(a.essence) + "</b>/" + a.cap + '</span><span class="chip">souls <b>' + num(a.souls) + "</b></span>" + (a.home_door ? '<span class="chip">door <b>' + a.home_door + "</b></span>" : "") + badgeChip(a.badge) + "</div>" :
       '<p class="inline-note">Your account starts the moment you send something in: 25 essence, the four starter monsters.</p>';
-    return '<div class="panel"><h3>Your arena</h3>' + wallet + "</div>" + releaseForm() + groupsPanel() + ordersPanel(mons) + hazardsPanel(mons) + roundsPanel() + consolePanel();
+    return '<div class="panel"><h3>Your arena</h3>' + wallet + "</div>" + (fortLive() ? fortressPanel() : "") + releaseForm() + groupsPanel() +
+      (fortLive() ? "" : ordersPanel(mons) + hazardsPanel(mons) + roundsPanel()) + consolePanel();
   }
   function tileHtml(x, picked) {
     const ok = ownsType(x.name);
@@ -625,9 +757,11 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
         '<p class="notes">' + esc(m.notes) + "</p>" + (ok ? "" : '<p class="locked-note">Locked: ' + m.unlock + ' souls in <a href="#bestiary/' + esc(m.key) + '">the bestiary</a>.</p>') +
         (a && a.progression ? '<p class="mastery-line">' + (mm && mm.rank ? rankPill(mm) + " " + esc(m.name + " " + mm.name) + " · " : "") + num(mm ? mm.xp : 0) + " XP" +
           (mm && mm.discount ? " · " + Math.round(mm.discount * 100) + "% off every send" : "") + "</p>" : "") + "</div></div>";
-      const ctf = ctfLive() || asLive();
+      const ctf = ctfLive() || asLive(), fside = fortLive() ? fortSide() : null;
       opts = seg("How many", "count", [1, 2, 3, 4, 5].map((n) => ({ v: n, t: String(n) })), f.count, "copies cost " + step + "% more each") +
-        (ctf ? seg("Door", "door", [{ v: 0, t: home ? "yours · " + home : "your side's", side: home ? sideOf(home) : "" }].concat([1, 2, 3, 4, 5, 6, 7, 8].map((d) => ({ v: d, t: String(d), side: sideOf(d) }))), f.door === 9 ? 0 : f.door, "1-4 Red · 5-8 Blue") +
+        (fside !== null ? seg("Door", "door", [{ v: 0, t: "your side's emptiest" }].concat(fortDoors(fside).map((d) => ({ v: d, t: String(d), side: d <= 5 ? "red" : "blue" }))),
+          fortDoors(fside).includes(f.door) ? f.door : 0, fside ? "you " + fside : "1-5 attack · 6-8 defend; your first send locks your side") :
+         ctf ? seg("Door", "door", [{ v: 0, t: home ? "yours · " + home : "your side's", side: home ? sideOf(home) : "" }].concat([1, 2, 3, 4, 5, 6, 7, 8].map((d) => ({ v: d, t: String(d), side: sideOf(d) }))), f.door === 9 ? 0 : f.door, "1-4 Red · 5-8 Blue") +
           (ctfLive() ? seg("Order", "role", [{ v: "", t: "auto" }, { v: "attack", t: "attack" }, { v: "defend", t: "defend" }, { v: "escort", t: "escort" }, { v: "mid", t: "hold the middle" }], f.role, "auto leaves it to the team's commander") : "")
           : seg("Door", "door", [{ v: 0, t: home ? "yours · " + home : "emptiest" }].concat([1, 2, 3, 4, 5, 6, 7, 8].map((d) => ({ v: d, t: String(d) })), [{ v: 9, t: "all · lv 6" }]), f.door)) +
         seg("Strength", "strength", STRENGTHS.map((s) => ({ v: s, t: s + "%" })), f.strength, "150% and up is a champion") +
@@ -776,6 +910,10 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     const stats = '<div class="panel"><h3>Record</h3><div class="stats">' + [["Sent in", p.releases], ["Kills", p.kills], ["Lost", p.deaths], ["Orders", p.orders], ["Hazards", p.hazards], ["Champion kills", p.champion_kills], ["Boss kills", p.boss_kills], ["Round wins", p.round_wins], ["Bets won", p.bets_won], ["Upsets", p.upsets]].map(([k, v]) => '<div class="stat"><div class="k">' + k + '</div><div class="v">' + num(v) + "</div></div>").join("") + "</div>" +
       (p.ctf && Object.values(p.ctf).some((v) => v) ? '<h3>Capture the Flag</h3><div class="stats">' + [["Flags taken", p.ctf.pickups], ["Captures", p.ctf.captures], ["Returns", p.ctf.returns], ["Drops", p.ctf.drops], ["Carriers stopped", p.ctf.stops], ["Matches won", p.ctf.wins]].map(([k, v]) => '<div class="stat"><div class="k">' + k + '</div><div class="v">' + num(v) + "</div></div>").join("") + "</div>" : "") +
       (p.raid && Object.values(p.raid).some((v) => v) ? '<h3>The Raid</h3><div class="stats">' + [["Raids", num(p.raid.raids)], ["Bosses down", num(p.raid.raid_wins)], ["Kinds beaten", num(p.raid.beaten || 0) + " of 9"], ["Most damage", num(p.raid.raid_mvps)], ["Last blows", num(p.raid.raid_lasthits)]].map(([k, v]) => '<div class="stat"><div class="k">' + k + '</div><div class="v">' + v + "</div></div>").join("") + "</div>" : "") +
+      (p.fortress && Object.values(p.fortress).some((v) => v) ? '<h3>The Fortress</h3><div class="stats">' + [["Sieges", p.fortress.sieges], ["Taken as an attacker", p.fortress.falls], ["Held as a defender", p.fortress.holds],
+        ["Pieces broken", p.fortress.pieces], ["First breaches", p.fortress.breaches], ["Castellans slain", p.fortress.castellans], ["Trap kills", p.fortress.trap_kills], ["Turret kills", p.fortress.crew_kills],
+        ["HP repaired", p.fortress.repair_hp], ["Pylons shattered", p.fortress.pylons], ["Walls toppled", p.fortress.toppled], ["Charges set off", p.fortress.charges], ["MVPs", p.fortress.mvps]]
+        .map(([k, v]) => '<div class="stat"><div class="k">' + k + '</div><div class="v">' + num(v || 0) + "</div></div>").join("") + "</div>" : "") +
       (p.assault && Object.values(p.assault).some((v) => v) ? '<h3>The Assault</h3><div class="stats">' + [["Matches", p.assault.matches], ["Won", p.assault.wins], ["Cores broken", p.assault.cores], ["Cores your side destroyed", p.assault.razes], ["Cores your side held", p.assault.holds]].map(([k, v]) => '<div class="stat"><div class="k">' + k + '</div><div class="v">' + num(v) + "</div></div>").join("") + "</div>" : "") +
       ((p.daily && p.daily.glory) || (p.weekly && p.weekly.glory) ? '<p class="inline-note">today: ' + num(p.daily.glory) + " glory, " + num(p.daily.kills) + " kills · this week: " + num(p.weekly.glory) + " glory, " + num(p.weekly.kills) + " kills</p>" : "") +
       (p.best && p.best.kills ? '<p class="inline-note">best monster: ' + esc(p.best.name) + " with " + p.best.kills + " kills</p>" : "") +
@@ -921,7 +1059,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
       (voteOn ? "ON" : "OFF") + "</b></button></div>" : "";
     const modePanel = st && st.online ? '<div class="panel"><h3>The show</h3><p class="sub">You change the mode at once, and it stays until it changes again, restarts included. Switching moves the game to the other map: about a minute of loading on the stream, and a round or a match in progress ends without a result (its bets are refunded).</p>' +
       '<div class="adm-switches">' + modeBtn("rounds", "The coliseum: rounds") + modeBtn("ctf", "Capture the Flag") + modeBtn("raid", "The Raid: every door against a boss") +
-        modeBtn("assault", "The Assault: attack and defend a Core") + "</div>" + voteRow + spawnsRow +
+        modeBtn("assault", "The Assault: attack and defend a Core") + modeBtn("fortress", "The Fortress: a siege") + "</div>" + voteRow + spawnsRow + fortAdmin(st) +
       (st.assault ? '<div class="form-row adm-row"><button data-act="adm" data-cmd="!assault end">End this match now</button></div>' +
         '<p class="sub">The Cores\' health, from the next half on (both sides the same). Now: <b>' + num(st.assault.core_hp || 0) + "</b></p>" +
         '<div class="adm-switches">' + [8000, 15000, 25000, 40000].map((n) => '<button class="switch' + ((st.assault.core_hp || 0) === n ? " on" : "") + '" data-act="adm" data-cmd="!assault hp ' + n + '">' + num(n) + "</button>").join("") + "</div>" +
@@ -977,6 +1115,27 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
       (modeNow === "ctf" ? '<div class="panel"><p class="sub">The special rounds below belong to the coliseum: they wait while Capture the Flag is on.</p></div>' : "") + switches + queue;
   }
 
+  function fortAdmin(st) {
+    // the Fortress's admin controls (docs/fortress/PHASE6.md 4.7): its end, kappa, the test fill and the director's trickle; the arena
+    // checks the sender, the page only shows the buttons. Opening it to the viewers (fortress.enabled "on") is the config's, not here
+    const f = st && st.fortress;
+    if (!f) return st && st.mode === "fortress" ? '<p class="sub">The Fortress is on air; a siege musters in a moment.</p>' : "";
+    const kappa = f.kappa, kcfg = f.kappa_cfg || 1, kpaced = f.kappa_paced || kcfg;
+    const kbtn = (m, label) => { const v = Math.round(kcfg * m * 100) / 100; return '<button class="switch' + (kappa != null && Math.abs(kappa - v) < 0.005 ? " on" : "") + '" data-act="adm" data-cmd="!fortress kappa ' + v + '">' + label + " (" + v + ")</button>"; };
+    return '<h4>The Fortress · siege ' + f.number + " · " + esc((f.plan || {}).name || "") + " · " + esc(f.phase) + (f.enabled !== "on" ? " · a test (fortress.enabled is " + esc(f.enabled) + ")" : "") + "</h4>" +
+      '<div class="form-row adm-row"><button data-act="adm" data-cmd="!fortress end held">End it: the fortress holds</button><button data-act="adm" data-cmd="!fortress end fell">End it: the fortress falls</button>' +
+      '<button class="red" data-act="adm" data-cmd="!fortress abandon">Abandon (refunds, no results)</button><button data-act="adm" data-cmd="!fortress new">A new siege now</button></div>' +
+      '<p class="sub">Kappa, the walls\' thickness for this siege (the paced value after it). Now: <b>' + esc(kappa != null ? kappa : "?") + "</b>; the config's " + esc(kcfg) + ", paced " + esc(kpaced) + ".</p>" +
+      '<div class="adm-switches">' + kbtn(0.5, "half the config's") + kbtn(1, "the config's") + kbtn(1.5, "1.5 times") + kbtn(2, "twice") +
+      '<button class="switch' + (kappa != null && Math.abs(kappa - kpaced) < 0.005 ? " on" : "") + '" data-act="adm" data-cmd="!fortress kappa default">The paced value</button></div>' +
+      '<p class="sub">The test fill keeps so many attackers alive (free: never a real siege\'s pace).</p><div class="adm-switches">' +
+      [["off", "Off"], ["10", "10"], ["20", "20"], ["30", "30"]].map(([a, l]) => '<button class="switch" data-act="adm" data-cmd="!fortress fill ' + a + '">' + l + "</button>").join("") + "</div>" +
+      '<p class="sub">The director\'s trickle, its light attack while no viewer attacks (it also needs the director\'s spawns on). Now: <b>' + (f.trickle ? "on" : "off") + "</b>" +
+      (f.trickle_rate != null ? ", " + esc(f.trickle_rate) + " TP a siege minute (the quiet guard steers it)" : "") + "</p>" +
+      '<div class="adm-switches"><button class="switch' + (f.trickle ? " on" : "") + '" data-act="adm" data-cmd="!fortress trickle on">On</button><button class="switch' + (f.trickle ? "" : " on") + '" data-act="adm" data-cmd="!fortress trickle off">Off</button>' +
+      ["0.05", "0.1", "0.2", "0.4"].map((r) => '<button class="switch' + (f.trickle_rate != null && Math.abs(f.trickle_rate - Number(r)) < 0.001 ? " on" : "") + '" data-act="adm" data-cmd="!fortress trickle ' + r + '">' + r + " a minute</button>").join("") + "</div>";
+  }
+
   // ------------------------------------------------------------------ commands
   async function send(text) {
     if (!S.me) { notice("Sign in with Discord first.", false, true); return null; }
@@ -1003,6 +1162,14 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
   }
   function bound(name) { const el = document.querySelector('[data-bind="' + name + '"]'); return el ? el.value : ""; }
 
+  document.addEventListener("change", (ev) => {
+    // the siege's verb: the selects it does not read are greyed at once (and stay so at the next redraw)
+    const v = ev.target.closest('[data-bind="fverb"]');
+    if (!v) return;
+    S.form.fverb = v.value;
+    const uses = FORT_USES[v.value] || ["fsec", "fturret"];
+    ["fsec", "fturret"].forEach((b) => { const s2 = document.querySelector('[data-bind="' + b + '"]'); if (s2) s2.disabled = !uses.includes(b); });
+  });
   document.addEventListener("change", (ev) => {
     const el = ev.target.closest('[data-act="group-pick"]');
     if (!el) return;
@@ -1048,7 +1215,8 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
       // numbers as door and strength, and a lone number of fifty or more as the strength; "all" sends as
       // many as the essence buys at once (the agent settles the count with the copy tax)
       let text = "!release " + m.name;
-      if (f.door) text += " " + f.door + " " + f.strength;
+      const door = fortLive() && !fortDoors(fortSide()).includes(f.door) ? 0 : f.door;      // a siege: only the side's doors; none, the agent picks
+      if (door) text += " " + door + " " + f.strength;
       else if (f.strength !== 100) text += " " + f.strength;
       if (act === "release-all") text += " all";
       else if (f.count > 1) text += " x" + f.count;
@@ -1096,6 +1264,16 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     if (act === "bet") { await send("!bet " + bound("betDoor") + " " + bound("betAmt")); return; }
     if (act === "bet-team") { await send("!bet " + bound("betTeam") + " " + bound("betAmt")); return; }
     if (act === "ctf-order") { await send("!order mine " + el.dataset.role); return; }
+    if (act === "fcmd") { await send(el.dataset.cmd); return; }
+    if (act === "fverb") {
+      // a defender's verb: crew and upgrade take a turret, sally nothing, re-arm a section or nothing, the rest a section
+      const v = bound("fverb"), sec = bound("fsec") || "here", tur = bound("fturret");
+      if (v === "upgrade" && !tur) { notice("Pick the turret to upgrade."); return; }
+      const text = v === "crew" || v === "upgrade" ? "!" + v + (tur ? " " + tur : "") : v === "sally" ? "!sally" : v === "trap" ? "!trap" + (sec !== "here" ? " " + sec : "") : "!" + v + " " + sec;
+      await send(text); return;
+    }
+    if (act === "frally") { await send("!rally " + (bound("frally") || "here")); return; }
+    if (act === "fbet") { await send("!bet " + bound("fbet") + " " + bound("betAmt")); return; }
     if (act === "adm-play") { await send("!play " + bound("admPlayTeam") + " " + bound("admPlayCall")); return; }
     if (act === "unlock") { await send("!unlock " + el.dataset.name + (el.dataset.variant ? " " + el.dataset.variant : "")); return; }
     if (act === "spend") { await send("!talent " + el.dataset.build + " " + el.dataset.key); return; }
