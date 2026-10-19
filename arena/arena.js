@@ -563,11 +563,70 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
       '<div class="fort-layers">' + layers + "</div>" + cast + '<span class="facts">' + facts.join(" · ") + "</span>" +
       "<span>" + esc(hint) + (side ? ' You: <b class="side">' + esc(side === "attack" ? "attacking" : "defending") + "</b>." : "") + "</span></div>";
   }
+  // the map is interactive (the owner, 2026-10-19): a wall or a turret clicked or tapped is picked (its section or turret goes into
+  // the siege panel's selects, its pieces are outlined) and the box under the map says what it is, with one-click commands for your
+  // side; + and - zoom, drag pans while zoomed. S.fortSel = {sec: id} | {tur: idx}; S.fortView = {z, x, y} (x, y: the top-left in
+  // fractions of the box)
+  const FORT_HP_WORD = { down: "down", crit: "about to fall", bad: "breaking", hurt: "damaged", ok: "sound" };
+  const FORT_GROUP_WORD = { wall: "wall", kwall: "keep wall", tower: "tower", ktower: "keep tower", gate: "gatehouse", kgate: "keep gate",
+                            stake: "stakes", plat: "platform", watch: "watchtower", barracks: "barracks", hall: "the keep hall" };
+  function fortHpClass(q) { const v = HEXV.indexOf(q); return v <= 0 ? "down" : v >= 12 ? "ok" : v >= 8 ? "hurt" : v >= 4 ? "bad" : "crit"; }
   function fortPieceClass(q, layer, front) {
-    const v = HEXV.indexOf(q);
-    return "fp " + (v <= 0 ? "down" : v >= 12 ? "ok" : v >= 8 ? "hurt" : v >= 4 ? "bad" : "crit") + (layer === front ? " front" : "");
+    return "fp " + fortHpClass(q) + (layer === front ? " front" : "");
   }
   const FORT_SIZE = { wall: 44, kwall: 44, tower: 60, ktower: 64, gate: 56, kgate: 60, stake: 26, plat: 44, watch: 44, barracks: 52, hall: 70 };
+  function fortView() { const v = S.fortView || (S.fortView = { z: 1, x: 0, y: 0 }); return v; }
+  function fortApplyView(host) {
+    const v = fortView(), box = host.querySelector(".fort-box"), zw = host.querySelector(".fort-zoom");
+    if (!zw || !box) return;
+    v.z = Math.max(1, Math.min(4, v.z));
+    v.x = Math.max(0, Math.min(1 - 1 / v.z, v.x)); v.y = Math.max(0, Math.min(1 - 1 / v.z, v.y));
+    zw.style.transform = "scale(" + v.z + ") translate(" + (-v.x * 100) + "%, " + (-v.y * 100) + "%)";
+    box.classList.toggle("zoomed", v.z > 1);
+  }
+  function fortSecName(plan, id) { const x = (plan.sections || []).find((q) => q.id === id); return x ? x.name : ""; }
+  function fortMapSelect(sel) {
+    // the panel's selects changed: the map follows (a section by its name, a turret by its index)
+    const f = S.live && S.live.fortress, plan = f && fortPlanFor(f);
+    if (!plan) return;
+    if (sel.sec != null) {
+      const x = (plan.sections || []).find((q) => q.name === sel.sec);
+      S.fortSel = x ? { sec: x.id } : null;
+    } else if (sel.tur != null) S.fortSel = sel.tur === "" ? null : { tur: +sel.tur };
+    const host = $("#ctf-map");
+    if (host && S.live) fortMap(host, S.live, f);
+  }
+  function fortInfo(plan, f, front) {
+    const sel = S.fortSel, side = fortSide(), hp = String(f.pieces || ""), thp = String(f.turrets || "");
+    const frontSecs = fortTargets(f).secs.map((x) => x.id);
+    const btn = (label, cmd, cls) => '<button class="' + (cls || "") + '" data-act="fcmd" data-cmd="' + esc(cmd) + '">' + esc(label) + "</button>";
+    if (!sel) return '<span class="arena-muted">Tap a wall or a turret on the map to see it' + (side === "defend" ? " and act on it" : side === "attack" ? " and rally the camp to it" : "") + ".</span>";
+    if (sel.tur != null) {
+      const r = rows(plan.turrets).find((t) => t[0] === sel.tur);
+      if (!r) return "";
+      const standing = (thp.charAt(r[0]) || "f") !== "0", onFront = r[3] === front;
+      const what = "<b>" + esc((r[5] || "turret").replace(/_/g, " ")) + " turret #" + r[0] + "</b> · " + esc(fortSecName(plan, r[4]) || "the walls") + " · " +
+        esc(FORT_LAYERS[r[3]] || "layer " + r[3]) + " · " + (standing ? "standing" : "wrecked");
+      let acts = "";
+      if (side === "defend" && standing && onFront) acts = btn("Crew it", "!crew " + r[0]) + btn("Upgrade it", "!upgrade " + r[0], "gold");
+      else if (side === "defend" && standing) acts = '<span class="arena-muted">Not on the front yet.</span>';
+      return what + (acts ? '<span class="acts">' + acts + "</span>" : "");
+    }
+    const sec = (plan.sections || []).find((q) => q.id === sel.sec);
+    if (!sec) return "";
+    const ps = rows(plan.pieces).filter((p) => p[4] === sec.id);
+    const counts = {};
+    ps.forEach((p) => { const c = fortHpClass(hp.charAt(p[0]) || "f"); counts[c] = (counts[c] || 0) + 1; });
+    const state = ["down", "crit", "bad", "hurt", "ok"].filter((c) => counts[c]).map((c) => counts[c] + " " + FORT_HP_WORD[c]).join(", ");
+    const kinds = Array.from(new Set(ps.map((p) => FORT_GROUP_WORD[p[5]] || p[5]))).join(", ");
+    const what = "<b>" + esc(sec.name) + "</b> · " + esc(FORT_LAYERS[sec.layer] || "layer " + sec.layer) + (kinds ? " · " + esc(kinds) : "") + (state ? " · " + esc(state) : "");
+    const live = frontSecs.includes(sec.id);
+    let acts = "";
+    if (side === "defend" && live) acts = btn("Repair here", "!repair " + sec.name, "gold") + btn("Re-arm traps here", "!trap " + sec.name) + btn("Sound the horn here", "!horn " + sec.name);
+    else if (side === "attack" && live) acts = btn("Rally the camp here", "!rally " + sec.name, "red");
+    else if (!live && side) acts = '<span class="arena-muted">Not on the front.</span>';
+    return what + (acts ? '<span class="acts">' + acts + "</span>" : "");
+  }
   function fortMap(host, st, f) {
     const plan = fortPlanFor(f);
     if (!plan) { host.hidden = false; if (host.dataset.map !== "fort-wait") { host.dataset.map = "fort-wait"; host.innerHTML = '<div class="ctf-map-head"><h3>The fortress, live</h3></div><p class="arena-muted">Loading the plan…</p>'; } return; }
@@ -576,17 +635,20 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     const front = (f.fallen || []).includes(3) ? 4 : (f.front || 1);
     if (host.dataset.map !== "fort" + plan.id) {
       host.dataset.map = "fort" + plan.id;
+      S.fortSel = null; S.fortView = { z: 1, x: 0, y: 0 };
       // a piece is drawn its own size (its footprint follows sp2 in the row), else a square by its group
-      const pieces = rows(plan.pieces).map((r) => { const sz = FORT_SIZE[r[5]] || 40, w = Math.max(24, r[7] || sz), h = Math.max(24, r[8] || sz); return '<rect data-p="' + r[0] + '" data-l="' + r[3] + '" x="' + (X(r[1]) - w / 2) + '" y="' + (Y(r[2]) - h / 2) + '" width="' + w + '" height="' + h + '" rx="6"><title>' + esc(r[5] + " #" + r[0]) + "</title></rect>"; }).join("");
-      const turrets = rows(plan.turrets).map((r) => '<circle data-t="' + r[0] + '" cx="' + X(r[1]) + '" cy="' + Y(r[2]) + '" r="34"><title>' + esc(r[5] + " turret #" + r[0]) + "</title></circle>").join("");
+      const pieces = rows(plan.pieces).map((r) => { const sz = FORT_SIZE[r[5]] || 40, w = Math.max(24, r[7] || sz), h = Math.max(24, r[8] || sz); return '<rect data-p="' + r[0] + '" data-l="' + r[3] + '" data-s="' + r[4] + '" x="' + (X(r[1]) - w / 2) + '" y="' + (Y(r[2]) - h / 2) + '" width="' + w + '" height="' + h + '" rx="6"><title>' + esc((FORT_GROUP_WORD[r[5]] || r[5]) + " · " + (fortSecName(plan, r[4]) || "")) + "</title></rect>"; }).join("");
+      const turrets = rows(plan.turrets).map((r) => '<circle data-t="' + r[0] + '" data-s="' + r[4] + '" cx="' + X(r[1]) + '" cy="' + Y(r[2]) + '" r="40"><title>' + esc((r[5] || "").replace(/_/g, " ") + " turret #" + r[0]) + "</title></circle>").join("");
       const traps = rows(plan.traps).map((r) => '<path class="ftrap" d="M' + (X(r[1]) - 14) + " " + (Y(r[2]) - 14) + "l28 28m0 -28l-28 28" + '"><title>' + esc(r[5] + " trap") + "</title></path>").join("");
-      host.innerHTML = '<div class="ctf-map-head"><h3>' + esc(plan.name || "The fortress") + ', live</h3><span class="legend"><i class="mdot red"></i>attackers <i class="mdot blue"></i>defenders <i class="fleg ok"></i>wall <i class="fleg bad"></i>breaking <i class="fleg down"></i>down <i class="fleg tur"></i>turret <i class="fleg trp"></i>trap</span></div>' +
-        '<div class="ctf-map-box fort-box" style="aspect-ratio:' + W + " / " + H + '"><svg viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="none" role="img" aria-label="The plan of the fortress: its walls coloured by their health, its turrets and traps">' +
-        '<g class="traps">' + traps + '</g><g class="pieces">' + pieces + '</g><g class="turrets">' + turrets + '</g></svg><div class="layer"></div></div>';
+      host.innerHTML = '<div class="ctf-map-head"><h3>' + esc(plan.name || "The fortress") + ', live</h3><span class="legend"><i class="mdot red"></i>attackers <i class="mdot blue"></i>defenders <i class="fleg ok"></i>wall <i class="fleg bad"></i>breaking <i class="fleg down"></i>down <i class="fleg tur"></i>turret <i class="fleg trp"></i>trap</span>' +
+        '<span class="fort-tools"><button type="button" data-fz="in" title="Zoom in" aria-label="Zoom in">+</button><button type="button" data-fz="out" title="Zoom out" aria-label="Zoom out">&minus;</button><button type="button" data-fz="reset" title="The whole fortress" aria-label="Show the whole fortress">&#x2922;</button></span></div>' +
+        '<div class="ctf-map-box fort-box" style="aspect-ratio:' + W + " / " + H + '"><div class="fort-zoom"><svg viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="none" role="img" aria-label="The plan of the fortress: its walls coloured by their health, its turrets and traps; tap one to pick it">' +
+        '<g class="traps">' + traps + '</g><g class="pieces">' + pieces + '</g><g class="turrets">' + turrets + '</g></svg><div class="layer"></div></div></div>' +
+        '<div class="fort-info" aria-live="polite"></div>';
     }
-    const hp = String(f.pieces || ""), thp = String(f.turrets || "");
-    host.querySelectorAll("rect[data-p]").forEach((el) => { const i = +el.dataset.p; el.setAttribute("class", fortPieceClass(hp.charAt(i) || "f", +el.dataset.l, front)); });
-    host.querySelectorAll("circle[data-t]").forEach((el) => { const q = thp.charAt(+el.dataset.t) || "f"; el.setAttribute("class", "ft" + (q === "0" ? " dead" : "")); });
+    const hp = String(f.pieces || ""), thp = String(f.turrets || ""), sel = S.fortSel;
+    host.querySelectorAll("rect[data-p]").forEach((el) => { const i = +el.dataset.p; el.setAttribute("class", fortPieceClass(hp.charAt(i) || "f", +el.dataset.l, front) + (sel && sel.sec != null && +el.dataset.s === sel.sec ? " sel" : "")); });
+    host.querySelectorAll("circle[data-t]").forEach((el) => { const q = thp.charAt(+el.dataset.t) || "f"; el.setAttribute("class", "ft" + (q === "0" ? " dead" : "") + (sel && sel.tur != null && +el.dataset.t === sel.tur ? " sel" : "")); });
     const layer = host.querySelector(".layer"), seen = {};
     (st.monsters || []).filter((m) => m.xy).forEach((m) => {
       const id = "m" + m.id;
@@ -599,13 +661,68 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
       seen[id] = 1;
     });
     layer.querySelectorAll("[data-k]").forEach((el) => { if (!seen[el.dataset.k]) el.remove(); });
+    const info = host.querySelector(".fort-info");
+    if (info) { const html = fortInfo(plan, f, front); if (info.dataset.h !== html) { info.dataset.h = html; info.innerHTML = html; } }
+    fortApplyView(host);
   }
+  // the map's clicks: a piece or a turret picks it (and fills the panel's select), the zoom buttons zoom; drag pans while zoomed
+  document.addEventListener("click", (ev) => {
+    const host = ev.target.closest("#ctf-map");
+    if (!host || !host.querySelector(".fort-box")) return;
+    const z = ev.target.closest("[data-fz]");
+    if (z) {
+      const v = fortView();
+      if (z.dataset.fz === "reset") { v.z = 1; v.x = 0; v.y = 0; }
+      else {
+        const cx = v.x + 0.5 / v.z, cy = v.y + 0.5 / v.z;             // keep the middle of the view where it is
+        v.z = z.dataset.fz === "in" ? Math.min(4, v.z * 1.6) : Math.max(1, v.z / 1.6);
+        v.x = cx - 0.5 / v.z; v.y = cy - 0.5 / v.z;
+      }
+      fortApplyView(host);
+      return;
+    }
+    if (S.fortDragged) { S.fortDragged = false; return; }
+    const f = S.live && S.live.fortress, plan = f && fortPlanFor(f);
+    if (!plan) return;
+    const p = ev.target.closest("rect[data-p]"), t = ev.target.closest("circle[data-t]");
+    if (t) {
+      S.fortSel = { tur: +t.dataset.t };
+      S.form.fturret = t.dataset.t;
+      if (!["crew", "upgrade"].includes(S.form.fverb)) S.form.fverb = "upgrade";
+    } else if (p) {
+      const sid = +p.dataset.s, name = fortSecName(plan, sid);
+      S.fortSel = { sec: sid };
+      if (name && fortTargets(f).secs.some((x) => x.id === sid)) {
+        S.form.fsec = name;
+        if (!["repair", "trap", "horn"].includes(S.form.fverb)) S.form.fverb = "repair";
+      }
+    } else return;
+    render();
+  });
+  document.addEventListener("pointerdown", (ev) => {
+    const box = ev.target.closest(".fort-box");
+    if (!box || fortView().z <= 1) return;
+    S.fortDrag = { x0: ev.clientX, y0: ev.clientY, vx: fortView().x, vy: fortView().y, w: box.clientWidth, h: box.clientHeight };
+    S.fortDragged = false;
+  });
+  document.addEventListener("pointermove", (ev) => {
+    const d = S.fortDrag;
+    if (!d) return;
+    const v = fortView(), dx = ev.clientX - d.x0, dy = ev.clientY - d.y0;
+    if (Math.abs(dx) + Math.abs(dy) > 4) S.fortDragged = true;
+    v.x = d.vx - dx / d.w / v.z; v.y = d.vy - dy / d.h / v.z;
+    const host = $("#ctf-map");
+    if (host) fortApplyView(host);
+  });
+  document.addEventListener("pointerup", () => { S.fortDrag = null; });
   function fortressPanel() {
     const f = S.live.fortress, side = fortSide(), costs = f.costs || {}, t = fortTargets(f);
     const bets = (S.cat && S.cat.costs && S.cat.costs.bet) || [2, 5, 10, 20];
     const open = (f.books || []).filter((x) => x && x.open);
-    const secOpts = '<option value="here">where the pressure is</option>' + t.secs.map((x) => '<option value="' + esc(x.name) + '">' + esc(x.name) + "</option>").join("");
-    const turOpts = '<option value="">the nearest</option>' + t.turrets.map((x) => '<option value="' + x.idx + '">' + esc(x.label) + "</option>").join("");
+    // the picks are kept in S.form (the page redraws on every live update, which used to snap them back before "Do it")
+    const selSec = S.form.fsec || "here", selTur = String(S.form.fturret || "");
+    const secOpts = '<option value="here">where the pressure is</option>' + t.secs.map((x) => '<option value="' + esc(x.name) + '"' + (x.name === selSec ? " selected" : "") + ">" + esc(x.name) + "</option>").join("");
+    const turOpts = '<option value="">the nearest</option>' + t.turrets.map((x) => '<option value="' + x.idx + '"' + (String(x.idx) === selTur ? " selected" : "") + ">" + esc(x.label) + "</option>").join("");
     const sideRow = side ? '<p class="sub">You <b class="side">' + (side === "attack" ? "attack" : "defend") + "</b> this siege, until the fortress falls or holds.</p>"
       : '<p class="sub">Pick a side for this siege: it stays yours until the fortress falls or holds. Attackers get a free starter, defenders a free crewman.' +
         (f.balance ? " " + esc(f.balance.charAt(0).toUpperCase() + f.balance.slice(1)) + "." : "") + "</p>" +
@@ -627,6 +744,9 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     const host = $("#ctf-map");
     if (!host) return;
     const fort = st && st.online && st.fortress;
+    const col = $("#col-feed"), status = $("#watch-status");
+    if (fort && col && col.firstElementChild !== host) col.insertBefore(host, col.firstElementChild);
+    else if (!fort && status && status.nextElementSibling !== host) status.after(host);
     if (fort) { host.hidden = false; fortMap(host, st, fort); return; }
     const asl = st && st.online && st.assault, c = st && st.online && (st.ctf || asl);
     if (!c) { host.hidden = true; return; }
@@ -1268,7 +1388,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     if (act === "fverb") {
       // a defender's verb: crew and upgrade take a turret, sally nothing, re-arm a section or nothing, the rest a section
       const v = bound("fverb"), sec = bound("fsec") || "here", tur = bound("fturret");
-      if (v === "upgrade" && !tur) { notice("Pick the turret to upgrade."); return; }
+      // (a bare !upgrade upgrades the front's turret where the pressure is: the bot picks it, since 2026-10-19)
       const text = v === "crew" || v === "upgrade" ? "!" + v + (tur ? " " + tur : "") : v === "sally" ? "!sally" : v === "trap" ? "!trap" + (sec !== "here" ? " " + sec : "") : "!" + v + " " + sec;
       await send(text); return;
     }
@@ -1291,6 +1411,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     else if (b === "threat") S.filter.threat = el.value;
     else if (b === "owned") S.filter.owned = el.checked;
     else if (b === "sendShelf") S.form.shelf = el.value;
+    else if (b === "fsec" || b === "fturret") { S.form[b] = el.value; fortMapSelect(b === "fsec" ? { sec: el.value } : { tur: el.value }); return; }
     else if (b === "admA" || b === "admB") { (S.adm || (S.adm = {}))[b === "admA" ? "a" : "b"] = el.value; return; }   // kept for the next redraw; nothing to redraw now
     else return;
     render();

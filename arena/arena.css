@@ -446,3 +446,22 @@ body:not(.view-watch) #arena-stream { max-width: 360px; justify-self: end; }
 .fort-panel b.side { color: var(--gold); }
 .feed li.fortress b { color: var(--gold); }
 @media (prefers-reduced-motion: reduce) { .fort-box .fp { transition: none; } }
+
+/* the Fortress map, interactive (2026-10-19): zoom buttons, a picked wall or turret outlined, the box under it with its commands */
+.fort-tools { display: inline-flex; gap: 4px; margin-left: auto; }
+.fort-tools button { font: inherit; min-width: 30px; height: 28px; padding: 0 8px; color: var(--text); background: var(--panel-strong); border: 1px solid var(--line); border-radius: 6px; cursor: pointer; }
+.fort-tools button:hover, .fort-tools button:focus-visible { border-color: var(--gold); color: var(--gold); }
+.fort-box .fort-zoom { position: absolute; inset: 0; transform-origin: 0 0; transition: transform .15s ease; }
+.fort-box.zoomed { cursor: grab; touch-action: none; }
+.fort-box.zoomed:active { cursor: grabbing; }
+.fort-box rect[data-p], .fort-box circle[data-t] { cursor: pointer; }
+.fort-box rect[data-p]:hover, .fort-box circle[data-t]:hover { stroke: #fff; }
+.fort-box .fp.sel, .fort-box .ft.sel { stroke: #fff; stroke-width: 14; }
+.fort-info { margin-top: 8px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; min-height: 32px; font-size: .95em; }
+.fort-info b { color: var(--gold); }
+.fort-info .acts { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.fort-info button { font: inherit; padding: 5px 12px; color: var(--text); background: var(--panel-strong); border: 1px solid var(--line); border-radius: 6px; cursor: pointer; }
+.fort-info button:hover, .fort-info button:focus-visible { border-color: var(--gold); }
+.fort-info button.gold { border-color: var(--gold); color: var(--gold); }
+.fort-info button.red { border-color: #a33a30; color: #f0857a; }
+@media (prefers-reduced-motion: reduce) { .fort-box .fort-zoom { transition: none; } }
