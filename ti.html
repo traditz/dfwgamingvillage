@@ -155,7 +155,7 @@ body > h1 {
 
 .controls {
     display: grid;
-    grid-template-columns: minmax(220px, 1fr) auto auto;
+    grid-template-columns: minmax(220px, 1fr) auto auto auto auto;
     gap: 12px;
     align-items: end;
     margin-bottom: 20px;
@@ -292,6 +292,16 @@ body > h1 {
     box-shadow: inset 0 0 0 1px rgba(255, 152, 0, 0.35);
 }
 
+.br-faction {
+    border-color: #4fa3ff;
+    box-shadow: inset 0 0 0 1px rgba(79, 163, 255, 0.35);
+}
+
+.ll-faction {
+    border-color: #b57bff;
+    box-shadow: inset 0 0 0 1px rgba(181, 123, 255, 0.35);
+}
+
 .faction-tile img {
     width: 68px;
     height: 68px;
@@ -324,6 +334,17 @@ body > h1 {
 #menuToggle:hover,
 #menuToggle:focus-visible {
     background-color: #ffe08a;
+}
+
+@media (max-width: 1100px) {
+    .controls {
+        grid-template-columns: repeat(4, auto);
+        justify-content: start;
+    }
+
+    .control-group {
+        grid-column: 1 / -1;
+    }
 }
 
 @media (max-width: 860px) {
@@ -387,7 +408,16 @@ body > h1 {
 </style>
 <script>
 let factionData = [];
-let showDS = localStorage.getItem("showDS") === "true";
+
+// Optional faction sets: each is hidden unless its toggle is checked.
+const FACTION_SOURCES = [
+    { flag: "ds:", toggleId: "dsToggle", storageKey: "showDS", tileClass: "ds-faction" },
+    { flag: "br:", toggleId: "brToggle", storageKey: "showBR", tileClass: "br-faction" },
+    { flag: "ll:", toggleId: "llToggle", storageKey: "showLL", tileClass: "ll-faction" }
+];
+FACTION_SOURCES.forEach(source => {
+    source.shown = localStorage.getItem(source.storageKey) === "true";
+});
 
 function factionSlug(name) {
     return name.replace(/\s+/g, "_").toLowerCase();
@@ -398,9 +428,18 @@ function factionFromHash() {
     return match ? decodeURIComponent(match[1]) : "";
 }
 
-function isDiscordantStarsFaction(faction) {
-    const dsKey = Object.keys(faction).find(k => k.trim().toLowerCase() === "ds:");
-    return Boolean(dsKey && String(faction[dsKey]).toLowerCase() === "yes");
+function hasSourceFlag(faction, flag) {
+    const key = Object.keys(faction).find(k => k.trim().toLowerCase() === flag);
+    return Boolean(key && String(faction[key]).toLowerCase() === "yes");
+}
+
+function factionSource(faction) {
+    return FACTION_SOURCES.find(source => hasSourceFlag(faction, source.flag));
+}
+
+function isFactionHidden(faction) {
+    const source = factionSource(faction);
+    return Boolean(source && !source.shown);
 }
 
 function findFactionBySlug(slug) {
@@ -439,11 +478,13 @@ function normalizeControls() {
     const container = document.getElementById("container");
     const factionLabel = document.querySelector('label[for="factionDropdown"]');
     const dropdown = document.getElementById("factionDropdown");
-    const dsCheckbox = document.getElementById("dsToggle");
-    const dsLabel = dsCheckbox ? dsCheckbox.closest("label") : null;
+    const toggleLabels = FACTION_SOURCES.map(source => {
+        const checkbox = document.getElementById(source.toggleId);
+        return checkbox ? checkbox.closest("label") : null;
+    });
     const menuToggle = document.getElementById("menuToggle");
 
-    if (!container || !factionLabel || !dropdown || !dsLabel || !menuToggle) return;
+    if (!container || !factionLabel || !dropdown || toggleLabels.includes(null) || !menuToggle) return;
 
     const controls = document.createElement("div");
     controls.className = "controls";
@@ -455,10 +496,11 @@ function normalizeControls() {
     controlGroup.appendChild(factionLabel);
     controlGroup.appendChild(dropdown);
 
-    dsLabel.className = "toggle-control";
-
     controls.appendChild(controlGroup);
-    controls.appendChild(dsLabel);
+    toggleLabels.forEach(label => {
+        label.className = "toggle-control";
+        controls.appendChild(label);
+    });
     controls.appendChild(menuToggle);
     container.insertBefore(controls, document.getElementById("factionMenu"));
 }
@@ -468,7 +510,7 @@ function populateDropdown() {
     dropdown.innerHTML = '<option value="">--Choose a faction--</option>';
 
     factionData.forEach(faction => {
-        if (!showDS && isDiscordantStarsFaction(faction)) return;
+        if (isFactionHidden(faction)) return;
 
         let option = document.createElement("option");
         option.value = faction["Faction Name:"];
@@ -482,17 +524,16 @@ function populateFactionMenu() {
     menu.innerHTML = "";
 
     factionData.forEach(faction => {
-        const isDSFaction = isDiscordantStarsFaction(faction);
-
-        if (!showDS && isDSFaction) return;
+        if (isFactionHidden(faction)) return;
 
         let tile = document.createElement("button");
         tile.type = "button";
         tile.className = "faction-tile";
         tile.setAttribute("aria-label", `View ${faction["Faction Name:"]}`);
 
-        if (isDSFaction) {
-            tile.classList.add("ds-faction");
+        const source = factionSource(faction);
+        if (source) {
+            tile.classList.add(source.tileClass);
         }
 
         tile.onclick = () => {
@@ -544,7 +585,7 @@ function displayFactionInfo(selectedFaction, options = {}) {
 
     let faction = factionData.find(f => f["Faction Name:"] === selectedFaction);
     if (!faction) return;
-    if (!showDS && isDiscordantStarsFaction(faction)) {
+    if (isFactionHidden(faction)) {
         showFactionMenu({ updateHistory });
         return;
     }
@@ -582,7 +623,7 @@ function displayFactionInfo(selectedFaction, options = {}) {
     infoDiv.appendChild(headerDiv);
 
     Object.entries(faction).forEach(([key, value]) => {
-        if (key.trim().toLowerCase() === "ds:") return;
+        if (FACTION_SOURCES.some(source => source.flag === key.trim().toLowerCase())) return;
         if (key === "Faction Name:" || value === "") return;
         let section = document.createElement("div");
         section.className = "info-section";
@@ -634,18 +675,19 @@ document.addEventListener("DOMContentLoaded", function() {
     normalizeNavigationLinks();
     normalizeControls();
 
-    const dsCheckbox = document.getElementById("dsToggle");
+    FACTION_SOURCES.forEach(source => {
+        const checkbox = document.getElementById(source.toggleId);
 
-    // Restore from localStorage
-    dsCheckbox.checked = localStorage.getItem("showDS") === "true";
-    showDS = dsCheckbox.checked;
+        // Restore from localStorage
+        checkbox.checked = source.shown;
 
-    dsCheckbox.addEventListener("change", () => {
-        showDS = dsCheckbox.checked;
-        localStorage.setItem("showDS", showDS);
-        populateDropdown();
-        populateFactionMenu();
-        openFactionFromCurrentUrl();
+        checkbox.addEventListener("change", () => {
+            source.shown = checkbox.checked;
+            localStorage.setItem(source.storageKey, source.shown);
+            populateDropdown();
+            populateFactionMenu();
+            openFactionFromCurrentUrl();
+        });
     });
 
     fetch("factionData_with_icons.json")
@@ -691,6 +733,8 @@ document.addEventListener("DOMContentLoaded", function() {
 <div id="container">
     <label for="factionDropdown"><strong>Select a Faction:</strong></label>
     <label><input type="checkbox" id="dsToggle"> Discordant Stars?</label>
+    <label><input type="checkbox" id="brToggle"> Blue Reverie?</label>
+    <label><input type="checkbox" id="llToggle"> Lost Legacies?</label>
     <select id="factionDropdown" onchange="displayFactionInfo(this.value)">
         <option value="">--Choose a faction--</option>
     </select>
