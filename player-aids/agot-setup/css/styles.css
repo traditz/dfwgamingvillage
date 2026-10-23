@@ -1,0 +1,476 @@
+/* =============================================================================
+   A Game of Thrones: The Board Game (Second Edition) — Setup & Reference Utility
+   Design: the Second Edition "Rules of Play" book. A parchment page bound in tooled
+   leather (Rules p.2–32 page frame), the cover painting and logo as the header, chapter
+   headings in wide old-style capitals over the gold rod with iron finials (p.4 "Game
+   Setup"), red italic sub-heads and the red swash bullet (p.21), bold small-caps step
+   labels (p.4), black numbered example markers (p.21) and the parchment scroll with its
+   iron clasp for callouts (p.4, p.6). Colours sampled from the PDFs.
+   ============================================================================= */
+
+:root {
+  /* parchment page (Rules page texture, lightened) */
+  --paper:      #f3eee4;   /* page median */
+  --paper-lo:   #ddd8c9;   /* darkest mottling: every text pair is checked against this */
+  --card:       #fbf8f1;   /* raised controls, cards */
+  --scroll:     #f6efdf;   /* scroll callout fill (Rules p.4 scroll, lightened) */
+  --wash:       #ebe3d3;   /* table heads, open accordion row */
+
+  /* ink, sampled from the rulebook text */
+  --ink:        #1f1a15;   /* body */
+  --ink-2:      #4a3d31;   /* secondary */
+  --ink-3:      #5e4c3c;   /* meta, citations */
+  --brown:      #624934;   /* chapter headings, small-caps labels (Rules p.4 #624934) */
+  --red:        #89331c;   /* sub-heads and swash bullets (Rules p.21 #89331c) */
+  --slate:      #4f6068;   /* running head (Rules p.4 #4f6068) */
+  --faq-blue:   #295e94;   /* FAQ v2.0 change colour (FAQ p.1 #295e94) */
+
+  /* leather binding and gold trim (cover frame, page spine) */
+  --leather:    #3b2618;
+  --leather-hi: #4a3020;
+  --leather-lo: #24170e;
+  --gold:       #c09e66;   /* the rod (Rules p.4) */
+  --gold-deep:  #8a6a3a;
+  --cream:      #f6efe0;   /* lettering on leather */
+
+  --ctl:        #7d6a55;   /* control borders: >= 3:1 on the darkest parchment */
+  --line:       #d3c6b0;   /* hairlines */
+  --focus:      #295e94;
+  --marker:     #221c17;   /* example-marker disc (Rules p.21) */
+
+  --measure: 68ch;
+  --f-display: "Cormorant SC", "Cormorant Garamond", Garamond, "Times New Roman", serif;
+  --f-label: "Alegreya SC", "Alegreya", Georgia, serif;
+  --f-text: "Alegreya", Georgia, "Times New Roman", serif;
+
+  /* the red swash bullet: AmorSerifPro glyph "end3" as printed beside the rulebook's lists (Rules p.21) */
+  --swash: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-50 -720 1060 735'%3E%3Cpath fill='%2389331c' transform='scale(1 -1)' d='M328 693C438 679 475 589 475 505C475 238 213 21 -38 21H-43L-36 0C281 1 565 260 565 507C565 610 502 708 339 711ZM912 262C942 278 958 307 958 342C958 419 879 461 784 461C703 461 609 431 541 365L558 401C642 484 749 526 837 526C929 526 1000 480 1001 386C1001 332 971 266 925 246Z'/%3E%3C/svg%3E");
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+*::before, *::after { box-sizing: border-box; }
+
+html { font-size: 112.5%; scroll-behavior: smooth; }   /* 18px: Alegreya reads small */
+
+body {
+  background-color: var(--leather-lo);
+  background-image:
+    radial-gradient(ellipse 70% 40% at 50% 0%, rgba(110, 72, 42, 0.55), transparent 70%),
+    radial-gradient(ellipse 120% 80% at 50% 100%, rgba(0, 0, 0, 0.35), transparent 70%);
+  color: var(--ink);
+  font-family: var(--f-text);
+  font-size: 1rem;
+  line-height: 1.55;
+  font-variant-numeric: lining-nums;   /* Alegreya's old-style 1 and 0 read as I and O in counts like "10 rounds" */
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+
+.vh {
+  position: absolute !important; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0;
+  overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+
+/* ---- header: the cover, framed in tooled leather -------------------------- */
+.topbar {
+  background: url("../images/leather-band.webp") center top / auto 60px repeat-x;
+  padding-top: 60px;
+}
+.hero { max-width: 1000px; margin: 0 auto; padding: 22px 24px 0; text-align: center; }
+.hero-frame {
+  max-width: 853px; margin: 0 auto;
+  border: 1px solid var(--gold);
+  box-shadow: 0 0 0 4px var(--leather-lo), 0 0 0 5px var(--gold-deep), 0 14px 34px rgba(0, 0, 0, 0.6);
+  background: #3a3532;
+  line-height: 0;
+}
+.brand-title { margin: 0; line-height: 0; }
+.hero-img { display: block; width: 100%; height: auto; }
+
+.brand-sub {
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: 0 0.1em;
+  margin: 0 auto; padding: 22px 12px 28px;
+  font-family: var(--f-display); font-weight: 600; text-transform: uppercase;
+  font-size: clamp(1.1rem, 2.6vw, 1.55rem); letter-spacing: 0.16em; line-height: 1.3;
+  color: var(--cream);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6);
+}
+.brand-sub .brand-dot { color: var(--gold); padding: 0 0.35em; letter-spacing: 0; }
+
+/* ---- the page: parchment bound to the leather ------------------------------ */
+.page {
+  position: relative;
+  max-width: 1000px; margin: 0 auto;
+  padding: 26px 56px 60px;
+  background: var(--paper) url("../images/parchment.webp") center top / 600px auto repeat;
+  box-shadow: 0 0 0 2px var(--gold-deep), 0 0 0 4px var(--leather-lo), 0 18px 44px rgba(0, 0, 0, 0.55);
+}
+.page::before {                     /* the rulebook's thin layout rules near the page edge */
+  content: ""; position: absolute; inset: 12px; pointer-events: none;
+  border: 1px solid rgba(98, 73, 52, 0.26);
+  box-shadow: inset 0 0 0 4px rgba(243, 238, 228, 0), inset 0 0 0 5px rgba(98, 73, 52, 0.12);
+}
+.runhead {
+  text-align: center; margin: 0 0 14px;
+  font-family: var(--f-display); font-weight: 600; text-transform: uppercase;
+  font-size: 0.78rem; letter-spacing: 0.32em; color: var(--slate);
+}
+.tagline { max-width: 62ch; margin: 0 auto; text-align: center; font-style: italic; color: var(--ink-2); }
+.tagline .tag-hook { display: block; margin-top: 6px; color: var(--red); }
+
+/* ---- chapter headings: wide capitals over the gold rod (Rules p.4) ---------- */
+.sec { margin-top: 56px; }
+.sec-cfg { margin-top: 36px; }
+section h2 {
+  font-family: var(--f-display); font-weight: 600; text-transform: uppercase;
+  font-size: clamp(1.55rem, 3.6vw, 2.2rem); line-height: 1.12; letter-spacing: 0.13em;
+  color: var(--brown); text-align: center;
+  margin: 0 0 4px;
+}
+section h2::after {
+  content: ""; display: block;
+  width: min(100%, 600px); height: 20px; margin: 8px auto 0;
+  border-style: solid; border-width: 0 34px;
+  border-image: url("../images/rod.webp") 0 46 fill / 0 34px / 0 stretch;
+}
+.sec-note {
+  max-width: 62ch; margin: 12px auto 24px; text-align: center;
+  font-style: italic; color: var(--ink-2);
+}
+
+/* ---- configurator ---------------------------------------------------------- */
+.cfg { display: flex; flex-direction: column; gap: 24px; }
+.cfg-label {
+  display: block; margin-bottom: 9px;
+  font-family: var(--f-label); font-weight: 700; font-size: 1.08rem; letter-spacing: 0.02em; color: var(--brown);
+}
+.cfg-label .hint { font-family: var(--f-text); font-weight: 400; font-style: italic; font-size: 0.9rem; letter-spacing: 0; color: var(--ink-3); }
+
+.chips, .mods, .pbtns { display: flex; flex-wrap: wrap; gap: 10px; }
+
+.chip, .mod {
+  position: relative; font: inherit; color: var(--ink); text-align: left; cursor: pointer;
+  background-color: var(--card); border: 1.5px solid var(--ctl); border-radius: 3px;
+  box-shadow: 0 1px 2px rgba(60, 40, 20, 0.12);
+  transition: background-color .15s, border-color .15s, color .15s, box-shadow .15s;
+}
+.chip:hover, .mod:hover { border-color: var(--brown); background-color: #fffdf8; box-shadow: 0 2px 5px rgba(60, 40, 20, 0.2); }
+
+/* selected: tooled leather with a gold edge and a check mark (not colour alone) */
+.chip.on, .mod.on {
+  background-color: var(--leather); border: 2px solid var(--gold); color: var(--cream);
+  box-shadow: inset 0 0 0 2px var(--leather-lo), 0 2px 5px rgba(40, 25, 12, 0.35);
+}
+.chip.on::after, .mod.on::after {
+  content: "✓"; position: absolute; top: 5px; right: 8px;
+  font-family: var(--f-text); font-size: 0.9rem; font-weight: 700; line-height: 1; color: var(--gold);
+}
+.chip.on:hover, .mod.on:hover { background-color: var(--leather-hi); border-color: var(--gold); }
+.chip.lock { cursor: default; }
+.chip.lock:hover { background-color: var(--leather); }
+
+.chip { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; min-height: 52px; padding: 7px 28px 7px 14px; }
+.chip b { font-weight: 700; font-size: 1rem; line-height: 1.25; }
+.chip span { font-size: 0.86rem; line-height: 1.3; color: var(--ink-3); }
+.chip.on span { color: #e9dcc2; }
+.chip.off { cursor: not-allowed; background-color: transparent; border-style: dashed; color: var(--ink-3); box-shadow: none; }
+.chip.off b { font-weight: 400; }
+.chip.off:hover { border-color: var(--ctl); background-color: transparent; box-shadow: none; }
+
+/* House chips carry the House sigil (Rules p.6 "The Houses of Westeros"; Arryn and Targaryen from MoD p.2).
+   The order follows GT.houses in js/data.js: Stark, Lannister, Baratheon, Greyjoy, Tyrell, Martell, Arryn, Targaryen. */
+.chips.houses { display: grid; grid-template-columns: repeat(auto-fill, minmax(134px, 1fr)); }
+.houses .chip {
+  padding-left: 48px;
+  background-repeat: no-repeat; background-position: 10px center; background-size: 30px 30px;
+}
+.houses .chip:nth-child(1) { background-image: url("../images/sigil-stark.webp"); }
+.houses .chip:nth-child(2) { background-image: url("../images/sigil-lannister.webp"); }
+.houses .chip:nth-child(3) { background-image: url("../images/sigil-baratheon.webp"); }
+.houses .chip:nth-child(4) { background-image: url("../images/sigil-greyjoy.webp"); }
+.houses .chip:nth-child(5) { background-image: url("../images/sigil-tyrell.webp"); }
+.houses .chip:nth-child(6) { background-image: url("../images/sigil-martell.webp"); }
+.houses .chip:nth-child(7) { background-image: url("../images/sigil-arryn.webp"); }
+.houses .chip:nth-child(8) { background-image: url("../images/sigil-targaryen.webp"); }
+.houses .chip.on::after { top: auto; bottom: 8px; }   /* clear of long House names */
+.houses .chip.off { background-color: #e6dfd2; background-blend-mode: luminosity; }
+.chip.house.vassal { border-style: dotted; border-width: 2.5px; border-color: var(--brown); background-color: #efe5d2; }
+.chip.house.vassal span { color: var(--brown); font-weight: 700; }
+.vassal-note { margin-top: 10px; color: var(--ink-2); max-width: var(--measure); }
+.vassal-note[hidden] { display: none; }
+
+/* player count: round tokens; the chosen one is leather with a gold ring and underlined */
+.pbtn {
+  width: 48px; height: 48px; border-radius: 50%;
+  display: inline-grid; place-items: center;
+  background: var(--card); color: var(--ink);
+  border: 1.5px solid var(--ctl); cursor: pointer;
+  font: inherit; font-weight: 700; font-size: 1.2rem; line-height: 1;
+  box-shadow: 0 1px 2px rgba(60, 40, 20, 0.15);
+  transition: background-color .15s, border-color .15s;
+}
+.pbtn:hover { border-color: var(--brown); background: #fffdf8; }
+.pbtn.on {
+  background: var(--leather); border: 2px solid var(--gold); color: var(--cream);
+  box-shadow: inset 0 0 0 2px var(--leather-lo), 0 0 0 2px var(--gold-deep), 0 2px 5px rgba(40, 25, 12, 0.35);
+  text-decoration: underline; text-decoration-color: var(--gold); text-underline-offset: 4px; text-decoration-thickness: 2px;
+}
+.pbtn.off { cursor: not-allowed; background: transparent; color: var(--ink-3); border-style: dashed; font-weight: 400; box-shadow: none; }
+.pbtn.off:hover { border-color: var(--ctl); }
+
+.mod { flex: 1 1 300px; padding: 11px 30px 13px 16px; color: var(--ink-2); }
+.mod-name { display: block; font-family: var(--f-label); font-weight: 700; font-size: 1.06rem; color: var(--ink); margin-bottom: 3px; }
+.mod-sum { display: block; font-size: 0.94rem; line-height: 1.45; }
+.mod.on { color: #e9dcc2; }
+.mod.on .mod-name { color: var(--cream); }
+
+/* ---- setup ----------------------------------------------------------------- */
+.teach-bar { margin: 0 0 22px; text-align: center; }
+
+#teachBtn {
+  display: inline-flex; align-items: center; gap: 8px;
+  min-height: 48px; padding: 10px 26px;
+  background: var(--leather); color: var(--cream);
+  border: 2px solid var(--gold); border-radius: 3px; cursor: pointer;
+  box-shadow: inset 0 0 0 2px var(--leather-lo), 0 2px 6px rgba(40, 25, 12, 0.35);
+  font-family: var(--f-label); font-weight: 700; font-size: 1.08rem; letter-spacing: 0.02em;
+}
+#teachBtn:hover { background: var(--leather-hi); }
+#teachBtn[aria-expanded="true"] { background: var(--leather-lo); }
+
+/* phase: the rulebook's red italic sub-head (Rules p.13, p.21) */
+.phase { margin-top: 34px; }
+.phase:first-child { margin-top: 8px; }
+.phase-title {
+  display: flex; align-items: baseline; gap: 14px;
+  font-family: var(--f-text); font-style: italic; font-weight: 400;
+  font-size: 1.42rem; line-height: 1.25; color: var(--red);
+  padding-bottom: 6px; margin-bottom: 2px;
+  border-bottom: 1px solid rgba(137, 51, 28, 0.35);
+}
+
+.step {
+  display: grid; grid-template-columns: 52px minmax(0, 1fr); column-gap: 14px;
+  padding: 18px 0 16px; border-bottom: 1px solid var(--line);
+}
+.step:last-child { border-bottom: 0; }
+/* the numbered example marker (Rules p.21): a black disc, white numeral, pale ring */
+.step-num {
+  width: 38px; height: 38px; margin: 0 0 0 auto; border-radius: 50%;
+  display: grid; place-items: center;
+  background: radial-gradient(circle at 40% 35%, #3a322b, var(--marker) 70%);
+  color: #fff; font-family: var(--f-display); font-weight: 600; font-size: 1.3rem; line-height: 1;
+  padding-bottom: 2px;
+  box-shadow: 0 0 0 2px #efe8da, 0 0 0 3px #9c8b76, 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+.step-body { min-width: 0; }
+.step-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin-bottom: 6px; }
+/* bold small-caps step labels (Rules p.4 "Prepare the Game Board:") */
+.step-head h4 { font-family: var(--f-label); font-weight: 700; font-size: 1.16rem; line-height: 1.3; color: var(--ink); letter-spacing: 0.01em; }
+.step-text { max-width: var(--measure); }
+.step-text ul, .step-text ol { margin: 4px 0 2px 1.35em; }
+.step-text li { margin-bottom: 5px; }
+.step-text p { margin-bottom: 6px; }
+.inline-note { margin-top: 6px; font-size: 0.94rem; color: var(--ink-2); font-style: italic; }
+.muted { color: var(--ink-3); }
+
+/* influence tracks after the slide (setup) */
+.tracks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 18px; margin: 8px 0 10px; }
+.tracks h5 { font-family: var(--f-label); font-size: 1rem; font-weight: 700; color: var(--brown); margin-bottom: 2px; }
+ol.track { margin: 0 0 0 1.6em; }
+ol.track li { margin-bottom: 2px; }
+.stars { color: var(--ink-3); font-size: 0.92rem; white-space: nowrap; }
+
+/* source tags: the box each step comes from */
+.tag {
+  display: inline-block; white-space: nowrap;
+  font-family: var(--f-label); font-weight: 700; font-size: 0.86rem; letter-spacing: 0.05em; line-height: 1.25;
+  padding: 2px 10px 3px; border-radius: 2px;
+  color: #fff;
+}
+.tag-core { background: var(--slate); }            /* base book running-head slate */
+.tag-mod  { background: #6b2c5f; }                 /* Mother of Dragons */
+.tag-faq  { background: var(--faq-blue); }         /* the FAQ's own change colour */
+.tag-opt  { background: #3d5a2a; }
+.tag-pc   { background: #7a5418; }
+
+.src-line { margin-top: 9px; font-size: 0.88rem; font-style: italic; color: var(--ink-3); }
+.src-line::before { content: "Source: "; font-family: var(--f-label); font-style: normal; font-weight: 700; color: var(--brown); }
+
+/* swash bullets for the reference, setup and teaching lists (not the icon lists) */
+.step-text ul:not(.aid-icons), .ref-body ul:not(.aid-icons), .teach-panel ul { list-style: none; margin-left: 1.45em; }
+.step-text ul:not(.aid-icons) > li, .ref-body ul:not(.aid-icons) > li, .teach-panel ul > li { position: relative; }
+.step-text ul:not(.aid-icons) > li::before, .ref-body ul:not(.aid-icons) > li::before, .teach-panel ul > li::before {
+  content: ""; position: absolute; left: -1.42em; top: 0.33em;
+  width: 1.12em; height: 0.78em;
+  background: var(--swash) left center / contain no-repeat;
+}
+.step-text ol > li::marker, .ref-body ol > li::marker, .teach-panel ol > li::marker { color: var(--red); font-weight: 700; }
+ul ul:not(.aid-icons) > li::before { width: 0.85em; height: 0.59em; top: 0.42em; opacity: 0.85; }
+
+/* ---- teaching script: the parchment scroll with its iron clasp (Rules p.4, p.6) ---- */
+.teach-panel {
+  position: relative; scroll-margin-top: 44px;   /* keep the top scroll rod in view when app.js scrolls to it */
+  max-width: calc(var(--measure) + 80px); margin: 40px auto 46px;
+  padding: 30px 34px 26px;
+  background: var(--scroll);
+  border-left: 1px solid rgba(98, 73, 52, 0.28); border-right: 1px solid rgba(98, 73, 52, 0.28);
+  box-shadow: 0 3px 12px rgba(60, 40, 20, 0.22), inset 0 0 40px rgba(170, 140, 95, 0.18);
+}
+.teach-panel[hidden] { display: none; }
+.teach-panel::before, .teach-panel::after {
+  content: ""; position: absolute; left: -16px; right: -16px; height: 38px; pointer-events: none;
+  background: url("../images/scroll-rod.webp") center / 100% 100% no-repeat;
+}
+.teach-panel::before { top: -22px; }
+.teach-panel::after { bottom: -22px; }
+.teach-top {
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  margin: 0 0 14px; text-align: center;
+}
+.teach-top h3 { font-family: var(--f-label); font-weight: 500; font-size: 1.55rem; line-height: 1.2; color: var(--brown); }
+.teach-copy {
+  min-height: 44px; padding: 8px 18px;
+  background: var(--card); color: var(--leather);
+  border: 1.5px solid var(--ctl); border-radius: 3px; cursor: pointer;
+  font-family: var(--f-label); font-weight: 700; font-size: 0.98rem;
+}
+.teach-copy:hover { background: var(--leather); color: var(--cream); border-color: var(--leather); }
+.teach-note { font-style: italic; color: var(--ink-2); margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed var(--ctl); }
+.teach-panel h4 { font-style: italic; font-weight: 400; font-size: 1.24rem; color: var(--red); margin: 18px 0 6px; }
+.teach-panel p { margin-bottom: 10px; }
+.teach-panel ul, .teach-panel ol { margin-top: 4px; margin-bottom: 12px; }
+.teach-panel ol { margin-left: 1.35em; }
+.teach-panel li { margin-bottom: 5px; }
+
+/* ---- rules reference ------------------------------------------------------- */
+#reference { border-top: 1px solid var(--line); }
+.ref { border-bottom: 1px solid var(--line); }
+.ref summary {
+  cursor: pointer; list-style: none;
+  display: flex; align-items: center; gap: 12px;
+  min-height: 54px; padding: 10px 6px 10px 8px;
+  font-family: var(--f-label); font-weight: 700; font-size: 1.14rem; line-height: 1.3; color: var(--brown);
+}
+.ref summary::-webkit-details-marker { display: none; }
+.ref summary::before {
+  content: ""; flex: none; width: 1.15em; height: 0.8em;
+  background: var(--swash) left center / contain no-repeat;
+}
+.ref summary::after {                 /* open/close: a small example marker */
+  content: "+"; flex: none; margin-left: auto;
+  width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--card); color: var(--marker);
+  border: 1.5px solid var(--ctl);
+  font-family: var(--f-text); font-size: 1.25rem; font-weight: 700; line-height: 1;
+}
+.ref summary:hover { background: rgba(98, 73, 52, 0.07); }
+.ref summary:hover::after { border-color: var(--brown); }
+.ref[open] > summary { background: rgba(98, 73, 52, 0.06); }
+.ref[open] > summary::after { content: "\2212"; background: var(--marker); color: #fff; border-color: var(--marker); box-shadow: 0 0 0 2px #efe8da, 0 0 0 3px #9c8b76; }
+.ref-body { padding: 8px 10px 24px 10px; max-width: calc(var(--measure) + 24px); }
+.ref-body h4 { font-style: italic; font-weight: 400; font-size: 1.2rem; color: var(--red); margin: 16px 0 5px; }
+.ref-body h4:first-child { margin-top: 4px; }
+.ref-body h5 { font-family: var(--f-label); font-weight: 700; font-size: 1rem; color: var(--brown); margin: 10px 0 3px; }
+.ref-body p { margin-bottom: 9px; }
+.ref-body ul, .ref-body ol { margin: 4px 0 12px 1.45em; }
+.ref-body li { margin-bottom: 5px; }
+.ref-body li.here { font-weight: 700; }
+.ref-table { border-collapse: collapse; margin: 8px 0 14px; font-size: 0.97rem; background: rgba(251, 248, 241, 0.7); }
+.ref-table th, .ref-table td { border: 1px solid #c9b99d; padding: 5px 10px; text-align: left; vertical-align: top; }
+.ref-table th { background: var(--wash); font-family: var(--f-label); font-weight: 700; color: var(--brown); }
+.ref-table tr.here td { background: #f1e2bf; font-weight: 700; }
+
+/* ---- search ---------------------------------------------------------------- */
+.rsearch-wrap { margin: 0 auto 18px; max-width: calc(var(--measure) + 60px); }
+#rresults { max-width: calc(var(--measure) + 60px); margin: 0 auto; }
+#rsearch {
+  width: 100%; min-height: 52px; padding: 12px 18px;
+  background: var(--card); color: var(--ink);
+  border: 1.5px solid var(--ctl); border-radius: 3px; font: inherit; font-size: 1.04rem;
+  box-shadow: inset 0 1px 3px rgba(60, 40, 20, 0.15);
+  -webkit-appearance: none; appearance: none;
+}
+#rsearch:hover { border-color: var(--brown); }
+#rsearch:focus { outline: 3px solid var(--focus); outline-offset: 2px; border-color: var(--brown); }
+#rsearch::placeholder { color: var(--ink-3); font-style: italic; opacity: 1; }
+.rhint { color: var(--ink-2); font-style: italic; }
+.rhit {
+  padding: 12px 18px 14px; margin-bottom: 10px;
+  background: var(--card); border: 1px solid var(--line); border-left: 3px solid var(--red); border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(60, 40, 20, 0.1);
+}
+.rhit-src { font-family: var(--f-label); font-weight: 700; font-size: 0.95rem; letter-spacing: 0.03em; color: var(--brown); margin-bottom: 4px; }
+.rhit-text { font-size: 0.98rem; line-height: 1.55; }
+.rhit-text mark, .aid-srch mark { background: #f2d58c; color: var(--ink); padding: 0 2px; border-radius: 2px; }
+
+/* ---- footer: on the leather ------------------------------------------------ */
+.footer {
+  padding: 34px 24px 46px; text-align: center;
+  color: #e8dcc4; font-style: italic; font-size: 0.94rem;
+}
+.footer::before {
+  content: ""; display: block; width: min(80%, 420px); height: 16px; margin: 0 auto 18px;
+  border-style: solid; border-width: 0 27px;
+  border-image: url("../images/rod.webp") 0 46 fill / 0 27px / 0 stretch;
+  opacity: 0.9;
+}
+.footer p { max-width: 68ch; margin: 0 auto; }
+
+/* ---- responsive ------------------------------------------------------------ */
+@media (max-width: 1040px) {
+  .page { margin: 0 12px; }
+}
+@media (max-width: 640px) {
+  html { font-size: 106.25%; }   /* 17px */
+  .topbar { padding-top: 36px; background-size: auto 36px; }
+  .hero { padding: 12px 0 0; }
+  .hero-frame { border-left: 0; border-right: 0; box-shadow: 0 0 0 0 transparent, 0 3px 0 var(--leather-lo), 0 4px 0 var(--gold-deep); }
+  .brand-sub { flex-direction: column; align-items: center; padding: 14px 12px 18px; letter-spacing: 0.12em; font-size: 1.05rem; }
+  .brand-sub .brand-dot { display: none; }
+  .page { margin: 0; padding: 18px 16px 40px; box-shadow: 0 0 0 0 transparent, 0 -2px 0 var(--gold-deep); }
+  .page::before { inset: 6px; }
+  .tagline .tag-lead { display: none; }
+  .tagline .tag-hook { margin-top: 0; }
+  .sec { margin-top: 44px; }
+  .sec-cfg { margin-top: 26px; }
+  section h2::after { border-width: 0 26px; border-image-width: 0 26px; height: 16px; }
+  .mod { flex-basis: 100%; }
+  .chips.houses { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pbtns { gap: 8px; }
+  .pbtn { width: 46px; height: 46px; }
+  .step { grid-template-columns: 34px minmax(0, 1fr); column-gap: 12px; }
+  .step-num { width: 32px; height: 32px; font-size: 1.15rem; }
+  #rsearch { padding: 12px 14px; font-size: 1rem; }
+  .phase-title { font-size: 1.28rem; }
+  .tracks { grid-template-columns: minmax(0, 1fr); }
+  .teach-panel { padding: 26px 16px 20px; margin: 34px 4px 40px; }
+  .teach-panel::before, .teach-panel::after { left: -10px; right: -10px; height: 30px; }
+  .teach-panel::before { top: -17px; }
+  .teach-panel::after { bottom: -17px; }
+  .teach-top h3 { font-size: 1.32rem; }
+  .ref summary { font-size: 1.06rem; padding-left: 4px; }
+  .ref-body { padding: 4px 2px 20px; }
+  .ref-table { font-size: 0.94rem; }
+  .ref-table th, .ref-table td { padding: 5px 7px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+  html { scroll-behavior: auto; }
+}
+
+/* Components glossary and rulebook search (css/components.css, css/search.css): the page palette */
+#components, .aid-srch {
+  --comp-surface: var(--card); --comp-fig: #e0d8ce; --comp-ink: var(--ink); --comp-muted: var(--ink-3);
+  --comp-line: var(--ctl); --comp-accent: var(--leather); --comp-accent-ink: var(--cream);
+  --comp-head-font: var(--f-label); --comp-radius: 3px;
+}
+
+/* Rulebook icons: keep an inline icon on the same line as the word it labels */
+.ic-nb { white-space: nowrap; }
+/* Neutral Force token sides in the setup step: shown larger so the player-range badge stays legible */
+.aid-icon-row.nf-range { --aid-ic-size: 52px; margin-top: 6px; }

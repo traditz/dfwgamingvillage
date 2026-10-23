@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sid Meier's Civilization: The Board Game — Setup &amp; Reference Utility</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=IM+Fell+English+SC&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=3">
+  <link rel="stylesheet" href="css/components.css?v=1">
+  <link rel="stylesheet" href="css/search.css?v=1.1">
+  <link rel="stylesheet" href="css/icons.css?v=1">
+</head>
+<body>
+  <header class="topbar">
+    <div class="hero">
+      <div class="hero-frame">
+        <img class="hero-art" src="images/hero.webp" width="853" height="440" alt="" aria-hidden="true" decoding="async">
+        <div class="hero-title">
+          <h1 class="brand-title"><img class="brand-logo" src="images/logo.webp" width="1300" height="247" alt="Sid Meier’s Civilization: The Board Game"></h1>
+          <div class="brand-sub">Setup &amp; Reference Utility</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-copy">
+      <p class="tagline">
+        <span class="tag-lead">Choose the sets you own, the player count, the civilizations at the table and any variants
+        for exact setup steps, a full rules reference with the official FAQ v2.0 errata applied, and a
+        searchable index of every rulebook.</span>
+        <span class="tag-hook">From a single humble city to the stars, the stage or the enemy’s capital: which path will your people take?</span>
+      </p>
+    </div>
+  </header>
+
+  <main>
+    <section aria-label="Configuration" class="sec sec-cfg">
+      <h2>Your Game</h2>
+      <p class="sec-note">Select the sets in your box, the number of players, the civilizations in play and any variants. Every step, ruling and script below adapts to your choices.</p>
+      <div class="cfg">
+        <div>
+          <label class="cfg-label">Sets owned</label>
+          <div id="expansions" class="chips"></div>
+        </div>
+        <div>
+          <label class="cfg-label">Players <span class="hint">(2–4 in the core game; 5 needs Fame and Fortune)</span></label>
+          <div id="players" class="pbtns"></div>
+        </div>
+        <div>
+          <label class="cfg-label">Civilizations in play <span id="civ-hint" class="hint"></span></label>
+          <div id="civs" class="civ-groups"></div>
+        </div>
+        <div id="modules-group">
+          <label class="cfg-label">Variants &amp; modules <span class="hint">— optional; everyone agrees before setup</span></label>
+          <div id="modules" class="mods"></div>
+        </div>
+      </div>
+    </section>
+
+    <section aria-label="Setup" class="sec sec-setup">
+      <h2>Setup</h2>
+      <p class="sec-note">Follow the steps in order. Each cites its official source by printed page; the FAQ v2.0 errata are already applied.</p>
+      <div class="teach-bar"><button id="teachBtn" type="button" title="A ~5 minute script to teach this exact setup aloud">📖 Teaching script</button></div>
+      <div id="teach" class="teach-panel" hidden></div>
+      <div id="setup"></div>
+    </section>
+
+    <section class="sec sec-comp" id="components" aria-labelledby="comp-h" hidden>
+      <h2 id="comp-h">Components</h2>
+      <p class="sec-note">Every component pictured in the rulebooks for the sets and modules you’ve selected, with its count. Tap a picture to enlarge it.</p>
+      <div id="aid-comp"></div>
+    </section>
+
+    <section aria-label="Reference" class="sec sec-ref">
+      <h2>Rules Reference</h2>
+      <p class="sec-note">Tap a heading to open it. Contents adapt to your sets, player count, civilizations and variants.</p>
+      <div id="reference"></div>
+    </section>
+
+    <section aria-label="Rulebook search" class="sec sec-search">
+      <h2>Search the Rulebooks</h2>
+      <p class="sec-note">Answers from this page come first, then every matching page of the core rulebook, each selected expansion and the official FAQ v2.0.</p>
+      <div class="rsearch-wrap">
+        <input id="rsearch" type="search" placeholder="e.g. village, blockade, anarchy, loot… or ask a question" aria-label="Search this page and the rulebooks">
+      </div>
+      <div id="rresults"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Setup and reference content grounded in the official Sid Meier’s Civilization: The Board Game rulebook,
+    the Fame and Fortune and Wisdom and Warfare expansion rulebooks, and the official FAQ version 2.0 (June 2013).
+    A fan-made play aid — not affiliated with Fantasy Flight Games, Firaxis Games or 2K.</p>
+  </footer>
+
+  <script src="js/data.js?v=2"></script>
+  <script src="js/rules.js?v=1"></script>
+  <script src="js/components.js?v=1"></script>
+  <script src="js/comp-widget.js?v=1"></script>
+  <script src="js/search-widget.js?v=1.1"></script>
+  <script src="js/app.js?v=2"></script>
+  <!-- DFW Gaming Village site analytics (lives at site root; harmless 404 in standalone dev) -->
+  <script src="/site-analytics.js?v=20260607-analytics"></script>
+</body>
+</html>

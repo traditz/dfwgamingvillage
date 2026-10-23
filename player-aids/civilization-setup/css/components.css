@@ -1,0 +1,176 @@
+/* =============================================================================
+   Components glossary: the standard stylesheet for every DFWGV player-aid page (v1).
+   Use it unchanged. Theme it from the page's own styles.css by setting these tokens,
+   e.g. on :root or #components, with values sampled from the page's palette:
+     --comp-surface       card background
+     --comp-ink           card text (name)
+     --comp-muted         secondary text (notes, meta). Needs ≥ 4.5:1 on --comp-surface.
+     --comp-line          card and control borders. Needs ≥ 3:1 against the page background.
+     --comp-accent        count badge, toggle button, focus ring
+     --comp-accent-ink    text on --comp-accent. Needs ≥ 4.5:1.
+     --comp-fig           picture panel behind each component image
+     --comp-head-font     font family for the set headings and the toggle (the page's display font)
+     --comp-radius        corner radius, matching the page's cards
+   Every token has a neutral fallback, so the widget is readable before it is themed.
+   ============================================================================= */
+#aid-comp {
+  --c-surface: var(--comp-surface, #ffffff);
+  --c-ink: var(--comp-ink, #1f1f24);
+  --c-muted: var(--comp-muted, #4b4b55);
+  --c-line: var(--comp-line, #85858f);
+  --c-accent: var(--comp-accent, #2b4c7e);
+  --c-accent-ink: var(--comp-accent-ink, #ffffff);
+  --c-fig: var(--comp-fig, #eeeef2);
+  --c-head: var(--comp-head-font, inherit);
+  --c-radius: var(--comp-radius, 10px);
+  --fig-h: 7.5rem;
+  margin-top: 0.75rem;
+}
+
+#aid-comp .aid-comp-vh {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0; border: 0;
+  overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+
+/* the widget toggles items, sets and messages with the hidden attribute: keep it winning over display rules below */
+#aid-comp [hidden] { display: none !important; }
+
+/* ---- toggle bar ---- */
+#aid-comp .aid-comp-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+#aid-comp .aid-comp-toggle {
+  display: inline-flex; align-items: center; gap: 12px;
+  min-height: 44px; padding: 8px 16px 8px 14px;
+  font: 700 1rem/1.2 var(--c-head);
+  color: var(--c-ink);
+  background: var(--c-surface);
+  border: 2px solid var(--c-accent);
+  border-radius: var(--c-radius);
+  cursor: pointer;
+}
+#aid-comp .aid-comp-toggle::before {
+  content: ""; flex: none;
+  width: 0.55em; height: 0.55em;
+  border-right: 2px solid currentColor; border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 0.15s ease;
+}
+#aid-comp .aid-comp-toggle[aria-expanded="true"]::before { transform: rotate(45deg) translate(-2px, -2px); }
+#aid-comp .aid-comp-toggle:hover { background: var(--c-fig); }
+#aid-comp .aid-comp-count {
+  font: 700 0.875rem/1 var(--c-head);
+  padding: 4px 9px;
+  color: var(--c-accent-ink);
+  background: var(--c-accent);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* ---- body ---- */
+#aid-comp .aid-comp-body { margin-top: 14px; }
+#aid-comp .aid-comp-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-bottom: 14px; }
+#aid-comp .aid-comp-filter { flex: 1 1 16rem; max-width: 24rem; }
+#aid-comp .aid-comp-filter input {
+  width: 100%; min-height: 44px; box-sizing: border-box;
+  padding: 8px 12px;
+  font-family: inherit; font-size: 1rem; line-height: 1.3;
+  color: var(--c-ink);
+  background: var(--c-surface);
+  border: 1px solid var(--c-line);
+  border-radius: calc(var(--c-radius) * 0.6);
+}
+#aid-comp .aid-comp-filter input::placeholder { color: var(--c-muted); opacity: 1; }
+#aid-comp .aid-comp-shown { font-size: 0.875rem; color: var(--c-muted); }
+#aid-comp .aid-comp-none { color: var(--c-muted); font-style: italic; }
+
+#aid-comp .aid-comp-set { margin: 0 0 20px; }
+#aid-comp .aid-comp-set-h {
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 12px;
+  margin: 0 0 10px; padding-bottom: 6px;
+  font: 700 1.125rem/1.25 var(--c-head);
+  color: var(--c-ink);
+  border-bottom: 1px solid var(--c-line);
+}
+#aid-comp .aid-comp-set-meta { font-family: inherit; font-weight: 400; font-size: 0.875rem; line-height: 1.3; color: var(--c-muted); }
+
+/* ---- the grid of components ---- */
+#aid-comp .aid-comp-grid {
+  list-style: none; margin: 0; padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
+  gap: 12px;
+}
+#aid-comp .aid-comp-item {
+  display: flex; flex-direction: column; gap: 8px;
+  margin: 0; padding: 10px;
+  background: var(--c-surface);
+  border: 1px solid var(--c-line);
+  border-radius: var(--c-radius);
+  min-width: 0;
+}
+#aid-comp .aid-comp-item::before, #aid-comp .aid-comp-item::marker { content: none; }
+#aid-comp .aid-comp-fig {
+  display: grid; place-items: center;
+  width: 100%; height: var(--fig-h);
+  margin: 0; padding: 6px; box-sizing: border-box;
+  background: var(--c-fig);
+  border: 0; border-radius: calc(var(--c-radius) * 0.6);
+  cursor: zoom-in;
+}
+#aid-comp .aid-comp-fig img {
+  display: block;
+  max-width: 100%; max-height: calc(var(--fig-h) - 12px);
+  width: auto; height: auto;
+  object-fit: contain;
+}
+#aid-comp .aid-comp-txt { min-width: 0; }
+#aid-comp .aid-comp-name {
+  margin: 0;
+  font-size: 1rem; line-height: 1.35; font-weight: 700;
+  color: var(--c-ink);
+  overflow-wrap: anywhere;
+}
+#aid-comp .aid-comp-qty {
+  display: inline-block;
+  min-width: 1.6em; margin-right: 0.4em; padding: 1px 7px;
+  font-size: 0.875rem; line-height: 1.35; font-weight: 700; text-align: center;
+  color: var(--c-accent-ink);
+  background: var(--c-accent);
+  border-radius: 999px;
+  vertical-align: 1px;
+}
+#aid-comp .aid-comp-note { margin: 4px 0 0; font-size: 1rem; line-height: 1.45; color: var(--c-muted); }
+#aid-comp .aid-comp-src { margin: 4px 0 0; font-size: 0.875rem; line-height: 1.3; color: var(--c-muted); }
+
+/* enlarged picture: the card spans the whole row */
+#aid-comp .aid-comp-item.is-zoomed { grid-column: 1 / -1; flex-direction: row; align-items: flex-start; gap: 16px; }
+#aid-comp .aid-comp-item.is-zoomed .aid-comp-fig { flex: 0 0 auto; width: min(100%, 22rem); height: auto; min-height: var(--fig-h); cursor: zoom-out; }
+#aid-comp .aid-comp-item.is-zoomed .aid-comp-fig img { max-height: 22rem; }
+#aid-comp .aid-comp-item.is-zoomed .aid-comp-txt { flex: 1 1 12rem; padding-top: 4px; }
+
+/* focus */
+#aid-comp .aid-comp-toggle:focus-visible,
+#aid-comp .aid-comp-fig:focus-visible,
+#aid-comp .aid-comp-filter input:focus-visible {
+  outline: 3px solid var(--c-accent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 520px) {
+  #aid-comp .aid-comp-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  #aid-comp .aid-comp-item { padding: 8px; }
+  #aid-comp { --fig-h: 6.25rem; }
+  #aid-comp .aid-comp-item.is-zoomed { flex-direction: column; align-items: stretch; }
+  #aid-comp .aid-comp-item.is-zoomed .aid-comp-fig { width: 100%; }
+  #aid-comp .aid-comp-item.is-zoomed .aid-comp-txt { flex: none; padding-top: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #aid-comp .aid-comp-toggle::before { transition: none; }
+}
+
+@media print {
+  #aid-comp .aid-comp-body[hidden] { display: block !important; }
+  #aid-comp .aid-comp-bar, #aid-comp .aid-comp-tools { display: none; }
+}
