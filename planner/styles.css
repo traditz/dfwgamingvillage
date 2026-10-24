@@ -2179,3 +2179,34 @@ select.input:focus {
   border-color: rgba(211, 47, 52, .55);
   box-shadow: 0 0 0 3px rgba(211, 47, 52, .15);
 }
+
+/* ---- Brand lives in the top bar ------------------------------------------
+   The standalone banner was the third repetition of the same logo (tile +
+   wordmark + banner) and ate ~130px of the first screen before any content.
+   The bar carries it instead, with a faint brand wash so it still feels
+   branded rather than generic chrome. */
+.topbar {
+  background:
+    linear-gradient(90deg, rgba(211, 47, 52, .10), transparent 42%),
+    rgba(12, 12, 17, .72);
+}
+
+.logo {
+  width: 42px;
+  height: 42px;
+}
+
+.logo img {
+  width: 32px;
+  height: 38px;
+}
+
+.topbar h1.title {
+  font-size: 15px;
+}
+
+/* First card no longer sits under a banner, so it needs its own top margin. */
+.container > .grid:first-child,
+.container > .plannerPageHeader:first-child {
+  margin-top: 4px;
+}
