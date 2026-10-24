@@ -13,7 +13,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js";
 
-import { esc, asDate, fmtDate, fmtEventWhen, centralDateKey, fmtCentralDatetimeValue, parseDatetimeLocalToISO, confirmDialog, toast, unwrapCallableError } from "../shared.js?v=20260817-p39";
+import { esc, asDate, fmtDate, fmtEventWhen, centralDateKey, fmtCentralDatetimeValue, parseDatetimeLocalToISO, confirmDialog, toast, unwrapCallableError } from "../shared.js?v=20260817-p40";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -44,6 +44,7 @@ const eventVisibility = document.querySelector("#eventVisibility");
 const eventEndDate = document.querySelector("#eventEndDate");
 const eventLocation = document.querySelector("#eventLocation");
 const eventLibraryConventionId = document.querySelector("#eventLibraryConventionId");
+const eventDiscordMode = document.querySelector("#eventDiscordMode");
 const btnDeleteEvent = document.querySelector("#btnDeleteEvent");
 const publicLink = document.querySelector("#publicLink");
 const discordStatusValue = document.querySelector("#discordStatusValue");
@@ -121,6 +122,7 @@ function selectEvent(id) {
   if (eventEndDate) eventEndDate.value = gd.endsAt ? fmtCentralDatetimeValue(gd.endsAt) : "";
   eventLocation.value = gd.location || "";
   if (eventLibraryConventionId) eventLibraryConventionId.value = gd.libraryConventionId || "";
+  if (eventDiscordMode) eventDiscordMode.value = gd.discordBoardMode === "posts" ? "posts" : "board";
   publicLink.href = `../events/?id=${encodeURIComponent(gd.id)}`;
   renderDiscordBinding(gd);
   loadActivity();
@@ -144,6 +146,7 @@ function newEvent() {
   if (eventEndDate) eventEndDate.value = "";
   eventLocation.value = "";
   if (eventLibraryConventionId) eventLibraryConventionId.value = "";
+  if (eventDiscordMode) eventDiscordMode.value = "board";
   publicLink.href = "../events/";
   renderDiscordBinding(null);
   loadActivity();
@@ -471,6 +474,7 @@ eventForm?.addEventListener("submit", async (ev) => {
     startsAt: eventStart.value ? parseDatetimeLocalToISO(eventStart.value) : "",
     location: eventLocation.value.trim(),
     libraryConventionId: eventLibraryConventionId ? eventLibraryConventionId.value.trim() : "",
+    discordBoardMode: eventDiscordMode ? eventDiscordMode.value : "board",
     status: eventStatus.value,
     visibility: eventVisibility ? eventVisibility.value : "public",
     // Blank clears it (back to a single-day event).

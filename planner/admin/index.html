@@ -12,8 +12,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" />
 
-  <link rel="stylesheet" href="../styles.css?v=20260817-p39" />
-  <link rel="stylesheet" href="./admin.css?v=20260817-p39" />
+  <link rel="stylesheet" href="../styles.css?v=20260817-p40" />
+  <link rel="stylesheet" href="./admin.css?v=20260817-p40" />
 </head>
 <body>
   <header class="topbar">
@@ -106,6 +106,14 @@
           <label class="field">
             <div class="label">Location</div>
             <input id="eventLocation" maxlength="160" />
+          </label>
+          <label class="field">
+            <div class="label">Discord layout</div>
+            <select id="eventDiscordMode">
+              <option value="board">Single board (classic)</option>
+              <option value="posts">Posts by day — every table its own post with Join buttons</option>
+            </select>
+            <div class="hint muted">Switch back to Single board any time; the bot removes the day threads and restores the classic board.</div>
           </label>
           <label class="field">
             <div class="label">Library convention ID (optional)</div>
@@ -226,6 +234,6 @@
     </div>
   </div>
 
-  <script type="module" src="./admin.js?v=20260817-p39"></script>
+  <script type="module" src="./admin.js?v=20260817-p40"></script>
 </body>
 </html>
