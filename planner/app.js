@@ -45,7 +45,7 @@ import {
   showInlineStatus,
   confirmDialog,
   toast
-} from "./shared.js?v=20260817-p37";
+} from "./shared.js?v=20260817-p38";
 
 // -----------------------------
 // Config
@@ -2266,11 +2266,26 @@ function renderGameDayHeader(gd) {
   const isPast = isPastGameDay(gd);
   const isPrivate = gd.visibility === "private";
   const canManage = isAdmin() || isOrganizerOf(gd);
+  // One fact per line, same treatment as the game day cards — a single
+  // bullet-joined run-on was the hardest thing on the page to scan.
   gamedayMeta.innerHTML = `
-    <div class="muted">
+    ${(isPast || isPrivate) ? `<div class="eventCardBadges">
       ${isPast ? `<span class="eventPill is-history">Past Event</span> ` : ""}
-      ${isPrivate ? `<span class="eventPill is-private">🔒 Private</span> ` : ""}
-      ${esc(fmtEventWhen(gd.startsAt, gd.endsAt))}${gd.location ? ` • ${esc(gd.location)}` : ""}${gd.createdByDisplayName ? ` • Hosted by ${esc(gd.createdByDisplayName)}` : ""}
+      ${isPrivate ? `<span class="eventPill is-private">🔒 Private</span>` : ""}
+    </div>` : ""}
+    <div class="eventCardLines">
+      <div class="eventCardLine is-when">
+        <span class="eventCardIcon" aria-hidden="true">📅</span>
+        <span>${esc(fmtEventWhen(gd.startsAt, gd.endsAt))}</span>
+      </div>
+      ${gd.location ? `<div class="eventCardLine">
+        <span class="eventCardIcon" aria-hidden="true">📍</span>
+        <span>${esc(gd.location)}</span>
+      </div>` : ""}
+      ${gd.createdByDisplayName ? `<div class="eventCardLine">
+        <span class="eventCardIcon" aria-hidden="true">👤</span>
+        <span>Hosted by ${esc(gd.createdByDisplayName)}</span>
+      </div>` : ""}
     </div>
     ${isPrivate && canManage ? `
     <div class="actions inviteControls">

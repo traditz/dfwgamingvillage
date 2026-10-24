@@ -2096,3 +2096,86 @@ textarea:focus {
   margin-top: 4px;
   font-size: 11px;
 }
+
+/* ---- Second refresh pass: header, nav and section rhythm ------------------ */
+
+/* The event title was the same size as a card heading despite being the
+   page's subject. Give it real presence and let the meta sit under it. */
+#gamedayTitle {
+  font-size: clamp(20px, 2.4vw, 26px);
+  font-weight: 700;
+  letter-spacing: -.02em;
+}
+
+.gamedayMeta {
+  margin-bottom: 4px;
+}
+
+.gamedayMeta .eventCardLines {
+  gap: 6px;
+}
+
+/* Nav pills: quieter by default, clearly selected on hover/focus. Borders on
+   every pill made the bar look like a toolbar from 2010. */
+.topnav a {
+  min-height: 34px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 600;
+  box-shadow: none;
+}
+
+.topnav a:hover,
+.topnav a:focus-visible {
+  border-color: transparent;
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.brand .title {
+  letter-spacing: -.01em;
+}
+
+.subtitle {
+  color: var(--muted);
+}
+
+/* Section headings introduce the list below them, so they read as labels
+   rather than competing with the card titles they sit above. */
+h3 {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+}
+
+/* The logo tile was a heavy bevelled box; flatten it to sit in the bar. */
+.logo {
+  border-color: var(--line);
+  background: var(--surface-1);
+  box-shadow: none;
+}
+
+.logo:hover,
+.logo:focus-visible {
+  background: var(--surface-2);
+}
+
+/* Inputs matched the old flat-bordered look. */
+.input,
+.textarea,
+select.input {
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, .25);
+  border-color: var(--line-strong);
+}
+
+.input:focus,
+.textarea:focus,
+select.input:focus {
+  outline: none;
+  border-color: rgba(211, 47, 52, .55);
+  box-shadow: 0 0 0 3px rgba(211, 47, 52, .15);
+}
