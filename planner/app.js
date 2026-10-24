@@ -101,16 +101,15 @@ const btnSignIn = document.querySelector("#btnSignIn");
 const btnSignOut = document.querySelector("#btnSignOut");
 const adminLinks = document.querySelectorAll("[data-admin-link]");
 
-
-
-const btnCreateGameDay = document.querySelector("#btnCreateGameDay");
-const btnPastEvents = document.querySelector("#btnPastEvents");
 const btnBecomeHost = document.querySelector("#btnBecomeHost");
 const btnNickname = document.querySelector("#btnNickname");
 const btnMyEvents = document.querySelector("#btnMyEvents");
 const btnInbox = document.querySelector("#btnInbox");
 const inboxBadge = document.querySelector("#inboxBadge");
 const btnHostGuide = document.querySelector("#btnHostGuide");
+const acctWrap = document.querySelector("#acctWrap");
+const btnAccount = document.querySelector("#btnAccount");
+const acctMenu = document.querySelector("#acctMenu");
 
 // Discord bot invite: same application as OAuth. Permissions = View Channels,
 // Send Messages, Manage Messages (pinning), Embed Links, Read Message History.
@@ -118,28 +117,68 @@ const BOT_INVITE_URL =
   `https://discord.com/oauth2/authorize?client_id=${encodeURIComponent(DISCORD_CLIENT_ID)}` +
   `&scope=bot%20applications.commands&permissions=93184`;
 
-const gamedayList = document.querySelector("#gamedayList");
-const pastEventsPanel = document.querySelector("#pastEventsPanel");
-const pastGamedayList = document.querySelector("#pastGamedayList");
+const gdRail = document.querySelector("#gdRail");
+const gdPicker = document.querySelector("#gdPicker");
 const gamedayCard = document.querySelector("#gamedayCard");
 const gamedayTitle = document.querySelector("#gamedayTitle");
 const gamedayMeta = document.querySelector("#gamedayMeta");
-const btnBack = document.querySelector("#btnBack");
+const gdKicker = document.querySelector("#gdKicker");
+const gdActs = document.querySelector("#gdActs");
+const gdStats = document.querySelector("#gdStats");
+const evBg = document.querySelector("#evBg");
 
 const btnHostTable = document.querySelector("#btnHostTable");
 const btnWantToPlay = document.querySelector("#btnWantToPlay");
 
+const dayTabsEl = document.querySelector("#dayTabs");
+const tTitle = document.querySelector("#tTitle");
+const tSub = document.querySelector("#tSub");
 const tablesList = document.querySelector("#tablesList");
 const wantsList = document.querySelector("#wantsList");
+const wantsCount = document.querySelector("#wantsCount");
+const yourDayEl = document.querySelector("#yourDay");
+const ydTitle = document.querySelector("#ydTitle");
+const ydCount = document.querySelector("#ydCount");
 
-const tablePager = document.querySelector("#tablePager");
-const btnPrev = document.querySelector("#btnPrev");
-const btnNext = document.querySelector("#btnNext");
-const pageInfo = document.querySelector("#pageInfo");
-const tablePagerBottom = document.querySelector("#tablePagerBottom");
-const btnPrevBottom = document.querySelector("#btnPrevBottom");
-const btnNextBottom = document.querySelector("#btnNextBottom");
-const pageInfoBottom = document.querySelector("#pageInfoBottom");
+const sheetEl = document.querySelector("#tableSheet");
+const sheetBody = document.querySelector("#sheetBody");
+const sheetScrim = document.querySelector("#sheetScrim");
+
+// Stroke icon set, referenced as <use href="#i-name"> (static markup included).
+const ICONS = {
+  cal: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+  pin: '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0116 0z"/><circle cx="12" cy="10" r="3"/>',
+  user: '<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  users: '<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>',
+  lock: '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>',
+  link: '<path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>',
+  clip: '<path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/>',
+  bell: '<path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  right: '<path d="M9 18l6-6-6-6"/>',
+  down: '<path d="M6 9l6 6 6-6"/>',
+  pencil: '<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4z"/>',
+  trash: '<path d="M3 6h18M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6M10 11v6M14 11v6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/>',
+  ext: '<path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/>',
+  check: '<path d="M20 6L9 17l-5-5"/>',
+  clock: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+  dice: '<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.25" fill="currentColor" stroke="none"/><circle cx="15.5" cy="8.5" r="1.25" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.25" fill="currentColor" stroke="none"/><circle cx="8.5" cy="15.5" r="1.25" fill="currentColor" stroke="none"/><circle cx="15.5" cy="15.5" r="1.25" fill="currentColor" stroke="none"/>',
+  book: '<path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>',
+  hand: '<path d="M18 11V6a2 2 0 00-4 0v5"/><path d="M14 10V4a2 2 0 00-4 0v6"/><path d="M10 10.5V6a2 2 0 00-4 0v8"/><path d="M18 8a2 2 0 014 0v6a8 8 0 01-8 8h-2a8 8 0 01-8-8v-1"/>',
+  more: '<circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="5" cy="12" r="1.3" fill="currentColor" stroke="none"/>',
+  shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+  x: '<path d="M18 6L6 18M6 6l12 12"/>',
+  rotate: '<path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0115-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 01-15 6.7L3 16"/>',
+  share: '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/>',
+  logout: '<path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>',
+  star: '<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>',
+  history: '<path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 106 5.3L3 8"/><path d="M12 7v5l4 2"/>',
+  login: '<path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/>'
+};
+document.body.insertAdjacentHTML("afterbegin",
+  '<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">' +
+  Object.keys(ICONS).map((k) => `<symbol id="i-${k}" viewBox="0 0 24 24">${ICONS[k]}</symbol>`).join("") + "</svg>");
+const ic = (name, cls) => `<svg class="ico${cls ? " " + cls : ""}" aria-hidden="true"><use href="#i-${name}"/></svg>`;
 
 // Modal element wiring lives in shared.js (single controller for all pages).
 
@@ -175,11 +214,21 @@ let invitePromptShown = false;
   }
 }
 
-// tables pagination
+// The open game day's tables and requests. No pager: every table for the
+// selected day shows, grouped under its start time.
 let currentTables = [];
 let currentPosts = [];
-let currentPage = 0;
-const PAGE_SIZE = 8;
+let showPastDays = false;    // date rail: Upcoming vs Past
+let pickerOpen = false;      // phone "Change" list
+let activeDayKey = null;     // selected day tab on multi-day events
+let sheetTableId = null;     // table whose details sheet is open
+let sheetBusy = false;       // an action in the sheet is in flight
+let sheetOpener = null;
+const notesOpen = new Set();
+const expOpen = new Set();
+let lastLayoutSig = "";
+let tablesLoaded = false;
+let gameDaysLoaded = false;
 
 // roster (per-table signups)
 const rosterByTableId = new Map(); // tableId -> { confirmed: string[], waitlist: string[], confirmedIds: Set, waitlistIds: Set }
@@ -285,9 +334,9 @@ function gameMetaText(item) {
   const parts = [];
   const year = gameYear(item);
   const rating = gameRating(item);
-  if (year) parts.push(`Year: ${year}`);
-  if (rating) parts.push(`BGG: ${rating}`);
-  return parts.join(" • ");
+  if (year) parts.push(year);
+  if (rating) parts.push(`★ ${rating}`);
+  return parts.join(" · ");
 }
 
 async function fetchBggMeta(bggId) {
@@ -314,6 +363,7 @@ async function hydrateGameMeta(root, item) {
   const text = gameMetaText(meta);
   if (text) {
     host.textContent = text;
+    host.hidden = false;
     host.style.display = "";
   }
 }
@@ -360,7 +410,7 @@ async function refreshMyRole() {
     if (!myRole.nickname && !localStorage.getItem("plannerNickNudge")) {
       localStorage.setItem("plannerNickNudge", "1");
       const shownAs = lastDisplayName ? ` You'll appear as “${lastDisplayName}” on game days.` : "";
-      toast(`Welcome!${shownAs} Want a different name? Tap the ✏️ Nickname button up top.`, "info", 8000);
+      toast(`Welcome!${shownAs} Want a different name? Open your account menu (top right) and choose Change nickname.`, "info", 8000);
     }
   } catch {
     if (seq !== roleSeq) return;
@@ -372,16 +422,18 @@ async function refreshMyRole() {
   applyRoleUI();
 }
 
+function canCreateGameDays() {
+  return !!currentUser && (myRole.owner || myRole.host);
+}
+
 function applyRoleUI() {
   const signedIn = !!currentUser;
-  if (btnCreateGameDay) {
-    btnCreateGameDay.style.display = signedIn && (myRole.owner || myRole.host) ? "" : "none";
-  }
   if (btnBecomeHost) {
     const show = signedIn && !myRole.owner && !myRole.host;
     btnBecomeHost.style.display = show ? "" : "none";
     btnBecomeHost.disabled = myRole.requested;
-    btnBecomeHost.textContent = myRole.requested ? "Organizer request pending" : "Request Organizer Access";
+    const label = btnBecomeHost.querySelector("span");
+    if (label) label.textContent = myRole.requested ? "Organizer request pending" : "Request organizer access";
   }
   if (btnHostGuide) {
     btnHostGuide.style.display = signedIn && (myRole.owner || myRole.host) ? "" : "none";
@@ -392,10 +444,12 @@ function applyRoleUI() {
     link.hidden = !show;
     if (show) link.textContent = myRole.owner ? "Admin" : "Manage Events";
   });
-  // Organizer-only controls live inside rendered lists — refresh them.
+  updateAccountUI();
+  // Organizer-only controls (create, invites, delete, edit) are rendered.
   if (lastGameDaysRaw.length) renderGameDays(lastGameDaysRaw);
+  if (currentGameDay) renderGameDayHeader(currentGameDay);
   if (currentGameDayId) {
-    renderTablesPage();
+    renderTablesPage({ force: true });
     renderWants(currentPosts);
   }
 }
@@ -472,82 +526,136 @@ function ensureRosterListener(gamedayId, tableId) {
   rosterUnsubsByTableId.set(tableId, unsub);
 }
 
+// A live roster changed: refresh that table's card, its sheet if open, and
+// everything summarised from rosters (Your day, the header stats).
 function updateRosterDom(tableId) {
-  const host = tablesList?.querySelector?.(`[data-roster-for="${CSS.escape(String(tableId))}"]`);
-  if (!host) return;
-
-  const roster = rosterByTableId.get(tableId) || { confirmed: [], waitlist: [] };
-
-  const cEl = host.querySelector('[data-roster-kind="confirmed"]');
-  const wEl = host.querySelector('[data-roster-kind="waitlist"]');
-  const cCountEl = host.querySelector('[data-roster-count="confirmed"]');
-  const wCountEl = host.querySelector('[data-roster-count="waitlist"]');
-
-  if (cEl) cEl.innerHTML = rosterNamesHtml(roster.confirmed);
-  if (wEl) wEl.innerHTML = rosterNamesHtml(roster.waitlist);
-  if (cCountEl) cCountEl.textContent = String(roster.confirmed.length);
-  if (wCountEl) wCountEl.textContent = String(roster.waitlist.length);
-
-  const card = host.closest(".tablecard");
   const t = currentTables.find((x) => x.id === tableId);
-  if (card && t) refreshSeatsDom(card, t);
+  if (!t) return;
+  const card = tableCardEl(tableId);
+  if (card) refreshCardState(card, t);
+  if (sheetTableId === tableId) renderSheet();
+  renderYourDay();
+  renderStats();
 }
 
-// Toggle a table card's Join/Leave buttons in place (no DOM rebuild) so live
-// roster updates don't cause the whole list to flicker.
-function applyJoinLeaveState(card, t) {
+function tableCardEl(tableId) {
+  return tablesList?.querySelector?.(`[data-table-card="${CSS.escape(String(tableId))}"]`) || null;
+}
+
+function isCustomTable(t) {
+  return t.isCustom === true || !t.bggId;
+}
+
+// "hosting" | "joined" | "waitlist" | null, for the signed-in user.
+function myTableStatus(t) {
   const uid = currentUser?.uid;
-  const roster = rosterByTableId.get(t.id);
-  const isSignedUp = !!(roster && uid && (roster.confirmedIds.has(uid) || roster.waitlistIds.has(uid)));
-  const isHostMine = !!(uid && t.hostUid && uid === t.hostUid);
-
-  // Card-level cue even when the action row is absent (past events).
-  card.classList.toggle("is-mine", isSignedUp || isHostMine);
-
-  const joinBtn = card.querySelector('[data-action="join"]');
-  const leaveBtn = card.querySelector('[data-action="leave"]');
-  if (!joinBtn || !leaveBtn) return;
-
-  const isPast = currentEventIsPast();
-
-  if (isHostMine) {
-    // The host manages via Leave (which deletes the table) — a permanently
-    // disabled "Joined" pill is just noise on their own card.
-    joinBtn.style.display = "none";
-    leaveBtn.style.display = isPast ? "none" : "";
-    leaveBtn.disabled = isPast;
-    leaveBtn.textContent = "Leave";
-    return;
-  }
-  joinBtn.style.display = "";
-
-  if (isSignedUp) {
-    joinBtn.disabled = true;
-    joinBtn.textContent = "✅ Joined";
-    joinBtn.classList.remove("btn-primary");
-    joinBtn.title = "";
-    leaveBtn.style.display = isPast ? "none" : "";
-    leaveBtn.disabled = isPast;
-    leaveBtn.textContent = "Leave";
-  } else {
-    // Signed-out visitors keep an ENABLED Join that routes to the sign-in
-    // chooser — a dead disabled button explains nothing on a phone.
-    joinBtn.disabled = isPast;
-    joinBtn.textContent = currentUser ? "Join" : "Sign in to join";
-    joinBtn.classList.add("btn-primary");
-    joinBtn.title = isPast ? "Past events are read-only." : "";
-    leaveBtn.style.display = "none";
-    leaveBtn.disabled = true;
-  }
+  if (!uid) return null;
+  if (t.hostUid && uid === t.hostUid) return "hosting";
+  const r = rosterByTableId.get(t.id);
+  if (!r) return null;
+  if (r.confirmedIds.has(uid)) return "joined";
+  if (r.waitlistIds.has(uid)) return "waitlist";
+  return null;
 }
+
+function myWaitPos(t) {
+  const r = rosterByTableId.get(t.id);
+  const uid = currentUser?.uid;
+  if (!r || !uid) return 0;
+  return r.waitlist.findIndex((e) => e.uid === uid) + 1;
+}
+
+function tableIsFull(t) {
+  const cap = Number(t.capacity || 0);
+  return cap > 0 && seatCounts(t).confirmed >= cap;
+}
+
+function tablePillsHtml(t) {
+  const s = myTableStatus(t);
+  const ts = tableTimeState(t);
+  const out = [];
+  if (s === "hosting") out.push(`<span class="pill pill-red">${ic("star")}Hosting</span>`);
+  else if (s === "joined") out.push(`<span class="pill pill-green">${ic("check")}Joined</span>`);
+  else if (s === "waitlist") out.push(`<span class="pill pill-gold num">Waitlist #${myWaitPos(t)}</span>`);
+  else if (tableIsFull(t) && !currentEventIsPast() && ts !== "past") out.push(`<span class="pill pill-gold">Full</span>`);
+  if (ts === "started") out.push(`<span class="pill pill-amber">${ic("clock")}Started</span>`);
+  if (ts === "past") out.push(`<span class="pill">${ic("history")}Past</span>`);
+  if (isCustomTable(t)) out.push(`<span class="pill pill-blue">${ic("clip")}Sign-up</span>`);
+  if (t.gameSource === "library") out.push(`<span class="pill">${ic("book")}Library copy</span>`);
+  return out.join("");
+}
+
+// One dot per chair (green = confirmed, gold = waiting); a bar past 12 seats.
+function seatMeterHtml(t) {
+  const cap = Number(t.capacity || 0);
+  const { confirmed, waitlist } = seatCounts(t);
+  const unit = isCustomTable(t) ? "spots" : "seats";
+  const text = `${confirmed}/${cap || "?"} ${unit}` + (waitlist ? ` · <span class="w">${waitlist} waiting</span>` : "");
+  let vis = "";
+  if (cap > 0 && cap <= 12) {
+    let h = "";
+    const filled = Math.min(confirmed, cap);
+    for (let i = 0; i < cap; i++) h += `<i class="${i < filled ? "on" : ""}"></i>`;
+    if (waitlist) {
+      h += '<b class="gap"></b>';
+      for (let i = 0; i < Math.min(waitlist, 4); i++) h += '<i class="wait"></i>';
+    }
+    vis = `<span class="pips" aria-hidden="true">${h}</span>`;
+  } else if (cap > 0) {
+    vis = `<span class="seatBar" aria-hidden="true"><i style="width:${Math.min(100, Math.round((confirmed / cap) * 100))}%"></i></span>`;
+  }
+  return `${vis}<span class="seatTxt">${text}</span>`;
+}
+
+function avatarStackHtml(entries, max = 3) {
+  if (!entries?.length) return "";
+  const uid = currentUser?.uid;
+  const shown = entries.slice(0, max);
+  const total = entries.reduce((n, e) => n + 1 + (e.guests || 0), 0);
+  const extra = total - shown.length;
+  const label = entries.map((e) => e.name + (e.guests ? ` +${e.guests}` : "")).join(", ");
+  return `<span class="avStack" title="${esc(label)}">${shown.map((e) => avatarHtml(e.name, "av-sm", !!uid && e.uid === uid)).join("")}${extra > 0 ? `<span class="av av-sm more" aria-hidden="true">+${extra}</span>` : ""}<span class="sr">${esc(label)}</span></span>`;
+}
+
+// Join / Joined + Leave / Sign in to join. A host's own table and tables on a
+// finished day (or a past event) have no join actions.
+function joinActionsHtml(t, { small = true } = {}) {
+  const sz = small ? " btn-small" : "";
+  if (currentEventIsPast() || tableTimeState(t) === "past") return "";
+  if (!currentUser) return `<button class="btn btn-primary${sz}" data-action="join">Sign in to join</button>`;
+  const s = myTableStatus(t);
+  if (s === "hosting") return "";
+  if (s === "joined" || s === "waitlist") {
+    return `<button class="btn is-joined${sz}" disabled>${ic("check", "ico-sm")}${s === "waitlist" ? "On waitlist" : "Joined"}</button><button class="btn${sz}" data-action="leave">Leave</button>`;
+  }
+  return `<button class="btn btn-primary${sz}" data-action="join">${tableIsFull(t) ? "Join waitlist" : "Join"}</button>`;
+}
+
+// Update a card in place (pills, seats, roster avatars, join buttons) so live
+// roster changes never rebuild the card or steal focus.
+function refreshCardState(card, t) {
+  const pills = tablePillsHtml(t);
+  card.querySelectorAll("[data-pills]").forEach((el) => { el.innerHTML = pills; el.hidden = !pills; });
+  const seats = card.querySelector("[data-seats]");
+  if (seats) seats.innerHTML = seatMeterHtml(t);
+  const stack = card.querySelector("[data-avstack]");
+  if (stack) {
+    const r = rosterByTableId.get(t.id);
+    stack.innerHTML = r ? avatarStackHtml(r.confirmed) : "";
+  }
+  const join = card.querySelector("[data-joinbox]");
+  if (join && !join.dataset.busy) join.innerHTML = joinActionsHtml(t);
+  card.classList.toggle("is-mine", !!myTableStatus(t));
+}
+const applyJoinLeaveState = refreshCardState;
 
 function rosterNamesHtml(entries) {
-  if (!entries?.length) return `<span class="rosterEmpty">None yet</span>`;
+  if (!entries?.length) return `<span class="none">None yet</span>`;
   const myUid = currentUser?.uid;
   return entries.map((e) => {
     const isYou = !!(myUid && e.uid === myUid);
-    const party = e.guests > 0 ? ` +${e.guests}` : "";
-    return `<span class="rosterChip${isYou ? " is-you" : ""}">${esc(e.name)}${party}${isYou ? " (you)" : ""}</span>`;
+    const party = e.guests > 0 ? ` <span class="party">+${e.guests}</span>` : "";
+    return `<span class="rchip${isYou ? " is-you" : ""}">${avatarHtml(e.name, "av-sm", isYou)}${esc(e.name)}${party}${isYou ? " (you)" : ""}</span>`;
   }).join("");
 }
 
@@ -619,24 +727,63 @@ function setAuthStatus(text) {
 
 
 function setButtonsForAuth(user) {
-  if (!btnSignIn || !btnSignOut) return;
-
-  if (user) {
-    btnSignIn.style.display = "none";
-    btnSignOut.style.display = "";
-    if (btnNickname) btnNickname.style.display = "";
-    if (btnMyEvents) btnMyEvents.style.display = "";
-    if (btnInbox) btnInbox.style.display = "";
-  } else {
-    btnSignIn.style.display = "";
-    btnSignOut.style.display = "none";
-    if (btnNickname) btnNickname.style.display = "none";
-    if (btnMyEvents) btnMyEvents.style.display = "none";
-    if (btnInbox) btnInbox.style.display = "none";
-  }
-  // Create Game Day / Request Organizer Access buttons are role-driven.
+  if (!btnSignIn) return;
+  btnSignIn.style.display = user ? "none" : "";
+  if (btnInbox) btnInbox.style.display = user ? "" : "none";
+  if (acctWrap) acctWrap.hidden = !user;
+  if (!user) setAccountMenu(false);
+  // Create Game Day / Request Organizer Access are role-driven.
   applyRoleUI();
 }
+
+// -----------------------------
+// Avatars and the account menu
+// -----------------------------
+function initials(name) {
+  const parts = String(name || "").replace(/[^\p{L}\p{N} ]/gu, " ").trim().split(/\s+/);
+  return (((parts[0] || "")[0] || "") + ((parts[1] || "")[0] || "")).toUpperCase() || "?";
+}
+function nameHue(name) {
+  let h = 11;
+  const s = String(name || "");
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 360;
+  return h;
+}
+function avatarHtml(name, cls = "", isMe = false) {
+  return `<span class="av${cls ? " " + cls : ""}${isMe ? " me" : ""}" style="--h:${nameHue(name)}" aria-hidden="true">${esc(initials(name))}</span>`;
+}
+
+function myName() {
+  return myRole.nickname || lastDisplayName || "";
+}
+
+function updateAccountUI() {
+  if (!currentUser) return;
+  const name = myName() || "Signed in";
+  const av = document.querySelector("#acctAvatar");
+  if (av) {
+    av.textContent = initials(name);
+    av.style.setProperty("--h", String(nameHue(name)));
+  }
+  const nm = document.querySelector("#acctName");
+  if (nm) nm.textContent = name;
+  const role = document.querySelector("#acctRole");
+  if (role) role.textContent = myRole.owner ? "Site admin" : myRole.host ? "Organizer" : "Player";
+}
+
+function setAccountMenu(open) {
+  if (!acctMenu || !btnAccount) return;
+  acctMenu.hidden = !open;
+  btnAccount.setAttribute("aria-expanded", String(open));
+}
+btnAccount?.addEventListener("click", (e) => {
+  e.stopPropagation();
+  setAccountMenu(acctMenu.hidden);
+});
+// Any choice in the menu closes it.
+acctMenu?.addEventListener("click", (e) => {
+  if (e.target.closest(".mi")) setAccountMenu(false);
+});
 
 // One sign-in entry point: a chooser with a hint per provider. Also opened
 // when a signed-out visitor taps Join / Host a Table / Request a Game.
@@ -1268,10 +1415,11 @@ function subscribeGameDays() {
   unsubGameDays = onSnapshot(q, (snap) => {
     const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
     lastGameDaysRaw = list;
+    gameDaysLoaded = true;
     renderGameDays(list);
     tryOpenDeepLink();
 
-    // Keep the OPEN game day's header live, and bounce out if it vanishes
+    // Keep the OPEN game day's header live, and move on if it vanishes
     // (deleted/unpublished while someone was looking at it).
     if (currentGameDayId) {
       const fresh = list.find((g) => g.id === currentGameDayId);
@@ -1280,17 +1428,16 @@ function subscribeGameDays() {
         renderGameDayHeader(fresh);
       } else if (currentGameDay?.visibility !== "private") {
         // Private events aren't in the public snapshot — never bounce those.
-        showGameDayList();
         history.replaceState({}, "", gameDayUrl(null));
         toast("This Game Day is no longer available.", "info");
+        showGameDayList();
       }
     }
+    // Nothing chosen (no deep link): open the next game day.
+    if (!currentGameDayId) showGameDayList();
   }, () => {
-    // Snapshot failure (offline, rules): never leave a blank/broken-looking list.
-    gamedayList.innerHTML = `
-      <div class="muted">Couldn't load game days — check your connection.</div>
-      <button class="btn" id="btnRetryGamedays" style="margin-top:6px;">Retry</button>
-    `;
+    // Snapshot failure (offline, rules): never leave a blank/broken-looking page.
+    if (gdRail) gdRail.innerHTML = `<div class="railIn wrap gutter"><p class="railEmpty">Couldn't load game days — check your connection. <button class="linkBtn" id="btnRetryGamedays">Retry</button></p></div>`;
     document.querySelector("#btnRetryGamedays")?.addEventListener("click", subscribeGameDays);
   });
 }
@@ -1335,9 +1482,10 @@ function subscribeGameDayDetails(gamedayId) {
   const tablesQ = query(collection(db, "gamedays", gamedayId, "tables"), orderBy("startTime", "asc"));
   unsubTables = onSnapshot(tablesQ, (snap) => {
     currentTables = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-    // NOTE: no page reset here — a remote join must not yank viewers back to
-    // page 1. The page resets in openGameDay when a new event is opened.
+    tablesLoaded = true;
     renderTablesPage();
+    // The header's art tint and stats come from the tables.
+    if (currentGameDay) renderGameDayHeader(currentGameDay);
   });
 
   const postsQ = query(collection(db, "gamedays", gamedayId, "posts"), orderBy("createdAt", "desc"));
@@ -1345,6 +1493,7 @@ function subscribeGameDayDetails(gamedayId) {
     const posts = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
     currentPosts = posts.filter((p) => p.kind === "want_to_play");
     renderWants(currentPosts);
+    renderYourDay();
   });
 }
 
@@ -1355,186 +1504,129 @@ function renderGameDays(list) {
   // Private events I'm part of merge into the list (never in the public query).
   const merged = [...list, ...myPrivateGamedays.filter((p) => !list.some((g) => g.id === p.id))];
   const sorted = sortByStartsAtAsc(merged);
-  const visibleGameDays = sorted.filter((gd) => !isPastGameDay(gd));
-  currentGameDays = visibleGameDays;
+  currentGameDays = sorted.filter((gd) => !isPastGameDay(gd));
   currentPastGameDays = sortByStartsAtDesc(sorted.filter(isPastGameDay));
-  if (btnPastEvents) {
-    btnPastEvents.disabled = currentPastGameDays.length === 0;
-    if (currentPastGameDays.length === 0 && pastEventsPanel) {
-      pastEventsPanel.style.display = "none";
-    }
-    btnPastEvents.setAttribute("aria-expanded", pastEventsPanel?.style.display !== "none" ? "true" : "false");
-    btnPastEvents.setAttribute("aria-label", currentPastGameDays.length
-      ? `Past Events — ${currentPastGameDays.length} available`
-      : "Past Events — none yet");
-  }
-  renderPastGameDays();
-
-  gamedayList.innerHTML = "";
-  if (!visibleGameDays.length) {
-    gamedayList.innerHTML = `<div class="muted">No upcoming game days yet — check back soon!</div>`;
-  } else {
-    for (const gd of visibleGameDays) {
-      const el = document.createElement("div");
-      el.className = "listitem eventCard";
-      el.innerHTML = `
-        <div class="eventCardMain">
-          ${gd.visibility === "private"
-            ? `<div class="eventCardBadges"><span class="eventPill is-private">🔒 Private</span></div>` : ""}
-          <button type="button" class="cardOpenBtn"><span class="title">${esc(gd.title || "Game Day")}</span></button>
-          <div class="eventCardLines">
-            <div class="eventCardLine is-when">
-              <span class="eventCardIcon" aria-hidden="true">📅</span>
-              <span>${esc(fmtEventWhen(gd.startsAt, gd.endsAt))}</span>
-            </div>
-            ${gd.location ? `<div class="eventCardLine">
-              <span class="eventCardIcon" aria-hidden="true">📍</span>
-              <span>${esc(gd.location)}</span>
-            </div>` : ""}
-            ${gd.createdByDisplayName ? `<div class="eventCardLine">
-              <span class="eventCardIcon" aria-hidden="true">👤</span>
-              <span>Hosted by ${esc(gd.createdByDisplayName)}</span>
-            </div>` : ""}
-          </div>
-        </div>
-      `;
-
-      const actions = document.createElement("div");
-      actions.className = "eventCardFooter plannerEventActions";
-
-      // Private events have no public share page — organizers get the invite
-      // link instead; public events keep View / Share.
-      if (gd.visibility === "private") {
-        if (isAdmin() || isOrganizerOf(gd)) {
-          const inviteBtn = document.createElement("button");
-          inviteBtn.type = "button";
-          inviteBtn.className = "btn eventCardAction";
-          inviteBtn.textContent = "🔗 Invite Link";
-          inviteBtn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            copyInviteLink(gd.id);
-          });
-          actions.appendChild(inviteBtn);
-        }
-      } else {
-        const publicLink = document.createElement("a");
-        publicLink.className = "btn eventCardAction";
-        publicLink.href = `./events/?id=${encodeURIComponent(gd.id)}`;
-        publicLink.textContent = "View / Share";
-        publicLink.addEventListener("click", (e) => e.stopPropagation());
-        actions.appendChild(publicLink);
-      }
-
-      // Delete: site owner, or this Game Day's organizer
-      if (isAdmin() || isOrganizerOf(gd)) {
-        const delBtn = document.createElement("button");
-        delBtn.className = "btn btn-danger eventCardAction";
-        delBtn.textContent = "Delete";
-        delBtn.addEventListener("click", async (e) => {
-          e.stopPropagation();
-          const ok = await confirmDialog({
-            title: "Delete Game Day?",
-            message: `Delete “${gd.title || "Game Day"}”? This wipes all of its tables and signups.`,
-            confirmLabel: "Delete Game Day",
-            danger: true
-          });
-          if (!ok) return;
-          try {
-              await fnDeleteGameDay({ gamedayId: gd.id });
-              toast("Game Day deleted.", "success");
-          } catch (err) {
-              toast(unwrapCallableError(err), "error");
-          }
-        });
-        actions.appendChild(delBtn);
-      }
-
-      el.appendChild(actions);
-      // The title button is the keyboard/SR action; whole-card click stays as
-      // a mouse convenience.
-      el.querySelector(".cardOpenBtn")?.addEventListener("click", (e) => {
-        e.stopPropagation();
-        openGameDay(gd);
-      });
-      el.addEventListener("click", (e) => {
-        if (e.target.closest("a, button")) return;
-        openGameDay(gd);
-      });
-      gamedayList.appendChild(el);
-    }
-  }
-
+  if (!currentPastGameDays.length) showPastDays = false;
+  renderRail();
 }
 
-function renderPastGameDays() {
-  if (!pastGamedayList) return;
-  pastGamedayList.innerHTML = "";
-  if (!currentPastGameDays.length) {
-    pastGamedayList.innerHTML = `<div class="muted">No past events yet.</div>`;
+// Date pieces for a Central day key ("2026-11-06"). Noon UTC keeps the
+// calendar date stable in every viewer's timezone.
+function keyParts(key) {
+  const d = new Date(`${key}T12:00:00Z`);
+  const f = (o) => d.toLocaleDateString("en-US", { timeZone: "UTC", ...o });
+  return {
+    day: String(Number(String(key).slice(8, 10))),
+    mon: f({ month: "short" }),
+    dow: f({ weekday: "short" }),
+    label: f({ weekday: "short", month: "short", day: "numeric" }),
+    long: f({ weekday: "long", month: "long", day: "numeric" })
+  };
+}
+
+const gdDays = (gd) => eventDayKeys(gd?.startsAt, gd?.endsAt);
+
+// 1-based day number while a multi-day event is running, else 0.
+function liveDayOf(gd) {
+  if (!gd || isPastGameDay(gd)) return 0;
+  const days = gdDays(gd);
+  if (days.length < 2) return 0;
+  return days.indexOf(centralDateKey(new Date())) + 1;
+}
+
+const shortPlace = (gd) => String(gd?.location || "").split(",")[0].trim();
+
+function ticketInnerHtml(gd) {
+  const days = gdDays(gd);
+  const f = days.length ? keyParts(days[0]) : null;
+  const l = days.length ? keyParts(days[days.length - 1]) : null;
+  const multi = days.length > 1;
+  const day = !f ? "?" : multi ? `${f.day}–${l.day}` : f.day;
+  const mon = !f ? "TBD" : f.mon === l.mon ? f.mon : `${f.mon}–${l.mon}`;
+  const live = liveDayOf(gd);
+  const when = live ? `<span class="live">Day ${live} of ${days.length}</span>` : (f ? esc(multi ? `${f.dow}–${l.dow}` : f.dow) : "");
+  const sub = [when, shortPlace(gd) ? esc(shortPlace(gd)) : ""].filter(Boolean).join(" · ");
+  return `<span class="tkDate${multi ? " is-multi" : ""}"><span class="d">${day}</span><span class="m">${esc(mon)}</span></span>
+    <span class="tkT">${gd.visibility === "private" ? ic("lock", "ico-sm") : ""}<span>${esc(gd.title || "Game Day")}</span></span>
+    <span class="tkS">${sub}</span>`;
+}
+
+const ticketBtnHtml = (gd) =>
+  `<button class="ticket" type="button" data-gd="${esc(gd.id)}" aria-current="${gd.id === currentGameDayId}">${ticketInnerHtml(gd)}</button>`;
+
+function railListHtml() {
+  if (!gameDaysLoaded) return `<p class="railEmpty">Loading game days…</p>`;
+  const list = showPastDays ? currentPastGameDays : currentGameDays;
+  return list.map(ticketBtnHtml).join("")
+    || `<p class="railEmpty">${showPastDays ? "No past game days yet." : "No upcoming game days yet — check back soon!"}</p>`;
+}
+
+function pastSegHtml() {
+  const n = currentPastGameDays.length;
+  return `<div class="seg" role="group" aria-label="Which game days">
+    <button type="button" data-past="0" aria-pressed="${!showPastDays}">Upcoming</button>
+    <button type="button" data-past="1" aria-pressed="${showPastDays}"${n ? "" : " disabled"}>Past (${n})</button>
+  </div>`;
+}
+
+const addTicketHtml = () => (canCreateGameDays() && !showPastDays)
+  ? `<button class="ticket add" type="button" data-create>${ic("plus", "ico-sm")}Create game day</button>`
+  : "";
+
+// Wide screens get a row of date tickets; phones get the open game day plus a
+// "Change" list (CSS shows one or the other), so nothing scrolls sideways.
+function renderRail() {
+  if (gdRail) {
+    gdRail.innerHTML = `<div class="railIn wrap gutter"><div class="railTools">${pastSegHtml()}</div><div class="railTickets">${railListHtml()}${addTicketHtml()}</div></div>`;
+  }
+  if (gdPicker) {
+    const cur = currentGameDay;
+    const open = pickerOpen || !cur;
+    gdPicker.innerHTML = `<div class="gdPickIn wrap gutter">
+      ${cur ? `<button class="gdNow" type="button" data-pick aria-expanded="${open}"><span class="tkGrid">${ticketInnerHtml(cur)}</span><span class="chg">Change${ic("down", "ico-sm")}</span></button>` : ""}
+      ${open ? `<div class="gdPanel">${pastSegHtml()}${railListHtml()}${addTicketHtml()}</div>` : ""}
+    </div>`;
+  }
+}
+
+function onRailClick(e) {
+  const container = e.currentTarget;
+  const gdBtn = e.target.closest("[data-gd]");
+  if (gdBtn) {
+    const id = gdBtn.getAttribute("data-gd");
+    const gd = [...currentGameDays, ...currentPastGameDays].find((g) => g.id === id);
+    pickerOpen = false;
+    if (gd && gd.id !== currentGameDayId) openGameDay(gd);
+    else renderRail();
     return;
   }
-
-  for (const gd of currentPastGameDays) {
-    const el = document.createElement("div");
-    el.className = "listitem eventCard pastEventItem";
-    el.innerHTML = `
-      <div class="eventCardMain">
-        <button type="button" class="cardOpenBtn"><span class="title">${esc(gd.title || "Game Day")}</span></button>
-        <div class="eventCardLines">
-          <div class="eventCardLine is-when">
-            <span class="eventCardIcon" aria-hidden="true">📅</span>
-            <span>${esc(fmtEventWhen(gd.startsAt, gd.endsAt))}</span>
-          </div>
-          ${gd.location ? `<div class="eventCardLine">
-            <span class="eventCardIcon" aria-hidden="true">📍</span>
-            <span>${esc(gd.location)}</span>
-          </div>` : ""}
-        </div>
-      </div>
-    `;
-
-    const actions = document.createElement("div");
-    actions.className = "eventCardFooter plannerEventActions";
-
-    // Past private events: no public share page either.
-    if (gd.visibility !== "private") {
-      const publicLink = document.createElement("a");
-      publicLink.className = "btn eventCardAction";
-      publicLink.href = `./events/?id=${encodeURIComponent(gd.id)}`;
-      publicLink.textContent = "View / Share";
-      publicLink.addEventListener("click", (e) => e.stopPropagation());
-      actions.appendChild(publicLink);
-    }
-
-    el.appendChild(actions);
-    el.querySelector(".cardOpenBtn")?.addEventListener("click", (e) => {
-      e.stopPropagation();
-      openGameDay(gd);
-    });
-    el.addEventListener("click", (e) => {
-      if (e.target.closest("a, button")) return;
-      openGameDay(gd);
-    });
-    pastGamedayList.appendChild(el);
+  const past = e.target.closest("[data-past]");
+  if (past && !past.disabled) {
+    showPastDays = past.getAttribute("data-past") === "1";
+    renderRail();
+    container.querySelector(`[data-past="${showPastDays ? 1 : 0}"]`)?.focus();
+    return;
+  }
+  if (e.target.closest("[data-create]")) {
+    pickerOpen = false;
+    renderRail();
+    if (!currentUser) return openSignInModal();
+    openCreateGameDayModal();
+    return;
+  }
+  if (e.target.closest("[data-pick]")) {
+    pickerOpen = !pickerOpen;
+    renderRail();
+    container.querySelector("[data-pick]")?.focus();
   }
 }
+gdRail?.addEventListener("click", onRailClick);
+gdPicker?.addEventListener("click", onRailClick);
 
-function togglePastEvents() {
-  if (!pastEventsPanel || !btnPastEvents) return;
-  const show = pastEventsPanel.style.display === "none";
-  pastEventsPanel.style.display = show ? "" : "none";
-  btnPastEvents.setAttribute("aria-expanded", String(show));
-}
-
+// Past events are read-only: no Host a Table or Request a Game.
 function setPastEventActions(isPast) {
-  if (btnHostTable) {
-    btnHostTable.disabled = isPast;
-    btnHostTable.title = isPast ? "Past events are read-only." : "";
-  }
-  if (btnWantToPlay) {
-    btnWantToPlay.disabled = isPast;
-    btnWantToPlay.title = isPast ? "Past events are read-only." : "";
-  }
+  if (btnHostTable) btnHostTable.hidden = isPast;
+  if (btnWantToPlay) btnWantToPlay.hidden = isPast;
 }
 
 function currentEventIsPast() {
@@ -1561,54 +1653,6 @@ function seatCounts(t) {
   return { confirmed: Number(t.confirmedCount || 0), waitlist: Number(t.waitlistCount || 0) };
 }
 
-// The only writer of the seats text/bar/full state.
-function refreshSeatsDom(card, t) {
-  const seatsEl = card.querySelector(`[data-seats-root="${CSS.escape(String(t.id))}"]`);
-  if (!seatsEl) return;
-  const cap = Number(t.capacity || 0);
-  const { confirmed, waitlist } = seatCounts(t);
-  const textEl = seatsEl.querySelector(".seatsText");
-  if (textEl) textEl.textContent = `Seats: ${confirmed}/${cap}${waitlist ? ` • Waitlist: ${waitlist}` : ""}`;
-  const fillEl = seatsEl.querySelector(".seatsFill");
-  if (fillEl) fillEl.style.width = `${cap ? Math.min(100, Math.round((confirmed / cap) * 100)) : 0}%`;
-  const isFull = cap > 0 && confirmed >= cap;
-  seatsEl.classList.toggle("is-full", isFull);
-
-  // Seat dots: one per chair, filled as people join (the bar stays as the
-  // fallback for unusually large capacities where dots would be noise).
-  const pipsEl = seatsEl.querySelector(".seatPips");
-  const barEl = seatsEl.querySelector(".seatsBar");
-  const usePips = cap > 0 && cap <= 12;
-  if (pipsEl) {
-    pipsEl.style.display = usePips ? "" : "none";
-    if (usePips) {
-      const filled = Math.min(confirmed, cap);
-      let html = "";
-      for (let i = 0; i < cap; i++) {
-        html += `<span class="seatDot${i < filled ? " is-filled" : ""}"></span>`;
-      }
-      pipsEl.innerHTML = html;
-    } else {
-      pipsEl.innerHTML = "";
-    }
-  }
-  if (barEl) barEl.style.display = usePips ? "none" : "";
-
-  // Explain the waitlist in words — the red bar alone says nothing.
-  let note = seatsEl.querySelector(".seatsNote");
-  if (isFull && !note) {
-    note = document.createElement("span");
-    note.className = "seatsNote muted";
-    note.textContent = "Table full — Join adds you to the waitlist.";
-    seatsEl.appendChild(note);
-  } else if (!isFull && note) {
-    note.remove();
-  }
-}
-
-// Everything that affects a card's static markup. When unchanged, the card's
-// DOM node is reused verbatim by the reconcile — preserving in-flight button
-// labels, scroll position, and focus during live updates.
 // "" | "started" | "past" — only meaningful for multi-day events, where a
 // finished day's tables drop to the bottom and read as Past.
 function tableTimeState(t) {
@@ -1623,174 +1667,285 @@ function tableTimeState(t) {
   return "";
 }
 
-function tableRenderSig(t, isPast) {
-  const isHost = !!(currentUser && currentUser.uid === t.hostUid);
-  const canManage = !isPast && (isHost || isAdmin() || isOrganizerOf(currentGameDay));
+// Everything that affects a card's static markup. When unchanged, the card's
+// DOM node is reused as-is by the reconcile, preserving in-flight button
+// labels and focus during live updates; seats, pills and Join state are
+// refreshed in place by refreshCardState.
+function tableRenderSig(t) {
   return JSON.stringify([
     asDate(t.startTime)?.getTime() ?? null,
-    t.capacity, t.notes, t.gameName, t.thumbUrl, t.bggId,
-    t.hostUid, t.hostDisplayName,
-    t.requestedByDisplayName ?? null,
-    t.gameSource ?? null,
-    Array.isArray(t.expansions) ? t.expansions.map((e) => e?.bggId) : [],
-    isHost, canManage, isPast,
-    currentUser?.uid || null,
-    tableTimeState(t)
+    t.gameName, t.thumbUrl, t.bggId, t.isCustom === true,
+    t.hostUid, t.hostDisplayName, t.bggYear ?? null, t.bggRating ?? null,
+    currentUser?.uid || null
   ]);
 }
 
-function buildTableCard(t, isPast, sig) {
-  const startTime = asDate(t.startTime);
-  // Tables are same-day as their event, so time-only ("2:00 PM") reads far
-  // better than 8 repeated full dates; legacy off-day rows keep the full date.
-  const eventDays = currentGameDay ? eventDayKeys(currentGameDay.startsAt, currentGameDay.endsAt) : [];
-  const inEvent = !!(startTime && eventDays.includes(centralDateKey(startTime)));
-  const timeDisplay = startTime ? esc(inEvent ? fmtTime(startTime) : fmtDate(startTime)) : "TBD";
+// The event day a table belongs to (off-day legacy rows clamp to the
+// nearest event day so they never vanish from the tabs).
+function tableDayKey(t, bounds) {
+  const st = asDate(t.startTime);
+  const key = st ? centralDateKey(st) : "";
+  if (!bounds || !bounds.days.length) return key;
+  if (!key || key < bounds.firstDay) return bounds.firstDay;
+  if (key > bounds.lastDay) return bounds.lastDay;
+  return key;
+}
 
-  const cap = Number(t.capacity || 0);
-  const { confirmed, waitlist: wait } = seatCounts(t);
+// Open on today while a multi-day event runs, else day 1 (like the host picker).
+function pickActiveDay(bounds) {
+  if (activeDayKey && bounds.days.includes(activeDayKey)) return activeDayKey;
+  return bounds.days.includes(bounds.todayKey) ? bounds.todayKey : bounds.firstDay;
+}
 
-  const isHost = currentUser && (currentUser.uid === t.hostUid);
-  const canManageEvent = isAdmin() || isOrganizerOf(currentGameDay);
-  const canDelete = !isPast && (isHost || canManageEvent);
-  const canEdit = !isPast && (isHost || canManageEvent);
+function splitTimeLabel(label) {
+  const i = String(label).lastIndexOf(" ");
+  return i > 0 ? { hm: label.slice(0, i), ap: label.slice(i + 1) } : { hm: label, ap: "" };
+}
 
-  const bggUrl = t.bggId ? `https://boardgamegeek.com/boardgame/${encodeURIComponent(t.bggId)}` : null;
-  // Custom sign-ups (food runs, setup crew) have no BGG game behind them.
-  const isCustomEntry = t.isCustom === true || !t.bggId;
+// BGG thumbnails are small (about 200px): show them at their own size over a
+// blurred copy of themselves rather than stretched and soft.
+function artHtml(t) {
+  if (t.thumbUrl) {
+    const u = esc(encodeURI(String(t.thumbUrl)));
+    return `<span class="tArtBg" style="background-image:url(&quot;${u}&quot;)"></span><img class="tArtImg" src="${esc(t.thumbUrl)}" alt="" loading="lazy" />`;
+  }
+  if (isCustomTable(t)) return `<img class="tArtImg" src="./signup-sheet.png" alt="" loading="lazy" />`;
+  return `<span class="ph">${ic("dice")}</span>`;
+}
 
-  const expansions = Array.isArray(t.expansions) ? t.expansions : [];
-  const expLinks = expansions.map((e) => {
-    const expId = e?.bggId ?? "";
-    const expName = shortExpansionName(e?.name ?? "", t.gameName ?? "");
-    const expUrl = expId ? `https://boardgamegeek.com/boardgame/${encodeURIComponent(expId)}` : null;
-    return expUrl
-      ? `<li><a href="${esc(expUrl)}" target="_blank" rel="noopener">${esc(expName)}</a></li>`
-      : `<li>${esc(expName)}</li>`;
-  });
-  // Long expansion lists collapse to the first 3 with a toggle — full list
-  // always reachable, cards stay scannable.
-  const expansionsHtml = expLinks.length
-    ? `
-      <div class="expansionsBlock">
-        <div class="expansionsLabel">Expansions</div>
-        <ul class="expansionsList">${expLinks.slice(0, 3).join("")}</ul>
-        ${expLinks.length > 3
-          ? `<ul class="expansionsList expMore" hidden>${expLinks.slice(3).join("")}</ul>
-             <button type="button" class="btn btn-small expToggle">+${expLinks.length - 3} more</button>`
-          : ""}
-      </div>
-    `
-    : "";
-
-  const el = document.createElement("div");
-  el.className = "tablecard";
+function buildTableCard(t, sig) {
+  const el = document.createElement("article");
+  el.className = "tCard";
   el.dataset.tableCard = t.id;
   el.dataset.sig = sig;
-  if (tableTimeState(t) === "past") el.classList.add("is-pastTable");
+  const isHost = !!(currentUser && currentUser.uid === t.hostUid);
+  const custom = isCustomTable(t);
+  const meta = custom ? "Custom sign-up" : gameMetaText(t);
   el.innerHTML = `
-    <div class="thumb">
-      ${t.thumbUrl
-        ? `<img src="${esc(t.thumbUrl)}" alt="" loading="lazy" />`
-        : (isCustomEntry
-            ? `<img src="./signup-sheet.png" alt="" loading="lazy" />`
-            : `<div class="thumbph">🎲</div>`)}
+    <button class="tArt${custom && !t.thumbUrl ? " signup" : ""}" type="button" data-open tabindex="-1" aria-hidden="true">${artHtml(t)}<span class="tOver" data-pills hidden></span></button>
+    <div class="tBody">
+      <div class="tPills pills" data-pills hidden></div>
+      <div>
+        <h3 style="margin:0"><button class="tName" type="button" data-open>${esc(t.gameName || "Game")}</button></h3>
+        <p class="tMeta" data-game-meta${meta ? "" : " hidden"}>${esc(meta)}</p>
+      </div>
+      <div class="tHost">${avatarHtml(t.hostDisplayName || "?", "av-sm", isHost)}<span>${isHost ? '<span class="you">You’re hosting</span>' : `Hosted by <b>${esc(t.hostDisplayName || "Unknown")}</b>`}</span></div>
+      <div class="tSeats"><span class="seatMeter" data-seats></span><span data-avstack></span></div>
     </div>
-    <div class="body">
-      <div class="row1">
-        <div class="name">
-          ${(() => {
-            const st = tableTimeState(t);
-            if (st === "past") return `<span class="timePill is-past">Past</span> `;
-            if (st === "started") return `<span class="timePill is-started">Started</span> `;
-            return "";
-          })()}${isCustomEntry ? `<span class="signupPill">📋 Sign-up</span> ` : ""}${bggUrl ? `<a href="${esc(bggUrl)}" target="_blank" rel="noopener">${esc(t.gameName || "Game")}</a>` : esc(t.gameName || "Game")}
-          <div class="gameMeta" data-game-meta ${gameMetaText(t) ? "" : "style=\"display:none;\""}>${esc(gameMetaText(t))}</div>
-        </div>
-        <div class="time">${timeDisplay}</div>
-      </div>
-      <div class="row2">
-        <div class="muted">Host: <span class="hostName${isHost ? " is-you" : ""}">${esc(t.hostDisplayName || t.hostUid || "Unknown")}</span>${isHost ? " (you)" : ""}</div>
-        ${t.requestedByDisplayName ? `<div class="muted requestedBy">🙋 Requested by ${esc(t.requestedByDisplayName)}</div>` : ""}
-        ${t.gameSource === "library" ? `<div class="libPill">📚 Library copy</div>` : ""}
-        <div class="seats" data-seats-root="${esc(t.id)}" data-cap="${cap}">
-          <span class="seatsText muted">Seats: ${confirmed}/${cap}${wait ? ` • Waitlist: ${wait}` : ""}</span>
-          <span class="seatPips" aria-hidden="true"></span>
-          <span class="seatsBar" aria-hidden="true" style="display:none;"><span class="seatsFill" style="width:${cap ? Math.min(100, Math.round((confirmed / cap) * 100)) : 0}%"></span></span>
-        </div>
-      </div>
-      ${t.notes ? `<div class="notes notesClamp"><span style="font-weight:600;">Notes:</span> ${esc(t.notes)}</div>` : ""}
-      ${expansionsHtml}
-      <div class="roster" data-roster-for="${esc(t.id)}">
-        <div class="rosterTopline">${isCustomEntry ? "Sign-ups" : "Players"}</div>
-        <div class="rosterGrid">
-          <div class="rosterGroup">
-            <div class="rosterGroupHead">
-              <span>Confirmed</span>
-              <span class="rosterCount" data-roster-count="confirmed">${confirmed}</span>
-            </div>
-            <div class="rosterNames" data-roster-kind="confirmed"><span class="rosterEmpty">None yet</span></div>
-          </div>
-          <div class="rosterGroup">
-            <div class="rosterGroupHead">
-              <span>Waitlist</span>
-              <span class="rosterCount" data-roster-count="waitlist">${wait}</span>
-            </div>
-            <div class="rosterNames" data-roster-kind="waitlist"><span class="rosterEmpty">None yet</span></div>
-          </div>
-        </div>
-      </div>
-
-      ${isPast ? "" : `
-      <div class="row3">
-        <button class="btn btn-primary" data-action="join">Join</button>
-        <button class="btn" data-action="leave">Leave</button>
-        ${canEdit ? `<button class="btn" data-action="edit">Edit</button>` : ""}
-        ${canDelete ? `<button class="btn btn-danger" data-action="delete">Delete</button>` : ""}
-      </div>`}
-    </div>
+    <div class="tFoot"><span data-joinbox style="display:contents"></span><span class="grow"></span><button class="btn btn-quiet btn-small" type="button" data-open>Details${ic("right", "ico-sm")}</button></div>
   `;
+  return el;
+}
 
-  el.querySelector(".expToggle")?.addEventListener("click", (ev) => {
-    const more = el.querySelector(".expMore");
-    if (!more) return;
-    const show = more.hidden;
-    more.hidden = !show;
-    ev.currentTarget.textContent = show ? "Show fewer" : `+${expLinks.length - 3} more`;
+const dEmpty = (icon, title, body, action = "") =>
+  `<div class="dEmpty"><span class="eico">${ic(icon, "ico-lg")}</span><b>${esc(title)}</b><span>${esc(body)}</span>${action}</div>`;
+
+function tablesEmptyHtml(isPast, multi) {
+  if (isPast) return dEmpty("history", "No tables were hosted", multi ? "Nothing ran on this day." : "This game day finished without any tables.");
+  return dEmpty("dice", multi ? "No tables on this day yet" : "No tables yet",
+    "Host a table to run a game, or request one and see who would play.",
+    `<button class="btn btn-primary btn-small" type="button" data-empty-host>${ic("plus", "ico-sm")}Host a Table</button>`);
+}
+
+function renderDayTabs(bounds, day) {
+  if (!dayTabsEl) return;
+  if (!bounds || !bounds.multiDay) {
+    dayTabsEl.innerHTML = "";
+    dayTabsEl.className = "";
+    dayTabsEl.removeAttribute("role");
+    return;
+  }
+  const counts = {};
+  currentTables.forEach((t) => { const k = tableDayKey(t, bounds); counts[k] = (counts[k] || 0) + 1; });
+  dayTabsEl.className = "dayTabs";
+  dayTabsEl.setAttribute("role", "tablist");
+  dayTabsEl.setAttribute("aria-label", "Days");
+  dayTabsEl.innerHTML = bounds.days.map((k, i) => {
+    const p = keyParts(k);
+    const isToday = k === bounds.todayKey;
+    const isPastDay = k < bounds.todayKey;
+    const n = counts[k] || 0;
+    const edge = [
+      i === 0 ? `from ${bounds.startsLabel}` : "",
+      i === bounds.days.length - 1 && bounds.endsLabel ? `until ${bounds.endsLabel}` : ""
+    ].filter(Boolean).join(" · ");
+    return `<button class="dayTab${isToday ? " is-today" : ""}${isPastDay ? " is-past" : ""}" type="button" role="tab" aria-selected="${k === day}" data-day="${k}">
+      <span class="dn">Day ${i + 1}${isToday ? " · Today" : ""}${isPastDay ? " · Past" : ""}</span>
+      <span class="dl">${esc(p.label)}</span>
+      <span class="ds">${n} ${n === 1 ? "table" : "tables"}${edge ? `<span class="edge"> · ${esc(edge)}</span>` : ""}</span>
+    </button>`;
+  }).join("");
+}
+
+dayTabsEl?.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-day]");
+  if (!b) return;
+  activeDayKey = b.getAttribute("data-day");
+  renderTablesPage();
+  dayTabsEl.querySelector(`[data-day="${activeDayKey}"]`)?.focus();
+});
+
+// Slot headings turn red where you're hosting or playing.
+function refreshSlotMine() {
+  tablesList?.querySelectorAll(".slot").forEach((sec) => {
+    sec.classList.toggle("has-mine", !!sec.querySelector(".tCard.is-mine"));
   });
+}
 
-  el.querySelector('[data-action="join"]')?.addEventListener("click", async (ev) => {
-    ev.stopPropagation();
-    if (stopPastEventAction(ev)) return;
+// No pager: the selected day's tables, grouped under their start time. Every
+// table of the open game day keeps a live roster (seats, Join state, Your day).
+function renderTablesPage({ force = false } = {}) {
+  if (!tablesList) return;
+  const isPast = currentEventIsPast();
+
+  const ids = new Set(currentTables.map((t) => t.id));
+  stopRosterListenersExcept(ids);
+  if (currentGameDayId) currentTables.forEach((t) => ensureRosterListener(currentGameDayId, t.id));
+
+  const bounds = eventDayBounds();
+  const multi = !!(bounds && bounds.multiDay);
+  const day = multi ? pickActiveDay(bounds) : null;
+  renderDayTabs(bounds, day);
+
+  const sorted = [...currentTables].sort((a, b) =>
+    (asDate(a.startTime)?.getTime() ?? Infinity) - (asDate(b.startTime)?.getTime() ?? Infinity));
+  const list = multi ? sorted.filter((t) => tableDayKey(t, bounds) === day) : sorted;
+
+  if (tTitle) tTitle.textContent = multi ? `Day ${bounds.days.indexOf(day) + 1} · ${keyParts(day).long}` : "Tables";
+  const edge = multi ? [
+    day === bounds.firstDay ? `starts ${bounds.startsLabel}` : "",
+    day === bounds.lastDay && bounds.endsLabel ? `ends ${bounds.endsLabel}` : ""
+  ].filter(Boolean).join(" · ") : "";
+  if (tSub) {
+    tSub.textContent = tablesLoaded
+      ? `${list.length} ${list.length === 1 ? "table" : "tables"} by start time${edge ? " · " + edge : ""}`
+      : "Loading tables…";
+  }
+
+  if (!tablesLoaded) return; // the skeleton stays until the first snapshot
+
+  if (!list.length) {
+    lastLayoutSig = "";
+    tablesList.innerHTML = tablesEmptyHtml(isPast, multi);
+  } else {
+    const slots = [];
+    for (const t of list) {
+      const st = asDate(t.startTime);
+      const key = st ? String(Math.floor(st.getTime() / 60000)) : "tbd";
+      const last = slots[slots.length - 1];
+      if (last && last.key === key) last.items.push(t);
+      else slots.push({ key, label: st ? fmtTime(st) : "TBD", items: [t] });
+    }
+
+    const existing = new Map([...tablesList.querySelectorAll("[data-table-card]")].map((el) => [el.dataset.tableCard, el]));
+    const cardFor = (t) => {
+      const sig = tableRenderSig(t);
+      let el = existing.get(t.id);
+      if (!el || el.dataset.sig !== sig) {
+        el = buildTableCard(t, sig);
+        hydrateGameMeta(el, t);
+      }
+      el.classList.toggle("is-pastTable", tableTimeState(t) === "past");
+      refreshCardState(el, t);
+      return el;
+    };
+
+    const layoutSig = JSON.stringify([day, isPast, slots.map((s) => [s.key, s.items.map((t) => t.id)])]);
+    if (layoutSig === lastLayoutSig && !force) {
+      // Same structure: replace only cards whose markup changed.
+      for (const s of slots) {
+        for (const t of s.items) {
+          const old = existing.get(t.id);
+          const el = cardFor(t);
+          if (old && old !== el) old.replaceWith(el);
+        }
+      }
+    } else {
+      lastLayoutSig = layoutSig;
+      const frag = document.createDocumentFragment();
+      for (const s of slots) {
+        const sec = document.createElement("section");
+        sec.className = `slot n${Math.min(s.items.length, 3)}`;
+        sec.setAttribute("aria-label", s.label);
+        const tm = splitTimeLabel(s.label);
+        sec.innerHTML = `<div class="slotHead" aria-hidden="true"><span class="hm">${esc(tm.hm)}</span><span class="ap">${esc(tm.ap)}</span>${s.items.length > 1 ? `<span class="cnt">${s.items.length} tables</span>` : ""}<span class="rule"></span></div><div class="slotGrid"></div>`;
+        const grid = sec.querySelector(".slotGrid");
+        for (const t of s.items) grid.appendChild(cardFor(t));
+        frag.appendChild(sec);
+      }
+      tablesList.replaceChildren(frag);
+    }
+    refreshSlotMine();
+  }
+
+  if (sheetTableId) {
+    if (!currentTables.some((t) => t.id === sheetTableId)) closeSheet();
+    else renderSheet();
+  }
+  renderYourDay();
+  renderStats();
+}
+
+tablesList?.addEventListener("click", (e) => {
+  if (e.target.closest("[data-empty-host]")) { btnHostTable?.click(); return; }
+  const card = e.target.closest("[data-table-card]");
+  if (!card || e.target.closest("a")) return;
+  const t = currentTables.find((x) => x.id === card.dataset.tableCard);
+  if (!t) return;
+  const actBtn = e.target.closest("[data-action]");
+  if (actBtn) {
+    e.stopPropagation();
+    runTableAction(actBtn.getAttribute("data-action"), t, actBtn, card.querySelector("[data-joinbox]"));
+    return;
+  }
+  const opener = e.target.closest("[data-open]");
+  if (opener) openSheet(t.id, card.querySelector(".tName"));
+});
+
+// One implementation of every table action, for cards and the details sheet.
+async function runTableAction(action, t, btn, joinBox) {
+  const busy = () => {
+    if (joinBox) joinBox.dataset.busy = "1";
+    sheetBusy = true;
+    return () => {
+      if (joinBox) delete joinBox.dataset.busy;
+      sheetBusy = false;
+      const fresh = currentTables.find((x) => x.id === t.id);
+      if (!fresh) return;
+      const card = tableCardEl(fresh.id);
+      if (card) refreshCardState(card, fresh);
+      if (sheetTableId === fresh.id) renderSheet();
+    };
+  };
+
+  if (action === "join") {
+    if (stopPastEventAction()) return;
     if (!currentUser) return openSignInModal();
-
-    const btn = ev.currentTarget;
-    const prevLabel = btn.textContent;
     let guestCount = 0;
     if (GUESTS_ENABLED && t.isCustom !== true) {
       guestCount = await openJoinPartyModal(t);
       if (guestCount === null) return; // cancelled
     }
-    await attemptJoin(t, btn, prevLabel, { guestCount });
-  });
+    const done = busy();
+    await attemptJoin(t, btn, btn.textContent, { guestCount });
+    done();
+    return;
+  }
 
-  el.querySelector('[data-action="leave"]')?.addEventListener("click", async (ev) => {
-    ev.stopPropagation();
-    if (stopPastEventAction(ev)) return;
+  if (action === "leave") {
+    if (stopPastEventAction()) return;
     if (!currentUser) return openSignInModal();
-
-    // HOST LEAVE WARNING
+    const isHost = currentUser.uid === t.hostUid;
     if (isHost) {
       const ok = await confirmDialog({
         title: "Leave & delete table?",
-        message: "⚠️ You are the host.\n\nLeaving will DELETE this table and remove all players.",
+        message: "You are the host.\n\nLeaving will delete this table and remove all players.",
         confirmLabel: "Delete table",
         danger: true
       });
       if (!ok) return;
     }
-
-    const btn = el.querySelector('[data-action="leave"]');
+    const done = busy();
     const prevLabel = btn.textContent;
     btn.disabled = true;
     btn.textContent = "Leaving…";
@@ -1802,16 +1957,17 @@ function buildTableCard(t, isPast, sig) {
       btn.textContent = prevLabel;
       toast(`Leave failed: ${unwrapCallableError(e)}`, "error");
     }
-  });
+    done();
+    return;
+  }
 
-  el.querySelector('[data-action="edit"]')?.addEventListener("click", async (ev) => {
-    ev.stopPropagation();
-    if (stopPastEventAction(ev)) return;
+  if (action === "edit") {
+    if (stopPastEventAction()) return;
     openEditTableModal(t);
-  });
+    return;
+  }
 
-  el.querySelector('[data-action="delete"]')?.addEventListener("click", async (ev) => {
-    ev.stopPropagation();
+  if (action === "delete") {
     const ok = await confirmDialog({
       title: "Delete table?",
       message: "This removes the table and all of its signups.",
@@ -1825,154 +1981,193 @@ function buildTableCard(t, isPast, sig) {
     } catch (e) {
       toast(`Delete failed: ${unwrapCallableError(e)}`, "error");
     }
-  });
-
-  return el;
+  }
 }
 
-// Adds a Show more/less toggle to notes that exceed the 3-line clamp.
-function setupNotesClamp(card) {
-  const notes = card.querySelector(".notes");
-  if (!notes || card.querySelector(".notesToggle")) return;
-  requestAnimationFrame(() => {
-    if (!notes.isConnected || notes.scrollHeight <= notes.clientHeight + 4) return;
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "btn btn-small notesToggle";
-    btn.textContent = "Show more";
-    btn.addEventListener("click", () => {
-      const clamped = notes.classList.toggle("notesClamp");
-      btn.textContent = clamped ? "Show more" : "Show less";
-    });
-    notes.after(btn);
-  });
+// -----------------------------
+// Table details sheet
+// -----------------------------
+function openSheet(tableId, opener) {
+  if (!sheetEl || !sheetBody) return;
+  sheetTableId = tableId;
+  sheetOpener = opener || document.activeElement;
+  renderSheet();
+  sheetEl.hidden = false;
+  if (sheetScrim) sheetScrim.hidden = false;
+  document.body.classList.add("sheet-open");
+  sheetBody.scrollTop = 0;
+  sheetBody.querySelector("[data-close]")?.focus();
 }
 
-function renderTablesPage() {
-  const total = currentTables.length;
-  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  currentPage = Math.max(0, Math.min(currentPage, pages - 1));
+function closeSheet() {
+  if (!sheetTableId) return;
+  sheetTableId = null;
+  sheetBusy = false;
+  if (sheetEl) sheetEl.hidden = true;
+  if (sheetScrim) sheetScrim.hidden = true;
+  document.body.classList.remove("sheet-open");
+  if (sheetBody) sheetBody.innerHTML = "";
+  if (sheetOpener && sheetOpener.isConnected) sheetOpener.focus();
+  sheetOpener = null;
+}
+
+function renderSheet() {
+  if (!sheetTableId || !sheetBody || sheetBusy) return;
+  const t = currentTables.find((x) => x.id === sheetTableId);
+  if (!t) { closeSheet(); return; }
   const isPast = currentEventIsPast();
+  const isHost = !!(currentUser && currentUser.uid === t.hostUid);
+  const canManage = !isPast && (isHost || isAdmin() || isOrganizerOf(currentGameDay));
+  const custom = isCustomTable(t);
+  const bggUrl = t.bggId ? `https://boardgamegeek.com/boardgame/${encodeURIComponent(t.bggId)}` : null;
+  const r = rosterByTableId.get(t.id) || { confirmed: [], waitlist: [] };
+  const { confirmed, waitlist } = seatCounts(t);
+  const bounds = eventDayBounds();
+  const st = asDate(t.startTime);
+  const dayFact = bounds?.multiDay
+    ? (() => { const k = tableDayKey(t, bounds); return `Day ${bounds.days.indexOf(k) + 1} · ${keyParts(k).label}`; })()
+    : (st ? keyParts(centralDateKey(st)).label : "TBD");
+  const exps = Array.isArray(t.expansions) ? t.expansions : [];
+  const expLinks = exps.map((e) => {
+    const name = shortExpansionName(e?.name ?? "", t.gameName ?? "");
+    const id = e?.bggId ?? "";
+    return id
+      ? `<a class="chip" href="https://boardgamegeek.com/boardgame/${encodeURIComponent(id)}" target="_blank" rel="noopener">${esc(name)}</a>`
+      : `<span class="chip">${esc(name)}</span>`;
+  });
+  const showAllExp = expOpen.has(t.id);
+  const notesLong = String(t.notes || "").length > 180;
+  const notesAll = notesOpen.has(t.id);
+  const meta = custom ? "Custom sign-up" : gameMetaText(t);
+  const pills = tablePillsHtml(t);
+  const join = joinActionsHtml(t, { small: false });
+  // Re-rendering replaces the toggle buttons; keep keyboard focus on them.
+  const ae = document.activeElement;
+  const focusKey = ae && sheetBody.contains(ae)
+    ? (ae.hasAttribute("data-notes") ? "[data-notes]" : ae.hasAttribute("data-exp") ? "[data-exp]" : null)
+    : null;
 
-  // Multi-day events push finished days to the bottom so what's still ahead
-  // leads. Single-day events keep their plain chronological order.
-  const boundsForOrder = eventDayBounds();
-  let ordered = currentTables;
-  if (boundsForOrder && boundsForOrder.multiDay) {
-    const todayKey = centralDateKey(new Date());
-    const dayOf = (t) => {
-      const st = asDate(t.startTime);
-      return st ? centralDateKey(st) : "";
-    };
-    const upcoming = currentTables.filter((t) => !dayOf(t) || dayOf(t) >= todayKey);
-    const finished = currentTables.filter((t) => dayOf(t) && dayOf(t) < todayKey);
-    ordered = [...upcoming, ...finished];
-  }
+  sheetBody.innerHTML = `
+    <div class="shArt${custom && !t.thumbUrl ? " signup" : ""}">${artHtml(t)}<button class="btn btn-icon shClose" type="button" data-close aria-label="Close details">${ic("x")}</button></div>
+    <div class="shBody">
+      <div>
+        ${pills ? `<div class="pills" style="margin-bottom:10px">${pills}</div>` : ""}
+        <h2 class="shTitle" id="sheetTitle">${bggUrl ? `<a href="${esc(bggUrl)}" target="_blank" rel="noopener">${esc(t.gameName || "Game")}</a>` : esc(t.gameName || "Game")}</h2>
+        <p class="tMeta" data-game-meta${meta ? "" : " hidden"}>${esc(meta)}</p>
+        ${t.requestedByDisplayName ? `<p class="shReq">${ic("hand", "ico-sm")}Requested by ${esc(t.requestedByDisplayName)}</p>` : ""}
+      </div>
+      <dl class="facts">
+        <div><dt>Starts</dt><dd class="num">${esc(st ? fmtTime(st) : "TBD")}</dd></div>
+        <div><dt>Host</dt><dd>${avatarHtml(t.hostDisplayName || "?", "av-sm", isHost)}<span>${isHost ? "You" : esc(t.hostDisplayName || "Unknown")}</span></dd></div>
+        <div><dt>${custom ? "Spots" : "Seats"}</dt><dd><span class="seatMeter">${seatMeterHtml(t)}</span></dd></div>
+        <div><dt>${bounds?.multiDay ? "Day" : "Date"}</dt><dd>${esc(dayFact)}</dd></div>
+      </dl>
+      ${t.notes ? `<div class="dNotes${notesLong && !notesAll ? " clamp" : ""}"><span class="txt"><span class="lbl">Notes:</span> ${esc(t.notes)}</span>${notesLong ? `<button class="linkBtn" type="button" data-notes>${notesAll ? "Show less" : "Show more"}</button>` : ""}</div>` : ""}
+      ${expLinks.length ? `<div class="chips"><span class="lbl">Expansions</span>${(showAllExp ? expLinks : expLinks.slice(0, 3)).join("")}${expLinks.length > 3 ? `<button class="linkBtn" type="button" data-exp>${showAllExp ? "Show fewer" : `+${expLinks.length - 3} more`}</button>` : ""}</div>` : ""}
+      <div class="rgroups">
+        <div class="rgroup"><div class="rhead">${custom ? "Sign-ups" : "Confirmed"}<span class="rcount num">${confirmed}</span></div><div class="rchips">${rosterNamesHtml(r.confirmed)}</div></div>
+        <div class="rgroup wait"><div class="rhead">Waitlist<span class="rcount num">${waitlist}</span></div><div class="rchips">${rosterNamesHtml(r.waitlist)}</div></div>
+      </div>
+    </div>
+    ${(join || canManage) ? `<div class="shFoot"><span data-joinbox style="display:contents">${join}</span><span class="grow"></span>${canManage ? `<button class="btn btn-quiet" type="button" data-action="edit">${ic("pencil", "ico-sm")}Edit</button><button class="btn btn-dangerQuiet" type="button" data-action="delete">${ic("trash", "ico-sm")}Delete</button>` : ""}</div>` : ""}
+  `;
+  hydrateGameMeta(sheetBody, t);
+  if (focusKey) sheetBody.querySelector(focusKey)?.focus();
+}
 
-  const startIdx = currentPage * PAGE_SIZE;
-  const pageItems = ordered.slice(startIdx, startIdx + PAGE_SIZE);
-
-  const visibleIds = new Set(pageItems.map((t) => t.id));
-  stopRosterListenersExcept(visibleIds);
-  for (const t of pageItems) {
-    if (currentGameDayId) ensureRosterListener(currentGameDayId, t.id);
-  }
-
-  if (total > PAGE_SIZE) {
-    const label = `Page ${currentPage + 1} / ${pages}`;
-    tablePager.style.display = "";
-    pageInfo.textContent = label;
-    if (tablePagerBottom) tablePagerBottom.style.display = "";
-    if (pageInfoBottom) pageInfoBottom.textContent = label;
-  } else {
-    tablePager.style.display = "none";
-    if (tablePagerBottom) tablePagerBottom.style.display = "none";
-  }
-
-  if (!pageItems.length) {
-    tablesList.innerHTML = `<div class="muted">No tables yet. Tap “Host a Table” to run a game, or “Request a Game” to ask for one.</div>`;
+sheetBody?.addEventListener("click", (e) => {
+  if (e.target.closest("[data-close]")) { closeSheet(); return; }
+  const t = currentTables.find((x) => x.id === sheetTableId);
+  if (!t) return;
+  if (e.target.closest("[data-notes]")) {
+    notesOpen.has(t.id) ? notesOpen.delete(t.id) : notesOpen.add(t.id);
+    renderSheet();
     return;
   }
-
-  // Clear a possible empty-state placeholder before reconciling real cards.
-  if (!tablesList.querySelector("[data-table-card]")) tablesList.innerHTML = "";
-
-  // Keyed reconcile: reuse each card whose render signature is unchanged so a
-  // remote join/edit can never destroy in-flight buttons, scroll, or focus.
-  const existing = new Map();
-  for (const el of tablesList.querySelectorAll("[data-table-card]")) {
-    existing.set(el.dataset.tableCard, el);
+  if (e.target.closest("[data-exp]")) {
+    expOpen.has(t.id) ? expOpen.delete(t.id) : expOpen.add(t.id);
+    renderSheet();
+    return;
   }
-  // Day headers are rebuilt each pass — they're cheap and carry no state.
-  tablesList.querySelectorAll("[data-day-header]").forEach((el) => el.remove());
+  const actBtn = e.target.closest("[data-action]");
+  if (actBtn) runTableAction(actBtn.getAttribute("data-action"), t, actBtn, sheetBody.querySelector("[data-joinbox]"));
+});
+sheetScrim?.addEventListener("click", closeSheet);
 
-  // Multi-day events group their tables under a header per day.
+// -----------------------------
+// Your day + header stats (summaries of the live tables and rosters)
+// -----------------------------
+function renderYourDay() {
+  if (!yourDayEl) return;
   const bounds = eventDayBounds();
-  const showDayHeaders = !!(bounds && bounds.multiDay);
-  let lastDayKey = null;
-
-  let cursor = null;
-  for (const t of pageItems) {
-    const sig = tableRenderSig(t, isPast);
-    let el = existing.get(t.id);
-    let isNew = false;
-    if (el && el.dataset.sig !== sig) {
-      const fresh = buildTableCard(t, isPast, sig);
-      el.replaceWith(fresh);
-      el = fresh;
-      isNew = true;
-    } else if (!el) {
-      el = buildTableCard(t, isPast, sig);
-      isNew = true;
-    }
-    existing.delete(t.id);
-
-    // Day header whenever the day changes (and at the top of each page).
-    if (showDayHeaders) {
-      const st = asDate(t.startTime);
-      const dayKey = st ? centralDateKey(st) : "";
-      if (dayKey && dayKey !== lastDayKey) {
-        lastDayKey = dayKey;
-        const header = document.createElement("div");
-        header.className = "dayHeader";
-        header.setAttribute("data-day-header", dayKey);
-        const dayNum = bounds.days.indexOf(dayKey);
-        const todayKey = centralDateKey(new Date());
-        const isFinished = dayKey < todayKey;
-        const isToday = dayKey === todayKey;
-        header.classList.toggle("is-past", isFinished);
-        header.innerHTML = `
-          <span class="dayHeaderLabel">${esc(fmtDayLabel(dayKey))}</span>
-          ${dayNum >= 0 ? `<span class="dayHeaderBadge">Day ${dayNum + 1}</span>` : ""}
-          ${isFinished ? `<span class="dayHeaderState is-past">Past</span>` : ""}
-          ${isToday ? `<span class="dayHeaderState is-today">Today</span>` : ""}
-          ${dayKey === bounds.firstDay
-            ? `<span class="dayHeaderEnds muted">starts ${esc(bounds.startsLabel)}</span>` : ""}
-          ${(bounds.endsLabel && dayKey === bounds.lastDay)
-            ? `<span class="dayHeaderEnds muted">ends ${esc(bounds.endsLabel)}</span>` : ""}
-        `;
-        const at = cursor ? cursor.nextElementSibling : tablesList.firstElementChild;
-        tablesList.insertBefore(header, at);
-        cursor = header;
-      }
-    }
-
-    // Keep DOM order aligned with the sorted data without touching settled nodes.
-    const expectedNext = cursor ? cursor.nextElementSibling : tablesList.firstElementChild;
-    if (el !== expectedNext) tablesList.insertBefore(el, expectedNext);
-    cursor = el;
-
-    if (isNew) {
-      hydrateGameMeta(el, t);
-      setupNotesClamp(el);
-    }
-    updateRosterDom(t.id);
-    applyJoinLeaveState(el, t);
-    refreshSeatsDom(el, t);
+  const multi = !!(bounds && bounds.multiDay);
+  if (ydTitle) ydTitle.textContent = multi ? "Your schedule" : "Your day";
+  if (!currentUser) {
+    if (ydCount) ydCount.textContent = "";
+    yourDayEl.innerHTML = `<div class="ydEmpty"><p style="margin:0">Sign in to see every table you host, play or wait on, in time order.</p><button class="btn btn-primary btn-small" type="button" data-signin style="justify-self:start">${ic("login", "ico-sm")}Sign in</button></div>`;
+    return;
   }
+  const todayKey = centralDateKey(new Date());
+  const items = currentTables
+    .map((t) => ({ t, s: myTableStatus(t) }))
+    .filter((x) => x.s)
+    .sort((a, b) => {
+      if (multi) {
+        const fa = tableDayKey(a.t, bounds) < todayKey ? 1 : 0;
+        const fb = tableDayKey(b.t, bounds) < todayKey ? 1 : 0;
+        if (fa !== fb) return fa - fb;
+      }
+      return (asDate(a.t.startTime)?.getTime() ?? Infinity) - (asDate(b.t.startTime)?.getTime() ?? Infinity);
+    });
+  const wants = currentPosts.filter((p) => (Array.isArray(p.interested) ? p.interested : []).some((x) => x?.uid === currentUser.uid));
+  const total = items.length + wants.length;
+  if (ydCount) ydCount.textContent = total ? String(total) : "";
+  if (!total) {
+    yourDayEl.innerHTML = `<p class="none" style="margin:0">${currentEventIsPast() ? "You weren’t at any tables." : "Nothing yet. Join a table, or host one."}</p>`;
+    return;
+  }
+  const label = { hosting: ["pill-red", "Hosting"], joined: ["pill-green", "Playing"], waitlist: ["pill-gold", "Waitlist"] };
+  const rows = items.map(({ t, s }) => {
+    const st = asDate(t.startTime);
+    const tm = splitTimeLabel(st ? fmtTime(st) : "TBD");
+    const day = multi ? `<span class="ydDay">${esc(keyParts(tableDayKey(t, bounds)).dow)}</span>` : "";
+    const [cls, txt] = label[s];
+    return `<li><button class="ydItem" type="button" data-yd="${esc(t.id)}"><span class="t">${esc(tm.hm)}<small>${esc(tm.ap)}</small></span><span style="min-width:0"><span class="g">${esc(t.gameName || "Game")}</span><span class="k">${day}<span class="pill ${cls}">${txt}${s === "waitlist" ? " #" + myWaitPos(t) : ""}</span>${tableTimeState(t) === "past" ? '<span class="pill">Past</span>' : ""}</span></span></button></li>`;
+  }).concat(wants.map((p) => `<li><div class="ydItem" style="cursor:default"><span class="t">—</span><span style="min-width:0"><span class="g">${esc(p.gameName || "Game")}</span><span class="k"><span class="pill">${ic("hand")}Would play</span></span></span></div></li>`));
+  yourDayEl.innerHTML = `<ul class="yd">${rows.join("")}</ul>`;
+}
 
-  // Cards whose tables left this page (or were deleted) go away.
-  for (const el of existing.values()) el.remove();
+yourDayEl?.addEventListener("click", (e) => {
+  if (e.target.closest("[data-signin]")) { openSignInModal(); return; }
+  const b = e.target.closest("[data-yd]");
+  if (!b) return;
+  const t = currentTables.find((x) => x.id === b.getAttribute("data-yd"));
+  if (!t) return;
+  const bounds = eventDayBounds();
+  if (bounds?.multiDay) {
+    activeDayKey = tableDayKey(t, bounds);
+    renderTablesPage();
+  }
+  openSheet(t.id, b);
+});
+
+function renderStats() {
+  if (!gdStats) return;
+  if (!tablesLoaded) { gdStats.innerHTML = ""; return; }
+  const isPast = currentEventIsPast();
+  let taken = 0, open = 0, waiting = 0;
+  for (const t of currentTables) {
+    const { confirmed, waitlist } = seatCounts(t);
+    taken += confirmed;
+    waiting += waitlist;
+    const cap = Number(t.capacity || 0);
+    if (!isCustomTable(t) && cap > 0 && tableTimeState(t) !== "past") open += Math.max(0, cap - confirmed);
+  }
+  const n = currentTables.length;
+  gdStats.innerHTML = `<span class="stat"><b>${n}</b>${n === 1 ? "table" : "tables"}</span>`
+    + `<span class="stat"><b>${taken}</b>${isPast ? "seats filled" : "seats taken"}</span>`
+    + (isPast ? "" : `<span class="stat green"><b>${open}</b>open seats</span>`)
+    + (waiting ? `<span class="stat gold"><b>${waiting}</b>on waitlists</span>` : "");
 }
 
 // -----------------------------
@@ -2137,47 +2332,51 @@ function wantInterestNames(p) {
     .map((x) => x?.name).filter(Boolean);
 }
 
-function wantPostHtml(p, bggUrl, { canDelete = false, canAct = false, iAmInterested = false } = {}) {
-  const names = wantInterestNames(p);
+function wantPostHtml(p, bggUrl, { canDelete = false, canAct = false, iAmInterested = false, isMine = false, signIn = false } = {}) {
+  const people = (Array.isArray(p.interested) ? p.interested : []).filter((x) => x?.name);
+  const meta = gameMetaText(p);
+  const acts = [
+    canAct ? `<button class="btn btn-small" type="button" data-action="want-convert">${ic("dice", "ico-sm")}Host this</button>` : "",
+    canAct ? `<button class="btn btn-small${iAmInterested ? " is-on" : ""}" type="button" data-action="want-interest" aria-pressed="${iAmInterested}">${iAmInterested ? ic("check", "ico-sm") + "Interested" : ic("hand", "ico-sm") + "I’d play this"}</button>` : "",
+    canDelete ? `<button class="btn btn-dangerQuiet btn-small btn-icon" type="button" data-action="want-delete" aria-label="Delete request" title="Delete request">${ic("trash", "ico-sm")}</button>` : "",
+    signIn ? `<button class="btn btn-quiet btn-small" type="button" data-action="want-signin">Sign in to respond</button>` : ""
+  ].join("");
   return `
-    <div class="wantGame">
-      <div class="title">
-        ${bggUrl ? `<a href="${esc(bggUrl)}" target="_blank" rel="noopener">${esc(p.gameName || "Game")}</a>` : esc(p.gameName || "Game")}
-        <div class="gameMeta" data-game-meta ${gameMetaText(p) ? "" : "style=\"display:none;\""}>${esc(gameMetaText(p))}</div>
+    <div class="rqTop">
+      <span class="rqThumb">${p.thumbUrl ? `<img src="${esc(p.thumbUrl)}" alt="" loading="lazy" />` : ic("dice")}</span>
+      <div style="min-width:0">
+        <div class="nm">${bggUrl ? `<a href="${esc(bggUrl)}" target="_blank" rel="noopener">${esc(p.gameName || "Game")}</a>` : esc(p.gameName || "Game")}</div>
+        <div class="sub" data-game-meta${meta ? "" : " hidden"}>${esc(meta)}</div>
       </div>
     </div>
-    <div class="wantDetails">
-      <div class="wantBy"><span>Requested by</span> ${esc(p.createdByDisplayName || p.createdByUid || "Someone")}${p.restoredAt ? ` <span class="restoredPill" title="A table picked this up, then closed">↩️ back on the list</span>` : ""}</div>
-      ${names.length ? `<div class="wantInterest">🙋 <b>${names.length}</b> would play — ${esc(names.join(", "))}</div>` : ""}
-      ${p.notes ? `<div class="wantNote"><span>Note</span> <div class="wantNoteText">${esc(p.notes)}</div></div>` : ""}
-    </div>
-    ${(canAct || canDelete) ? `<div class="wantActions">${[
-      canAct ? `<button class="btn btn-small" data-action="want-convert">🎲 Host this</button>` : "",
-      canAct ? `<button class="btn btn-small${iAmInterested ? " is-on" : ""}" data-action="want-interest">${iAmInterested ? "✔ Interested" : "🙋 I'd play this"}</button>` : "",
-      canDelete ? `<button class="btn btn-danger btn-small" data-action="want-delete">Delete</button>` : ""
-    ].join("")}</div>` : ""}
+    <div class="rqBy">Requested by <b>${esc(p.createdByDisplayName || p.createdByUid || "Someone")}${isMine ? " (you)" : ""}</b>${p.restoredAt ? `<span class="pill" title="A table picked this up, then closed">${ic("rotate")}Back on the list</span>` : ""}</div>
+    ${p.notes ? `<p class="rqNote">${esc(p.notes)}</p>` : ""}
+    ${people.length ? `<span class="rqInt">${avatarStackHtml(people.map((x) => ({ name: x.name, uid: x.uid, guests: 0 })))}<span><b class="num">${people.length}</b> would play</span></span>` : ""}
+    ${acts ? `<div class="rqActs">${acts}</div>` : ""}
   `;
 }
 
 function renderWants(items) {
+  if (!wantsList) return;
   wantsList.innerHTML = "";
+  if (wantsCount) wantsCount.textContent = items.length ? String(items.length) : "";
   const isPast = currentEventIsPast();
   if (!items.length) {
-    wantsList.innerHTML = `<div class="muted">No requests yet. Tap “Request a Game” to ask for a game — a host may pick it up.</div>`;
+    wantsList.innerHTML = `<p class="none" style="margin:0">${isPast ? "No requests were posted." : "No requests yet. Tap “Request a Game” to ask for one — a host may pick it up."}</p>`;
     return;
   }
 
   for (const p of items) {
-    const isCreator = currentUser && (currentUser.uid === p.createdByUid);
+    const isCreator = !!(currentUser && currentUser.uid === p.createdByUid);
     const canDelete = !isPast && (isCreator || isAdmin() || isOrganizerOf(currentGameDay));
     const canAct = !isPast && !!currentUser;
     const iAmInterested = !!(currentUser
       && (Array.isArray(p.interested) ? p.interested : []).some((x) => x?.uid === currentUser.uid));
 
     const bggUrl = p.bggId ? `https://boardgamegeek.com/boardgame/${encodeURIComponent(p.bggId)}` : null;
-    const el = document.createElement("div");
-    el.className = "listitem wantItem";
-    el.innerHTML = wantPostHtml(p, bggUrl, { canDelete, canAct, iAmInterested });
+    const el = document.createElement("article");
+    el.className = "rq";
+    el.innerHTML = wantPostHtml(p, bggUrl, { canDelete, canAct, iAmInterested, isMine: isCreator, signIn: !isPast && !currentUser });
 
     // Keyed bindings — never querySelector("button"), which grabs whichever
     // action happens to render first.
@@ -2216,6 +2415,8 @@ function renderWants(items) {
         convertRequestFlow(p);
     });
 
+    el.querySelector('[data-action="want-signin"]')?.addEventListener("click", () => openSignInModal());
+
     wantsList.appendChild(el);
     hydrateGameMeta(el, p);
   }
@@ -2232,17 +2433,41 @@ function gameDayUrl(gamedayId) {
   return u.toString();
 }
 
-function showGameDayList({ push = false } = {}) {
+// There's no separate list view any more (the date rail is the list): this
+// opens the next game day, or the most recent past one, or shows the empty
+// state when there are none.
+function showGameDayList() {
+  const gd = currentGameDays[0] || currentPastGameDays[0] || null;
+  if (gd) {
+    openGameDay(gd, { push: false });
+    return;
+  }
+  if (!gameDaysLoaded) return;
   stopRosterListenersExcept(new Set());
+  if (unsubTables) { unsubTables(); unsubTables = null; }
+  if (unsubPosts) { unsubPosts(); unsubPosts = null; }
+  closeSheet();
   currentGameDayId = null;
   currentGameDay = null;
-  setPastEventActions(false);
-  gamedayCard.style.display = "none";
-  if (push) history.pushState({}, "", gameDayUrl(null));
+  currentTables = [];
+  currentPosts = [];
+  if (gamedayCard) gamedayCard.hidden = true;
+  if (dayTabsEl) { dayTabsEl.innerHTML = ""; dayTabsEl.className = ""; }
+  if (tTitle) tTitle.textContent = "No game days yet";
+  if (tSub) tSub.textContent = "";
+  if (tablesList) {
+    tablesList.innerHTML = dEmpty("cal", "No game days posted yet", "Check back soon. Organizers can post the next one.",
+      canCreateGameDays() ? `<button class="btn btn-primary btn-small" type="button" data-empty-create>${ic("plus", "ico-sm")}Create game day</button>` : "");
+    tablesList.querySelector("[data-empty-create]")?.addEventListener("click", openCreateGameDayModal);
+  }
+  if (wantsList) wantsList.innerHTML = "";
+  if (wantsCount) wantsCount.textContent = "";
+  renderYourDay();
+  renderRail();
 }
 
 function showGameDayCard() {
-  gamedayCard.style.display = "";
+  if (gamedayCard) gamedayCard.hidden = false;
 }
 
 // Fetch the current invite token and put the invite link on the clipboard.
@@ -2262,65 +2487,123 @@ async function copyInviteLink(gamedayId) {
 
 function renderGameDayHeader(gd) {
   gamedayTitle.textContent = gd.title || "Game Day";
-  const startsAt = asDate(gd.startsAt);
-  const isPast = isPastGameDay(gd);
+  const isPast = isPastGameDay(gd) || currentPastGameDays.some((x) => x.id === gd.id);
   const isPrivate = gd.visibility === "private";
   const canManage = isAdmin() || isOrganizerOf(gd);
-  // One fact per line, same treatment as the game day cards — a single
-  // bullet-joined run-on was the hardest thing on the page to scan.
-  gamedayMeta.innerHTML = `
-    ${(isPast || isPrivate) ? `<div class="eventCardBadges">
-      ${isPast ? `<span class="eventPill is-history">Past Event</span> ` : ""}
-      ${isPrivate ? `<span class="eventPill is-private">🔒 Private</span>` : ""}
-    </div>` : ""}
-    <div class="eventCardLines">
-      <div class="eventCardLine is-when">
-        <span class="eventCardIcon" aria-hidden="true">📅</span>
-        <span>${esc(fmtEventWhen(gd.startsAt, gd.endsAt))}</span>
-      </div>
-      ${gd.location ? `<div class="eventCardLine">
-        <span class="eventCardIcon" aria-hidden="true">📍</span>
-        <span>${esc(gd.location)}</span>
-      </div>` : ""}
-      ${gd.createdByDisplayName ? `<div class="eventCardLine">
-        <span class="eventCardIcon" aria-hidden="true">👤</span>
-        <span>Hosted by ${esc(gd.createdByDisplayName)}</span>
-      </div>` : ""}
-    </div>
-    ${isPrivate && canManage ? `
-    <div class="actions inviteControls">
-      <button class="btn" id="btnCopyInvite">🔗 Copy Invite Link</button>
-      <button class="btn" id="btnManageInvites">Invited…</button>
-      <button class="btn" id="btnResetInvite">Reset Link</button>
-    </div>` : ""}
-  `;
-  setPastEventActions(isPast);
+  const days = gdDays(gd);
+  const f = days.length ? keyParts(days[0]) : null;
+  const l = days.length ? keyParts(days[days.length - 1]) : null;
+  const year = days.length ? days[0].slice(0, 4) : "";
+  const live = liveDayOf(gd);
 
-  if (isPrivate && canManage) {
-    const buildLink = (token) =>
-      `${window.location.origin}${window.location.pathname}?event=${encodeURIComponent(gd.id)}&invite=${encodeURIComponent(token)}`;
+  const dateText = !f ? "Date TBD" : days.length > 1 ? `${f.long} – ${l.long}, ${year}` : `${f.long}, ${year}`;
+  const pills = (isPast ? `<span class="pill">${ic("history")}Past event</span>` : "")
+    + (live ? `<span class="pill pill-amber">Day ${live} of ${days.length}</span>` : (days.length > 1 ? `<span class="pill">${days.length} days</span>` : ""))
+    + (isPrivate ? `<span class="pill pill-gold">${ic("lock")}Private</span>` : "");
+  if (gdKicker) gdKicker.innerHTML = `<span class="num">${esc(dateText)}</span>${pills}`;
 
-    gamedayMeta.querySelector("#btnCopyInvite")?.addEventListener("click", () => copyInviteLink(gd.id));
+  const startT = asDate(gd.startsAt) ? fmtTime(gd.startsAt) : "";
+  const endL = eventEndTimeLabel(gd.endsAt);
+  const timeText = !startT ? ""
+    : days.length > 1 ? `${startT} ${f.dow}${endL ? ` – ${endL} ${l.dow}` : ""}`
+    : `${startT}${endL ? ` – ${endL}` : ""}`;
+  gamedayMeta.innerHTML = [
+    timeText ? `<span>${ic("clock")}<span class="num">${esc(timeText)}</span></span>` : "",
+    gd.location ? `<span>${ic("pin")}<span>${esc(gd.location)}</span></span>` : "",
+    gd.createdByDisplayName ? `<span>${avatarHtml(gd.createdByDisplayName, "av-sm")}<span>Hosted by ${esc(gd.createdByDisplayName)}</span></span>` : ""
+  ].join("");
 
-    gamedayMeta.querySelector("#btnResetInvite")?.addEventListener("click", async () => {
-      const ok = await confirmDialog({
-        title: "Reset invite link?",
-        message: "The old link stops working immediately. People already invited keep their access.",
-        confirmLabel: "Reset Link"
-      });
-      if (!ok) return;
-      try {
-        const r = await fnRotateInviteToken({ gamedayId: gd.id });
-        await navigator.clipboard.writeText(buildLink(r.data.token));
-        toast("New invite link created and copied.", "success", 6000);
-      } catch (e) {
-        toast(unwrapCallableError(e), "error");
-      }
-    });
-
-    gamedayMeta.querySelector("#btnManageInvites")?.addEventListener("click", () => openInvitesModal(gd));
+  // Private events have no public share page: organizers get the invite
+  // controls instead. Delete lives in the ⋯ menu for organizers and admins.
+  let lead = "";
+  const menuItems = [];
+  if (isPrivate) {
+    if (canManage) {
+      lead = `<button class="btn btn-quiet" type="button" data-gdact="invite-copy">${ic("link", "ico-sm")}Copy invite link</button>`;
+      menuItems.push(
+        `<button class="mi" type="button" data-gdact="invite-list">${ic("users")}Invited…</button>`,
+        `<button class="mi" type="button" data-gdact="invite-reset">${ic("rotate")}Reset invite link</button>`
+      );
+    }
+  } else {
+    lead = `<a class="btn btn-quiet" href="./events/?id=${encodeURIComponent(gd.id)}">${ic("share", "ico-sm")}View / Share</a>`;
   }
+  if (canManage) {
+    menuItems.push(`${menuItems.length ? "<hr />" : ""}<button class="mi danger" type="button" data-gdact="delete">${ic("trash")}Delete game day</button>`);
+  }
+  if (gdActs) {
+    gdActs.innerHTML = lead + (menuItems.length
+      ? `<div class="menuWrap"><button class="btn btn-quiet btn-icon" type="button" data-gdact="menu" aria-haspopup="menu" aria-expanded="false" aria-label="More game day actions">${ic("more")}</button><div class="menu" role="menu" hidden>${menuItems.join("")}</div></div>`
+      : "");
+  }
+
+  // The header picks up the colors of the day's own box art.
+  const art = currentTables.find((t) => t.thumbUrl)?.thumbUrl;
+  if (evBg) evBg.style.backgroundImage = art ? `url("${encodeURI(String(art))}")` : "";
+
+  renderStats();
+  setPastEventActions(isPast);
 }
+
+gdActs?.addEventListener("click", async (e) => {
+  const b = e.target.closest("[data-gdact]");
+  const gd = currentGameDay;
+  if (!b || !gd) return;
+  const act = b.getAttribute("data-gdact");
+  const menu = gdActs.querySelector(".menu");
+  if (act === "menu") {
+    e.stopPropagation();
+    const open = !!menu?.hidden;
+    if (menu) menu.hidden = !open;
+    b.setAttribute("aria-expanded", String(open));
+    return;
+  }
+  if (menu) menu.hidden = true;
+
+  if (act === "invite-copy") return copyInviteLink(gd.id);
+  if (act === "invite-list") return openInvitesModal(gd);
+  if (act === "invite-reset") {
+    const ok = await confirmDialog({
+      title: "Reset invite link?",
+      message: "The old link stops working immediately. People already invited keep their access.",
+      confirmLabel: "Reset Link"
+    });
+    if (!ok) return;
+    try {
+      const r = await fnRotateInviteToken({ gamedayId: gd.id });
+      const link = `${window.location.origin}${window.location.pathname}?event=${encodeURIComponent(gd.id)}&invite=${encodeURIComponent(r.data.token)}`;
+      await navigator.clipboard.writeText(link);
+      toast("New invite link created and copied.", "success", 6000);
+    } catch (err) {
+      toast(unwrapCallableError(err), "error");
+    }
+    return;
+  }
+  if (act === "delete") {
+    const ok = await confirmDialog({
+      title: "Delete Game Day?",
+      message: `Delete “${gd.title || "Game Day"}”? This wipes all of its tables and signups.`,
+      confirmLabel: "Delete Game Day",
+      danger: true
+    });
+    if (!ok) return;
+    try {
+      await fnDeleteGameDay({ gamedayId: gd.id });
+      toast("Game Day deleted.", "success");
+      // Move on now rather than waiting for the snapshot (private events never
+      // appear in it).
+      lastGameDaysRaw = lastGameDaysRaw.filter((g) => g.id !== gd.id);
+      myPrivateGamedays = myPrivateGamedays.filter((g) => g.id !== gd.id);
+      currentGameDayId = null;
+      currentGameDay = null;
+      renderGameDays(lastGameDaysRaw);
+      history.replaceState({}, "", gameDayUrl(null));
+      showGameDayList();
+    } catch (err) {
+      toast(unwrapCallableError(err), "error");
+    }
+  }
+});
 
 async function openInvitesModal(gd) {
   openModal(`Invited — ${gd.title || "Game Day"}`, `<div class="modalStack"><div class="muted">Loading…</div></div>`);
@@ -2453,15 +2736,32 @@ async function tryRedeemPendingInvite() {
 }
 
 function openGameDay(gd, { push = true, deepLink = false } = {}) {
+  const changed = gd.id !== currentGameDayId;
   currentGameDayId = gd.id;
   currentGameDay = gd;
-  currentPage = 0;
+  if (changed) {
+    closeSheet();
+    activeDayKey = null;
+    notesOpen.clear();
+    expOpen.clear();
+    currentTables = [];
+    currentPosts = [];
+    tablesLoaded = false;
+    lastLayoutSig = "";
+    stopRosterListenersExcept(new Set());
+    if (tablesList) tablesList.innerHTML = '<div class="skeletonCard" aria-hidden="true"></div><div class="skeletonCard" aria-hidden="true"></div>';
+    if (dayTabsEl) { dayTabsEl.innerHTML = ""; dayTabsEl.className = ""; }
+    if (wantsList) wantsList.innerHTML = "";
+    if (wantsCount) wantsCount.textContent = "";
+    subscribeGameDayDetails(gd.id);
+  }
   renderGameDayHeader(gd);
   showGameDayCard();
-  subscribeGameDayDetails(gd.id);
+  renderRail();
+  renderTablesPage();
   if (deepLink) {
     // A deep-linked load has only one history entry; give Back somewhere to
-    // land (the list) instead of leaving the site.
+    // land (the planner's default view) instead of leaving the site.
     history.replaceState({}, "", gameDayUrl(null));
     history.pushState({ event: gd.id }, "", gameDayUrl(gd.id));
   } else if (push) {
@@ -2893,6 +3193,7 @@ function openNicknameModal(opts = {}) {
       await fnSetNickname({ nickname: nick });
       myRole.nickname = nick;
       setAuthStatus(`Signed in as: ${nick}`);
+      updateAccountUI();
       closeModal();
       toast("Nickname updated everywhere.", "success");
       if (opts.returnToMyEvents) openMyEventsModal();
@@ -2950,15 +3251,23 @@ if (btnSignOut) btnSignOut.addEventListener("click", async () => {
   await signOut(auth);
 });
 
-if (btnCreateGameDay) btnCreateGameDay.addEventListener("click", async () => {
-  if (!currentUser) return openSignInModal();
-  openCreateGameDayModal();
+// Menus close on an outside click; Escape closes menus, then the sheet.
+document.addEventListener("click", (e) => {
+  if (acctMenu && !acctMenu.hidden && !e.target.closest("#acctWrap")) setAccountMenu(false);
+  const gdMenu = gdActs?.querySelector(".menu");
+  if (gdMenu && !gdMenu.hidden && !e.target.closest("#gdActs .menuWrap")) {
+    gdMenu.hidden = true;
+    gdActs.querySelector('[data-gdact="menu"]')?.setAttribute("aria-expanded", "false");
+  }
 });
-
-if (btnPastEvents) btnPastEvents.addEventListener("click", togglePastEvents);
-
-if (btnBack) btnBack.addEventListener("click", () => {
-  showGameDayList({ push: true });
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape") return;
+  if (document.querySelector("#modal")?.style.display !== "none") return; // the modal handles its own Escape
+  if (acctMenu && !acctMenu.hidden) { setAccountMenu(false); btnAccount?.focus(); return; }
+  const gdMenu = gdActs?.querySelector(".menu");
+  if (gdMenu && !gdMenu.hidden) { gdMenu.hidden = true; return; }
+  if (sheetTableId) { closeSheet(); return; }
+  if (pickerOpen) { pickerOpen = false; renderRail(); }
 });
 
 if (btnHostTable) btnHostTable.addEventListener("click", async () => {
@@ -2988,7 +3297,7 @@ if (btnWantToPlay) btnWantToPlay.addEventListener("click", async () => {
   await wantToPlayFlow(currentGameDayId);
 });
 
-// Browser back/forward navigates between the list and a Game Day.
+// Browser back/forward moves between game days.
 window.addEventListener("popstate", () => {
   const id = new URLSearchParams(window.location.search).get("event");
   if (!id) return showGameDayList();
@@ -2999,31 +3308,7 @@ window.addEventListener("popstate", () => {
     // Snapshot data may not have arrived yet — re-arm the deep link so the
     // next game-days snapshot opens it, instead of stranding the URL.
     initialEventId = id;
-    showGameDayList();
   }
-});
-
-// pager
-if (btnPrev) btnPrev.addEventListener("click", () => {
-  currentPage = Math.max(0, currentPage - 1);
-  renderTablesPage();
-});
-if (btnNext) btnNext.addEventListener("click", () => {
-  const pages = Math.max(1, Math.ceil(currentTables.length / PAGE_SIZE));
-  currentPage = Math.min(pages - 1, currentPage + 1);
-  renderTablesPage();
-});
-// Bottom pager mirrors the top one — handy after scrolling through a full page.
-if (btnPrevBottom) btnPrevBottom.addEventListener("click", () => {
-  currentPage = Math.max(0, currentPage - 1);
-  renderTablesPage();
-  tablesList?.scrollIntoView({ block: "start" });
-});
-if (btnNextBottom) btnNextBottom.addEventListener("click", () => {
-  const pages = Math.max(1, Math.ceil(currentTables.length / PAGE_SIZE));
-  currentPage = Math.min(pages - 1, currentPage + 1);
-  renderTablesPage();
-  tablesList?.scrollIntoView({ block: "start" });
 });
 
 // -----------------------------
@@ -3074,12 +3359,16 @@ setInterval(() => {
   if (!currentGameDayId) return;
   const bounds = eventDayBounds();
   if (!bounds || !bounds.multiDay) return;
-  // Every minute keeps "Started" honest; a day change reshuffles the groups.
+  // Every minute keeps "Started" honest; a day change moves Today, the
+  // "Day N of M" tag and the default day tab along.
   renderTablesPage();
-  if (dayChanged && lastGameDaysRaw.length) renderGameDays(lastGameDaysRaw);
+  if (dayChanged) {
+    if (lastGameDaysRaw.length) renderGameDays(lastGameDaysRaw);
+    if (currentGameDay) renderGameDayHeader(currentGameDay);
+  }
 }, 60 * 1000);
 
 // start
+renderRail();
 await handleDiscordCallbackIfPresent();
 subscribeGameDays();
-showGameDayList();

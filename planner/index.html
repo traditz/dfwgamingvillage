@@ -20,108 +20,107 @@
   <meta property="twitter:description" content="DFW Gaming Village game day planning. Host tables, join games, and manage waitlists across Discord and the web." />
   <meta property="twitter:image" content="https://dfwgamingvillage.com/planner/banner2.png" />
 
-  <meta name="theme-color" content="#d71920" />
+  <meta name="theme-color" content="#0a0a0e" />
 
   <link rel="icon" href="./dfwgv-icon.png" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Inter:wght@400;500;600;700;800&display=swap" />
 
-  <link rel="stylesheet" href="./styles.css?v=20260817-p39" />
+  <!-- styles.css is shared with Events and Admin; planner.css is this page's layout. -->
+  <link rel="stylesheet" href="./styles.css?v=20261024-d1" />
+  <link rel="stylesheet" href="./planner.css?v=20261024-d1" />
 </head>
-<body>
-  <a class="skipLink" href="#gamedayList">Skip to game days</a>
-  <header class="topbar">
-    <div class="brand">
-      <a class="logo" href="https://www.dfwgamingvillage.com/" aria-label="Go to DFW Gaming Village home">
-        <img src="./dfwgv-icon.png" alt="DFW Gaming Village logo" />
+<body class="plannerD">
+  <a class="skipLink" href="#main">Skip to tables</a>
+
+  <header class="top">
+    <div class="topIn wrap gutter">
+      <a class="brandLink" href="https://www.dfwgamingvillage.com/" aria-label="DFW Gaming Village home">
+        <img src="./dfwgv-icon.png" alt="" />
+        <span>DFWGV Planner</span>
       </a>
-      <div>
-        <h1 class="title">DFWGV Planner</h1>
-        <div class="subtitle">Game day planning for DFW Gaming Village</div>
+      <nav class="links" aria-label="Planner navigation">
+        <a class="link" href="./" aria-current="page">Planner</a>
+        <a class="link" href="./events/">Events</a>
+        <a class="link" href="/vgplanner/">Video games</a>
+        <a class="link" href="./admin/" data-admin-link hidden>Admin</a>
+      </nav>
+      <div class="topRight" id="authbar">
+        <span class="sr" id="authStatus" aria-live="polite">Loading…</span>
+        <button class="btn btn-primary btn-small" id="btnSignIn" style="display:none;">Sign in</button>
+        <button class="btn btn-quiet btn-icon bell" id="btnInbox" style="display:none;" aria-label="Notifications">
+          <svg class="ico ico-lg" aria-hidden="true"><use href="#i-bell"/></svg>
+          <span class="badge" id="inboxBadge" hidden>0</span>
+        </button>
+        <div class="menuWrap" id="acctWrap" hidden>
+          <button class="acctBtn" id="btnAccount" aria-haspopup="menu" aria-expanded="false" aria-label="Account menu">
+            <span class="av av-lg" id="acctAvatar" aria-hidden="true"></span>
+          </button>
+          <div class="menu" id="acctMenu" role="menu" hidden>
+            <div class="mwho"><b id="acctName"></b><span id="acctRole"></span></div>
+            <hr />
+            <button class="mi" id="btnMyEvents" role="menuitem"><svg class="ico" aria-hidden="true"><use href="#i-cal"/></svg>My profile and events</button>
+            <button class="mi" id="btnNickname" role="menuitem"><svg class="ico" aria-hidden="true"><use href="#i-pencil"/></svg>Change nickname</button>
+            <button class="mi" id="btnHostGuide" role="menuitem" style="display:none;"><svg class="ico" aria-hidden="true"><use href="#i-book"/></svg>Host guide</button>
+            <button class="mi" id="btnBecomeHost" role="menuitem" style="display:none;"><svg class="ico" aria-hidden="true"><use href="#i-shield"/></svg><span>Request organizer access</span></button>
+            <hr />
+            <button class="mi danger" id="btnSignOut" role="menuitem"><svg class="ico" aria-hidden="true"><use href="#i-logout"/></svg>Sign out</button>
+          </div>
+        </div>
       </div>
-      <button class="btn" id="btnHostGuide" style="display:none;">📖 Host Guide</button>
-    </div>
-
-    <nav class="topnav" aria-label="Planner navigation">
-      <a href="./">Planner</a>
-      <a href="./events/">Events</a>
-      <a href="/vgplanner/">Video games</a>
-      <a href="./admin/" data-admin-link hidden>Admin</a>
-    </nav>
-
-    <div class="authbar" id="authbar">
-      <div class="auth-status" id="authStatus">Loading auth...</div>
-      <button class="btn btn-primary" id="btnSignIn" style="display:none;">Sign In</button>
-      <button class="btn bellBtn" id="btnInbox" style="display:none;" aria-label="Notifications">
-        🔔<span class="bellBadge" id="inboxBadge" hidden>0</span>
-      </button>
-      <button class="btn" id="btnMyEvents" style="display:none;">📅 My Profile and Events</button>
-      <button class="btn" id="btnNickname" style="display:none;">✏️ Nickname</button>
-      <button class="btn btn-danger" id="btnSignOut" style="display:none;">Sign out</button>
     </div>
   </header>
 
-  <main class="container">
-    <section class="grid">
-      <section class="card">
-        <div class="cardhead">
-          <h2>Upcoming Game Days</h2>
-          <div class="cardActions">
-            <button class="btn" id="btnPastEvents">Past Events</button>
-            <button class="btn" id="btnBecomeHost" style="display:none;">Request Organizer Access</button>
-            <button class="btn btn-primary" id="btnCreateGameDay" style="display:none;">Create Game Day</button>
-          </div>
-        </div>
-        <div class="muted">Choose a game day to see and join its tables.</div>
-        <div id="gamedayList" class="list">
-          <div class="skeletonCard" aria-hidden="true"></div>
-          <div class="skeletonCard" aria-hidden="true"></div>
-        </div>
-        <div id="pastEventsPanel" class="pastEventsPanel" style="display:none;">
-          <div class="pastEventsLabel">Past Events</div>
-          <div id="pastGamedayList" class="list"></div>
-        </div>
-      </section>
+  <!-- Game days: a row of date tickets on wide screens, a "Change" list on phones. -->
+  <nav class="rail" id="gdRail" aria-label="Game days"></nav>
+  <nav class="gdPicker" id="gdPicker" aria-label="Game days"></nav>
 
-      <section class="card" id="gamedayCard" style="display:none;">
-        <div class="cardhead">
-          <h2 id="gamedayTitle">Game Day</h2>
-          <button class="btn" id="btnBack">Back</button>
+  <section class="evHero" id="gamedayCard" hidden>
+    <div class="evBg" id="evBg" aria-hidden="true"></div>
+    <div class="ev wrap gutter">
+      <div class="evKicker" id="gdKicker"></div>
+      <h1 id="gamedayTitle">Game Day</h1>
+      <div class="evRow">
+        <div class="evMeta" id="gamedayMeta"></div>
+        <div class="evActs">
+          <div class="evActsDyn" id="gdActs"></div>
+          <button class="btn" id="btnWantToPlay"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-hand"/></svg>Request a Game</button>
+          <button class="btn btn-primary" id="btnHostTable"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-plus"/></svg>Host a Table</button>
         </div>
+      </div>
+      <div class="evStats" id="gdStats"></div>
+    </div>
+  </section>
 
-        <div class="gamedayMeta" id="gamedayMeta"></div>
-
-        <div class="actions">
-          <button class="btn btn-primary" id="btnHostTable">Host a Table</button>
-          <button class="btn" id="btnWantToPlay">Request a Game</button>
-        </div>
-
-        <div class="split">
-          <div>
-            <h3>Hosted Tables</h3>
-            <div class="pager" id="tablePager" style="display:none;">
-              <button class="btn" id="btnPrev">Prev</button>
-              <div class="muted" id="pageInfo"></div>
-              <button class="btn" id="btnNext">Next</button>
-            </div>
-            <div id="tablesList" class="tables"></div>
-            <div class="pager" id="tablePagerBottom" style="display:none;">
-              <button class="btn" id="btnPrevBottom">Prev</button>
-              <div class="muted" id="pageInfoBottom"></div>
-              <button class="btn" id="btnNextBottom">Next</button>
-            </div>
-          </div>
-
-          <div>
-            <h3>Game Requests</h3>
-            <div id="wantsList" class="list"></div>
-          </div>
-        </div>
-      </section>
+  <main id="main" class="layout wrap gutter">
+    <section class="tablesSec" aria-labelledby="tTitle">
+      <div id="dayTabs"></div>
+      <div class="agHead"><div><h2 id="tTitle">Tables</h2><p id="tSub"></p></div></div>
+      <div class="slots"><div id="tablesList" class="dayGrid">
+        <div class="skeletonCard" aria-hidden="true"></div>
+        <div class="skeletonCard" aria-hidden="true"></div>
+      </div></div>
     </section>
+
+    <aside class="aside" id="gdAside">
+      <section class="sideCard" aria-labelledby="ydTitle">
+        <div class="cardHead"><h2 id="ydTitle">Your day</h2><span class="count num" id="ydCount"></span></div>
+        <div id="yourDay"></div>
+      </section>
+      <section class="sideCard" aria-labelledby="rqTitle">
+        <div class="cardHead"><h2 id="rqTitle">Requested games</h2><span class="count num" id="wantsCount"></span></div>
+        <div id="wantsList"></div>
+      </section>
+    </aside>
   </main>
+
+  <!-- Table details: a sheet from the right (full screen on phones). -->
+  <div class="sheetScrim" id="sheetScrim" hidden></div>
+  <aside class="sheet" id="tableSheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" hidden>
+    <div class="sheetBody" id="sheetBody"></div>
+  </aside>
 
   <div class="modal" id="modal" style="display:none;">
     <div class="modalCard" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
@@ -133,7 +132,7 @@
     </div>
   </div>
 
-  <script type="module" src="./app.js?v=20260817-p39"></script>
+  <script type="module" src="./app.js?v=20261024-d1"></script>
   <script src="../site-analytics.js?v=20260611-planner"></script>
 </body>
 </html>
