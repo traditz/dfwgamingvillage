@@ -17,103 +17,107 @@
   <meta property="twitter:description" content="DFW Gaming Village game days — see hosted tables, open seats, and game requests, then sign in to join." />
   <meta property="twitter:image" content="https://dfwgamingvillage.com/planner/banner2.png" />
 
-  <meta name="theme-color" content="#d71920" />
+  <meta name="theme-color" content="#0a0a0e" />
   <link rel="icon" href="../dfwgv-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Inter:wght@400;500;600;700;800&display=swap" />
 
   <link rel="stylesheet" href="../styles.css?v=20260817-p39" />
-  <link rel="stylesheet" href="./event.css?v=20260817-p39" />
+  <link rel="stylesheet" href="../planner.css?v=20261024-d2" />
+  <link rel="stylesheet" href="./event.css?v=20261024-d2" />
 </head>
-<body>
-  <header class="topbar">
-    <div class="brand">
-      <a class="logo" href="https://www.dfwgamingvillage.com/" aria-label="Go to DFW Gaming Village home">
-        <img src="../dfwgv-icon.png" alt="DFW Gaming Village logo" />
+<body class="plannerD">
+  <a class="skipLink" href="#main">Skip to content</a>
+
+  <header class="top">
+    <div class="topIn wrap gutter">
+      <a class="brandLink" href="https://www.dfwgamingvillage.com/" aria-label="DFW Gaming Village home">
+        <img src="../dfwgv-icon.png" alt="" />
+        <span>DFWGV Planner</span>
       </a>
-      <div>
-        <div class="title">DFWGV Events</div>
-        <div class="subtitle">Game day event pages</div>
+      <nav class="links" aria-label="Planner navigation">
+        <a class="link" href="../">Planner</a>
+        <a class="link" href="./" aria-current="page">Events</a>
+        <a class="link" href="/vgplanner/">Video games</a>
+        <a class="link" href="../admin/" data-admin-link hidden>Admin</a>
+      </nav>
+      <div class="topRight">
+        <span class="topNote" id="pubAuthStatus" hidden></span>
+        <a class="btn btn-primary btn-small" id="pubAuthLink" href="../">Sign in to join</a>
       </div>
-    </div>
-    <nav class="topnav" aria-label="Planner navigation">
-      <a href="../">Planner</a>
-      <a href="./">Events</a>
-      <a href="/vgplanner/">Video games</a>
-      <a href="../admin/" data-admin-link hidden>Admin</a>
-    </nav>
-    <div class="authbar">
-      <div class="auth-status" id="pubAuthStatus" style="display:none;"></div>
-      <a class="btn btn-primary" id="pubAuthLink" href="../">Sign in to join</a>
     </div>
   </header>
 
-  <main class="container publicShell">
-    <section class="plannerHero publicHero plannerBanner" aria-label="DFW Gaming Village">
-      <img src="../banner2.png" alt="" />
-    </section>
-
-    <section class="plannerPageHeader publicPageHeader" aria-labelledby="pageTitle">
-      <div class="eyebrow">Event</div>
-      <h1 id="pageTitle">DFWGV Events</h1>
-    </section>
-
-    <section id="eventListView" class="card">
-      <div class="cardhead">
-        <h2>Events</h2>
-        <a class="btn" href="../">Open Planner</a>
+  <!-- All public game days -->
+  <main id="eventListView" class="evList wrap gutter">
+    <div class="listHead">
+      <div>
+        <div class="evKicker">DFW Gaming Village</div>
+        <h1 id="pageTitle">Game days</h1>
+        <p class="listLede">See who's hosting what and where the open seats are. Join from the planner.</p>
       </div>
-      <div class="eventSection">
-        <h3>Upcoming Events</h3>
-        <div id="upcomingEvents" class="eventGrid"></div>
+      <div class="seg" role="group" aria-label="Which game days">
+        <button type="button" id="btnUpcomingToggle" aria-pressed="true">Upcoming</button>
+        <button type="button" id="btnPastEventsToggle" aria-pressed="false">Past</button>
       </div>
-      <div class="eventSection historySection">
-        <button class="btn" id="btnPastEventsToggle" type="button" aria-expanded="false">Past Events</button>
-      </div>
-      <div class="eventSection pastEventsPanel" id="pastEventsPanel" hidden>
-        <div id="pastEvents" class="eventGrid"></div>
-      </div>
-    </section>
-
-    <section id="eventDetailView" class="eventLayout" style="display:none;">
-      <section class="card eventSummary">
-        <div class="cardhead">
-          <h2 id="eventTitle">Game Day</h2>
-          <button class="btn" id="btnShare">Share</button>
-        </div>
-        <div class="eventMeta" id="eventMeta"></div>
-        <div class="historyNotice" id="historyNotice" style="display:none;">
-          This is a past event. Tables and posts are retained here for history.
-        </div>
-        <div class="publicActions">
-          <a class="btn btn-primary" id="btnOpenPlanner" href="../">Host or Join</a>
-          <a class="btn" id="btnCalendar" href="#">Add to Calendar</a>
-        </div>
-      </section>
-
-      <section class="card">
-        <div class="cardhead">
-          <h2>Hosted Tables</h2>
-          <div class="filterbar" id="filters">
-            <button class="chip is-active" data-filter="all">All</button>
-            <button class="chip" data-filter="open">Open Seats</button>
-            <button class="chip" data-filter="waitlist">Waitlist</button>
-          </div>
-        </div>
-        <div id="publicTables" class="publicTables"></div>
-      </section>
-
-      <section class="card">
-        <div class="cardhead">
-          <h2>Game Requests</h2>
-        </div>
-        <div id="publicWants" class="list"></div>
-      </section>
-    </section>
+    </div>
+    <div id="upcomingEvents" class="evGrid"></div>
+    <div id="pastEventsPanel" hidden><div id="pastEvents" class="evGrid"></div></div>
   </main>
 
-  <script type="module" src="./event.js?v=20260817-p39"></script>
+  <!-- One game day -->
+  <div id="eventDetailView" hidden>
+    <section class="evHero">
+      <div class="evBg" id="evBg" aria-hidden="true"></div>
+      <div class="ev wrap gutter">
+        <a class="backLink" href="./"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-left"/></svg>All game days</a>
+        <div class="evKicker" id="evKicker"></div>
+        <h1 id="eventTitle">Game Day</h1>
+        <div class="evRow">
+          <div class="evMeta" id="eventMeta"></div>
+          <div class="evActs">
+            <button class="btn btn-quiet" type="button" id="btnShare"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-share"/></svg><span>Share</span></button>
+            <a class="btn" id="btnCalendar" href="#"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-cal"/></svg>Add to calendar</a>
+            <a class="btn btn-primary" id="btnOpenPlanner" href="../">Host or Join</a>
+          </div>
+        </div>
+        <div class="evStats" id="evStats"></div>
+        <p class="historyNotice" id="historyNotice" hidden>This is a past event. Its tables and requests stay here for history.</p>
+      </div>
+    </section>
+
+    <main id="main" class="layout wrap gutter">
+      <section class="tablesSec" aria-labelledby="tTitle">
+        <div id="dayTabs"></div>
+        <div class="agHead">
+          <div><h2 id="tTitle">Tables</h2><p id="tSub"></p></div>
+          <div class="seg" id="filters" role="group" aria-label="Show tables">
+            <button type="button" data-filter="all" aria-pressed="true">All</button>
+            <button type="button" data-filter="open" aria-pressed="false">Open seats</button>
+            <button type="button" data-filter="waitlist" aria-pressed="false">Waitlist</button>
+          </div>
+        </div>
+        <div class="slots"><div id="publicTables" class="dayGrid">
+          <div class="skeletonCard" aria-hidden="true"></div>
+        </div></div>
+      </section>
+
+      <aside class="aside">
+        <section class="sideCard joinCard">
+          <div class="cardHead"><h2 id="joinTitle">Want a seat?</h2></div>
+          <p id="joinText">Sign in on the planner to join a table, host your own game, or request one.</p>
+          <a class="btn btn-primary" id="btnOpenPlanner2" href="../">Open in the planner</a>
+        </section>
+        <section class="sideCard" aria-labelledby="rqTitle">
+          <div class="cardHead"><h2 id="rqTitle">Requested games</h2><span class="count num" id="wantsCount"></span></div>
+          <div id="publicWants"></div>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <script type="module" src="./event.js?v=20261024-d2"></script>
   <script src="../../site-analytics.js?v=20260611-planner"></script>
 </body>
 </html>

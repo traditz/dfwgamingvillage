@@ -1,53 +1,47 @@
 /* PATH: site/admin/admin.css — layout for the owner dashboard, on top of ../styles.css */
 
-.card {
-  padding: 18px 20px; border: 1px solid var(--line); border-radius: var(--radius-lg);
-  background: linear-gradient(180deg, var(--card), var(--panel)); box-shadow: var(--shadow);
-}
-.card h2 { margin: 0; font-size: 18px; font-weight: 800; letter-spacing: -.01em; }
-.card h3 { margin: 0 0 6px; font-size: 15px; font-weight: 800; }
-.cardhead { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; }
+.card { display: grid; gap: 14px; align-content: start; padding: 18px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--card); min-width: 0; }
+.card h2 { margin: 0; font-family: var(--font-display); font-size: 17px; font-weight: 700; font-stretch: 105%; }
+.card h3 { margin: 0; font-family: var(--font-display); font-size: 15px; font-weight: 700; }
+.card p { margin: 0; }
+.cardhead { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+#blockedState { max-width: 640px; }
 
-.adminGrid { display: grid; grid-template-columns: minmax(280px, 1fr) minmax(0, 1.4fr); gap: 16px; align-items: start; }
+.adminGrid { display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: 18px; align-items: start; }
 .fullWidth { grid-column: 1 / -1; }
 
-.adminRows { display: flex; flex-direction: column; gap: 6px; max-height: 70vh; overflow: auto; }
-.adminRow {
-  display: block; width: 100%; text-align: left; padding: 10px 12px; cursor: pointer;
-  border: 1px solid var(--line); border-radius: var(--radius-sm); background: rgba(255, 255, 255, .03);
-  color: var(--text); font: inherit;
-}
-.adminRow:hover { border-color: rgba(255, 255, 255, .3); }
-.adminRow.is-selected { border-color: var(--accent-2); background: rgba(220, 38, 38, .1); }
-.adminRow.is-past { opacity: .6; }
-.adminRowTitle { font-weight: 700; }
-.adminRowMeta { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
-.adminRowBadge {
-  display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: var(--radius-pill);
-  font-size: 11px; font-weight: 700; background: rgba(34, 197, 94, .16); color: #7ee2a3; vertical-align: middle;
-}
+.adminRows { display: grid; gap: 6px; max-height: 70vh; overflow: auto; }
+.adminRow { display: flex; align-items: center; gap: 12px; width: 100%; min-width: 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--r); background: var(--s1); color: var(--text); font: inherit; text-align: left; cursor: pointer; transition: background var(--ease), border-color var(--ease); }
+.adminRow:hover { background: var(--s2); border-color: var(--line-strong); }
+.adminRow.is-selected { background: var(--accent-soft); border-color: var(--accent-line); }
+.adminRow.is-past { opacity: .62; }
+.adminRowMain { flex: 1; display: grid; gap: 3px; min-width: 0; }
+.adminRowTitle { display: flex; align-items: center; gap: 8px; font-size: 14.5px; font-weight: 650; overflow-wrap: anywhere; }
+.adminRowMeta { color: var(--muted); font-size: 12.5px; overflow-wrap: anywhere; }
+.adminRowBadge { display: inline-flex; align-items: center; gap: 4px; height: 20px; padding: 0 7px; border-radius: 999px; background: var(--success-soft); color: var(--success); font-size: 11px; font-weight: 700; }
+.rowDate { flex: none; display: grid; justify-items: center; min-width: 44px; line-height: .9; font-family: var(--font-display); }
+.rowDate .d { font-size: 28px; font-weight: 700; font-stretch: 72%; }
+.rowDate.is-multi .d { font-size: 19px; letter-spacing: -.02em; }
+.rowDate .m { margin-top: 4px; font-size: 10px; font-weight: 800; font-stretch: 110%; letter-spacing: .14em; text-transform: uppercase; color: var(--accent-text); }
 
 .adminForm { display: grid; gap: 14px; }
 
-.discordBlock { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
-.cmdRow { display: flex; gap: 8px; align-items: center; margin: 8px 0 12px; }
-.cmd {
-  flex: 1; min-width: 0; padding: 10px 12px; border-radius: var(--radius-sm);
-  background: var(--bg-2); border: 1px solid var(--line-strong); color: var(--gold);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13.5px;
-  overflow-wrap: anywhere; user-select: all;
-}
+.discordBlock { display: grid; gap: 10px; padding-top: 16px; border-top: 1px solid var(--line); }
+.cmdRow { display: flex; gap: 8px; align-items: center; }
+.cmd { flex: 1; min-width: 0; padding: 9px 12px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--bg); color: var(--gold); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; overflow-wrap: anywhere; user-select: all; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .92em; color: var(--text); }
 
-.bindingList { display: flex; flex-direction: column; gap: 8px; }
-.bindingRow {
-  display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px;
-  padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: rgba(255, 255, 255, .03);
-  font-size: 13.5px;
-}
-.bindingRow .muted { font-size: 12.5px; }
-.bindingRow.is-orphan { border-color: rgba(245, 158, 11, .5); }
-.bindingEmpty { color: var(--muted); font-size: 13.5px; }
+.bindingList { display: grid; gap: 8px; }
+.bindingRow { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--s1); font-size: 13.5px; min-width: 0; overflow-wrap: anywhere; }
+.bindingRow .muted { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; }
+.bindingRow.is-orphan { border-color: rgba(245, 158, 11, .45); background: var(--gold-soft); }
+.bindingRow .cardActions { margin: 0; }
+.bindingEmpty { color: var(--dim); font-size: 13.5px; }
 
-@media (max-width: 900px) {
-  .adminGrid { grid-template-columns: 1fr; }
+@media (max-width: 1060px) {
+  .adminGrid { grid-template-columns: minmax(0, 1fr); }
+  .adminRows { max-height: none; }
+}
+@media (max-width: 720px) {
+  .cmdRow { flex-direction: column; align-items: stretch; }
 }

@@ -11,7 +11,6 @@ import {
   collection,
   doc,
   getDoc,
-  getDocs,
   onSnapshot,
   orderBy,
   query,
@@ -19,7 +18,8 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js";
 
-import { esc, asDate, fmtDate, fmtTime, fmtEventWhen, fmtDayLabel, eventDayKeys, centralDateKey, isPastEventDates, toast } from "../shared.js?v=20260817-p39";
+import { esc, asDate, fmtTime, eventDayKeys, eventEndTimeLabel, centralDateKey, isPastEventDates, toast } from "../shared.js?v=20260817-p39";
+import { ic, keyParts, dateBlockHtml, slotHeadHtml, seatMeterHtml, artHtml, avatarHtml, emptyHtml } from "../ui.js?v=20261024-d2";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -27,27 +27,38 @@ const db = getFirestore(app);
 const functions = getFunctions(app, appConfig.FUNCTIONS_REGION);
 const fnGetMyPlannerRole = httpsCallable(functions, "getMyPlannerRole");
 
-const pageTitle = document.querySelector("#pageTitle");
 const eventListView = document.querySelector("#eventListView");
 const eventDetailView = document.querySelector("#eventDetailView");
 const upcomingEvents = document.querySelector("#upcomingEvents");
 const pastEvents = document.querySelector("#pastEvents");
+const btnUpcomingToggle = document.querySelector("#btnUpcomingToggle");
 const btnPastEventsToggle = document.querySelector("#btnPastEventsToggle");
 const pastEventsPanel = document.querySelector("#pastEventsPanel");
 const eventTitle = document.querySelector("#eventTitle");
+const evKicker = document.querySelector("#evKicker");
 const eventMeta = document.querySelector("#eventMeta");
+const evStats = document.querySelector("#evStats");
+const evBg = document.querySelector("#evBg");
 const historyNotice = document.querySelector("#historyNotice");
+const dayTabsEl = document.querySelector("#dayTabs");
+const tTitle = document.querySelector("#tTitle");
+const tSub = document.querySelector("#tSub");
 const publicTables = document.querySelector("#publicTables");
 const publicWants = document.querySelector("#publicWants");
+const wantsCount = document.querySelector("#wantsCount");
 const btnShare = document.querySelector("#btnShare");
 const btnOpenPlanner = document.querySelector("#btnOpenPlanner");
+const btnOpenPlanner2 = document.querySelector("#btnOpenPlanner2");
 const btnCalendar = document.querySelector("#btnCalendar");
+const joinCard = document.querySelector(".joinCard");
 const filters = document.querySelector("#filters");
 const adminLinks = document.querySelectorAll("[data-admin-link]");
 
 let activeFilter = "all";
+let activeDayKey = null;
 let currentGd = null;
 let tables = [];
+let tablesLoaded = false;
 let unsubTables = null;
 let unsubPosts = null;
 const bggMetaCache = new Map();
@@ -90,9 +101,9 @@ function gameMetaText(item) {
   const parts = [];
   const year = gameYear(item);
   const rating = gameRating(item);
-  if (year) parts.push(`Year: ${year}`);
-  if (rating) parts.push(`BGG: ${rating}`);
-  return parts.join(" • ");
+  if (year) parts.push(year);
+  if (rating) parts.push(`★ ${rating}`);
+  return parts.join(" · ");
 }
 
 async function fetchBggMeta(bggId) {
@@ -114,10 +125,11 @@ async function hydrateGameMeta(root, item) {
   const host = root?.querySelector?.("[data-game-meta]");
   if (!host || !item?.bggId || gameMetaText(item)) return;
   const meta = await fetchBggMeta(item.bggId);
+  if (!host.isConnected) return;
   const text = gameMetaText(meta);
   if (text) {
     host.textContent = text;
-    host.style.display = "";
+    host.hidden = false;
   }
 }
 
@@ -145,37 +157,65 @@ function isPastEvent(gd) {
   return isPastEventDates(gd?.startsAt, gd?.endsAt);
 }
 
-function renderEventCollection(host, items, emptyText) {
-  host.innerHTML = "";
-  if (!items.length) {
-    host.innerHTML = `<div class="muted">${esc(emptyText)}</div>`;
-    return;
-  }
+const gdDays = (gd) => eventDayKeys(gd?.startsAt, gd?.endsAt);
 
-  for (const gd of items) {
-    const isPast = isPastEvent(gd);
-    // The inner "Open Event" link is the single accessible action — the card
-    // itself is a mouse convenience, not a second tab stop.
-    const el = document.createElement("article");
-    el.className = "eventTile eventCard";
-    el.innerHTML = `
-      <div class="eventCardMain">
-        <div class="eventCardKicker">${isPast ? "Past Event" : "Upcoming Event"}</div>
-        <div class="eventTileTitle eventCardTitle">${esc(gd.title || "DFWGV Game Day")}</div>
-        <div class="eventCardMeta">${esc(fmtEventWhen(gd.startsAt, gd.endsAt))}</div>
-        ${gd.location ? `<div class="eventCardMeta">${esc(gd.location)}</div>` : ""}
-      </div>
-      <div class="eventCardFooter">
-        ${isPast ? `<span class="eventCardStatus">History</span>` : `<span class="eventCardStatus is-live">Open</span>`}
-        <a class="btn btn-primary eventCardAction" href="${eventUrl(gd.id)}">${isPast ? "Open History" : "Open Event"}</a>
-      </div>
-    `;
-    el.addEventListener("click", (ev) => {
-      if (ev.target.closest("a, button")) return;
-      window.location.href = eventUrl(gd.id);
-    });
-    host.appendChild(el);
-  }
+// 1-based day number while a multi-day event is running, else 0.
+function liveDayOf(gd) {
+  if (!gd || isPastEvent(gd)) return 0;
+  const days = gdDays(gd);
+  if (days.length < 2) return 0;
+  return days.indexOf(centralDateKey(new Date())) + 1;
+}
+
+// "Sat, Nov 7 · 11:00 AM – 9:00 PM" or "Fri, Nov 6, 10:00 AM – Sun, Nov 8, 4:00 PM".
+function whenText(gd) {
+  const days = gdDays(gd);
+  if (!days.length) return "Date TBD";
+  const f = keyParts(days[0]);
+  const l = keyParts(days[days.length - 1]);
+  const start = asDate(gd.startsAt) ? fmtTime(gd.startsAt) : "";
+  const end = eventEndTimeLabel(gd.endsAt);
+  if (days.length > 1) return `${f.label}${start ? `, ${start}` : ""} – ${l.label}${end ? `, ${end}` : ""}`;
+  return `${f.label}${start ? ` · ${start}${end ? ` – ${end}` : ""}` : ""}`;
+}
+
+function statusPillHtml(gd) {
+  const days = gdDays(gd);
+  const live = liveDayOf(gd);
+  if (isPastEvent(gd)) return `<span class="pill">${ic("history")}Past</span>`;
+  if (live) return `<span class="pill pill-amber">Day ${live} of ${days.length}</span>`;
+  if (days.length > 1) return `<span class="pill">${days.length} days</span>`;
+  return "";
+}
+
+// -----------------------------
+// List of game days
+// -----------------------------
+function eventCardHtml(gd) {
+  const status = statusPillHtml(gd);
+  return `<a class="evCard" href="${eventUrl(gd.id)}">
+    ${dateBlockHtml(gdDays(gd), "evDate")}
+    <span class="evCardBody">
+      ${status ? `<span class="pills">${status}</span>` : ""}
+      <span class="evCardTitle">${esc(gd.title || "DFWGV Game Day")}</span>
+      <span class="evCardLine">${ic("clock", "ico-sm")}<span>${esc(whenText(gd))}</span></span>
+      ${gd.location ? `<span class="evCardLine">${ic("pin", "ico-sm")}<span>${esc(gd.location)}</span></span>` : ""}
+    </span>
+    <span class="evCardGo" aria-hidden="true">${ic("right")}</span>
+  </a>`;
+}
+
+function renderEventCollection(host, items, emptyTitle, emptyBody) {
+  host.innerHTML = items.length
+    ? items.map(eventCardHtml).join("")
+    : emptyHtml("cal", emptyTitle, emptyBody, `<a class="btn btn-small" href="../">Open the planner</a>`);
+}
+
+function setListMode(past) {
+  if (pastEventsPanel) pastEventsPanel.hidden = !past;
+  if (upcomingEvents) upcomingEvents.hidden = past;
+  btnUpcomingToggle?.setAttribute("aria-pressed", String(!past));
+  btnPastEventsToggle?.setAttribute("aria-pressed", String(past));
 }
 
 function renderEventList(items) {
@@ -189,147 +229,256 @@ function renderEventList(items) {
   upcoming.sort((a, b) => (asDate(a.startsAt)?.getTime() || 0) - (asDate(b.startsAt)?.getTime() || 0));
   past.sort((a, b) => (asDate(b.startsAt)?.getTime() || 0) - (asDate(a.startsAt)?.getTime() || 0));
 
-  renderEventCollection(upcomingEvents, upcoming, "No upcoming public events.");
-  renderEventCollection(pastEvents, past, "No past public events yet.");
+  renderEventCollection(upcomingEvents, upcoming, "No upcoming public game days", "Check back soon. New game days show up here as soon as they're posted.");
+  renderEventCollection(pastEvents, past, "No past game days yet", "Finished game days stay here for history.");
   if (btnPastEventsToggle) {
     btnPastEventsToggle.disabled = past.length === 0;
-    btnPastEventsToggle.setAttribute("aria-label", past.length
-      ? `Past Events — ${past.length} available`
-      : "Past Events — none yet");
+    btnPastEventsToggle.textContent = `Past (${past.length})`;
   }
-  if (pastEventsPanel) {
-    pastEventsPanel.hidden = true;
+  if (!past.length) setListMode(false);
+}
+
+// -----------------------------
+// One game day
+// -----------------------------
+function seatsOf(t) {
+  return {
+    cap: Number(t.capacity || 0),
+    confirmed: Number(t.confirmedCount || 0),
+    waitlist: Number(t.waitlistCount || 0)
+  };
+}
+
+function eventBounds() {
+  const days = currentGd ? gdDays(currentGd) : [];
+  if (days.length < 2) return null;
+  return {
+    days,
+    firstDay: days[0],
+    lastDay: days[days.length - 1],
+    todayKey: centralDateKey(new Date()),
+    startsLabel: asDate(currentGd.startsAt) ? fmtTime(currentGd.startsAt) : "",
+    endsLabel: eventEndTimeLabel(currentGd.endsAt)
+  };
+}
+
+// The event day a table belongs to (off-day rows clamp to the nearest day).
+function tableDayKey(t, bounds) {
+  const st = asDate(t.startTime);
+  const key = st ? centralDateKey(st) : "";
+  if (!bounds) return key;
+  if (!key || key < bounds.firstDay) return bounds.firstDay;
+  if (key > bounds.lastDay) return bounds.lastDay;
+  return key;
+}
+
+// "" | "started" | "past": only meaningful on multi-day events.
+function tableTimeState(t, bounds) {
+  if (!bounds) return "";
+  const st = asDate(t.startTime);
+  if (!st) return "";
+  const key = centralDateKey(st);
+  if (key < bounds.todayKey) return "past";
+  if (key === bounds.todayKey && st.getTime() < Date.now()) return "started";
+  return "";
+}
+
+function renderDetailHeader(gd) {
+  eventTitle.textContent = gd.title || "DFWGV Game Day";
+  document.title = `${gd.title || "DFWGV Game Day"} — DFWGV Events`;
+  const isPast = isPastEvent(gd);
+  const days = gdDays(gd);
+  const f = days.length ? keyParts(days[0]) : null;
+  const l = days.length ? keyParts(days[days.length - 1]) : null;
+  const year = days.length ? days[0].slice(0, 4) : "";
+  const dateText = !f ? "Date TBD" : days.length > 1 ? `${f.long} – ${l.long}, ${year}` : `${f.long}, ${year}`;
+  const status = statusPillHtml(gd).replace(">Past<", ">Past event<");
+  if (evKicker) evKicker.innerHTML = `<span class="num">${esc(dateText)}</span>${status}`;
+
+  const start = asDate(gd.startsAt) ? fmtTime(gd.startsAt) : "";
+  const end = eventEndTimeLabel(gd.endsAt);
+  const timeText = !start ? ""
+    : days.length > 1 ? `${start} ${f.dow}${end ? ` – ${end} ${l.dow}` : ""}`
+    : `${start}${end ? ` – ${end}` : ""}`;
+  eventMeta.innerHTML = [
+    timeText ? `<span>${ic("clock")}<span class="num">${esc(timeText)}</span></span>` : "",
+    gd.location ? `<span>${ic("pin")}<span>${esc(gd.location)}</span></span>` : "",
+    gd.createdByDisplayName ? `<span>${avatarHtml(gd.createdByDisplayName, "av-sm")}<span>Hosted by ${esc(gd.createdByDisplayName)}</span></span>` : ""
+  ].join("");
+
+  if (historyNotice) historyNotice.hidden = !isPast;
+  const plannerHref = `../?event=${encodeURIComponent(gd.id)}`;
+  btnOpenPlanner.href = plannerHref;
+  btnOpenPlanner.textContent = isPast ? "View in planner" : "Host or Join";
+  btnOpenPlanner.classList.toggle("btn-primary", !isPast);
+  if (btnOpenPlanner2) btnOpenPlanner2.href = plannerHref;
+  if (joinCard) joinCard.hidden = isPast;
+  btnCalendar.href = calendarUrl(gd);
+  btnCalendar.hidden = isPast;
+  renderStats();
+}
+
+function renderStats() {
+  if (!evStats) return;
+  if (!tablesLoaded || !currentGd) { evStats.innerHTML = ""; return; }
+  const bounds = eventBounds();
+  const isPast = isPastEvent(currentGd);
+  let taken = 0, open = 0, waiting = 0;
+  for (const t of tables) {
+    const s = seatsOf(t);
+    taken += s.confirmed;
+    waiting += s.waitlist;
+    const custom = t.isCustom === true || !t.bggId;
+    if (!custom && s.cap > 0 && tableTimeState(t, bounds) !== "past") open += Math.max(0, s.cap - s.confirmed);
   }
-  btnPastEventsToggle?.setAttribute("aria-expanded", "false");
+  const n = tables.length;
+  evStats.innerHTML = `<span class="stat"><b>${n}</b>${n === 1 ? "table" : "tables"}</span>`
+    + `<span class="stat"><b>${taken}</b>${isPast ? "seats filled" : "seats taken"}</span>`
+    + (isPast ? "" : `<span class="stat green"><b>${open}</b>open seats</span>`)
+    + (waiting ? `<span class="stat gold"><b>${waiting}</b>on waitlists</span>` : "");
+  // The header picks up the colors of the day's own box art.
+  const art = tables.find((t) => t.thumbUrl)?.thumbUrl;
+  if (evBg) evBg.style.backgroundImage = art ? `url("${encodeURI(String(art))}")` : "";
+}
+
+function renderDayTabs(bounds, day) {
+  if (!dayTabsEl) return;
+  if (!bounds) {
+    dayTabsEl.innerHTML = "";
+    dayTabsEl.className = "";
+    dayTabsEl.removeAttribute("role");
+    return;
+  }
+  const counts = {};
+  tables.forEach((t) => { const k = tableDayKey(t, bounds); counts[k] = (counts[k] || 0) + 1; });
+  dayTabsEl.className = "dayTabs";
+  dayTabsEl.setAttribute("role", "tablist");
+  dayTabsEl.setAttribute("aria-label", "Days");
+  dayTabsEl.innerHTML = bounds.days.map((k, i) => {
+    const p = keyParts(k);
+    const isToday = k === bounds.todayKey;
+    const isPastDay = k < bounds.todayKey;
+    const n = counts[k] || 0;
+    const edge = [
+      i === 0 && bounds.startsLabel ? `from ${bounds.startsLabel}` : "",
+      i === bounds.days.length - 1 && bounds.endsLabel ? `until ${bounds.endsLabel}` : ""
+    ].filter(Boolean).join(" · ");
+    return `<button class="dayTab${isToday ? " is-today" : ""}${isPastDay ? " is-past" : ""}" type="button" role="tab" aria-selected="${k === day}" data-day="${k}">
+      <span class="dn">Day ${i + 1}${isToday ? " · Today" : ""}${isPastDay ? " · Past" : ""}</span>
+      <span class="dl">${esc(p.label)}</span>
+      <span class="ds">${n} ${n === 1 ? "table" : "tables"}${edge ? `<span class="edge"> · ${esc(edge)}</span>` : ""}</span>
+    </button>`;
+  }).join("");
+}
+
+function cardHtml(t, bounds) {
+  const s = seatsOf(t);
+  const custom = t.isCustom === true || !t.bggId;
+  const ts = tableTimeState(t, bounds);
+  const isPast = isPastEvent(currentGd);
+  const pills = [
+    !isPast && ts !== "past" && s.cap > 0 && s.confirmed >= s.cap ? `<span class="pill pill-gold">Full</span>` : "",
+    ts === "started" ? `<span class="pill pill-amber">${ic("clock")}Started</span>` : "",
+    ts === "past" ? `<span class="pill">${ic("history")}Past</span>` : "",
+    custom ? `<span class="pill pill-blue">${ic("clip")}Sign-up</span>` : "",
+    t.gameSource === "library" ? `<span class="pill">${ic("book")}Library copy</span>` : ""
+  ].join("");
+  const bggUrl = t.bggId ? `https://boardgamegeek.com/boardgame/${encodeURIComponent(t.bggId)}` : "";
+  const name = esc(t.gameName || "Game");
+  const meta = custom ? "Custom sign-up" : gameMetaText(t);
+  const host = t.hostDisplayName || "Unknown";
+  return `<article class="tCard${ts === "past" ? " is-pastTable" : ""}">
+    <div class="tArt${custom && !t.thumbUrl ? " signup" : ""}" aria-hidden="true">${artHtml(t.thumbUrl, { custom, signupSrc: "../signup-sheet.png" })}${pills ? `<span class="tOver">${pills}</span>` : ""}</div>
+    <div class="tBody">
+      ${pills ? `<div class="tPills pills">${pills}</div>` : ""}
+      <div>
+        <h3 class="tName">${bggUrl ? `<a href="${esc(bggUrl)}" target="_blank" rel="noopener">${name}</a>` : name}</h3>
+        <p class="tMeta" data-game-meta${meta ? "" : " hidden"}>${esc(meta)}</p>
+      </div>
+      <div class="tHost">${avatarHtml(host, "av-sm")}<span>Hosted by <b>${esc(host)}</b></span></div>
+      <div class="tSeats"><span class="seatMeter">${seatMeterHtml({ ...s, custom })}</span></div>
+      ${t.notes ? `<p class="tNotes">${esc(t.notes)}</p>` : ""}
+    </div>
+  </article>`;
 }
 
 function renderTables() {
-  publicTables.innerHTML = "";
-  const visible = tables.filter((t) => {
-    const cap = Number(t.capacity || 0);
-    const confirmed = Number(t.confirmedCount || 0);
-    const wait = Number(t.waitlistCount || 0);
-    if (activeFilter === "open") return cap > confirmed;
-    if (activeFilter === "waitlist") return wait > 0;
+  const bounds = eventBounds();
+  const day = bounds
+    ? (activeDayKey && bounds.days.includes(activeDayKey) ? activeDayKey
+      : bounds.days.includes(bounds.todayKey) ? bounds.todayKey : bounds.firstDay)
+    : null;
+  renderDayTabs(bounds, day);
+
+  const onDay = bounds ? tables.filter((t) => tableDayKey(t, bounds) === day) : tables;
+  const visible = onDay.filter((t) => {
+    const s = seatsOf(t);
+    if (activeFilter === "open") return s.cap > s.confirmed;
+    if (activeFilter === "waitlist") return s.waitlist > 0;
     return true;
   });
 
+  if (tTitle) tTitle.textContent = bounds ? `Day ${bounds.days.indexOf(day) + 1} · ${keyParts(day).long}` : "Tables";
+  if (tSub) {
+    tSub.textContent = !tablesLoaded ? "Loading tables…"
+      : `${visible.length} ${visible.length === 1 ? "table" : "tables"} by start time`
+        + (activeFilter === "open" ? " · with open seats" : activeFilter === "waitlist" ? " · with a waitlist" : "");
+  }
+  if (!tablesLoaded) return;
+
   if (!visible.length) {
-    publicTables.innerHTML = `<div class="muted">No tables match this view.</div>`;
+    publicTables.innerHTML = onDay.length
+      ? emptyHtml("dice", "No tables match", "Choose All to see every table.")
+      : emptyHtml("dice", bounds ? "No tables on this day yet" : "No tables yet",
+          isPastEvent(currentGd) ? "Nothing was hosted." : "Hosts add tables in the planner. Check back soon.");
     return;
   }
 
-  // Multi-day events (conventions) group their tables under a header per day,
-  // with finished days pushed to the bottom and marked Past.
-  const days = currentGd ? eventDayKeys(currentGd.startsAt, currentGd.endsAt) : [];
-  const showDayHeaders = days.length > 1;
-  let lastDayKey = null;
-
-  let ordered = visible;
-  const todayKey = centralDateKey(new Date());
-  if (showDayHeaders) {
-    const dayOf = (t) => {
-      const st = asDate(t.startTime);
-      return st ? centralDateKey(st) : "";
-    };
-    ordered = [
-      ...visible.filter((t) => !dayOf(t) || dayOf(t) >= todayKey),
-      ...visible.filter((t) => dayOf(t) && dayOf(t) < todayKey)
-    ];
+  const slots = [];
+  for (const t of visible) {
+    const st = asDate(t.startTime);
+    const key = st ? String(Math.floor(st.getTime() / 60000)) : "tbd";
+    const last = slots[slots.length - 1];
+    if (last && last.key === key) last.items.push(t);
+    else slots.push({ key, label: st ? fmtTime(st) : "TBD", items: [t] });
   }
-
-  for (const t of ordered) {
-    if (showDayHeaders) {
-      const st = asDate(t.startTime);
-      const dayKey = st ? centralDateKey(st) : "";
-      if (dayKey && dayKey !== lastDayKey) {
-        lastDayKey = dayKey;
-        const dayNum = days.indexOf(dayKey);
-        const isFinished = dayKey < todayKey;
-        const header = document.createElement("div");
-        header.className = `dayHeader${isFinished ? " is-past" : ""}`;
-        header.innerHTML = `
-          <span class="dayHeaderLabel">${esc(fmtDayLabel(dayKey))}</span>
-          ${dayNum >= 0 ? `<span class="dayHeaderBadge">Day ${dayNum + 1}</span>` : ""}
-          ${isFinished ? `<span class="dayHeaderState is-past">Past</span>` : ""}
-          ${dayKey === todayKey ? `<span class="dayHeaderState is-today">Today</span>` : ""}
-        `;
-        publicTables.appendChild(header);
-      }
-    }
-    const cap = Number(t.capacity || 0);
-    const confirmed = Number(t.confirmedCount || 0);
-    const wait = Number(t.waitlistCount || 0);
-    const openSeats = Math.max(0, cap - confirmed);
-    const bggUrl = t.bggId ? `https://boardgamegeek.com/boardgame/${encodeURIComponent(t.bggId)}` : "";
-    // Custom sign-up sheets (food run, setup crew) have no box art to show.
-    const isCustomEntry = t.isCustom === true || !t.bggId;
-
-    const stDay = asDate(t.startTime) ? centralDateKey(asDate(t.startTime)) : "";
-    const isPastTable = showDayHeaders && stDay && stDay < todayKey;
-    const isStarted = showDayHeaders && stDay === todayKey
-      && asDate(t.startTime) && asDate(t.startTime).getTime() < Date.now();
-
-    const el = document.createElement("article");
-    el.className = `publicTable${isPastTable ? " is-pastTable" : ""}`;
-    el.innerHTML = `
-      <div class="publicThumb">
-        ${t.thumbUrl
-          ? `<img src="${esc(t.thumbUrl)}" alt="" loading="lazy" />`
-          : (isCustomEntry
-              ? `<img src="../signup-sheet.png" alt="" loading="lazy" />`
-              : `<div class="thumbph">Game</div>`)}
-      </div>
-      <div>
-        <div class="publicTableTitle">
-          ${isPastTable ? `<span class="timePill is-past">Past</span> ` : ""}${isStarted ? `<span class="timePill is-started">Started</span> ` : ""}${bggUrl ? `<a href="${esc(bggUrl)}" target="_blank" rel="noopener">${esc(t.gameName || "Game")}</a>` : esc(t.gameName || "Game")}
-          <div class="gameMeta" data-game-meta ${gameMetaText(t) ? "" : "style=\"display:none;\""}>${esc(gameMetaText(t))}</div>
-        </div>
-        <div class="seatBadge ${openSeats ? "is-open" : ""}">
-          ${openSeats
-            ? `${openSeats} open ${isCustomEntry ? "spot" : "seat"}${openSeats === 1 ? "" : "s"}`
-            : `Waitlist ${wait}`}
-        </div>
-        <div class="publicTableMeta">Host: ${esc(t.hostDisplayName || "Unknown")}</div>
-        ${t.gameSource === "library" ? `<div class="publicTableMeta">📚 Library copy</div>` : ""}
-        <div class="publicTableMeta">Starts: ${esc(showDayHeaders ? fmtTime(t.startTime) : fmtDate(t.startTime))}</div>
-        ${t.notes ? `<div class="publicTableMeta">${esc(t.notes)}</div>` : ""}
-      </div>
-    `;
-    publicTables.appendChild(el);
-    hydrateGameMeta(el, t);
-  }
+  publicTables.innerHTML = slots.map((s) =>
+    `<section class="slot n${Math.min(s.items.length, 3)}" aria-label="${esc(s.label)}">${slotHeadHtml(s.label, s.items.length)}<div class="slotGrid">${s.items.map((t) => cardHtml(t, bounds)).join("")}</div></section>`
+  ).join("");
+  const cards = publicTables.querySelectorAll(".tCard");
+  visible.forEach((t, i) => { if (cards[i]) hydrateGameMeta(cards[i], t); });
 }
 
-function wantPostHtml(p, bggUrl) {
+function wantHtml(p) {
+  const bggUrl = p.bggId ? `https://boardgamegeek.com/boardgame/${encodeURIComponent(p.bggId)}` : "";
+  const meta = gameMetaText(p);
+  const n = Number(p.interestedCount || (Array.isArray(p.interested) ? p.interested.length : 0) || 0);
   return `
-    <div class="wantGame">
-      <div class="title">
-        ${bggUrl ? `<a href="${esc(bggUrl)}" target="_blank" rel="noopener">${esc(p.gameName || "Game")}</a>` : esc(p.gameName || "Game")}
-        <div class="gameMeta" data-game-meta ${gameMetaText(p) ? "" : "style=\"display:none;\""}>${esc(gameMetaText(p))}</div>
+    <div class="rqTop">
+      <span class="rqThumb">${p.thumbUrl ? `<img src="${esc(p.thumbUrl)}" alt="" loading="lazy" />` : ic("dice")}</span>
+      <div style="min-width:0">
+        <div class="nm">${bggUrl ? `<a href="${esc(bggUrl)}" target="_blank" rel="noopener">${esc(p.gameName || "Game")}</a>` : esc(p.gameName || "Game")}</div>
+        <div class="sub" data-game-meta${meta ? "" : " hidden"}>${esc(meta)}</div>
       </div>
     </div>
-    <div class="wantDetails">
-      <div class="wantBy"><span>Requested by</span> ${esc(p.createdByDisplayName || "Someone")}</div>
-      ${Number(p.interestedCount || 0) > 0 ? `<div class="wantInterest">🙋 <b>${Number(p.interestedCount)}</b> would play</div>` : ""}
-      ${p.notes ? `<div class="wantNote"><span>Note</span> <div class="wantNoteText">${esc(p.notes)}</div></div>` : ""}
-    </div>
+    <div class="rqBy">Requested by <b>${esc(p.createdByDisplayName || "Someone")}</b></div>
+    ${p.notes ? `<p class="rqNote">${esc(p.notes)}</p>` : ""}
+    ${n > 0 ? `<span class="rqInt">${ic("hand", "ico-sm")}<span><b class="num">${n}</b> would play</span></span>` : ""}
   `;
 }
 
 function renderWants(posts) {
   publicWants.innerHTML = "";
   const wants = posts.filter((p) => p.kind === "want_to_play");
+  if (wantsCount) wantsCount.textContent = wants.length ? String(wants.length) : "";
   if (!wants.length) {
-    publicWants.innerHTML = `<div class="muted">No game requests yet.</div>`;
+    publicWants.innerHTML = `<p class="none" style="margin:0">No game requests yet.</p>`;
     return;
   }
-
   for (const p of wants) {
-    const bggUrl = p.bggId ? `https://boardgamegeek.com/boardgame/${encodeURIComponent(p.bggId)}` : "";
-    const el = document.createElement("div");
-    el.className = "listitem wantItem";
-    el.innerHTML = wantPostHtml(p, bggUrl);
+    const el = document.createElement("article");
+    el.className = "rq";
+    el.innerHTML = wantHtml(p);
     publicWants.appendChild(el);
     hydrateGameMeta(el, p);
   }
@@ -344,13 +493,17 @@ function stopDetailListeners() {
   if (unsubEventDoc) { unsubEventDoc(); unsubEventDoc = null; }
 }
 
+function showListError() {
+  upcomingEvents.innerHTML = emptyHtml("alert", "Couldn't load game days", "Check your connection and try again.",
+    `<button class="btn btn-small" type="button" id="btnRetryLoad">Retry</button>`);
+  pastEvents.innerHTML = "";
+  document.querySelector("#btnRetryLoad")?.addEventListener("click", () => location.reload());
+}
+
 function loadList() {
   stopDetailListeners();
-  eventListView.style.display = "";
-  eventDetailView.style.display = "none";
-  const header = document.querySelector(".publicPageHeader");
-  if (header) header.style.display = "";
-  pageTitle.textContent = "DFWGV Events";
+  eventListView.hidden = false;
+  eventDetailView.hidden = true;
   document.title = "DFWGV Events";
   const q = query(
     collection(db, "gamedays"),
@@ -361,30 +514,7 @@ function loadList() {
   if (unsubList) unsubList();
   unsubList = onSnapshot(q, (snap) => {
     renderEventList(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
-  }, () => {
-    upcomingEvents.innerHTML = `
-      <div class="muted">Couldn't load events — check your connection.</div>
-      <button class="btn" id="btnRetryLoad" style="margin-top:10px;">Retry</button>
-    `;
-    pastEvents.innerHTML = "";
-    document.querySelector("#btnRetryLoad")?.addEventListener("click", () => location.reload());
-  });
-}
-
-function renderDetailHeader(gd) {
-  eventTitle.textContent = gd.title || "DFWGV Game Day";
-  document.title = `${gd.title || "DFWGV Game Day"} — DFWGV Events`;
-  const isPast = isPastEvent(gd);
-  eventMeta.innerHTML = `
-    ${isPast ? `<span class="eventPill is-history">Past Event</span>` : ""}
-    <span class="eventPill">${esc(fmtEventWhen(gd.startsAt, gd.endsAt))}</span>
-    ${gd.location ? `<span class="eventPill">${esc(gd.location)}</span>` : ""}
-  `;
-  if (historyNotice) historyNotice.style.display = isPast ? "" : "none";
-  btnOpenPlanner.href = `../?event=${encodeURIComponent(gd.id)}`;
-  btnOpenPlanner.textContent = isPast ? "View in Planner" : "Host or Join";
-  btnOpenPlanner.classList.toggle("btn-primary", !isPast);
-  btnCalendar.href = calendarUrl(gd);
+  }, showListError);
 }
 
 function showUnavailable(msg) {
@@ -406,13 +536,9 @@ async function loadEvent(id) {
   const gd = { id: snap.id, ...snap.data() };
   if (gd.status !== "published") return showUnavailable("That event isn't public yet. Here's what's on:");
 
-  eventListView.style.display = "none";
-  eventDetailView.style.display = "";
-  // The generic "Event" header block is redundant on the detail view — the
-  // card right below carries the real title.
-  const header = document.querySelector(".publicPageHeader");
-  if (header) header.style.display = "none";
-  pageTitle.textContent = "";
+  if (unsubList) { unsubList(); unsubList = null; }
+  eventListView.hidden = true;
+  eventDetailView.hidden = false;
   currentGd = gd;
   renderDetailHeader(gd);
 
@@ -427,21 +553,24 @@ async function loadEvent(id) {
     }
     currentGd = { id: s.id, ...s.data() };
     renderDetailHeader(currentGd);
+    renderTables();
   });
 
   const tablesQ = query(collection(db, "gamedays", id, "tables"), orderBy("startTime", "asc"));
   unsubTables = onSnapshot(tablesQ, (tableSnap) => {
     tables = tableSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    tablesLoaded = true;
     renderTables();
+    renderStats();
   }, () => {
-    publicTables.innerHTML = `<div class="muted">Couldn't load tables — check your connection.</div>`;
+    publicTables.innerHTML = emptyHtml("alert", "Couldn't load tables", "Check your connection and reload.");
   });
 
   const postsQ = query(collection(db, "gamedays", id, "posts"), orderBy("createdAt", "desc"));
   unsubPosts = onSnapshot(postsQ, (postSnap) => {
     renderWants(postSnap.docs.map((d) => ({ id: d.id, ...d.data() })));
   }, () => {
-    publicWants.innerHTML = `<div class="muted">Couldn't load requests — check your connection.</div>`;
+    publicWants.innerHTML = `<p class="none" style="margin:0">Couldn't load requests — check your connection.</p>`;
   });
 }
 
@@ -449,33 +578,38 @@ filters?.addEventListener("click", (ev) => {
   const btn = ev.target.closest("[data-filter]");
   if (!btn) return;
   activeFilter = btn.getAttribute("data-filter");
-  filters.querySelectorAll("[data-filter]").forEach((el) => el.classList.toggle("is-active", el === btn));
+  filters.querySelectorAll("[data-filter]").forEach((el) => el.setAttribute("aria-pressed", String(el === btn)));
   renderTables();
 });
 
+dayTabsEl?.addEventListener("click", (ev) => {
+  const b = ev.target.closest("[data-day]");
+  if (!b) return;
+  activeDayKey = b.getAttribute("data-day");
+  renderTables();
+  dayTabsEl.querySelector(`[data-day="${activeDayKey}"]`)?.focus();
+});
+
 btnShare?.addEventListener("click", async () => {
+  const label = btnShare.querySelector("span");
   try {
     await navigator.clipboard.writeText(window.location.href);
-    btnShare.textContent = "Copied";
-    setTimeout(() => { btnShare.textContent = "Share"; }, 1400);
+    if (label) label.textContent = "Link copied";
+    setTimeout(() => { if (label) label.textContent = "Share"; }, 1600);
   } catch {
     toast("Couldn't copy automatically — copy this page's address from the address bar.", "info", 6000);
   }
 });
 
-btnPastEventsToggle?.addEventListener("click", () => {
-  if (!pastEventsPanel) return;
-  const shouldShow = pastEventsPanel.hidden;
-  pastEventsPanel.hidden = !shouldShow;
-  btnPastEventsToggle.setAttribute("aria-expanded", String(shouldShow));
-});
+btnUpcomingToggle?.addEventListener("click", () => setListMode(false));
+btnPastEventsToggle?.addEventListener("click", () => setListMode(true));
 
 onAuthStateChanged(auth, async (user) => {
   // Reflect the signed-in state — the static "Sign in to join" read as
   // signed-out even for signed-in visitors.
   const authLink = document.querySelector("#pubAuthLink");
   const authStatusEl = document.querySelector("#pubAuthStatus");
-  if (authLink) authLink.textContent = user ? "Open Planner" : "Sign in to join";
+  if (authLink) authLink.textContent = user ? "Open planner" : "Sign in to join";
 
   let owner = false;
   let host = false;
@@ -492,10 +626,16 @@ onAuthStateChanged(auth, async (user) => {
     }
   }
   if (authStatusEl) {
-    authStatusEl.style.display = user ? "" : "none";
+    authStatusEl.hidden = !user;
     authStatusEl.textContent = user ? (nickname ? `Signed in as ${nickname}` : "Signed in") : "";
   }
-  // Owner sees "Admin", approved hosts see "My Events" — matching the planner.
+  const joinText = document.querySelector("#joinText");
+  if (joinText) {
+    joinText.textContent = user
+      ? "Join a table, host your own game, or request one in the planner."
+      : "Sign in on the planner to join a table, host your own game, or request one.";
+  }
+  // Owner sees "Admin", approved hosts see "Manage Events" — matching the planner.
   adminLinks.forEach((link) => {
     link.hidden = !(owner || host);
     if (owner || host) link.textContent = owner ? "Admin" : "Manage Events";
@@ -514,20 +654,18 @@ async function boot() {
     }
   } catch (e) {
     console.error("Events page failed to load", e);
-    eventListView.style.display = "";
-    eventDetailView.style.display = "none";
-    upcomingEvents.innerHTML = `
-      <div class="muted">Couldn't load events — check your connection.</div>
-      <button class="btn" id="btnRetryLoad" style="margin-top:10px;">Retry</button>
-    `;
-    pastEvents.innerHTML = "";
-    document.querySelector("#btnRetryLoad")?.addEventListener("click", () => location.reload());
+    eventListView.hidden = false;
+    eventDetailView.hidden = true;
+    showListError();
   }
 }
 
-// Day rollovers are clock events — refresh the grouping periodically.
+// Day rollovers and start times are clock events — refresh periodically.
 setInterval(() => {
-  if (currentGd && eventDayKeys(currentGd.startsAt, currentGd.endsAt).length > 1) renderTables();
+  if (currentGd && gdDays(currentGd).length > 1) {
+    renderTables();
+    renderStats();
+  }
 }, 60 * 1000);
 
 await boot();

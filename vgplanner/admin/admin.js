@@ -4,10 +4,12 @@
 // /api/vg-me (owner = your Discord id or your Google email); the page only
 // hides itself for everyone else.
 
-import { esc, asDate, fmtEventWhen, isPastEvent, toDatetimeLocalValue, fromDatetimeLocalValue } from "../shared.js";
+import { esc, asDate, fmtEventWhen, isPastEvent, centralDateKey, eventEnd, toDatetimeLocalValue, fromDatetimeLocalValue } from "../shared.js";
 import { apiFetch } from "../api.js";
 import { onUser, signInWithDiscord, signInWithGoogle, signOutUser, handleDiscordRedirect } from "../auth.js";
 import { BASE_PATH, IS_LOCAL } from "../app-config.js";
+// Loads the icon sprite the page's buttons use; shared with the board-game planner.
+import { ic, dateBlockHtml } from "/planner/ui.js?v=20261024-d2";
 
 const qs = (sel, root = document) => root.querySelector(sel);
 
@@ -108,8 +110,11 @@ function renderRows() {
   const past = events.filter(isPastEvent).reverse();
   const row = (ev) => `
     <button type="button" class="adminRow${ev.id === selectedId ? " is-selected" : ""}${isPastEvent(ev) ? " is-past" : ""}" data-id="${esc(ev.id)}">
-      <div class="adminRowTitle">${esc(ev.title)}${bindingsFor(ev.id).length ? `<span class="adminRowBadge">${bindingsFor(ev.id).length} Discord</span>` : ""}</div>
-      <div class="adminRowMeta">${esc(fmtEventWhen(ev))}${ev.location ? ` · ${esc(ev.location)}` : ""}</div>
+      ${dateBlockHtml([centralDateKey(ev.startsAt), centralDateKey(eventEnd(ev))].filter((k, i, a) => k && a.indexOf(k) === i), "rowDate")}
+      <span class="adminRowMain">
+        <span class="adminRowTitle">${esc(ev.title)}${bindingsFor(ev.id).length ? `<span class="adminRowBadge">${ic("discord", "ico-xs")}${bindingsFor(ev.id).length}<span class="sr"> Discord</span></span>` : ""}</span>
+        <span class="adminRowMeta">${esc(fmtEventWhen(ev))}${ev.location ? ` · ${esc(ev.location)}` : ""}</span>
+      </span>
     </button>`;
   root.innerHTML = [...upcoming, ...past].map(row).join("") || `<div class="bindingEmpty">No events yet. Create the first one on the right.</div>`;
 }
@@ -155,11 +160,11 @@ function bindingRowHtml(b, { showEvent = false } = {}) {
       <div>
         <strong>#${esc(b.channelName || b.channelId || b.id)}</strong>
         <span class="muted"> · ${esc(b.guildName || "Discord")}</span>
-        ${showEvent ? `<div class="muted">${orphan ? `⚠️ event ${esc(b.eventId || "?")} no longer exists` : `→ ${esc(ev.title)}`}</div>` : ""}
+        ${showEvent ? `<div class="muted">${orphan ? `${ic("alert", "ico-xs")} Event ${esc(b.eventId || "?")} no longer exists` : `Shows ${esc(ev.title)}`}</div>` : ""}
         ${b.messageId ? "" : `<div class="muted">Board message not posted yet</div>`}
       </div>
       <div class="cardActions">
-        <button type="button" class="btn btn-small btn-danger" data-forget="${esc(b.id)}">Forget binding</button>
+        <button type="button" class="btn btn-small btn-danger" data-forget="${esc(b.id)}">${ic("x", "ico-sm")}Forget binding</button>
       </div>
     </div>`;
 }

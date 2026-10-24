@@ -5,41 +5,47 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>DFWGV Video Game Planner Admin</title>
   <meta name="description" content="Owner dashboard for the DFWGV video game planner: events and Discord boards." />
-  <meta name="theme-color" content="#d71920" />
+  <meta name="theme-color" content="#0a0a0e" />
+  <link rel="icon" href="/planner/dfwgv-icon.png" />
   <meta name="robots" content="noindex" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Inter:wght@400;500;600;700;800&display=swap" />
 
-  <link rel="stylesheet" href="../styles.css" />
-  <link rel="stylesheet" href="./admin.css" />
+  <link rel="stylesheet" href="../styles.css?v=20261024-d2" />
+  <link rel="stylesheet" href="./admin.css?v=20261024-d2" />
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">
-      <a class="logo" href="https://www.dfwgamingvillage.com/" aria-label="Go to DFW Gaming Village home">🎮</a>
-      <div>
-        <h1 class="title"><a href="../" class="titleLink">Video Game Planner Admin</a></h1>
-        <div class="subtitle">Events and Discord boards</div>
+  <header class="top">
+    <div class="topIn wrap gutter">
+      <a class="brandLink" href="https://www.dfwgamingvillage.com/" aria-label="DFW Gaming Village home">
+        <img src="/planner/dfwgv-icon.png" alt="" />
+        <span>DFWGV Planner</span>
+      </a>
+      <nav class="links" aria-label="Admin navigation">
+        <a class="link" href="../">Video games</a>
+        <a class="link" href="/planner/" target="_blank" rel="noopener" title="Opens the board game planner in a new tab">Board games<svg class="ico ico-xs" aria-hidden="true"><use href="#i-ext"/></svg></a>
+        <a class="link" href="./" aria-current="page">Admin</a>
+      </nav>
+      <div class="authbar">
+        <span class="authStatus" id="authStatus">Checking access…</span>
+        <button class="btn btn-primary btn-small" id="btnSignIn" hidden>Sign in</button>
+        <button class="btn btn-small" id="btnSignOut" hidden>Sign out</button>
       </div>
-    </div>
-
-    <nav class="topnav" aria-label="Admin navigation">
-      <a href="../">Events</a>
-      <a href="/planner/" target="_blank" rel="noopener" title="Opens the board game planner in a new tab">Board games ↗</a>
-      <a href="./" aria-current="page">Admin</a>
-    </nav>
-
-    <div class="authbar">
-      <span class="authStatus" id="authStatus">Checking access…</span>
-      <button class="btn btn-primary btn-small" id="btnSignIn" hidden>Sign in</button>
-      <button class="btn btn-small" id="btnSignOut" hidden>Sign out</button>
     </div>
   </header>
 
   <main class="page">
     <div class="pageStatus" id="pageStatus" hidden></div>
+
+    <div class="hero">
+      <div>
+        <div class="kicker">Video games · Operations</div>
+        <h2 class="heroTitle">Manage events</h2>
+        <p class="muted heroText">Create and edit video game nights, and put their boards in Discord channels.</p>
+      </div>
+    </div>
 
     <section id="blockedState" class="card">
       <h2>Owner access</h2>
@@ -54,7 +60,7 @@
       <section class="card">
         <div class="cardhead">
           <h2>Events</h2>
-          <button type="button" class="btn btn-primary btn-small" id="btnNewEvent">＋ New event</button>
+          <button type="button" class="btn btn-primary btn-small" id="btnNewEvent"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-plus"/></svg>New event</button>
         </div>
         <div id="eventRows" class="adminRows"></div>
       </section>
@@ -62,7 +68,7 @@
       <section class="card">
         <div class="cardhead">
           <h2 id="detailTitle">Event</h2>
-          <a class="btn btn-small" id="publicLink" href="../" target="_blank" rel="noopener">Public page ↗</a>
+          <a class="btn btn-small btn-ghost" id="publicLink" href="../" target="_blank" rel="noopener"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-ext"/></svg>Public page</a>
         </div>
 
         <form id="eventForm" class="adminForm">
@@ -92,7 +98,7 @@
           </div>
           <div class="cardActions">
             <button class="btn btn-primary" type="submit" id="btnSave">Save event</button>
-            <button class="btn btn-danger" type="button" id="btnDeleteEvent" hidden>Delete event</button>
+            <button class="btn btn-danger" type="button" id="btnDeleteEvent" hidden><svg class="ico ico-sm" aria-hidden="true"><use href="#i-trash"/></svg>Delete event</button>
           </div>
           <div class="modalStatus" id="formStatus" hidden></div>
           <div class="modalError" id="formError" hidden></div>
@@ -103,7 +109,7 @@
           <p class="muted small">Run this in the channel that should show the event's board. Only you can run it.</p>
           <div class="cmdRow">
             <code class="cmd" id="bindCommand">/vg_bind event:&lt;event id&gt;</code>
-            <button type="button" class="btn btn-small" id="btnCopyBind">Copy</button>
+            <button type="button" class="btn btn-small" id="btnCopyBind"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-copy"/></svg>Copy</button>
           </div>
           <div id="eventBindings" class="bindingList"></div>
           <p class="muted small">To take a board down, run <code>/vg_unbind</code> in that channel (add <code>remove_message: True</code> to delete the pinned message too).</p>
@@ -113,7 +119,7 @@
       <section class="card fullWidth">
         <div class="cardhead">
           <h2>All Discord bindings</h2>
-          <button type="button" class="btn btn-small" id="btnReload">Reload</button>
+          <button type="button" class="btn btn-small" id="btnReload"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-refresh"/></svg>Reload</button>
         </div>
         <p class="muted small">Every channel the bot is currently keeping a video game board in.</p>
         <div id="allBindings" class="bindingList"></div>
@@ -121,6 +127,6 @@
     </section>
   </main>
 
-  <script type="module" src="./admin.js"></script>
+  <script type="module" src="./admin.js?v=20261024-d2"></script>
 </body>
 </html>

@@ -7,6 +7,12 @@ cards grouped under their start time, with no pager. Type is Archivo for
 display and times, Inter for everything else. Layout lives in
 `planner.css`; `styles.css` stays shared with Events and Admin.
 
+Events (`events/`), Admin (`admin/`) and the Discord sign-in page use D too:
+they load `planner.css` plus their own layout file, and share icons, avatars,
+date blocks and the seat meter through `ui.js`. The video game planner
+(`/vgplanner/`) has its own `styles.css` with the same tokens and imports
+`ui.js` from here.
+
 The palette is inherited and locked: near-black surfaces, DFWGV red, gold.
 No brand color changes here. What changes is the job each color does, the
 type scale, and the component set. Those three things are what make a solid

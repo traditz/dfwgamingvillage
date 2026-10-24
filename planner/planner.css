@@ -1,7 +1,8 @@
 /* PATH: planner/planner.css
-   The planner page's layout (Direction D: Gallery + Schedule; see DESIGN.md).
-   Loaded after styles.css, which the Events and Admin pages share, so this
-   file only adds and overrides what the main planner page needs. */
+   The planner design (Direction D: Gallery + Schedule; see DESIGN.md): tokens,
+   components and the Planner page layout. The Events and Admin pages load it
+   too (body.plannerD) and add their own layout in event.css / admin.css.
+   Loaded after styles.css, which those pages still share. */
 
 :root {
   --raised: #1c1c24;

@@ -1,315 +1,116 @@
-.adminShell {
-  padding-bottom: 60px;
+/* PATH: planner/admin/admin.css
+   The Manage Events dashboard. Tokens, the top bar, cards, pills, buttons and
+   the seat meter come from ../planner.css; this file lays out the dashboard. */
+
+.topNote { font-size: 13px; color: var(--dim); white-space: nowrap; max-width: 260px; overflow: hidden; text-overflow: ellipsis; }
+
+.adminShell { display: grid; gap: 22px; padding-block: 36px 64px; }
+.adminHead h1 { margin: 6px 0 0; font-family: var(--font-display); font-size: clamp(30px, 4.6vw, 50px); font-weight: 800; font-stretch: 118%; line-height: .95; letter-spacing: -.015em; text-transform: uppercase; }
+.adminHead p { margin: 12px 0 0; max-width: 60ch; color: var(--muted); font-size: 15px; }
+.cardText { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+.blockedCard { max-width: 640px; }
+
+.adminApp { display: grid; gap: 18px; }
+
+/* At a glance (owner only) */
+.statStrip { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--line); border-radius: var(--r); background: var(--card); }
+.statCell { display: grid; gap: 4px; padding: 14px 18px; min-width: 0; }
+.statCell + .statCell { border-left: 1px solid var(--line); }
+.statCell .k { font-size: 12.5px; color: var(--dim); font-weight: 500; }
+.statCell .v { font-family: var(--font-display); font-size: 28px; font-weight: 700; font-stretch: 80%; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.statCell.gold .v { color: var(--gold); }
+
+.adminGrid { display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: 18px; align-items: start; }
+.eventsCard { position: sticky; top: calc(78px + env(safe-area-inset-top, 0px)); max-height: calc(100vh - 96px); overflow: auto; }
+.detailCol { display: grid; gap: 18px; min-width: 0; }
+.cardActions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+/* rows: events (selectable), tables and hosts (static) */
+.adminRows { display: grid; gap: 6px; }
+.adminRow { display: flex; align-items: center; gap: 12px; width: 100%; min-width: 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--r); background: var(--s1); color: inherit; font: inherit; text-align: left; cursor: pointer; transition: background var(--ease), border-color var(--ease); }
+.adminRow:hover { background: var(--s2); border-color: var(--line-strong); }
+.adminRow.is-active { background: var(--accent-soft); border-color: var(--accent-line); }
+.adminRow.is-static { cursor: default; }
+.adminRow.is-static:hover { background: var(--s1); border-color: var(--line); }
+.rowMain { flex: 1; display: grid; gap: 3px; min-width: 0; }
+.rowTitle { display: flex; align-items: center; gap: 6px; font-size: 14.5px; font-weight: 650; color: var(--text); overflow-wrap: anywhere; }
+.rowTitle .ico { color: var(--gold); }
+.rowMeta { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); min-width: 0; overflow-wrap: anywhere; }
+.rowMeta .ico { color: var(--dim); }
+.rowMain .seatMeter { margin-top: 3px; }
+.rowDate { flex: none; display: grid; justify-items: center; min-width: 44px; line-height: .9; font-family: var(--font-display); }
+.rowDate .d { font-size: 28px; font-weight: 700; font-stretch: 72%; }
+.rowDate.is-multi .d { font-size: 19px; letter-spacing: -.02em; }
+.rowDate .m { margin-top: 4px; font-size: 10px; font-weight: 800; font-stretch: 110%; letter-spacing: .14em; text-transform: uppercase; color: var(--accent-text); }
+.rowThumb { flex: none; display: grid; place-items: center; width: 48px; height: 48px; border-radius: 10px; overflow: hidden; background: var(--s2); color: var(--dim); }
+.rowThumb img { width: 100%; height: 100%; object-fit: cover; }
+.hostRow .btn { flex: none; }
+.adminRows .none, .adminRows > div.none { padding: 6px 2px; }
+
+/* the event form */
+.adminForm { display: grid; gap: 14px; }
+.formGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.plannerD .adminForm .field, .plannerD #hostsCard .field { display: grid; gap: 6px; min-width: 0; }
+.plannerD .adminForm .label { font-size: 13px; font-weight: 600; color: var(--muted); }
+.plannerD .adminForm input, .plannerD .adminForm select,
+.plannerD #hostsCard .input, .plannerD #activityFilter {
+  width: 100%; min-height: 40px; padding: 9px 12px; border: 1px solid var(--line-strong); border-radius: var(--r-sm);
+  background: var(--bg-2); color: var(--text); font: inherit; font-size: 15px; outline: none;
+  transition: border-color var(--ease), box-shadow var(--ease);
 }
+.plannerD .adminForm input:focus, .plannerD .adminForm select:focus,
+.plannerD #hostsCard .input:focus, .plannerD #activityFilter:focus { border-color: var(--accent-text); box-shadow: 0 0 0 3px rgba(248, 113, 113, .16); }
+.plannerD .adminForm .hint { font-size: 12.5px; line-height: 1.45; color: var(--dim); }
+.adminActions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.adminActions .grow { flex: 1; }
 
-.adminHero {
-  min-height: 210px;
+/* Discord */
+.discordStatus { display: flex; align-items: center; gap: 8px; min-height: 40px; padding: 9px 12px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--s1); color: var(--muted); font-size: 14px; font-weight: 600; }
+.discordStatus.is-linked { border-color: rgba(47, 191, 107, .35); background: var(--success-soft); color: var(--success); }
+.discordStatus.is-unlinked { border-color: rgba(245, 197, 66, .35); background: var(--gold-soft); color: var(--gold); }
+.discordHelp { color: var(--muted); font-size: 13.5px; line-height: 1.5; }
+.commandRow { display: flex; align-items: center; gap: 8px; }
+.commandBox { flex: 1; min-width: 0; padding: 9px 12px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--bg); color: var(--text); font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace; font-size: 13px; overflow-wrap: anywhere; }
+.bindServers { display: grid; gap: 8px; }
+.bindServers:empty { display: none; }
+.bindServer { padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--s1); }
+.bindServerName { font-size: 12.5px; font-weight: 650; color: var(--text); }
+.bindChannels { margin: 6px 0 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+.bindChannels li { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.bindChannelName { font-size: 13.5px; font-weight: 500; }
+.bindSync { font-size: 12px; color: var(--dim); }
+.bindDead { display: inline-flex; align-items: center; gap: 5px; height: 22px; padding: 0 8px; border-radius: 999px; background: var(--danger-soft); color: #ff8a8a; font-size: 11.5px; font-weight: 650; }
+
+/* activity log */
+.auditList { display: grid; gap: 2px; max-height: 460px; overflow-y: auto; margin: 0; padding: 0; list-style: none; }
+.auditList:empty { display: none; }
+.auditRow { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; align-items: start; padding: 8px; border-radius: var(--r-xs); }
+.auditRow:nth-child(odd) { background: var(--s1); }
+.auditIcon { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; background: var(--s2); color: var(--muted); }
+.auditText { font-size: 13.5px; line-height: 1.45; overflow-wrap: break-word; color: var(--muted); }
+.auditText b { color: var(--text); font-weight: 600; }
+.auditWhen { margin-top: 2px; font-size: 12px; color: var(--dim); }
+.auditEmpty { padding: 10px 2px; font-size: 13.5px; }
+.plannerD #activityFilter { width: auto; min-width: 160px; min-height: 34px; padding: 6px 10px; font-size: 13.5px; }
+
+/* hosts (owner only) */
+.hostGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: start; }
+.subHead { margin: 16px 0 8px; font-size: 12.5px; font-weight: 650; color: var(--dim); }
+.hostGrid > div > .subHead:first-child { margin-top: 0; }
+.inviteRow { display: flex; gap: 8px; }
+.inviteRow .input { flex: 1; min-width: 0; }
+
+@media (max-width: 1060px) {
+  .adminGrid, .hostGrid { grid-template-columns: minmax(0, 1fr); }
+  .eventsCard { position: static; max-height: none; }
 }
-
-.adminGrid {
-  display: grid;
-  grid-template-columns: 380px minmax(0, 1fr);
-  gap: 14px;
-}
-
-/* Cards that span the full grid width, marked explicitly in the markup —
-   positional nth-child rules broke whenever cards were added or reordered. */
-.adminGrid > .cardSpan {
-  grid-column: 1 / -1;
-}
-
-.adminRows {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.adminRow {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 10px;
-  align-items: center;
-  padding: 12px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: rgba(255, 255, 255, .045);
-  cursor: pointer;
-}
-
-.adminRow:hover,
-.adminRow.is-active {
-  border-color: rgba(255, 61, 69, .45);
-  background: rgba(185, 28, 28, .10);
-}
-
-.rowTitle {
-  color: var(--text);
-  font-weight: 950;
-}
-
-.rowMeta {
-  margin-top: 4px;
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.discordCard {
-  grid-column: 2;
-  align-self: start;
-}
-
-.discordStatus {
-  min-height: 42px;
-  display: flex;
-  align-items: center;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 10px 12px;
-  background: rgba(255, 255, 255, .045);
-  color: var(--muted);
-  font-weight: 900;
-}
-
-.discordStatus.is-linked {
-  border-color: rgba(34, 197, 94, .35);
-  background: rgba(34, 197, 94, .12);
-  color: #bbf7d0;
-}
-
-.discordStatus.is-unlinked {
-  border-color: rgba(245, 158, 11, .35);
-  background: rgba(245, 158, 11, .12);
-  color: #fed7aa;
-}
-
-.discordHelp {
-  margin-top: 10px;
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.45;
-}
-
-.commandBox {
-  margin: 12px 0;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 10px 12px;
-  background: rgba(0, 0, 0, .28);
-  color: var(--text);
-  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
-  font-size: 13px;
-  overflow-wrap: anywhere;
-}
-
-.statusPill {
-  display: inline-flex;
-  align-items: center;
-  min-height: 28px;
-  padding: 4px 8px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 900;
-  text-transform: capitalize;
-}
-
-.statusPill.published {
-  border-color: rgba(34, 197, 94, .35);
-  background: rgba(34, 197, 94, .12);
-  color: #bbf7d0;
-}
-
-.statusPill.draft {
-  border-color: rgba(245, 158, 11, .35);
-  background: rgba(245, 158, 11, .12);
-  color: #fed7aa;
-}
-
-.statusPill.archived {
-  color: #cbd5e1;
-}
-
-.adminForm {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.formGrid {
-  display: grid;
-  grid-template-columns: 1fr 180px;
-  gap: 12px;
-}
-
-.adminActions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.healthGrid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.healthCard {
-  min-height: 104px;
-  padding: 14px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: rgba(255, 255, 255, .045);
-}
-
-.healthLabel {
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: .08em;
-}
-
-.healthValue {
-  margin-top: 12px;
-  color: var(--text);
-  font-size: 18px;
-  font-weight: 950;
-}
-
-@media (max-width: 1040px) {
-  .adminGrid,
-  .healthGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .adminGrid > .cardSpan {
-    grid-column: auto;
-  }
-
-  .discordCard {
-    grid-column: auto;
-  }
-}
-
-@media (max-width: 680px) {
-  .formGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .adminActions {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .adminActions .btn {
-    width: 100%;
-  }
-}
-
-/* Every channel this event's board is posted in, grouped by server. */
-.bindServers {
-  display: grid;
-  gap: 10px;
-  margin: 10px 0 4px;
-}
-
-.bindServers:empty {
-  display: none;
-}
-
-.bindServer {
-  padding: 9px 11px;
-  border: 1px solid var(--line, rgba(255, 255, 255, .12));
-  border-radius: 10px;
-  background: rgba(255, 255, 255, .04);
-}
-
-.bindServerName {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: .01em;
-}
-
-.bindChannels {
-  margin: 5px 0 0;
-  padding-left: 15px;
-  list-style: disc;
-  line-height: 1.5;
-}
-
-.bindChannels li::marker {
-  color: rgba(255, 255, 255, .34);
-}
-
-.bindChannelName {
-  font-size: 13px;
-}
-
-.bindSync {
-  margin-left: 7px;
-  font-size: 11px;
-}
-
-/* ---- Per-event activity log ---------------------------------------------- */
-.auditList {
-  display: grid;
-  gap: 2px;
-  max-height: 460px;
-  overflow-y: auto;
-  margin: 10px 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.auditRow {
-  display: grid;
-  grid-template-columns: 22px minmax(0, 1fr);
-  gap: 9px;
-  align-items: start;
-  padding: 7px 8px;
-  border-radius: 8px;
-}
-
-.auditRow:nth-child(odd) {
-  background: rgba(255, 255, 255, .035);
-}
-
-.auditIcon {
-  font-size: 13px;
-  line-height: 1.5;
-  text-align: center;
-}
-
-.auditText {
-  font-size: 13px;
-  line-height: 1.4;
-  overflow-wrap: break-word;
-}
-
-.auditWhen {
-  font-size: 11px;
-}
-
-.auditEmpty {
-  padding: 10px 2px;
-  font-size: 13px;
-}
-
-#activityFilter {
-  width: auto;
-  min-width: 150px;
-}
-
-/* A bound channel the bot can no longer reach (deleted or hidden). */
-.bindDead {
-  margin-left: 7px;
-  border: 1px solid rgba(239, 68, 68, .4);
-  border-radius: var(--radius-pill, 999px);
-  padding: 0 7px;
-  background: rgba(239, 68, 68, .12);
-  color: #fecaca;
-  font-size: 11px;
-  font-weight: 700;
+@media (max-width: 720px) {
+  .adminShell { padding-block: 24px 48px; }
+  .statStrip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .statCell:nth-child(3) { border-left: 0; }
+  .statCell:nth-child(n + 3) { border-top: 1px solid var(--line); }
+  .formGrid { grid-template-columns: minmax(0, 1fr); }
+  .adminActions .btn-primary { flex: 1; }
+  .commandRow, .inviteRow { flex-direction: column; align-items: stretch; }
+  .topNote { display: none; }
 }

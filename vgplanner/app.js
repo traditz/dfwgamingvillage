@@ -10,6 +10,8 @@ import { LAUNCHERS, LAUNCHER_ORDER, launcherMeta, defaultLauncher, crossplayHint
 import { createStore } from "./store.js";
 import { onUser, signInWithDiscord, signInWithGoogle, signOutUser, handleDiscordRedirect } from "./auth.js";
 import { IGDB_PROXY_BASE } from "./app-config.js";
+// Icons, avatars, date blocks and the seat meter are shared with the board-game planner.
+import { ic, avatarHtml, dateBlockHtml, seatMeterHtml } from "/planner/ui.js?v=20261024-d2";
 
 const qs = (sel, root = document) => root.querySelector(sel);
 const qsa = (sel, root = document) => [...root.querySelectorAll(sel)];
@@ -56,7 +58,7 @@ function openModal(title, bodyHtml) {
       <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
         <div class="modalHead">
           <h2 id="modalTitle">${esc(title)}</h2>
-          <button type="button" class="btn btn-small" data-close aria-label="Close">✕</button>
+          <button type="button" class="btn btn-small btn-ghost btn-icon" data-close aria-label="Close">${ic("x")}</button>
         </div>
         <div class="modalBody" data-body>${bodyHtml}</div>
       </div>
@@ -260,7 +262,7 @@ function resultRowHtml(hit) {
     .filter(Boolean).join(" • ");
   return `
     <button type="button" class="resultRow" data-igdb-id="${esc(hit.igdbId)}" aria-label="${esc(hit.name)}${hit.year ? ` (${esc(hit.year)})` : ""}">
-      ${hit.thumbUrl ? `<img src="${esc(hit.thumbUrl)}" alt="" loading="lazy" />` : `<div class="thumbph">🎮</div>`}
+      ${hit.thumbUrl ? `<img src="${esc(hit.thumbUrl)}" alt="" loading="lazy" />` : `<div class="thumbph">${ic("gamepad")}</div>`}
       <span>
         <span class="resultName">${esc(hit.name)}</span>
         <span class="resultMeta">${esc(meta)}</span>
@@ -352,7 +354,7 @@ function formHtml(game, event) {
 
   return `
     <div class="gameHeader">
-      ${game.coverUrl ? `<img src="${esc(game.coverUrl)}" alt="" />` : `<div class="coverph">🎮</div>`}
+      ${game.coverUrl ? `<img src="${esc(game.coverUrl)}" alt="" />` : `<div class="coverph">${ic("gamepad")}</div>`}
       <div class="gameHeaderBody">
         <div class="gameHeaderTitle">${esc(game.name)}</div>
         <div class="muted">${esc(meta)}</div>
@@ -398,7 +400,7 @@ function formHtml(game, event) {
     <div class="modalError" id="modalError" hidden></div>
 
     <div class="modalFoot">
-      <button type="button" class="btn" id="btnBack">← Back to search</button>
+      <button type="button" class="btn btn-ghost" id="btnBack">${ic("left", "ico-sm")}Back to search</button>
       <button type="button" class="btn btn-primary" id="btnHostIt">Host it</button>
     </div>`;
 }
@@ -490,17 +492,19 @@ function sessionCardHtml(s, event) {
   const canCancel = isHost || Boolean(me && (event.createdBy === me.uid || role?.isOwner));
   const isIn = Boolean(me && [...confirmed, ...waitlist].some((e) => e.uid === me.uid));
   const past = isPastSession(s);
-  const pct = cap ? Math.min(100, Math.round((confirmed.length / cap) * 100)) : 0;
   const facts = multiplayerFacts(s.multiplayer);
 
   const rosterList = (entries) => entries.length
-    ? `<ul class="rosterList">${entries.map((e) => `<li class="${e.uid === s.hostUid ? "is-host" : ""}${me && e.uid === me.uid ? " is-you" : ""}">${esc(e.name)}</li>`).join("")}</ul>`
+    ? `<ul class="rosterList">${entries.map((e) => {
+        const you = Boolean(me && e.uid === me.uid);
+        return `<li class="${e.uid === s.hostUid ? "is-host" : ""}${you ? " is-you" : ""}">${avatarHtml(e.name, "av-sm", you)}${esc(e.name)}</li>`;
+      }).join("")}</ul>`
     : `<div class="rosterEmpty">Nobody yet</div>`;
 
   return `
     <article class="sessionCard${past ? " is-past" : ""}" data-session-id="${esc(s.id)}" data-event-id="${esc(event.id)}">
       <div class="cover">
-        ${s.coverUrl ? `<img src="${esc(s.coverUrl)}" alt="" loading="lazy" />` : `<div class="coverph">🎮</div>`}
+        ${s.coverUrl ? `<img src="${esc(s.coverUrl)}" alt="" loading="lazy" />` : `<div class="coverph">${ic("gamepad")}</div>`}
       </div>
       <div class="cardBody">
         <div class="cardTop">
@@ -508,55 +512,54 @@ function sessionCardHtml(s, event) {
             ${s.igdbUrl ? `<a href="${esc(s.igdbUrl)}" target="_blank" rel="noopener">${esc(s.gameName)}</a>` : esc(s.gameName)}
             ${s.year ? `<span class="gameYear">(${esc(s.year)})</span>` : ""}
           </div>
-          <div class="when" title="${esc(fmtDate(s.startTime))}">${esc(fmtTime(s.startTime))}</div>
+          <div class="when" title="${esc(fmtDate(s.startTime))}">${ic("clock", "ico-sm")}${esc(fmtTime(s.startTime))}</div>
         </div>
 
         <div class="cardRow">
           ${badgeHtml(s.launcher, s.launcher === "other" ? s.launcherLabel : "")}
           <span class="chip">PC</span>
-          ${s.storeUrl ? `<a class="storeLink" href="${esc(s.storeUrl)}" target="_blank" rel="noopener">Store page ↗</a>` : ""}
+          ${s.storeUrl ? `<a class="storeLink" href="${esc(s.storeUrl)}" target="_blank" rel="noopener">Store page${ic("ext", "ico-xs")}</a>` : ""}
         </div>
 
         <div class="cardMeta">
           ${[...(s.genres || []).slice(0, 2), ...(s.modes || []).filter((x) => /multi|co-op|mmo/i.test(x)).slice(0, 2)].map(esc).join(" • ")}
         </div>
 
-        <div class="muted small">Host: <strong>${esc(s.hostDisplayName || "Unknown")}</strong>${isHost ? " (you)" : ""}</div>
+        <div class="hostLine">${avatarHtml(s.hostDisplayName || "?", "av-sm", isHost)}<span>Hosted by <strong>${esc(s.hostDisplayName || "Unknown")}</strong>${isHost ? " (you)" : ""}</span></div>
 
         <div class="seats${confirmed.length >= cap ? " is-full" : ""}">
-          <span>Players ${confirmed.length}/${cap}${waitlist.length ? ` • Waitlist ${waitlist.length}` : ""}</span>
-          <span class="seatsBar" aria-hidden="true"><span class="seatsFill" style="width:${pct}%"></span></span>
+          <span class="seatMeter">${seatMeterHtml({ confirmed: confirmed.length, waitlist: waitlist.length, cap }).replace(" seats", " players")}</span>
         </div>
 
-        ${s.crossplayNote ? `<div class="crossplay">🔗 ${esc(s.crossplayNote)}</div>` : ""}
+        ${s.crossplayNote ? `<div class="crossplay">${ic("link", "ico-sm")}<span>${esc(s.crossplayNote)}</span></div>` : ""}
         ${s.notes ? `<div class="notes"><strong>Notes:</strong> ${esc(s.notes)}</div>` : ""}
 
         <div class="roster">
           <div class="rosterGroup">
-            <div class="rosterHead"><span>Confirmed</span><span>${confirmed.length}</span></div>
+            <div class="rosterHead"><span>Confirmed</span><span class="n">${confirmed.length}</span></div>
             ${rosterList(confirmed)}
           </div>
-          <div class="rosterGroup">
-            <div class="rosterHead"><span>Waitlist</span><span>${waitlist.length}</span></div>
+          <div class="rosterGroup wait">
+            <div class="rosterHead"><span>Waitlist</span><span class="n">${waitlist.length}</span></div>
             ${rosterList(waitlist)}
           </div>
         </div>
 
         <div class="cardActions">
           ${past ? "" : (isIn
-            ? `<button type="button" class="btn btn-small" data-action="leave">Leave</button>`
-            : `<button type="button" class="btn btn-small btn-primary" data-action="join">${confirmed.length >= cap ? "Join waitlist" : "Join"}</button>`)}
-          <button type="button" class="btn btn-small btn-ghost" data-action="details">Details</button>
-          ${canCancel && !past ? `<button type="button" class="btn btn-small btn-danger" data-action="delete">Cancel session</button>` : ""}
+            ? `<button type="button" class="btn btn-small" data-action="leave">${ic("logout", "ico-sm")}Leave</button>`
+            : `<button type="button" class="btn btn-small btn-primary" data-action="join">${ic(confirmed.length >= cap ? "clock" : "plus", "ico-sm")}${confirmed.length >= cap ? "Join waitlist" : "Join"}</button>`)}
+          <button type="button" class="btn btn-small btn-ghost" data-action="details">${ic("down", "ico-sm")}Details</button>
+          ${canCancel && !past ? `<button type="button" class="btn btn-small btn-danger" data-action="delete">${ic("trash", "ico-sm")}Cancel session</button>` : ""}
         </div>
 
         <div class="details" data-details hidden>
           ${s.summary ? `<div class="summary">${esc(s.summary)}</div>` : ""}
           ${facts.length ? `<div class="factGrid">${facts.map(([k, v]) => `<div class="fact"><span class="k">${esc(k)}</span><span class="v">${esc(v)}</span></div>`).join("")}</div>` : ""}
           <div class="linkRow">
-            ${s.igdbUrl ? `<a href="${esc(s.igdbUrl)}" target="_blank" rel="noopener">IGDB</a>` : ""}
-            ${s.officialUrl ? `<a href="${esc(s.officialUrl)}" target="_blank" rel="noopener">Official site</a>` : ""}
-            ${s.storeUrl ? `<a href="${esc(s.storeUrl)}" target="_blank" rel="noopener">${esc(launcherMeta(s.launcher).label)} page</a>` : ""}
+            ${s.igdbUrl ? `<a href="${esc(s.igdbUrl)}" target="_blank" rel="noopener">IGDB${ic("ext", "ico-xs")}</a>` : ""}
+            ${s.officialUrl ? `<a href="${esc(s.officialUrl)}" target="_blank" rel="noopener">Official site${ic("ext", "ico-xs")}</a>` : ""}
+            ${s.storeUrl ? `<a href="${esc(s.storeUrl)}" target="_blank" rel="noopener">${esc(launcherMeta(s.launcher).label)} page${ic("ext", "ico-xs")}</a>` : ""}
           </div>
           <div class="muted small">${esc([s.developers?.[0] && `Developer: ${s.developers[0]}`, s.publishers?.[0] && `Publisher: ${s.publishers[0]}`, s.rating && `IGDB rating ${s.rating}`].filter(Boolean).join(" • "))}</div>
         </div>
@@ -599,16 +602,31 @@ async function onCardAction(e) {
 
 // ---------- views ----------
 
+// First and last Central day of an event, for the date block.
+function eventDays(ev) {
+  const first = centralDateKey(ev.startsAt);
+  const last = centralDateKey(eventEnd(ev));
+  if (!first) return [];
+  return last && last !== first ? [first, last] : [first];
+}
+
 function eventCardHtml(ev) {
   const past = isPastEvent(ev);
   return `
-    <a class="eventCard${past ? " is-past" : ""}" href="?event=${encodeURIComponent(ev.id)}" data-event-link="${esc(ev.id)}">
-      <div class="eventTitle">${esc(ev.title)}</div>
-      <div class="eventWhen">${esc(fmtEventWhen(ev))}</div>
-      <div class="eventMeta">${ev.location ? `📍 ${esc(ev.location)}<br>` : ""}Organizer: ${esc(ev.createdByDisplayName || "Unknown")}</div>
-      <div class="eventOpen">${past ? "View" : "Open event"} →</div>
+    <a class="eventCard${past ? " is-past" : ""}" href="?event=${encodeURIComponent(ev.id)}" data-event-link="${esc(ev.id)}" aria-label="${esc(ev.title)}${past ? " (ended)" : ""}">
+      ${dateBlockHtml(eventDays(ev), "evDate")}
+      <div class="eventBody">
+        <div class="eventTitle">${esc(ev.title)}</div>
+        <div class="eventLine eventWhen">${ic("clock", "ico-sm")}<span>${esc(fmtEventWhen(ev))}</span></div>
+        ${ev.location ? `<div class="eventLine">${ic("pin", "ico-sm")}<span>${esc(ev.location)}</span></div>` : ""}
+        <div class="eventLine">${ic("user", "ico-sm")}<span>Organized by ${esc(ev.createdByDisplayName || "Unknown")}</span></div>
+      </div>
+      <span class="eventGo">${ic("right")}</span>
     </a>`;
 }
+
+const emptyHtml = (icon, title, body) =>
+  `<div class="empty"><span class="eico">${ic(icon, "ico-lg")}</span><strong>${esc(title)}</strong><span>${body}</span></div>`;
 
 async function renderEventsView(view) {
   const events = await store.listEvents();
@@ -619,17 +637,18 @@ async function renderEventsView(view) {
   view.innerHTML = `
     <section class="hero">
       <div>
-        <h2 class="heroTitle">Upcoming events</h2>
+        <div class="kicker">Video games</div>
+        <h2 class="heroTitle">PC game nights</h2>
         <p class="muted heroText">Open an event to see who's hosting what, grab a slot, or host a game yourself.</p>
       </div>
-      ${canCreate ? `<button type="button" class="btn btn-primary btn-lg" id="btnCreateEvent">＋ Create event</button>` : ""}
+      ${canCreate ? `<button type="button" class="btn btn-primary btn-lg" id="btnCreateEvent">${ic("plus")}Create event</button>` : ""}
     </section>
     ${upcoming.length
       ? `<div class="eventGrid">${upcoming.map(eventCardHtml).join("")}</div>`
-      : `<div class="empty"><strong>No upcoming events</strong>${canCreate ? "Create one and people can start hosting games in it." : "Check back soon — the next game night will show up here."}</div>`}
+      : emptyHtml("cal", "No upcoming events", canCreate ? "Create one and people can start hosting games in it." : "Check back soon — the next game night will show up here.")}
     ${past.length ? `
       <details class="pastBlock">
-        <summary>Past events (${past.length})</summary>
+        <summary>${ic("history", "ico-sm")}Past events (${past.length})</summary>
         <div class="eventGrid">${past.map(eventCardHtml).join("")}</div>
       </details>` : ""}`;
 
@@ -643,14 +662,14 @@ async function renderEventView(view, eventId) {
   const bundle = await store.getEventBundle(eventId);
   if (bundle === null) {
     view.innerHTML = `
-      <a class="backLink" href="./" data-nav="events">← All events</a>
-      <div class="empty"><strong>This event was removed</strong>It may have been cancelled by its organizer.</div>`;
+      <a class="backLink" href="./" data-nav="events">${ic("left", "ico-sm")}All events</a>
+      ${emptyHtml("x", "This event was removed", "It may have been cancelled by its organizer.")}`;
     return;
   }
   if (!bundle) {
     view.innerHTML = `
-      <a class="backLink" href="./" data-nav="events">← All events</a>
-      <div class="empty"><strong>Couldn't load this event</strong>${esc(store.lastError || "The planner API didn't answer.")} It will retry automatically.</div>`;
+      <a class="backLink" href="./" data-nav="events">${ic("left", "ico-sm")}All events</a>
+      ${emptyHtml("alert", "Couldn't load this event", `${esc(store.lastError || "The planner API didn't answer.")} It will retry automatically.`)}`;
     return;
   }
 
@@ -667,22 +686,31 @@ async function renderEventView(view, eventId) {
     byDay.get(key).push(s);
   }
   const multiDay = byDay.size > 1;
+  const players = upcoming.reduce((n, s) => n + (Array.isArray(s.confirmed) ? s.confirmed.length : 0), 0);
+  const open = upcoming.reduce((n, s) => n + Math.max(0, Number(s.capacity || 0) - (Array.isArray(s.confirmed) ? s.confirmed.length : 0)), 0);
+  const state = past ? `<span class="pill">Ended</span>` : eventStarted(event) ? `<span class="pill pill-green">Under way</span>` : "";
 
   view.innerHTML = `
-    <a class="backLink" href="./" data-nav="events">← All events</a>
+    <a class="backLink" href="./" data-nav="events">${ic("left", "ico-sm")}All events</a>
     <section class="eventHeader">
-      <div>
+      <div class="eventHeaderMain">
+        <div class="kicker">Video game night${state}</div>
         <h2>${esc(event.title)}</h2>
         <div class="eventHeaderLines">
-          🗓 <strong>${esc(fmtEventWhen(event))}</strong>${eventStarted(event) && !past ? " · under way" : ""}${past ? " · ended" : ""}<br>
-          ${event.location ? `📍 ${esc(event.location)}<br>` : ""}
-          🎙 Organizer: ${esc(event.createdByDisplayName || "Unknown")}
+          <span>${ic("cal")}<strong>${esc(fmtEventWhen(event))}</strong></span>
+          ${event.location ? `<span>${ic("pin")}${esc(event.location)}</span>` : ""}
+          <span>${ic("user")}Organized by ${esc(event.createdByDisplayName || "Unknown")}</span>
         </div>
         ${event.notes ? `<div class="eventNotes">${esc(event.notes)}</div>` : ""}
+        ${upcoming.length ? `<div class="stats">
+          <span class="stat"><b>${upcoming.length}</b>${upcoming.length === 1 ? "session" : "sessions"}</span>
+          <span class="stat green"><b>${open}</b>open ${open === 1 ? "slot" : "slots"}</span>
+          <span class="stat"><b>${players}</b>${players === 1 ? "player" : "players"}</span>
+        </div>` : ""}
       </div>
       <div class="eventActions">
-        ${past ? "" : `<button type="button" class="btn btn-primary btn-lg" id="btnHost">＋ Host a game</button>`}
-        ${canManage ? `<button type="button" class="btn btn-danger btn-small" id="btnDeleteEvent">Delete event</button>` : ""}
+        ${canManage ? `<button type="button" class="btn btn-danger" id="btnDeleteEvent">${ic("trash", "ico-sm")}Delete event</button>` : ""}
+        ${past ? "" : `<button type="button" class="btn btn-primary btn-lg" id="btnHost">${ic("plus")}Host a game</button>`}
       </div>
     </section>
 
@@ -691,12 +719,12 @@ async function renderEventView(view, eventId) {
         ? [...byDay.entries()].map(([key, items]) => `
             ${multiDay ? `<h3 class="dayHeader">${esc(key === "tbd" ? "Date TBD" : fmtDayHeader(items[0].startTime))}</h3>` : ""}
             <div class="sessionGrid">${items.map((s) => sessionCardHtml(s, event)).join("")}</div>`).join("")
-        : `<div class="empty"><strong>No games hosted yet</strong>${past ? "This event has ended." : "Hit “Host a game”, pick a title, and say which launcher you're on."}</div>`}
+        : emptyHtml("gamepad", "No games hosted yet", past ? "This event has ended." : "Hit “Host a game”, pick a title, and say which launcher you're on.")}
     </section>
 
     ${done.length ? `
       <details class="pastBlock">
-        <summary>Finished sessions (${done.length})</summary>
+        <summary>${ic("history", "ico-sm")}Finished sessions (${done.length})</summary>
         <div class="sessionGrid" id="pastList">${done.reverse().map((s) => sessionCardHtml(s, event)).join("")}</div>
       </details>` : ""}`;
 

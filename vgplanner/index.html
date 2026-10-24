@@ -6,37 +6,35 @@
 
   <title>DFWGV Video Game Planner</title>
   <meta name="description" content="DFW Gaming Village video game nights. Organizers create events, hosts pick a PC game and launcher inside them, and players grab a slot." />
-  <meta name="theme-color" content="#d71920" />
+  <meta name="theme-color" content="#0a0a0e" />
+  <link rel="icon" href="/planner/dfwgv-icon.png" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Inter:wght@400;500;600;700;800&display=swap" />
 
-  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./styles.css?v=20261024-d2" />
 </head>
 <body>
   <a class="skipLink" href="#view">Skip to content</a>
 
-  <header class="topbar">
-    <div class="brand">
-      <a class="logo" href="https://www.dfwgamingvillage.com/" aria-label="Go to DFW Gaming Village home">🎮</a>
-      <div>
-        <h1 class="title"><a href="./" data-nav="events" class="titleLink">DFWGV Video Game Planner</a></h1>
-        <div class="subtitle">PC game nights for DFW Gaming Village</div>
+  <header class="top">
+    <div class="topIn wrap gutter">
+      <a class="brandLink" href="https://www.dfwgamingvillage.com/" aria-label="DFW Gaming Village home">
+        <img src="/planner/dfwgv-icon.png" alt="" />
+        <span>DFWGV Planner</span>
+      </a>
+      <nav class="links" aria-label="Planner navigation">
+        <a class="link" href="./" data-nav="events" aria-current="page">Video games</a>
+        <a class="link" href="/planner/" target="_blank" rel="noopener" title="Opens the board game planner in a new tab">Board games<svg class="ico ico-xs" aria-hidden="true"><use href="#i-ext"/></svg></a>
+        <a class="link" href="./admin/" data-admin-link hidden>Admin</a>
+      </nav>
+      <div class="authbar">
+        <span class="authStatus" id="authStatus">Loading…</span>
+        <span class="statusPill" id="proxyStatus" title="API status">Checking API…</span>
+        <button class="btn btn-primary btn-small" id="btnSignIn" hidden>Sign in</button>
+        <button class="btn btn-small" id="btnSignOut" hidden>Sign out</button>
       </div>
-    </div>
-
-    <nav class="topnav" aria-label="Planner navigation">
-      <a href="./" data-nav="events" aria-current="page">Events</a>
-      <a href="/planner/" target="_blank" rel="noopener" title="Opens the board game planner in a new tab">Board games ↗</a>
-      <a href="./admin/" data-admin-link hidden>Admin</a>
-    </nav>
-
-    <div class="authbar">
-      <span class="authStatus" id="authStatus">Loading…</span>
-      <button class="btn btn-primary btn-small" id="btnSignIn" hidden>Sign in</button>
-      <button class="btn btn-small" id="btnSignOut" hidden>Sign out</button>
-      <span class="statusPill" id="proxyStatus" title="API status">Checking API…</span>
     </div>
   </header>
 
@@ -48,6 +46,6 @@
 
   <div id="modalRoot"></div>
 
-  <script type="module" src="./app.js"></script>
+  <script type="module" src="./app.js?v=20261024-d2"></script>
 </body>
 </html>

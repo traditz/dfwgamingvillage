@@ -13,7 +13,8 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js";
 
-import { esc, asDate, fmtDate, fmtEventWhen, centralDateKey, fmtCentralDatetimeValue, parseDatetimeLocalToISO, confirmDialog, toast, unwrapCallableError } from "../shared.js?v=20260817-p40";
+import { esc, asDate, fmtDate, fmtEventWhen, eventDayKeys, centralDateKey, fmtCentralDatetimeValue, parseDatetimeLocalToISO, confirmDialog, toast, unwrapCallableError } from "../shared.js?v=20260817-p40";
+import { ic, avatarHtml, dateBlockHtml, seatMeterHtml } from "../ui.js?v=20261024-d2";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -150,7 +151,7 @@ function newEvent() {
   publicLink.href = "../events/";
   renderDiscordBinding(null);
   loadActivity();
-  tableRows.innerHTML = `<div class="muted">Save the event before managing tables.</div>`;
+  tableRows.innerHTML = `<div class="none">Save the event before managing tables.</div>`;
   renderEvents();
 }
 
@@ -249,7 +250,7 @@ function renderDiscordBinding(gd) {
             <li>
               <span class="bindChannelName">#${esc(c.channelName || c.channelId)}</span>
               ${c.unreachableSince
-                ? `<span class="bindDead" title="The bot can't reach this channel — it was deleted or hidden. Unbind it, or re-bind if it returns.">⚠ unreachable since ${esc(fmtDate(c.unreachableSince))}</span>`
+                ? `<span class="bindDead" title="The bot can't reach this channel — it was deleted or hidden. Unbind it, or re-bind if it returns.">${ic("alert", "ico-xs")}Unreachable since ${esc(fmtDate(c.unreachableSince))}</span>`
                 : `<span class="bindSync muted">${c.lastSyncedAt ? `synced ${esc(fmtDate(c.lastSyncedAt))}` : "not synced yet"}</span>`}
             </li>
           `).join("")}
@@ -263,27 +264,27 @@ function renderDiscordBinding(gd) {
 // Each audit action becomes one plain sentence. Anything unrecognised still
 // renders (as its raw action name) rather than vanishing from the log.
 const AUDIT_ACTIONS = {
-  "table.create":       { icon: "\u2795", group: "table",  text: (e) => `hosted ${e.payload?.gameName || "a table"}` },
-  "table.update":       { icon: "\u270f\ufe0f", group: "table",  text: (e) => `edited a table${e.payload?.fields?.length ? ` (${e.payload.fields.join(", ")})` : ""}` },
-  "table.delete":       { icon: "\ud83d\uddd1\ufe0f", group: "table",  text: () => "deleted a table" },
-  "table.join":         { icon: "\u2705", group: "signup", text: (e) => `joined ${e.payload?.gameName || "a table"}` },
-  "table.waitlist":     { icon: "\u23f3", group: "signup", text: (e) => `joined the waitlist for ${e.payload?.gameName || "a table"}` },
-  "table.leave":        { icon: "\u21a9\ufe0f", group: "signup", text: (e) => e.payload?.promotedName
+  "table.create":       { icon: "plus", group: "table",  text: (e) => `hosted ${e.payload?.gameName || "a table"}` },
+  "table.update":       { icon: "pencil", group: "table",  text: (e) => `edited a table${e.payload?.fields?.length ? ` (${e.payload.fields.join(", ")})` : ""}` },
+  "table.delete":       { icon: "trash", group: "table",  text: () => "deleted a table" },
+  "table.join":         { icon: "check", group: "signup", text: (e) => `joined ${e.payload?.gameName || "a table"}` },
+  "table.waitlist":     { icon: "clock", group: "signup", text: (e) => `joined the waitlist for ${e.payload?.gameName || "a table"}` },
+  "table.leave":        { icon: "logout", group: "signup", text: (e) => e.payload?.promotedName
                             ? `left a table \u2014 ${e.payload.promotedName} moved up from the waitlist`
                             : (e.payload?.tableDeleted ? "left a table, which removed it" : "left a table") },
-  "want.restore":       { icon: "↩️", group: "table",  text: (e) => `closed a table, putting the ${e.payload?.gameName || "game"} request back` },
-  "want.interest":      { icon: "🙋", group: "signup", text: (e) => e.payload?.on === false
+  "want.restore":       { icon: "rotate", group: "table",  text: (e) => `closed a table, putting the ${e.payload?.gameName || "game"} request back` },
+  "want.interest":      { icon: "hand", group: "signup", text: (e) => e.payload?.on === false
                             ? `withdrew interest in ${e.payload?.gameName || "a request"}`
                             : `would play ${e.payload?.gameName || "a requested game"}` },
-  "gameday.create":     { icon: "\ud83d\udcc5", group: "event",  text: (e) => `created the event${e.payload?.title ? ` \u201c${e.payload.title}\u201d` : ""}` },
-  "gameday.update":     { icon: "\u2699\ufe0f", group: "event",  text: (e) => `updated the event${e.payload?.fields?.length ? ` (${e.payload.fields.join(", ")})` : ""}` },
-  "gameday.delete":     { icon: "\ud83d\uddd1\ufe0f", group: "event",  text: () => "deleted the event" },
-  "invite.request":     { icon: "\ud83d\udd11", group: "access", text: () => "requested an invite" },
-  "invite.redeem":      { icon: "\ud83d\udd11", group: "access", text: () => "joined via an invite link" },
-  "invite.approve":     { icon: "\ud83d\udc4d", group: "access", text: () => "approved an invite request" },
-  "invite.deny":        { icon: "\ud83d\udc4e", group: "access", text: () => "denied an invite request" },
-  "invite.rotate":      { icon: "\ud83d\udd04", group: "access", text: () => "reset the invite link" },
-  "invite.remove":      { icon: "\u274c", group: "access", text: () => "removed someone's access" }
+  "gameday.create":     { icon: "cal", group: "event",  text: (e) => `created the event${e.payload?.title ? ` \u201c${e.payload.title}\u201d` : ""}` },
+  "gameday.update":     { icon: "pencil", group: "event",  text: (e) => `updated the event${e.payload?.fields?.length ? ` (${e.payload.fields.join(", ")})` : ""}` },
+  "gameday.delete":     { icon: "trash", group: "event",  text: () => "deleted the event" },
+  "invite.request":     { icon: "link", group: "access", text: () => "requested an invite" },
+  "invite.redeem":      { icon: "link", group: "access", text: () => "joined via an invite link" },
+  "invite.approve":     { icon: "check", group: "access", text: () => "approved an invite request" },
+  "invite.deny":        { icon: "x", group: "access", text: () => "denied an invite request" },
+  "invite.rotate":      { icon: "rotate", group: "access", text: () => "reset the invite link" },
+  "invite.remove":      { icon: "x", group: "access", text: () => "removed someone's access" }
 };
 
 let activityEntries = [];
@@ -318,7 +319,7 @@ function renderActivity() {
     const what = def ? def.text(e) : esc(e.action);
     return `
       <li class="auditRow">
-        <span class="auditIcon" aria-hidden="true">${def ? def.icon : "\u2022"}</span>
+        <span class="auditIcon" aria-hidden="true">${ic(def ? def.icon : "activity", "ico-sm")}</span>
         <div class="auditBody">
           <div class="auditText"><b>${esc(auditActorLabel(e))}</b> ${what}</div>
           <div class="auditWhen muted">${e.createdAt ? esc(fmtDate(e.createdAt)) : "unknown time"}</div>
@@ -379,7 +380,7 @@ activityFilter?.addEventListener("change", renderActivity);
 function renderEvents() {
   eventRows.innerHTML = "";
   if (!events.length) {
-    eventRows.innerHTML = `<div class="muted">No events yet.</div>`;
+    eventRows.innerHTML = `<div class="none">No events yet.</div>`;
     return;
   }
 
@@ -395,13 +396,16 @@ function renderEvents() {
       : bound.length === 1
         ? `Discord: ${esc(bound[0].channelName ? `#${bound[0].channelName}` : bound[0].channelId)}`
         : `Discord: ${bound.length} channels`;
+    const status = gd.status || "draft";
+    const statusCls = status === "published" ? " pill-green" : status === "draft" ? " pill-gold" : "";
     row.innerHTML = `
-      <div>
-        <div class="rowTitle">${esc(gd.title || "Game Day")}</div>
-        <div class="rowMeta">${esc(fmtEventWhen(gd.startsAt, gd.endsAt))}${gd.location ? ` - ${esc(gd.location)}` : ""}</div>
-        <div class="rowMeta">${discordLabel}</div>
+      ${dateBlockHtml(eventDayKeys(gd.startsAt, gd.endsAt), "rowDate")}
+      <div class="rowMain">
+        <div class="rowTitle">${gd.visibility === "private" ? ic("lock", "ico-sm") : ""}${esc(gd.title || "Game Day")}</div>
+        <div class="rowMeta">${esc(fmtEventWhen(gd.startsAt, gd.endsAt))}${gd.location ? ` · ${esc(gd.location)}` : ""}</div>
+        <div class="rowMeta">${ic("discord", "ico-xs")}${discordLabel}</div>
       </div>
-      <span class="statusPill ${esc(gd.status || "draft")}">${esc(gd.status || "draft")}</span>
+      <span class="pill${statusCls}">${esc(status.charAt(0).toUpperCase() + status.slice(1))}</span>
     `;
     row.addEventListener("click", () => selectEvent(gd.id));
     eventRows.appendChild(row);
@@ -411,19 +415,24 @@ function renderEvents() {
 function renderTables(items) {
   tableRows.innerHTML = "";
   if (!items.length) {
-    tableRows.innerHTML = `<div class="muted">No hosted tables for this event.</div>`;
+    tableRows.innerHTML = `<div class="none">No hosted tables for this event.</div>`;
     return;
   }
 
   for (const table of items) {
     const row = document.createElement("div");
-    row.className = "adminRow";
+    row.className = "adminRow is-static";
+    const wait = Number(table.waitlistCount || 0);
+    const custom = table.isCustom === true || !table.bggId;
+    const start = asDate(table.startTime);
+    const when = start ? start.toLocaleString("en-US", { timeZone: "America/Chicago", weekday: "short", hour: "numeric", minute: "2-digit" }) : "Time TBD";
     row.innerHTML = `
-      <div>
+      <span class="rowThumb">${table.thumbUrl ? `<img src="${esc(table.thumbUrl)}" alt="" loading="lazy" />` : ic(custom ? "clip" : "dice")}</span>
+      <div class="rowMain">
         <div class="rowTitle">${esc(table.gameName || "Game")}</div>
-        <div class="rowMeta">Host: ${esc(table.hostDisplayName || "Unknown")} - Seats ${Number(table.confirmedCount || 0)}/${Number(table.capacity || 0)}</div>
+        <div class="rowMeta">${esc(when)} · Hosted by ${esc(table.hostDisplayName || "Unknown")}</div>
+        <span class="seatMeter">${seatMeterHtml({ confirmed: Number(table.confirmedCount || 0), waitlist: wait, cap: Number(table.capacity || 0), custom })}</span>
       </div>
-      <span class="statusPill">${Number(table.waitlistCount || 0)} wait</span>
     `;
     tableRows.appendChild(row);
   }
@@ -650,9 +659,10 @@ function userLabel(u) {
 
 function hostActionRow(title, meta, buttons) {
   const row = document.createElement("div");
-  row.className = "adminRow";
+  row.className = "adminRow is-static hostRow";
   row.innerHTML = `
-    <div style="flex:1; min-width:0;">
+    ${avatarHtml(title, "av-lg")}
+    <div class="rowMain">
       <div class="rowTitle">${esc(title)}</div>
       <div class="rowMeta">${esc(meta)}</div>
     </div>
@@ -660,7 +670,7 @@ function hostActionRow(title, meta, buttons) {
   for (const b of buttons) {
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.className = `btn ${b.danger ? "btn-danger" : b.primary ? "btn-primary" : ""}`;
+    btn.className = `btn btn-small ${b.danger ? "btn-dangerQuiet" : b.primary ? "btn-primary" : ""}`;
     btn.textContent = b.label;
     btn.addEventListener("click", async () => {
       btn.disabled = true;
@@ -684,7 +694,7 @@ function renderHostsPanel() {
   hostRequestRows.innerHTML = "";
   const requests = hostData.requests || [];
   if (!requests.length) {
-    hostRequestRows.innerHTML = `<div class="muted">No pending requests.</div>`;
+    hostRequestRows.innerHTML = `<div class="none">No pending requests.</div>`;
   } else {
     for (const r of requests) {
       const { name, meta } = userLabel(r);
@@ -698,7 +708,7 @@ function renderHostsPanel() {
   hostRows.innerHTML = "";
   const hosts = hostData.hosts || [];
   if (!hosts.length) {
-    hostRows.innerHTML = `<div class="muted">No approved hosts yet.</div>`;
+    hostRows.innerHTML = `<div class="none">No approved hosts yet.</div>`;
   } else {
     for (const h of hosts) {
       const { name, meta } = userLabel(h);
@@ -722,7 +732,7 @@ function renderHostSearch(hostUids) {
   const q = String(hostSearch?.value || "").trim().toLowerCase();
   hostSearchRows.innerHTML = "";
   if (!q) {
-    hostSearchRows.innerHTML = `<div class="muted">Type to search everyone who has signed in to the planner.</div>`;
+    hostSearchRows.innerHTML = `<div class="none">Type to search everyone who has signed in to the planner.</div>`;
     return;
   }
 
@@ -733,7 +743,7 @@ function renderHostSearch(hostUids) {
   }).slice(0, 12);
 
   if (!matches.length) {
-    hostSearchRows.innerHTML = `<div class="muted">No matches. They may need to sign in to the planner once first — or use an email invite below.</div>`;
+    hostSearchRows.innerHTML = `<div class="none">No matches. They may need to sign in to the planner once first — or use an email invite below.</div>`;
     return;
   }
 
