@@ -13,7 +13,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js";
 
-import { esc, asDate, fmtDate, fmtEventWhen, centralDateKey, fmtCentralDatetimeValue, parseDatetimeLocalToISO, confirmDialog, toast, unwrapCallableError } from "../shared.js?v=20260817-p35";
+import { esc, asDate, fmtDate, fmtEventWhen, centralDateKey, fmtCentralDatetimeValue, parseDatetimeLocalToISO, confirmDialog, toast, unwrapCallableError } from "../shared.js?v=20260817-p36";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -165,7 +165,8 @@ function discordBindings(gd) {
         guildId: String(c?.guildId || "").trim(),
         guildName: String(c?.guildName || "").trim(),
         messageId: String(c?.plannerMessageId || "").trim(),
-        lastSyncedAt: c?.lastSyncedAt || null
+        lastSyncedAt: c?.lastSyncedAt || null,
+        unreachableSince: c?.unreachableSince || null
       }))
       .filter((c) => c.channelId);
   }
@@ -244,7 +245,9 @@ function renderDiscordBinding(gd) {
           ${s.channels.map((c) => `
             <li>
               <span class="bindChannelName">#${esc(c.channelName || c.channelId)}</span>
-              <span class="bindSync muted">${c.lastSyncedAt ? `synced ${esc(fmtDate(c.lastSyncedAt))}` : "not synced yet"}</span>
+              ${c.unreachableSince
+                ? `<span class="bindDead" title="The bot can't reach this channel — it was deleted or hidden. Unbind it, or re-bind if it returns.">⚠ unreachable since ${esc(fmtDate(c.unreachableSince))}</span>`
+                : `<span class="bindSync muted">${c.lastSyncedAt ? `synced ${esc(fmtDate(c.lastSyncedAt))}` : "not synced yet"}</span>`}
             </li>
           `).join("")}
         </ul>
