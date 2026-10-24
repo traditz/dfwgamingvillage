@@ -1,26 +1,41 @@
 :root {
-  --bg: #060608;
-  --bg-2: #111114;
-  --panel: #141417;
-  --panel-2: #1b1b1f;
-  --card: #18181c;
-  --text: #f7f7f8;
-  --muted: #b8b8c2;
-  --line: rgba(255, 255, 255, .12);
-  --line-strong: rgba(255, 255, 255, .2);
-  --accent: #b91c1c;
-  --accent-2: #dc2626;
-  --accent-dark: #7f1116;
+  /* Surfaces sit just off pure black and step up in even increments, so
+     depth comes from elevation rather than from drawing a border on
+     everything. Pure #060608 + hairlines everywhere read as a terminal. */
+  --bg: #0a0a0e;
+  --bg-2: #101016;
+  --panel: #14141b;
+  --panel-2: #1a1a22;
+  --card: #16161d;
+  --surface-1: rgba(255, 255, 255, .032);
+  --surface-2: rgba(255, 255, 255, .055);
+  --surface-3: rgba(255, 255, 255, .08);
+
+  --text: #f1f2f5;
+  /* Dimmer than before: secondary text should recede, not compete. */
+  --muted: #9a9ba7;
+  /* Hairlines are lighter now that shadow carries the separation. */
+  --line: rgba(255, 255, 255, .07);
+  --line-strong: rgba(255, 255, 255, .14);
+
+  --accent: #d32f34;
+  --accent-2: #e8464b;
+  --accent-dark: #8e1519;
+  --accent-soft: rgba(211, 47, 52, .14);
   --gold: #f5c542;
-  --gold-soft: rgba(245, 197, 66, .18);
-  --success: #22c55e;
+  --gold-soft: rgba(245, 197, 66, .14);
+  --success: #2fbf6b;
   --warning: #f59e0b;
   --danger: #ef4444;
-  --shadow: 0 18px 50px rgba(0, 0, 0, .42);
-  /* Layered radius scale (was a flat 8px everywhere) */
-  --radius: 12px;
-  --radius-sm: 9px;
-  --radius-lg: 16px;
+
+  /* Two-part shadow: a tight contact edge plus a soft ambient pool. */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .4);
+  --shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 10px 28px -12px rgba(0, 0, 0, .7);
+  --shadow-lg: 0 2px 4px rgba(0, 0, 0, .35), 0 24px 56px -20px rgba(0, 0, 0, .8);
+
+  --radius: 14px;
+  --radius-sm: 10px;
+  --radius-lg: 18px;
   --radius-pill: 999px;
   --ease: .16s cubic-bezier(.2, .6, .2, 1);
 }
@@ -39,12 +54,13 @@ body {
   margin: 0;
   color: var(--text);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  /* The 32px graph-paper grid was the single most dated thing on the page.
+     One soft brand wash at the top does the same job without the noise. */
   background:
-    linear-gradient(180deg, rgba(185, 28, 28, .13), transparent 260px),
-    linear-gradient(90deg, rgba(255, 255, 255, .03) 1px, transparent 1px),
-    linear-gradient(180deg, rgba(255, 255, 255, .025) 1px, transparent 1px),
+    radial-gradient(1200px 400px at 50% -200px, rgba(211, 47, 52, .16), transparent 70%),
     var(--bg);
-  background-size: auto, 32px 32px, 32px 32px, auto;
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
 }
 
 body::before {
@@ -53,9 +69,9 @@ body::before {
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(110deg, rgba(185, 28, 28, .08), transparent 28%),
-    linear-gradient(250deg, rgba(185, 28, 28, .09), transparent 30%);
-  opacity: .58;
+    linear-gradient(110deg, rgba(211, 47, 52, .05), transparent 26%),
+    linear-gradient(250deg, rgba(211, 47, 52, .05), transparent 26%);
+  opacity: .5;
 }
 
 a {
@@ -75,10 +91,10 @@ a:hover {
   grid-template-columns: minmax(220px, 1fr) auto minmax(260px, 1fr);
   align-items: center;
   gap: 18px;
-  padding: 12px 18px;
+  padding: 12px 20px;
   border-bottom: 1px solid var(--line);
-  background: rgba(18, 18, 22, .92);
-  backdrop-filter: blur(14px);
+  background: rgba(12, 12, 17, .72);
+  backdrop-filter: blur(20px) saturate(140%);
 }
 
 .brand {
@@ -116,7 +132,7 @@ a:hover {
 }
 
 .title {
-  font-weight: 900;
+  font-weight: 700;
   letter-spacing: 0;
   line-height: 1.05;
 }
@@ -248,7 +264,11 @@ a:hover {
   display: flex;
   justify-content: center;
   margin-bottom: 0;
-  padding: clamp(6px, 1.4vw, 10px);
+  padding: clamp(4px, 1vw, 8px);
+  /* Let the artwork sit on the page instead of inside a black slab. */
+  border: 0;
+  background: none;
+  box-shadow: none;
 }
 
 .plannerBanner img {
@@ -284,7 +304,7 @@ a:hover {
   margin: 0;
   color: var(--text);
   font-size: clamp(26px, 3.4vw, 38px);
-  font-weight: 900;
+  font-weight: 700;
   line-height: 1.12;
   letter-spacing: 0;
   overflow-wrap: anywhere;
@@ -302,10 +322,10 @@ a:hover {
 
 .card {
   overflow: hidden;
-  padding: 16px;
+  padding: 18px;
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
-  background: linear-gradient(180deg, rgba(255, 255, 255, .055), rgba(255, 255, 255, .025));
+  background: var(--card);
   box-shadow: var(--shadow);
 }
 
@@ -359,11 +379,11 @@ h3 {
 }
 
 .btn {
-  min-height: 40px;
-  border: 1px solid var(--line);
+  min-height: 38px;
+  border: 1px solid var(--line-strong);
   border-radius: var(--radius-sm);
   padding: 9px 14px;
-  background: rgba(255, 255, 255, .055);
+  background: var(--surface-2);
   color: var(--text);
   cursor: pointer;
   font: inherit;
@@ -394,17 +414,17 @@ h3 {
 }
 
 .btn-primary {
-  border-color: rgba(248, 113, 113, .42);
-  background: linear-gradient(180deg, #c92a2f, var(--accent));
-  color: white;
-  font-weight: 700;
-  box-shadow: 0 8px 22px rgba(185, 28, 28, .28);
+  border-color: transparent;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 650;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 6px 16px -6px rgba(211, 47, 52, .55);
 }
 
 .btn-primary:hover {
-  border-color: rgba(255, 255, 255, .3);
-  background: linear-gradient(180deg, #d33a3f, #991b1b);
-  box-shadow: 0 12px 28px rgba(185, 28, 28, .38);
+  border-color: transparent;
+  background: var(--accent-2);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 20px -6px rgba(211, 47, 52, .7);
 }
 
 .btn-danger {
@@ -495,7 +515,7 @@ textarea:focus {
   max-width: 100%;
   color: #ff7a82;
   font-size: 15px;
-  font-weight: 800;
+  font-weight: 650;
   line-height: 1.2;
   overflow-wrap: break-word;
 }
@@ -521,7 +541,7 @@ textarea:focus {
   margin-right: 5px;
   color: var(--gold);
   font-size: 11px;
-  font-weight: 900;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .04em;
 }
@@ -598,7 +618,7 @@ textarea:focus {
   margin-bottom: 7px;
   color: var(--gold);
   font-size: 11px;
-  font-weight: 900;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .08em;
 }
@@ -607,7 +627,7 @@ textarea:focus {
 .eventCard .title {
   color: var(--text);
   font-size: clamp(16px, 2vw, 20px);
-  font-weight: 900;
+  font-weight: 700;
   line-height: 1.18;
   overflow-wrap: break-word;
 }
@@ -648,7 +668,7 @@ textarea:focus {
   background: rgba(185, 28, 28, .14);
   color: #fecaca;
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .eventCardStatus.is-live {
@@ -678,7 +698,7 @@ textarea:focus {
 .pastEventsLabel {
   color: var(--muted);
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .08em;
 }
@@ -693,7 +713,7 @@ textarea:focus {
   background: rgba(255, 255, 255, .055);
   color: var(--muted);
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .eventPill.is-history {
@@ -741,16 +761,18 @@ textarea:focus {
   display: grid;
   grid-template-columns: 86px minmax(0, 1fr);
   gap: 12px;
-  padding: 14px;
+  padding: 16px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: rgba(255, 255, 255, .045);
-  transition: border-color var(--ease), background var(--ease);
+  background: var(--surface-1);
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--ease), background var(--ease), box-shadow var(--ease);
 }
 
 .tablecard:hover {
-  border-color: rgba(255, 255, 255, .18);
-  background: rgba(255, 255, 255, .06);
+  border-color: var(--line-strong);
+  background: var(--surface-2);
+  box-shadow: var(--shadow);
 }
 
 /* Slight cue for tables the signed-in user hosts or has joined */
@@ -830,14 +852,47 @@ textarea:focus {
 
 .row1 .name {
   min-width: 180px;
-  font-weight: 900;
-  overflow-wrap: anywhere;
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: -.01em;
+  overflow-wrap: break-word;
+}
+
+/* The game title doubles as a BoardGameGeek link, so it inherited the global
+   link red and read as an action. It is the card's heading first - give it
+   heading colour and keep the link affordance for hover/focus. */
+.row1 .name a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.row1 .name a:hover,
+.row1 .name a:focus-visible {
+  color: var(--accent-2);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Same story on the public events page and the request cards. */
+.publicTableTitle a,
+.wantGame .title a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.publicTableTitle a:hover,
+.wantGame .title a:hover {
+  color: var(--accent-2);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .row1 .time {
-  color: #ffb4b8;
+  /* Pink read as an unvisited link. The time is data, not an action. */
+  color: var(--text);
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
 .row2 {
@@ -851,22 +906,22 @@ textarea:focus {
 }
 
 .notes {
-  margin-top: 10px;
-  padding: 9px 10px;
-  border-left: 3px solid var(--accent);
-  background: rgba(0, 0, 0, .18);
-  color: #e7e7ec;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  /* The red left bar made every note look like an error. */
+  background: rgba(255, 255, 255, .035);
+  color: #dcdde3;
   overflow-wrap: anywhere;
   word-break: break-word;
   white-space: pre-wrap;
 }
 
 .roster {
-  margin-top: 10px;
-  padding: 10px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: rgba(0, 0, 0, .18);
+  margin-top: 14px;
+  padding-top: 12px;
+  /* One divider instead of a box-within-a-box. */
+  border-top: 1px solid var(--line);
 }
 
 .rosterTopline {
@@ -885,10 +940,6 @@ textarea:focus {
 
 .rosterGroup {
   min-width: 0;
-  padding: 9px;
-  border: 1px solid rgba(255, 255, 255, .09);
-  border-radius: var(--radius);
-  background: rgba(255, 255, 255, .035);
 }
 
 .rosterGroupHead {
@@ -897,21 +948,24 @@ textarea:focus {
   justify-content: space-between;
   gap: 8px;
   margin-bottom: 8px;
-  color: var(--text);
-  font-size: 12px;
-  font-weight: 900;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
 }
 
 .rosterCount {
-  min-width: 24px;
-  min-height: 24px;
+  min-width: 22px;
+  min-height: 22px;
   display: inline-grid;
   place-items: center;
-  border: 1px solid rgba(248, 113, 113, .28);
-  border-radius: 999px;
-  background: rgba(185, 28, 28, .14);
-  color: #fecaca;
-  font-size: 12px;
+  border-radius: var(--radius-pill);
+  /* A headcount is not an error - red was reading as a warning. */
+  background: rgba(255, 255, 255, .08);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 700;
   line-height: 1;
 }
 
@@ -929,7 +983,7 @@ textarea:focus {
   border-radius: 999px;
   padding: 4px 8px;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 650;
   line-height: 1.2;
 }
 
@@ -944,12 +998,12 @@ textarea:focus {
   border-color: rgba(245, 197, 66, .55);
   background: var(--gold-soft);
   color: #ffe7a3;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .hostName.is-you {
   color: var(--gold);
-  font-weight: 800;
+  font-weight: 650;
 }
 
 .rosterEmpty {
@@ -1096,7 +1150,7 @@ textarea:focus {
 }
 
 .resultTitle {
-  font-weight: 900;
+  font-weight: 700;
   line-height: 1.2;
 }
 
@@ -1126,12 +1180,12 @@ textarea:focus {
 
 .gameHeaderTitle {
   font-size: 16px;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .expBlock .label {
   margin-bottom: 8px;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .expList {
@@ -1626,7 +1680,7 @@ textarea:focus {
   gap: 10px;
   margin-bottom: 8px;
   color: var(--text);
-  font-weight: 800;
+  font-weight: 650;
 }
 
 .guideNum {
@@ -1639,7 +1693,7 @@ textarea:focus {
   background: var(--accent);
   color: #fff;
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 650;
 }
 
 .guideList {
@@ -1705,7 +1759,7 @@ textarea:focus {
   background: rgba(96, 165, 250, .12);
   color: #bfdbfe;
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 650;
   vertical-align: middle;
 }
 
@@ -1717,7 +1771,7 @@ textarea:focus {
 }
 
 .customBlock .label {
-  font-weight: 800;
+  font-weight: 650;
   margin-bottom: 4px;
 }
 
@@ -1746,7 +1800,7 @@ textarea:focus {
 .dayHeaderLabel {
   color: var(--gold);
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 650;
   text-transform: uppercase;
   letter-spacing: .07em;
 }
@@ -1758,7 +1812,7 @@ textarea:focus {
   background: rgba(255, 255, 255, .06);
   color: var(--muted);
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 650;
   text-transform: uppercase;
   letter-spacing: .04em;
 }
@@ -1777,7 +1831,7 @@ textarea:focus {
   border-radius: var(--radius-pill);
   padding: 2px 9px;
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 650;
   text-transform: uppercase;
   letter-spacing: .04em;
 }
@@ -1800,7 +1854,7 @@ textarea:focus {
   border-radius: var(--radius-pill);
   padding: 2px 8px;
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 650;
   text-transform: uppercase;
   letter-spacing: .04em;
   vertical-align: middle;
@@ -2011,7 +2065,7 @@ textarea:focus {
   background: var(--accent-2);
   color: #fff;
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 650;
   line-height: 1;
 }
 
