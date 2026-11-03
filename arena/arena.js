@@ -396,6 +396,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
     if (toggle) { toggle.textContent = S.layout === "side" ? "Bigger stream" : "Commands beside the stream"; toggle.hidden = S.view !== "watch"; }
     const app = $("#app");
     const st = S.live, mons = (st && st.monsters) || [];
+    recordBlast(st);
     if (S.view === "watch") {
       $("#watch-status").innerHTML = statusLine(st) + ctfBanner(st) + raidBanner(st) + assaultBanner(st) + siegeBanner(st) + specialBanner(st) + modeVoteBanner(st);
       $("#watch-feed").innerHTML = feedList(st);
@@ -423,6 +424,12 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
         (st.fortress ? "siege " + esc(st.fortress.number) + " · " + esc(st.fortress.phase === "siege" ? "the siege " + hms(st.fortress.clock) : st.fortress.phase === "muster" ? "the muster" : "the results") : "round " + esc(st.round || "") + (rounds && rounds.phase ? " · " + esc(rounds.phase) + (rounds.seconds != null ? " " + Math.floor(rounds.seconds / 60) + ":" + String(rounds.seconds % 60).padStart(2, "0") : "") : "")) +
         "</span><span>" + mons.length + " alive</span>" : "") + "</div>";
   }
+  // a match's clock (the owner, 2026-11-03): what is left, what has been played with the admin's match timer off, or the wait for a first monster
+  function matchClock(c) {
+    if (c.waiting) return "waiting";
+    if (c.untimed) return mss(c.elapsed) + " · no time limit";
+    return Math.floor((c.seconds || 0) / 60) + ":" + String((c.seconds || 0) % 60).padStart(2, "0");
+  }
   // ---- Capture the Flag: the match over the stream's status line, and a live map of the forts under it
   const CTF_MAP = { xMin: -2752, yMax: 1792, w: 5504, h: 3584, basement: -100, deck: 200, red: [-2560, 0], blue: [2560, 0] };      // tools/arena/ctf2fort.json
   const WELL_MAP = { xMin: -3840, yMax: 1664, w: 7680, h: 3328, basement: -100, deck: 200, red: [-3456, 0], blue: [3456, 0] };      // tools/arena/well.json (the Cores where the flags would be)
@@ -439,9 +446,10 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
   function ctfBanner(st) {
     const c = st && st.online && st.ctf;
     if (!c) return st && st.online && st.mode === "ctf" ? '<div class="special ctf"><b>Capture the Flag</b><span>The game is moving to the forts; the first match opens in a moment.</span></div>' : "";
-    const sc = c.score || [0, 0], fl = c.flags || {}, left = Math.floor((c.seconds || 0) / 60) + ":" + String((c.seconds || 0) % 60).padStart(2, "0");
+    const sc = c.score || [0, 0], fl = c.flags || {}, left = matchClock(c);
     const phase = { warmup: "warm-up", play: "play", results: "results" }[c.phase] || c.phase, side = mySide();
-    const hint = c.phase === "warmup" ? "Doors 1-4 fight for Red, 5-8 for Blue. Send your monsters in with an order; your first one picks your side for the match."
+    const hint = c.waiting ? c.waiting + ". Doors 1-4 fight for Red, 5-8 for Blue; your first monster picks your side for the match."
+      : c.phase === "warmup" ? "Doors 1-4 fight for Red, 5-8 for Blue. Send your monsters in with an order; your first one picks your side for the match."
       : c.phase === "play" ? "A capture pays 100 souls to the owner of the monster that carries the flag home, and 25 to everyone else on its side."
         : (c.result && c.result.caption ? c.result.caption.toLowerCase() : "the next match opens in a moment") + ".";
     return '<div class="special ctf"><b>Capture the Flag · match ' + c.number + " · " + esc(phase) + " " + left + '</b>' +
@@ -469,28 +477,93 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
       (r.bets ? " Pot " + r.pot + " in " + r.bets + (r.bets === 1 ? " bet" : " bets") + (r.bets_open ? "" : " (closed)") + "." : "") +
       (mine ? " You bet " + mine[1] + " on " + (mine[0] === 1 ? "the raiders" : "the boss") + "." : "") + "</span></div>";
   }
+  // the Assault's records, with the match timer off: the fastest Core death and the longest Core defense at this Core health
+  function recordEntry(e, verb) {
+    if (!e) return '<span class="rec-none">not set yet</span>';
+    const who = e.who && e.monster ? e.who + "'s " + e.monster : e.monster ? e.attacker + "'s " + e.monster : e.attacker;
+    return "<b>" + esc(mss(e.t)) + "</b><small>" + esc(verb === "death" ? who + " destroyed " + e.defender + "'s Core" : e.defender + "'s Core against " + e.attacker) + " · match " + esc(e.match) + "</small>";
+  }
+  function recordsRow(r) {
+    if (!r) return "";
+    return '<div class="asl-records" role="group" aria-label="The records at ' + num(r.hp) + ' Core health">' +
+      '<div class="rec"><span class="rec-name">Fastest Core death</span>' + recordEntry(r.fastest, "death") + "</div>" +
+      '<div class="rec"><span class="rec-name">Longest Core defense</span>' + recordEntry(r.longest, "defense") + "</div>" +
+      '<span class="rec-hp">at ' + num(r.hp) + " Core health</span></div>";
+  }
+  // a record beaten: the whole page for a few seconds, once per record and per browser. It comes with the state ("news"), and only while it is news
+  function recordBlast(st) {
+    const n = st && st.online && st.assault && st.assault.news;
+    if (!n || n.id === S.blastSeen) return;
+    S.blastSeen = n.id;
+    let seen = "";
+    try { seen = localStorage.getItem("arena-record-seen") || ""; } catch (e) { /* a private window: it may play again after a reload */ }
+    if (seen === n.id) return;
+    try { localStorage.setItem("arena-record-seen", n.id); } catch (e) { /* as above */ }
+    if (Math.abs(Date.now() / 1000 - (n.wall || 0)) > 75) return;
+    const old = document.getElementById("record-blast");
+    if (old) old.remove();
+    const el = document.createElement("div");
+    el.id = "record-blast";
+    el.className = "record-blast " + (n.kind === "fastest" ? "fastest" : "longest");
+    el.setAttribute("role", "status");
+    el.innerHTML = '<div class="rb-rays"></div><canvas class="rb-sparks" aria-hidden="true"></canvas><div class="rb-card"><div class="rb-new">New record</div>' +
+      '<div class="rb-title">' + esc(n.kind === "fastest" ? "Fastest Core death" : "Longest Core defense") + "</div>" +
+      '<div class="rb-time">' + esc(n.time) + (n.live ? '<small>and counting</small>' : "") + "</div>" +
+      '<div class="rb-line">' + esc(n.line) + "</div>" +
+      '<div class="rb-old">The old record: <s>' + esc(n.old_time) + "</s> · at " + num(n.hp || 0) + " Core health</div></div>";
+    document.body.appendChild(el);
+    const close = () => { el.classList.add("out"); setTimeout(() => el.remove(), 500); };
+    el.addEventListener("click", close);
+    setTimeout(close, 9000);
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // the sparks: gold shards thrown out from the card, on a canvas of their own; they stop with the takeover
+    const cv = el.querySelector(".rb-sparks"), ctx = cv.getContext && cv.getContext("2d");
+    if (!ctx) return;
+    cv.width = window.innerWidth; cv.height = window.innerHeight;
+    const cx = cv.width / 2, cy = cv.height / 2, colours = ["#f5c850", "#ffe9a8", "#ffffff", "#e89a2c"];
+    const shards = Array.from({ length: Math.min(260, Math.round(cv.width / 5)) }, () => {
+      const a = Math.random() * Math.PI * 2, v = 3 + Math.random() * 13;
+      return { x: cx, y: cy, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 3, s: 2 + Math.random() * 5, r: Math.random() * 6, c: colours[Math.floor(Math.random() * colours.length)], d: 1600 + Math.random() * 2600 };
+    });
+    const t0 = performance.now();
+    (function draw(t) {
+      if (!el.isConnected) return;
+      const age = t - t0;
+      ctx.clearRect(0, 0, cv.width, cv.height);
+      let live = 0;
+      shards.forEach((p) => {
+        if (age > p.d) return;
+        live += 1;
+        p.x += p.vx; p.y += p.vy; p.vy += 0.16; p.vx *= 0.992; p.r += 0.12;
+        ctx.save(); ctx.globalAlpha = Math.max(0, 1 - age / p.d); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.c; ctx.fillRect(-p.s, -p.s / 3, p.s * 2, p.s * 0.66); ctx.restore();
+      });
+      if (live) requestAnimationFrame(draw);
+    })(t0);
+  }
   // ---- the Assault: each side attacks the other's Core for a half; both Cores' health, who attacks, what the second half must beat
   function asLive() { const st = S.live; return !!(st && st.online && st.assault); }
   function assaultBanner(st) {
     const a = st && st.online && st.assault;
     if (!a) return st && st.online && st.mode === "assault" ? '<div class="special assault"><b>The Assault</b><span>The game is moving to the Well; the first match opens in a moment.</span></div>' : "";
-    const left = Math.floor((a.seconds || 0) / 60) + ":" + String((a.seconds || 0) % 60).padStart(2, "0");
+    const left = matchClock(a);
     const phase = { warmup: "warm-up", half1: "first half", switch: "the switch", half2: "second half", results: "results" }[a.phase] || a.phase;
     const playing = a.phase === "half1" || a.phase === "half2", cores = a.cores || {}, side = mySide();
     const core = (t, name) => {
       const c = cores[t] || {}, pct = Math.max(0, Math.min(100, c.pct == null ? 100 : c.pct));
-      const role = playing ? (a.attacker === name ? "attacking" : a.defender === name ? "defending" : "") : a.phase === "warmup" && a.first ? (a.first === name ? "attacks first" : "defends first") : "";
+      const role = playing ? (a.attacker === name ? "attacking" : a.defender === name ? "defending" : "") : a.phase === "warmup" && a.first && !a.waiting ? (a.first === name ? "attacks first" : "defends first") : "";
       return '<div class="asl-core ' + t + (playing && a.defender === name ? " under" : "") + '"><div class="asl-head"><span class="name">' + name + "'s Core</span>" + (role ? '<span class="role">' + role + "</span>" : "") + "</div>" +
         '<div class="raid-bar" role="img" aria-label="' + name + "'s Core has " + pct + '% of its health"><i style="width:' + pct + '%"></i><span>' + (pct <= 0 ? "destroyed" : pct + "%" + (c.max && playing ? " · " + num(c.hp) + " of " + num(c.max) : "")) + "</span></div></div>";
     };
     const halves = (a.halves || []).filter((h) => h.finished).map((h) => "Half " + h.half + ": " + h.line + ".").join(" ");
-    const hint = a.phase === "warmup" ? (a.first || "Red") + " attacks first. Doors 1-4 fight for Red, 5-8 for Blue; your first monster picks your side for the match."
+    const hint = a.waiting ? a.waiting + ". Doors 1-4 fight for Red, 5-8 for Blue; your first monster picks your side for the match."
+      : a.clock_idle && a.untimed ? "Nobody is attacking " + a.defender + "'s Core: the clock waits for " + a.attacker + "'s next monster."
+      : a.phase === "warmup" ? (a.first || "Red") + " attacks first. Doors 1-4 fight for Red, 5-8 for Blue; your first monster picks your side for the match."
       : a.phase === "half1" ? a.attacker + " attacks " + a.defender + "'s Core. The last blow pays 100 souls to its monster's owner, and 25 to everyone else on its side."
         : a.phase === "switch" ? "The sides change over." + (a.target ? " " + a.target + "." : "")
           : a.phase === "half2" ? (a.target || a.attacker + " attacks") + "."
             : (a.result && a.result.caption ? a.result.caption.toLowerCase() : "the next match opens in a moment") + ".";
     return '<div class="special assault"><b>The Assault · match ' + a.number + " · " + esc(phase) + " " + left + "</b>" +
-      '<div class="asl-cores">' + core("red", "Red") + core("blue", "Blue") + "</div>" +
+      '<div class="asl-cores">' + core("red", "Red") + core("blue", "Blue") + "</div>" + (a.timer === false ? recordsRow(a.records) : "") +
       "<span>" + esc(hint) + (halves ? " " + esc(halves) : "") + (side ? " You: <b class=\"side\">" + esc(side) + "</b>." : "") +
       (a.bets ? " Pot " + a.pot + " in " + a.bets + (a.bets === 1 ? " bet" : " bets") + (a.bets_open ? "" : " (closed)") + "." : "") + "</span></div>";
   }
@@ -1168,6 +1241,18 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
       "Off, only the viewers' monsters come in (the Raid's boss still does), and it stays off through restarts until you switch it back.</p>" +
       '<div class="adm-switches"><button class="switch' + (spawnsOn ? " on" : "") + '" data-act="adm" data-cmd="!spawns ' + (spawnsOn ? "off" : "on") + '">Director spawns <b>' +
       (spawnsOn ? "ON" : "OFF") + "</b></button></div>" : "";
+    // the match timer (2026-11-03): Capture the Flag's play and the Assault's halves
+    const timerOn = !dir || dir.timer !== false;
+    const timerRow = dir ? '<p class="sub">The match timer, for Capture the Flag and the Assault. Off, a Capture the Flag match goes on until a side wins, and an Assault half until its Core falls ' +
+      "(or you end the match); the Assault then records the fastest Core death and the longest Core defense at each Core health. It stays as you leave it through restarts. " +
+      (spawnsOn ? "" : "With the director's monsters off as well, the clock counts only while there is somebody fighting, and a play with nobody on the floor for three minutes ends.") + "</p>" +
+      '<div class="adm-switches"><button class="switch' + (timerOn ? " on" : "") + '" data-act="adm" data-cmd="!timer ' + (timerOn ? "off" : "on") + '">Match timer <b>' +
+      (timerOn ? "ON" : "OFF") + "</b></button></div>" : "";
+    const recs = st && st.assault && st.assault.records_all ? st.assault.records_all : [];
+    const recRows = recs.length ? '<table class="adm-records"><thead><tr><th>Core health</th><th>Fastest Core death</th><th>Longest Core defense</th></tr></thead><tbody>' + recs.map((r) =>
+      "<tr><td>" + num(r.hp) + "</td><td>" + (r.fastest ? esc(mss(r.fastest.t)) + " · " + esc(r.fastest.attacker) + (r.fastest.who ? ", " + esc(r.fastest.who) : "") : "not set") + "</td><td>" +
+      (r.longest ? esc(mss(r.longest.t)) + " · " + esc(r.longest.defender) + "'s Core" : "not set") + "</td></tr>").join("") + "</tbody></table>" +
+      '<p class="sub">To start a Core health over, type <code>!assault records clear</code> in the console while the Cores are set to it.</p>' : "";
     const modeBtn = (m, label) => '<button class="switch' + (modeNow === m ? " on" : "") + '" data-act="adm" data-cmd="!mode ' + m + '"' + (modeNow === m ? " disabled" : "") + ">" + label + (modeNow === m ? " <b>ON AIR</b>" : "") + "</button>";
     // the viewers' vote on the next mode: a majority of their votes switches it when the game on air ends; the switch stops and starts the vote
     const mv = st && st.mode_vote, voteOn = !!(mv && mv.on);
@@ -1179,7 +1264,7 @@ import { collection, doc, addDoc, getDoc, onSnapshot, serverTimestamp } from "ht
       (voteOn ? "ON" : "OFF") + "</b></button></div>" : "";
     const modePanel = st && st.online ? '<div class="panel"><h3>The show</h3><p class="sub">You change the mode at once, and it stays until it changes again, restarts included. Switching moves the game to the other map: about a minute of loading on the stream, and a round or a match in progress ends without a result (its bets are refunded).</p>' +
       '<div class="adm-switches">' + modeBtn("rounds", "The coliseum: rounds") + modeBtn("ctf", "Capture the Flag") + modeBtn("raid", "The Raid: every door against a boss") +
-        modeBtn("assault", "The Assault: attack and defend a Core") + modeBtn("fortress", "The Fortress: a siege") + "</div>" + voteRow + spawnsRow + fortAdmin(st) +
+        modeBtn("assault", "The Assault: attack and defend a Core") + modeBtn("fortress", "The Fortress: a siege") + "</div>" + voteRow + spawnsRow + timerRow + recRows + fortAdmin(st) +
       (st.assault ? '<div class="form-row adm-row"><button data-act="adm" data-cmd="!assault end">End this match now</button></div>' +
         '<p class="sub">The Cores\' health, from the next half on (both sides the same). Now: <b>' + num(st.assault.core_hp || 0) + "</b></p>" +
         '<div class="adm-switches">' + [8000, 15000, 25000, 40000].map((n) => '<button class="switch' + ((st.assault.core_hp || 0) === n ? " on" : "") + '" data-act="adm" data-cmd="!assault hp ' + n + '">' + num(n) + "</button>").join("") + "</div>" +
